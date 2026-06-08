@@ -7,6 +7,7 @@ import datart.core.mappers.ext.AccessLogMapperExt;
 import datart.security.base.ResourceType;
 import datart.server.service.AsyncAccessLogService;
 import datart.server.service.BaseService;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,7 @@ public class AccessLogServiceImpl extends BaseService implements AsyncAccessLogS
 
     private final Thread logThread;
 
-    private boolean stop = false;
+    private volatile boolean stop = false;
 
     public AccessLogServiceImpl(AccessLogMapperExt logMapper) {
         logThread = new Thread(() -> {
@@ -39,7 +40,14 @@ public class AccessLogServiceImpl extends BaseService implements AsyncAccessLogS
 
     @Override
     public void start() {
-        logThread.start();
+        if (!logThread.isAlive()) {
+            logThread.start();
+        }
+    }
+
+    @Override
+    public void setAccessLogService(AsyncAccessLogService accessLogService) {
+        // AccessLogService 自身不需要再注入访问日志服务，否则会形成自引用循环依赖。
     }
 
     @Override
@@ -73,8 +81,10 @@ public class AccessLogServiceImpl extends BaseService implements AsyncAccessLogS
     }
 
     @Override
+    @PreDestroy
     public void stop() {
         stop = true;
+        logThread.interrupt();
     }
 
 

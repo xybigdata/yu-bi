@@ -36,11 +36,11 @@ spring:
       org:
         quartz:
           scheduler:
-            instancName: DatartScheduleCluster
+            instanceName: DatartScheduleCluster
             instanceId: AUTO
           jobStore:
-            class: org.quartz.impl.jdbcjobstore.JobStoreTX
             driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            tablePrefix: QRTZ_
             isClustered: true
             clusterCheckinInterval: 5000
             useProperties: true
