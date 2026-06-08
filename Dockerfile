@@ -1,4 +1,4 @@
-FROM java:8
+FROM eclipse-temurin:21-jre
 LABEL "author"="tl"
 RUN mkdir /datart
 COPY ./bin/ /datart/bin/

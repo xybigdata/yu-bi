@@ -25,7 +25,6 @@ import datart.core.common.ReflectUtils;
 import datart.core.data.provider.ScriptVariable;
 import datart.data.provider.base.DataProviderException;
 import datart.data.provider.jdbc.SqlSplitter;
-import jdk.nashorn.internal.parser.TokenType;
 import org.apache.calcite.avatica.util.Quoting;
 import org.apache.calcite.config.Lex;
 import org.apache.calcite.sql.SqlDialect;
@@ -117,7 +116,7 @@ public class SqlStringUtils {
             } else {
                 Object tokenType = ReflectUtils.getFieldValue(token, "type");
                 Integer endIndex = (Integer) ReflectUtils.getFieldValue(tokenizer, "pos");
-                if (tokenType.toString().equals(TokenType.COMMENT.name())) {
+                if ("COMMENT".equals(tokenType.toString())) {
                     posList.add(new SqlParserPos(0, currPos, 0, endIndex));
                 }
                 currPos = endIndex;

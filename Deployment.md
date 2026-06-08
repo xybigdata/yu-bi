@@ -54,7 +54,7 @@ datart.webdriver-path=http://127.0.0.1:4444/wd/hub
 # 2. 本地部署 
 ## 2.1. 环境准备
 
-- JDK 1.8+
+- JDK 21+
 - MySql5.7+
 - datart安装包（datart-server-1.0.0-beta.x-install.zip)
 - Mail Server （可选）
