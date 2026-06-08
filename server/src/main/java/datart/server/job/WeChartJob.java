@@ -19,13 +19,13 @@ package datart.server.job;
 
 import datart.server.base.dto.JobFile;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.nio.file.Files;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +51,7 @@ public class WeChartJob extends ScheduleJob {
 
     private Map<String, Object> createParam(File file) throws Exception {
         byte[] bytes = Files.readAllBytes(file.toPath());
-        String base64 = Base64Utils.encodeToString(bytes);
+        String base64 = Base64.getEncoder().encodeToString(bytes);
         String md5 = DigestUtils.md5DigestAsHex(bytes);
         HashMap<String, Object> param = new HashMap<>();
         param.put("msgtype", "image");

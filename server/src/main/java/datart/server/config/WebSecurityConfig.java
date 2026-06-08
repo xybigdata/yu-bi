@@ -6,11 +6,14 @@ import datart.security.oauth2.CustomOauth2AuthenticationFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 
@@ -19,7 +22,7 @@ import static datart.core.common.Application.getApiPrefix;
 @Configuration
 @EnableWebSecurity
 @Slf4j
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig {
 
     private OAuth2ClientProperties oAuth2ClientProperties;
 
@@ -29,27 +32,28 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private ClientRegistrationRepositoryImpl clientRegistrations;
 
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers(getApiPrefix() + "/tpa");
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web.ignoring().requestMatchers(getApiPrefix() + "/tpa");
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable();
-        http.headers().frameOptions().disable();
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(AbstractHttpConfigurer::disable);
+        http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
         if (this.oAuth2ClientProperties != null) {
             http.addFilterBefore(new CustomOAuth2AuthorizationRequestRedirectFilter(clientRegistrations), OAuth2AuthorizationRequestRedirectFilter.class);
             http.addFilterBefore(new CustomOauth2AuthenticationFilter(clientRegistrations, authenticationSuccessHandler), OAuth2LoginAuthenticationFilter.class);
-            http.oauth2Login().failureHandler(authenticationFailureHandler);
-            http.oauth2Login().clientRegistrationRepository(clientRegistrations);
-            http.oauth2Login().successHandler(authenticationSuccessHandler);
-            http
-                    .authorizeRequests()
-                    .antMatchers(getApiPrefix() + "/tpa").permitAll()
-                    .and().oauth2Login().loginPage("/")
-                    .and().logout().logoutUrl("/tpa/oauth2/logout").permitAll();
+            http.oauth2Login(oauth2Login -> oauth2Login
+                    .failureHandler(authenticationFailureHandler)
+                    .clientRegistrationRepository(clientRegistrations)
+                    .successHandler(authenticationSuccessHandler)
+                    .loginPage("/"));
+            http.authorizeHttpRequests(authorize -> authorize
+                    .requestMatchers(getApiPrefix() + "/tpa").permitAll());
+            http.logout(logout -> logout.logoutUrl("/tpa/oauth2/logout").permitAll());
         }
+        return http.build();
     }
 
     @Autowired(required = false)

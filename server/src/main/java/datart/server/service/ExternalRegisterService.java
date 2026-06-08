@@ -19,7 +19,7 @@ package datart.server.service;
 
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
 
 public interface ExternalRegisterService {

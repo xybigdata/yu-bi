@@ -177,7 +177,7 @@ public class HttpDataProvider extends DefaultDataProvider {
 
         httpRequestParam.setUsername(schema.get(USERNAME).toString());
 
-        httpRequestParam.setMethod(HttpMethod.resolve(schema.getOrDefault(REQUEST_METHOD, HttpMethod.GET.name()).toString()));
+        httpRequestParam.setMethod(HttpMethod.valueOf(schema.getOrDefault(REQUEST_METHOD, HttpMethod.GET.name()).toString()));
 
         httpRequestParam.setTimeout(Integer.parseInt(schema.getOrDefault(TIMEOUT, DEFAULT_REQUEST_TIMEOUT + "").toString()));
 

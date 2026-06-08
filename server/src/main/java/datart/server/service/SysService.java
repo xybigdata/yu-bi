@@ -3,7 +3,7 @@ package datart.server.service;
 import datart.server.base.dto.SystemInfo;
 import datart.server.base.params.SetupParams;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
 
 public interface SysService {

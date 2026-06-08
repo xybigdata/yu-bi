@@ -20,8 +20,8 @@ package datart.security.oauth2;
 import com.google.common.collect.Sets;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Set;
 
 public interface CustomOauth2Client {

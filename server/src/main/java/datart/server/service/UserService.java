@@ -28,7 +28,7 @@ import datart.server.base.dto.UserProfile;
 import datart.server.base.params.*;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 

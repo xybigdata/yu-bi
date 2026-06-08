@@ -23,7 +23,7 @@ import datart.core.data.provider.ScriptVariable;
 import datart.core.data.provider.SelectColumn;
 import lombok.Data;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 @Data

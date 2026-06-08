@@ -1,7 +1,6 @@
 package datart.server.service.impl;
 
 import datart.core.common.Cache;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 

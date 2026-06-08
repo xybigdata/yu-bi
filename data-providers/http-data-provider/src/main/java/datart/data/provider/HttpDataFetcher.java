@@ -35,6 +35,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.ssl.SSLContexts;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
@@ -87,23 +88,18 @@ public class HttpDataFetcher {
     private HttpRequestBase createHttpRequest(HttpRequestParam param) throws URISyntaxException {
         HttpRequestBase httpRequest;
         HttpEntity entity = createHttpEntity(param);
-        switch (param.getMethod()) {
-            case POST:
-                HttpPost httpPost = new HttpPost();
-                httpPost.setEntity(entity);
-                httpRequest = httpPost;
-                break;
-            case PUT:
-                HttpPut httpPut = new HttpPut();
-                httpPut.setEntity(entity);
-                httpRequest = httpPut;
-                break;
-            case DELETE:
-                httpRequest = new HttpDelete();
-                break;
-            default:
-                httpRequest = new HttpGet();
-                break;
+        if (HttpMethod.POST.matches(param.getMethod().name())) {
+            HttpPost httpPost = new HttpPost();
+            httpPost.setEntity(entity);
+            httpRequest = httpPost;
+        } else if (HttpMethod.PUT.matches(param.getMethod().name())) {
+            HttpPut httpPut = new HttpPut();
+            httpPut.setEntity(entity);
+            httpRequest = httpPut;
+        } else if (HttpMethod.DELETE.matches(param.getMethod().name())) {
+            httpRequest = new HttpDelete();
+        } else {
+            httpRequest = new HttpGet();
         }
         RequestConfig config = RequestConfig.custom()
                 .setConnectTimeout(param.getTimeout())

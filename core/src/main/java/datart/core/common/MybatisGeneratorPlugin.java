@@ -42,7 +42,7 @@ public class MybatisGeneratorPlugin extends PluginAdapter {
 //        topLevelClass.addImportedType("lombok.Builder");
 //        topLevelClass.addImportedType("lombok.NoArgsConstructor");
 //        topLevelClass.addImportedType("lombok.AllArgsConstructor");
-        topLevelClass.getImportedTypes().remove(new FullyQualifiedJavaType("javax.annotation.Generated"));
+        topLevelClass.getImportedTypes().remove(new FullyQualifiedJavaType("jakarta.annotation.Generated"));
 
         //添加domain的注解
         topLevelClass.addAnnotation("@Data");

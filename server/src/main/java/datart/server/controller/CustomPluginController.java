@@ -21,8 +21,8 @@ package datart.server.controller;
 import datart.core.base.annotations.SkipLogin;
 import datart.server.base.dto.ResponseData;
 import datart.server.service.CustomPluginService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,8 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.MalformedURLException;
 import java.util.Set;
 
-@Api
-@RestController
+@Tag(name = "CustomPluginController")
+
 @RequestMapping(value = "/plugins")
 public class CustomPluginController extends BaseController {
 
@@ -42,7 +42,7 @@ public class CustomPluginController extends BaseController {
     }
 
     @SkipLogin
-    @ApiOperation(value = "scan custom chart plugins")
+    @Operation(summary = "scan custom chart plugins")
     @GetMapping(value = "/custom/charts")
     public ResponseData<Set<String>> scanCustomCharts() throws MalformedURLException {
         return ResponseData.success(customPluginService.scanCustomChartPlugins());

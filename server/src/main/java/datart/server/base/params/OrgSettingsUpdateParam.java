@@ -21,8 +21,8 @@ package datart.server.base.params;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
