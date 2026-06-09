@@ -28,11 +28,11 @@ import {
 import { Divider, Dropdown, Select, Space, Tooltip } from 'antd';
 import { ToolbarButton } from 'app/components';
 import { Chronograph } from 'app/components/Chronograph';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { CommonFormTypes } from 'globalConstants';
 import React, { memo, useCallback, useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
 import { format } from 'sql-formatter';
 import styled from 'styled-components/macro';
 import {
@@ -75,8 +75,8 @@ export const Toolbar = memo(
     const { onRun, onSave } = useContext(EditorContext);
     const { showSaveForm } = useContext(SaveFormContext);
     const sources = useSelector(selectSources);
-    const history = useHistory();
-    const histState = history.location.state as any;
+    const navigate = useCompatNavigate();
+    const histState = navigate.location.state as any;
     const viewsData = useSelector(selectViews);
     const t = useI18NPrefix('view.editor');
     const saveAsView = useSaveAsView();

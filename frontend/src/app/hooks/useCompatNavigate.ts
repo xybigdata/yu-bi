@@ -28,6 +28,7 @@ export const useCompatNavigate = () => {
       replace: history.replace,
       goBack: history.goBack,
       go: history.go,
+      location: history.location,
     }),
     [history],
   );

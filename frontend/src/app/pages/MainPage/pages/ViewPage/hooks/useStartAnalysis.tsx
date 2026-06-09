@@ -16,22 +16,22 @@
  * limitations under the License.
  */
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 
 export function useStartAnalysis() {
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const orgId = useSelector(selectOrgId);
 
   const startAnalysis = useCallback(
     viewId => {
-      history.push({
+      navigate.push({
         pathname: `/organizations/${orgId}/vizs/chartEditor`,
         search: `dataChartId=&chartType=dataChart&container=dataChart&defaultViewId=${viewId}`,
       });
     },
-    [history, orgId],
+    [navigate, orgId],
   );
 
   return startAnalysis;
