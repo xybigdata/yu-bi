@@ -48,10 +48,10 @@
 - Node 26 下前端开发启动兼容。
 - `.npmrc` registry 配置已兼容 npm 11。
 - Maven Enforcer 已声明 Java 21+ 与 Maven 3.9+。
+- 前端构建产物复制已后移到 `package` 阶段，后端 Java 编译不再被 `frontend/build/task/index.js` 缺失阻断。
 
 待完成：
-- 将前端构建产物缺失导致的 `copy-rename-maven-plugin` 失败纳入显式构建流程。
-- 拆分 Maven 后端编译与前端构建生命周期，避免后端 Java 编译被前端产物缺失阻断。
+- 将前端完整构建纳入发布包验收，确保 `package` 阶段生成静态资源和 parser task 产物。
 
 验收门槛：
 - `mvn -DskipTests -Dexec.skip=true -Dmaven.resources.skip=true compile -pl server -am` 的 Java 编译阶段通过。
@@ -221,6 +221,6 @@
 
 1. 修复 `.npmrc` 的 npm 11 registry 配置警告。
 2. 增加 Maven Enforcer，声明 Maven 与 Java 最低版本。
-3. 调整 Maven 前端构建产物依赖，避免 Java 编译被 `frontend/build/task/index.js` 缺失阻断。
+3. 验证 Maven `package` 阶段的前端完整构建和发布包产物。
 
 完成阶段 0 后，再进入阶段 1：CRA4/CRACO6 升级到 CRA5/CRACO7。

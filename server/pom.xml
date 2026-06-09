@@ -296,7 +296,7 @@
                 <executions>
                     <execution>
                         <id>copy-resource</id>
-                        <phase>compile</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -319,7 +319,7 @@
                 <executions>
                     <execution>
                         <id>rename-file</id>
-                        <phase>compile</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>rename</goal>
                         </goals>
