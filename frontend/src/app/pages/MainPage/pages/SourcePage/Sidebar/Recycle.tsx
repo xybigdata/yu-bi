@@ -23,6 +23,7 @@ import {
 } from '@ant-design/icons';
 import { Menu, message, Popconfirm, TreeDataNode } from 'antd';
 import { MenuListItem, Popup, Tree, TreeTitle } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
   selectIsOrgOwner,
@@ -31,7 +32,6 @@ import {
 import { CommonFormTypes } from 'globalConstants';
 import { memo, useCallback, useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
 import { getInsertedNodeIndex, stopPPG } from 'utils/utils';
 import { SaveFormContext } from '../SaveFormContext';
 import { selectArchivedListLoading } from '../slice/selectors';
@@ -53,7 +53,7 @@ interface RecycleProps {
 
 export const Recycle = memo(({ sourceId, list }: RecycleProps) => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const orgId = useSelector(selectOrgId);
   const loading = useSelector(selectArchivedListLoading);
   const t = useI18NPrefix('source.sidebar');
@@ -66,9 +66,9 @@ export const Recycle = memo(({ sourceId, list }: RecycleProps) => {
 
   const toDetail = useCallback(
     id => () => {
-      history.push(`/organizations/${orgId}/sources/${id}`);
+      navigate.push(`/organizations/${orgId}/sources/${id}`);
     },
-    [history, orgId],
+    [navigate, orgId],
   );
 
   const moreMenuClick = useCallback(
@@ -114,10 +114,10 @@ export const Recycle = memo(({ sourceId, list }: RecycleProps) => {
   const treeSelect = useCallback(
     (_, { node }) => {
       if (!node.isFolder && node.id !== sourceId) {
-        history.push(`/organizations/${orgId}/sources/${node.id}`);
+        navigate.push(`/organizations/${orgId}/sources/${node.id}`);
       }
     },
-    [history, orgId, sourceId],
+    [navigate, orgId, sourceId],
   );
 
   const del = useCallback(

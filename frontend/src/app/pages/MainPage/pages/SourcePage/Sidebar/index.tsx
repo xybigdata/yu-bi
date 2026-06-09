@@ -22,6 +22,7 @@ import {
 } from '@ant-design/icons';
 import { message } from 'antd';
 import { ListNav, ListPane, ListTitle } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useGetSourceDbTypeIcon from 'app/hooks/useGetSourceDbTypeIcon';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -30,7 +31,7 @@ import { dispatchResize } from 'app/utils/dispatchResize';
 import { CommonFormTypes } from 'globalConstants';
 import { memo, useCallback, useContext, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { LEVEL_5, SPACE_TIMES, SPACE_XS } from 'styles/StyleConstants';
 import { getInsertedNodeIndex } from 'utils/utils';
@@ -55,7 +56,7 @@ interface SidebarProps {
 export const Sidebar = memo(
   ({ width, isDragging, sliderVisible, handleSliderVisible }: SidebarProps) => {
     const dispatch = useDispatch();
-    const history = useHistory();
+    const navigate = useCompatNavigate();
     const orgId = useSelector(selectOrgId);
     const archived = useSelector(selectArchived);
     const sourceData = useSelector(selectSources);
@@ -102,7 +103,7 @@ export const Sidebar = memo(
       ({ key }) => {
         switch (key) {
           case 'add':
-            history.push(`/organizations/${orgId}/sources/add`);
+            navigate.push(`/organizations/${orgId}/sources/add`);
             break;
           case 'folder':
             showSaveForm({
@@ -136,7 +137,7 @@ export const Sidebar = memo(
             break;
         }
       },
-      [dispatch, history, orgId, showSaveForm, sourceData, t],
+      [dispatch, navigate, orgId, showSaveForm, sourceData, t],
     );
 
     const moreMenuClick = useCallback(

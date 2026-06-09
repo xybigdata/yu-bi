@@ -20,6 +20,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Input, message, Popconfirm, Select } from 'antd';
 import { Authorized, EmptyFiller } from 'app/components';
 import { DetailPageHeader } from 'app/components/DetailPageHeader';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useAccess, useCascadeAccess } from 'app/pages/MainPage/Access';
 import {
@@ -42,7 +43,7 @@ import React, {
   useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import {
   BORDER_RADIUS,
@@ -96,7 +97,7 @@ export function SourceDetailPage() {
   const [lastUpdateTime, setLastUpdateTime] = useState<string | undefined>();
   const { actions } = useSourceSlice();
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const orgId = useSelector(selectOrgId);
   const isOwner = useSelector(selectIsOrgOwner);
   const editingSource = useSelector(selectEditingSource);
@@ -296,7 +297,7 @@ export function SourceDetailPage() {
                   },
                   resolve: (id: string) => {
                     message.success(t('createSuccess'));
-                    history.push(`/organizations/${orgId}/sources/${id}`);
+                    navigate.push(`/organizations/${orgId}/sources/${id}`);
                     onClose();
                   },
                 }),
@@ -338,12 +339,12 @@ export function SourceDetailPage() {
                 ? tg('operation.archiveSuccess')
                 : tg('operation.deleteSuccess'),
             );
-            history.replace(`/organizations/${orgId}/sources`);
+            navigate.replace(`/organizations/${orgId}/sources`);
           },
         }),
       );
     },
-    [dispatch, history, orgId, editingSource, tg],
+    [dispatch, navigate, orgId, editingSource, tg],
   );
 
   const unarchive = useCallback(() => {
@@ -367,7 +368,7 @@ export function SourceDetailPage() {
             },
             resolve: () => {
               message.success(tg('operation.restoreSuccess'));
-              history.replace(`/organizations/${orgId}/sources`);
+              navigate.replace(`/organizations/${orgId}/sources`);
               onClose();
             },
           }),
@@ -381,7 +382,7 @@ export function SourceDetailPage() {
     sourceData,
     dispatch,
     tg,
-    history,
+    navigate,
     orgId,
   ]);
 
@@ -391,13 +392,13 @@ export function SourceDetailPage() {
   );
 
   const addNewView = useCallback(() => {
-    history.push({
+    navigate.push({
       pathname: `/organizations/${orgId}/views/${`${UNPERSISTED_ID_PREFIX}${uuidv4()}`}`,
       state: {
         sourcesId: editingSource?.id,
       },
     });
-  }, [history, orgId, editingSource]);
+  }, [navigate, orgId, editingSource]);
 
   const handleSyncDatabase = async () => {
     if (!editingSource?.id) {

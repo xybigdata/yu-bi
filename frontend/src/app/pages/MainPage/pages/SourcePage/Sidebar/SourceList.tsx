@@ -24,6 +24,7 @@ import {
 } from '@ant-design/icons';
 import { Menu, message, Popconfirm, TreeDataNode } from 'antd';
 import { MenuListItem, Popup, Tree, TreeTitle } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
   selectIsOrgOwner,
@@ -33,7 +34,6 @@ import {
 import { CommonFormTypes } from 'globalConstants';
 import { memo, useCallback, useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
 import { onDropTreeFn, stopPPG, uuidv4 } from 'utils/utils';
 import { CascadeAccess, getCascadeAccess } from '../../../Access';
 import {
@@ -55,7 +55,7 @@ interface SourceListProps {
 
 export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const orgId = useSelector(selectOrgId);
   const deleteLoading = useSelector(selectDeleteSourceLoading);
   const loading = useSelector(selectSourceListLoading);
@@ -72,9 +72,9 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
 
   const toDetails = useCallback(
     id => () => {
-      history.push(`/organizations/${orgId}/sources/${id}`);
+      navigate.push(`/organizations/${orgId}/sources/${id}`);
     },
-    [history, orgId],
+    [navigate, orgId],
   );
 
   const moreMenuClick = useCallback(
@@ -113,7 +113,7 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
             });
             break;
           case 'addNewView':
-            history.push({
+            navigate.push({
               pathname: `/organizations/${orgId}/views/${`${UNPERSISTED_ID_PREFIX}${uuidv4()}`}`,
               state: {
                 sourcesId: id,
@@ -126,7 +126,7 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
             break;
         }
       },
-    [dispatch, history, orgId, showSaveForm, t, toDetails],
+    [dispatch, navigate, orgId, showSaveForm, t, toDetails],
   );
 
   const del = useCallback(
@@ -142,12 +142,12 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
                 ? tg('operation.archiveSuccess')
                 : tg('operation.deleteSuccess'),
             );
-            history.replace(`/organizations/${orgId}/sources`);
+            navigate.replace(`/organizations/${orgId}/sources`);
           },
         }),
       );
     },
-    [deleteLoading, dispatch, tg, history, orgId],
+    [deleteLoading, dispatch, tg, navigate, orgId],
   );
 
   const renderTreeTitle = useCallback(
@@ -262,10 +262,10 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
           setExpandedKeys([node.key].concat(expandedKeys));
         }
       } else {
-        history.push(`/organizations/${orgId}/sources/${node.id}`);
+        navigate.push(`/organizations/${orgId}/sources/${node.id}`);
       }
     },
-    [expandedKeys, history, orgId],
+    [expandedKeys, navigate, orgId],
   );
 
   const handleExpandTreeNode = expandedKeys => {
