@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { CheckOutlined } from '@ant-design/icons';
-import { Menu } from 'antd';
+import { Menu, MenuProps } from 'antd';
 import {
   ChartDataViewFieldCategory,
   RUNTIME_DATE_LEVEL_KEY,
@@ -97,56 +97,44 @@ const DateLevelMenuItems = memo(
       [config, onChange],
     );
 
-    return (
-      <>
-        <Menu.Item
-          icon={!config.expression ? <CheckOutlined /> : ''}
-          key="defaultDateComputerField"
-          eventKey="defaultDateComputerField"
-          onClick={() => {
-            config.field &&
-              handleChangeFn({
-                category: ChartDataViewFieldCategory.Field,
-                colName: config.field,
-              });
-          }}
-        >
-          {t('default')}
-        </Menu.Item>
-        {DATE_LEVELS.map(item => {
-          if (availableSourceFunctions?.includes(item.expression)) {
-            const configColName =
-              config.category === ChartDataViewFieldCategory.Field
-                ? config.colName
-                : config.field;
-            const row = getAllColumnInMeta(metas)?.find(
-              v => v.name === configColName,
-            );
-            const expression = `${item.expression}(${FieldTemplate(
-              row?.path,
-            )})`;
-            return (
-              <Menu.Item
-                key={expression}
-                eventKey={expression}
-                icon={config.expression === expression ? <CheckOutlined /> : ''}
-                onClick={() =>
-                  handleChangeFn({
-                    category: ChartDataViewFieldCategory.DateLevelComputedField,
-                    colName:
-                      configColName + DATE_LEVEL_DELIMITER + item.expression,
-                    expression,
-                  })
-                }
-              >
-                {item.name}
-              </Menu.Item>
-            );
-          }
+    const items: MenuProps['items'] = [
+      {
+        key: 'defaultDateComputerField',
+        icon: !config.expression ? <CheckOutlined /> : '',
+        label: t('default'),
+        onClick: () => {
+          config.field &&
+            handleChangeFn({
+              category: ChartDataViewFieldCategory.Field,
+              colName: config.field,
+            });
+        },
+      },
+      ...DATE_LEVELS.map(item => {
+        if (!availableSourceFunctions?.includes(item.expression)) {
           return null;
-        })}
-      </>
-    );
+        }
+        const configColName =
+          config.category === ChartDataViewFieldCategory.Field
+            ? config.colName
+            : config.field;
+        const row = getAllColumnInMeta(metas)?.find(v => v.name === configColName);
+        const expression = `${item.expression}(${FieldTemplate(row?.path)})`;
+        return {
+          key: expression,
+          icon: config.expression === expression ? <CheckOutlined /> : '',
+          label: item.name,
+          onClick: () =>
+            handleChangeFn({
+              category: ChartDataViewFieldCategory.DateLevelComputedField,
+              colName: configColName + DATE_LEVEL_DELIMITER + item.expression,
+              expression,
+            }),
+        };
+      }).filter(Boolean),
+    ];
+
+    return <Menu selectable={false} items={items} />;
   },
 );
 export default DateLevelMenuItems;
