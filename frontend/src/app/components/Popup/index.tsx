@@ -48,5 +48,5 @@ export function Popup({
   );
 }
 
-export { MenuListItem } from './MenuListItem';
+export { MenuItemContent } from './MenuListItem';
 export { MenuWrapper } from './MenuWrapper';

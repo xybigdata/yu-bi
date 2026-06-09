@@ -1125,6 +1125,21 @@
   - `npm test -- --runInBand --watchAll=false` 通过
   - `npm run build` 通过
 
+### 并行治理：清理 Popup 菜单兼容壳里的 Ant Design 旧菜单 API
+
+- 在业务页面层的 `MenuListItem` 使用点基本清零后，`Popup` 通用基座里历史保留的 `Menu.Item` / `Menu.SubMenu` 兼容壳也已移除，覆盖：
+  - `frontend/src/app/components/Popup/MenuListItem.tsx`
+  - `frontend/src/app/components/Popup/MenuWrapper.tsx`
+  - `frontend/src/app/components/Popup/index.tsx`
+  - `frontend/src/app/components/index.tsx`
+- `MenuListItem.tsx` 现在只保留 `MenuItemContent` 这个纯渲染容器，继续承接 prefix / suffix / icon 样式；不再通过兼容组件继续向外扩散旧 `Menu.Item` / `Menu.SubMenu` 写法。
+- `MenuWrapper` 也同步收口为纯 `items` / `MenuProps` 包装层，只保留统一 `onClose` 关闭逻辑，不再承接 children 方式的历史菜单拼装。
+- 这一步意味着当前前端仓库里，主业务代码和通用 `Popup` 基座都已经不再依赖 `MenuListItem` 这种旧菜单包装壳，后续进入 Ant Design 5 主升级时，`Menu children -> items` 这一类兼容负担会显著减小。
+- 2026-06-10 验证：
+  - `npm run checkTs` 通过
+  - `npm test -- --runInBand --watchAll=false` 通过
+  - `npm run build` 通过
+
 ### 2026-06-10 全项目老旧技术栈复核结论
 
 这一轮不是只看版本号，而是按“是否仍在主维护线、是否已经被现代替代方案覆盖、是否值得继续在当前架构上扩展”三条标准重新复核。

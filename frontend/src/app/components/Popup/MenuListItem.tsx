@@ -1,53 +1,7 @@
-import { Menu, MenuItemProps } from 'antd';
 import { cloneElement, ReactElement, ReactNode } from 'react';
-import styled, { css } from 'styled-components';
-import { LINE_HEIGHT_HEADING, SPACE, SPACE_XS } from 'styles/StyleConstants';
+import styled from 'styled-components';
+import { SPACE, SPACE_XS } from 'styles/StyleConstants';
 import { mergeClassNames } from 'utils/utils';
-
-const WrapperStyle = css`
-  line-height: ${LINE_HEIGHT_HEADING};
-
-  &.selected {
-    background-color: ${p => p.theme.emphasisBackground};
-  }
-
-  .ant-dropdown-menu-submenu-title {
-    line-height: ${LINE_HEIGHT_HEADING};
-  }
-`;
-
-interface MenuListItemProps extends Omit<MenuItemProps, 'prefix'> {
-  prefix?: ReactElement;
-  suffix?: ReactElement;
-  sub?: boolean;
-}
-
-export function MenuListItem({
-  prefix,
-  suffix,
-  sub,
-  ...menuProps
-}: MenuListItemProps) {
-  return sub ? (
-    <Menu.SubMenu
-      css={WrapperStyle}
-      {...menuProps}
-      title={
-        <MenuItemContent prefix={prefix} suffix={suffix}>
-          {menuProps.title}
-        </MenuItemContent>
-      }
-    >
-      {menuProps.children}
-    </Menu.SubMenu>
-  ) : (
-    <Menu.Item css={WrapperStyle} {...menuProps}>
-      <MenuItemContent prefix={prefix} suffix={suffix}>
-        {menuProps.children}
-      </MenuItemContent>
-    </Menu.Item>
-  );
-}
 
 interface ListItemProps {
   prefix?: ReactElement;
