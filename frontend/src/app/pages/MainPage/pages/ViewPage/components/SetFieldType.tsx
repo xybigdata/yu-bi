@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { Dropdown, Menu, Tooltip } from 'antd';
+import { Dropdown, Menu, MenuProps, Tooltip } from 'antd';
 import { DataViewFieldType, DateFormat } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { memo, ReactNode } from 'react';
@@ -41,6 +41,42 @@ const SetFieldType = memo(
   }: SetFieldTypeProps) => {
     const t = useI18NPrefix('view.schemaTable');
     const tg = useI18NPrefix('global');
+    const menuItems: MenuProps['items'] = [
+      ...Object.values(DataViewFieldType).map(type => {
+        if (type === DataViewFieldType.DATE && hasFormat) {
+          return {
+            key: type,
+            label: tg(`columnType.${type.toLowerCase()}`),
+            popupClassName: 'datart-schema-table-header-menu',
+            children: Object.values(DateFormat).map(format => ({
+              key: format,
+              label: format,
+            })),
+          };
+        }
+        return {
+          key: type,
+          label: tg(`columnType.${type.toLowerCase()}`),
+        };
+      }),
+      ...(hasCategory
+        ? [
+            {
+              type: 'divider' as const,
+            },
+            {
+              key: 'categories',
+              label: t('category'),
+              popupClassName: 'datart-schema-table-header-menu',
+              children: Object.values(ColumnCategories).map(category => ({
+                key: `category-${category}`,
+                label: tg(`columnCategory.${category.toLowerCase()}`),
+              })),
+            },
+          ]
+        : []),
+    ];
+
     return (
       <Dropdown
         trigger={['click']}
@@ -53,44 +89,8 @@ const SetFieldType = memo(
             ]}
             className="datart-schema-table-header-menu"
             onClick={({ keyPath }) => onChange(keyPath, field?.name)}
-          >
-            {Object.values(DataViewFieldType).map(t => {
-              if (t === DataViewFieldType.DATE && hasFormat) {
-                return (
-                  <Menu.SubMenu
-                    key={t}
-                    title={tg(`columnType.${t.toLowerCase()}`)}
-                    popupClassName="datart-schema-table-header-menu"
-                  >
-                    {Object.values(DateFormat).map(format => {
-                      return <Menu.Item key={format}>{format}</Menu.Item>;
-                    })}
-                  </Menu.SubMenu>
-                );
-              }
-              return (
-                <Menu.Item key={t}>
-                  {tg(`columnType.${t.toLowerCase()}`)}
-                </Menu.Item>
-              );
-            })}
-            {hasCategory && (
-              <>
-                <Menu.Divider />
-                <Menu.SubMenu
-                  key="categories"
-                  title={t('category')}
-                  popupClassName="datart-schema-table-header-menu"
-                >
-                  {Object.values(ColumnCategories).map(t => (
-                    <Menu.Item key={`category-${t}`}>
-                      {tg(`columnCategory.${t.toLowerCase()}`)}
-                    </Menu.Item>
-                  ))}
-                </Menu.SubMenu>
-              </>
-            )}
-          </Menu>
+            items={menuItems}
+          />
         )}
       >
         <Tooltip

@@ -187,6 +187,8 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
 - 继续预处理 AntD 5 菜单 API：故事板操作菜单和仪表板全屏 widget 列表已从 JSX `Menu.Item` 切换到 `Menu items` 配置，保留原有 Popconfirm 和点击行为。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
+- 预处理视图字段类型菜单：字段类型、日期格式和字段分类菜单已从 JSX `Menu.Item`/`Menu.SubMenu` 切换到 `Menu items` 配置，保留原有 `keyPath` 回调语义。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
 
 预研结果：
 - Ant Design 相关调用点约 358 个文件，`visible`/`onVisibleChange`/`overlay`/`Menu.Item` 等 AntD 5 迁移热点分布广，不能直接大版本替换。
