@@ -29,7 +29,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import MonacoEditor from 'react-monaco-editor';
+import MonacoEditor, { MonacoEditorHandle } from 'react-monaco-editor';
 import styled from 'styled-components/macro';
 import ChartComputedFieldEditorDarkTheme from './ChartComputedFieldEditorDarkTheme';
 import DatartQueryLanguageSpecification from './DatartQueryLanguageSpecification';
@@ -42,7 +42,7 @@ const ChartComputedFieldEditor: ForwardRefRenderFunction<
     onChange: (expression: string) => void;
   }
 > = (props, ref) => {
-  const editorRef = useRef<MonacoEditor>(null);
+  const editorRef = useRef<MonacoEditorHandle>(null);
   const [editorText, setEditorText] = useState(props.value);
   const [description, setDescription] = useState<FunctionDescription>();
 

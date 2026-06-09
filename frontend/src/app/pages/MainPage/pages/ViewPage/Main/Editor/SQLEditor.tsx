@@ -200,7 +200,7 @@ export const SQLEditor = memo(() => {
       run,
     );
     editorInstance?.addCommand(
-      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S,
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
       callSave,
     );
   }, [editorInstance, run, callSave]);

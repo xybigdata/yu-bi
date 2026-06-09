@@ -20,7 +20,7 @@ import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
 import { ChartIFrameContainer } from '../index';
 
-jest.mock('uuid/dist/umd/uuidv4.min');
+jest.mock('uuid');
 
 describe('ChartIFrameContainer Test', () => {
   test('should render within iframe when enable use iframe', async () => {

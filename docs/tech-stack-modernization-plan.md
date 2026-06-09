@@ -7,13 +7,15 @@
 - Java 运行时：JDK 21。
 - 后端主框架：Spring Boot 3.5.12，Spring Cloud 2025.0.1。
 - 构建工具：Maven，`maven-compiler-plugin` 3.14.1，`maven-assembly-plugin` 3.8.0，`exec-maven-plugin` 3.6.3。
-- 前端运行时：本机 Node 26 可启动，CRA4/Webpack4 通过 `NODE_OPTIONS=--openssl-legacy-provider` 兼容。
-- 前端主框架：React 17、React Router 5、Ant Design 4、CRACO 6、TypeScript 4.5。
+- 前端运行时：本机 Node 26 可启动，CRA5/Webpack5 已不再依赖 `NODE_OPTIONS=--openssl-legacy-provider`。
+- 前端主框架：React 17、React Router 5、Ant Design 4、CRACO 7、TypeScript 4.5。
 - 已验证基线：
   - `npm run checkTs` 通过。
+  - `npm run build:task` 通过。
+  - `npm run build` 通过。
   - `mvn test -pl data-providers/jdbc-data-provider -am` 通过。
   - `GET /api/v1/sys/info` 返回 200。
-  - `http://127.0.0.1:3000` 返回 200。
+  - `http://127.0.0.1:3001` 返回 200，`/api/v1/plugins/custom/charts` 返回成功。
 
 ## 目标终态
 
@@ -62,22 +64,31 @@
 
 目标：在不改业务代码的前提下消除 CRA4/Webpack4 对 Node 26 的明显摩擦。
 
-升级项：
-- `react-scripts 4 -> 5.0.1`。
-- `@craco/craco 6 -> 7`。
+已完成：
+- `react-scripts 4.0.3 -> 5.0.1`。
+- `@craco/craco 6 -> 7.1.0`。
 - Webpack 4 间接升级到 Webpack 5。
-- Babel、PostCSS、Browserslist 数据做兼容性更新。
+- `monaco-editor-webpack-plugin 4 -> 7.1.1`，`monaco-editor 0.28 -> 0.52`，`react-monaco-editor 0.46 -> 0.59`。
+- `webpackbar 5 -> 7`，Webpack 类型包升级到 5.x。
+- 移除前端 `start`/`build` 中的 `NODE_OPTIONS=--openssl-legacy-provider`。
+- 适配 webpack-dev-server 4 的 `setupMiddlewares`。
+- 删除 `uuid` 私有导入路径，改用 `uuid` 公开 API，兼容 Webpack 5 package exports。
+- 显式固定 `ajv@8`、`ajv-keywords@5`，避免 npm 11 hoist 到 Webpack5 不兼容组合。
+- 显式固定 `@types/babel__traverse@7.18.5`，避免 TypeScript 4.5 解析新版类型语法失败。
 
-风险：
-- CRACO 配置对 Webpack 4 API 的假设可能失效。
-- Ant Design Less 主题、Monaco 插件、多入口 share 页面可能需要适配。
+遗留风险：
+- CRA5 自身仍会打印 webpack-dev-server `onBeforeSetupMiddleware`/`onAfterSetupMiddleware` 弃用警告，长期应通过阶段 2 迁出 CRA 解决。
+- Monaco 开发构建会打印缺失 `marked.umd.js.map` 的 source map 警告，不影响构建和运行。
+- `eslint-plugin-jsdoc` 仍声明只支持 Node 12-17，安装时在 Node 26 下有 engine warning；后续放入阶段 5 的 lint 工具链升级。
+- `npm audit` 仍有历史漏洞，需随后续前后端依赖升级分批处理。
 
 验收门槛：
 - `npm start` 成功。
 - `npm run checkTs` 成功。
 - `npm run build:task` 成功。
 - `npm run build` 成功。
-- 登录页、系统信息接口代理、至少一个核心页面可打开。
+- `build/index.html`、`build/shareChart.html`、`build/shareDashboard.html`、`build/shareStoryPlayer.html` 均生成。
+- 前端开发服务返回 200，自定义插件接口 `/api/v1/plugins/custom/charts` 返回成功。
 
 ### 阶段 2：迁出 CRA 到 Vite
 
@@ -217,10 +228,8 @@
 
 ## 当前下一步
 
-优先进入阶段 0 剩余项：
+阶段 1 已完成，下一步优先处理阶段 2 的迁出 CRA 预研和准备工作：
 
-1. 修复 `.npmrc` 的 npm 11 registry 配置警告。
-2. 增加 Maven Enforcer，声明 Maven 与 Java 最低版本。
-3. 验证 Maven `package` 阶段的前端完整构建和发布包产物。
-
-完成阶段 0 后，再进入阶段 1：CRA4/CRACO6 升级到 CRA5/CRACO7。
+1. 梳理 CRACO 当前承担的能力：多入口 HTML、dev proxy、custom charts middleware、Monaco、Less/AntD 主题、split chunks。
+2. 设计 Vite 等价配置和产物目录，确保后端 Maven `package` 阶段仍能复制 `frontend/build` 和 `frontend/build/task/index.js`。
+3. 先建立 Vite 构建分支或并行脚本，再替换默认 `start/build`，避免一次提交同时迁移 React/Router/AntD。

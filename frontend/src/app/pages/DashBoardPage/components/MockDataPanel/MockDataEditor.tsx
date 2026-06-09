@@ -38,7 +38,7 @@ export const MockDataEditor: FC<{ originalData: object; onDataChange: any }> =
         // Removing the tooltip on the read-only editor
         // https://github.com/microsoft/monaco-editor/issues/1742
 
-        editor.getAction('editor.action.formatDocument').run(); //格式化
+        editor.getAction('editor.action.formatDocument')?.run(); //格式化
         editor.setValue(editor.getValue());
         editor.focus();
       },

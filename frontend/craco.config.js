@@ -44,7 +44,7 @@ module.exports = {
     alias: {},
     plugins: [
       new WebpackBar(),
-      new MonacoWebpackPlugin({ languages: [''] }),
+      new MonacoWebpackPlugin({ languages: ['sql', 'javascript'] }),
       // new BundleAnalyzerPlugin(),
     ],
     configure: (webpackConfig, { env, paths }) => {
@@ -70,7 +70,6 @@ module.exports = {
         ...webpackConfig.optimization.splitChunks,
         ...{
           chunks: 'all',
-          name: true,
           cacheGroups: {
             chartGraph: {
               name: 'ChartGraph',
@@ -197,8 +196,8 @@ module.exports = {
     modulePaths: ['../'],
   },
   devServer: {
-    before: function (app, server, compiler) {
-      app.get('/api/v1/plugins/custom/charts', function (req, res) {
+    setupMiddlewares: (middlewares, devServer) => {
+      devServer.app.get('/api/v1/plugins/custom/charts', function (req, res) {
         const pluginPath = 'custom-chart-plugins';
         const dir = fs.readdirSync(`./public/${pluginPath}`);
         res.json({
@@ -209,6 +208,8 @@ module.exports = {
           success: true,
         });
       });
+
+      return middlewares;
     },
     hot: true,
     proxy: {
