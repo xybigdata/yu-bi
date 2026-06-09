@@ -94,7 +94,7 @@
     }
   },
   "dependencies": {
-    "@ant-design/icons": "^4.5.0",
+    "@ant-design/icons": "4.8.3",
     "@ant-design/pro-table": "2.60.1",
     "@antv/s2": "1.19.0",
     "@antv/s2-react": "1.18.0",
@@ -132,7 +132,7 @@
     "react-dom": "18.3.1",
     "react-draggable": "^4.4.3",
     "react-grid-layout": "^1.2.4",
-    "react-helmet-async": "1.2.2",
+    "react-helmet-async": "3.0.0",
     "react-hotkeys-hook": "^3.4.0",
     "react-i18next": "11.15.3",
     "react-monaco-editor": "0.59.0",

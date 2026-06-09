@@ -168,8 +168,18 @@
 - React Router 5 升级到 6/7。
 - 替换或适配不再维护的 UI 依赖。
 
+已完成：
+- `react-helmet-async 1.2.2 -> 3.0.0`，先消除 React 18 类型迁移中 Helmet/HelmetProvider `children` 类型不完整的问题。
+
+预研结果：
+- Ant Design 相关调用点约 358 个文件，`visible`/`onVisibleChange`/`overlay`/`Menu.Item` 等 AntD 5 迁移热点分布广，不能直接大版本替换。
+- `antd 4.16.13 -> 4.24.16` 预演会触发若干类型变化，包括 `Input` 类型引用、`InputNumber` 的 `number | null`、Tree/Cascader 类型收紧等。
+- `antd 4.24.16` 还会阻断当前 `antd-theme-generator 1.2.11`：主题生成尝试读取 `antd/lib/style/themes/@{root-entry-name}.less`，导致 `npm run build:theme` 失败。
+- 因此 UI 阶段的实际顺序应先替换或移除 `antd-theme-generator` 动态 Less 主题链，再把 Ant Design 升到 4.24.x，最后迁移到 Ant Design 5 token 主题。
+
 风险：
 - Ant Design 5/6 token、Less 变量和组件 API 变化较大。
+- 当前动态主题依赖 Ant Design 4 Less 变量和浏览器端 `less.min.js`，这是迁移 Ant Design 5/6 的主要阻塞。
 - React Router 6/7 的路由声明和导航 API 有破坏性变化。
 
 验收门槛：
@@ -259,7 +269,8 @@
 
 阶段 3 已完成，下一步进入阶段 4 的 UI 与路由现代化准备：
 
-1. 先评估 Ant Design 4 -> 5 的 API、Less 变量、主题 token 和图标类型影响。
-2. 梳理 `@types/react@18` 的阻塞点，优先补齐公共组件和上下文组件的 `children` 类型。
-3. 评估 React Router 5 -> 6/7 的路由声明、`useHistory`、`Redirect` 和嵌套路由替换方案。
-4. 保持 CRA5/CRACO 回退脚本，直到 Jest/测试栈迁出 CRA。
+1. 替换 `antd-theme-generator` 和浏览器端 Less 动态主题链，为 Ant Design 4.24.x/5 铺路。
+2. 在主题链替换后，先把 Ant Design 升到 4.24.x，并修复 Tree/Cascader/InputNumber 等类型收紧问题。
+3. 梳理 `@types/react@18` 的阻塞点，优先补齐公共组件和上下文组件的 `children` 类型。
+4. 评估 React Router 5 -> 6/7 的路由声明、`useHistory`、`Redirect` 和嵌套路由替换方案。
+5. 保持 CRA5/CRACO 回退脚本，直到 Jest/测试栈迁出 CRA。
