@@ -1,6 +1,7 @@
 import { LeftOutlined, MoreOutlined, SearchOutlined } from '@ant-design/icons';
-import { Input, Space, Tooltip } from 'antd';
+import { Input, MenuProps, Space, Tooltip } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { MenuItemContent } from 'app/components/Popup/MenuListItem';
 import React, { ReactElement, useCallback, useState } from 'react';
 import styled from 'styled-components';
 import {
@@ -15,7 +16,7 @@ import {
   SPACE_UNIT,
   SPACE_XS,
 } from 'styles/StyleConstants';
-import { MenuListItem, MenuWrapper, Popup } from '../Popup';
+import { MenuWrapper, Popup } from '../Popup';
 import { ToolbarButton } from '../ToolbarButton';
 import { AddButton } from './AddButton';
 
@@ -78,6 +79,17 @@ export function ListTitle({
     onPrevious && onPrevious();
   }, [onPrevious]);
 
+  const moreItems: MenuProps['items'] | undefined = more?.items.map(
+    ({ key, text, prefix, suffix }) => ({
+      key,
+      label: (
+        <MenuItemContent prefix={prefix} suffix={suffix}>
+          {text}
+        </MenuItemContent>
+      ),
+    }),
+  );
+
   return (
     <Wrapper className={className}>
       <Title className="title">
@@ -109,17 +121,8 @@ export function ListTitle({
                   prefixCls="ant-dropdown-menu"
                   selectable={false}
                   onClick={moreMenuClick}
-                >
-                  {more.items.map(({ key, text, prefix, suffix }) => (
-                    <MenuListItem
-                      key={key}
-                      {...(prefix && { prefix })}
-                      {...(suffix && { suffix })}
-                    >
-                      {text}
-                    </MenuListItem>
-                  ))}
-                </MenuWrapper>
+                  items={moreItems}
+                />
               }
             >
               <ToolbarButton size="small" icon={<MoreOutlined />} />

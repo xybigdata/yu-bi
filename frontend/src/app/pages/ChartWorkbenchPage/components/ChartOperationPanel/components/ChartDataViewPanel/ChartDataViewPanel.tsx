@@ -26,13 +26,15 @@ import {
   Button,
   Input,
   Menu,
+  MenuProps,
   message,
   Popover,
   Space,
   Tooltip,
   TreeSelect,
 } from 'antd';
-import { MenuListItem, ToolbarButton } from 'app/components';
+import { ToolbarButton } from 'app/components';
+import { MenuItemContent } from 'app/components/Popup/MenuListItem';
 import { Confirm, ConfirmProps } from 'app/components/Confirm';
 import { ChartDataViewFieldCategory } from 'app/constants';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
@@ -471,6 +473,53 @@ const ChartDataViewPanel: FC<{
     ],
   );
 
+  const dataViewMenuItems = useMemo<MenuProps['items']>(
+    () => [
+      {
+        key: 'searchField',
+        label: (
+          <MenuItemContent>{t('searchField')}</MenuItemContent>
+        ),
+      },
+      {
+        key: 'createComputedFields',
+        label: (
+          <MenuItemContent>{t('createComputedFields')}</MenuItemContent>
+        ),
+      },
+      {
+        key: 'group',
+        label: <MenuItemContent>{t('Group')}</MenuItemContent>,
+        disabled: dataView?.type !== 'STRUCT',
+        children: [
+          {
+            key: 'byGroup',
+            label: <MenuItemContent>{t('byDataBaseGroup')}</MenuItemContent>,
+          },
+          {
+            key: 'byNoGroup',
+            label: <MenuItemContent>{t('noGroup')}</MenuItemContent>,
+          },
+        ],
+      },
+      {
+        key: 'sort',
+        label: <MenuItemContent>{t('Sort')}</MenuItemContent>,
+        children: [
+          {
+            key: 'byNameSort',
+            label: <MenuItemContent>{t('byNameSort')}</MenuItemContent>,
+          },
+          {
+            key: 'byOriginalFieldSort',
+            label: <MenuItemContent>{t('noSort')}</MenuItemContent>,
+          },
+        ],
+      },
+    ],
+    [dataView?.type, t],
+  );
+
   useMount(() => {
     if (defaultViewId) {
       handleDataViewChange(defaultViewId);
@@ -517,33 +566,8 @@ const ChartDataViewPanel: FC<{
                   'byNameSort',
                   isGroup ? 'byGroup' : 'byNoGroup',
                 ]}
-              >
-                <MenuListItem key="searchField">
-                  {t('searchField')}
-                </MenuListItem>
-                <MenuListItem key="createComputedFields">
-                  {t('createComputedFields')}
-                </MenuListItem>
-                <MenuListItem
-                  disabled={dataView?.type !== 'STRUCT'}
-                  title={t('Group')}
-                  key="group"
-                  sub
-                >
-                  <MenuListItem key="byGroup">
-                    {t('byDataBaseGroup')}
-                  </MenuListItem>
-                  <MenuListItem key="byNoGroup">{t('noGroup')}</MenuListItem>
-                </MenuListItem>
-                <MenuListItem title={t('Sort')} key="sort" sub>
-                  <MenuListItem key="byNameSort">
-                    {t('byNameSort')}
-                  </MenuListItem>
-                  <MenuListItem key="byOriginalFieldSort">
-                    {t('noSort')}
-                  </MenuListItem>
-                </MenuListItem>
-              </Menu>
+                items={dataViewMenuItems}
+              />
             }
           >
             <ToolbarButton icon={<MoreOutlined />} size="small" />

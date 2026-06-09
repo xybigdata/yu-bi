@@ -1062,6 +1062,23 @@
   - `npm test -- --runInBand --watchAll=false` 通过
   - `npm run build` 通过
 
+### 并行治理：收口数据视图与通用标题里的 Ant Design 旧菜单 API
+
+- `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartDataViewPanel/ChartDataViewPanel.tsx`
+  已将数据视图弹出菜单从 `MenuListItem` / `Menu.SubMenu` 组合收口到 `Menu items` 数组模式。
+- 这一步保留了原有行为：
+  - 搜索字段
+  - 新建计算字段
+  - 分组 / 取消分组
+  - 按名称排序 / 保持原字段顺序
+- `frontend/src/app/components/ListTitle/index.tsx`
+  已把通用标题栏里的 “更多” 菜单切到 `MenuWrapper items` 模式，不再在该处继续拼 `MenuListItem` JSX 子节点。
+- 这一批的意义不只是清一个页面，而是继续把通用菜单构造方式往 `items` 数据模型收敛，为后续剩余侧边栏和树节点菜单复用同一模式做准备。
+- 2026-06-10 验证：
+  - `npm run checkTs` 通过
+  - `npm test -- --runInBand --watchAll=false` 通过
+  - `npm run build` 通过
+
 ### 2026-06-10 全项目老旧技术栈复核结论
 
 这一轮不是只看版本号，而是按“是否仍在主维护线、是否已经被现代替代方案覆盖、是否值得继续在当前架构上扩展”三条标准重新复核。
