@@ -129,7 +129,7 @@ export function OrganizationList() {
         />
       </Title>
       {list}
-      <OrganizationForm visible={formVisible} onCancel={hideForm} />
+      <OrganizationForm open={formVisible} onCancel={hideForm} />
     </Wrapper>
   );
 }

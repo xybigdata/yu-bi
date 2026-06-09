@@ -33,11 +33,11 @@ import {
 } from 'utils/validators';
 const FormItem = Form.Item;
 interface ModifyPasswordProps {
-  visible: boolean;
+  open: boolean;
   onCancel: () => void;
 }
 export const ModifyPassword: FC<ModifyPasswordProps> = ({
-  visible,
+  open,
   onCancel,
 }) => {
   const dispatch = useAppDispatch();
@@ -52,10 +52,10 @@ export const ModifyPassword: FC<ModifyPasswordProps> = ({
   }, [form]);
 
   useEffect(() => {
-    if (visible) {
+    if (open) {
       reset();
     }
-  }, [visible, reset]);
+  }, [open, reset]);
 
   const formSubmit = useCallback(
     ({ confirmPassword, ...params }: ModifyUserPassword) => {
@@ -76,7 +76,7 @@ export const ModifyPassword: FC<ModifyPasswordProps> = ({
     <Modal
       title={t('title')}
       footer={false}
-      open={visible}
+      open={open}
       onCancel={onCancel}
       afterClose={reset}
     >

@@ -35,7 +35,7 @@ import { getToken } from 'utils/auth';
 
 const FormItem = Form.Item;
 
-export function Profile({ visible, onCancel }: ModalProps) {
+export function Profile({ open, onCancel }: ModalProps) {
   const [avatarLoading, setAvatarLoading] = useState(false);
   const dispatch = useAppDispatch();
   const loggedInUser = useSelector(selectLoggedInUser);
@@ -51,10 +51,10 @@ export function Profile({ visible, onCancel }: ModalProps) {
   }, [form]);
 
   useEffect(() => {
-    if (visible) {
+    if (open) {
       reset();
     }
-  }, [visible, reset, loggedInUser]);
+  }, [open, reset, loggedInUser]);
 
   const avatarChange = useCallback(
     ({ file }) => {
@@ -105,7 +105,7 @@ export function Profile({ visible, onCancel }: ModalProps) {
     <Modal
       title={t('title')}
       footer={false}
-      open={visible}
+      open={open}
       onCancel={onCancel}
       afterClose={reset}
     >

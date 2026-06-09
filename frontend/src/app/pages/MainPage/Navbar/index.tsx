@@ -407,11 +407,8 @@ export function Navbar() {
             </li>
           </Popup>
         </Toolbar>
-        <Profile visible={profileVisible} onCancel={hideProfile} />
-        <ModifyPassword
-          visible={modifyPasswordVisible}
-          onCancel={hideModifyPassword}
-        />
+        <Profile open={profileVisible} onCancel={hideProfile} />
+        <ModifyPassword open={modifyPasswordVisible} onCancel={hideModifyPassword} />
       </MainNav>
       {showSubNav && (
         <SubNav>

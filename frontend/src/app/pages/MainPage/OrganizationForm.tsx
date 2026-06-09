@@ -34,7 +34,7 @@ interface OrganizationFormProps extends Omit<ModalProps, 'onCancel'> {
   onCancel: () => void;
 }
 
-export function OrganizationForm({ visible, onCancel }: OrganizationFormProps) {
+export function OrganizationForm({ open, onCancel }: OrganizationFormProps) {
   const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const loading = useSelector(selectSaveOrganizationLoading);
@@ -68,7 +68,7 @@ export function OrganizationForm({ visible, onCancel }: OrganizationFormProps) {
   return (
     <Modal
       title={t('create')}
-      open={visible}
+      open={open}
       okText={t('save')}
       confirmLoading={loading}
       onOk={save}

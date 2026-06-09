@@ -1156,6 +1156,23 @@
   - `npm test -- --runInBand --watchAll=false` 通过
   - `npm run build` 通过
 
+### 并行治理：收口主导航与组织管理弹层的 visible/open 兼容层
+
+- 主导航与组织管理相关的三个 Modal 包装组件已把对外控制属性从 `visible` 收口到 `open`，覆盖：
+  - `frontend/src/app/pages/MainPage/OrganizationForm.tsx`
+  - `frontend/src/app/pages/MainPage/Navbar/Profile.tsx`
+  - `frontend/src/app/pages/MainPage/Navbar/ModifyPassword.tsx`
+- 对应调用点也已同步切换到 `open`，覆盖：
+  - `frontend/src/app/pages/MainPage/Background.tsx`
+  - `frontend/src/app/pages/MainPage/Navbar/OrganizationList.tsx`
+  - `frontend/src/app/pages/MainPage/Navbar/index.tsx`
+- 这三类弹层内部本来就已经把 AntD Modal 的真实属性写成 `open`，这一步主要是消除组件边界上仍然遗留的 `visible` 命名，让主导航和组织管理链路不再继续保留历史过渡语义。
+- 这一步不改动新增组织、编辑资料、修改密码的业务逻辑，只收口控制属性命名，为后续继续推进其它 Modal/Popover/Dropdown 的 `visible -> open` 存量提供同一模式。
+- 2026-06-10 验证：
+  - `npm run checkTs` 通过
+  - `npm test -- --runInBand --watchAll=false` 通过
+  - `npm run build` 通过
+
 ### 2026-06-10 全项目老旧技术栈复核结论
 
 这一轮不是只看版本号，而是按“是否仍在主维护线、是否已经被现代替代方案覆盖、是否值得继续在当前架构上扩展”三条标准重新复核。

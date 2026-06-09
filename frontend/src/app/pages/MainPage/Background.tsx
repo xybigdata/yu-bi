@@ -85,7 +85,7 @@ export function Background() {
           <AppstoreAddOutlined className="img" />
           <p>{t('createOrg')}</p>
         </Hint>
-        <OrganizationForm visible={formVisible} onCancel={hideForm} />
+        <OrganizationForm open={formVisible} onCancel={hideForm} />
       </>
     );
   } else {
