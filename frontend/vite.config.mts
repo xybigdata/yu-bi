@@ -37,6 +37,31 @@ const customChartPluginsMiddleware = (): Plugin => ({
   },
 });
 
+const shareHtmlFallback = (): Plugin => ({
+  name: 'datart-share-html-fallback',
+  configureServer(server) {
+    server.middlewares.use(async (req, res, next) => {
+      const url = req.url || '';
+      const matched = [
+        { prefix: '/shareChart/', html: 'shareChart.html' },
+        { prefix: '/shareDashboard/', html: 'shareDashboard.html' },
+        { prefix: '/shareStoryPlayer/', html: 'shareStoryPlayer.html' },
+      ].find(item => url.startsWith(item.prefix));
+
+      if (!matched) {
+        next();
+        return;
+      }
+
+      const htmlPath = path.resolve(appRoot, matched.html);
+      const html = fs.readFileSync(htmlPath, 'utf-8');
+      const transformedHtml = await server.transformIndexHtml(url, html);
+      res.setHeader('Content-Type', 'text/html');
+      res.end(transformedHtml);
+    });
+  },
+});
+
 const lessTildeImportCompat = (): Plugin => ({
   name: 'datart-less-tilde-import-compat',
   enforce: 'pre',
@@ -76,6 +101,7 @@ export default defineConfig(({ mode }) => ({
     lessTildeImportCompat(),
     craSvgReactComponentCompat(),
     customChartPluginsMiddleware(),
+    shareHtmlFallback(),
   ],
   resolve: {
     alias: [
