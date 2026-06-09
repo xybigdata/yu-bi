@@ -776,3 +776,9 @@
 - 删除了只为 v5 `Router history` 桥接而存在的 `routerCompatRuntime.tsx`，兼容层不再依赖 `react-router-dom/node_modules/history/*` 这类脆弱内部路径。
 - `useCompatNavigate` 已改为包装 `useNavigate + useLocation`，`location` 改为响应式来源，不再透传自持 history 的静态快照。
 - `CompatRoute` 已切到 Router 6 的 `matchPath(pattern, pathname)` 新签名，并把原有 `exact` 语义映射到 v6 的 `end`。
+
+### 并行治理：移除 Enzyme 测试基座
+
+- `frontend/src/setupTests.ts` 已删除 Enzyme 初始化，前端测试基座不再依赖 React 18 的社区 Enzyme adapter。
+- `frontend/package.json` 已移除 `enzyme` 与 `@cfaester/enzyme-adapter-react-18`。
+- 当前测试文件已全部使用 Testing Library / Jest 风格断言，Enzyme 仅剩历史初始化残留，因此这一步不会改变现有测试写法。
