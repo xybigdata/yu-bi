@@ -324,7 +324,7 @@ export function SourceDetailPage() {
           break;
       }
     },
-    [formType, showSaveForm, t, dispatch, editingSource, orgId, history, tg],
+    [formType, showSaveForm, t, dispatch, editingSource, orgId, navigate, tg],
   );
 
   const del = useCallback(

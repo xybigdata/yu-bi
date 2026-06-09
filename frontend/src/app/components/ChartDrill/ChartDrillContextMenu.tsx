@@ -253,7 +253,6 @@ const ChartDrillContextMenu: FC<{
     drillOption,
     selectDrillStatusMenu,
     runtimeDateLevelFields,
-    onDrillOptionChange,
     availableSourceFunctions,
     handleDateLevelChange,
     hasDrillThroughSetting,
