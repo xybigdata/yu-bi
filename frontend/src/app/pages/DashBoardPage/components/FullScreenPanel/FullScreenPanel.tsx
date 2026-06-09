@@ -50,6 +50,14 @@ export const FullScreenPanel: React.FC<{}> = memo(() => {
       item => widgetManager.meta(item.config.originalType).canFullScreen,
     );
   }, [widgetMap]);
+  const widgetMenuItems = useMemo(
+    () =>
+      widgets.map(ele => ({
+        key: ele.id,
+        label: ele.config.name,
+      })),
+    [widgets],
+  );
 
   const [collapsed, setCollapsed] = useState(false);
 
@@ -116,11 +124,8 @@ export const FullScreenPanel: React.FC<{}> = memo(() => {
                   mode="inline"
                   onClick={changeItem}
                   defaultSelectedKeys={[itemId]}
-                >
-                  {widgets.map(ele => (
-                    <Menu.Item key={ele.id}>{ele.config.name}</Menu.Item>
-                  ))}
-                </Menu>
+                  items={widgetMenuItems}
+                />
               </div>
             )}
           </div>

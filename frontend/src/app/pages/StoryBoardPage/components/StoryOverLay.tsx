@@ -20,7 +20,7 @@ import {
   ShareAltOutlined,
   VerticalAlignBottomOutlined,
 } from '@ant-design/icons';
-import { Menu, Popconfirm } from 'antd';
+import { Menu, MenuProps, Popconfirm } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useRecycleViz } from 'app/hooks/useRecycleViz';
 import { memo, useContext, useMemo } from 'react';
@@ -76,26 +76,21 @@ export const StoryOverLay: React.FC<BoardOverLayProps> = memo(
       ],
       [onOpenShareLink, allowShare, t, onPublish, allowManage, tg, recycleViz],
     );
-    const actionItems = useMemo(
-      () =>
-        renderList
-          .filter(item => item.render)
-          .map(item => {
-            return (
-              <>
-                <Menu.Item
-                  key={item.key}
-                  icon={item.icon}
-                  onClick={item.onClick}
-                >
-                  {item.content}
-                </Menu.Item>
-                {item.className && <Menu.Divider />}
-              </>
-            );
-          }),
-      [renderList],
-    );
-    return <Menu>{actionItems}</Menu>;
+    const actionItems = useMemo<MenuProps['items']>(() => {
+      return renderList
+        .filter(item => item.render)
+        .flatMap<NonNullable<MenuProps['items']>[number]>(item => {
+          const menuItem: NonNullable<MenuProps['items']>[number] = {
+            key: item.key,
+            icon: item.icon,
+            label: item.content,
+            onClick: item.onClick,
+          };
+          return item.className
+            ? [menuItem, { key: `${item.key}Line`, type: 'divider' }]
+            : [menuItem];
+        });
+    }, [renderList]);
+    return <Menu items={actionItems} />;
   },
 );
