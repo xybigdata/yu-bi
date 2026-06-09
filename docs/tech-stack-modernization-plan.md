@@ -165,6 +165,19 @@
   - 发布包和 Docker 都不依赖手工准备的静态目录。
   - `/api/v1/sys/info`、登录页、至少一个 share 入口具备稳定验收路径。
 
+当前状态补充：
+
+- 已完成
+  - `.github/workflows/dev-ut-stage.js.yml` 已统一到 Node `26.x`。
+  - CI 已纳入前端 `npm ci`、`checkTs`、`build:task`、`build`、`test:ci`、`lint:css`、`lint:style`。
+  - CI 已纳入后端 `mvn -pl server -am -DskipTests compile` 与 JDBC provider 定向测试：
+    `mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.sql.SqlScriptRenderTest,datart.data.provider.function.SqlFunctionValidateTest -Dsurefire.failIfNoSpecifiedTests=false test`。
+  - Workflow 已显式声明 Temurin JDK `21`，并启用 npm / Maven 缓存。
+- 仍未完成
+  - CI 里还没有启动后的 `/api/v1/sys/info` 健康检查。
+  - Dockerfile 仍直接消费仓库内 `bin/`、`config/`、`lib/`、`static/` 目录，尚未切到“由统一构建链生成再打包”的闭环模式。
+  - `mvn test -pl data-providers/jdbc-data-provider -am` 这种全量上游联动测试当前还不适合作为 CI 默认命令；本机复核显示它会先触发 `core` 的 `POIUtilsTest`，并在当前 JDK 21 环境下出现 surefire fork crash，需要后续单独收口该测试稳定性。
+
 ### Phase B：Ant Design 5 主升级
 
 目标：把前端主 UI 栈从 Ant Design 4 彻底迁到当前主线，为后续 `moment` 退出和主题系统现代化扫清阻塞。
