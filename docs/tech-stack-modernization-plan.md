@@ -833,15 +833,15 @@
    - 风险判断：这一项适合先“减使用面”，再决定是否整体升版本。
 
 5. `commons-csv 1.8` 与 `commons-text 1.9`
-   - 现状：`CSVParse`、文本处理仍依赖这两条较老公共库。
-   - 更现代替代：升级到当前 1.14.x / 1.13.x 之后的稳定线，或在低频能力上改回 JDK 原生能力。
-   - 调研结论：Apache Commons CSV 发布页显示 1.14.1 已发布；Commons Text 的 release history 已进入 1.13+ / 1.14+ 演进区间，当前项目版本明显滞后。
-   - 风险判断：代码使用面不大，属于后续可以优先尝试的小批次。
+   - 现状：`commons-csv` 已从 `1.8` 升级到 `1.14.1`；`commons-text` 已确认在生产代码中无使用面，并已移除直接依赖。
+   - 更现代替代：CSV 能力继续保留在 Apache Commons CSV；文本处理优先回归 JDK / `commons-lang3`，不再保留无效壳依赖。
+   - 调研结论：这一批已完成，当前主链不再存在 `commons-text`，`commons-csv` 也已收口到现代稳定线。
+   - 风险判断：后续只需在处理 `CSVParse` 时关注 1.14.x 的 API 废弃告警，无需再为版本滞后单独开专项。
 
 6. `aspectjweaver 1.9.8.M1`
-   - 现状：仍在 `core/pom.xml` 中以 milestone 版本存在。
-   - 更现代替代：升级到正式 GA 版本，或评估是否可完全依赖 Spring AOP 当前生态。
-   - 风险判断：只要项目里确实还依赖 `@Aspect` 与织入行为，就不应草率移除，但继续保留 milestone 版本也不理想。
+   - 现状：已从 `1.9.8.M1` 升级到 `1.9.25.1`，不再保留 milestone 版。
+   - 更现代替代：当前先保持 Spring AOP + AspectJ weaver 组合，后续再评估是否还有必要继续显式声明。
+   - 风险判断：升级已完成，当前仅剩 `AccessLogAdvice` 一处切面使用面，后续若继续收缩 AOP 能力可以再评估是否移除。
 
 7. `H2 1.4.200`
    - 现状：当前主要用于 demo / 内置样例兼容。
@@ -1017,6 +1017,18 @@
 - 2026-06-10 验证：
   - `mvn -pl security -am -Dtest=datart.security.test.jwt.TestJwkParse -Dsurefire.failIfNoSpecifiedTests=false test` 通过。
   - `mvn -pl server -am -DskipTests compile` 通过。
+
+### 并行治理：升级 commons-csv、移除 commons-text 并收口 AspectJ 版本
+
+- `core/pom.xml` 已将 `org.apache.commons:commons-csv` 从 `1.8` 升级到 `1.14.1`。
+- `core/pom.xml` 已删除未使用的 `org.apache.commons:commons-text:1.9` 直接依赖；当前主代码检索 `commons-text` 结果为空。
+- `core/pom.xml` 已将 `org.aspectj:aspectjweaver` 从 `1.9.8.M1` 升级到 `1.9.25.1`，去掉 milestone 版本残留。
+- 当前 `aspectj` 生产使用面已确认只剩 [server/src/main/java/datart/server/config/AccessLogAdvice.java](/Users/chencongyu/WorkHome/VSProjects/open-project/datart/server/src/main/java/datart/server/config/AccessLogAdvice.java)，升级后切面编译和主链行为保持不变。
+- 2026-06-10 依赖树复核：
+  - `commons-csv` 已统一到 `1.14.1`
+  - `commons-text` 已不再出现在 `server` 联动依赖树中
+  - `aspectjweaver` 已统一到 `1.9.25.1`
+- 2026-06-10 验证：`mvn -pl server -am -DskipTests compile` 与 `mvn -pl server -am dependency:tree -Dincludes=org.apache.commons:commons-csv,org.apache.commons:commons-text,org.aspectj:aspectjweaver -DskipTests` 通过。
 
 ### 并行治理：移除未使用的 cglib 直接依赖
 
