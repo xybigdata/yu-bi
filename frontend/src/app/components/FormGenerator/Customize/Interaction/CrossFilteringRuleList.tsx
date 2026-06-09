@@ -17,7 +17,7 @@
  */
 
 import { Button, Dropdown, Select, Space, Table } from 'antd';
-import { ColumnsType } from 'antd/lib/table';
+import type { TableColumnsType as ColumnsType } from 'antd';
 import { selectViewMap } from 'app/pages/DashBoardPage/pages/Board/slice/selector';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
 import ChartDataView from 'app/types/ChartDataView';

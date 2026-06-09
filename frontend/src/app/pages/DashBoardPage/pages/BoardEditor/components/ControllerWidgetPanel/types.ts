@@ -1,4 +1,4 @@
-import { RadioGroupOptionType } from 'antd/lib/radio';
+import type { RadioGroupOptionType } from 'antd/es/radio/interface';
 import { DataViewFieldType, TimeFilterValueCategory } from 'app/constants';
 import {
   ControllerVisibleType,

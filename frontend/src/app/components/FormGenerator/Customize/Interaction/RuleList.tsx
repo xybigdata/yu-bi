@@ -17,7 +17,7 @@
  */
 
 import { Button, Input, Select, Table } from 'antd';
-import { ColumnsType } from 'antd/lib/table';
+import type { TableColumnsType as ColumnsType } from 'antd';
 import ChartDataView from 'app/types/ChartDataView';
 import { FC } from 'react';
 import styled from 'styled-components';

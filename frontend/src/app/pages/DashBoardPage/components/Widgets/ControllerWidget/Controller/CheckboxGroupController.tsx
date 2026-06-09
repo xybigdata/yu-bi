@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { Checkbox, Form } from 'antd';
-import { CheckboxValueType } from 'antd/lib/checkbox/Group';
+import type { CheckboxValueType } from 'antd/es/checkbox/Group';
 import { ControlOption } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';

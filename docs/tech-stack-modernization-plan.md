@@ -1013,6 +1013,14 @@
 - 适配策略保持保守：不改主题结构，不动运行时样式语义，只把类型入口和少量依赖 `css` prop 魔法的节点改成显式 styled/class 包装。
 - 2026-06-10 验证：`npm run checkTs`、`npm test -- --runInBand --watchAll=false`、`npm run build` 均通过。
 
+### 并行治理：收口 Ant Design 深路径导入
+
+- 前端一批 `antd/lib/*` 深路径导入已切回公开导出路径，覆盖 `message`、`Dropdown`、`Modal.useModal`、`FormInstance`、`InputRef`、`TreeDataNode`、`TableColumnsType` 等运行时或类型入口。
+- 这一步重点清理的是只依赖 AntD 内部目录结构的历史导入方式，降低后续升级到 Ant Design 5 时因内部文件路径调整带来的额外噪音。
+- 对 Jest 仍敏感的 locale 资源保留在 `antd/lib/locale/*`，避免把前端测试链额外拉进 `node_modules` ESM 转译范围；其它类型和组件入口则优先回到公开导出。
+- 本批不改变业务逻辑，也不处理 `visible`、`Menu.*` 或 Dropdown/Modal 的历史 API 语义，只收口 import 边界。
+- 2026-06-10 验证：`npm run checkTs`、`npm test -- --runInBand --watchAll=false`、`npm run build` 均通过。
+
 ### 并行治理：删除 CRACO 回退外壳
 
 - `frontend/package.json` 已删除 `start:cra`、`build:cra`、`eject` 等只服务 CRA/CRACO 的历史脚本。

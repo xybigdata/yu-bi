@@ -17,7 +17,7 @@
  */
 
 import { Button, Col, Popconfirm, Row, Space, Table, Tag } from 'antd';
-import { ColumnsType } from 'antd/lib/table';
+import type { TableColumnsType as ColumnsType } from 'antd';
 import {
   ChartStyleConfig,
   ChartStyleSelectorItem,

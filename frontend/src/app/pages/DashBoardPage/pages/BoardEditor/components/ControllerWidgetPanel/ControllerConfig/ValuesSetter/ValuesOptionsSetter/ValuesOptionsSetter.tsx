@@ -25,7 +25,7 @@ import {
   Tree,
   TreeSelect,
 } from 'antd';
-import type { DefaultOptionType } from 'antd/lib/cascader';
+import type { DefaultOptionType } from 'antd/es/cascader';
 import { ControllerFacadeTypes } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import migrationViewConfig from 'app/migration/ViewConfig/migrationViewConfig';

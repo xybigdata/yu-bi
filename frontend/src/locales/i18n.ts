@@ -1,5 +1,5 @@
-import antd_en_US from 'antd/lib/locale/en_US';
-import antd_zh_CN from 'antd/lib/locale/zh_CN';
+import enUS from 'antd/lib/locale/en_US';
+import zhCN from 'antd/lib/locale/zh_CN';
 import { StorageKeys } from 'globalConstants';
 import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
@@ -59,6 +59,6 @@ export const i18n = i18next
   });
 
 export const antdLocales = {
-  en: antd_en_US,
-  zh: antd_zh_CN,
+  en: enUS,
+  zh: zhCN,
 };

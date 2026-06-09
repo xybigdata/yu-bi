@@ -1,6 +1,6 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import { Empty, Tree as AntTree, TreeProps as AntTreeProps } from 'antd';
-import type { DataNode } from 'antd/lib/tree';
+import type { TreeDataNode as DataNode } from 'antd';
 import classnames from 'classnames';
 import { ComponentType, MutableRefObject } from 'react';
 import styled from 'styled-components';

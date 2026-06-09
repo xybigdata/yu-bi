@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { Modal, Table } from 'antd';
-import { RowSelectionType } from 'antd/lib/table/interface';
+import type { RowSelectionType } from 'antd/es/table/interface';
 import { Folder } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import i18next from 'i18next';
 import React, { useEffect, useState } from 'react';

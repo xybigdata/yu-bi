@@ -18,7 +18,7 @@
 
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Checkbox, Tooltip } from 'antd';
-import { CheckboxChangeEvent } from 'antd/lib/checkbox';
+import type { CheckboxChangeEvent } from 'antd/es/checkbox';
 import useStateModal, { StateModalSize } from 'app/hooks/useStateModal';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo } from 'react';

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { Button, Col, Popconfirm, Row, Space, Table, Tag } from 'antd';
-import { ColumnsType } from 'antd/lib/table';
+import type { TableColumnsType as ColumnsType } from 'antd';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';

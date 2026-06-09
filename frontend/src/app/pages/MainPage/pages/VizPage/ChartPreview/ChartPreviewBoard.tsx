@@ -17,7 +17,7 @@
  */
 
 import { message, Spin } from 'antd';
-import useModal from 'antd/lib/modal/useModal';
+import { Modal } from 'antd';
 import ChartDrillContextMenu from 'app/components/ChartDrill/ChartDrillContextMenu';
 import ChartDrillPaths from 'app/components/ChartDrill/ChartDrillPaths';
 import { ChartIFrameContainer } from 'app/components/ChartIFrameContainer';
@@ -140,7 +140,7 @@ const ChartPreviewBoard: FC<{
       useDisplayViewDetail();
     const [openJumpVizDialogModal, openJumpVizDialogModalContextHolder] =
       useDisplayJumpVizDialog();
-    const [jumpDialogModal, jumpDialogContextHolder] = useModal();
+    const [jumpDialogModal, jumpDialogContextHolder] = Modal.useModal();
     const {
       getDrillThroughSetting,
       getViewDetailSetting,

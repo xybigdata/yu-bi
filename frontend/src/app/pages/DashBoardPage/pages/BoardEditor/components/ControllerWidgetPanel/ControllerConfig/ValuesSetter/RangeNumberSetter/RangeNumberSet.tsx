@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { Form, FormItemProps, InputNumber } from 'antd';
-import { valueType } from 'antd/lib/statistic/utils';
+import type { valueType } from 'antd/es/statistic/utils';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import React, { memo, useEffect, useState } from 'react';
 import { ControllerValuesName } from '../..';

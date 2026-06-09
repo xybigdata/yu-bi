@@ -17,8 +17,8 @@
  */
 
 import { Form, Input, Table, TableProps } from 'antd';
-import { FormInstance } from 'antd/lib/form';
-import type { InputRef } from 'antd/lib/input';
+import type { FormInstance } from 'antd';
+import type { InputRef } from 'antd';
 import { RelationFilterValue } from 'app/types/ChartConfig';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
