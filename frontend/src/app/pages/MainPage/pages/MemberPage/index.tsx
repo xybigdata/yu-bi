@@ -30,14 +30,12 @@ export function MemberPage() {
     <Container>
       <Sidebar />
       <Switch>
-        <Route
-          path="/organizations/:orgId/members/:memberId"
-          component={MemberDetailPage}
-        />
-        <Route
-          path="/organizations/:orgId/roles/:roleId"
-          component={RoleDetailPage}
-        />
+        <Route path="/organizations/:orgId/members/:memberId">
+          <MemberDetailPage />
+        </Route>
+        <Route path="/organizations/:orgId/roles/:roleId">
+          <RoleDetailPage />
+        </Route>
       </Switch>
     </Container>
   );

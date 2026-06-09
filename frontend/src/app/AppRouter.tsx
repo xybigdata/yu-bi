@@ -74,12 +74,24 @@ export function AppRouter() {
           <meta name="description" content="Data Art" />
         </Helmet>
         <Switch>
-          <Route path="/setup" component={LazySetupPage} />
-          <Route path="/login" component={LazyLoginPage} />
-          <Route path="/register" component={LazyRegisterPage} />
-          <Route path="/activation" component={LazyActivationPage} />
-          <Route path="/forgetPassword" component={LazyForgetPasswordPage} />
-          <Route path="/authorization" component={LazyAuthorizationPage} />
+          <Route path="/setup">
+            <LazySetupPage />
+          </Route>
+          <Route path="/login">
+            <LazyLoginPage />
+          </Route>
+          <Route path="/register">
+            <LazyRegisterPage />
+          </Route>
+          <Route path="/activation">
+            <LazyActivationPage />
+          </Route>
+          <Route path="/forgetPassword">
+            <LazyForgetPasswordPage />
+          </Route>
+          <Route path="/authorization">
+            <LazyAuthorizationPage />
+          </Route>
           <LoginAuthRoute />
         </Switch>
         <GlobalStyles />

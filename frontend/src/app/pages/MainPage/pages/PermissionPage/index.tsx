@@ -73,10 +73,9 @@ export function PermissionPage() {
         viewpointId={matchDetail?.params.id}
       />
       {matchDetail ? (
-        <Route
-          path={`/organizations/:orgId/permissions/:viewpoint/:type/:id`}
-          component={Main}
-        />
+        <Route path={`/organizations/:orgId/permissions/:viewpoint/:type/:id`}>
+          <Main />
+        </Route>
       ) : (
         <EmptyFiller
           title={`${t('empty1')}${

@@ -69,10 +69,9 @@ export function SchedulePage() {
           handleSliderVisible={handleSliderVisible}
         />
         <EditorPageWrapper className={sliderVisible ? 'close' : ''}>
-          <Route
-            path="/organizations/:orgId/schedules/:scheduleId"
-            component={EditorPage}
-          />
+          <Route path="/organizations/:orgId/schedules/:scheduleId">
+            <EditorPage />
+          </Route>
         </EditorPageWrapper>
         <SaveForm
           formProps={{

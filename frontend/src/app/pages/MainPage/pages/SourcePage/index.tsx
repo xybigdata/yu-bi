@@ -84,10 +84,9 @@ export function SourcePage() {
           handleSliderVisible={handleSliderVisible}
         />
         <DetailPageWrapper className={sliderVisible ? 'close' : ''}>
-          <Route
-            path="/organizations/:orgId/sources/:sourceId"
-            component={SourceDetailPage}
-          />
+          <Route path="/organizations/:orgId/sources/:sourceId">
+            <SourceDetailPage />
+          </Route>
         </DetailPageWrapper>
         <SaveForm
           formProps={{

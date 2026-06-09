@@ -27,6 +27,7 @@ import {
   Route,
   Switch,
   useHistory,
+  useLocation,
   useRouteMatch,
 } from 'react-router';
 import styled from 'styled-components/macro';
@@ -108,6 +109,31 @@ export function MainPage() {
     [dispatch, history],
   );
 
+  const ChartEditorRoute = () => {
+    const location = useLocation();
+    const hisSearch = new URLSearchParams(location.search);
+    const hisState = {
+      dataChartId: hisSearch.get('dataChartId') || '',
+      chartType: hisSearch.get('chartType') || 'dataChart',
+      container: hisSearch.get('container') || 'dataChart',
+      defaultViewId: hisSearch.get('defaultViewId') || '',
+    } as ChartEditorBaseProps;
+
+    return (
+      <AccessRoute module={ResourceTypes.Viz}>
+        <ChartEditor
+          dataChartId={hisState.dataChartId}
+          orgId={orgId}
+          chartType={hisState.chartType}
+          container={hisState.container}
+          defaultViewId={hisState.defaultViewId}
+          onClose={() => history.go(-1)}
+          onSaveInDataChart={onSaveInDataChart}
+        />
+      </AccessRoute>
+    );
+  };
+
   return (
     <AppContainer>
       <Background />
@@ -117,132 +143,82 @@ export function MainPage() {
           <Route path="/" exact>
             <Redirect to={`/organizations/${orgId}`} />
           </Route>
-          <Route path="/confirminvite" component={ConfirmInvitePage} />
+          <Route path="/confirminvite">
+            <ConfirmInvitePage />
+          </Route>
           <Route path="/organizations/:orgId" exact>
             <Redirect
               to={`/organizations/${organizationMatch?.params.orgId}/vizs`}
             />
           </Route>
-          <Route
-            path="/organizations/:orgId/vizs/chartEditor"
-            render={res => {
-              const hisSearch = new URLSearchParams(res.location.search);
-              const hisState = {
-                dataChartId: hisSearch.get('dataChartId') || '',
-                chartType: hisSearch.get('chartType') || 'dataChart',
-                container: hisSearch.get('container') || 'dataChart',
-                defaultViewId: hisSearch.get('defaultViewId') || '',
-              } as ChartEditorBaseProps;
-              return (
-                <AccessRoute module={ResourceTypes.Viz}>
-                  <ChartEditor
-                    dataChartId={hisState.dataChartId}
-                    orgId={orgId}
-                    chartType={hisState.chartType}
-                    container={hisState.container}
-                    defaultViewId={hisState.defaultViewId}
-                    onClose={() => history.go(-1)}
-                    onSaveInDataChart={onSaveInDataChart}
-                  />
-                </AccessRoute>
-              );
-            }}
-          />
+          <Route path="/organizations/:orgId/vizs/chartEditor">
+            <ChartEditorRoute />
+          </Route>
 
-          <Route
-            path="/organizations/:orgId/vizs/storyPlayer/:storyId"
-            render={() => <StoryPlayer />}
-          />
-          <Route
-            path="/organizations/:orgId/vizs/storyEditor/:storyId"
-            render={() => <StoryEditor />}
-          />
-          <Route
-            path="/organizations/:orgId/vizs/:vizId?"
-            render={() => (
-              <AccessRoute module={ResourceTypes.Viz}>
-                <VizPage />
-              </AccessRoute>
-            )}
-          />
-          <Route
-            path="/organizations/:orgId/views/:viewId?"
-            render={() => (
-              <AccessRoute module={ResourceTypes.View}>
-                <ViewPage />
-              </AccessRoute>
-            )}
-          />
-          <Route
-            path="/organizations/:orgId/sources"
-            render={() => (
-              <AccessRoute module={ResourceTypes.Source}>
-                <SourcePage />
-              </AccessRoute>
-            )}
-          />
-          <Route
-            path="/organizations/:orgId/schedules"
-            render={() => (
-              <AccessRoute module={ResourceTypes.Schedule}>
-                <SchedulePage />
-              </AccessRoute>
-            )}
-          />
-          <Route
-            path="/organizations/:orgId/members"
-            render={() => (
-              <AccessRoute module={ResourceTypes.User}>
-                <MemberPage />
-              </AccessRoute>
-            )}
-          />
-          <Route
-            path="/organizations/:orgId/roles"
-            render={() => (
-              <AccessRoute module={ResourceTypes.User}>
-                <MemberPage />
-              </AccessRoute>
-            )}
-          />
+          <Route path="/organizations/:orgId/vizs/storyPlayer/:storyId">
+            <StoryPlayer />
+          </Route>
+          <Route path="/organizations/:orgId/vizs/storyEditor/:storyId">
+            <StoryEditor />
+          </Route>
+          <Route path="/organizations/:orgId/vizs/:vizId?">
+            <AccessRoute module={ResourceTypes.Viz}>
+              <VizPage />
+            </AccessRoute>
+          </Route>
+          <Route path="/organizations/:orgId/views/:viewId?">
+            <AccessRoute module={ResourceTypes.View}>
+              <ViewPage />
+            </AccessRoute>
+          </Route>
+          <Route path="/organizations/:orgId/sources">
+            <AccessRoute module={ResourceTypes.Source}>
+              <SourcePage />
+            </AccessRoute>
+          </Route>
+          <Route path="/organizations/:orgId/schedules">
+            <AccessRoute module={ResourceTypes.Schedule}>
+              <SchedulePage />
+            </AccessRoute>
+          </Route>
+          <Route path="/organizations/:orgId/members">
+            <AccessRoute module={ResourceTypes.User}>
+              <MemberPage />
+            </AccessRoute>
+          </Route>
+          <Route path="/organizations/:orgId/roles">
+            <AccessRoute module={ResourceTypes.User}>
+              <MemberPage />
+            </AccessRoute>
+          </Route>
           <Route path="/organizations/:orgId/permissions" exact>
             <Redirect
               to={`/organizations/${organizationMatch?.params.orgId}/permissions/subject`}
             />
           </Route>
-          <Route
-            path="/organizations/:orgId/permissions/:viewpoint"
-            render={() => (
-              <AccessRoute module={ResourceTypes.Manager}>
-                <PermissionPage />
-              </AccessRoute>
-            )}
-          />
-          <Route
-            path="/organizations/:orgId/variables"
-            render={() => (
-              <AccessRoute module={ResourceTypes.Manager}>
-                <VariablePage />
-              </AccessRoute>
-            )}
-          />
-          <Route
-            path="/organizations/:orgId/orgSettings"
-            render={() => (
-              <AccessRoute module={ResourceTypes.Manager}>
-                <OrgSettingPage />
-              </AccessRoute>
-            )}
-          />
-          <Route
-            path="/organizations/:orgId/resourceMigration"
-            render={() => (
-              <AccessRoute module={ResourceTypes.Manager}>
-                <ResourceMigrationPage />
-              </AccessRoute>
-            )}
-          />
-          <Route path="*" component={NotFoundPage} />
+          <Route path="/organizations/:orgId/permissions/:viewpoint">
+            <AccessRoute module={ResourceTypes.Manager}>
+              <PermissionPage />
+            </AccessRoute>
+          </Route>
+          <Route path="/organizations/:orgId/variables">
+            <AccessRoute module={ResourceTypes.Manager}>
+              <VariablePage />
+            </AccessRoute>
+          </Route>
+          <Route path="/organizations/:orgId/orgSettings">
+            <AccessRoute module={ResourceTypes.Manager}>
+              <OrgSettingPage />
+            </AccessRoute>
+          </Route>
+          <Route path="/organizations/:orgId/resourceMigration">
+            <AccessRoute module={ResourceTypes.Manager}>
+              <ResourceMigrationPage />
+            </AccessRoute>
+          </Route>
+          <Route path="*">
+            <NotFoundPage />
+          </Route>
         </Switch>
       )}
     </AppContainer>
