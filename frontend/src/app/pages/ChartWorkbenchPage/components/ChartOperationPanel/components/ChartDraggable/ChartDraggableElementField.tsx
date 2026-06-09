@@ -43,6 +43,10 @@ import {
 import ChartDataConfigSectionActionMenu from './ChartDataConfigSectionActionMenu';
 import { ChartDataConfigSectionReplaceMenu } from './ChartDataConfigSectionReplaceMenu';
 
+type DropdownPopupRenderCompatProps = {
+  popupRender?: (originNode: React.ReactNode) => React.ReactNode;
+};
+
 const ChartDraggableElementField: FC<{
   modalSize;
   config;
@@ -124,6 +128,9 @@ const ChartDraggableElementField: FC<{
         />
       );
     };
+    const dropdownPopupRenderProps = {
+      popupRender: () => renderActionExtensionMenu(),
+    } as DropdownPopupRenderCompatProps;
 
     const enableActionsIcons = col => {
       const icons = [] as any;
@@ -161,7 +168,7 @@ const ChartDraggableElementField: FC<{
         key={columnConfig.uid}
         disabled={!config?.actions}
         destroyPopupOnHide={true}
-        dropdownRender={() => renderActionExtensionMenu()}
+        {...(dropdownPopupRenderProps as any)}
         overlayClassName="datart-data-section-dropdown"
         trigger={['click']}
       >

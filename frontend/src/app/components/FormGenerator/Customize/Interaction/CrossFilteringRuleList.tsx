@@ -28,6 +28,10 @@ import { InteractionFieldRelation } from '../../constants';
 import BoardRelationList from './BoardRelationList';
 import { CrossFilteringInteractionRule, I18nTranslator } from './types';
 
+type DropdownPopupRenderCompatProps = {
+  popupRender?: (originNode: React.ReactNode) => React.ReactNode;
+};
+
 const CrossFilteringRuleList: FC<
   {
     widgetId: string;
@@ -109,27 +113,30 @@ const CrossFilteringRuleList: FC<
                   record?.relation !== InteractionFieldRelation.Customize ||
                   !rules?.map(r => r.id).includes(record?.id)
                 }
-                dropdownRender={() => (
-                  <BoardRelationList
-                    translate={t}
-                    targetRelId={record?.relId}
-                    boardVizs={boardVizs}
-                    viewMap={viewMap}
-                    sourceFields={
-                      dataview?.meta?.concat(dataview?.computedFields || []) ||
-                      []
-                    }
-                    sourceVariables={dataview?.variables || []}
-                    relations={record?.[InteractionFieldRelation.Customize]}
-                    onRelationChange={newRelations => {
-                      onRuleChange(
-                        record?.id,
-                        InteractionFieldRelation.Customize,
-                        newRelations,
-                      );
-                    }}
-                  />
-                )}
+                {...({
+                  popupRender: () => (
+                    <BoardRelationList
+                      translate={t}
+                      targetRelId={record?.relId}
+                      boardVizs={boardVizs}
+                      viewMap={viewMap}
+                      sourceFields={
+                        dataview?.meta?.concat(
+                          dataview?.computedFields || [],
+                        ) || []
+                      }
+                      sourceVariables={dataview?.variables || []}
+                      relations={record?.[InteractionFieldRelation.Customize]}
+                      onRelationChange={newRelations => {
+                        onRuleChange(
+                          record?.id,
+                          InteractionFieldRelation.Customize,
+                          newRelations,
+                        );
+                      }}
+                    />
+                  ),
+                } as DropdownPopupRenderCompatProps as any)}
                 placement="bottomLeft"
                 trigger={['click']}
                 arrow

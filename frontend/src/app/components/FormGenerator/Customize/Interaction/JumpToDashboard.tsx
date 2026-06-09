@@ -24,6 +24,10 @@ import { InteractionFieldRelation } from '../../constants';
 import ControllerList from './ControllerList';
 import { I18nTranslator, JumpToDashboardRule, VizType } from './types';
 
+type DropdownPopupRenderCompatProps = {
+  popupRender?: (originNode: React.ReactNode) => React.ReactNode;
+};
+
 const JumpToDashboard: FC<
   {
     vizs?: VizType[];
@@ -44,6 +48,22 @@ const JumpToDashboard: FC<
       ...{ [InteractionFieldRelation.Customize]: newRelations },
     });
   };
+  const dropdownPopupRenderProps = {
+    popupRender: () => (
+      <ControllerList
+        translate={t}
+        targetRelId={value?.relId}
+        sourceFields={
+          getAllColumnInMeta(dataview?.meta)?.concat(
+            dataview?.computedFields || [],
+          ) || []
+        }
+        sourceVariables={dataview?.variables || []}
+        relations={relations}
+        onRelationChange={handleUpdateRelations}
+      />
+    ),
+  } as DropdownPopupRenderCompatProps;
 
   return (
     <Space>
@@ -70,20 +90,7 @@ const JumpToDashboard: FC<
       <Dropdown
         destroyPopupOnHide
         overlayStyle={{ margin: 4 }}
-        dropdownRender={() => (
-          <ControllerList
-            translate={t}
-            targetRelId={value?.relId}
-            sourceFields={
-              getAllColumnInMeta(dataview?.meta)?.concat(
-                dataview?.computedFields || [],
-              ) || []
-            }
-            sourceVariables={dataview?.variables || []}
-            relations={relations}
-            onRelationChange={handleUpdateRelations}
-          />
-        )}
+        {...(dropdownPopupRenderProps as any)}
         placement="bottomLeft"
         trigger={['click']}
         arrow

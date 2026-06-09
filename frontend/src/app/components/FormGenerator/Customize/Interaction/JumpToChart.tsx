@@ -25,6 +25,10 @@ import { InteractionFieldRelation } from '../../constants';
 import ChartRelationList from './ChartRelationList';
 import { I18nTranslator, JumpToChartRule, VizType } from './types';
 
+type DropdownPopupRenderCompatProps = {
+  popupRender?: (originNode: React.ReactNode) => React.ReactNode;
+};
+
 const JumpToChart: FC<
   {
     vizs?: VizType[];
@@ -45,6 +49,22 @@ const JumpToChart: FC<
       ...{ [InteractionFieldRelation.Customize]: newRelations },
     });
   };
+  const dropdownPopupRenderProps = {
+    popupRender: () => (
+      <ChartRelationList
+        translate={t}
+        targetRelId={value?.relId}
+        sourceFields={
+          getAllColumnInMeta(dataview?.meta)?.concat(
+            dataview?.computedFields || [],
+          ) || []
+        }
+        sourceVariables={dataview?.variables || []}
+        relations={relations}
+        onRelationChange={handleUpdateRelations}
+      />
+    ),
+  } as DropdownPopupRenderCompatProps;
 
   return (
     <Space>
@@ -87,20 +107,7 @@ const JumpToChart: FC<
           value?.relation !== InteractionFieldRelation.Customize ||
           isEmpty(value?.relId)
         }
-        dropdownRender={() => (
-          <ChartRelationList
-            translate={t}
-            targetRelId={value?.relId}
-            sourceFields={
-              getAllColumnInMeta(dataview?.meta)?.concat(
-                dataview?.computedFields || [],
-              ) || []
-            }
-            sourceVariables={dataview?.variables || []}
-            relations={relations}
-            onRelationChange={handleUpdateRelations}
-          />
-        )}
+        {...(dropdownPopupRenderProps as any)}
         placement="bottomLeft"
         trigger={['click']}
         arrow
