@@ -19,6 +19,7 @@
 import { DatePicker, Form, Modal, Radio, Select, Space } from 'antd';
 import { FormItemEx } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { datartDayjs } from 'app/utils/date';
 import { useMemberSlice } from 'app/pages/MainPage/pages/MemberPage/slice';
 import {
   selectMembers,
@@ -170,7 +171,12 @@ const ShareLinkModal: FC<{
             value={expiryDate ? moment(expiryDate, TIME_FORMATTER) : null}
             showTime
             disabledDate={current => {
-              return current && current < moment().endOf('day');
+              return (
+                current &&
+                datartDayjs(current as any).isBefore(
+                  datartDayjs().endOf('day'),
+                )
+              );
             }}
             onChange={(_, dateString) => {
               setExpiryDate(dateString);
