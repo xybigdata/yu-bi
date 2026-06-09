@@ -843,6 +843,19 @@
   - `security/src/test/java/datart/security/test/jwt/JwkSetCreator.java`
 - 这部分不再阻塞后端生产主链从 `fastjson` 退出，但后续仍建议和 JWT 技术栈统一时一起清理。
 
+### 并行治理：清理 commons-lang 2 与直连 commons-io 1.x 使用点
+
+- `core/pom.xml` 已删除 `commons-lang:commons-lang:2.6` 与 `commons-io:commons-io:1.3.1` 两个直接依赖。
+- `core/src/main/java/datart/core/common/CSVParse.java`、`data-providers/data-provider-base/src/main/java/datart/data/provider/DefaultDataProvider.java` 已切到 `org.apache.commons.lang3.math.NumberUtils`。
+- `core/src/main/java/datart/core/entity/poi/format/PoiNumFormat.java` 已将 `NumberUtils.isNumber(...)` 替换为 `NumberUtils.isCreatable(...)`，保持原有数值判定语义。
+- `core/src/main/java/datart/core/data/provider/sql/ColumnOperator.java` 已去除 `commons-lang` 的 `ArrayUtils` 依赖，改为直接使用 JDK `System.arraycopy(...)`。
+- `data-providers/file-data-provider/src/main/java/datart/data/provider/FileDataProvider.java` 已去除 `commons-io` 的 `FilenameUtils` 依赖，改为使用 `java.nio.file.Path` 处理文件名和父目录。
+- `data-providers/data-provider-base/pom.xml` 已对 `calcite-core` 排除 `aggdesigner-algorithm`，切断其传递引入的 `commons-lang:commons-lang:2.4` 运行时依赖；当前项目代码中未发现对该聚合设计器算法包的直接使用。
+- 2026-06-09 验证：`mvn -pl server -am -DskipTests compile` 通过；`mvn -pl server -am dependency:tree -Dincludes=commons-lang:commons-lang -DskipTests` 不再出现 `commons-lang` 依赖链。
+- 当前剩余的旧 `commons-io` 传递链仍需后续单独治理，已确认至少包括：
+  - `org.apache.calcite:calcite-core:1.26.0 -> commons-io:commons-io:2.4`
+  - `org.apache.poi:poi-ooxml:5.0.0 -> org.apache.xmlgraphics:xmlgraphics-commons:2.4 -> commons-io:commons-io:1.3.1`
+
 ### 并行治理：HTTP JSON 解析与 widget 配置链切到 Jackson
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/ResponseJsonParser.java` 已移除 `fastjson`，改为使用 Jackson `JsonNode` 解析 HTTP 响应 JSON。

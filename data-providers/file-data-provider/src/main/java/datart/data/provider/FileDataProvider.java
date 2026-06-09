@@ -28,12 +28,12 @@ import datart.data.provider.jdbc.SqlScriptRender;
 import datart.data.provider.local.LocalDB;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -152,9 +152,13 @@ public class FileDataProvider extends DefaultDataProvider {
             refFiles.add(FileUtils.withBasePath(path));
         }
         if (refFiles.size() > 0) {
-            Set<String> refFilenames = refFiles.stream().map(FilenameUtils::getName).collect(Collectors.toSet());
+            Set<String> refFilenames = refFiles.stream()
+                    .map(path -> Path.of(path).getFileName().toString())
+                    .collect(Collectors.toSet());
 
-            String basePath = FilenameUtils.getFullPath(refFiles.stream().findFirst().get());
+            String basePath = Optional.ofNullable(Path.of(refFiles.stream().findFirst().get()).getParent())
+                    .map(Path::toString)
+                    .orElse("");
             Set<String> fileNames = FileUtils.walkDir(new File(basePath), null, false);
             if (!CollectionUtils.isEmpty(fileNames)) {
                 for (String fileName : fileNames) {

@@ -18,8 +18,6 @@
 
 package datart.core.data.provider.sql;
 
-import org.apache.commons.lang.ArrayUtils;
-
 import java.util.Arrays;
 
 public abstract class ColumnOperator implements Operator {
@@ -38,7 +36,8 @@ public abstract class ColumnOperator implements Operator {
         if (withDefaultColumnPrefix) {
             String[] names = new String[column.length + 1];
             names[0] = defaultColumnPrefix;
-            return (String[]) ArrayUtils.add(column, 0, defaultColumnPrefix);
+            System.arraycopy(column, 0, names, 1, column.length);
+            return names;
         } else {
             return column;
         }
