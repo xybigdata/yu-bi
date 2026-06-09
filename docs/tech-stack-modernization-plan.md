@@ -113,20 +113,20 @@
 - Axios：`1.x`
 - TypeScript：`5.9.x`
 
-### 已确定目标线，但尚未完成迁移
+### 已确定目标线，分批迁移中
 
 - Ant Design：`4.24.x -> 5.x`，6.x 暂不作为本轮硬目标
 - `@ant-design/icons`：随 Ant Design 5 同步进入当前主线
 - Jest：`27.5.x -> 30.x`，若验证成本更低可改为 Vitest，但二选一后必须收敛为单栈
 - `styled-components`：`5.3.x -> 6.x`
-- `jjwt`：`0.7.0 -> 0.12+`
-- Apache HttpClient：`4.5.14 -> 5.x`
-- Apache POI：`5.0.0 -> 较新 5.x 稳定线`
-- Guava：`21.0 -> 较新稳定线`，或先清理使用面后择机移除
-- Commons CSV：`1.8 -> 较新稳定线`
-- Commons Text：`1.9 -> 较新稳定线`
-- AspectJ Weaver：`1.9.8.M1 -> 正式 GA 版本`
-- H2：`1.4.200 -> 2.x`
+- `jjwt`：`0.7.0 -> 0.12+`，已完成到 `0.12.7`
+- Apache HttpClient：`4.5.14 -> 5.x`，已完成到 `5.5`
+- Apache POI：`5.0.0 -> 较新 5.x 稳定线`，已完成到 `5.5.1`
+- Guava：`21.0 -> 较新稳定线`，项目自有生产代码使用面已清零
+- Commons CSV：`1.8 -> 较新稳定线`，已完成到 `1.14.1`
+- Commons Text：`1.9 -> 较新稳定线`，已移除直接依赖
+- AspectJ Weaver：`1.9.8.M1 -> 正式 GA 版本`，已完成到 `1.9.25.1`
+- H2：`1.4.200 -> 2.x`，已完成到 `2.4.240`
 
 ### 中长期演进项
 
@@ -143,8 +143,8 @@
 
 - `M0 已完成`：JDK 21、Spring Boot 3、Spring Cloud 2025、Node 26、Vite 5、React 18、Router 6 依赖切换、RTK 2、React Redux 9、Selenium 4、后端生产代码 `fastjson` 清零。
 - `M1 进行中`：前端 Router 兼容层收口、Ant Design 5 升级前清障、测试工具链去 CRA 化、CI/Docker 与当前基线对齐。
-- `M2 待开始`：JWT 升级、HttpClient 5、POI/Guava/Commons 系列老基础库清理。
-- `M3 待开始`：H2 2.x demo 数据重建、连接池与安全框架长期演进策略落地。
+- `M2 已完成`：JWT 升级、HttpClient 5、POI/Guava/Commons 系列老基础库清理。
+- `M3 进行中`：H2 2.x demo 数据重建已完成，连接池与安全框架长期演进策略待落地。
 
 ### 每个 checkpoint 的强制约束
 
@@ -801,7 +801,7 @@
 1. 收口 AntD 5 升级前最后一批热点：复杂 `Menu.*` JSX、`visible`、深路径导入和主题 token 入口。
 2. 把测试栈从 Jest 27 + `react-app` 系配置推进到较新稳定线。
 3. 继续推进 `poi-ooxml 5.0.0 -> 较新 5.x` 专项，优先补导出与样式转换链回归。
-4. 在已完成 JWT、HttpClient、Commons 系列和 Guava 生产使用面清理后，开始评估 H2 2.x / 安全框架 / 连接池等中长期专项。
+4. 在已完成 H2 2.x 迁移后，继续评估连接池、安全框架与脚本引擎等中长期专项。
 
 ## 2026-06-10 老旧技术栈盘点
 
@@ -845,10 +845,10 @@
    - 风险判断：升级已完成，当前仅剩 `AccessLogAdvice` 一处切面使用面，后续若继续收缩 AOP 能力可以再评估是否移除。
 
 7. `H2 1.4.200`
-   - 现状：当前主要用于 demo / 内置样例兼容。
-   - 更现代替代：`H2 2.x`，或把集成验证迁到 Testcontainers。
-   - 调研结论：H2 官方最新 release 已到 2.4.240；其发布说明明确提到，1.4.200 及更早数据库需要先导出 SQL，再在新版本中重建导入。
-   - 风险判断：这不是“升版本”问题，而是“样例数据重建”问题，需要独立准备迁移脚本或新 demo 数据。
+   - 现状：父 POM 已升级到 `H2 2.4.240`；`LocalDB` 本地 SQL 执行链与仓库内 demo 数据库文件都已完成适配。
+   - 更现代替代：当前已落到 `H2 2.x` 现代稳定线；更长期的测试隔离方案仍可评估迁到 Testcontainers。
+   - 调研结论：这批升级的关键不在 API，而在数据库文件格式。旧 `1.4.200` demo 库不能被 `2.4.240` 直接打开，必须先用旧版导出 SQL，再在新版中重建导入。
+   - 风险判断：当前版本迁移已完成；剩余风险主要在于后续若继续维护 demo 数据，必须沿用“脚本化重建”路径，而不能再回到直接提交旧版 H2 文件库。
 
 ### 二类：前端仍有明显年代感，但需要结合大版本迁移节奏推进
 
@@ -1068,6 +1068,21 @@
 - 2026-06-10 验证：
   - `mvn -pl core -am -Dtest=datart.core.common.POIUtilsTest -Dsurefire.failIfNoSpecifiedTests=false test` 通过。
   - `mvn -pl server -am -DskipTests compile` 通过；该命令联动触发的 `npm run build:task` 与 `vite build` 也通过。
+
+### 并行治理：升级 H2 到 2.4 并迁移 demo 数据库
+
+- 父 `pom.xml` 已将 `com.h2database:h2` 从 `1.4.200` 升级到 `2.4.240`，并已通过 `mvn -pl server -am dependency:tree -Dincludes=com.h2database:h2 -DskipTests` 复核多模块统一收口到同一版本。
+- `data-providers/data-provider-base/src/main/java/datart/data/provider/local/LocalDB.java` 已去掉 H2 2.x 不再支持的连接参数 `LOG=0` 与 `UNDO_LOG=0`，保留项目实际仍可用的 `MODE=MySQL`、`DATABASE_TO_UPPER=false`、`CASE_INSENSITIVE_IDENTIFIERS=TRUE`、`CACHE_SIZE=65536`、`LOCK_MODE=0`。
+- `LocalDB.init()` 增加了 `Application.getContext() == null` 的保护，避免纯单测场景在静态初始化阶段因为 Spring 上下文尚未就绪而抛空指针。
+- `data-providers/data-provider-base/src/test/java/datart/data/provider/local/LocalDBTest.java` 已新增最小回归测试，覆盖 dataframe 注册到内存 H2 后执行 `SELECT name, score ORDER BY score DESC` 的本地 SQL 主链。
+- `bin/h2/datart.demo.mv.db` 已按 H2 官方兼容路径完成重建：先用 `1.4.200` 导出旧 demo 库 SQL，再用 `2.4.240` 回灌生成新的仓库内 demo 数据库文件。
+- 本批关键结论：
+  - 旧 demo 库无法被 H2 2.4.240 直接打开，报错为文件格式过旧，不能只改依赖版本号。
+  - demo profile 使用的是仓库内现成的 H2 文件库，而不是启动时自动跑 migration SQL，所以必须同步迁移仓库中的样例数据库文件。
+- 2026-06-10 验证：
+  - `mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.local.LocalDBTest -Dsurefire.failIfNoSpecifiedTests=false test` 通过。
+  - `mvn -pl server -am -DskipTests compile` 通过。
+  - 新版 `bin/h2/datart.demo.mv.db` 已在 H2 2.4.240 下验证可读，结果为 `tables=39`、`users=1`。
 
 ### 并行治理：移除未使用的 cglib 直接依赖
 
