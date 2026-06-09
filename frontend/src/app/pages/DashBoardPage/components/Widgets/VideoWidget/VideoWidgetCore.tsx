@@ -18,20 +18,17 @@
 
 import { memo, useContext } from 'react';
 import styled from 'styled-components';
-import { Player } from 'video-react';
-import 'video-react/dist/video-react.css';
 import { WidgetContext } from '../../WidgetProvider/WidgetProvider';
 import { videoWidgetToolKit } from './videoConfig';
 
 export const VideoWidgetCore: React.FC = memo(() => {
   const widget = useContext(WidgetContext);
-  let video = videoWidgetToolKit.getVideo(widget.config.customConfig.props);
-  let srcWithParams = video.src;
+  const video = videoWidgetToolKit.getVideo(widget.config.customConfig.props);
   return (
     <WrapVideo className="WrapVideo">
-      <Player>
-        <source src={srcWithParams} />
-      </Player>
+      <StyledVideo controls playsInline preload="metadata">
+        <source src={video.src} />
+      </StyledVideo>
     </WrapVideo>
   );
 });
@@ -45,4 +42,12 @@ const WrapVideo = styled.div`
     margin-bottom: 4px;
     background-color: ${p => p.theme.emphasisBackground};
   }
+`;
+
+const StyledVideo = styled.video`
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
 `;

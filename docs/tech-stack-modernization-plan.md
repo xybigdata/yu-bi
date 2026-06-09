@@ -214,6 +214,12 @@
 
 目标：替换仍停留在较老生态的前端插件型依赖，降低 React 18+ 长期兼容风险。
 
+当前阶段补充：
+
+- `video-react 0.15.0` 已从运行时代码与前端依赖清单中移除。
+- `frontend/src/app/pages/DashBoardPage/components/Widgets/VideoWidget/VideoWidgetCore.tsx` 已改为原生 `<video>` + 轻量样式适配，继续保留现有视频组件的输入配置结构与仪表板嵌入行为。
+- 这一项优先收口了使用面极小、但明显停留在旧 React 包装生态的媒体依赖，为后续把注意力集中到 `react-quill` 与 `reveal.js` 这类更重的升级专题腾出空间。
+
 - 富文本
   - 当前状态：`react-quill 1.3.5`，仓库内 `react-quill` / `Quill` 使用面约 `110` 处。
   - 目标方案：优先评估 `react-quill 2.x`；若自定义 blot、toolbar、导出链和只读渲染不兼容，再评估 Quill 2 的其它 React 封装。

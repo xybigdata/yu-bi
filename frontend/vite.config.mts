@@ -216,7 +216,6 @@ export default defineConfig(({ mode }) => ({
           quill: ['quill'],
           react: ['react', 'react-dom'],
           reactGridLayout: ['react-grid-layout'],
-          videoReact: ['video-react'],
         },
       },
     },

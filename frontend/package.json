@@ -108,8 +108,7 @@
     "reveal.js": "^4.1.0",
     "split.js": "^1.6.4",
     "sql-formatter": "9.2.0",
-    "uuid": "^8.3.2",
-    "video-react": "^0.15.0"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.15.8",
