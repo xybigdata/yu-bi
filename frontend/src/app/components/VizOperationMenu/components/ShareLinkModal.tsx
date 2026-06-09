@@ -40,6 +40,10 @@ import { SPACE } from 'styles/StyleConstants';
 import { AuthenticationModeType, RowPermissionByType } from './slice/constants';
 import { ShareDetail } from './slice/type';
 
+type ModalDestroyOnHiddenCompatProps = {
+  destroyOnHidden?: boolean;
+};
+
 const ShareLinkModal: FC<{
   orgId: string;
   vizType: string;
@@ -63,6 +67,9 @@ const ShareLinkModal: FC<{
   const usersList = useSelector(selectMembers);
   const rolesList = useSelector(rdxSelectRoles);
   const isOwner = useSelector(selectIsOrgOwner);
+  const modalDestroyOnHiddenProps = {
+    destroyOnHidden: true,
+  } as ModalDestroyOnHiddenCompatProps;
 
   const handleOkFn = useCallback(
     async ({
@@ -157,7 +164,7 @@ const ShareLinkModal: FC<{
       }
       okButtonProps={{ loading: btnLoading }}
       onCancel={onCancel}
-      destroyOnClose
+      {...(modalDestroyOnHiddenProps as any)}
       forceRender
     >
       <Form

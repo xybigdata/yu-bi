@@ -43,6 +43,10 @@ interface SubjectFormProps extends ModalProps {
   onSave: (rowPermissions: RowPermission[]) => void;
 }
 
+type ModalDestroyOnHiddenCompatProps = {
+  destroyOnHidden?: boolean;
+};
+
 export const SubjectForm = memo(
   ({
     scope,
@@ -68,6 +72,9 @@ export const SubjectForm = memo(
     const members = useSelector(selectMembers);
     const roleListLoading = useSelector(selectRoleListLoading);
     const memberListLoading = useSelector(selectMemberListLoading);
+    const modalDestroyOnHiddenProps = {
+      destroyOnHidden: true,
+    } as ModalDestroyOnHiddenCompatProps;
     const t = useI18NPrefix('variable');
     const subjectTabItems = [
       {
@@ -211,7 +218,7 @@ export const SubjectForm = memo(
         }
         onOk={save}
         afterClose={onAfterClose}
-        destroyOnClose
+        {...(modalDestroyOnHiddenProps as any)}
       >
         <RowPermissionTable
           type="role"

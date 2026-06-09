@@ -40,6 +40,10 @@ interface AddProps {
   onCancel: () => void;
 }
 
+type ModalDestroyOnHiddenCompatProps = {
+  destroyOnHidden?: boolean;
+};
+
 export default function Add({
   translate: t = title => title,
   values,
@@ -69,6 +73,9 @@ export default function Add({
   );
   const [form] = Form.useForm<ScorecardConditionalStyleFormValues>();
   const [type] = useState(DataViewFieldType.NUMERIC);
+  const modalDestroyOnHiddenProps = {
+    destroyOnHidden: true,
+  } as ModalDestroyOnHiddenCompatProps;
 
   useMount(() => {
     if (type) {
@@ -149,7 +156,7 @@ export default function Add({
 
   return (
     <Modal
-      destroyOnClose
+      {...(modalDestroyOnHiddenProps as any)}
       title={t('conditionalStyleTable.modal.title')}
       open={open}
       onOk={modalOk}
