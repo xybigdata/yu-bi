@@ -25,7 +25,7 @@ import {
   SaveFilled,
   SettingFilled,
 } from '@ant-design/icons';
-import { Divider, Dropdown, Menu, Select, Space, Tooltip } from 'antd';
+import { Divider, Dropdown, Select, Space, Tooltip } from 'antd';
 import { ToolbarButton } from 'app/components';
 import { Chronograph } from 'app/components/Chronograph';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -248,13 +248,10 @@ export const Toolbar = memo(
             )}
             <Dropdown
               trigger={['click']}
-              overlay={
-                <Menu onClick={sizeMenuClick}>
-                  {PREVIEW_SIZE_LIST.map(s => (
-                    <Menu.Item key={s}>{s}</Menu.Item>
-                  ))}
-                </Menu>
-              }
+              menu={{
+                items: PREVIEW_SIZE_LIST.map(s => ({ key: s, label: s })),
+                onClick: sizeMenuClick,
+              }}
             >
               <ToolbarButton size="small">{`Limit: ${size}`}</ToolbarButton>
             </Dropdown>

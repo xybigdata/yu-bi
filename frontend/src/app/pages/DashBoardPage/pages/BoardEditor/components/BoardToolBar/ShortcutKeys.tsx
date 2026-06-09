@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Button, Dropdown, Menu } from 'antd';
+import { Button, Dropdown } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import styled from 'styled-components/macro';
 import { G20 } from 'styles/StyleConstants';
@@ -36,21 +36,22 @@ export const ShortcutKeys = () => {
   const t = useI18NPrefix(`viz.board.action`);
   const gt = useI18NPrefix(`global.button`);
   // shortcuts
-  const menu = (
-    <Menu>
-      {Hotkeys.map(item => (
-        <Menu.Item key={item.text}>
-          <StyledWrap>
-            <div>{t(item.text)}</div>
-            <div>{item.key}</div>
-          </StyledWrap>
-        </Menu.Item>
-      ))}
-    </Menu>
-  );
+  const menuItems = Hotkeys.map(item => ({
+    key: item.text,
+    label: (
+      <StyledWrap>
+        <div>{t(item.text)}</div>
+        <div>{item.key}</div>
+      </StyledWrap>
+    ),
+  }));
 
   return (
-    <Dropdown overlay={menu} placement="bottomRight" trigger={['click']}>
+    <Dropdown
+      menu={{ items: menuItems }}
+      placement="bottomRight"
+      trigger={['click']}
+    >
       <Button type="text">{gt('shortcuts')}</Button>
     </Dropdown>
   );

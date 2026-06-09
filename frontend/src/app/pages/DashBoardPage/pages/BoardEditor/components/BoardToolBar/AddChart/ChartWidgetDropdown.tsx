@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { BarChartOutlined } from '@ant-design/icons';
-import { Dropdown, Menu, Tooltip } from 'antd';
+import { Dropdown, Tooltip } from 'antd';
 import { ToolbarButton } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import React, { useCallback } from 'react';
@@ -50,16 +50,13 @@ export const ChartWidgetDropdown: React.FC<{
     },
   ];
 
-  const chartWidgetItems = (
-    <Menu onClick={onChartWidget}>
-      {addChartTypes.map(({ name, icon, type }) => (
-        <Menu.Item key={type}>{name}</Menu.Item>
-      ))}
-    </Menu>
-  );
+  const chartWidgetItems = addChartTypes.map(({ name, type }) => ({
+    key: type,
+    label: name,
+  }));
   return (
     <Dropdown
-      overlay={chartWidgetItems}
+      menu={{ items: chartWidgetItems, onClick: onChartWidget }}
       placement="bottomLeft"
       trigger={['click']}
     >

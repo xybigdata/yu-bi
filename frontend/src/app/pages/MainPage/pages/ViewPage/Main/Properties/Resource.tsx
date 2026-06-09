@@ -24,16 +24,7 @@ import {
   SearchOutlined,
   TableOutlined,
 } from '@ant-design/icons';
-import {
-  Button,
-  Col,
-  Dropdown,
-  Input,
-  Menu,
-  Row,
-  Space,
-  TreeDataNode,
-} from 'antd';
+import { Button, Col, Dropdown, Input, Row, Space, TreeDataNode } from 'antd';
 import { Tree } from 'app/components';
 import { DataViewFieldType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -41,7 +32,14 @@ import useResizeObserver from 'app/hooks/useResizeObserver';
 import { useSearchAndExpand } from 'app/hooks/useSearchAndExpand';
 import { updateBy } from 'app/utils/mutation';
 import { DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
-import { memo, useCallback, useContext, useEffect, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { monaco } from 'react-monaco-editor';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components/macro';
@@ -179,16 +177,25 @@ export const Resource = memo(() => {
     [databaseTreeModel, sortListOrTree, databaseSchemas, buildTableNode],
   );
 
-  const getOverlays = useCallback(() => {
-    return (
-      <Menu onClick={handleMenuClick}>
-        <Menu.SubMenu key="sort" title={t('sortType')}>
-          <Menu.Item key="byNameSort">{t('byName')}</Menu.Item>
-          <Menu.Item key="byOriginalFieldSort">{t('byField')}</Menu.Item>
-        </Menu.SubMenu>
-      </Menu>
-    );
-  }, [handleMenuClick, t]);
+  const menuItems = useMemo(
+    () => [
+      {
+        key: 'sort',
+        label: t('sortType'),
+        children: [
+          {
+            key: 'byNameSort',
+            label: t('byName'),
+          },
+          {
+            key: 'byOriginalFieldSort',
+            label: t('byField'),
+          },
+        ],
+      },
+    ],
+    [t],
+  );
 
   return (
     <Container title="reference">
@@ -202,7 +209,11 @@ export const Resource = memo(() => {
               bordered={false}
               onChange={debouncedSearch}
             />
-            <Dropdown key="more" trigger={['click']} overlay={getOverlays()}>
+            <Dropdown
+              key="more"
+              trigger={['click']}
+              menu={{ items: menuItems, onClick: handleMenuClick }}
+            >
               <Button type="text" icon={<MoreOutlined />} />
             </Dropdown>
           </StyleSpace>

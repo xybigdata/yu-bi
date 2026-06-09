@@ -1,5 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Dropdown, Menu, Tooltip } from 'antd';
+import { Dropdown, Tooltip } from 'antd';
 import React, { ReactElement } from 'react';
 import { ToolbarButton } from '../ToolbarButton';
 
@@ -25,13 +25,10 @@ export function AddButton({
   ) : (
     <Dropdown
       trigger={['click']}
-      overlay={
-        <Menu onClick={callback}>
-          {items.map(({ key, text }) => (
-            <Menu.Item key={key}>{text}</Menu.Item>
-          ))}
-        </Menu>
-      }
+      menu={{
+        items: items.map(({ key, text }) => ({ key, label: text })),
+        onClick: callback,
+      }}
     >
       <ToolbarButton size="small" icon={icon || <PlusOutlined />} />
     </Dropdown>

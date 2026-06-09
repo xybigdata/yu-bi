@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { DesktopOutlined, MobileOutlined } from '@ant-design/icons';
-import { Dropdown, Menu, Tooltip } from 'antd';
+import { Dropdown, Tooltip } from 'antd';
 import { ToolbarButton } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { DeviceType } from 'app/pages/DashBoardPage/pages/Board/slice/types';
@@ -45,30 +45,27 @@ export const DeviceSwitcher = () => {
       <DesktopOutlined />
     );
   }, [curDeviceType]);
-  const deviceItems = (
-    <Menu onClick={onDeviceSwitch}>
-      <Menu.Item
-        disabled={curDeviceType === DeviceType.Desktop}
-        key={DeviceType.Desktop}
-        icon={<DesktopOutlined />}
-      >
-        {DeviceType.Desktop}
-      </Menu.Item>
-      {/* <Menu.Item key={'tablet'} icon={<TabletOutlined />}>
-        {'tablet'}
-      </Menu.Item> */}
-      <Menu.Item
-        disabled={curDeviceType === DeviceType.Mobile}
-        key={DeviceType.Mobile}
-        icon={<MobileOutlined />}
-      >
-        {DeviceType.Mobile}
-      </Menu.Item>
-    </Menu>
-  );
+  const deviceItems = [
+    {
+      disabled: curDeviceType === DeviceType.Desktop,
+      key: DeviceType.Desktop,
+      icon: <DesktopOutlined />,
+      label: DeviceType.Desktop,
+    },
+    {
+      disabled: curDeviceType === DeviceType.Mobile,
+      key: DeviceType.Mobile,
+      icon: <MobileOutlined />,
+      label: DeviceType.Mobile,
+    },
+  ];
 
   return (
-    <Dropdown overlay={deviceItems} placement="bottomLeft" trigger={['click']}>
+    <Dropdown
+      menu={{ items: deviceItems, onClick: onDeviceSwitch }}
+      placement="bottomLeft"
+      trigger={['click']}
+    >
       <Tooltip title={t('deviceSwitch')}>
         <ToolbarButton icon={curIcon} />
       </Tooltip>

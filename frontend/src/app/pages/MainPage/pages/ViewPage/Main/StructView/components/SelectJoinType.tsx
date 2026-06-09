@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { Dropdown, Menu } from 'antd';
+import { Dropdown } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import classnames from 'classnames';
 import { memo } from 'react';
@@ -35,19 +35,24 @@ const SelectJoinType = memo(({ type, onChange }: SelectJoinTypeProps) => {
     <Dropdown
       trigger={['click']}
       placement="bottomLeft"
-      overlay={
-        <Menu selectedKeys={[type]} onClick={e => onChange(e.key)}>
-          <Menu.Item key={StructViewJoinType.LeftJoin}>
-            {t(StructViewJoinType.LeftJoin)}
-          </Menu.Item>
-          <Menu.Item key={StructViewJoinType.RightJoin}>
-            {t(StructViewJoinType.RightJoin)}
-          </Menu.Item>
-          <Menu.Item key={StructViewJoinType.InnerJoin}>
-            {t(StructViewJoinType.InnerJoin)}
-          </Menu.Item>
-        </Menu>
-      }
+      menu={{
+        selectedKeys: [type],
+        onClick: e => onChange(e.key),
+        items: [
+          {
+            key: StructViewJoinType.LeftJoin,
+            label: t(StructViewJoinType.LeftJoin),
+          },
+          {
+            key: StructViewJoinType.RightJoin,
+            label: t(StructViewJoinType.RightJoin),
+          },
+          {
+            key: StructViewJoinType.InnerJoin,
+            label: t(StructViewJoinType.InnerJoin),
+          },
+        ],
+      }}
     >
       <Icon
         className={classnames('iconfont', {

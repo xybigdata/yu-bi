@@ -17,7 +17,7 @@
  */
 
 import { AppstoreAddOutlined } from '@ant-design/icons';
-import { Dropdown, Menu, Tooltip } from 'antd';
+import { Dropdown, Tooltip } from 'antd';
 import { ToolbarButton } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import widgetManagerInstance from 'app/pages/DashBoardPage/components/WidgetManager';
@@ -73,18 +73,14 @@ export const AddMedia: React.FC<{}> = () => {
       type: 'video',
     },
   ];
-  const mediaWidgetItems = (
-    <Menu onClick={onSelectMediaWidget}>
-      {mediaWidgetTypes.map(({ name, icon, type }) => (
-        <Menu.Item icon={icon} key={type}>
-          {name}
-        </Menu.Item>
-      ))}
-    </Menu>
-  );
+  const mediaWidgetItems = mediaWidgetTypes.map(({ name, icon, type }) => ({
+    icon,
+    key: type,
+    label: name,
+  }));
   return (
     <Dropdown
-      overlay={mediaWidgetItems}
+      menu={{ items: mediaWidgetItems, onClick: onSelectMediaWidget }}
       placement="bottomLeft"
       trigger={['click']}
     >

@@ -1,5 +1,5 @@
 import { CloseOutlined } from '@ant-design/icons';
-import { Dropdown, Menu } from 'antd';
+import { Dropdown } from 'antd';
 import { EmptyFiller, TabPane, Tabs } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import BoardEditor from 'app/pages/DashBoardPage/pages/BoardEditor';
@@ -189,20 +189,23 @@ export function Main({ sliderVisible }: { sliderVisible: boolean }) {
     );
   };
 
-  const menu = (id: string) => (
-    <Menu onClick={e => handleClickMenu(e, id)}>
-      <Menu.Item key="CLOSE_OTHER">
-        <span>{t('closeOther')}</span>
-      </Menu.Item>
-      <Menu.Item key="CLOSE_ALL">
-        <span>{t('closeAll')}</span>
-      </Menu.Item>
-    </Menu>
-  );
+  const menuItems = [
+    {
+      key: 'CLOSE_OTHER',
+      label: <span>{t('closeOther')}</span>,
+    },
+    {
+      key: 'CLOSE_ALL',
+      label: <span>{t('closeAll')}</span>,
+    },
+  ];
 
   const Tab = (id: string, name: string) => (
     <span>
-      <Dropdown overlay={menu(id)} trigger={['contextMenu']}>
+      <Dropdown
+        menu={{ items: menuItems, onClick: e => handleClickMenu(e, id) }}
+        trigger={['contextMenu']}
+      >
         <span className="ant-dropdown-link">{name}</span>
       </Dropdown>
     </span>

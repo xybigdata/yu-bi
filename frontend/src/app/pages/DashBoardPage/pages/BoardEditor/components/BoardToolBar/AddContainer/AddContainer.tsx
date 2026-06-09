@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { ContainerOutlined } from '@ant-design/icons';
-import { Dropdown, Menu, Tooltip } from 'antd';
+import { Dropdown, Tooltip } from 'antd';
 import { ToolbarButton } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import widgetManagerInstance from 'app/pages/DashBoardPage/components/WidgetManager';
@@ -60,18 +60,16 @@ export const AddContainer: React.FC<{}> = () => {
     },
   ];
 
-  const containerWidgetItems = (
-    <Menu onClick={onSelectContainerWidget}>
-      {containerWidgetTypes.map(({ name, type, disabled }) => (
-        <Menu.Item disabled={disabled} key={type}>
-          {name}
-        </Menu.Item>
-      ))}
-    </Menu>
+  const containerWidgetItems = containerWidgetTypes.map(
+    ({ name, type, disabled }) => ({
+      disabled,
+      key: type,
+      label: name,
+    }),
   );
   return (
     <Dropdown
-      overlay={containerWidgetItems}
+      menu={{ items: containerWidgetItems, onClick: onSelectContainerWidget }}
       placement="bottomLeft"
       trigger={['click']}
     >

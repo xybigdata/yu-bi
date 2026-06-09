@@ -21,7 +21,7 @@ import {
   InfoCircleOutlined,
   LoadingOutlined,
 } from '@ant-design/icons';
-import { Button, Dropdown, Menu, Space } from 'antd';
+import { Button, Dropdown, Space } from 'antd';
 import { Confirm, TabPane, Tabs as TabsComponent } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
@@ -130,20 +130,23 @@ export const Tabs = memo(() => {
     dispatch(closeAllEditingViews({ resolve: redirect }));
   };
 
-  const menu = (id: string) => (
-    <Menu onClick={e => handleClickMenu(e, id)}>
-      <Menu.Item key="CLOSE_OTHER">
-        <span>{t('closeOther')}</span>
-      </Menu.Item>
-      <Menu.Item key="CLOSE_ALL">
-        <span>{t('closeAll')}</span>
-      </Menu.Item>
-    </Menu>
-  );
+  const menuItems = [
+    {
+      key: 'CLOSE_OTHER',
+      label: <span>{t('closeOther')}</span>,
+    },
+    {
+      key: 'CLOSE_ALL',
+      label: <span>{t('closeAll')}</span>,
+    },
+  ];
 
   const Tab = (id: string, name: string) => (
     <span>
-      <Dropdown overlay={menu(id)} trigger={['contextMenu']}>
+      <Dropdown
+        menu={{ items: menuItems, onClick: e => handleClickMenu(e, id) }}
+        trigger={['contextMenu']}
+      >
         <span className="ant-dropdown-link">{name}</span>
       </Dropdown>
     </span>
