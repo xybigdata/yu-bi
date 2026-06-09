@@ -26,7 +26,7 @@ export function universalUUID() {
 export function errorHandle(error) {
   if (error?.response) {
     // AxiosError
-    const { response } = error as AxiosError;
+    const { response } = error as AxiosError<APIResponse<any>>;
     switch (response?.status) {
       case 401:
         message.error({ key: '401', content: i18next.t('global.401') });
@@ -50,7 +50,7 @@ export function getErrorMessage(error) {
     return error;
   }
   if (error?.response) {
-    const { response } = error as AxiosError;
+    const { response } = error as AxiosError<APIResponse<any>>;
     switch (response?.status) {
       case 401:
         removeToken();

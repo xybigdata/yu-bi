@@ -238,6 +238,8 @@
 已完成：
 - `js-cookie 2.2.1 -> 3.0.8`，`@types/js-cookie 2.2.6 -> 3.0.6`，先完成低风险认证 cookie 库升级，保持现有 token 读写封装不变。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
+- `axios 0.21.1 -> 1.17.0`，完成请求库主线升级；按 `AxiosError<APIResponse<any>>` 补齐错误响应类型，保持现有拦截器和错误提示行为不变。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 
 验收门槛：
 - `npm run checkTs` 通过。
