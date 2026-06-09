@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { Menu } from 'antd';
+import { Menu, MenuProps } from 'antd';
 import { ChartDataSectionField } from 'app/types/ChartConfig';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { FC } from 'react';
@@ -59,23 +59,22 @@ export const ChartDataConfigSectionReplaceMenu: FC<{
     onConfigChanged?.(ancestors, newConfig, true);
   };
 
-  const renderMenuItem = (item: ChartDataViewMeta) => {
+  const renderMenuItem = (
+    item: ChartDataViewMeta,
+  ): NonNullable<MenuProps['items']>[number] => {
     if (item.children && item.children.length) {
-      return (
-        <Menu.SubMenu key={item.name} title={item.name}>
-          {item.children.map(item => renderMenuItem(item))}
-        </Menu.SubMenu>
-      );
+      return {
+        key: item.name,
+        label: item.name,
+        children: item.children.map(item => renderMenuItem(item)),
+      };
     } else {
-      return (
-        <Menu.Item
-          key={item.name}
-          onClick={() => handleFieldConfigChanged(item)}
-        >
-          {item.name}
-        </Menu.Item>
-      );
+      return {
+        key: item.name,
+        label: item.name,
+        onClick: () => handleFieldConfigChanged(item),
+      };
     }
   };
-  return <Menu>{viewFields.map(item => renderMenuItem(item))}</Menu>;
+  return <Menu items={viewFields.map(item => renderMenuItem(item))} />;
 };
