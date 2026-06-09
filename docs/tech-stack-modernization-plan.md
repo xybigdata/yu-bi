@@ -843,6 +843,11 @@
   - `security/src/test/java/datart/security/test/jwt/JwkSetCreator.java`
 - 这部分不再阻塞后端生产主链从 `fastjson` 退出，但后续仍建议和 JWT 技术栈统一时一起清理。
 
+### 并行治理：移除 fastjson 直接依赖
+
+- `core/pom.xml` 已删除 `com.alibaba:fastjson:1.2.83` 直接依赖。
+- 2026-06-09 复核：后端生产代码检索 `fastjson` 结果为空，当前仅剩测试代码中的 `org.json` 使用，不再有生产主链的 `fastjson` 依赖入口。
+
 ### 并行治理：清理 commons-lang 2 与直连 commons-io 1.x 使用点
 
 - `core/pom.xml` 已删除 `commons-lang:commons-lang:2.6` 与 `commons-io:commons-io:1.3.1` 两个直接依赖。
