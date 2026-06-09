@@ -20,6 +20,7 @@ import { LoadingOutlined, UserAddOutlined } from '@ant-design/icons';
 import { List, Modal } from 'antd';
 import { Avatar, ListItem, ListTitle } from 'app/components';
 import { TenantManagementMode } from 'app/constants';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectSystemInfo } from 'app/slice/selectors';
@@ -32,7 +33,7 @@ import {
   useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { SPACE_MD } from 'styles/StyleConstants';
 import { selectOrgId } from '../../../slice/selectors';
@@ -47,7 +48,7 @@ import { getMembers, inviteMember } from '../slice/thunks';
 export const MemberList = memo(() => {
   const [inviteFormVisible, setInviteFormVisible] = useState(false);
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const location = useLocation();
   const systemInfo = useSelector(selectSystemInfo);
   const orgId = useSelector(selectOrgId);
@@ -124,9 +125,9 @@ export const MemberList = memo(() => {
 
   const toDetail = useCallback(
     id => () => {
-      history.push(`/organizations/${orgId}/members/${id}`);
+      navigate.push(`/organizations/${orgId}/members/${id}`);
     },
-    [history, orgId],
+    [navigate, orgId],
   );
 
   const toAdd = useCallback(() => {

@@ -18,11 +18,12 @@
 
 import { TeamOutlined, UserOutlined } from '@ant-design/icons';
 import { ListSwitch } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { SPACE_XS } from 'styles/StyleConstants';
 import { MemberList } from './MemberList';
@@ -30,7 +31,7 @@ import { RoleList } from './RoleList';
 
 export const Sidebar = memo(() => {
   const [selectedKey, setSelectedKey] = useState('');
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const location = useLocation();
   const orgId = useSelector(selectOrgId);
   const t = useI18NPrefix('member.sidebar');
@@ -54,9 +55,9 @@ export const Sidebar = memo(() => {
 
   const switchSelect = useCallback(
     key => {
-      history.push(`/organizations/${orgId}/${key}`);
+      navigate.push(`/organizations/${orgId}/${key}`);
     },
-    [history, orgId],
+    [navigate, orgId],
   );
 
   return (

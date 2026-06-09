@@ -1,13 +1,13 @@
 import { DeleteOutlined, EditOutlined, MoreOutlined } from '@ant-design/icons';
 import { Menu, message, Popconfirm } from 'antd';
 import { MenuListItem, Popup, Tree, TreeTitle } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { CascadeAccess } from 'app/pages/MainPage/Access';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
 import { memo, useCallback, useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
 import { onDropTreeFn, stopPPG } from 'utils/utils';
 import { LocalTreeDataNode } from '../../../../slice/types';
 import {
@@ -30,7 +30,7 @@ interface StoryboardListProps {
 
 export const List = memo(({ list, selectedId }: StoryboardListProps) => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const loading = useSelector(selectStoryboardListLoading);
   const orgId = useSelector(selectOrgId);
   const { showSaveForm } = useContext(SaveFormContext);
@@ -44,12 +44,12 @@ export const List = memo(({ list, selectedId }: StoryboardListProps) => {
   const redirect = useCallback(
     tabKey => {
       if (tabKey) {
-        history.push(`/organizations/${orgId}/vizs/${tabKey}`);
+        navigate.push(`/organizations/${orgId}/vizs/${tabKey}`);
       } else {
-        history.push(`/organizations/${orgId}/vizs`);
+        navigate.push(`/organizations/${orgId}/vizs`);
       }
     },
-    [history, orgId],
+    [navigate, orgId],
   );
 
   const archiveStoryboard = useCallback(
@@ -170,10 +170,10 @@ export const List = memo(({ list, selectedId }: StoryboardListProps) => {
           setExpandedKeys([node.key].concat(expandedKeys));
         }
       } else {
-        history.push(`/organizations/${orgId}/vizs/${node.id}`);
+        navigate.push(`/organizations/${orgId}/vizs/${node.id}`);
       }
     },
-    [expandedKeys, history, orgId],
+    [expandedKeys, navigate, orgId],
   );
 
   const onDrop = info => {

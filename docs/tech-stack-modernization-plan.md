@@ -238,6 +238,8 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 - React Router 预迁移第十一批：扩展 `useCompatNavigate` 以暴露 `location`，并将 `ViewPage` 的启动分析与编辑器工具栏迁到兼容层，覆盖带 `search` 参数和 `location.state` 读取的复杂导航场景。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
+- React Router 预迁移第十二批：`VizPage` 与成员页侧边栏中的纯路径跳转已切到 `useCompatNavigate`，覆盖可视化回收站、文件夹树、故事板列表以及成员/角色列表与切换导航，继续缩小主应用侧边栏层对 `useHistory` 的直接依赖。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 
 验收门槛：
 - 全部路由可访问。

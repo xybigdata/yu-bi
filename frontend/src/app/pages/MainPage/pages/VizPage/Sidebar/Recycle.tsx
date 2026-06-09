@@ -5,12 +5,12 @@ import {
 } from '@ant-design/icons';
 import { Menu, message, Popconfirm, TreeDataNode } from 'antd';
 import { MenuListItem, Popup, Tree, TreeTitle } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectIsOrgOwner } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
 import { memo, useCallback, useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { getInsertedNodeIndex, stopPPG } from 'utils/utils';
 import { SaveFormContext } from '../SaveFormContext';
 import { selectVizs } from '../slice/selectors';
@@ -28,7 +28,7 @@ interface RecycleProps {
 export const Recycle = memo(
   ({ type, orgId, selectedId, list, listLoading, onInit }: RecycleProps) => {
     const dispatch = useDispatch();
-    const history = useHistory();
+    const navigate = useCompatNavigate();
     const { showSaveForm } = useContext(SaveFormContext);
     const vizs = useSelector(selectVizs);
     const isOwner = useSelector(selectIsOrgOwner);
@@ -41,12 +41,12 @@ export const Recycle = memo(
     const redirect = useCallback(
       vizId => {
         if (vizId) {
-          history.push(`/organizations/${orgId}/vizs/${vizId}`);
+          navigate.push(`/organizations/${orgId}/vizs/${vizId}`);
         } else {
-          history.push(`/organizations/${orgId}/vizs`);
+          navigate.push(`/organizations/${orgId}/vizs`);
         }
       },
-      [history, orgId],
+      [navigate, orgId],
     );
 
     const del = useCallback(
@@ -109,10 +109,10 @@ export const Recycle = memo(
     const treeSelect = useCallback(
       (_, { node }) => {
         if (node.id !== selectedId) {
-          history.push(`/organizations/${orgId}/vizs/${node.id}`);
+          navigate.push(`/organizations/${orgId}/vizs/${node.id}`);
         }
       },
-      [history, orgId, selectedId],
+      [navigate, orgId, selectedId],
     );
 
     const renderTreeTitle = useCallback(

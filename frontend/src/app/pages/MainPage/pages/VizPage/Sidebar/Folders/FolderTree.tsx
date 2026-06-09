@@ -6,6 +6,7 @@ import {
 } from '@ant-design/icons';
 import { Menu, message, Popconfirm } from 'antd';
 import { MenuListItem, Popup, Tree, TreeTitle } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import { CascadeAccess } from 'app/pages/MainPage/Access';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
@@ -13,7 +14,6 @@ import { LocalTreeDataNode } from 'app/pages/MainPage/slice/types';
 import { CommonFormTypes } from 'globalConstants';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { getInsertedNodeIndex, onDropTreeFn, stopPPG } from 'utils/utils';
 import { isParentIdEqual } from '../../../../slice/utils';
 import {
@@ -42,7 +42,7 @@ export function FolderTree({
 }: FolderTreeProps) {
   const tg = useI18NPrefix('global');
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const orgId = useSelector(selectOrgId);
   const loading = useSelector(selectVizListLoading);
@@ -57,12 +57,12 @@ export function FolderTree({
   const redirect = useCallback(
     tabKey => {
       if (tabKey) {
-        history.push(`/organizations/${orgId}/vizs/${tabKey}`);
+        navigate.push(`/organizations/${orgId}/vizs/${tabKey}`);
       } else {
-        history.push(`/organizations/${orgId}/vizs`);
+        navigate.push(`/organizations/${orgId}/vizs`);
       }
     },
-    [history, orgId],
+    [navigate, orgId],
   );
 
   const menuSelect = useCallback(
@@ -74,10 +74,10 @@ export function FolderTree({
           setExpandedKeys([node.key].concat(expandedKeys));
         }
       } else {
-        history.push(`/organizations/${orgId}/vizs/${node.relId}`);
+        navigate.push(`/organizations/${orgId}/vizs/${node.relId}`);
       }
     },
-    [expandedKeys, history, orgId],
+    [expandedKeys, navigate, orgId],
   );
 
   const archiveViz = useCallback(

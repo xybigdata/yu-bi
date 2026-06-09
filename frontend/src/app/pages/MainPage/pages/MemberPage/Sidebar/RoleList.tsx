@@ -19,11 +19,12 @@
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { List } from 'antd';
 import { ListItem, ListTitle } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { memo, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { selectOrgId } from '../../../slice/selectors';
 import { selectRoleListLoading, selectRoles } from '../slice/selectors';
@@ -31,7 +32,7 @@ import { getRoles } from '../slice/thunks';
 
 export const RoleList = memo(() => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const location = useLocation();
   const list = useSelector(selectRoles);
   const listLoading = useSelector(selectRoleListLoading);
@@ -49,14 +50,14 @@ export const RoleList = memo(() => {
   }, [dispatch, orgId]);
 
   const toAdd = useCallback(() => {
-    history.push(`/organizations/${orgId}/roles/add`);
-  }, [history, orgId]);
+    navigate.push(`/organizations/${orgId}/roles/add`);
+  }, [navigate, orgId]);
 
   const toDetail = useCallback(
     id => () => {
-      history.push(`/organizations/${orgId}/roles/${id}`);
+      navigate.push(`/organizations/${orgId}/roles/${id}`);
     },
-    [history, orgId],
+    [navigate, orgId],
   );
 
   const titleProps = useMemo(
