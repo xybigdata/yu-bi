@@ -810,10 +810,10 @@
 ### 一类：运行时主链里仍偏旧，且后续收益明确
 
 1. `jjwt 0.7.0`
-   - 现状：当前 JWT 主链仍在 `core/pom.xml`，生产代码调用集中在 `JwtUtils` 与 `JwkUtils`。
+   - 现状：当前 JWT 主链已在 `core/pom.xml` 升级到 `jjwt-api/jjwt-impl/jjwt-jackson 0.12.7`，生产代码调用仍集中在 `JwtUtils` 与 `JwkUtils`。
    - 更现代替代：`jjwt 0.12+`，或后续统一到 Spring Security 的 JOSE 能力。
-   - 调研结论：新版 `jjwt` 对 HMAC 密钥长度校验更严格，当前默认 `datart.security.token.secret` 过短，不能直接硬升。
-   - 风险判断：会影响 token 签发、解析、刷新和已有默认配置兼容性，必须单独做专项迁移。
+   - 调研结论：新版 `jjwt` 对 HMAC 密钥长度校验更严格，当前默认 `datart.security.token.secret` 过短，不能直接硬升；因此已在工具层实现“新签发使用派生的 256-bit HMAC key，旧短 secret token 继续兼容解析”的双轨策略。
+   - 风险判断：主链升级已完成，但若未来要彻底移除旧短 secret 兼容分支，需要先准备配置迁移公告和 token 失效窗口。
 
 2. `org.apache.httpcomponents:httpclient:4.5.14`
    - 现状：仍处在 HTTP 数据源与第三方 OAuth 运行时主链。
@@ -1008,9 +1008,15 @@
 ### 并行治理：收口 JWT 双栈中的未使用依赖
 
 - `security/pom.xml` 已删除未使用的 `com.auth0:java-jwt:3.7.0` 依赖。
-- 2026-06-09 复核：当前仓库的 JWT 主链调用均来自 `security/src/main/java/datart/security/util/JwtUtils.java` 与 `security/src/main/java/datart/security/util/JwkUtils.java`，运行时实际仍基于 `io.jsonwebtoken:jjwt:0.7.0`。
-- 这一步先完成“去冗余”，后续仍需单独把 `jjwt 0.7.0` 升级到现代版本，并处理其 API 变更。
-- 当前已确认一个升级风险点：现有默认 `datart.security.token.secret` 是短字符串，若直接升级到现代 `jjwt 0.12+`，HMAC 密钥长度校验可能导致默认配置无法继续用于 `HS256`，需要在升级批次里一并处理兼容策略。
+- 2026-06-10 当前状态：JWT 主链已从 `io.jsonwebtoken:jjwt:0.7.0` 升级到 `0.12.7` 三件套（`jjwt-api`、`jjwt-impl`、`jjwt-jackson`）。
+- `security/src/main/java/datart/security/util/JwtUtils.java` 已切到 `Jwts.builder().claims(...).subject(...).expiration(...).signWith(key)` 与 `Jwts.parser().verifyWith(key).build().parseSignedClaims(...)` 新 API。
+- 为兼容默认短字符串 `datart.security.token.secret`，当前策略是：
+  - 新签发 token 使用 `SHA-256(secret + 固定 salt)` 派生出的 256-bit HMAC key；
+  - 历史短 secret token 解析失败后，回退到 legacy `SecretKeySpec(secret, "HmacSHA256")` 再验一次，保证已有激活链接、邀请链接和登录 token 不被一次性打断。
+- `security/src/main/java/datart/security/util/JwkUtils.java` 保留了历史 JWK 验签能力，并把弱 HMAC key 与 `secp256k1` 这类 legacy 测试资源的兼容收敛在本地验签实现里，不把这些历史约束继续反向污染生产登录主链。
+- 2026-06-10 验证：
+  - `mvn -pl security -am -Dtest=datart.security.test.jwt.TestJwkParse -Dsurefire.failIfNoSpecifiedTests=false test` 通过。
+  - `mvn -pl server -am -DskipTests compile` 通过。
 
 ### 并行治理：移除未使用的 cglib 直接依赖
 

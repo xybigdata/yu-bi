@@ -25,14 +25,23 @@ import datart.security.base.InviteToken;
 import datart.security.base.JwtToken;
 import datart.security.base.PasswordToken;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Header;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.security.Keys;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 public class JwtUtils {
 
@@ -43,6 +52,8 @@ public class JwtUtils {
     private static final String TOKEN_KEY_INVITER = "inviter";
 
     private static final String PASSWORD_HASH = "password";
+
+    private static final String LEGACY_SECRET_COMPAT_SALT = "datart-jjwt-hs256-compat";
 
     public static final int VERIFY_CODE_TIMEOUT_MIN = 10 * 60 * 1000;
 
@@ -62,10 +73,10 @@ public class JwtUtils {
             claims.put(PASSWORD_HASH, token.getPwdHash());
         }
         String jwt = Jwts.builder()
-                .setClaims(claims)
-                .setSubject(token.getSubject())
-                .setExpiration(token.getExp() != null ? token.getExp() : new Date(token.getCreateTime() + getSessionTimeout()))
-                .signWith(SignatureAlgorithm.HS256, Application.getTokenSecret().getBytes(StandardCharsets.UTF_8))
+                .claims(claims)
+                .subject(token.getSubject())
+                .expiration(token.getExp() != null ? token.getExp() : new Date(token.getCreateTime() + getSessionTimeout()))
+                .signWith(getSigningKey())
                 .compact();
         return Const.TOKEN_HEADER_PREFIX + jwt;
     }
@@ -76,10 +87,10 @@ public class JwtUtils {
         claims.put(TOKEN_KEY_USER_ID, token.getUserId());
         claims.put(TOKEN_KEY_ORG_ID, token.getOrgId());
         String jwt = Jwts.builder()
-                .setClaims(claims)
-                .setSubject(token.getSubject())
-                .setExpiration(token.getExp() != null ? token.getExp() : new Date(token.getCreateTime() + VERIFY_CODE_TIMEOUT_MIN))
-                .signWith(SignatureAlgorithm.HS256, Application.getTokenSecret().getBytes(StandardCharsets.UTF_8))
+                .claims(claims)
+                .subject(token.getSubject())
+                .expiration(token.getExp() != null ? token.getExp() : new Date(token.getCreateTime() + VERIFY_CODE_TIMEOUT_MIN))
+                .signWith(getSigningKey())
                 .compact();
         return Const.TOKEN_HEADER_PREFIX + jwt;
     }
@@ -96,24 +107,6 @@ public class JwtUtils {
         jwtToken.setExp(claims.getExpiration());
         return jwtToken;
     }
-
-//    public static PasswordToken toPasswordToken(String jwtString) {
-//        try {
-//            jwtString = URLDecoder.decode(jwtString, StandardCharsets.UTF_8.displayName());
-//        } catch (Exception ignored) {
-//        }
-//        if (jwtString == null || !jwtString.startsWith(Const.TOKEN_HEADER_PREFIX)) {
-//            return null;
-//        }
-//        jwtString = StringUtils.removeStart(jwtString, Const.TOKEN_HEADER_PREFIX);
-//        Claims claims = getClaims(jwtString);
-//        PasswordToken passwordToken = new PasswordToken();
-//        passwordToken.setSubject(claims.getSubject());
-//        passwordToken.setPassword(claims.get(PASSWORD_HASH, String.class));
-//        passwordToken.setExp(claims.getExpiration());
-//        return passwordToken;
-//    }
-
 
     public static InviteToken toInviteToken(String token) {
         token = StringUtils.removeStart(token, Const.TOKEN_HEADER_PREFIX);
@@ -135,10 +128,54 @@ public class JwtUtils {
     }
 
     private static Claims getClaims(String token) {
-        return Jwts.parser()
-                .setSigningKey(Application.getTokenSecret().getBytes(StandardCharsets.UTF_8))
-                .parseClaimsJws(token.trim())
-                .getBody();
+        String compactToken = token.trim();
+        try {
+            return parseClaims(compactToken, getSigningKey()).getPayload();
+        } catch (ExpiredJwtException expired) {
+            throw expired;
+        } catch (JwtException ignored) {
+            SecretKey legacyKey = getLegacyVerificationKey();
+            if (legacyKey == null) {
+                throw ignored;
+            }
+            try {
+                return parseClaims(compactToken, legacyKey).getPayload();
+            } catch (ExpiredJwtException expired) {
+                throw expired;
+            } catch (JwtException secondary) {
+                throw ignored;
+            }
+        }
+    }
+
+    private static Jws<Claims> parseClaims(String token, SecretKey key) {
+        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
+    }
+
+    private static SecretKey getSigningKey() {
+        byte[] secretBytes = Application.getTokenSecret().getBytes(StandardCharsets.UTF_8);
+        if (secretBytes.length >= 32) {
+            return Keys.hmacShaKeyFor(secretBytes);
+        }
+        return new SecretKeySpec(sha256(secretBytes), "HmacSHA256");
+    }
+
+    private static SecretKey getLegacyVerificationKey() {
+        byte[] secretBytes = Application.getTokenSecret().getBytes(StandardCharsets.UTF_8);
+        if (secretBytes.length >= 32) {
+            return null;
+        }
+        return new SecretKeySpec(secretBytes, "HmacSHA256");
+    }
+
+    private static byte[] sha256(byte[] input) {
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+            messageDigest.update(LEGACY_SECRET_COMPAT_SALT.getBytes(StandardCharsets.UTF_8));
+            return messageDigest.digest(input);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 algorithm unavailable", e);
+        }
     }
 
     private static long getSessionTimeout() {
