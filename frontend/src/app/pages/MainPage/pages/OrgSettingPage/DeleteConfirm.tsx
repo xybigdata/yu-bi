@@ -10,7 +10,9 @@ import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import { deleteOrganization } from '../../slice/thunks';
 
-export const DeleteConfirm = ({ visible, open, ...props }: ModalProps) => {
+type DeleteConfirmProps = Omit<ModalProps, 'visible'>;
+
+export const DeleteConfirm = ({ open, ...props }: DeleteConfirmProps) => {
   const [inputValue, setInputValue] = useState('');
   const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
@@ -36,7 +38,7 @@ export const DeleteConfirm = ({ visible, open, ...props }: ModalProps) => {
   return (
     <Modal
       {...props}
-      open={open ?? visible}
+      open={open}
       footer={[
         <Button key="cancel" onClick={props.onCancel}>
           {t('cancel')}

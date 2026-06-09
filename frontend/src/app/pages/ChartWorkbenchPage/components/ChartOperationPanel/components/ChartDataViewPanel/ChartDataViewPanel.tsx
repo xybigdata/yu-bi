@@ -147,19 +147,19 @@ const ChartDataViewPanel: FC<{
       let Data = chartConfig?.datas?.filter(v => v.rows && v.rows.length);
       if (Data?.length) {
         setConfirmProps({
-          visible: true,
+          open: true,
           title: t('toggleViewTip'),
           width: 500,
           icon: <InfoCircleOutlined style={{ color: ORANGE }} />,
           footer: (
             <Space>
-              <Button onClick={() => setConfirmProps({ visible: false })}>
+              <Button onClick={() => setConfirmProps({ open: false })}>
                 {t('cancel')}
               </Button>
               <Button
                 onClick={() => {
                   onDataViewChange?.(true);
-                  setConfirmProps({ visible: false });
+                  setConfirmProps({ open: false });
                   dispatch(fetchViewDetailAction(value));
                 }}
               >
@@ -168,7 +168,7 @@ const ChartDataViewPanel: FC<{
               <Button
                 onClick={() => {
                   onDataViewChange?.();
-                  setConfirmProps({ visible: false });
+                  setConfirmProps({ open: false });
                   dispatch(fetchViewDetailAction(value));
                 }}
                 type="primary"

@@ -29,7 +29,7 @@ import { editOrganization } from '../../slice/thunks';
 import { DeleteConfirm } from './DeleteConfirm';
 
 export function OrgSettingPage() {
-  const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const { actions } = useMainSlice();
   const [avatarLoading, setAvatarLoading] = useState(false);
   const dispatch = useAppDispatch();
@@ -75,11 +75,11 @@ export function OrgSettingPage() {
   );
 
   const showDeleteConfirm = useCallback(() => {
-    setDeleteConfirmVisible(true);
+    setDeleteConfirmOpen(true);
   }, []);
 
   const hideDeleteConfirm = useCallback(() => {
-    setDeleteConfirmVisible(false);
+    setDeleteConfirmOpen(false);
   }, []);
 
   return (
@@ -160,7 +160,7 @@ export function OrgSettingPage() {
         <DeleteConfirm
           width={480}
           title={t('deleteOrg')}
-          open={deleteConfirmVisible}
+          open={deleteConfirmOpen}
           onCancel={hideDeleteConfirm}
         />
       </Card>

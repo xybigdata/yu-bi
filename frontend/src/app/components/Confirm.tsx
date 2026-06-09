@@ -8,23 +8,16 @@ import {
 } from 'styles/StyleConstants';
 import { mergeClassNames } from 'utils/utils';
 
-export interface ConfirmProps extends ModalProps {
+export interface ConfirmProps extends Omit<ModalProps, 'visible'> {
   icon?: ReactElement;
   title?: ReactNode;
   content?: ReactNode;
   footer?: ReactNode;
 }
 
-export function Confirm({
-  title,
-  content,
-  icon,
-  visible,
-  open,
-  ...modalProps
-}: ConfirmProps) {
+export function Confirm({ title, content, icon, open, ...modalProps }: ConfirmProps) {
   return (
-    <Modal width={400} closable={false} open={open ?? visible} {...modalProps}>
+    <Modal width={400} closable={false} open={open} {...modalProps}>
       <ConfirmBody>
         {icon &&
           cloneElement(icon, {
