@@ -8,7 +8,7 @@ import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import classnames from 'classnames';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useRouteMatch } from 'react-router';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { LEVEL_5, SPACE_TIMES } from 'styles/StyleConstants';
 import { selectStoryboards, selectVizs } from '../slice/selectors';
@@ -35,10 +35,7 @@ export const Sidebar = memo(
     const vizs = useSelector(selectVizs);
     const storyboards = useSelector(selectStoryboards);
 
-    const matchDetail = useRouteMatch<{ vizId: string }>(
-      '/organizations/:orgId/vizs/:vizId',
-    );
-    const vizId = matchDetail?.params.vizId;
+    const { vizId } = useParams<{ vizId?: string }>();
     const t = useI18NPrefix(i18nPrefix);
     const selectedFolderId = useMemo(() => {
       if (vizId && vizs) {

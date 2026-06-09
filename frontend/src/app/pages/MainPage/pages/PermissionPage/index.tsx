@@ -18,8 +18,8 @@
 import { EmptyFiller, Split } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useSplitSizes } from 'app/hooks/useSplitSizes';
-import { useCallback } from 'react';
-import { Route, useRouteMatch } from 'react-router-dom';
+import { useCallback, useMemo } from 'react';
+import { Route, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { useMemberSlice } from '../MemberPage/slice';
 import { useScheduleSlice } from '../SchedulePage/slice';
@@ -38,13 +38,18 @@ export function PermissionPage() {
   useViewSlice();
   useVizSlice();
   usePermissionSlice();
-  const {
-    params: { viewpoint },
-  } = useRouteMatch<{ viewpoint: Viewpoints }>();
-  const matchDetail = useRouteMatch<{
-    type: ResourceTypes | SubjectTypes;
-    id: string;
-  }>('/organizations/:orgId/permissions/:viewpoint/:type/:id');
+  const { viewpoint } = useParams<{ viewpoint: Viewpoints }>();
+  const location = useLocation();
+  const detailParams = useMemo(() => {
+    const urlArr = location.pathname.split('/');
+    if (urlArr.length < 7 || urlArr[3] !== 'permissions') {
+      return undefined;
+    }
+    return {
+      type: urlArr[5] as ResourceTypes | SubjectTypes,
+      id: urlArr[6],
+    };
+  }, [location.pathname]);
   const t = useI18NPrefix('permission');
   const { sizes, setSizes } = useSplitSizes({
     limitedSide: 0,
@@ -69,10 +74,10 @@ export function PermissionPage() {
     >
       <Sidebar
         viewpoint={viewpoint}
-        viewpointType={matchDetail?.params.type}
-        viewpointId={matchDetail?.params.id}
+        viewpointType={detailParams?.type}
+        viewpointId={detailParams?.id}
       />
-      {matchDetail ? (
+      {detailParams ? (
         <Route path={`/organizations/:orgId/permissions/:viewpoint/:type/:id`}>
           <Main />
         </Route>

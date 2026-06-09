@@ -19,7 +19,7 @@
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { memo } from 'react';
 import { useSelector } from 'react-redux';
-import { useRouteMatch } from 'react-router';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { SPACE_LG } from 'styles/StyleConstants';
 import { ResourceTypes, SubjectTypes, Viewpoints } from '../constants';
@@ -27,9 +27,7 @@ import { ResourcesPermissionSetting } from './ResourcesPermissionSetting';
 import { SubjectPermissionSetting } from './SubjectsPermissionSetting';
 
 export const Main = memo(() => {
-  const {
-    params: { viewpoint, type: viewpointType, id: viewpointId },
-  } = useRouteMatch<{
+  const { viewpoint, type: viewpointType, id: viewpointId } = useParams<{
     viewpoint: Viewpoints;
     type: ResourceTypes | SubjectTypes;
     id: string;

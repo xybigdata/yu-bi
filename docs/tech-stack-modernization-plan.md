@@ -228,6 +228,8 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 - React Router 预迁移第六批：`Navbar` 与 `SourcePage` 中的模块名、`sourceId` 读取已从 `useRouteMatch` 迁到 `useLocation().pathname` / `useParams`，保留设置区子导航显隐和数据源详情页打开逻辑不变。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
+- React Router 预迁移第七批：`ViewPage`、`VizPage Sidebar`、`SchedulePage`、`PermissionPage` 中剩余的 `useRouteMatch` 已全部迁到 `useParams` / `useLocation().pathname`，前端主应用内的路由参数读取已不再依赖 `useRouteMatch`。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 
 验收门槛：
 - 全部路由可访问。

@@ -21,7 +21,7 @@ import {
   useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useRouteMatch } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { BORDER_RADIUS, SPACE_LG, SPACE_SM } from 'styles/StyleConstants';
 import { getInsertedNodeIndex } from 'utils/utils';
@@ -69,7 +69,10 @@ export const EditorPage: FC = () => {
   );
   const [periodUnit, setPeriodUnit] = useState<TimeModes>(TimeModes.Minute);
   const [periodInput, setPeriodInput] = useState(false);
-  const { params } = useRouteMatch<{ scheduleId: string; orgId: string }>();
+  const { scheduleId, orgId } = useParams<{
+    scheduleId: string;
+    orgId: string;
+  }>();
   const editingSchedule = useSelector(selectEditingSchedule);
   const loading = useSelector(selectScheduleDetailLoading);
   const saveLoading = useSelector(selectSaveLoading);
@@ -82,7 +85,6 @@ export const EditorPage: FC = () => {
   const t = useI18NPrefix('schedule.editor.index');
   const isOwner = useSelector(selectIsOrgOwner);
   const { actions } = useScheduleSlice();
-  const { scheduleId, orgId } = params;
   const isAdd = useMemo(() => {
     return scheduleId === 'add';
   }, [scheduleId]);
