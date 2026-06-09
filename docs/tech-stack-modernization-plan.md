@@ -179,6 +179,8 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
 - 预处理 AntD 5 的 Dropdown 菜单 API：第一批静态菜单已从 `overlay={<Menu />}` 和 `Menu.Item` JSX 改为 `menu={{ items, onClick }}`，覆盖 ListTitle、视图/图表 Tab 右键菜单、仪表板工具栏添加入口、快捷键、设备切换、SQL 预览 Limit、引用资源排序和 Join 类型选择。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
+- 预处理 AntD 5 的自定义 Dropdown 渲染 API：Header/Widget/ChartDraggable 等自定义 `overlay` 入口已切换为 `dropdownRender`，复杂菜单内部 JSX 暂保留。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
 
 预研结果：
 - Ant Design 相关调用点约 358 个文件，`visible`/`onVisibleChange`/`overlay`/`Menu.Item` 等 AntD 5 迁移热点分布广，不能直接大版本替换。
@@ -186,7 +188,7 @@
 
 风险：
 - Ant Design 5/6 token、Less 变量和组件 API 变化较大。
-- 当前仍有 AntD 4 API 调用点，包括自定义 `Dropdown overlay`、复杂 `Menu.Item`/`Menu.SubMenu` JSX 菜单、少量项目封装层的 legacy `visible` 入参；这是迁移 Ant Design 5/6 的主要阻塞。
+- 当前仍有 AntD 4 API 调用点，包括复杂 `Menu.Item`/`Menu.SubMenu` JSX 菜单、Tooltip/Popover 的 `overlay` 内容、少量项目封装层的 legacy `visible` 入参；这是迁移 Ant Design 5/6 的主要阻塞。
 - React Router 6/7 的路由声明和导航 API 有破坏性变化。
 
 验收门槛：
@@ -276,6 +278,6 @@
 
 阶段 3 已完成，下一步进入阶段 4 的 UI 与路由现代化准备：
 
-1. 继续预处理 AntD 5 API 迁移热点：自定义 `Dropdown overlay`、复杂 `Menu.Item`/`Menu.SubMenu` JSX 菜单和项目封装层 legacy `visible` 入参。
+1. 继续预处理 AntD 5 API 迁移热点：复杂 `Menu.Item`/`Menu.SubMenu` JSX 菜单、Tooltip/Popover 的 `overlay` 内容和项目封装层 legacy `visible` 入参。
 2. 评估 React Router 5 -> 6/7 的路由声明、`useHistory`、`Redirect` 和嵌套路由替换方案。
 3. 保持 CRA5/CRACO 回退脚本，直到 Jest/测试栈迁出 CRA。

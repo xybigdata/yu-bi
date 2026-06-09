@@ -117,14 +117,14 @@ export const StoryHeader: FC<StoryHeaderProps> = memo(
             </Button>
             {(allowManage || allowShare) && (
               <Dropdown
-                overlay={
+                dropdownRender={() => (
                   <StoryOverLay
                     allowShare={allowShare}
                     allowManage={allowManage}
                     onOpenShareLink={onOpenShareLink}
                     onPublish={Number(status) === 2 ? onPublish : ''}
                   />
-                }
+                )}
                 arrow
               >
                 <Button icon={<MoreOutlined />} />

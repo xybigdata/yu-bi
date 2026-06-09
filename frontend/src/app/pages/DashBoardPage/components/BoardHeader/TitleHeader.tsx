@@ -105,13 +105,13 @@ export const TitleHeader: FC = memo(() => {
         )}
         {!isArchived && (
           <Dropdown
-            overlay={
+            dropdownRender={() => (
               <BoardDropdownList
                 onOpenShareLink={onOpenShareLink}
                 openStoryList={() => setShowSaveToStory(true)}
                 openMockData={() => setMockDataModal(true)}
               />
-            }
+            )}
             placement="bottomRight"
             arrow
           >

@@ -83,7 +83,7 @@ export const WidgetDropdownList: React.FC<{
   return (
     <Dropdown
       className="widget-tool-dropdown"
-      overlay={dropdownList}
+      dropdownRender={() => dropdownList}
       placement="bottomCenter"
       trigger={['click']}
       arrow

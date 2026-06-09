@@ -161,7 +161,7 @@ const ChartDraggableElementField: FC<{
         key={columnConfig.uid}
         disabled={!config?.actions}
         destroyPopupOnHide={true}
-        overlay={renderActionExtensionMenu()}
+        dropdownRender={() => renderActionExtensionMenu()}
         overlayClassName="datart-data-section-dropdown"
         trigger={['click']}
       >

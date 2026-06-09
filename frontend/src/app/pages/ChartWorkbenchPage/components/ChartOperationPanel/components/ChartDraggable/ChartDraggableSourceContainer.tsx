@@ -281,7 +281,7 @@ export const ChartDraggableSourceContainer: FC<
           <div onClick={stopPPG}>
             <Dropdown
               disabled={_isAllowMoreAction()}
-              overlay={_getExtraActionMenus()}
+              dropdownRender={_getExtraActionMenus}
               trigger={['click']}
             >
               <ToolbarButton

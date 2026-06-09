@@ -172,7 +172,7 @@ const VizHeader: FC<{
                 </Button>
               )}
               {!isArchived && (
-                <Dropdown key="more" arrow overlay={getOverlays()}>
+                <Dropdown key="more" arrow dropdownRender={getOverlays}>
                   <Button icon={<MoreOutlined />} />
                 </Dropdown>
               )}
