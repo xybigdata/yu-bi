@@ -18,12 +18,13 @@
 
 import { ConfigProvider } from 'antd';
 import echartsDefaultTheme from 'app/assets/theme/echarts_default_theme.json';
-import { CompatSwitch } from 'app/components/CompatSwitch';
+import { CompatRoute } from 'app/components/CompatRoute';
+import { CompatRoutes } from 'app/components/CompatRoutes';
 import { registerTheme } from 'echarts';
 import { PUBLIC_URL } from 'globalConstants';
 import { antdLocales } from 'locales/i18n';
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { GlobalStyles } from 'styles/globalStyles';
 import HelmetPageTitle from '../components/HelmetPageTitle';
 import { LazyShareChart } from './Loadable';
@@ -37,11 +38,9 @@ export function Router() {
     <ConfigProvider locale={antdLocales[i18n.language]}>
       <BrowserRouter basename={PUBLIC_URL}>
         <HelmetPageTitle lang={i18n.language} />
-        <CompatSwitch>
-          <Route path="/shareChart/:token">
-            <LazyShareChart />
-          </Route>
-        </CompatSwitch>
+        <CompatRoutes>
+          <CompatRoute path="/shareChart/:token" element={<LazyShareChart />} />
+        </CompatRoutes>
         <GlobalStyles />
       </BrowserRouter>
     </ConfigProvider>

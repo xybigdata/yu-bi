@@ -248,6 +248,7 @@
 - React Router 预迁移第十八批：`VizPage` 文件夹侧边栏、`BoardEditor` 初始化流程和 Dashboard widget action 中透传的导航对象已切到 `useCompatNavigate`，覆盖新建分析入口、仪表板编辑态从 `location.state` 读取挂件信息，以及图表跳转动作对兼容导航对象的依赖收口。
 - React Router 预迁移第十九批：前端主应用内剩余 `Redirect` 已统一替换为本地 `CompatRedirect` 组件，覆盖登录鉴权跳转、模块访问拒绝跳转以及 `MainPage` 根路径、组织首页和权限首页的默认跳转，先消除 `Redirect` 对 Router v5 的直接依赖。
 - React Router 预迁移第二十批：`AppRouter`、三个分享页 Router、成员页和 `VizPage/Main` 中的 `Switch` 已统一替换为本地 `CompatSwitch` 组件，先把 Router 容器组件的升级入口收敛到单点，降低后续切换到 Router 6 `Routes` 时的改动面。
+- React Router 预迁移第二十一批：新增 `CompatRoute` / `CompatRoutes`，并将 `AppRouter`、三个分享页 Router、成员页和 `VizPage/Main` 改写为 `element` 风格声明，先把低风险路由容器从 v5 的 children 形态迁到更接近 Router 6 `Routes + Route element` 的结构。
 
 验收门槛：
 - 全部路由可访问。

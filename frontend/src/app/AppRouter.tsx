@@ -18,7 +18,8 @@
 
 import { ConfigProvider, message } from 'antd';
 import echartsDefaultTheme from 'app/assets/theme/echarts_default_theme.json';
-import { CompatSwitch } from 'app/components/CompatSwitch';
+import { CompatRoute } from 'app/components/CompatRoute';
+import { CompatRoutes } from 'app/components/CompatRoutes';
 import { registerTheme } from 'echarts';
 import { PUBLIC_URL, StorageKeys } from 'globalConstants';
 import { antdLocales } from 'locales/i18n';
@@ -26,7 +27,7 @@ import { useEffect, useLayoutEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { GlobalStyles } from 'styles/globalStyles';
 import { getToken } from 'utils/auth';
 import useI18NPrefix from './hooks/useI18NPrefix';
@@ -74,27 +75,21 @@ export function AppRouter() {
         >
           <meta name="description" content="Data Art" />
         </Helmet>
-        <CompatSwitch>
-          <Route path="/setup">
-            <LazySetupPage />
-          </Route>
-          <Route path="/login">
-            <LazyLoginPage />
-          </Route>
-          <Route path="/register">
-            <LazyRegisterPage />
-          </Route>
-          <Route path="/activation">
-            <LazyActivationPage />
-          </Route>
-          <Route path="/forgetPassword">
-            <LazyForgetPasswordPage />
-          </Route>
-          <Route path="/authorization">
-            <LazyAuthorizationPage />
-          </Route>
+        <CompatRoutes>
+          <CompatRoute path="/setup" element={<LazySetupPage />} />
+          <CompatRoute path="/login" element={<LazyLoginPage />} />
+          <CompatRoute path="/register" element={<LazyRegisterPage />} />
+          <CompatRoute path="/activation" element={<LazyActivationPage />} />
+          <CompatRoute
+            path="/forgetPassword"
+            element={<LazyForgetPasswordPage />}
+          />
+          <CompatRoute
+            path="/authorization"
+            element={<LazyAuthorizationPage />}
+          />
           <LoginAuthRoute />
-        </CompatSwitch>
+        </CompatRoutes>
         <GlobalStyles />
       </BrowserRouter>
     </ConfigProvider>

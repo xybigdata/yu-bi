@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-import { CompatSwitch } from 'app/components/CompatSwitch';
-import { Route } from 'react-router-dom';
+import { CompatRoute } from 'app/components/CompatRoute';
+import { CompatRoutes } from 'app/components/CompatRoutes';
 import styled from 'styled-components/macro';
 import { MemberDetailPage } from './pages/MemberDetailPage';
 import { RoleDetailPage } from './pages/RoleDetailPage';
@@ -30,14 +30,16 @@ export function MemberPage() {
   return (
     <Container>
       <Sidebar />
-      <CompatSwitch>
-        <Route path="/organizations/:orgId/members/:memberId">
-          <MemberDetailPage />
-        </Route>
-        <Route path="/organizations/:orgId/roles/:roleId">
-          <RoleDetailPage />
-        </Route>
-      </CompatSwitch>
+      <CompatRoutes>
+        <CompatRoute
+          path="/organizations/:orgId/members/:memberId"
+          element={<MemberDetailPage />}
+        />
+        <CompatRoute
+          path="/organizations/:orgId/roles/:roleId"
+          element={<RoleDetailPage />}
+        />
+      </CompatRoutes>
     </Container>
   );
 }
