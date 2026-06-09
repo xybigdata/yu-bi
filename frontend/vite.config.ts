@@ -188,7 +188,6 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           antdDesign: ['@ant-design/icons', 'antd'],
           echarts: ['echarts', 'zrender'],
-          lodash: ['lodash'],
           quill: ['quill'],
           react: ['react', 'react-dom'],
           reactGridLayout: ['react-grid-layout'],

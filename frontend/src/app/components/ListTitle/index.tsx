@@ -1,11 +1,5 @@
 import { LeftOutlined, MoreOutlined, SearchOutlined } from '@ant-design/icons';
 import { Input, Space, Tooltip } from 'antd';
-import {
-  MenuListItem,
-  MenuWrapper,
-  Popup,
-  ToolbarButton,
-} from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import React, { ReactElement, useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
@@ -21,6 +15,8 @@ import {
   SPACE_UNIT,
   SPACE_XS,
 } from 'styles/StyleConstants';
+import { MenuListItem, MenuWrapper, Popup } from '../Popup';
+import { ToolbarButton } from '../ToolbarButton';
 import { AddButton } from './AddButton';
 
 export interface ListTitleProps {
