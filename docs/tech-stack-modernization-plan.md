@@ -1384,6 +1384,61 @@
   - `npm test -- --runInBand --watchAll=false` 通过
   - `npm run build` 通过
 
+### 并行治理：继续收口资源保存表单的 open 语义
+
+- 四个资源保存表单上下文与容器已继续把对外控制属性从 `visible` 收口到 `open`，覆盖：
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/SaveFormContext.ts`
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/SaveForm.tsx`
+  - `frontend/src/app/pages/MainPage/pages/SourcePage/SaveFormContext.ts`
+  - `frontend/src/app/pages/MainPage/pages/SourcePage/SaveForm.tsx`
+  - `frontend/src/app/pages/MainPage/pages/SchedulePage/SaveFormContext.ts`
+  - `frontend/src/app/pages/MainPage/pages/SchedulePage/SaveForm.tsx`
+  - `frontend/src/app/pages/MainPage/pages/VizPage/SaveFormContext.ts`
+  - `frontend/src/app/pages/MainPage/pages/VizPage/SaveForm.tsx`
+- 对应调用点也已同步切换到 `open`，覆盖 `View` / `Source` / `Schedule` / `Viz` 四个主业务域的保存、新建、另存、归档等入口。
+- 这一步只收口弹层控制语义，不改资源保存、复制、移动等业务逻辑。
+- 2026-06-10 验证：
+  - `npm run checkTs` 通过
+  - `npm test -- --runInBand --watchAll=false` 通过
+  - `npm run build` 通过
+  - `git diff --check` 通过
+
+### 并行治理：收口头部更多菜单的 dropdownRender 用法
+
+- 三组头部“更多”菜单已从 `dropdownRender={() => <Menu ... />}` 收口到 `Dropdown menu={{ items }}` 数据模式，覆盖：
+  - `frontend/src/app/components/VizHeader/VizHeader.tsx`
+  - `frontend/src/app/components/VizOperationMenu/VizOperationMenu.tsx`
+  - `frontend/src/app/pages/StoryBoardPage/components/StoryHeader.tsx`
+  - `frontend/src/app/pages/StoryBoardPage/components/StoryOverLay.tsx`
+  - `frontend/src/app/pages/DashBoardPage/components/BoardHeader/TitleHeader.tsx`
+  - `frontend/src/app/pages/DashBoardPage/components/BoardDropdownList/BoardDropdownList.tsx`
+- 这一步复用了原有菜单项、`Popconfirm`、分享/发布/归档/下载等动作，只把 Dropdown 承载方式切到 AntD 5 主线接口。
+- 当前剩余 `dropdownRender` 主要是交互规则关系面板、树选择器扩展面板和图表工作台动作面板，这些属于自定义内容容器，不在这一批强行改成 `menu.items`。
+- 2026-06-10 验证：
+  - `npm run checkTs` 通过
+  - `npm test -- --runInBand --watchAll=false` 通过
+  - `npm run build` 通过
+  - `git diff --check` 通过
+
+### 并行治理：继续收口局部弹层状态与 Popup 兼容壳
+
+- 以下局部 UI 状态命名已从 `visible` 收口到 `open`，覆盖：
+  - `frontend/src/app/components/ColorPicker/ColorPickerPopover.tsx`
+  - `frontend/src/app/components/FormGenerator/Customize/ConditionalStyle/ConditionalStyle.tsx`
+  - `frontend/src/app/components/FormGenerator/Customize/ScorecardConditionalStyle/ScorecardConditionalStyle.tsx`
+  - `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/index.tsx`
+  - `frontend/src/app/pages/StoryBoardPage/Editor/StoryToolBar.tsx`
+  - `frontend/src/app/components/ChartGraph/BasicRichText/ChartRichTextAdapter.tsx`
+- `frontend/src/app/components/Popup/index.tsx` 已移除 `onVisibleChange` 兼容壳，只保留 `open` / `onOpenChange` 语义；仓库调用点检索已确认没有业务侧仍在传 `onVisibleChange`。
+- 这一步不修改 Board 可见性、Widget 可见性等真实业务字段，只清理 UI 浮层控制态与 Popup 封装边界。
+- 2026-06-10 验证：
+  - `npm run checkTs` 通过
+  - `npm test -- --runInBand --watchAll=false` 通过
+  - `npm run build` 通过
+  - `npm run lint:css` 通过
+  - `npm run lint:style` 通过
+  - `git diff --check` 通过
+
 ### 并行治理：收口看板选图与故事板加页弹层的 visible/open 兼容层
 
 - 两个直接承接 AntD Modal 的选择弹层组件已把对外控制属性从 `visible` 收口到 `open`，覆盖：
@@ -1511,6 +1566,13 @@
    - 同步处理 token / 主题链与时间组件兼容。
 3. `moment -> dayjs`
    - 结合 AntD 5 的时间组件与 locale 策略一起收口。
+   - 当前复核后的更细分层：
+     - 可单独清理的轻残留已经越来越少；
+     - `frontend/src/app/pages/MainPage/pages/SchedulePage/types.ts`、`frontend/src/app/pages/MainPage/pages/SchedulePage/utils.ts`
+     - `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types.ts`
+     - `frontend/src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/TimeFilter.tsx`
+     - `frontend/src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/RangeTimePickerFilter.tsx`
+       这些文件当前都仍与 AntD 4 `DatePicker` / `RangePicker` 的 `Moment` 值对象链直接耦合，应与 AntD 5 时间组件适配一起处理，而不是提前零碎替换。
 4. 富文本与媒体插件链
    - `react-quill`、`video-react`、`reveal.js` 分别评估升级或替代。
 5. 后端长期专项
