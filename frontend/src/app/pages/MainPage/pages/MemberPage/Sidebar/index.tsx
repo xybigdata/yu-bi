@@ -22,7 +22,7 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { SPACE_XS } from 'styles/StyleConstants';
 import { MemberList } from './MemberList';
@@ -31,14 +31,14 @@ import { RoleList } from './RoleList';
 export const Sidebar = memo(() => {
   const [selectedKey, setSelectedKey] = useState('');
   const history = useHistory();
+  const location = useLocation();
   const orgId = useSelector(selectOrgId);
-  const { url } = useRouteMatch();
   const t = useI18NPrefix('member.sidebar');
 
   useEffect(() => {
-    const urlArr = url.split('/');
+    const urlArr = location.pathname.split('/');
     setSelectedKey(urlArr[urlArr.length - 1]);
-  }, [url]);
+  }, [location.pathname]);
 
   const titles = useMemo(
     () => [

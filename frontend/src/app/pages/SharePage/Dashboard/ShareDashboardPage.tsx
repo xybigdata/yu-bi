@@ -29,7 +29,7 @@ import {
 import { StorageKeys } from 'globalConstants';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation, useRouteMatch } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { getToken } from 'utils/auth';
 import persistence from 'utils/persistence';
@@ -60,9 +60,8 @@ function ShareDashboardPage() {
 
   const dispatch = useDispatch();
   const location = useLocation();
-  const { params }: { params: { token: string } } = useRouteMatch();
+  const { token: shareToken } = useParams<{ token: string }>();
   const search = location.search;
-  const shareToken = params.token;
 
   const [shareClientId, setShareClientId] = useState('');
   const executeTokenMap = useSelector(selectShareExecuteTokenMap);

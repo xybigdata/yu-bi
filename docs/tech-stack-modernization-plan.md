@@ -215,6 +215,10 @@
 - 当前仍有 AntD 4 API 调用点，包括复杂 `Menu.Item`/`Menu.SubMenu` JSX 菜单、Tooltip/Popover 的 `overlay` 内容、少量项目封装层的 legacy `visible` 入参；这是迁移 Ant Design 5/6 的主要阻塞。
 - React Router 6/7 的路由声明和导航 API 有破坏性变化。
 
+继续推进：
+- React Router 预迁移第一批：分享页 token 路由和成员页 sidebar 选择态已从 `useRouteMatch` 的 `params/url` 读取迁到 `useParams` / `useLocation`，先减少 `useRouteMatch` 依赖，为后续 `Switch`、`Redirect`、`useHistory` 迁移铺路。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
+
 验收门槛：
 - 全部路由可访问。
 - 表单、弹窗、表格、菜单、布局无明显视觉破坏。

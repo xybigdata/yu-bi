@@ -22,7 +22,7 @@ import ChartManager from 'app/models/ChartManager';
 import { login } from 'app/slice/thunks';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation, useRouteMatch } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { getToken } from 'utils/auth';
 import persistence from 'utils/persistence';
@@ -52,9 +52,8 @@ export function ShareChartPage() {
   const dispatch = useDispatch();
   const location = useLocation();
 
-  const { params }: { params: { token: string } } = useRouteMatch();
+  const { token: shareToken } = useParams<{ token: string }>();
   const search = location.search;
-  const shareToken = params.token;
   const logged = !!getToken();
 
   const needVerify = useSelector(selectNeedVerify);
