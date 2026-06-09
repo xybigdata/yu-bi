@@ -1,1 +1,1 @@
-export { Route, Switch, useHistory } from 'react-router-dom';
+export { useHistory } from 'react-router-dom';
