@@ -103,7 +103,7 @@ export const SQLEditor = memo(() => {
       if (isNewView(id)) {
         showSaveForm({
           type: CommonFormTypes.Edit,
-          visible: true,
+          open: true,
           parentIdLabel: t('folder'),
           initialValues: {
             name: '',

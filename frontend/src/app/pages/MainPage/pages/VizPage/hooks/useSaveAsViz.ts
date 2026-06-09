@@ -62,7 +62,7 @@ export function useSaveAsViz() {
       showSaveForm({
         vizType: type,
         type: CommonFormTypes.SaveAs,
-        visible: true,
+        open: true,
         initialValues: {
           ...vizData,
           parentId: vizData.parentId || void 0,

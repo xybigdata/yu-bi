@@ -152,7 +152,7 @@ const SaveToDashboard: FC<SaveToDashboardTypes> = memo(
       addVizFn({
         vizType: 'DASHBOARD',
         type: CommonFormTypes.Add,
-        visible: true,
+        open: true,
         initialValues: undefined,
         onAfterClose: () => {
           handleOpen();

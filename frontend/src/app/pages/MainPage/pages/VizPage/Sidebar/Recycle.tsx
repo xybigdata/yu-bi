@@ -77,7 +77,7 @@ export const Recycle = memo(
               showSaveForm({
                 vizType,
                 type: CommonFormTypes.Edit,
-                visible: true,
+                open: true,
                 initialValues: { id, name, parentId: void 0 },
                 onSave: (values, onClose) => {
                   let index = getInsertedNodeIndex(values, vizs);

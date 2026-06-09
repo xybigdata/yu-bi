@@ -284,7 +284,7 @@ export function SourceDetailPage() {
           showSaveForm({
             sourceType: 'title',
             type: CommonFormTypes.Add,
-            visible: true,
+            open: true,
             simple: true,
             parentIdLabel: t('sidebar.parent'),
             onSave: (val, onClose) => {
@@ -353,7 +353,7 @@ export function SourceDetailPage() {
     showSaveForm({
       sourceType: 'folder',
       type: CommonFormTypes.Edit,
-      visible: true,
+      open: true,
       simple: false,
       initialValues: { id, name, parentId: null },
       parentIdLabel: t('sidebar.parent'),

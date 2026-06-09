@@ -88,7 +88,7 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
             showSaveForm({
               sourceType: 'folder',
               type: CommonFormTypes.Edit,
-              visible: true,
+              open: true,
               simple: false,
               initialValues: {
                 id,

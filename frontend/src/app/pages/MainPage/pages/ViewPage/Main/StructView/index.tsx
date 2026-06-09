@@ -308,7 +308,7 @@ export const StructView = memo(
         if (isNewView(id)) {
           showSaveForm({
             type: CommonFormTypes.Edit,
-            visible: true,
+            open: true,
             parentIdLabel: t('file'),
             initialValues: {
               name: '',

@@ -30,7 +30,7 @@ interface SaveFormModel {
 interface SaveFormState {
   scheduleType: string;
   type: CommonFormTypes;
-  visible: boolean;
+  open: boolean;
   simple?: boolean;
   initialValues?: SaveFormModel;
   parentIdLabel: string;
@@ -46,7 +46,7 @@ interface SaveFormContextValue extends SaveFormState {
 const saveFormContextValue: SaveFormContextValue = {
   scheduleType: 'title',
   type: CommonFormTypes.Add,
-  visible: false,
+  open: false,
   simple: false,
   parentIdLabel: '',
   onSave: () => {},
@@ -60,7 +60,7 @@ export const useSaveFormContext = (): SaveFormContextValue => {
   const t = useI18NPrefix('schedule.saveForm');
   const [type, setType] = useState(CommonFormTypes.Add);
   const [scheduleType, setScheduleType] = useState('title');
-  const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
   const [simple, setSimple] = useState<boolean | undefined>(false);
   const [initialValues, setInitialValues] = useState<
     undefined | SaveFormModel
@@ -70,14 +70,14 @@ export const useSaveFormContext = (): SaveFormContextValue => {
   const [onAfterClose, setOnAfterClose] = useState(() => () => {});
 
   const onCancel = useCallback(() => {
-    setVisible(false);
-  }, [setVisible]);
+    setOpen(false);
+  }, [setOpen]);
 
   const showSaveForm = useCallback(
     ({
       scheduleType,
       type,
-      visible,
+      open,
       simple,
       initialValues,
       parentIdLabel,
@@ -86,7 +86,7 @@ export const useSaveFormContext = (): SaveFormContextValue => {
     }: SaveFormState) => {
       setType(type);
       setScheduleType(scheduleType);
-      setVisible(visible);
+      setOpen(open);
       setSimple(simple);
       setInitialValues(initialValues);
       setParentIdLabel(parentIdLabel);
@@ -100,7 +100,7 @@ export const useSaveFormContext = (): SaveFormContextValue => {
     () => ({
       scheduleType,
       type,
-      visible,
+      open,
       simple,
       initialValues,
       parentIdLabel,
@@ -112,7 +112,7 @@ export const useSaveFormContext = (): SaveFormContextValue => {
     [
       scheduleType,
       type,
-      visible,
+      open,
       simple,
       initialValues,
       parentIdLabel,

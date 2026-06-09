@@ -81,7 +81,7 @@ export const ScheduleList: FC<{
             showSaveForm({
               scheduleType: 'folder',
               type: CommonFormTypes.Edit,
-              visible: true,
+              open: true,
               simple: false,
               initialValues: {
                 id,

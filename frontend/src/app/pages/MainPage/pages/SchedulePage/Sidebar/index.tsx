@@ -112,7 +112,7 @@ export const Sidebar = memo(
             showSaveForm({
               scheduleType: 'folder',
               type: CommonFormTypes.Add,
-              visible: true,
+              open: true,
               simple: false,
               parentIdLabel: t('scheduleList.parent'),
               onSave: (values, onClose) => {

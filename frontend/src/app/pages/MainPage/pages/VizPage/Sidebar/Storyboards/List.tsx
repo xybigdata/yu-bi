@@ -83,7 +83,7 @@ export const List = memo(({ list, selectedId }: StoryboardListProps) => {
             showSaveForm({
               vizType: 'STORYBOARD',
               type: CommonFormTypes.Edit,
-              visible: true,
+              open: true,
               initialValues: {
                 ...storyboard,
                 parentId: storyboard.parentId || void 0,

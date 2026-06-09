@@ -41,7 +41,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
   const {
     sourceType,
     type,
-    visible,
+    open,
     simple,
     parentIdLabel,
     initialValues,
@@ -102,7 +102,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
       {...modalProps}
       title={t(sourceType)}
       type={type}
-      open={visible}
+      open={open}
       onSave={save}
       onCancel={onCancel}
       afterClose={afterClose}

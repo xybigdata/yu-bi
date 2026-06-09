@@ -134,7 +134,7 @@ export const Toolbar = memo(
     const showEdit = useCallback(() => {
       showSaveForm({
         type: CommonFormTypes.Edit,
-        visible: true,
+        open: true,
         initialValues: {
           name,
           parentId,

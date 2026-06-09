@@ -122,7 +122,7 @@ export const Folders = memo(
         addVizFn({
           vizType: key,
           type: CommonFormTypes.Add,
-          visible: true,
+          open: true,
           initialValues: undefined,
         });
       },

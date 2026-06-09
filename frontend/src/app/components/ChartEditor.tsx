@@ -477,7 +477,7 @@ export const ChartEditor: FC<ChartEditorProps> = ({
           addVizFn({
             vizType: 'DATACHART',
             type: CommonFormTypes.Add,
-            visible: true,
+            open: true,
             initialValues: {
               config: JSON.stringify({
                 aggregation,

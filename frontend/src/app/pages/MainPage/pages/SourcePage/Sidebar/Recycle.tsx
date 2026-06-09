@@ -82,7 +82,7 @@ export const Recycle = memo(({ sourceId, list }: RecycleProps) => {
             showSaveForm({
               sourceType: 'folder',
               type: CommonFormTypes.Edit,
-              visible: true,
+              open: true,
               simple: false,
               initialValues: { id, name, parentId: null },
               parentIdLabel: t('parent'),

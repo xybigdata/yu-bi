@@ -115,7 +115,7 @@ export const Sidebar = memo(
           case 'folder':
             showSaveForm({
               type: CommonFormTypes.Add,
-              visible: true,
+              open: true,
               simple: true,
               parentIdLabel: t('parent'),
               onSave: (values, onClose) => {

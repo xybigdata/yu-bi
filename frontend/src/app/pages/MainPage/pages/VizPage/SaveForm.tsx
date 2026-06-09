@@ -34,7 +34,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
   const {
     vizType,
     type,
-    visible,
+    open,
     initialValues,
     onSave,
     onCancel,
@@ -107,7 +107,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
       {...modalProps}
       title={t(`vizType.${vizType.toLowerCase()}`)}
       type={type}
-      open={visible}
+      open={open}
       confirmLoading={saveFolderLoading || saveStoryboardLoading}
       onSave={save}
       onCancel={onCancel}

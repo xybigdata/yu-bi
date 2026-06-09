@@ -110,7 +110,7 @@ export const Sidebar = memo(
             showSaveForm({
               sourceType: 'folder',
               type: CommonFormTypes.Add,
-              visible: true,
+              open: true,
               simple: false,
               parentIdLabel: t('sidebar.parent'),
               onSave: (values, onClose) => {

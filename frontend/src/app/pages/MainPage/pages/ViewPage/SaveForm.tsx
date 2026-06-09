@@ -69,7 +69,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
   const [expensiveQuery, setExpensiveQuery] = useState(false); // beta.2 add expensiveQuery
   const {
     type,
-    visible,
+    open,
     simple,
     parentIdLabel,
     initialValues,
@@ -142,7 +142,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
       {...modalProps}
       title={t(simple ? 'folder' : 'title')}
       type={type}
-      open={visible}
+      open={open}
       confirmLoading={currentEditingView?.stage === ViewViewModelStages.Saving}
       onSave={save}
       onCancel={onCancel}

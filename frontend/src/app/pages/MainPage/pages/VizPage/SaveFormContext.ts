@@ -18,7 +18,7 @@ export interface SaveFormModel {
 interface SaveFormState {
   vizType: VizType;
   type: CommonFormTypes;
-  visible: boolean;
+  open: boolean;
   isSaveAs?: boolean;
   initialValues?: SaveFormModel;
   onSave: (values: SaveFormModel, onClose: () => void) => void;
@@ -33,7 +33,7 @@ interface SaveFormContextValue extends SaveFormState {
 const saveFormContextValue: SaveFormContextValue = {
   vizType: 'FOLDER',
   type: CommonFormTypes.Add,
-  visible: false,
+  open: false,
   isSaveAs: false,
   onSave: () => {},
   onCancel: () => {},
@@ -43,7 +43,7 @@ export const SaveFormContext = createContext(saveFormContextValue);
 export const useSaveFormContext = (): SaveFormContextValue => {
   const [vizType, setVizType] = useState<VizType>('FOLDER');
   const [type, setType] = useState(CommonFormTypes.Add);
-  const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
   const [initialValues, setInitialValues] = useState<
     undefined | SaveFormModel
   >();
@@ -51,21 +51,21 @@ export const useSaveFormContext = (): SaveFormContextValue => {
   const [onAfterClose, setOnAfterClose] = useState(() => () => {});
 
   const onCancel = useCallback(() => {
-    setVisible(false);
-  }, [setVisible]);
+    setOpen(false);
+  }, [setOpen]);
 
   const showSaveForm = useCallback(
     ({
       vizType,
       type,
-      visible,
+      open,
       initialValues,
       onSave,
       onAfterClose,
     }: SaveFormState) => {
       setVizType(vizType);
       setType(type);
-      setVisible(visible);
+      setOpen(open);
       setInitialValues(initialValues);
       setOnSave(() => onSave);
       setOnAfterClose(() => onAfterClose);
@@ -76,7 +76,7 @@ export const useSaveFormContext = (): SaveFormContextValue => {
   return {
     vizType,
     type,
-    visible,
+    open,
     initialValues,
     onSave,
     onCancel,

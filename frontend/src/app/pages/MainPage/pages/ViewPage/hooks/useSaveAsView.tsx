@@ -67,7 +67,7 @@ export function useSaveAsView() {
 
       showSaveForm({
         type: CommonFormTypes.SaveAs,
-        visible: true,
+        open: true,
         initialValues: {
           name: name + '_' + tg('copy'),
           parentId,

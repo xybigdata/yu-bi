@@ -117,7 +117,7 @@ export function FolderTree({
             showSaveForm({
               vizType: node.relType,
               type: CommonFormTypes.Edit,
-              visible: true,
+              open: true,
               initialValues: { ...node, parentId: node.parentId || void 0 },
               onSave: (values, onClose) => {
                 let index = node.index;

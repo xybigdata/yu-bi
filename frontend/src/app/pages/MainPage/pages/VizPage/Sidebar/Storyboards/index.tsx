@@ -108,7 +108,7 @@ export const Storyboards = memo(
             showSaveForm({
               vizType: VizResourceSubTypes.Storyboard,
               type: CommonFormTypes.Add,
-              visible: true,
+              open: true,
               onSave: (values, onClose) => {
                 const index = getInsertedNodeIndex(values, storyborads);
                 dispatch(
@@ -130,7 +130,7 @@ export const Storyboards = memo(
             showSaveForm({
               vizType: VizResourceSubTypes.Storyboard,
               type: CommonFormTypes.Add,
-              visible: true,
+              open: true,
               onSave: (values, onClose) => {
                 const index = getInsertedNodeIndex(values, storyborads);
                 dispatch(
