@@ -22,6 +22,7 @@ import {
   DataViewFieldType,
   TimeFilterValueCategory,
 } from 'app/constants';
+import { datartDayjs } from 'app/utils/date';
 import {
   DataChart,
   RelatedView,
@@ -33,7 +34,6 @@ import {
 import { ChartDataConfig } from 'app/types/ChartConfig';
 import ChartDataView from 'app/types/ChartDataView';
 import { FilterSqlOperator } from 'globalConstants';
-import moment from 'moment';
 import {
   adaptBoardImageUrl,
   adjustRangeDataEndValue,
@@ -1082,8 +1082,8 @@ describe('getControllerDateValues', () => {
       },
       execute: true,
     } as Params;
-    const time = moment()
-      .add('-1', 'd')
+    const time = datartDayjs()
+      .add(-1, 'd')
       .startOf('d')
       .format(dateFormatObj[obj.filterDate.pickerType]);
     const res = [time, ''];
@@ -1133,8 +1133,8 @@ describe('getControllerDateValues', () => {
       },
       execute: true,
     } as Params;
-    const time = moment()
-      .add('-1', 'd')
+    const time = datartDayjs()
+      .add(-1, 'd')
       .add(1, 'd')
       .startOf('d')
       .format(dateFormatObj[obj2.filterDate.pickerType]);

@@ -36,6 +36,7 @@ import {
 import ChartDataView from 'app/types/ChartDataView';
 import { convertToChartConfigDTO } from 'app/utils/ChartDtoHelper';
 import { findPathByNameInMeta, getStyles } from 'app/utils/chartHelper';
+import { datartDayjs } from 'app/utils/date';
 import { getTime, splitRangerDateFilters } from 'app/utils/time';
 import {
   DATE_FORMATTER,
@@ -44,7 +45,6 @@ import {
   TIME_FORMATTER,
 } from 'globalConstants';
 import startsWith from 'lodash/startsWith';
-import moment from 'moment';
 import { CloneValueDeep } from 'utils/object';
 import { boardDrillManager } from '../components/BoardDrillManager/BoardDrillManager';
 import { BOARD_FILE_IMG_PREFIX } from '../constants';
@@ -363,7 +363,7 @@ export const getControllerDateValues = (obj: {
 
   if (obj.execute) {
     timeValues.forEach((v, i) => {
-      timeValues[i] = v ? moment(v).format(dateFormatObj[pickerType]) : v;
+      timeValues[i] = v ? datartDayjs(v).format(dateFormatObj[pickerType]) : v;
     });
   }
 
@@ -376,25 +376,25 @@ export const adjustRangeDataEndValue = (
   if (!timeValue) {
     return timeValue;
   }
-  let adjustTime = moment(timeValue);
+  let adjustTime = datartDayjs(timeValue);
   switch (pickerType) {
     case 'dateTime':
       // 比较特殊 不做增值处理
       break;
     case 'date':
-      adjustTime = adjustTime.add(1, 'days').startOf('days');
+      adjustTime = adjustTime.add(1, 'day').startOf('day');
       break;
     case 'month':
-      adjustTime = adjustTime.add(1, 'months').startOf('months');
+      adjustTime = adjustTime.add(1, 'month').startOf('month');
       break;
     case 'quarter':
-      adjustTime = adjustTime.add(1, 'quarters').startOf('quarters');
+      adjustTime = adjustTime.add(1, 'quarter').startOf('quarter');
       break;
     case 'week':
-      adjustTime = adjustTime.add(1, 'weeks').startOf('week');
+      adjustTime = adjustTime.add(1, 'week').startOf('week');
       break;
     case 'year':
-      adjustTime = adjustTime.add(1, 'years').startOf('years');
+      adjustTime = adjustTime.add(1, 'year').startOf('year');
       break;
     default:
       break;
