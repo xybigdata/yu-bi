@@ -18,7 +18,6 @@
 
 package datart.data.provider.calcite;
 
-import com.alibaba.fastjson.JSON;
 import datart.core.base.exception.Exceptions;
 import datart.core.data.provider.QueryScript;
 import datart.data.provider.script.JoinCondition;
@@ -34,7 +33,7 @@ import java.util.Arrays;
 public class StructScriptProcessor implements QueryScriptProcessor {
     @Override
     public QueryScriptProcessResult process(QueryScript queryScript) {
-        StructScript structScript = JSON.parseObject(queryScript.getScript(), StructScript.class);
+        StructScript structScript = StructScript.ofScript(queryScript.getScript());
 
         if (structScript.getTable() == null || structScript.getTable().length == 0) {
             Exceptions.msg("Join table can not be empty!");

@@ -18,9 +18,9 @@
 
 package datart.security.oauth2;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.aliyun.teaopenapi.models.Config;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import datart.core.base.exception.Exceptions;
 import datart.core.common.Application;
 import datart.security.util.AESUtil;
@@ -49,6 +49,8 @@ import jakarta.servlet.http.HttpServletResponse;
 public class WeChartOauth2Client implements CustomOauth2Client {
 
     private static final HttpClient httpClient;
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     static {
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
@@ -171,8 +173,8 @@ public class WeChartOauth2Client implements CustomOauth2Client {
         httpRequest.setURI(uriBuilder.build());
         HttpResponse response = httpClient.execute(httpRequest);
         String entity = EntityUtils.toString(response.getEntity());
-        JSONObject jsonObject = JSON.parseObject(entity);
-        return jsonObject.getString("access_token");
+        JsonNode jsonNode = OBJECT_MAPPER.readTree(entity);
+        return jsonNode.path("access_token").asText(null);
     }
 
     private OAuth2AuthenticationToken getUserinfo(String accessToken) throws Exception {
@@ -183,7 +185,7 @@ public class WeChartOauth2Client implements CustomOauth2Client {
         httpRequest.setURI(uriBuilder.build());
         HttpResponse response = httpClient.execute(httpRequest);
         String entity = EntityUtils.toString(response.getEntity());
-        JSONObject jsonObject = JSON.parseObject(entity);
+        OBJECT_MAPPER.readTree(entity);
 
         return null;
 

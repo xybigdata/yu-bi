@@ -18,7 +18,8 @@
 
 package datart.data.provider.jdbc.adapters;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import datart.core.base.PageInfo;
 import datart.core.base.consts.ValueType;
 import datart.core.base.exception.Exceptions;
@@ -58,6 +59,8 @@ import java.util.stream.Collectors;
 @Setter
 @Getter
 public class JdbcDataProviderAdapter implements Closeable {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private static final String SQL_DIALECT_PACKAGE = "datart.data.provider.calcite.dialect";
 
@@ -184,7 +187,19 @@ public class JdbcDataProviderAdapter implements Closeable {
 
     public String getQueryKey(QueryScript script, ExecuteParam executeParam) throws SqlParseException {
         SqlScriptRender render = new SqlScriptRender(script, executeParam, getSqlDialect(), jdbcProperties.isEnableSpecialSql(), driverInfo.getQuoteIdentifiers());
-        return "Q" + DigestUtils.md5Hex(render.render(true, supportPaging(), true) + ";includeColumns:" + JSON.toJSONString(executeParam.getIncludeColumns()) + ";viewId:" + script.getViewId() + ";pageInfo:" + JSON.toJSONString(executeParam.getPageInfo()));
+        return "Q" + DigestUtils.md5Hex(render.render(true, supportPaging(), true)
+                + ";includeColumns:" + writeAsJson(executeParam.getIncludeColumns())
+                + ";viewId:" + script.getViewId()
+                + ";pageInfo:" + writeAsJson(executeParam.getPageInfo()));
+    }
+
+    private String writeAsJson(Object value) {
+        try {
+            return OBJECT_MAPPER.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            Exceptions.e(e);
+        }
+        return "";
     }
 
     protected Column readTableColumn(ResultSet columnMetadata) throws SQLException {

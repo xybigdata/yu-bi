@@ -18,7 +18,9 @@
 
 package datart.data.provider.script;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import datart.core.base.exception.Exceptions;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,6 +28,12 @@ import java.util.List;
 
 @Data
 public class StructScript {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    static {
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     private String[] table;
 
@@ -37,6 +45,11 @@ public class StructScript {
         if (StringUtils.isBlank(script)) {
             return null;
         }
-        return JSON.parseObject(script, StructScript.class);
+        try {
+            return OBJECT_MAPPER.readValue(script, StructScript.class);
+        } catch (Exception e) {
+            Exceptions.e(e);
+        }
+        return null;
     }
 }

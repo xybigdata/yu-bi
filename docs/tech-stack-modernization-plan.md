@@ -839,11 +839,10 @@
 ### fastjson 后续残留重点
 
 - 当前后端剩余较集中的 `fastjson` 使用，主要在：
-  - `security/src/main/java/datart/security/oauth2/WeChartOauth2Client.java`
-  - `data-providers/data-provider-base/src/main/java/datart/data/provider/script/StructScript.java`
-  - `data-providers/data-provider-base/src/main/java/datart/data/provider/calcite/StructScriptProcessor.java`
-  - `data-providers/jdbc-data-provider/src/main/java/datart/data/provider/jdbc/adapters/JdbcDataProviderAdapter.java`
-- 另外 `server` 里 `UserServiceImpl`、`ExternalRegisterServiceImpl` 仍有把 OAuth 属性 `Map` 包成 `JSONObject` 的低风险残留，测试代码里也还有 `org.json` 使用，后续需要按主链优先级继续分批收口。
+  - `server/src/main/java/datart/server/service/impl/UserServiceImpl.java`
+  - `server/src/main/java/datart/server/service/impl/ExternalRegisterServiceImpl.java`
+- 这两处目前都只是把 Spring OAuth 返回的属性 `Map` 包成 `JSONObject` 供下游字段读取，属于低风险残留。
+- 另外测试代码里仍有 `org.json` 使用，后续可以和服务端最后一批低风险收口一起清理。
 
 ### 并行治理：HTTP JSON 解析与 widget 配置链切到 Jackson
 
@@ -851,4 +850,12 @@
 - 现有行为保持不变：支持顶层数组响应、支持按 `a.b.c` 点路径定位目标数组、嵌套对象/数组值仍序列化为 JSON 字符串写入结果集、未显式给列定义时仍按首行对象自动推断 schema。
 - `server/src/main/java/datart/server/base/dto/chart/WidgetConfig.java` 已将 `content` 从 `fastjson JSONObject` 切到 Jackson `JsonNode`。
 - `server/src/main/java/datart/server/service/impl/VizServiceImpl.java` 读取 widget 图表配置时，已改为使用 Jackson 反序列化 `WidgetConfig`。
+- 2026-06-09 验证：`mvn -pl server -am -DskipTests compile` 通过。
+
+### 并行治理：OAuth 返回解析与脚本模型切到 Jackson
+
+- `security/src/main/java/datart/security/oauth2/WeChartOauth2Client.java` 已移除 `fastjson`，微信 OAuth 的 access token 和用户信息返回解析改为使用 Jackson `JsonNode`。
+- `data-providers/data-provider-base/src/main/java/datart/data/provider/script/StructScript.java` 已将脚本 JSON 反序列化入口统一到 Jackson。
+- `data-providers/data-provider-base/src/main/java/datart/data/provider/calcite/StructScriptProcessor.java` 已改为复用 `StructScript.ofScript()`，脚本模型解析入口收敛为单点。
+- `data-providers/jdbc-data-provider/src/main/java/datart/data/provider/jdbc/adapters/JdbcDataProviderAdapter.java` 生成 query key 时，`includeColumns` 与 `pageInfo` 的 JSON 序列化已从 `fastjson` 切到 Jackson。
 - 2026-06-09 验证：`mvn -pl server -am -DskipTests compile` 通过。
