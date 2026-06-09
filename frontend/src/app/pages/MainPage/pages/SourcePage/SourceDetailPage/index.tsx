@@ -22,6 +22,7 @@ import { Authorized, EmptyFiller } from 'app/components';
 import { DetailPageHeader } from 'app/components/DetailPageHeader';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { useParams } from 'app/routerCompat';
 import { useAccess, useCascadeAccess } from 'app/pages/MainPage/Access';
 import {
   PermissionLevels,
@@ -43,7 +44,6 @@ import React, {
   useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import {
   BORDER_RADIUS,

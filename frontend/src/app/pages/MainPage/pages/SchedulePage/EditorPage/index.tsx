@@ -10,6 +10,7 @@ import {
 } from 'antd';
 import { DetailPageHeader } from 'app/components/DetailPageHeader';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { useParams } from 'app/routerCompat';
 import { getFolders } from 'app/pages/MainPage/pages/VizPage/slice/thunks';
 import { CommonFormTypes } from 'globalConstants';
 import {
@@ -21,7 +22,6 @@ import {
   useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { BORDER_RADIUS, SPACE_LG, SPACE_SM } from 'styles/StyleConstants';
 import { getInsertedNodeIndex } from 'utils/utils';
