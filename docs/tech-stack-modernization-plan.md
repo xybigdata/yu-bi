@@ -1021,6 +1021,105 @@
 - 本批不改变业务逻辑，也不处理 `visible`、`Menu.*` 或 Dropdown/Modal 的历史 API 语义，只收口 import 边界。
 - 2026-06-10 验证：`npm run checkTs`、`npm test -- --runInBand --watchAll=false`、`npm run build` 均通过。
 
+### 并行治理：收口 Node 26 工程化基线
+
+- `frontend/.nvmrc` 已从历史的 `lts/dubnium` 更新到 `v26.0.0`，与当前本机真实运行基线保持一致。
+- `frontend/package.json` 的 `engines.node` 已从 `>=22.0.0` 收紧到 `>=26.0.0`，避免继续让旧 Node 主版本处于“看似支持、实则未验证”的模糊状态。
+- `.github/workflows/dev-ut-stage.js.yml` 已将前端 CI 的 Node 版本矩阵从 `14.x/16.x` 切到 `26.x`，并补上 `npm run checkTs` 与 `npm run build:task`，让 CI 至少覆盖当前前端真实主链。
+- 这一步不引入新的构建工具，也不改变前端运行语义，目标只是把“本机已跑通的 Node 26 基线”真正下沉到仓库级工程化约束里。
+
+### 2026-06-10 全项目老旧技术栈复核结论
+
+这一轮不是只看版本号，而是按“是否仍在主维护线、是否已经被现代替代方案覆盖、是否值得继续在当前架构上扩展”三条标准重新复核。
+
+#### A. 仍建议尽快推进的前端老旧栈
+
+1. `antd 4.24.16`
+   - 当前状态：仍停在 4.x 最后稳定线，功能可用，但已经不是当前主线。
+   - 官方方向：Ant Design 官方文档已经把 v5 作为当前主迁移目标，受影响最明显的是 `visible -> open`、`Menu children -> items`、主题 token / CSS-in-JS 这几类接口与机制。
+   - 本仓库判断：这是前端下一阶段最值得优先推进的现代化主题，因为它会直接影响后面的 `moment` 替换、主题链清理和菜单/弹层兼容层收口。
+
+2. `moment`
+   - 当前状态：仍覆盖本地化、时间格式化、时间筛选器默认值和多个控制器组件。
+   - 官方状态：Moment 官方已明确将项目定义为 maintenance mode，只保留稳定性与关键安全/时区数据维护，不再建议新项目继续扩展。
+   - 更现代替代：`dayjs` 是最自然的低迁移成本替代；若后续要进一步走函数式与按需组合，也可以评估 `date-fns`。
+   - 本仓库判断：不适合零散替换，更适合与 Ant Design 5 时间组件和 locale 策略一起做一批联动迁移。
+
+3. `react-quill 1.3.5`
+   - 当前状态：富文本编辑与展示仍依赖旧版 `react-quill` / Quill 1 生态。
+   - 更现代替代：优先评估 `react-quill` 2.x 或直接评估仍活跃维护的 Quill 2 React 封装。
+   - 本仓库判断：它不一定要先于 AntD 5，但已经属于“仍能跑、后续应替换”的旧编辑器基座，尤其需要关注 React 18 严格模式与自定义 blot 扩展兼容性。
+
+4. `video-react 0.15.0`
+   - 当前状态：视频组件仍建立在较老的 React 封装之上。
+   - 更现代替代：优先评估直接使用原生 `<video>` + 自定义控制层，或迁到维护更积极的播放器方案。
+   - 本仓库判断：当前使用面相对集中，适合作为后续独立小专题，而不是长期拖着不管。
+
+5. `reveal.js 4.1.x`
+   - 当前状态：故事板编辑、预览和分享播放页都依赖该库。
+   - 更现代替代：如果仍保留“幻灯片式故事播放”模型，可以先升级到较新的 Reveal.js 稳定线；若长期改成交互式故事画布，再评估更贴近 React 的方案。
+   - 本仓库判断：这不是最紧急的老旧项，但属于明确的“历史前端插件型依赖”，后续应至少提升到当前稳定线。
+
+#### B. 后端中长期专项，当前不宜零散混改
+
+1. `Shiro 2.0.5`
+   - 当前状态：已经能跑在 Spring Boot 3 / Jakarta 链上，但和 Spring Security 并行维护两套安全体系。
+   - 更现代替代：长期方向仍是收口到 Spring Security 原生体系。
+   - 本仓库判断：Shiro 不是“坏掉了”，但它已经属于架构级历史包袱；适合单列安全专项，而不是在基础库升级时顺手搀带。
+
+2. `Druid 1.2.28`
+   - 当前状态：服务端主数据源和 JDBC provider 仍使用 Druid。
+   - 更现代替代：主方向仍是 HikariCP 统一池化。
+   - 本仓库判断：连接池迁移会影响监控、连接参数和多数据源工厂，不适合拆成微小提交，必须作为独立基础设施主题推进。
+
+3. `nashorn-core 15.4`
+   - 当前状态：脚本执行与表达式能力仍依赖 Nashorn 兼容层。
+   - 更现代替代：GraalJS。
+   - 本仓库判断：这是明显老旧但高风险的运行时基座，必须放在单独专项中，且先把脚本执行边界盘清楚。
+
+4. `mybatis-generator-core 1.4.0`
+   - 当前状态：主要服务代码生成，不是主运行时链。
+   - 更现代替代：升级生成器版本，或把生成链迁出主模块到独立 profile / 工具模块。
+   - 本仓库判断：优先级低于前端主栈清障和后端运行时基础设施收口。
+
+5. `calcite-core 1.26.0`
+   - 当前状态：仍是 SQL 解析与 provider 能力的关键底座，也带入部分旧传递依赖生态。
+   - 更现代替代：先评估上游兼容性再升级到较新的稳定线。
+   - 本仓库判断：它不是简单“提版本号”的库，升级会牵动 SQL 解析行为，必须配套 JDBC provider 回归验证。
+
+#### C. 已经收口到现代主线，可从“老旧清单”里降级处理的项
+
+- JDK `21`
+- Spring Boot `3.5.12`
+- Spring Cloud `2025.0.1`
+- Selenium `4.31.0`
+- JWT `0.12.7`
+- Apache HttpClient `5.5`
+- Apache POI `5.5.1`
+- H2 `2.4.240`
+- React `18.3.x`
+- React Router `6.30.x`
+- Redux Toolkit `2.x`
+- React Redux `9.x`
+- `styled-components 6.1.19`
+- Jest `29.7.0`
+- Vite `5.x`
+
+#### D. 推荐的后续推进顺序
+
+1. Ant Design 5 前置清障
+   - 优先处理真实 AntD 组件上的 `visible`、`tooltipVisible`、旧 `Menu.*` JSX 子节点用法和 Dropdown overlay / menu 边界。
+2. Ant Design 5 主升级
+   - 同步处理 token / 主题链与时间组件兼容。
+3. `moment -> dayjs`
+   - 结合 AntD 5 的时间组件与 locale 策略一起收口。
+4. 富文本与媒体插件链
+   - `react-quill`、`video-react`、`reveal.js` 分别评估升级或替代。
+5. 后端长期专项
+   - `Shiro -> Spring Security`
+   - `Druid -> HikariCP`
+   - `Nashorn -> GraalJS`
+
 ### 并行治理：删除 CRACO 回退外壳
 
 - `frontend/package.json` 已删除 `start:cra`、`build:cra`、`eject` 等只服务 CRA/CRACO 的历史脚本。
