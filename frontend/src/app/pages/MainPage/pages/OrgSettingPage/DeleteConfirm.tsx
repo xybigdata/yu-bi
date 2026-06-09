@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { deleteOrganization } from '../../slice/thunks';
 
-export const DeleteConfirm = (props: ModalProps) => {
+export const DeleteConfirm = ({ visible, open, ...props }: ModalProps) => {
   const [inputValue, setInputValue] = useState('');
   const dispatch = useDispatch();
   const history = useHistory();
@@ -35,6 +35,7 @@ export const DeleteConfirm = (props: ModalProps) => {
   return (
     <Modal
       {...props}
+      open={open ?? visible}
       footer={[
         <Button key="cancel" onClick={props.onCancel}>
           {t('cancel')}

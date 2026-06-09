@@ -175,6 +175,8 @@
 - 修复 AntD 4.24 暴露的类型收紧问题，包括 `InputRef`、`InputNumber` 的 `number | null`、Tree/Cascader 节点类型和 FormList `fieldKey` 可选值。
 - 修复 Vite 生产构建中 CRA HMR 兼容分支被折叠成裸 `module.hot` 后导致预览页空白的问题。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
+- 预处理 AntD 5 的浮层打开态 API：直接 `Modal`、`Popover` 以及项目 `Popup` 封装已从 `visible`/`onVisibleChange` 迁到 `open`/`onOpenChange`，`ModalForm`、`Confirm`、`DeleteConfirm` 封装保留旧入参并向 AntD 传递 `open`。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
 
 预研结果：
 - Ant Design 相关调用点约 358 个文件，`visible`/`onVisibleChange`/`overlay`/`Menu.Item` 等 AntD 5 迁移热点分布广，不能直接大版本替换。
@@ -182,7 +184,7 @@
 
 风险：
 - Ant Design 5/6 token、Less 变量和组件 API 变化较大。
-- 当前仍有大量 AntD 4 API 调用点，包括 `visible`/`onVisibleChange`/`overlay`/`Menu.Item`，这是迁移 Ant Design 5/6 的主要阻塞。
+- 当前仍有 AntD 4 API 调用点，包括 `Dropdown overlay`、`Menu.Item`/`Menu.SubMenu` JSX 菜单、少量项目封装层的 legacy `visible` 入参；这是迁移 Ant Design 5/6 的主要阻塞。
 - React Router 6/7 的路由声明和导航 API 有破坏性变化。
 
 验收门槛：
@@ -272,6 +274,6 @@
 
 阶段 3 已完成，下一步进入阶段 4 的 UI 与路由现代化准备：
 
-1. 批量梳理并预处理 AntD 5 API 迁移热点：`visible`/`onVisibleChange`/`overlay`/`Menu.Item`。
+1. 批量梳理并预处理 AntD 5 API 迁移热点：`Dropdown overlay`、`Menu.Item`/`Menu.SubMenu` JSX 菜单和项目封装层 legacy `visible` 入参。
 2. 评估 React Router 5 -> 6/7 的路由声明、`useHistory`、`Redirect` 和嵌套路由替换方案。
 3. 保持 CRA5/CRACO 回退脚本，直到 Jest/测试栈迁出 CRA。

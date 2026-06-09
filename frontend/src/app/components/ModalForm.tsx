@@ -12,7 +12,16 @@ export interface ModalFormProps extends ModalProps {
 
 export const ModalForm = forwardRef(
   (
-    { type, formProps, onSave, afterClose, children, ...rest }: ModalFormProps,
+    {
+      type,
+      formProps,
+      onSave,
+      afterClose,
+      children,
+      visible,
+      open,
+      ...rest
+    }: ModalFormProps,
     ref,
   ) => {
     const [form] = Form.useForm();
@@ -31,6 +40,7 @@ export const ModalForm = forwardRef(
     return (
       <Modal
         {...rest}
+        open={open ?? visible}
         title={
           type === CommonFormTypes.SaveAs
             ? tg('button.saveAs')

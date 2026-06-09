@@ -95,7 +95,7 @@ const SaveToStoryBoard: FC<SaveToStoryBoardTypes> = memo(
     return (
       <Modal
         title={title}
-        visible={isModalVisible}
+        open={isModalVisible}
         onOk={() => {
           saveToStoryFn(selectId);
         }}

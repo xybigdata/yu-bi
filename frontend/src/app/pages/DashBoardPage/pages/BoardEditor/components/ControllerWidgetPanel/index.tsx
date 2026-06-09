@@ -305,7 +305,7 @@ const ControllerWidgetPanel: React.FC<WidgetControllerPanelParams> = memo(
     return (
       <Modal
         title={`${tGMT(type)}${t(controllerType || '')}`}
-        visible={visible}
+        open={visible}
         onOk={onSubmit}
         centered
         destroyOnClose

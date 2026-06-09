@@ -12,20 +12,22 @@ export function Popup({
   content,
   overlayClassName,
   onVisibleChange,
+  onOpenChange,
   ...rest
 }: PopoverProps) {
-  const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
 
-  const visibleChange = useCallback(
+  const openChange = useCallback(
     v => {
-      setVisible(v);
+      setOpen(v);
       onVisibleChange && onVisibleChange(v);
+      onOpenChange && onOpenChange(v);
     },
-    [onVisibleChange],
+    [onOpenChange, onVisibleChange],
   );
 
   const onClose = useCallback(() => {
-    setVisible(false);
+    setOpen(false);
   }, []);
 
   const injectedContent = useMemo(
@@ -40,8 +42,8 @@ export function Popup({
       {...rest}
       overlayClassName={className}
       content={injectedContent}
-      visible={visible}
-      onVisibleChange={visibleChange}
+      open={open}
+      onOpenChange={openChange}
     />
   );
 }

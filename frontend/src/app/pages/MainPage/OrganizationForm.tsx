@@ -67,7 +67,7 @@ export function OrganizationForm({ visible, onCancel }: OrganizationFormProps) {
   return (
     <Modal
       title={t('create')}
-      visible={visible}
+      open={visible}
       okText={t('save')}
       confirmLoading={loading}
       onOk={save}

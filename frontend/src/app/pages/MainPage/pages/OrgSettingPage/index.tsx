@@ -159,7 +159,7 @@ export function OrgSettingPage() {
         <DeleteConfirm
           width={480}
           title={t('deleteOrg')}
-          visible={deleteConfirmVisible}
+          open={deleteConfirmVisible}
           onCancel={hideDeleteConfirm}
         />
       </Card>

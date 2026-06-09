@@ -308,7 +308,7 @@ export function Navbar() {
               content={<OrganizationList />}
               trigger={['click']}
               placement="rightBottom"
-              onVisibleChange={organizationListVisibleChange}
+              onOpenChange={organizationListVisibleChange}
             >
               <li>
                 <Tooltip title={t('nav.organization.title')} placement="right">

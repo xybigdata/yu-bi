@@ -126,7 +126,7 @@ const ChartSelectModalModal: React.FC<IProps> = props => {
   return (
     <Modal
       title={t('importExistingDataCharts')}
-      visible={visible}
+      open={visible}
       onOk={onOk}
       centered
       onCancel={onCancel}

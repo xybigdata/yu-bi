@@ -169,7 +169,7 @@ export const Tabs = memo(() => {
         ))}
       </TabsComponent>
       <Confirm
-        visible={confirmVisible}
+        open={confirmVisible}
         title={t('warning')}
         icon={<InfoCircleOutlined style={{ color: ORANGE }} />}
         footer={

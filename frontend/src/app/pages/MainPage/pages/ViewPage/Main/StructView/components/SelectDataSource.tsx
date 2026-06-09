@@ -283,8 +283,8 @@ const SelectDataSource = memo(
           trigger={['click']}
           placement="bottomLeft"
           overlayClassName="datart-popup"
-          visible={allowManage && visible}
-          onVisibleChange={
+          open={allowManage && visible}
+          onOpenChange={
             renderType === 'MANAGE' ? handleVisibleChange : undefined
           }
           content={

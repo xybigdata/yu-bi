@@ -144,7 +144,7 @@ export default function Add({
     <Modal
       destroyOnClose
       title={t('conditionalStyleTable.modal.title')}
-      visible={visible}
+      open={visible}
       onOk={modalOk}
       onCancel={onCancel}
     >

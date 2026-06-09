@@ -279,7 +279,7 @@ const ShareManageModal: FC<{
             </Button>
           </ModalHeader>
         }
-        visible={visibility}
+        open={visibility}
         onOk={onOk}
         onCancel={onCancel}
         destroyOnClose

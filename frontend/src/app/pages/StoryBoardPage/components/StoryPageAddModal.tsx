@@ -70,7 +70,7 @@ const StoryPageAddModal: React.FC<IProps> = props => {
   return (
     <Modal
       title="Add Story Page"
-      visible={visible}
+      open={visible}
       onOk={onOk}
       centered
       onCancel={onCancel}

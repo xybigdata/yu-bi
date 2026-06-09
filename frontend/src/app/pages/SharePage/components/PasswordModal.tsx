@@ -33,7 +33,7 @@ const PasswordModal: FC<{
   return (
     <Modal
       title={t('password')}
-      visible={visible}
+      open={visible}
       closable={false}
       footer={[
         <Button

@@ -287,7 +287,7 @@ export function CustomColor({
     <Modal
       width={273}
       mask={false}
-      visible={visible}
+      open={visible}
       footer={null}
       closable={false}
       onCancel={onCancel}

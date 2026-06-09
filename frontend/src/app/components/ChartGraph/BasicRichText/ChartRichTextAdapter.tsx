@@ -337,7 +337,7 @@ const ChartRichTextAdapter: FC<{
         </QuillBox>
         <Modal
           title={t?.('common.richTextPreview')}
-          visible={visible}
+          open={visible}
           footer={null}
           width="80%"
           getContainer={false}

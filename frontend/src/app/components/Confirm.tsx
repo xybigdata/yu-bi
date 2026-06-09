@@ -15,9 +15,21 @@ export interface ConfirmProps extends ModalProps {
   footer?: ReactNode;
 }
 
-export function Confirm({ title, content, icon, ...modalProps }: ConfirmProps) {
+export function Confirm({
+  title,
+  content,
+  icon,
+  visible,
+  open,
+  ...modalProps
+}: ConfirmProps) {
   return (
-    <Modal width={400} closable={false} {...modalProps}>
+    <Modal
+      width={400}
+      closable={false}
+      open={open ?? visible}
+      {...modalProps}
+    >
       <ConfirmBody>
         {icon &&
           cloneElement(icon, {

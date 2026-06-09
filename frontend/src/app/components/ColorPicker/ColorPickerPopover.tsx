@@ -43,8 +43,8 @@ export const ColorPickerPopover: FC<ColorPickerPopoverProps> = ({
   return (
     <Popover
       {..._popoverProps}
-      visible={visible}
-      onVisibleChange={setVisible}
+      open={visible}
+      onOpenChange={setVisible}
       content={<SingleColorSelection color={color} onChange={onColorChange} />}
       trigger="click"
       placement="right"

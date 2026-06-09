@@ -104,7 +104,7 @@ export function Profile({ visible, onCancel }: ModalProps) {
     <Modal
       title={t('title')}
       footer={false}
-      visible={visible}
+      open={visible}
       onCancel={onCancel}
       afterClose={reset}
     >

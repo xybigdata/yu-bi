@@ -142,7 +142,7 @@ const ShareLinkModal: FC<{
   return (
     <StyledShareLinkModal
       title={t('share.shareLink')}
-      visible={visibility}
+      open={visibility}
       okText={shareData ? t('share.save') : t('share.generateLink')}
       onOk={() =>
         handleOkFn?.({

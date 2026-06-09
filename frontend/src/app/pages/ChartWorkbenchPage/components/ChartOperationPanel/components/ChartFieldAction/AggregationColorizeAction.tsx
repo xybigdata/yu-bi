@@ -116,8 +116,8 @@ const AggregationColorizeAction: FC<{
         </Col>
         <Popover
           destroyTooltipOnHide
-          onVisibleChange={setSelColorBoxStatus}
-          visible={selColorBoxStatus}
+          onOpenChange={setSelColorBoxStatus}
+          open={selColorBoxStatus}
           trigger="click"
           placement="bottomRight"
           overlayClassName="datart-aggregation-colorpopover"
