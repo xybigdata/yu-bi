@@ -53,9 +53,11 @@ export interface BoardActionContextProps {
 export const BoardActionContext = createContext<BoardActionContextProps>(
   {} as BoardActionContextProps,
 );
-export const BoardActionProvider: FC<PropsWithChildren<{
-  boardId: string;
-}>> = memo(({ boardId, children }) => {
+export const BoardActionProvider: FC<
+  PropsWithChildren<{
+    boardId: string;
+  }>
+> = memo(({ boardId, children }) => {
   const dispatch = useDispatch();
   const navigate = useCompatNavigate();
 

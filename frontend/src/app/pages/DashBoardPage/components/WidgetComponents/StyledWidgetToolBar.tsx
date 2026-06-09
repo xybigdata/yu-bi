@@ -18,9 +18,11 @@
 import { PropsWithChildren, memo } from 'react';
 import styled from 'styled-components';
 import { LEVEL_50 } from 'styles/StyleConstants';
-export const StyledWidgetToolBar: React.FC<PropsWithChildren<{}>> = memo(props => {
-  return <StyleWrap>{props.children} </StyleWrap>;
-});
+export const StyledWidgetToolBar: React.FC<PropsWithChildren<{}>> = memo(
+  props => {
+    return <StyleWrap>{props.children} </StyleWrap>;
+  },
+);
 const StyleWrap = styled.div`
   position: absolute;
   top: 0;

@@ -41,10 +41,12 @@ export const BoardConfigValContext = createContext<BoardConfigValue>(
   {} as BoardConfigValue,
 );
 
-export const BoardConfigProvider: FC<PropsWithChildren<{
-  config: BoardConfig;
-  boardId: string;
-}>> = memo(({ config, boardId, children }) => {
+export const BoardConfigProvider: FC<
+  PropsWithChildren<{
+    config: BoardConfig;
+    boardId: string;
+  }>
+> = memo(({ config, boardId, children }) => {
   const props = config.jsonConfig.props;
   const [initialQuery, allowOverlap, scaleMode] = getJsonConfigs(
     props,

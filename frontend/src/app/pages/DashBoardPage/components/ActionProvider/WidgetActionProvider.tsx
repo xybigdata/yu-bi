@@ -64,13 +64,15 @@ import { editWidgetsQueryAction } from '../../pages/BoardEditor/slice/actions/co
 import { renderedEditWidgetAsync } from '../../pages/BoardEditor/slice/thunk';
 import { Widget, WidgetConf } from '../../types/widgetTypes';
 
-export const WidgetActionProvider: FC<PropsWithChildren<{
-  orgId: string;
-  boardId: string;
-  boardEditing: boolean;
-  renderMode: VizRenderMode;
-  boardType: BoardType;
-}>> = memo(
+export const WidgetActionProvider: FC<
+  PropsWithChildren<{
+    orgId: string;
+    boardId: string;
+    boardEditing: boolean;
+    renderMode: VizRenderMode;
+    boardType: BoardType;
+  }>
+> = memo(
   ({ boardEditing, boardId, orgId, boardType, renderMode, children }) => {
     const dispatch = useDispatch();
     const navigate = useCompatNavigate();
@@ -302,7 +304,15 @@ export const WidgetActionProvider: FC<PropsWithChildren<{
       };
       return contextValue;
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [boardEditing, boardId, boardType, dispatch, orgId, renderMode, navigate]);
+    }, [
+      boardEditing,
+      boardId,
+      boardType,
+      dispatch,
+      orgId,
+      renderMode,
+      navigate,
+    ]);
 
     return (
       <WidgetActionContext.Provider value={methods}>

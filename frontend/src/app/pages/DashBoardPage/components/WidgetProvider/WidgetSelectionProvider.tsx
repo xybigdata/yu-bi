@@ -28,10 +28,12 @@ export const WidgetSelectionContext = createContext<SelectedItem[]>(
   [] as SelectedItem[],
 );
 
-export const WidgetSelectionProvider: FC<PropsWithChildren<{
-  boardEditing: boolean;
-  widgetId: string;
-}>> = memo(({ widgetId, boardEditing, children }) => {
+export const WidgetSelectionProvider: FC<
+  PropsWithChildren<{
+    boardEditing: boolean;
+    widgetId: string;
+  }>
+> = memo(({ widgetId, boardEditing, children }) => {
   // 浏览模式
   const selectSelectedItems = useMemo(makeSelectSelectedItems, []);
   const selectedItemsInBoard = useSelector((state: { board: BoardState }) =>

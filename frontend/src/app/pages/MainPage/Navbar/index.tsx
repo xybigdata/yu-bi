@@ -203,14 +203,11 @@ export function Navbar() {
     [subNavs, t],
   );
 
-  const showSubNav = useMemo(
-    () => {
-      const urlArr = location.pathname.split('/');
-      const moduleName = urlArr[3];
-      return subNavs.some(({ name }) => name === moduleName);
-    },
-    [location.pathname, subNavs],
-  );
+  const showSubNav = useMemo(() => {
+    const urlArr = location.pathname.split('/');
+    const moduleName = urlArr[3];
+    return subNavs.some(({ name }) => name === moduleName);
+  }, [location.pathname, subNavs]);
 
   const handleChangeThemeFn = useCallback(
     (theme: ThemeKeyType) => {

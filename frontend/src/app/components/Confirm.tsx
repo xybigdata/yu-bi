@@ -24,12 +24,7 @@ export function Confirm({
   ...modalProps
 }: ConfirmProps) {
   return (
-    <Modal
-      width={400}
-      closable={false}
-      open={open ?? visible}
-      {...modalProps}
-    >
+    <Modal width={400} closable={false} open={open ?? visible} {...modalProps}>
       <ConfirmBody>
         {icon &&
           cloneElement(icon, {

@@ -29,11 +29,13 @@ export const WidgetDataContext = createContext<{
 }>({
   data: { id: '', columns: [], rows: [] } as WidgetData,
 });
-export const WidgetDataProvider: FC<PropsWithChildren<{
-  boardId: string;
-  boardEditing: boolean;
-  widgetId: string;
-}>> = memo(({ boardId, boardEditing, widgetId, children }) => {
+export const WidgetDataProvider: FC<
+  PropsWithChildren<{
+    boardId: string;
+    boardEditing: boolean;
+    widgetId: string;
+  }>
+> = memo(({ boardId, boardEditing, widgetId, children }) => {
   // 浏览模式
   const viewWidgetData = useSelector((state: { board: BoardState }) =>
     selectWidgetDataById(state, widgetId),

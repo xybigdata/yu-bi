@@ -25,17 +25,15 @@ import { boardInfoState } from '../../pages/BoardEditor/slice/selectors';
 export const BoardInfoContext = createContext<BoardInfo>({} as BoardInfo);
 export const BoardInfoProvider: FC<
   PropsWithChildren<{ id: string; editing: boolean }>
-> = memo(
-  ({ id, editing, children }) => {
-    const editBoardInfo = useSelector(boardInfoState);
-    const viewBoardInfo = useSelector((state: { board: BoardState }) =>
-      selectBoardInfoById(state, id),
-    );
-    const BoardInfo = editing ? editBoardInfo : viewBoardInfo;
-    return (
-      <BoardInfoContext.Provider value={BoardInfo}>
-        {children}
-      </BoardInfoContext.Provider>
-    );
-  },
-);
+> = memo(({ id, editing, children }) => {
+  const editBoardInfo = useSelector(boardInfoState);
+  const viewBoardInfo = useSelector((state: { board: BoardState }) =>
+    selectBoardInfoById(state, id),
+  );
+  const BoardInfo = editing ? editBoardInfo : viewBoardInfo;
+  return (
+    <BoardInfoContext.Provider value={BoardInfo}>
+      {children}
+    </BoardInfoContext.Provider>
+  );
+});

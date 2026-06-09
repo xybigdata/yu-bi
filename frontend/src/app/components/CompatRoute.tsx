@@ -21,14 +21,15 @@ export const isCompatRouteMatched = (
 
   const paths = Array.isArray(path) ? path : [path];
 
-  return paths.some(currentPath =>
-    !!matchPath(
-      {
-        path: currentPath,
-        end: !!exact,
-      },
-      pathname,
-    ),
+  return paths.some(
+    currentPath =>
+      !!matchPath(
+        {
+          path: currentPath,
+          end: !!exact,
+        },
+        pathname,
+      ),
   );
 };
 

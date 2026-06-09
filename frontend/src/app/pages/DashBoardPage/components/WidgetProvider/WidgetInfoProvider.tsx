@@ -26,11 +26,13 @@ import { EditBoardState } from '../../pages/BoardEditor/slice/types';
 
 export const WidgetInfoContext = createContext<WidgetInfo>({} as WidgetInfo);
 
-export const WidgetInfoProvider: FC<PropsWithChildren<{
-  boardId: string;
-  boardEditing: boolean;
-  widgetId: string;
-}>> = memo(({ widgetId, boardId, boardEditing, children }) => {
+export const WidgetInfoProvider: FC<
+  PropsWithChildren<{
+    boardId: string;
+    boardEditing: boolean;
+    widgetId: string;
+  }>
+> = memo(({ widgetId, boardId, boardEditing, children }) => {
   // 浏览模式
   const readWidgetInfo = useSelector((state: { board: BoardState }) =>
     selectWidgetInfoBy2Id(state, boardId, widgetId),

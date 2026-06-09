@@ -64,23 +64,19 @@ const isMatchedTheCondition = (
       break;
     case OperatorTypes.LessThan:
       matchTheCondition =
-        !Number.isNaN(numericValue) &&
-        numericValue < Number(conditionValues);
+        !Number.isNaN(numericValue) && numericValue < Number(conditionValues);
       break;
     case OperatorTypes.GreaterThan:
       matchTheCondition =
-        !Number.isNaN(numericValue) &&
-        numericValue > Number(conditionValues);
+        !Number.isNaN(numericValue) && numericValue > Number(conditionValues);
       break;
     case OperatorTypes.LessThanOrEqual:
       matchTheCondition =
-        !Number.isNaN(numericValue) &&
-        numericValue <= Number(conditionValues);
+        !Number.isNaN(numericValue) && numericValue <= Number(conditionValues);
       break;
     case OperatorTypes.GreaterThanOrEqual:
       matchTheCondition =
-        !Number.isNaN(numericValue) &&
-        numericValue >= Number(conditionValues);
+        !Number.isNaN(numericValue) && numericValue >= Number(conditionValues);
       break;
     case OperatorTypes.IsNull:
       if (typeof value === 'object' && value === null) {

@@ -959,7 +959,8 @@
   - `eslint-plugin-import`
 - `frontend/package.json` 与 `frontend/package-lock.json` 已补齐 `eslint`、`@typescript-eslint/parser`、`@typescript-eslint/eslint-plugin`、`eslint-plugin-react`、`eslint-plugin-import` 等前端 lint 运行时依赖。
 - 当前 `npm run lint` 已恢复为真实可执行状态，不再出现 `eslint: command not found` 或规则定义缺失错误。
-- 本批目标是恢复和显式化 ESLint 运行时，不是顺手清空所有历史 warning；当前 lint 结果仍存在一批 `prettier/prettier` 与 `react-hooks/exhaustive-deps` 存量 warning，后续应按主题分批治理。
+- 在恢复主链后，已先用 `prettier --write src` 清掉全部 `prettier/prettier` 格式告警；当前 lint 结果只剩 2 条 `react-hooks/exhaustive-deps` warning。
+- 本批目标是恢复和显式化 ESLint 运行时，并先清空纯机械格式告警；剩余 hooks 依赖 warning 应在下一批按行为语义逐条治理。
 
 ### React Router 预迁移第四十批：切到 Router 6 经典运行时底座
 

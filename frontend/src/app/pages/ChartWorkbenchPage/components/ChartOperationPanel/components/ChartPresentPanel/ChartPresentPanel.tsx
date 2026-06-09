@@ -97,9 +97,8 @@ const ChartPresentPanel: FC<{
       }
       chartConfig = setRuntimeDateLevelFieldsInChartConfig(chartConfig);
 
-      return (
-        (!!chart &&
-          chartDispatcher.getContainers(
+      return (!!chart &&
+        chartDispatcher.getContainers(
           containerId,
           chart,
           dataset,
@@ -108,8 +107,7 @@ const ChartPresentPanel: FC<{
           drillOption,
           selectedItems,
           isLoadingData,
-          )) as ReactNode
-      );
+        )) as ReactNode;
     };
 
     const renderReusableChartContainer = () => {

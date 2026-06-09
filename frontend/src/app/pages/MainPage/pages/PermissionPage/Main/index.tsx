@@ -27,7 +27,11 @@ import { ResourcesPermissionSetting } from './ResourcesPermissionSetting';
 import { SubjectPermissionSetting } from './SubjectsPermissionSetting';
 
 export const Main = memo(() => {
-  const { viewpoint, type: viewpointType, id: viewpointId } = useParams<{
+  const {
+    viewpoint,
+    type: viewpointType,
+    id: viewpointId,
+  } = useParams<{
     viewpoint: Viewpoints;
     type: ResourceTypes | SubjectTypes;
     id: string;

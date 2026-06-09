@@ -669,51 +669,51 @@ const ChartPreviewBoard: FC<{
           )}
           <PreviewBlock>
             <ChartDrillContext.Provider
-            value={{
-              drillOption: drillOptionRef.current,
-              availableSourceFunctions,
-              viewDetailSetting: chartRightClickViewDetailSetting,
-              drillThroughSetting: chartRightClickDrillThroughSetting,
-              onDrillOptionChange: handleDrillOptionChange,
-              onDateLevelChange: handleDateLevelChange,
-              onDrillThroughChange: handleDrillThroughChange(),
-              onViewDataChange: handleViewDataChange(),
-            }}
-          >
-            <div>
-              <ControllerPanel
-                viewId={chartPreview?.backendChart?.viewId}
-                view={chartPreview?.backendChart?.view}
-                chartConfig={chartPreview?.chartConfig}
-                onChange={handleFilterChange}
-              />
-            </div>
-            <ChartWrapper ref={ref}>
-              <Spin wrapperClassName="spinWrapper" spinning={loadingStatus}>
-                <ChartDrillContextMenu
-                  chartConfig={chartPreview?.chartConfig!}
-                  metas={chartPreview?.backendChart?.view?.meta}
-                >
-                  <ChartIFrameContainer
-                    key={backendChartId}
-                    containerId={backendChartId}
-                    dataset={dataset}
-                    chart={chart!}
-                    config={chartPreview?.chartConfig!}
-                    drillOption={drillOptionRef.current}
-                    selectedItems={selectedItems[backendChartId]}
-                    width={cacheW}
-                    height={cacheH}
-                    isLoadingData={isLoadingData}
-                  />
-                </ChartDrillContextMenu>
-              </Spin>
-            </ChartWrapper>
-            <StyledChartDrillPathsContainer>
-              <ChartDrillPaths chartConfig={chartPreview?.chartConfig!} />
-            </StyledChartDrillPathsContainer>
-          </ChartDrillContext.Provider>
-        </PreviewBlock>
+              value={{
+                drillOption: drillOptionRef.current,
+                availableSourceFunctions,
+                viewDetailSetting: chartRightClickViewDetailSetting,
+                drillThroughSetting: chartRightClickDrillThroughSetting,
+                onDrillOptionChange: handleDrillOptionChange,
+                onDateLevelChange: handleDateLevelChange,
+                onDrillThroughChange: handleDrillThroughChange(),
+                onViewDataChange: handleViewDataChange(),
+              }}
+            >
+              <div>
+                <ControllerPanel
+                  viewId={chartPreview?.backendChart?.viewId}
+                  view={chartPreview?.backendChart?.view}
+                  chartConfig={chartPreview?.chartConfig}
+                  onChange={handleFilterChange}
+                />
+              </div>
+              <ChartWrapper ref={ref}>
+                <Spin wrapperClassName="spinWrapper" spinning={loadingStatus}>
+                  <ChartDrillContextMenu
+                    chartConfig={chartPreview?.chartConfig!}
+                    metas={chartPreview?.backendChart?.view?.meta}
+                  >
+                    <ChartIFrameContainer
+                      key={backendChartId}
+                      containerId={backendChartId}
+                      dataset={dataset}
+                      chart={chart!}
+                      config={chartPreview?.chartConfig!}
+                      drillOption={drillOptionRef.current}
+                      selectedItems={selectedItems[backendChartId]}
+                      width={cacheW}
+                      height={cacheH}
+                      isLoadingData={isLoadingData}
+                    />
+                  </ChartDrillContextMenu>
+                </Spin>
+              </ChartWrapper>
+              <StyledChartDrillPathsContainer>
+                <ChartDrillPaths chartConfig={chartPreview?.chartConfig!} />
+              </StyledChartDrillPathsContainer>
+            </ChartDrillContext.Provider>
+          </PreviewBlock>
           {viewDetailPanelContextHolder}
           {jumpDialogContextHolder}
           {openJumpVizDialogModalContextHolder}

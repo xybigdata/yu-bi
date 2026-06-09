@@ -139,10 +139,7 @@ export function MainPage() {
             exact
             element={<CompatRedirect to={`/organizations/${orgId}`} />}
           />
-          <CompatRoute
-            path="/confirminvite"
-            element={<ConfirmInvitePage />}
-          />
+          <CompatRoute path="/confirminvite" element={<ConfirmInvitePage />} />
           <CompatRoute
             path="/organizations/:orgId"
             exact
@@ -212,7 +209,9 @@ export function MainPage() {
             path="/organizations/:orgId/permissions"
             exact
             element={
-              <CompatRedirect to={`/organizations/${orgId}/permissions/subject`} />
+              <CompatRedirect
+                to={`/organizations/${orgId}/permissions/subject`}
+              />
             }
           />
           <CompatRoute

@@ -1,9 +1,6 @@
 import { Children, FC, isValidElement, PropsWithChildren } from 'react';
 import { useLocation } from 'app/routerCompat';
-import {
-  CompatRouteProps,
-  isCompatRouteMatched,
-} from './CompatRoute';
+import { CompatRouteProps, isCompatRouteMatched } from './CompatRoute';
 
 export const CompatRoutes: FC<PropsWithChildren<{}>> = ({ children }) => {
   const location = useLocation();

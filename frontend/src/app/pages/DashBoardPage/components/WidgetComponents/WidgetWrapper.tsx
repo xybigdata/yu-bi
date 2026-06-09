@@ -24,11 +24,13 @@ import { PropsWithChildren, memo } from 'react';
 import styled from 'styled-components';
 import { getWidgetSomeStyle } from '../../utils/widget';
 
-export const WidgetWrapper: React.FC<PropsWithChildren<{
-  background: BackgroundConfig;
-  padding: WidgetPadding;
-  border: BorderConfig;
-}>> = memo(props => {
+export const WidgetWrapper: React.FC<
+  PropsWithChildren<{
+    background: BackgroundConfig;
+    padding: WidgetPadding;
+    border: BorderConfig;
+  }>
+> = memo(props => {
   const { children, ...rest } = props;
   const style = getWidgetSomeStyle(rest);
   return <Wrapper style={style}>{children}</Wrapper>;

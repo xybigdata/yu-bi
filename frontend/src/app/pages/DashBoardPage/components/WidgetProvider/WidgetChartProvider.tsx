@@ -69,11 +69,13 @@ export const WidgetChartContext = createContext<{
   supportTrigger: true,
 });
 
-export const WidgetChartProvider: FC<PropsWithChildren<{
-  boardId: string;
-  boardEditing: boolean;
-  widgetId: string;
-}>> = memo(({ boardId, boardEditing, widgetId, children }) => {
+export const WidgetChartProvider: FC<
+  PropsWithChildren<{
+    boardId: string;
+    boardEditing: boolean;
+    widgetId: string;
+  }>
+> = memo(({ boardId, boardEditing, widgetId, children }) => {
   const { datachartId } = useContext(WidgetContext);
   const dispatch = useDispatch();
   useEffect(() => {

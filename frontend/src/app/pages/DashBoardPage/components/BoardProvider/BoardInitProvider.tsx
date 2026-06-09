@@ -37,65 +37,66 @@ export interface BoardInitContextProps {
 export const BoardInitContext = createContext<BoardInitContextProps>(
   {} as BoardInitContextProps,
 );
-export const BoardInitProvider: FC<PropsWithChildren<BoardInitContextProps>> = memo(
-  ({
-    board,
-    editing,
-    children,
-    renderMode,
-    autoFit,
-    allowDownload,
-    allowShare,
-    allowManage,
-  }) => {
-    const boardContextProps: BoardContextProps = useMemo(() => {
-      const boardContextProps: BoardContextProps = {
-        name: board.name,
-        boardId: board.id,
-        status: board.status,
-        queryVariables: board.queryVariables,
-        renderMode,
-        orgId: board.orgId,
-        boardType: board.config.type,
-        editing: editing,
-        autoFit: autoFit,
-        allowDownload,
-        allowShare,
-        allowManage,
-      };
-      return boardContextProps;
-    }, [
-      allowDownload,
-      allowManage,
-      allowShare,
-      autoFit,
-      board.config.type,
-      board.id,
-      board.name,
-      board.orgId,
-      board.queryVariables,
-      board.status,
+export const BoardInitProvider: FC<PropsWithChildren<BoardInitContextProps>> =
+  memo(
+    ({
+      board,
       editing,
+      children,
       renderMode,
-    ]);
-    return (
-      <BoardActionProvider boardId={board.id}>
-        <WidgetActionProvider
-          boardId={board.id}
-          boardEditing={editing}
-          renderMode={renderMode}
-          orgId={board.orgId}
-          boardType={board.config.type}
-        >
-          <BoardProvider {...boardContextProps}>
-            <BoardConfigProvider config={board.config} boardId={board.id}>
-              <BoardInfoProvider id={board.id} editing={editing}>
-                {children}
-              </BoardInfoProvider>
-            </BoardConfigProvider>
-          </BoardProvider>
-        </WidgetActionProvider>
-      </BoardActionProvider>
-    );
-  },
-);
+      autoFit,
+      allowDownload,
+      allowShare,
+      allowManage,
+    }) => {
+      const boardContextProps: BoardContextProps = useMemo(() => {
+        const boardContextProps: BoardContextProps = {
+          name: board.name,
+          boardId: board.id,
+          status: board.status,
+          queryVariables: board.queryVariables,
+          renderMode,
+          orgId: board.orgId,
+          boardType: board.config.type,
+          editing: editing,
+          autoFit: autoFit,
+          allowDownload,
+          allowShare,
+          allowManage,
+        };
+        return boardContextProps;
+      }, [
+        allowDownload,
+        allowManage,
+        allowShare,
+        autoFit,
+        board.config.type,
+        board.id,
+        board.name,
+        board.orgId,
+        board.queryVariables,
+        board.status,
+        editing,
+        renderMode,
+      ]);
+      return (
+        <BoardActionProvider boardId={board.id}>
+          <WidgetActionProvider
+            boardId={board.id}
+            boardEditing={editing}
+            renderMode={renderMode}
+            orgId={board.orgId}
+            boardType={board.config.type}
+          >
+            <BoardProvider {...boardContextProps}>
+              <BoardConfigProvider config={board.config} boardId={board.id}>
+                <BoardInfoProvider id={board.id} editing={editing}>
+                  {children}
+                </BoardInfoProvider>
+              </BoardConfigProvider>
+            </BoardProvider>
+          </WidgetActionProvider>
+        </BoardActionProvider>
+      );
+    },
+  );

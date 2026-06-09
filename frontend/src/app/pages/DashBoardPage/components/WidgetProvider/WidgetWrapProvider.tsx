@@ -22,11 +22,13 @@ import { WidgetInfoProvider } from './WidgetInfoProvider';
 import { WidgetProvider } from './WidgetProvider';
 import { WidgetSelectionProvider } from './WidgetSelectionProvider';
 
-export const WidgetWrapProvider: FC<PropsWithChildren<{
-  id: string;
-  boardId: string;
-  boardEditing: boolean;
-}>> = memo(({ id, boardEditing, boardId, children }) => {
+export const WidgetWrapProvider: FC<
+  PropsWithChildren<{
+    id: string;
+    boardId: string;
+    boardEditing: boolean;
+  }>
+> = memo(({ id, boardEditing, boardId, children }) => {
   return (
     <WidgetProvider boardId={boardId} boardEditing={boardEditing} widgetId={id}>
       <WidgetInfoProvider

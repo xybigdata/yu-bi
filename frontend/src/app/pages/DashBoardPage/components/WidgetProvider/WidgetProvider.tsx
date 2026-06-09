@@ -28,17 +28,19 @@ export const WidgetContext = createContext<Widget>({} as Widget);
 
 const WProvider: FC<PropsWithChildren<{ val: Widget }>> = memo(
   ({ val, children }) => {
-  return (
-    <WidgetContext.Provider value={val}>{children}</WidgetContext.Provider>
-  );
+    return (
+      <WidgetContext.Provider value={val}>{children}</WidgetContext.Provider>
+    );
   },
 );
 
-export const WidgetProvider: FC<PropsWithChildren<{
-  boardId: string;
-  boardEditing: boolean;
-  widgetId: string;
-}>> = memo(({ boardId, boardEditing, widgetId, children }) => {
+export const WidgetProvider: FC<
+  PropsWithChildren<{
+    boardId: string;
+    boardEditing: boolean;
+    widgetId: string;
+  }>
+> = memo(({ boardId, boardEditing, widgetId, children }) => {
   // 浏览模式
   const readWidget = useSelector((state: { board: BoardState }) =>
     selectWidgetBy2Id(state, boardId, widgetId),

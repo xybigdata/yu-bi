@@ -42,7 +42,9 @@ export const buildDateLevelMenuItems = ({
   metas,
   onChange,
   t,
-}: DateLevelMenuItemsProps & { t: (key: string) => any }): MenuProps['items'] => {
+}: DateLevelMenuItemsProps & {
+  t: (key: string) => any;
+}): MenuProps['items'] => {
   const handleChangeFn = selectedConfig => {
     if (config.category === ChartDataViewFieldCategory.DateLevelComputedField) {
       if (selectedConfig.category === ChartDataViewFieldCategory.Field) {
@@ -72,8 +74,7 @@ export const buildDateLevelMenuItems = ({
           updateBy(config, draft => {
             draft.expression = selectedConfig.expression;
             draft.field = config.colName;
-            draft.category =
-              ChartDataViewFieldCategory.DateLevelComputedField;
+            draft.category = ChartDataViewFieldCategory.DateLevelComputedField;
             draft.colName = selectedConfig.colName;
             draft[RUNTIME_DATE_LEVEL_KEY] = null;
           }),
@@ -103,7 +104,9 @@ export const buildDateLevelMenuItems = ({
         config.category === ChartDataViewFieldCategory.Field
           ? config.colName
           : config.field;
-      const row = getAllColumnInMeta(metas)?.find(v => v.name === configColName);
+      const row = getAllColumnInMeta(metas)?.find(
+        v => v.name === configColName,
+      );
       const expression = `${item.expression}(${FieldTemplate(row?.path)})`;
       return {
         key: expression,

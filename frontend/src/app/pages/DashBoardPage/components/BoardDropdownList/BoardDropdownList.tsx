@@ -61,10 +61,7 @@ export const BoardDropdownList: FC<Props> = memo(
     };
     const { onBoardToDownLoad } = useContext(BoardActionContext);
     const { publishBoard } = usePublishBoard(boardId, 'DASHBOARD', status);
-    const confirmLabel = (
-      label: string,
-      onConfirm: () => void | undefined,
-    ) => (
+    const confirmLabel = (label: string, onConfirm: () => void | undefined) => (
       <Popconfirm
         placement="left"
         title={t('common.confirm')}

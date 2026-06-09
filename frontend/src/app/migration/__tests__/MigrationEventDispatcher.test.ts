@@ -108,10 +108,13 @@ describe('MigrationEventDispatcher Tests', () => {
     const event2 = new MigrationEvent(APP_VERSION_BETA_2, m => m);
     const dispatcher = new MigrationEventDispatcher(event0, event1, event2);
     expect(
-      dispatcher.process({ version: '', id: 1 } as any, {
-        version: 'drawback version',
-        id: 999,
-      } as any),
+      dispatcher.process(
+        { version: '', id: 1 } as any,
+        {
+          version: 'drawback version',
+          id: 999,
+        } as any,
+      ),
     ).toEqual({
       id: 999,
       version: 'drawback version',

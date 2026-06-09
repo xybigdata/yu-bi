@@ -31,9 +31,7 @@ export function LoginAuthRoute() {
   }
 
   if (systemInfo) {
-    return (
-      <CompatRedirect to={systemInfo.initialized ? '/login' : '/setup'} />
-    );
+    return <CompatRedirect to={systemInfo.initialized ? '/login' : '/setup'} />;
   } else {
     // TODO: add system info load fail page
     return null;

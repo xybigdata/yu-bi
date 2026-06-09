@@ -17,10 +17,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import {
-  useLocation,
-  useNavigate,
-} from 'app/routerCompat';
+import { useLocation, useNavigate } from 'app/routerCompat';
 
 type CompatLocationState = ReturnType<typeof useLocation>['state'];
 
@@ -32,7 +29,10 @@ interface CompatLocationTarget {
 }
 
 export interface CompatNavigate {
-  push: (to: string | CompatLocationTarget, state?: CompatLocationState) => void;
+  push: (
+    to: string | CompatLocationTarget,
+    state?: CompatLocationState,
+  ) => void;
   replace: (
     to: string | CompatLocationTarget,
     state?: CompatLocationState,
