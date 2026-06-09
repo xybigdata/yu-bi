@@ -26,7 +26,7 @@ import { antdLocales } from 'locales/i18n';
 import { useEffect, useLayoutEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { BrowserRouter } from 'app/routerCompat';
 import { GlobalStyles } from 'styles/globalStyles';
 import { getToken } from 'utils/auth';
@@ -44,7 +44,7 @@ import { getSystemInfo, logout, setLoggedInUser } from './slice/thunks';
 registerTheme('default', echartsDefaultTheme);
 
 export function AppRouter() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { i18n } = useTranslation();
   const logged = !!getToken();
   const t = useI18NPrefix('global');

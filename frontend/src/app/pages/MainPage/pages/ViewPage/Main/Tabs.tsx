@@ -27,7 +27,8 @@ import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { memo, useCallback, useContext, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled, { css } from 'styled-components';
 import { LEVEL_1, ORANGE } from 'styles/StyleConstants';
 import { ViewViewModelStages } from '../constants';
@@ -53,7 +54,7 @@ export const Tabs = memo(() => {
     null,
   );
   const [confirmVisible, setConfirmVisible] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const { editorInstance } = useContext(EditorContext);
   const orgId = useSelector(selectOrgId);

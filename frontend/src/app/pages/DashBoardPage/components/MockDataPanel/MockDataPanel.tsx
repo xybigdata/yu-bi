@@ -19,7 +19,7 @@ import { Button, Empty } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { BoardContext } from 'app/pages/DashBoardPage/components/BoardProvider/BoardProvider';
 import { FC, memo, useContext, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { LEVEL_100 } from 'styles/StyleConstants';
 import {
@@ -35,7 +35,7 @@ export interface MockDataPanelProps {
 }
 export const MockDataPanel: FC<MockDataPanelProps> = memo(({ onClose }) => {
   const { boardId } = useContext(BoardContext);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const t = useI18NPrefix('global.button');
   const [dataMap, setDataMap] = useState<any>();
   useEffect(() => {

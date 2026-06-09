@@ -25,7 +25,7 @@ import ChartI18NContext from 'app/pages/ChartWorkbenchPage/contexts/Chart18NCont
 import { BoardConfigContext } from 'app/pages/DashBoardPage/components/BoardProvider/BoardConfigProvider';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo, useContext } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { editBoardStackActions } from '../../slice';
 
@@ -35,7 +35,7 @@ const StyledWrapper = styled.div`
   overflow-y: auto;
 `;
 export const BoardConfigPanel: FC<{}> = memo(() => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const t = useI18NPrefix(`viz.board.setting`);
   const boardConfig = useContext(BoardConfigContext);
   const configs = boardConfig.jsonConfig.props;

@@ -21,7 +21,8 @@ import { LoadingMask } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import classnames from 'classnames';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { listToTree } from 'utils/utils';
 import {
@@ -83,7 +84,7 @@ export const VizPermissionForm = memo(
     const [vizType, setVizType] = useState<VizResourceSubTypes>(
       VizResourceSubTypes.Folder,
     );
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const selectPrivileges = useMemo(makeSelectPrivileges, []);
     const privileges = useSelector(state =>
       selectPrivileges(state, { viewpoint, dataSourceType }),

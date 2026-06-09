@@ -23,7 +23,8 @@ import useResizeObserver from 'app/hooks/useResizeObserver';
 import { selectSystemInfo } from 'app/slice/selectors';
 import { transparentize } from 'polished';
 import React, { memo, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { SPACE_MD, SPACE_TIMES, SPACE_XS } from 'styles/StyleConstants';
 import { newIssueUrl } from 'utils/utils';
@@ -35,7 +36,7 @@ import { Results } from './Results';
 
 export const Outputs = memo(() => {
   const { actions } = useViewSlice();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const systemInfo = useSelector(selectSystemInfo);
   const t = useI18NPrefix('view');
 

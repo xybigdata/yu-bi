@@ -20,7 +20,7 @@ import { CONTAINER_TAB } from 'app/pages/DashBoardPage/constants';
 import { rgba } from 'polished';
 import { memo } from 'react';
 import { DropTargetMonitor, useDrop } from 'react-dnd';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { ContainerItem } from '../../pages/Board/slice/types';
 import { editBoardStackActions } from '../../pages/BoardEditor/slice';
@@ -32,7 +32,7 @@ export interface DropHolderProps {
 }
 export const DropHolder: React.FC<DropHolderProps> = memo(
   ({ tabItem, tabWidgetId }) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const t = useI18NPrefix(`viz.widget.tips`);
     const [{ isOver, canDrop }, refDrop] = useDrop(
       () => ({

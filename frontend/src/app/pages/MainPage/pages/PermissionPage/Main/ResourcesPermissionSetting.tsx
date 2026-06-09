@@ -19,7 +19,8 @@
 import { Card } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { ResourceTypes, SubjectTypes, Viewpoints } from '../constants';
 import {
   selectFolderListLoading,
@@ -56,7 +57,7 @@ export const ResourcesPermissionSetting = memo(
     const [tabActiveKey, setTabActiveKey] = useState<ResourceTypes>(
       ResourceTypes.Viz,
     );
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const folders = useSelector(selectFolders);
     const storyboards = useSelector(selectStoryboards);
     const views = useSelector(selectViews);

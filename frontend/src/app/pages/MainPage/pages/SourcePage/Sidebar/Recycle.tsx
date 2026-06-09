@@ -31,7 +31,8 @@ import {
 } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
 import { memo, useCallback, useContext, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { getInsertedNodeIndex, stopPPG } from 'utils/utils';
 import { SaveFormContext } from '../SaveFormContext';
 import { selectArchivedListLoading } from '../slice/selectors';
@@ -52,7 +53,7 @@ interface RecycleProps {
 }
 
 export const Recycle = memo(({ sourceId, list }: RecycleProps) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const orgId = useSelector(selectOrgId);
   const loading = useSelector(selectArchivedListLoading);

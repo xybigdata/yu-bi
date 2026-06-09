@@ -26,7 +26,8 @@ import ChartManager from 'app/models/ChartManager';
 import { useLocation } from 'app/routerCompat';
 import { useAppSlice } from 'app/slice';
 import React, { useCallback, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { NotFoundPage } from '../NotFoundPage';
 import { StoryEditor } from '../StoryBoardPage/Editor';
@@ -62,7 +63,7 @@ export function MainPage() {
   const { actions } = useMainSlice();
   const { actions: vizActions } = useVizSlice();
   const { actions: viewActions } = useViewSlice();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const orgId = useSelector(selectOrgId);
   const navigate = useCompatNavigate();
   // loaded first time

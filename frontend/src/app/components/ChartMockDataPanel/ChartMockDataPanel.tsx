@@ -20,7 +20,7 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { MockDataEditor } from 'app/pages/DashBoardPage/components/MockDataPanel/MockDataEditor';
 import { exportChartTpl } from 'app/pages/MainPage/pages/VizPage/slice/thunks';
 import { FC, memo, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { LEVEL_100 } from 'styles/StyleConstants';
 import { getDataChartData } from './utils';
@@ -31,7 +31,7 @@ export interface MockDataPanelProps {
 }
 export const ChartMockDataPanel: FC<MockDataPanelProps> = memo(
   ({ chartId, onClose }) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const t = useI18NPrefix('global.button');
     const [dataset, setDataset] = useState<any>();
     useEffect(() => {

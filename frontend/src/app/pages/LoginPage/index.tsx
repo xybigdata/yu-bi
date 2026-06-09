@@ -27,11 +27,12 @@ import {
 } from 'app/slice/selectors';
 import { getOauth2Clients, login } from 'app/slice/thunks';
 import React, { useCallback, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { LoginForm } from './LoginForm';
 
 export function LoginPage() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const systemInfo = useSelector(selectSystemInfo);
   const loading = useSelector(selectLoginLoading);

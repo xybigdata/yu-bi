@@ -32,7 +32,8 @@ import { selectIsOrgOwner } from 'app/pages/MainPage/slice/selectors';
 import { TIME_FORMATTER } from 'globalConstants';
 import moment from 'moment';
 import { FC, memo, useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { SPACE } from 'styles/StyleConstants';
 import { AuthenticationModeType, RowPermissionByType } from './slice/constants';
@@ -49,7 +50,7 @@ const ShareLinkModal: FC<{
   useMemberSlice();
 
   const t = useI18NPrefix(`viz.action`);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [expiryDate, setExpiryDate] = useState<string | Date>('');
   const [authenticationMode, setAuthenticationMode] = useState(
     AuthenticationModeType.none,

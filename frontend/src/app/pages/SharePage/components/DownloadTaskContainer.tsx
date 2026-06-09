@@ -3,7 +3,8 @@ import {
   OnLoadTasksType,
 } from 'app/pages/MainPage/Navbar/DownloadListPopup';
 import { FC, ReactNode, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { SPACE_MD } from 'styles/StyleConstants';
 import { DownloadTask } from '../../MainPage/slice/types';
@@ -22,7 +23,7 @@ export const DownloadTaskContainer: FC<DownloadTaskContainerProps> = ({
 }) => {
   const sharePolling = useSelector(selectShareDownloadPolling);
   const { shareActions } = useShareSlice();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const onSetSharePolling = useCallback(
     (polling: boolean) => {
       dispatch(shareActions.setShareDownloadPolling(polling));

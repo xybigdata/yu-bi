@@ -24,14 +24,15 @@ import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useLocation, useParams } from 'app/routerCompat';
 import { memo, useCallback, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { selectOrgId } from '../../../slice/selectors';
 import { selectRoleListLoading, selectRoles } from '../slice/selectors';
 import { getRoles } from '../slice/thunks';
 
 export const RoleList = memo(() => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const location = useLocation();
   const list = useSelector(selectRoles);

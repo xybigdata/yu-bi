@@ -13,7 +13,8 @@ import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { CommonFormTypes } from 'globalConstants';
 import { FC, memo, useCallback, useContext, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { onDropTreeFn, stopPPG } from 'utils/utils';
 import { CascadeAccess, getCascadeAccess } from '../../../Access';
 import {
@@ -44,7 +45,7 @@ export const ScheduleList: FC<{
   scheduleId?: string;
   list?: TreeDataNode[];
 }> = memo(({ orgId, scheduleId, list }) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const editingSchedule = useSelector(selectEditingSchedule);
   const loading = useSelector(selectScheduleListLoading);
   const deleteLoading = useSelector(selectDeleteLoading);

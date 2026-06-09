@@ -20,7 +20,8 @@ import { ChartDataRequest } from 'app/types/ChartDataRequest';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { LEVEL_50 } from 'styles/StyleConstants';
 import { BoardInitProvider } from '../../DashBoardPage/components/BoardProvider/BoardInitProvider';
@@ -66,7 +67,7 @@ export const DashboardForShare: React.FC<ShareBoardProps> = memo(
     onLoadShareTask,
     onDownloadFile,
   }) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     const shareBoardInfo = useSelector(selectShareBoardInfo);
     const { needFetchItems, hasFetchItems, boardWidthHeight } = shareBoardInfo;

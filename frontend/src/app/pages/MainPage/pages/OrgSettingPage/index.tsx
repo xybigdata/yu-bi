@@ -9,7 +9,8 @@ import {
   DEFAULT_DEBOUNCE_WAIT,
 } from 'globalConstants';
 import { useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import {
   BORDER_RADIUS,
@@ -31,7 +32,7 @@ export function OrgSettingPage() {
   const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
   const { actions } = useMainSlice();
   const [avatarLoading, setAvatarLoading] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const currentOrganization = useSelector(selectCurrentOrganization);
   const saveOrganizationLoading = useSelector(selectSaveOrganizationLoading);
   const [form] = Form.useForm();

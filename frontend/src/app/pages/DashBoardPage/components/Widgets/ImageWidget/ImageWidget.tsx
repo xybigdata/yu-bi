@@ -23,7 +23,7 @@ import {
   editWidgetInfoActions,
 } from 'app/pages/DashBoardPage/pages/BoardEditor/slice';
 import { memo, useCallback, useContext, useEffect, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { BoardContext } from '../../BoardProvider/BoardProvider';
 import { FlexStyle, ZIndexStyle } from '../../WidgetComponents/constants';
@@ -44,7 +44,7 @@ import { Picture } from './Picture';
 
 export const ImageWidget: React.FC<{ hideTitle: boolean }> = memo(
   ({ hideTitle }) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const widget = useContext(WidgetContext);
     const widgetInfo = useContext(WidgetInfoContext);
     const { editing } = useContext(BoardContext);

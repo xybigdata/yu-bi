@@ -19,7 +19,7 @@
 import { WidgetContext } from 'app/pages/DashBoardPage/components/WidgetProvider/WidgetProvider';
 import { editBoardStackActions } from 'app/pages/DashBoardPage/pages/BoardEditor/slice';
 import { memo, useContext, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { WidgetActionContext } from '../../ActionProvider/WidgetActionProvider';
 import { AutoGroupWidget } from './AutoGroupWidget';
 import { FreeGroupWidget } from './FreeGroupWidget';
@@ -30,7 +30,7 @@ export const GroupWidget1: React.FC<{}> = memo(() => {
   const boardType = widget.config.boardType;
   // Only board type is auto and no parent id use auto board widget, otherwise is free board widget.
   const isAutoGroupWidget = boardType === 'auto' && !widget.parentId;
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(

@@ -27,7 +27,8 @@ import { selectHasVizFetched } from 'app/pages/MainPage/pages/VizPage/slice/sele
 import { getFolders } from 'app/pages/MainPage/pages/VizPage/slice/thunks';
 import { downloadFile } from 'app/utils/fetch';
 import { FC, memo, useCallback, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import {
   FONT_SIZE_ICON_SM,
@@ -63,7 +64,7 @@ const ChartHeaderPanel: FC<{
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
     const backendChart = useSelector(backendChartSelector);
     const downloadPolling = useSelector(selectChartEditorDownloadPolling);
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const { actions } = useWorkbenchSlice();
 
     const handleModalOk = useCallback(

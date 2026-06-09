@@ -13,7 +13,8 @@ import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
 import React, { memo, useCallback, useContext, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { SPACE_XS } from 'styles/StyleConstants';
 import { getInsertedNodeIndex } from 'utils/utils';
@@ -45,7 +46,7 @@ export const Storyboards = memo(
     sliderVisible,
     handleSliderVisible,
   }: FoldersProps) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const orgId = useSelector(selectOrgId);
     const { showSaveForm } = useContext(SaveFormContext);
     const storyborads = useSelector(selectStoryboards);

@@ -18,7 +18,7 @@
 import { Tabs } from 'antd';
 import { TabWidgetContent } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { memo, useCallback, useContext, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { PRIMARY } from 'styles/StyleConstants';
 import { uuidv4 } from 'utils/utils';
@@ -35,7 +35,7 @@ import tabProto, { TabToolkit } from './tabConfig';
 const { TabPane } = Tabs;
 
 export const TabWidgetCore: React.FC<{}> = memo(() => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const widget = useContext(WidgetContext);
   const { align, position } = (tabProto.toolkit as TabToolkit).getCustomConfig(
     widget.config.customConfig.props,

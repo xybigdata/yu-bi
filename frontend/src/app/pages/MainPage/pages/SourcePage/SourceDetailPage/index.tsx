@@ -43,7 +43,8 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import {
   BORDER_RADIUS,
@@ -96,7 +97,7 @@ export function SourceDetailPage() {
   const [testLoading, setTestLoading] = useState(false);
   const [lastUpdateTime, setLastUpdateTime] = useState<string | undefined>();
   const { actions } = useSourceSlice();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const orgId = useSelector(selectOrgId);
   const isOwner = useSelector(selectIsOrgOwner);

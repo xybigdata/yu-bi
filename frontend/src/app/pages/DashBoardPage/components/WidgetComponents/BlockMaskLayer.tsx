@@ -18,7 +18,8 @@
 import { WidgetInfo } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import classnames from 'classnames';
 import { memo, useCallback, useContext, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { LEVEL_20, LEVEL_5 } from 'styles/StyleConstants';
 import { ORIGINAL_TYPE_MAP, WIDGET_DRAG_HANDLE } from '../../constants';
@@ -36,7 +37,7 @@ export interface BlockMaskLayerProps {
 }
 export const BlockMaskLayer: React.FC<BlockMaskLayerProps> = memo(
   ({ widget, widgetInfo }) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const { onEditSelectWidget } = useContext(WidgetActionContext);
     const showBlockMask = useSelector(selectShowBlockMask);
     const onMouseDown = useCallback(

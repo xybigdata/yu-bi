@@ -22,14 +22,15 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { DeviceType } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import { useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { editDashBoardInfoActions } from '../../../slice';
 import { selectDeviceType } from '../../../slice/selectors';
 
 export const DeviceSwitcher = () => {
   const t = useI18NPrefix(`viz.board.action`);
   const curDeviceType = useSelector(selectDeviceType);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   //why use async/await because: Wait until the state changes before triggering resize
   const onDeviceSwitch = async value => {

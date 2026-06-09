@@ -20,7 +20,7 @@ import { DownloadFileType } from 'app/constants';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { generateShareLinkAsync } from 'app/utils/fetch';
 import { createContext, FC, PropsWithChildren, memo, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { BOARD_UNDO } from '../../constants';
 import { boardDownLoadAction } from '../../pages/Board/slice/asyncActions';
 import { fetchBoardDetail } from '../../pages/Board/slice/thunk';
@@ -58,7 +58,7 @@ export const BoardActionProvider: FC<
     boardId: string;
   }>
 > = memo(({ boardId, children }) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
 
   const actions = useMemo(() => {

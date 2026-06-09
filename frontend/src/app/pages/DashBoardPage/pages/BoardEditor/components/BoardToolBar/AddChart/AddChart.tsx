@@ -25,7 +25,8 @@ import { selectVizs } from 'app/pages/MainPage/pages/VizPage/slice/selectors';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { BOARD_SELF_CHART_PREFIX } from 'globalConstants';
 import { useCallback, useContext, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { uuidv4 } from 'utils/utils';
 import { addDataChartWidgets, addWrapChartWidget } from '../../../slice/thunk';
 import ChartSelectModalModal from '../../ChartSelectModal';
@@ -33,7 +34,7 @@ import { BoardToolBarContext } from '../context/BoardToolBarContext';
 import { ChartWidgetDropdown } from './ChartWidgetDropdown';
 
 export const AddChart = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { boardId, boardType } = useContext(BoardToolBarContext);
   const orgId = useSelector(selectOrgId);
   const chartOptionsMock = useSelector(selectVizs);

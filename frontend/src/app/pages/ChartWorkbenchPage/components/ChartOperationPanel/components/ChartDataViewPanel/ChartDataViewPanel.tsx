@@ -68,7 +68,8 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import {
   ORANGE,
@@ -90,7 +91,7 @@ const ChartDataViewPanel: FC<{
 }> = memo(({ dataView, defaultViewId, chartConfig, onDataViewChange }) => {
   const t = useI18NPrefix(`viz.workbench.dataview`);
   const tView = useI18NPrefix('view');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const [showModal, modalContextHolder] = useStateModal({});
   const { availableSourceFunctions } = useContext(ChartDataViewContext);

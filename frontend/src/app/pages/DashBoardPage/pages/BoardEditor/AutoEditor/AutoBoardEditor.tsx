@@ -44,7 +44,8 @@ import {
 } from 'react';
 import RGL, { Layout, WidthProvider } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import 'react-resizable/css/styles.css';
 import styled from 'styled-components';
 import {
@@ -63,7 +64,7 @@ import { WidgetOfAutoEditor } from './WidgetOfAutoEditor';
 const ReactGridLayout = WidthProvider(RGL);
 
 export const AutoBoardEditor: React.FC<{}> = memo(() => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { boardId } = useContext(BoardContext);
   const boardConfig = useContext(BoardConfigValContext);
   const { background, allowOverlap } = boardConfig;

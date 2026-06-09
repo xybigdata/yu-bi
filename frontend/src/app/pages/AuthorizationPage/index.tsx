@@ -4,7 +4,7 @@ import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { getUserInfoByToken } from 'app/slice/thunks';
 import { StorageKeys } from 'globalConstants';
 import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import persistence from 'utils/persistence';
 
 export const AuthorizationPage = () => {
@@ -12,7 +12,7 @@ export const AuthorizationPage = () => {
     AuthorizationStatus.Initialized,
   );
   const [errorMessage, setErrorMessage] = useState('');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
 
   useEffect(() => {

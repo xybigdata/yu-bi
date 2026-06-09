@@ -41,7 +41,8 @@ import React, {
   useEffect,
   useState,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { getInsertedNodeIndex, onDropTreeFn, stopPPG } from 'utils/utils';
 import { isParentIdEqual } from '../../../slice/utils';
 import {
@@ -68,7 +69,7 @@ interface FolderTreeProps {
 }
 
 export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const navigate = useCompatNavigate();
   const { showSaveForm } = useContext(SaveFormContext);

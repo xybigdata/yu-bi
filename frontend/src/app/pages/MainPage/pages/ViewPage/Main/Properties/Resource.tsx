@@ -41,7 +41,8 @@ import {
   useState,
 } from 'react';
 import { monaco } from 'react-monaco-editor';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { SPACE_MD, SPACE_XS } from 'styles/StyleConstants';
 import { RootState } from 'types';
@@ -58,7 +59,7 @@ import Container from './Container';
 
 export const Resource = memo(() => {
   const t = useI18NPrefix('view.resource');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { editorCompletionItemProviderRef } = useContext(EditorContext);
   const isDatabaseSchemaLoading = useSelector(selectDatabaseSchemaLoading);
   const sourceId = useSelector<RootState>(state =>

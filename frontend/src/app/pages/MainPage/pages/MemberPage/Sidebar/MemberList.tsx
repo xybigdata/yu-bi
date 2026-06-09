@@ -33,7 +33,8 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { SPACE_MD } from 'styles/StyleConstants';
 import { selectOrgId } from '../../../slice/selectors';
@@ -47,7 +48,7 @@ import { getMembers, inviteMember } from '../slice/thunks';
 
 export const MemberList = memo(() => {
   const [inviteFormVisible, setInviteFormVisible] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const location = useLocation();
   const systemInfo = useSelector(selectSystemInfo);

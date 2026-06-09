@@ -28,7 +28,7 @@ import { DownloadFileType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useSaveAsViz } from 'app/pages/MainPage/pages/VizPage/hooks/useSaveAsViz';
 import { FC, memo, useContext } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { useRecycleViz } from '../../../../hooks/useRecycleViz';
 import { usePublishBoard } from '../../hooks/usePublishBoard';
 import { widgetsQueryAction } from '../../pages/Board/slice/asyncActions';
@@ -44,7 +44,7 @@ export const BoardDropdownList: FC<Props> = memo(
   ({ onOpenShareLink, openStoryList, openMockData }) => {
     const t = useI18NPrefix(`viz.action`);
     const tg = useI18NPrefix(`global`);
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const {
       allowDownload,
       allowShare,

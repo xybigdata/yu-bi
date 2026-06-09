@@ -8,7 +8,8 @@ import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { useLocation, useParams } from 'app/routerCompat';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import { useCallback, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { LEVEL_1 } from 'styles/StyleConstants';
 import { useVizSlice } from '../slice';
@@ -27,7 +28,7 @@ import { VizContainer } from './VizContainer';
 
 export function Main({ sliderVisible }: { sliderVisible: boolean }) {
   const { actions } = useVizSlice();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const { vizId } = useParams<{ vizId?: string }>();
   const location = useLocation();

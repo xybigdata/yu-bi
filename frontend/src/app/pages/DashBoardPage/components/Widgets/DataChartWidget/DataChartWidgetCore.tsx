@@ -60,7 +60,8 @@ import React, {
   useMemo,
   useRef,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { isEmptyArray } from 'utils/object';
 import { uuidv4 } from 'utils/utils';
@@ -80,7 +81,7 @@ import { WidgetSelectionContext } from '../../WidgetProvider/WidgetSelectionProv
 export const DataChartWidgetCore: React.FC<{}> = memo(() => {
   const { dataChart, availableSourceFunctions, chartDataView } =
     useContext(WidgetChartContext);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const scale = useContext(BoardScaleContext);
   const { data: dataset } = useContext(WidgetDataContext);
   const { boardId, renderMode, orgId, queryVariables } =

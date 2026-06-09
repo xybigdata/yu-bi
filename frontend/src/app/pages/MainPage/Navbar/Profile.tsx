@@ -26,7 +26,8 @@ import {
 import { saveProfile, updateUser } from 'app/slice/thunks';
 import { BASE_API_URL, BASE_RESOURCE_URL } from 'globalConstants';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { SPACE_LG, SPACE_MD, SPACE_UNIT } from 'styles/StyleConstants';
 import { APIResponse } from 'types';
@@ -36,7 +37,7 @@ const FormItem = Form.Item;
 
 export function Profile({ visible, onCancel }: ModalProps) {
   const [avatarLoading, setAvatarLoading] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const loggedInUser = useSelector(selectLoggedInUser);
   const loading = useSelector(selectSaveProfileLoading);
   const [saveDisabled, setSaveDisabled] = useState(true);

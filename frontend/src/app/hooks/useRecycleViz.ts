@@ -25,10 +25,10 @@ import {
 } from 'app/pages/MainPage/pages/VizPage/slice/thunks';
 import { VizType } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 
 export const useRecycleViz = (orgId: string, vizId: string, type: VizType) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const tg = useI18NPrefix('global');
   const redirect = useCallback(

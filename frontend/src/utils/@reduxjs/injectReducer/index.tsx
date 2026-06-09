@@ -1,7 +1,9 @@
 import { Reducer } from '@reduxjs/toolkit';
+import { useAppStore } from 'app/hooks/useRedux';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import React from 'react';
-import { ReactReduxContext, useStore } from 'react-redux';
+import { ReactReduxContext } from 'react-redux';
+import type { AppStore } from 'redux/configureStore';
 import { RootState } from 'types';
 import getInjectors from './reducerInjectors';
 
@@ -45,7 +47,7 @@ const injectReducer =
       constructor(props, context) {
         super(props, context);
 
-        getInjectors(context.store).injectReducer(key, reducer);
+        getInjectors(context.store as AppStore).injectReducer(key, reducer);
       }
 
       render() {
@@ -76,7 +78,7 @@ export default injectReducer;
  * @public
  */
 export const useInjectReducer = ({ key, reducer }: InjectReducerParams) => {
-  const store = useStore();
+  const store = useAppStore();
 
   const isInjected = React.useRef(false);
 

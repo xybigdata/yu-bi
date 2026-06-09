@@ -19,7 +19,8 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { migrateViewConfig } from 'app/migration/ViewConfig/migrationViewDetailConfig';
 import { CommonFormTypes } from 'globalConstants';
 import { useCallback, useContext } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { request2 } from 'utils/request';
 import { errorHandle, getInsertedNodeIndex } from 'utils/utils';
 import { View } from '../../../../../types/View';
@@ -37,7 +38,7 @@ export function useSaveAsView() {
   const t = useI18NPrefix('view.editor');
   const tg = useI18NPrefix('global');
   const { showSaveForm } = useContext(SaveFormContext);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const viewsData = useSelector(selectViews);
   const allDatabaseSchemas = useSelector(selectAllSourceDatabaseSchemas);

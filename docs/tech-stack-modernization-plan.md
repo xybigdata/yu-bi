@@ -993,6 +993,15 @@
 - 升级后的目标是让前端测试栈从“CRA 时代遗留的 Jest 27”迈到当前仍广泛使用的稳定线，为后续继续评估 Jest 30 或 Vitest 迁移先打稳基础。
 - 在本机 `Node 26.0.0 / npm 11.15.0` 下，本批 `npm test -- --runInBand --watchAll=false` 与 `npm run build` 已通过；`npm run checkTs` 仍会暴露前端既有的 Redux thunk dispatch 类型债，这一批没有继续扩大该专项范围。
 
+### 并行治理：收口 React Redux 9 下的 thunk dispatch 类型债
+
+- `frontend/src/app/hooks/useRedux.ts` 已新增 `useAppDispatch` 与 `useAppStore` typed hooks，集中承接 `react-redux 9` 默认 `Dispatch<UnknownAction>` 带来的类型收紧，不再依赖组件侧各自手写 `any` 或宽松推断。
+- 前端业务组件、页面和自定义 hooks 中原先直接调用 `useDispatch()` 的位置，已统一切换到 `useAppDispatch()`；这一步只改变类型入口，不改变现有 dispatch 行为。
+- `frontend/src/utils/@reduxjs/injectReducer/index.tsx` 已改为使用 typed store hook，并把 HOC 场景下的 `context.store` 显式收口到 `AppStore`，让动态 reducer 注入链和当前 store 扩展类型保持一致。
+- `frontend/src/app/pages/DashBoardPage/pages/Board/slice/thunk.ts` 中 `renderedWidgetAsync` 的 thunk state 泛型已从局部 `{ board: BoardState }` 收口到统一 `RootState`，避免 RTK 2 thunk 与全局 `AppDispatch` 的状态签名分叉。
+- 这一批解决的是前一批 Jest/类型工具链升级后暴露出来的集中类型债：`dispatch(AsyncThunkAction | thunk function)` 不再被误判成 `UnknownAction`。
+- 2026-06-10 验证：`npm run checkTs`、`npm test -- --runInBand --watchAll=false`、`npm run build` 均通过。
+
 ### 并行治理：删除 CRACO 回退外壳
 
 - `frontend/package.json` 已删除 `start:cra`、`build:cra`、`eject` 等只服务 CRA/CRACO 的历史脚本。

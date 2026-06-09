@@ -27,7 +27,8 @@ import { checkComputedFieldAsync } from 'app/utils/fetch';
 import { updateBy, updateByKey } from 'app/utils/mutation';
 import { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { SPACE_LG } from 'styles/StyleConstants';
 import { Nullable } from 'types';
@@ -61,7 +62,7 @@ import { toModel } from './utils';
 const DataModelTree: FC = memo(() => {
   const t = useI18NPrefix('view');
   const { actions } = useViewSlice();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [openStateModal, contextHolder] = useStateModal({});
   const [showModal, modalContextHolder] = useStateModal({});
 

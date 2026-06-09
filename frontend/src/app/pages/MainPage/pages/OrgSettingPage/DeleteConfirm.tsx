@@ -6,12 +6,13 @@ import {
   selectDeleteOrganizationLoading,
 } from 'app/pages/MainPage/slice/selectors';
 import { useCallback, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { deleteOrganization } from '../../slice/thunks';
 
 export const DeleteConfirm = ({ visible, open, ...props }: ModalProps) => {
   const [inputValue, setInputValue] = useState('');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const currentOrganization = useSelector(selectCurrentOrganization);
   const loading = useSelector(selectDeleteOrganizationLoading);

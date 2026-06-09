@@ -23,7 +23,8 @@ import {
 import { XYCoord } from 'dnd-core';
 import React, { useEffect, useRef } from 'react';
 import { DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import {
   BORDER_RADIUS,
@@ -58,7 +59,7 @@ const ThumbnailItem: React.FC<IProps> = ({
   moveCard,
   moveEnd,
 }) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const ItemRef = useRef<HTMLDivElement>(null);
   const dashboard = useSelector((state: { board: BoardState }) =>
     makeSelectBoardConfigById()(state, page.relId),

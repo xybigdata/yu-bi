@@ -22,7 +22,8 @@ import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { memo, useCallback, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { SPACE_XS } from 'styles/StyleConstants';
 import { ResourceTypes, SubjectTypes, Viewpoints } from '../constants';
@@ -38,7 +39,7 @@ interface SidebarProps {
 
 export const Sidebar = memo(
   ({ viewpoint, viewpointType, viewpointId }: SidebarProps) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const navigate = useCompatNavigate();
     const orgId = useSelector(selectOrgId);
     const t = useI18NPrefix('permission');

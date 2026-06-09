@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
-import injectReducerEnhancer from 'utils/@reduxjs/injectReducer/enhancer';
+import { InjectedReducersType } from 'utils/types/injector-typings';
 import rejectedErrorHandlerMiddleware from '../utils/@reduxjs/rejectedErrorHandlerMiddleware';
 import { RootState } from '../types';
 import { createReducer } from './reducers';
@@ -11,16 +11,17 @@ export function configureAppStore() {
       getDefaultMiddleware({
         serializableCheck: false,
         // immutableCheck: false,
-      }).prepend(rejectedErrorHandlerMiddleware.middleware as any),
+      }).prepend(rejectedErrorHandlerMiddleware.middleware),
     devTools:
       /* istanbul ignore next line */
       process.env.NODE_ENV !== 'production' ||
       process.env.PUBLIC_URL.length > 0,
-    enhancers: getDefaultEnhancers =>
-      getDefaultEnhancers().concat(injectReducerEnhancer(createReducer)),
   });
 
-  return store;
+  return Object.assign(store, {
+    createReducer,
+    injectedReducers: {} as InjectedReducersType,
+  });
 }
 
 export type AppStore = ReturnType<typeof configureAppStore>;

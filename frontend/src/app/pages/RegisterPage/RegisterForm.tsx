@@ -23,7 +23,8 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectRegisterLoading } from 'app/slice/selectors';
 import { register } from 'app/slice/thunks';
 import React, { FC, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { LINE_HEIGHT_ICON_LG } from 'styles/StyleConstants';
 import { getPasswordValidator } from 'utils/validators';
@@ -32,7 +33,7 @@ interface RegisterFormProps {
   onRegisterSuccess: (email: string) => void;
 }
 export const RegisterForm: FC<RegisterFormProps> = ({ onRegisterSuccess }) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const loading = useSelector(selectRegisterLoading);
   const [form] = Form.useForm();

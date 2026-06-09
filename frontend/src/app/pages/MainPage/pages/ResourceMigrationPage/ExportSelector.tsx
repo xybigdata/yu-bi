@@ -19,7 +19,7 @@ import { Button, Card, message, TreeSelect } from 'antd';
 import { DataNode } from 'antd/lib/tree';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { FC, memo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { BORDER_RADIUS, SPACE_LG } from 'styles/StyleConstants';
 import { mainActions } from '../../slice';
@@ -31,7 +31,7 @@ export const ExportSelector: FC<{
   folders: Folder[];
 }> = memo(({ treeData, folders }) => {
   const t = useI18NPrefix('main.subNavs');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [selectedIds, setIds] = useState<string[]>();
   const onChange = (ids: string[], label, extra) => {
     setIds(ids);

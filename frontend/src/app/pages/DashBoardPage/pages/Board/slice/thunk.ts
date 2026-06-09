@@ -168,7 +168,7 @@ export const fetchBoardDetailInShare = createAsyncThunk<
 export const renderedWidgetAsync = createAsyncThunk<
   null,
   { boardId: string; widgetId: string; renderMode?: VizRenderMode },
-  { state: { board: BoardState } }
+  { state: RootState }
 >(
   'board/renderedWidgetAsync',
   async ({ boardId, widgetId, renderMode }, { getState, dispatch }) => {

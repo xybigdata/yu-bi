@@ -1,7 +1,8 @@
 import { Card, Table, TableColumnsType } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { FC, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { BORDER_RADIUS } from 'styles/StyleConstants';
 import { LogStatus, LOG_STATUS_TEXT } from '../../constants';
@@ -17,7 +18,7 @@ interface ScheduleErrorLogProps {
   scheduleId: string;
 }
 export const ScheduleErrorLog: FC<ScheduleErrorLogProps> = ({ scheduleId }) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const logs = useSelector(selectScheduleLogs),
     loading = useSelector(selectScheduleLogsLoading);
   const { actions } = useScheduleSlice();

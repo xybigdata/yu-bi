@@ -21,7 +21,8 @@ import { BOARD_SELF_CHART_PREFIX } from 'globalConstants';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { LEVEL_10 } from 'styles/StyleConstants';
 import { uuidv4 } from 'utils/utils';
@@ -55,7 +56,7 @@ export const BoardEditor: React.FC<{
   boardId: string;
 }> = memo(({ boardId }) => {
   useEditBoardSlice();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const board = useSelector(selectEditBoard);
   const boardLoading = useSelector(selectEditBoardLoading);

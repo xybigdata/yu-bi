@@ -7,7 +7,8 @@ import { CascadeAccess } from 'app/pages/MainPage/Access';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
 import { memo, useCallback, useContext, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { onDropTreeFn, stopPPG } from 'utils/utils';
 import { LocalTreeDataNode } from '../../../../slice/types';
 import {
@@ -29,7 +30,7 @@ interface StoryboardListProps {
 }
 
 export const List = memo(({ list, selectedId }: StoryboardListProps) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const loading = useSelector(selectStoryboardListLoading);
   const orgId = useSelector(selectOrgId);

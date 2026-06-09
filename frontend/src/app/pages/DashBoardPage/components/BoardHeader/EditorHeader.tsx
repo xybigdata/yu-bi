@@ -22,7 +22,7 @@ import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import classnames from 'classnames';
 import { FC, PropsWithChildren, memo, useContext } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import {
   FONT_SIZE_ICON_SM,
@@ -39,7 +39,7 @@ import { BoardInfoContext } from '../BoardProvider/BoardInfoProvider';
 import { BoardContext } from '../BoardProvider/BoardProvider';
 
 const EditorHeader: FC<PropsWithChildren<{}>> = memo(({ children }) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const t = useI18NPrefix(`viz.action`);
   const { updateBoard } = useContext(BoardActionContext);

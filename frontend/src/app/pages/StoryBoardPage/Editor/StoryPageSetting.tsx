@@ -25,7 +25,8 @@ import React, {
   useEffect,
   useMemo,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { StoryContext } from '../contexts/StoryContext';
 import {
   makeSelectStoryPagesById,
@@ -44,7 +45,7 @@ export interface StoryPageSettingProps {}
 export const StoryPageSetting: React.FC<StoryPageSettingProps> = memo(() => {
   const t = useI18NPrefix(`viz.board.setting`);
   const { storyId } = useContext(StoryContext);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const selectedPageIds = useSelector(
     (state: { storyBoard: StoryBoardState }) =>
       selectSelectedPageIds(state, storyId),

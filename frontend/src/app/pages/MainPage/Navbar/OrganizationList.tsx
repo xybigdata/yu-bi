@@ -33,7 +33,8 @@ import {
 import classnames from 'classnames';
 import { BASE_RESOURCE_URL } from 'globalConstants';
 import React, { useCallback, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import {
   FONT_SIZE_TITLE,
@@ -47,7 +48,7 @@ import { switchOrganization } from '../slice/thunks';
 
 export function OrganizationList() {
   const [formVisible, setFormVisible] = useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const organizations = useSelector(selectOrganizations);
   const orgId = useSelector(selectOrgId);

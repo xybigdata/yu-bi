@@ -12,7 +12,8 @@ import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import { CommonFormTypes } from 'globalConstants';
 import React, { memo, useCallback, useContext, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { SPACE_XS } from 'styles/StyleConstants';
 import { useAddViz } from '../../hooks/useAddViz';
@@ -47,7 +48,7 @@ export const Folders = memo(
     sliderVisible,
     handleSliderVisible,
   }: FoldersProps) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const orgId = useSelector(selectOrgId);
     const selectVizTree = useMemo(makeSelectVizTree, []);
     const t = useI18NPrefix(i18nPrefix);

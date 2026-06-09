@@ -22,14 +22,14 @@ import { publishViz } from 'app/pages/MainPage/pages/VizPage/slice/thunks';
 import { VizType } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import { storyActions } from 'app/pages/StoryBoardPage/slice';
 import { useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { boardActions } from '../pages/Board/slice';
 export const usePublishBoard = (
   vizId: string,
   type: VizType,
   status: number,
 ) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const t = useI18NPrefix('viz.main');
   const handlePublish = useCallback(
     callback => {

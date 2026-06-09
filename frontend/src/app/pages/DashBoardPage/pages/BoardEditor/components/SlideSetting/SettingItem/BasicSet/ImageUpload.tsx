@@ -20,7 +20,7 @@ import { Upload } from 'antd';
 import { BoardContext } from 'app/pages/DashBoardPage/components/BoardProvider/BoardProvider';
 import { convertImageUrl } from 'app/pages/DashBoardPage/utils';
 import { memo, useCallback, useContext, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { SPACE_MD } from 'styles/StyleConstants';
 import { uploadBoardImage } from '../../../../slice/thunk';
@@ -30,7 +30,7 @@ export const UploadDragger: React.FC<{
   onChange?: any;
   placeholder: string;
 }> = memo(({ value, onChange, placeholder }) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { boardId } = useContext(BoardContext);
 
   const beforeUpload = useCallback(

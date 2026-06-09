@@ -32,7 +32,8 @@ import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { CommonFormTypes } from 'globalConstants';
 import React, { memo, useCallback, useContext, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { format } from 'sql-formatter';
 import styled from 'styled-components';
 import {
@@ -71,7 +72,7 @@ interface ToolbarProps {
 export const Toolbar = memo(
   ({ allowManage, allowEnableViz, type }: ToolbarProps) => {
     const { actions } = useViewSlice();
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const { onRun, onSave } = useContext(EditorContext);
     const { showSaveForm } = useContext(SaveFormContext);
     const sources = useSelector(selectSources);

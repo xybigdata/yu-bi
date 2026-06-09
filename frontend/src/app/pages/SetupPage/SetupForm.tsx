@@ -21,14 +21,14 @@ import * as AuthLayout from 'app/components/styles/AuthLayout';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { setup } from 'app/slice/thunks';
 import React, { FC, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { getPasswordValidator } from 'utils/validators';
 
 interface RegisterFormProps {
   loading: boolean;
 }
 export const SetupForm: FC<RegisterFormProps> = ({ loading }) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [form] = Form.useForm();
   const t = useI18NPrefix('setup');
   const tg = useI18NPrefix('global');

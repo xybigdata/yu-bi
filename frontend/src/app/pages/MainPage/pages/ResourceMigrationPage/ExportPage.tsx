@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 import { FC, memo, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { listToTree } from 'utils/utils';
 import { selectOrgId } from '../../slice/selectors';
 import { usePermissionSlice } from '../PermissionPage/slice';
@@ -29,7 +30,7 @@ import { ExportSelector } from './ExportSelector';
 export const ExportPage: FC<{}> = memo(() => {
   usePermissionSlice();
   const orgId = useSelector(selectOrgId);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   useEffect(() => {
     if (orgId) {
       dispatch(getFolders(orgId));

@@ -22,7 +22,8 @@ import ChartManager from 'app/models/ChartManager';
 import { useLocation, useParams } from 'app/routerCompat';
 import { login } from 'app/slice/thunks';
 import { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { getToken } from 'utils/auth';
 import persistence from 'utils/persistence';
@@ -49,7 +50,7 @@ import ChartPreviewBoardForShare from './ChartPreviewBoardForShare';
 export function ShareChartPage() {
   const { shareActions: actions } = useShareSlice();
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const location = useLocation();
 
   const { token: shareToken } = useParams<{ token: string }>();

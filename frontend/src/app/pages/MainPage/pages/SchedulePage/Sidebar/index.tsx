@@ -18,7 +18,8 @@ import { useParams } from 'app/routerCompat';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import { CommonFormTypes } from 'globalConstants';
 import { memo, useCallback, useContext, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { LEVEL_5, SPACE_TIMES, SPACE_XS } from 'styles/StyleConstants';
 import { getInsertedNodeIndex } from 'utils/utils';
@@ -45,7 +46,7 @@ interface SidebarProps extends I18NComponentProps {
 
 export const Sidebar = memo(
   ({ width, isDragging, sliderVisible, handleSliderVisible }: SidebarProps) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const { scheduleId } = useParams<{
       scheduleId: string;
     }>();

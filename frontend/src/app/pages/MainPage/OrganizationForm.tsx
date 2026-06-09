@@ -23,7 +23,8 @@ import { fetchCheckName } from 'app/utils/fetch';
 import debounce from 'debounce-promise';
 import { DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
 import React, { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { selectSaveOrganizationLoading } from './slice/selectors';
 import { addOrganization } from './slice/thunks';
 
@@ -34,7 +35,7 @@ interface OrganizationFormProps extends Omit<ModalProps, 'onCancel'> {
 }
 
 export function OrganizationForm({ visible, onCancel }: OrganizationFormProps) {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const loading = useSelector(selectSaveOrganizationLoading);
   const [form] = Form.useForm();

@@ -29,7 +29,8 @@ import classnames from 'classnames';
 import { DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
 import { darken, getLuminance, lighten } from 'polished';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import {
   FONT_WEIGHT_MEDIUM,
@@ -70,7 +71,7 @@ const SelectDataSource = memo(
     allowManage,
     onChange,
   }: SelectDataSourceProps) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const propsSources = useSelector(selectSources);
     const allDatabaseSchemas = useSelector(selectAllSourceDatabaseSchemas);
     const t = useI18NPrefix(`view.structView`);

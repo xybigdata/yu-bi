@@ -26,7 +26,8 @@ import {
 } from 'app/pages/DashBoardPage/pages/Board/slice/selector';
 import { BoardState } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { memo, useCallback, useContext, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { LEVEL_10, LEVEL_100, SPACE_LG, SPACE_SM } from 'styles/StyleConstants';
 import { BoardContext } from '../BoardProvider/BoardProvider';
@@ -35,7 +36,7 @@ import { WidgetMapper } from '../WidgetMapper/WidgetMapper';
 
 export const FullScreenPanel: React.FC<{}> = memo(() => {
   const { boardId } = useContext(BoardContext);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const itemId = useSelector((state: { board: BoardState }) =>
     makeSelectBoardFullScreenPanelById()(state, boardId),

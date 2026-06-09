@@ -30,7 +30,8 @@ import React, {
 } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import Reveal from 'reveal.js';
 import 'reveal.js/dist/reveal.css';
 import RevealZoom from 'reveal.js/plugin/zoom/plugin';
@@ -52,7 +53,7 @@ export const StoryPlayer: React.FC<{}> = memo(() => {
   useBoardSlice();
   useEditBoardSlice();
   useStoryBoardSlice();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { storyId } = useParams<{ storyId: string }>();
   useEffect(() => {
     dispatch(getStoryDetail(storyId));

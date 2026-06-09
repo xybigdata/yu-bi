@@ -19,7 +19,8 @@ import { Checkbox, Form, InputNumber } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import produce from 'immer';
 import React, { memo, useCallback, useContext, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { StoryContext } from '../contexts/StoryContext';
 import { storyActions } from '../slice';
@@ -29,7 +30,7 @@ import { StoryBoardState } from '../slice/types';
 export interface StorySettingProps {}
 export const StorySetting: React.FC<StorySettingProps> = memo(() => {
   const t = useI18NPrefix(`viz.board.setting`);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { storyId } = useContext(StoryContext);
   const storyBoard = useSelector((state: { storyBoard: StoryBoardState }) =>
     makeSelectStoryBoardById(state, storyId),

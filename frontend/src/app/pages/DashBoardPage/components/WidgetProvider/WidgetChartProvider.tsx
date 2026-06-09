@@ -26,7 +26,8 @@ import {
   useContext,
   useEffect,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { setWidgetSampleDataAction } from '../../actions/widgetAction';
 import {
   selectAvailableSourceFunctionsMap,
@@ -77,7 +78,7 @@ export const WidgetChartProvider: FC<
   }>
 > = memo(({ boardId, boardEditing, widgetId, children }) => {
   const { datachartId } = useContext(WidgetContext);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   useEffect(() => {
     if (!datachartId) return;
     if (!widgetId) return;

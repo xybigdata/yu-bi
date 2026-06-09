@@ -19,7 +19,8 @@ import { getInitBoardConfig } from 'app/pages/DashBoardPage/utils/board';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { getInsertedNodeIndex } from 'utils/utils';
 import { SaveFormModel } from '../SaveFormContext';
 import { selectVizs } from '../slice/selectors';
@@ -42,7 +43,7 @@ export interface addVizParams {
 
 export function useAddViz({ showSaveForm }) {
   const vizsData = useSelector(selectVizs);
-  const dispatch: (any) => Promise<any> = useDispatch();
+  const dispatch: (any) => Promise<any> = useAppDispatch();
   const orgId = useSelector(selectOrgId);
 
   const updateValue = useCallback((relType: VizType, values: SaveFormModel) => {

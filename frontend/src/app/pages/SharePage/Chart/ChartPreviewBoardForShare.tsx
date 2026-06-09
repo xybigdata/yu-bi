@@ -39,7 +39,8 @@ import {
 } from 'app/utils/ChartEventListenerHelper';
 import { getChartDrillOption } from 'app/utils/internalChartHelper';
 import { FC, memo, useCallback, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { isEmptyArray } from 'utils/object';
 import ChartDrillContext from '../../../contexts/ChartDrillContext';
@@ -70,7 +71,7 @@ const ChartPreviewBoardForShare: FC<{
   availableSourceFunctions?: string[];
 }> = memo(
   ({ chartPreview, orgId, filterSearchParams, availableSourceFunctions }) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const drillOptionRef = useRef<IChartDrillOption>();
     const [chart] = useState<IChart | undefined>(() => {
       const currentChart = ChartManager.instance().getById(

@@ -22,14 +22,14 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import widgetManagerInstance from 'app/pages/DashBoardPage/components/WidgetManager';
 import { LightWidgetType } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import React, { useCallback, useContext } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { ORIGINAL_TYPE_MAP } from '../../../../../constants';
 import { addWidgetsToEditBoard } from '../../../slice/thunk';
 import { BoardToolBarContext } from '../context/BoardToolBarContext';
 
 export const AddContainer: React.FC<{}> = () => {
   const t = useI18NPrefix(`viz.board.action`);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { boardType } = useContext(BoardToolBarContext);
   const onSelectContainerWidget = useCallback(
     ({ keyPath }) => {

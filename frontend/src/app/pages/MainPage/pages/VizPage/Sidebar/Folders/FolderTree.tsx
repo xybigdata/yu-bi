@@ -13,7 +13,8 @@ import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { LocalTreeDataNode } from 'app/pages/MainPage/slice/types';
 import { CommonFormTypes } from 'globalConstants';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { getInsertedNodeIndex, onDropTreeFn, stopPPG } from 'utils/utils';
 import { isParentIdEqual } from '../../../../slice/utils';
 import {
@@ -41,7 +42,7 @@ export function FolderTree({
   i18nPrefix,
 }: FolderTreeProps) {
   const tg = useI18NPrefix('global');
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
   const orgId = useSelector(selectOrgId);

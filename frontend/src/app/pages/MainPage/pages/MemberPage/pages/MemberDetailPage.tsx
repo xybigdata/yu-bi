@@ -26,7 +26,8 @@ import { useParams } from 'app/routerCompat';
 import { selectSystemInfo } from 'app/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { BORDER_RADIUS, SPACE_LG } from 'styles/StyleConstants';
 import { getPasswordValidator } from 'utils/validators';
@@ -56,7 +57,7 @@ export function MemberDetailPage() {
   const [formType, setFormType] = useState(CommonFormTypes.Add);
   const [passwordVisible, setPasswordVisible] = useState(true);
   const { actions } = useMemberSlice();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const systemInfo = useSelector(selectSystemInfo);
   const orgId = useSelector(selectOrgId);

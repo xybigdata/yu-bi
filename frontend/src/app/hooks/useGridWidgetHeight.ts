@@ -27,12 +27,12 @@ import {
 import { boardActions } from 'app/pages/DashBoardPage/pages/Board/slice';
 import { ColsKeyType } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { useContext, useLayoutEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import useResizeObserver from './useResizeObserver';
 
 export const useGridWidgetHeight = () => {
   const { boardId, renderMode } = useContext(BoardContext);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [colsKey, setColsKey] = useState<ColsKeyType>(LAYOUT_COLS_KEYS[0]);
   const [cacheW, setCacheW] = useState(0);
   const { ref, width = 0, height = 0 } = useResizeObserver<HTMLDivElement>();

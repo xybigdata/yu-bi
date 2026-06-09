@@ -20,7 +20,8 @@ import { EmptyFiller } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useParams } from 'app/routerCompat';
 import React, { memo, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { selectOrgId } from '../../../slice/selectors';
 import { useMemberSlice } from '../../MemberPage/slice';
@@ -37,7 +38,7 @@ export const Main = memo(({ sliderVisible }: { sliderVisible: boolean }) => {
   useMemberSlice();
   useVariableSlice();
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { viewId } = useParams<{ viewId?: string }>();
 
   const orgId = useSelector(selectOrgId);

@@ -20,7 +20,7 @@ import { Modal, Switch } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useWorkbenchSlice } from 'app/pages/ChartWorkbenchPage/slice';
 import { FC, memo, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 
 const AggregationOperationMenu: FC<{
@@ -30,7 +30,7 @@ const AggregationOperationMenu: FC<{
   const checkedValue = useMemo(() => defaultValue, [defaultValue]);
   const t = useI18NPrefix(`viz.workbench.header`);
   const { actions } = useWorkbenchSlice();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const onChange = value => {
     Modal.confirm({

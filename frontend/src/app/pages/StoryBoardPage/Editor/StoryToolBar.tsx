@@ -19,7 +19,8 @@ import { LeftOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { selectVizs } from 'app/pages/MainPage/pages/VizPage/slice/selectors';
 import React, { memo, useCallback, useContext, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import {
   FONT_SIZE_ICON_SM,
@@ -37,7 +38,7 @@ import { StorySetting } from './StorySetting';
 
 export const StoryToolBar: React.FC<{ onCloseEditor?: () => void }> = memo(
   ({ onCloseEditor }) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     const closeEditor = useCallback(() => {
       onCloseEditor?.();

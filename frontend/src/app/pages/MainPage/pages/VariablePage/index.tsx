@@ -37,7 +37,8 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { CommonFormTypes, TIME_FORMATTER } from 'globalConstants';
 import { Moment } from 'moment';
 import { Key, useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import {
   BORDER_RADIUS,
@@ -94,7 +95,7 @@ export function VariablePage() {
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([]);
   const [updateRowPermissionLoading, setUpdateRowPermissionLoading] =
     useState(false);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const variables = useSelector(selectVariables);
   const listLoading = useSelector(selectVariableListLoading);
   const saveLoading = useSelector(selectSaveVariableLoading);

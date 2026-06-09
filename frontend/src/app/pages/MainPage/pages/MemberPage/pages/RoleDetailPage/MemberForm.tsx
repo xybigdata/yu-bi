@@ -21,7 +21,8 @@ import { LoadingMask, ModalForm } from 'app/components';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { User } from 'app/slice/types';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { SPACE_TIMES, SPACE_XS } from 'styles/StyleConstants';
 import { selectMemberListLoading, selectMembers } from '../../slice/selectors';
@@ -35,7 +36,7 @@ interface MemberFormProps extends ModalProps {
 export const MemberForm = memo(
   ({ initialValues, onChange, onCancel, ...modalProps }: MemberFormProps) => {
     const [targetKeys, setTargetKeys] = useState<string[]>([]);
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const formRef = useRef<FormInstance>();
     const members = useSelector(selectMembers);
     const memberListLoading = useSelector(selectMemberListLoading);

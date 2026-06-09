@@ -21,7 +21,8 @@ import { ToolbarButton } from 'app/components';
 import { ControllerFacadeTypes } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import React, { useContext } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { G60 } from 'styles/StyleConstants';
 import { ORIGINAL_TYPE_MAP } from '../../../../../constants';
 import { addControllerAction } from '../../../slice/actions/controlActions';
@@ -41,7 +42,7 @@ export const AddController: React.FC<AddControlBtnProps> = () => {
   const tType = useI18NPrefix(`viz.board.controlTypes`);
   const tWt = useI18NPrefix(`viz.widget.type`);
   const { boardId, boardType } = useContext(BoardToolBarContext);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const hasQueryBtn = useSelector(selectHasQueryBtn);
   const hasResetBtn = useSelector(selectHasResetBtn);
   const onAddController = (info: { key: any }) => {

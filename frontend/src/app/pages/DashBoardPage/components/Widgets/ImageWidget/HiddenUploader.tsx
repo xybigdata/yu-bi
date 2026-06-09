@@ -25,7 +25,7 @@ import {
   useImperativeHandle,
   useRef,
 } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import { BoardContext } from '../../BoardProvider/BoardProvider';
 
 interface HiddenUploaderProps {
@@ -34,7 +34,7 @@ interface HiddenUploaderProps {
 
 export const HiddenUploader = forwardRef(
   ({ onChange }: HiddenUploaderProps, ref) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const uploadRef = useRef<any>();
     const { boardId } = useContext(BoardContext);
 

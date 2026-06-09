@@ -51,7 +51,8 @@ import { BASE_RESOURCE_URL } from 'globalConstants';
 import { changeLang, getLang } from 'locales/i18n';
 import { cloneElement, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import {
   BLACK,
@@ -86,7 +87,7 @@ export function Navbar() {
   const [profileVisible, setProfileVisible] = useState(false);
   const [modifyPasswordVisible, setModifyPasswordVisible] = useState(false);
   const lang = getLang();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
   const location = useLocation();
   const { i18n } = useTranslation();
