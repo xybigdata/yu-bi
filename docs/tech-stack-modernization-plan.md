@@ -94,21 +94,28 @@
 
 目标：以 Vite 替代 CRA/CRACO，形成长期可维护的前端构建基础。
 
-升级项：
-- 新增 Vite 配置，替代 CRACO 配置。
-- 迁移入口文件、多页面 share 入口、静态资源路径和代理配置。
-- 替换 Webpack 专属插件，尤其是 Monaco 和 Less 主题处理。
-- 保留 Rollup task 构建，或统一到 Vite/Rollup 配置。
+已完成：
+- 新增并行 Vite 5 构建链：`dev:vite`、`build:vite`。
+- 新增 Vite 多页面 HTML 入口：`index.html`、`shareChart.html`、`shareDashboard.html`、`shareStoryPlayer.html`。
+- 迁移 Vite dev proxy 和 custom chart plugins middleware。
+- 适配 CRA 兼容层：`process.env.NODE_ENV`、`process.env.PUBLIC_URL`、`module.hot`/`import.meta.hot`、`styled-components/macro`、SVG `ReactComponent` 导入、Ant Design Less 的 `~` import。
+- 保持 CRA5 的 `start`/`build` 作为默认主构建，Vite 先以并行脚本验证。
 
 风险：
 - `process.env.PUBLIC_URL`、`BrowserRouter basename`、资源路径可能需要统一处理。
 - CRA 的 Jest 配置不能直接复用。
+- 当前 Vite 构建仍输出 Rollup 循环 re-export 分包警告，替换默认构建前需要处理 `app/components/index.tsx` 的循环导出或调整分包策略。
+- Vite 配置文件当前为 TypeScript CJS 加载路径，会打印 Vite CJS Node API 弃用警告；后续可改为 ESM 配置或设置前端 package type。
 
 验收门槛：
 - `npm run dev` 成功。
 - `npm run build` 生成可被后端托管的 `frontend/build` 或等价产物。
 - `npm run build:task` 生成 `frontend/build/task/index.js` 或更新 Maven 复制路径。
 - 端到端访问后端托管静态资源成功。
+
+当前并行验收：
+- `npm run build:vite` 成功，产出 `build-vite/index.html` 和三个 share HTML。
+- `npm run dev:vite` 成功，首页 200，`/api/v1/plugins/custom/charts` 返回成功，`/shareChart.html` 返回 200。
 
 ### 阶段 3：React 17 升级到 React 18
 
@@ -230,6 +237,7 @@
 
 阶段 1 已完成，下一步优先处理阶段 2 的迁出 CRA 预研和准备工作：
 
-1. 梳理 CRACO 当前承担的能力：多入口 HTML、dev proxy、custom charts middleware、Monaco、Less/AntD 主题、split chunks。
-2. 设计 Vite 等价配置和产物目录，确保后端 Maven `package` 阶段仍能复制 `frontend/build` 和 `frontend/build/task/index.js`。
-3. 先建立 Vite 构建分支或并行脚本，再替换默认 `start/build`，避免一次提交同时迁移 React/Router/AntD。
+1. 处理 Vite Rollup 循环 re-export 分包警告，重点检查 `app/components/index.tsx` 和相关直接导入路径。
+2. 将 Vite 配置切到 ESM 加载，消除 CJS Node API 弃用警告。
+3. 对比 CRA5 与 Vite 产物静态资源路径、动态主题、Monaco worker 和 share 页面运行时行为。
+4. 确认后端 Maven `package` 阶段如何接入 Vite 默认产物，再替换 `start/build`。
