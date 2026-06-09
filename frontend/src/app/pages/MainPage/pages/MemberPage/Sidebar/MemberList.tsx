@@ -23,6 +23,7 @@ import { TenantManagementMode } from 'app/constants';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { useLocation, useParams } from 'app/routerCompat';
 import { selectSystemInfo } from 'app/slice/selectors';
 import {
   memo,
@@ -33,7 +34,6 @@ import {
   useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { SPACE_MD } from 'styles/StyleConstants';
 import { selectOrgId } from '../../../slice/selectors';

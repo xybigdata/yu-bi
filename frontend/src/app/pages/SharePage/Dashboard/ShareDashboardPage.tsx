@@ -19,6 +19,7 @@
 import useMount from 'app/hooks/useMount';
 import useRouteQuery from 'app/hooks/useRouteQuery';
 import ChartManager from 'app/models/ChartManager';
+import { useLocation, useParams } from 'app/routerCompat';
 import { login } from 'app/slice/thunks';
 import { ChartDataRequest } from 'app/types/ChartDataRequest';
 import {
@@ -29,7 +30,6 @@ import {
 import { StorageKeys } from 'globalConstants';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { getToken } from 'utils/auth';
 import persistence from 'utils/persistence';

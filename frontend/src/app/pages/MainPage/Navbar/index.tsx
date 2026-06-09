@@ -42,6 +42,7 @@ import {
   selectOrgId,
 } from 'app/pages/MainPage/slice/selectors';
 import { getOrganizations } from 'app/pages/MainPage/slice/thunks';
+import { NavLink, useLocation } from 'app/routerCompat';
 import { selectLoggedInUser, selectSystemInfo } from 'app/slice/selectors';
 import { logout } from 'app/slice/thunks';
 import { downloadFile } from 'app/utils/fetch';
@@ -50,7 +51,6 @@ import { changeLang, getLang } from 'locales/i18n';
 import { cloneElement, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { NavLink, useLocation } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import {
   BLACK,

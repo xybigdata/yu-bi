@@ -5,10 +5,10 @@ import {
 } from '@ant-design/icons';
 import { ListSwitch } from 'app/components';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
+import { useParams } from 'app/routerCompat';
 import classnames from 'classnames';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { LEVEL_5, SPACE_TIMES } from 'styles/StyleConstants';
 import { selectStoryboards, selectVizs } from '../slice/selectors';

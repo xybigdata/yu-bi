@@ -20,10 +20,10 @@ import { Button, Form, Input } from 'antd';
 import * as AuthLayout from 'app/components/styles/AuthLayout';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import usePrefixI18N from 'app/hooks/useI18NPrefix';
+import { Link } from 'app/routerCompat';
 import { User } from 'app/slice/types';
 import { StorageKeys } from 'globalConstants';
 import React, { useCallback, useState } from 'react';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import {
   BORDER_RADIUS,
