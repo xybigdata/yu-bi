@@ -46,10 +46,10 @@
 - Spring Boot 3.5.12 迁移与运行期兼容修复。
 - 第一批低风险依赖和插件升级。
 - Node 26 下前端开发启动兼容。
+- `.npmrc` registry 配置已兼容 npm 11。
+- Maven Enforcer 已声明 Java 21+ 与 Maven 3.9+。
 
 待完成：
-- 增加 Maven Enforcer，声明 Maven 和 Java 最低版本。
-- 修复 `.npmrc` 中 npm 11 警告的 registry 配置格式。
 - 将前端构建产物缺失导致的 `copy-rename-maven-plugin` 失败纳入显式构建流程。
 - 拆分 Maven 后端编译与前端构建生命周期，避免后端 Java 编译被前端产物缺失阻断。
 
