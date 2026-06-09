@@ -362,6 +362,7 @@
 - React Router 预迁移第三十五批：成员、来源、调度、权限四类详情容器已从 `CompatRoute` 切到 `useParams` / `useLocation` 驱动的条件渲染；这些页面不再把详情区显示逻辑委托给 v5 `Route` 匹配，兼容层底座对 `Route` 的真实依赖面继续缩小。
 - React Router 预迁移第三十六批：`AppRouter` 中的 `LoginAuthRoute` 已回收为普通 `CompatRoute` 的 `element`，分享页三个 Router 和 Viz 看板编辑器入口也已去掉只承载单一路由的 `CompatRoutes` 包装；这些场景不再占用底层 `Switch`，兼容层对 `CompatRoutes` 的真实依赖进一步收敛到少数多分支主容器。
 - React Router 预迁移第三十七批：`CompatRoute` / `CompatRoutes` 已改为使用 `useLocation + matchPath` 自行匹配，不再依赖底层 `Route` / `Switch` 运行时；`routerCompatLegacy.ts` 因此只剩 `useHistory`，兼容层内部的 Router 5 运行时依赖已压缩到最后一个导航能力点。
+- React Router 预迁移第三十八批：新增 `routerCompatRuntime.tsx`，由兼容层自持 `BrowserRouter` / `MemoryRouter` 与 history 上下文；`useCompatNavigate` 已改为直接消费内部 `useCompatHistory`，不再依赖 `useHistory` hook，至此兼容层内部对 Router 5 运行时 hook 的依赖也已清空。
 
 验收门槛：
 - 全部路由可访问。
@@ -567,9 +568,10 @@
 - 成员、来源、调度、权限这些“详情区条件显示”页面已不再依赖 `CompatRoute`，当前 `Route` 的主要残留压力已经收敛到主入口和少数真正需要互斥匹配的容器。
 - `CompatRoutes` 已从分享页 Router、Viz 看板编辑器入口和 `LoginAuthRoute` 的特殊子项场景中退出，当前 `Switch` 的主要残留压力已经收敛到主应用和少量真正需要多分支互斥的容器。
 - `CompatRoute` / `CompatRoutes` 已不再依赖底层 `Route` / `Switch`，当前兼容层内部剩余的 Router 5 运行时依赖只剩 `useHistory`。
+- `useCompatNavigate` 已改为消费兼容层自持的 history 上下文，`useHistory` hook 依赖已移除；当前兼容层对 Router 5 的运行时依赖已经不再通过 v5 hooks 暴露。
 - 当前仍保留旧 Router 5 运行时语义的核心点，已经压缩到：
-  1. `frontend/src/app/routerCompatLegacy.ts`
-  2. `frontend/src/app/hooks/useCompatNavigate.ts`
+  1. `frontend/src/app/routerCompatRuntime.tsx`
+  2. `frontend/src/app/routerCompatLegacy.ts`
 - 剩余需要继续处理的重点不是“全局搜索更多旧 API”，而是：
   1. 让 `CompatRoute` / `CompatRoutes` 真实接管到 Router 6/7。
   2. 让 `useCompatNavigate` 从 `useHistory` 切到 `useNavigate`。

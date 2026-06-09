@@ -17,9 +17,9 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useHistory } from 'app/routerCompatLegacy';
+import { useCompatHistory } from 'app/routerCompatRuntime';
 
-type CompatHistory = ReturnType<typeof useHistory>;
+type CompatHistory = ReturnType<typeof useCompatHistory>;
 type CompatLocationState = CompatHistory['location']['state'];
 
 interface CompatLocationTarget {
@@ -41,7 +41,7 @@ export interface CompatNavigate {
 }
 
 export const useCompatNavigate = () => {
-  const history = useHistory();
+  const history = useCompatHistory();
   const push = useCallback(
     (to: string | CompatLocationTarget, state?: CompatLocationState) => {
       history.push(to, state);
