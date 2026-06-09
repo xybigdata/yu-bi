@@ -169,7 +169,7 @@ export const AddController: React.FC<AddControlBtnProps> = () => {
   );
   return (
     <Dropdown
-      overlay={controlerItems}
+      dropdownRender={() => controlerItems}
       placement="bottomLeft"
       trigger={['click']}
     >

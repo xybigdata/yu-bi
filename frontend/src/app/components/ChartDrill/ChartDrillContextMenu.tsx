@@ -259,7 +259,7 @@ const ChartDrillContextMenu: FC<{
     <StyledChartDrill className="chart-drill-menu-container">
       <Dropdown
         disabled={!enableContextMenu}
-        overlay={contextMenu}
+        dropdownRender={() => contextMenu}
         destroyPopupOnHide={true}
         trigger={['contextMenu']}
       >

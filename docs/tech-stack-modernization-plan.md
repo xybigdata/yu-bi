@@ -181,6 +181,8 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
 - 预处理 AntD 5 的自定义 Dropdown 渲染 API：Header/Widget/ChartDraggable 等自定义 `overlay` 入口已切换为 `dropdownRender`，复杂菜单内部 JSX 暂保留。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
+- 继续预处理 AntD 5 的自定义 Dropdown 渲染 API：交互规则关系配置、字段类型选择、富文本引用字段、图表钻取右键菜单和仪表板控制器添加入口已从 `overlay` 切换到 `dropdownRender`。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
 
 预研结果：
 - Ant Design 相关调用点约 358 个文件，`visible`/`onVisibleChange`/`overlay`/`Menu.Item` 等 AntD 5 迁移热点分布广，不能直接大版本替换。

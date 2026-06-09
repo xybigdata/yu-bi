@@ -87,7 +87,7 @@ const JumpToChart: FC<
           value?.relation !== InteractionFieldRelation.Customize ||
           isEmpty(value?.relId)
         }
-        overlay={() => (
+        dropdownRender={() => (
           <ChartRelationList
             translate={t}
             targetRelId={value?.relId}

@@ -44,7 +44,7 @@ const SetFieldType = memo(
     return (
       <Dropdown
         trigger={['click']}
-        overlay={
+        dropdownRender={() => (
           <Menu
             selectedKeys={[
               field.type,
@@ -91,7 +91,7 @@ const SetFieldType = memo(
               </>
             )}
           </Menu>
-        }
+        )}
       >
         <Tooltip
           title={hasCategory ? t('typeAndCategory') : t('category')}

@@ -68,7 +68,7 @@ const JumpToUrl: FC<
       <Dropdown
         destroyPopupOnHide
         overlayStyle={{ margin: 4 }}
-        overlay={() => (
+        dropdownRender={() => (
           <UrlParamList
             translate={t}
             targetRelId={value?.relId}

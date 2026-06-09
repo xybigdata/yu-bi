@@ -70,7 +70,7 @@ const JumpToDashboard: FC<
       <Dropdown
         destroyPopupOnHide
         overlayStyle={{ margin: 4 }}
-        overlay={() => (
+        dropdownRender={() => (
           <ControllerList
             translate={t}
             targetRelId={value?.relId}

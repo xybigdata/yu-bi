@@ -275,7 +275,7 @@ const ChartRichTextAdapter: FC<{
           extendNodes: {
             4: (
               <Dropdown
-                overlay={fieldItems}
+                dropdownRender={() => fieldItems}
                 trigger={['click']}
                 key="ql-selectLink"
               >

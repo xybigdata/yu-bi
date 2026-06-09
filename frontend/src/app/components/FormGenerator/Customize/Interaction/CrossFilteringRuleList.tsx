@@ -109,7 +109,7 @@ const CrossFilteringRuleList: FC<
                   record?.relation !== InteractionFieldRelation.Customize ||
                   !rules?.map(r => r.id).includes(record?.id)
                 }
-                overlay={() => (
+                dropdownRender={() => (
                   <BoardRelationList
                     translate={t}
                     targetRelId={record?.relId}
