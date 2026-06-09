@@ -697,59 +697,104 @@
 2. 继续 React Router 5 -> 6/7 预迁移，优先清理剩余 `Route component=` / `Route render=`、`Redirect`、`useHistory` 和嵌套路由旧写法。
 3. 继续升级前端测试栈到较新稳定线，并处理 `react-app-polyfill` 与 `eslint-config-react-app` 残留。
 
-## 2026-06-09 老旧技术栈盘点
+## 2026-06-10 老旧技术栈盘点
 
-本轮全项目 review 后，仍然建议继续现代化的重点如下，按优先级由高到低排列：
+本轮全项目 review 后，仍然建议继续现代化的重点如下。这里已经按“是否仍在运行时主链”和“升级风险是否可控”重新排序，避免把已完成项继续误标为待办。
 
-1. React Router 5
-   - 现状：主应用仍残留一批 `useHistory`、`Redirect` 和 v5 风格路由声明。
-   - 更现代替代：React Router 6/7。
-   - 当前动作：先继续用 `useCompatNavigate` 收口导航调用点，再统一升级路由声明与重定向。
+### 一类：运行时主链里仍偏旧，且后续收益明确
 
-2. CRA 测试链残留
-   - 现状：运行、构建、测试链已全部脱离 CRA/CRACO，但 Jest 仍停留在 27.5.1，ESLint 仍借用 `eslint-config-react-app` 这类 CRA 时代工具配置。
-   - 更现代替代：Vitest，或独立 Jest 29/30 配置。
-   - 升级前提：先完成 React Router 与 AntD 主迁移，避免多个高风险面同时变化。
+1. `jjwt 0.7.0`
+   - 现状：当前 JWT 主链仍在 `core/pom.xml`，生产代码调用集中在 `JwtUtils` 与 `JwkUtils`。
+   - 更现代替代：`jjwt 0.12+`，或后续统一到 Spring Security 的 JOSE 能力。
+   - 调研结论：新版 `jjwt` 对 HMAC 密钥长度校验更严格，当前默认 `datart.security.token.secret` 过短，不能直接硬升。
+   - 风险判断：会影响 token 签发、解析、刷新和已有默认配置兼容性，必须单独做专项迁移。
 
-3. Enzyme 过渡适配层
-   - 现状：`frontend/src/setupTests.ts` 仍依赖 `enzyme` 和社区 React 18 adapter。
-   - 更现代替代：React Testing Library。
-   - 风险判断：Enzyme 目前只是勉强兼容 React 18，不适合作为长期测试基线。
+2. `org.apache.httpcomponents:httpclient:4.5.14`
+   - 现状：仍处在 HTTP 数据源与第三方 OAuth 运行时主链。
+   - 更现代替代：`HttpClient 5.x`，或进一步收敛到 JDK `HttpClient` / `OkHttp` 单栈。
+   - 调研结论：Apache 官方提供了 5.x 迁移指南，经典阻塞式 API 已整体迁到 `org.apache.hc.httpclient5` 包名空间，属于明确的 API 级升级，不是只改版本号。
+   - 风险判断：需要同步改造请求/响应模型、URI 构造、SSL 配置和实体读取逻辑，建议单列为下一批后端专项。
 
-4. Ant Design 4.24
-   - 现状：已经在 AntD 4 最后稳定线，但仍不是当前主线。
+3. `poi-ooxml 5.0.0`
+   - 现状：Excel 导入导出、样式转换链仍依赖这条主链，并带出较老的 `xmlgraphics-commons`。
+   - 更现代替代：升级到较新的 POI 5.x 稳定线。
+   - 调研结论：这是值得继续推进的一类，但必须连同导出、图像、SVG 转换链一起回归验证。
+   - 风险判断：改动面跨 `core`、`server`，不适合和 JWT/HTTP 客户端升级混做。
+
+4. Guava 21.0
+   - 现状：生产代码仍有少量 `CaseFormat`、`Lists`、`Sets`、`ImmutableSet`、`Iterables` 使用点。
+   - 更现代替代：优先用 JDK 集合工厂、`StringJoiner`、自定义小工具替换；若保留，再升级到较新的 Guava 稳定线。
+   - 风险判断：这一项适合先“减使用面”，再决定是否整体升版本。
+
+5. `commons-csv 1.8` 与 `commons-text 1.9`
+   - 现状：`CSVParse`、文本处理仍依赖这两条较老公共库。
+   - 更现代替代：升级到当前 1.14.x / 1.13.x 之后的稳定线，或在低频能力上改回 JDK 原生能力。
+   - 调研结论：Apache Commons CSV 发布页显示 1.14.1 已发布；Commons Text 的 release history 已进入 1.13+ / 1.14+ 演进区间，当前项目版本明显滞后。
+   - 风险判断：代码使用面不大，属于后续可以优先尝试的小批次。
+
+6. `aspectjweaver 1.9.8.M1`
+   - 现状：仍在 `core/pom.xml` 中以 milestone 版本存在。
+   - 更现代替代：升级到正式 GA 版本，或评估是否可完全依赖 Spring AOP 当前生态。
+   - 风险判断：只要项目里确实还依赖 `@Aspect` 与织入行为，就不应草率移除，但继续保留 milestone 版本也不理想。
+
+7. `H2 1.4.200`
+   - 现状：当前主要用于 demo / 内置样例兼容。
+   - 更现代替代：`H2 2.x`，或把集成验证迁到 Testcontainers。
+   - 调研结论：H2 官方最新 release 已到 2.4.240；其发布说明明确提到，1.4.200 及更早数据库需要先导出 SQL，再在新版本中重建导入。
+   - 风险判断：这不是“升版本”问题，而是“样例数据重建”问题，需要独立准备迁移脚本或新 demo 数据。
+
+### 二类：前端仍有明显年代感，但需要结合大版本迁移节奏推进
+
+1. Ant Design 4.24
+   - 现状：已经在 4.x 最后稳定线，但仍不是当前主线。
    - 更现代替代：Ant Design 5。
-   - 当前阻塞：复杂 Dropdown/Menu/Modal/Popover 历史 API 仍需继续清理。
+   - 当前阻塞：复杂 Dropdown/Menu/Modal/Popover 历史 API 和 less 主题链仍需继续清理。
+
+2. Jest 27 测试链
+   - 现状：运行、构建已完全脱离 CRA，但测试仍停留在 `jest 27.5.1`，同时借用 `babel-preset-react-app` 与 `eslint-config-react-app` 的历史配置。
+   - 更现代替代：独立升级到 Jest 29/30，或评估迁到 Vitest。
+   - 调研结论：Jest 官方已在 2025-06-04 发布 Jest 30，说明上游仍积极维护；当前项目属于“已脱离 CRA 但测试栈仍留在 CRA 时代”的典型状态。
+   - 风险判断：建议先做测试配置去 CRA 化，再决定直接上 Jest 30 还是迁 Vitest。
+
+3. `styled-components 5.3.3` + `styled-components/macro` 兼容壳
+   - 现状：项目大量使用 `styled-components/macro`，并且仍保留 `@types/styled-components`。
+   - 更现代替代：`styled-components` 6 原生 TypeScript 版本，或后续再评估更轻的样式方案。
+   - 调研结论：官方 v6 迁移说明要求同时移除社区 `@types/styled-components`，并更新 `stylis`；这意味着当前仓库的 macro 别名、类型声明和样式工具链都要一起调。
+   - 风险判断：可以做，但不适合作为零散小改；最好与测试链或 AntD 主题链调整错峰推进。
+
+4. `moment`
+   - 现状：时间格式化、时间控件默认值、仪表板控制器等仍广泛依赖 `moment`。
+   - 更现代替代：`dayjs`、`date-fns`，或结合 AntD 5 时间适配策略重构。
+   - 调研结论：Moment 官方文档明确标注项目已进入 maintenance mode，属于典型“还能用，但不建议新项目继续扩展”的库。
+   - 风险判断：调用面很广，不适合拆成很小的随机提交；更适合与 AntD 5 升级联动处理。
 
 5. `react-app-polyfill`
-   - 现状：`frontend/src/setupTests.ts` 和运行时仍显式引入 `ie11`/`stable` polyfill。
-   - 更现代替代：按浏览器支持矩阵精简到 Vite + `browserslist`/按需 polyfill。
-   - 风险判断：需要先确认产品是否还要求兼容 IE 11。
+   - 现状：此前仅剩运行时与测试 3 个入口的 `stable` 引用。
+   - 更现代替代：按当前 `browserslist` 与 Vite 产物能力运行，个别缺口改为按需 polyfill。
+   - 当前动作：本批次已删除 `frontend/src/entryPointFactory.tsx`、`frontend/src/task.ts`、`frontend/src/setupTests.ts` 的显式引入，并移除前端依赖声明。
+   - 风险判断：在当前 `browserslist` 不再包含 IE 的前提下，这一步属于低风险兼容层收缩。
 
-6. `fastjson 1.x`
-   - 现状：后端多个模块和 Web MVC message converter 仍直接依赖 `fastjson`。
-   - 更现代替代：优先统一到 Jackson；如必须保留阿里生态特性，再评估 `fastjson2`。
-   - 风险判断：这是后端最敏感的基础设施替换之一，需要按 DTO/配置/导入导出链路分批验证。
+### 三类：中长期专项，不适合当作随手升级
 
-7. `jjwt 0.7.0`
-   - 现状：JWT 依赖明显偏老。
-   - 更现代替代：JJWT 0.12+，或统一到单一现代 JWT 库。
-   - 风险判断：会影响 token 签发、解析和兼容性验证。
+1. Shiro 2.0.5
+   - 现状：已经兼容当前 Boot 3 主线，但仍是与 Spring Security 并行的一套安全体系。
+   - 更现代替代：长期评估迁到 Spring Security 原生能力。
+   - 风险判断：收益高，但改动面极大，必须晚于 JWT、HTTP、测试链和前端主栈收口。
 
-8. Selenium 3 + PhantomJS Driver
-   - 现状：`core` 与 `server` 仍保留 `selenium-java 3.x` 和 `phantomjsdriver`。
-   - 更现代替代：Selenium 4 + Headless Chrome/Edge，或 Playwright。
-   - 风险判断：会影响截图、导出和服务器浏览器依赖安装方式。
+2. Druid 1.2.28
+   - 现状：服务端和 JDBC 数据源工厂仍依赖 Druid。
+   - 更现代替代：HikariCP 统一池化，或至少继续跟进 Druid 的 Boot 3 兼容稳定线。
+   - 风险判断：涉及连接池参数、监控和多数据源行为，不适合作为零散低风险批次。
 
-9. 后端通用基础库老版本
-   - 现状：仍有 `commons-lang 2.6`、`commons-io 1.3.1`、`guava 21.0`、`httpclient 4.5.x`、`poi-ooxml 5.0.0`、`commons-csv 1.8`、`aspectjweaver 1.9.8.M1`、`mysql-connector-java 8.0.29` 旧坐标等。
-   - 更现代替代：优先迁到 Boot 3 生态兼容的较新稳定线，并尽量使用 BOM 或父 POM 管理。
-   - 风险判断：这类升级适合拆成多个小批次，不应与 JSON/JWT/浏览器自动化迁移混做。
+3. `mybatis-generator-core 1.4.0`
+   - 现状：仍在 `core` 中声明，但主要服务代码生成链，不是主运行时链。
+   - 更现代替代：升级到更新版本，或把生成器能力迁到独立 profile / 独立工具模块。
+   - 风险判断：应按“代码生成链专项治理”处理，不建议和运行时模块混改。
 
-10. H2 1.4.200 demo 库
-   - 现状：仅用于 demo/内置样例，但版本过旧。
-   - 更现代替代：H2 2.x，或测试环境改用 Testcontainers。
-   - 风险判断：需要同步准备可读的新 demo 数据或迁移脚本，不能只升版本号。
+4. `nashorn-core 15.4`
+   - 现状：脚本解析链仍依赖 Nashorn 兼容层。
+   - 更现代替代：GraalJS，或进一步收缩脚本执行边界。
+   - 风险判断：会影响脚本数据源与表达式执行，不适合在当前阶段贸然切换。
 
 ### React Router 预迁移第三十九批之外的并行治理：浏览器自动化依赖收口
 
@@ -768,6 +813,12 @@
 - 运行时与测试入口已删除 `react-app-polyfill/ie11` 显式引入，浏览器兼容策略进一步从 IE11 历史包袱收缩到现代浏览器基线。
 - `frontend/src/react-app-env.d.ts` 已去掉 `react-scripts` 类型引用，改为保留项目真实需要的本地声明。
 - 为 Vite 链路补齐了 `*.svg` / `ReactComponent` 的显式类型声明，避免继续依赖 CRA 类型包做隐式兜底。
+
+### 并行治理：移除 `react-app-polyfill` 运行时残留
+
+- `frontend/src/entryPointFactory.tsx`、`frontend/src/task.ts`、`frontend/src/setupTests.ts` 已删除 `react-app-polyfill/stable` 显式引入。
+- `frontend/package.json` 与 `frontend/package-lock.json` 已移除 `react-app-polyfill` 依赖声明。
+- 这一步保留了当前仍在使用的 `core-js/features/string/replace-all`，只删除已不再需要的整包浏览器兼容壳。
 
 ### React Router 预迁移第四十批：切到 Router 6 经典运行时底座
 
@@ -865,6 +916,24 @@
 - `core/src/main/java/datart/core/migration/DatabaseMigration.java` 已去除 `de.vandermeer.asciitable`，数据库迁移版本输出改为本地 ASCII 表格渲染逻辑。
 - `core/pom.xml` 已删除 `de.vandermeer:asciitable:0.3.2` 直接依赖。
 - 这一步不改变迁移流程和成功/失败判定，只替换控制台展示实现。
+
+### 剩余老基础库评估：mybatis-generator-core 与 httpclient
+
+- `org.mybatis.generator:mybatis-generator-core:1.4.0`
+  - 当前判断：属于生成期依赖，不是主运行时链。
+  - 证据：
+    - `core/src/main/java/datart/core/common/MybatisGeneratorPlugin.java`
+    - `core/src/main/resources/mybatis-generator/generatorConfig.xml`
+  - 处理策略：单独归入“代码生成链专项治理”，后续结合驱动类名、JDK 21 与实体生成策略一起处理。
+
+- `org.apache.httpcomponents:httpclient:4.5.14`
+  - 当前判断：属于明确的运行时主链依赖，分布在 HTTP 数据源拉取和第三方 OAuth 登录流程中。
+  - 主要使用点：
+    - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
+    - `data-providers/http-data-provider/src/main/java/datart/data/provider/ResponseJsonParser.java`
+    - `security/src/main/java/datart/security/oauth2/WeChartOauth2Client.java`
+    - `security/src/main/java/datart/security/oauth2/DingTalkOauth2Client.java`
+  - 风险判断：若升级到 `httpclient5`，需要同步改造请求/响应模型、URI 构造、SSL 配置与实体读取 API，不适合作为“顺手清理”批次，需要单独专项推进。
 
 ### 并行治理：清理 commons-lang 2 与直连 commons-io 1.x 使用点
 

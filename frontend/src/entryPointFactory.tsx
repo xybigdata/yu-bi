@@ -20,7 +20,6 @@ import 'antd/dist/antd.variable.min.css';
 import 'app/assets/fonts/iconfont.css';
 import 'core-js/features/string/replace-all';
 import React, { Fragment } from 'react';
-import 'react-app-polyfill/stable'; // TODO(Stephen): check if need it
 import { Inspector } from 'react-dev-inspector';
 import { createRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
