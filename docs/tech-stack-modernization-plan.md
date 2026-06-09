@@ -782,3 +782,9 @@
 - `frontend/src/setupTests.ts` 已删除 Enzyme 初始化，前端测试基座不再依赖 React 18 的社区 Enzyme adapter。
 - `frontend/package.json` 已移除 `enzyme` 与 `@cfaester/enzyme-adapter-react-18`。
 - 当前测试文件已全部使用 Testing Library / Jest 风格断言，Enzyme 仅剩历史初始化残留，因此这一步不会改变现有测试写法。
+
+### 并行治理：测试执行入口脱离 `craco test`
+
+- `frontend/package.json` 的 `test` 脚本已从 `craco test` 切到 `jest --config jest.config.js`。
+- 当前 Jest 配置仍由 `frontend/jest.config.js` 通过 CRACO 配置对象生成，但测试执行入口已经不再依赖 CRA dev server / `react-scripts test` 这条工作流。
+- 这一步先把“测试怎么跑”从 CRA/CRACO 壳里拆出来，后续再继续把 `jest.config.js` 对 `@craco/craco` 的配置生成依赖替换掉。

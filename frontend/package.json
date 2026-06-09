@@ -23,7 +23,7 @@
     "build:vite": "vite build",
     "build:task": "rollup -c",
     "build:all": "npm run build:task && npm run build",
-    "test": "craco test",
+    "test": "jest --config jest.config.js",
     "test:coverage": "npm run test -- --watchAll=false --coverage",
     "test:ci": "npm run test -- --watchAll=false --runInBand --silent",
     "checkTs": "tsc --noEmit",
