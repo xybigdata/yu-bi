@@ -18,11 +18,11 @@
 
 import { CloseOutlined, LeftOutlined, SaveOutlined } from '@ant-design/icons';
 import { Button, Space } from 'antd';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import classnames from 'classnames';
 import { FC, PropsWithChildren, memo, useContext } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router';
 import styled from 'styled-components/macro';
 import {
   FONT_SIZE_ICON_SM,
@@ -40,7 +40,7 @@ import { BoardContext } from '../BoardProvider/BoardProvider';
 
 const EditorHeader: FC<PropsWithChildren<{}>> = memo(({ children }) => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const t = useI18NPrefix(`viz.action`);
   const { updateBoard } = useContext(BoardActionContext);
   const { onEditClearActiveWidgets } = useContext(WidgetActionContext);
@@ -48,9 +48,9 @@ const EditorHeader: FC<PropsWithChildren<{}>> = memo(({ children }) => {
   const { saving } = useContext(BoardInfoContext);
   const title = useStatusTitle(name, status);
   const onCloseBoardEditor = () => {
-    const pathName = history.location.pathname;
+    const pathName = navigate.location.pathname;
     const prePath = pathName.split('/boardEditor')[0];
-    history.push(`${prePath}`);
+    navigate.push(`${prePath}`);
     dispatch(clearEditBoardState());
   };
   const onUpdateBoard = () => {

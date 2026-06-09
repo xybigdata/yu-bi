@@ -17,10 +17,10 @@
  */
 
 import { DownloadFileType } from 'app/constants';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { generateShareLinkAsync } from 'app/utils/fetch';
 import { createContext, FC, PropsWithChildren, memo, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router';
 import { BOARD_UNDO } from '../../constants';
 import { boardDownLoadAction } from '../../pages/Board/slice/asyncActions';
 import { fetchBoardDetail } from '../../pages/Board/slice/thunk';
@@ -57,7 +57,7 @@ export const BoardActionProvider: FC<PropsWithChildren<{
   boardId: string;
 }>> = memo(({ boardId, children }) => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
 
   const actions = useMemo(() => {
     const actionObj: BoardActionContextProps = {
@@ -92,9 +92,9 @@ export const BoardActionProvider: FC<PropsWithChildren<{
         );
       },
       onCloseBoardEditor: (boardId: string) => {
-        const pathName = history.location.pathname;
+        const pathName = navigate.location.pathname;
         const prePath = pathName.split('/boardEditor')[0];
-        history.push(`${prePath}`);
+        navigate.push(`${prePath}`);
         dispatch(clearEditBoardState());
         // 更新view界面数据
         dispatch(fetchBoardDetail({ dashboardRelId: boardId }));
@@ -107,7 +107,7 @@ export const BoardActionProvider: FC<PropsWithChildren<{
       },
     };
     return actionObj;
-  }, [boardId, dispatch, history]);
+  }, [boardId, dispatch, navigate]);
   return (
     <BoardActionContext.Provider value={actions}>
       {children}

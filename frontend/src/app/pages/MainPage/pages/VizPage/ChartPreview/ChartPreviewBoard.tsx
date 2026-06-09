@@ -27,6 +27,7 @@ import { ChartInteractionEvent } from 'app/constants';
 import ChartDrillContext from 'app/contexts/ChartDrillContext';
 import { useCacheWidthHeight } from 'app/hooks/useCacheWidthHeight';
 import useChartInteractions from 'app/hooks/useChartInteractions';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useDebouncedLoadingStatus from 'app/hooks/useDebouncedLoadingStatus';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
@@ -56,7 +57,6 @@ import {
   useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { BORDER_RADIUS, SPACE_LG } from 'styles/StyleConstants';
 import { isEmptyArray } from 'utils/object';
@@ -133,7 +133,7 @@ const ChartPreviewBoard: FC<{
     const t = useI18NPrefix('viz.main');
     const tg = useI18NPrefix('global');
     const saveAsViz = useSaveAsViz();
-    const history = useHistory();
+    const navigate = useCompatNavigate();
     const vizs = useSelector(selectVizs);
     const [openViewDetailPanel, viewDetailPanelContextHolder] =
       useDisplayViewDetail();
@@ -446,7 +446,7 @@ const ChartPreviewBoard: FC<{
     }, [backendChartId, chart, registerChartEvents]);
 
     const handleGotoWorkbenchPage = () => {
-      history.push({
+      navigate.push({
         pathname: `/organizations/${orgId}/vizs/chartEditor`,
         search: `dataChartId=${backendChartId}&chartType=dataChart&container=dataChart`,
       });
@@ -578,7 +578,7 @@ const ChartPreviewBoard: FC<{
         );
 
         try {
-          history.push({
+          navigate.push({
             pathname: `/organizations/${orgId}/vizs/${dashboardId}/boardEditor`,
             state: {
               widgetInfo: JSON.stringify({
@@ -593,18 +593,18 @@ const ChartPreviewBoard: FC<{
           throw error;
         }
       },
-      [previewCharts, history, backendChartId, orgId],
+      [previewCharts, navigate, backendChartId, orgId],
     );
 
     const redirect = useCallback(
       tabKey => {
         if (tabKey) {
-          history.push(`/organizations/${orgId}/vizs/${tabKey}`);
+          navigate.push(`/organizations/${orgId}/vizs/${tabKey}`);
         } else {
-          history.push(`/organizations/${orgId}/vizs`);
+          navigate.push(`/organizations/${orgId}/vizs`);
         }
       },
-      [history, orgId],
+      [navigate, orgId],
     );
 
     const handleRecycleViz = useCallback(() => {

@@ -19,6 +19,7 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
 import { DownloadFileType, RUNTIME_DATE_LEVEL_KEY } from 'app/constants';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import useMount from 'app/hooks/useMount';
 import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
@@ -72,7 +73,6 @@ import { updateBy } from 'app/utils/mutation';
 import { CommonFormTypes } from 'globalConstants';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
 import styled from 'styled-components/macro';
 import { LEVEL_100 } from 'styles/StyleConstants';
 import { CloneValueDeep, isEmptyArray } from 'utils/object';
@@ -139,7 +139,7 @@ export const ChartEditor: FC<ChartEditorProps> = ({
   const [chart, setChart] = useState<IChart>();
   const drillOptionRef = useRef<IChartDrillOption>();
   const [allowQuery, setAllowQuery] = useState<boolean>(false);
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const addVizFn = useAddViz({
     showSaveForm: saveFormContextValue.showSaveForm,
   });
@@ -489,7 +489,7 @@ export const ChartEditor: FC<ChartEditorProps> = ({
             },
             callback: folder => {
               folder &&
-                history.push(`/organizations/${orgId}/vizs/${folder.relId}`);
+                navigate.push(`/organizations/${orgId}/vizs/${folder.relId}`);
             },
           });
         } catch (error) {
@@ -539,7 +539,7 @@ export const ChartEditor: FC<ChartEditorProps> = ({
     addVizFn,
     chartConfig,
     dataview?.computedFields,
-    history,
+    navigate,
     tg,
   ]);
 
@@ -547,7 +547,7 @@ export const ChartEditor: FC<ChartEditorProps> = ({
     (dashboardId, dashboardType) => {
       const dataChart = buildDataChart();
       try {
-        history.push({
+        navigate.push({
           pathname: `/organizations/${orgId}/vizs/${dashboardId}/boardEditor`,
           state: {
             widgetInfo: JSON.stringify({
@@ -562,7 +562,7 @@ export const ChartEditor: FC<ChartEditorProps> = ({
         throw error;
       }
     },
-    [history, buildDataChart, chartType, dataview, orgId],
+    [navigate, buildDataChart, chartType, dataview, orgId],
   );
 
   const handleRefreshDataset = useCallback(async () => {

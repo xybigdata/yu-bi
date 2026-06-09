@@ -19,12 +19,12 @@
 import { EditOutlined, MoreOutlined, SendOutlined } from '@ant-design/icons';
 import { Button, Dropdown, Space } from 'antd';
 import { ShareManageModal } from 'app/components/VizOperationMenu';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectPublishLoading } from 'app/pages/MainPage/pages/VizPage/slice/selectors';
 import classnames from 'classnames';
 import { FC, memo, useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import {
   FONT_SIZE_ICON_SM,
@@ -44,7 +44,7 @@ import SaveToStoryBoard from '../SaveToStoryBoard';
 export const TitleHeader: FC = memo(() => {
   const t = useI18NPrefix(`viz.action`);
   const publishLoading = useSelector(selectPublishLoading);
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const [showShareLinkModal, setShowShareLinkModal] = useState(false);
   const [mockDataModal, setMockDataModal] = useState(false);
   const [showSaveToStory, setShowSaveToStory] = useState<boolean>(false);
@@ -59,11 +59,11 @@ export const TitleHeader: FC = memo(() => {
   const isArchived = Number(status) === 0;
 
   const toBoardEditor = () => {
-    const pathName = history.location.pathname;
+    const pathName = navigate.location.pathname;
     if (pathName.includes(boardId)) {
-      history.push(`${pathName.split(boardId)[0]}${boardId}/boardEditor`);
+      navigate.push(`${pathName.split(boardId)[0]}${boardId}/boardEditor`);
     } else if (pathName.includes('/vizs')) {
-      history.push(
+      navigate.push(
         `${pathName.split('/vizs')[0]}${'/vizs/'}${boardId}/boardEditor`,
       );
     }
@@ -71,7 +71,7 @@ export const TitleHeader: FC = memo(() => {
 
   const saveToStoryOk = useCallback(
     (storyId: string) => {
-      history.push({
+      navigate.push({
         pathname: `/organizations/${orgId}/vizs/storyEditor/${storyId}`,
         state: {
           addDashboardId: boardId,
@@ -79,7 +79,7 @@ export const TitleHeader: FC = memo(() => {
       });
       setShowSaveToStory(false);
     },
-    [boardId, history, orgId],
+    [boardId, navigate, orgId],
   );
 
   return (
