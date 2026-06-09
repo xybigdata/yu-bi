@@ -28,6 +28,14 @@ import { FC, memo, useContext } from 'react';
 import styled from 'styled-components';
 import widgetManagerInstance from '../../../../components/WidgetManager';
 
+type CollapseItemsCompatProps = {
+  items: Array<{
+    key: string;
+    label: React.ReactNode;
+    children: React.ReactNode;
+  }>;
+};
+
 const StyledWrapper = styled.div`
   width: 100%;
   min-height: 0;
@@ -81,25 +89,32 @@ export const BoardConfigCollapse: FC<{
         ?.filter(c => !Boolean(c.hidden))
         .map((c, index) => {
           if (c.comType === 'group') {
+            const collapseProps = {
+              items: [
+                {
+                  key: c.key,
+                  label: <CollapseHeader title={t(c.label, true)} />,
+                  children: (
+                    <GroupLayout
+                      ancestors={[index]}
+                      mode={
+                        c.comType === 'group'
+                          ? FormGroupLayoutMode.INNER
+                          : FormGroupLayoutMode.OUTER
+                      }
+                      data={c}
+                      translate={t}
+                      dataConfigs={[]}
+                      context={context}
+                      onChange={onChange}
+                    />
+                  ),
+                },
+              ],
+            } as CollapseItemsCompatProps;
+
             return (
-              <Collapse.Panel
-                header={<CollapseHeader title={t(c.label, true)} />}
-                key={c.key}
-              >
-                <GroupLayout
-                  ancestors={[index]}
-                  mode={
-                    c.comType === 'group'
-                      ? FormGroupLayoutMode.INNER
-                      : FormGroupLayoutMode.OUTER
-                  }
-                  data={c}
-                  translate={t}
-                  dataConfigs={[]}
-                  context={context}
-                  onChange={onChange}
-                />
-              </Collapse.Panel>
+              <Collapse key={c.key} ghost {...(collapseProps as any)} />
             );
           } else {
             return (

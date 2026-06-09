@@ -24,6 +24,14 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ChartDataConfig, ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo } from 'react';
 
+type CollapseItemsCompatProps = {
+  items: Array<{
+    key: string;
+    label: React.ReactNode;
+    children: React.ReactNode;
+  }>;
+};
+
 const ChartStyleConfigPanel: FC<{
   configs?: ChartStyleConfig[];
   dataConfigs?: ChartDataConfig[];
@@ -44,23 +52,33 @@ const ChartStyleConfigPanel: FC<{
           ?.filter(c => !Boolean(c.hidden))
           ?.map((c, index) => {
             if (c.comType === 'group') {
+              const collapseProps = {
+                items: [
+                  {
+                    key: c.key,
+                    label: t(c.label, true),
+                    children: (
+                      <GroupLayout
+                        ancestors={[index]}
+                        mode={
+                          c.comType === 'group'
+                            ? FormGroupLayoutMode.INNER
+                            : FormGroupLayoutMode.OUTER
+                        }
+                        data={c}
+                        translate={t}
+                        dataConfigs={dataConfigs}
+                        onChange={onChange}
+                        context={context}
+                        flatten
+                      />
+                    ),
+                  },
+                ],
+              } as CollapseItemsCompatProps;
+
               return (
-                <Collapse.Panel header={t(c.label, true)} key={c.key}>
-                  <GroupLayout
-                    ancestors={[index]}
-                    mode={
-                      c.comType === 'group'
-                        ? FormGroupLayoutMode.INNER
-                        : FormGroupLayoutMode.OUTER
-                    }
-                    data={c}
-                    translate={t}
-                    dataConfigs={dataConfigs}
-                    onChange={onChange}
-                    context={context}
-                    flatten
-                  />
-                </Collapse.Panel>
+                <Collapse key={c.key} ghost {...(collapseProps as any)} />
               );
             } else {
               return (

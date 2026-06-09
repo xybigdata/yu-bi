@@ -29,6 +29,14 @@ import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { editBoardStackActions } from '../../slice';
 
+type CollapseItemsCompatProps = {
+  items: Array<{
+    key: string;
+    label: React.ReactNode;
+    children: React.ReactNode;
+  }>;
+};
+
 const StyledWrapper = styled.div`
   width: 100%;
   min-height: 0;
@@ -68,29 +76,30 @@ export const BoardConfigCollapse: FC<{
   ) => void;
 }> = memo(({ configs, onChange }) => {
   const t = useI18NPrefix();
-  return (
-    <Collapse className="" ghost>
-      {configs
-        ?.filter(c => !Boolean(c.hidden))
-        .map((c, index) => (
-          <Collapse.Panel
-            header={<CollapseHeader title={t(c.label, true)} />}
-            key={c.key}
-          >
-            <GroupLayout
-              ancestors={[index]}
-              mode={
-                c.comType === 'group'
-                  ? FormGroupLayoutMode.INNER
-                  : FormGroupLayoutMode.OUTER
-              }
-              data={c}
-              translate={t}
-              dataConfigs={[]}
-              onChange={onChange}
-            />
-          </Collapse.Panel>
-        ))}
-    </Collapse>
-  );
+  const collapseItems = configs
+    ?.filter(c => !Boolean(c.hidden))
+    .map((c, index) => ({
+      key: c.key,
+      label: <CollapseHeader title={t(c.label, true)} />,
+      children: (
+        <GroupLayout
+          ancestors={[index]}
+          mode={
+            c.comType === 'group'
+              ? FormGroupLayoutMode.INNER
+              : FormGroupLayoutMode.OUTER
+          }
+          data={c}
+          translate={t}
+          dataConfigs={[]}
+          onChange={onChange}
+        />
+      ),
+    }));
+
+  const collapseProps = {
+    items: collapseItems,
+  } as CollapseItemsCompatProps;
+
+  return <Collapse className="" ghost {...(collapseProps as any)} />;
 });
