@@ -47,6 +47,10 @@ type DropdownPopupRenderCompatProps = {
   popupRender?: (originNode: React.ReactNode) => React.ReactNode;
 };
 
+type DropdownDestroyOnHiddenCompatProps = {
+  destroyOnHidden?: boolean;
+};
+
 const ChartDraggableElementField: FC<{
   modalSize;
   config;
@@ -131,6 +135,9 @@ const ChartDraggableElementField: FC<{
     const dropdownPopupRenderProps = {
       popupRender: () => renderActionExtensionMenu(),
     } as DropdownPopupRenderCompatProps;
+    const dropdownDestroyOnHiddenProps = {
+      destroyOnHidden: true,
+    } as DropdownDestroyOnHiddenCompatProps;
 
     const enableActionsIcons = col => {
       const icons = [] as any;
@@ -167,7 +174,7 @@ const ChartDraggableElementField: FC<{
       <Dropdown
         key={columnConfig.uid}
         disabled={!config?.actions}
-        destroyPopupOnHide={true}
+        {...(dropdownDestroyOnHiddenProps as any)}
         {...(dropdownPopupRenderProps as any)}
         overlayClassName="datart-data-section-dropdown"
         trigger={['click']}

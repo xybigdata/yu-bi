@@ -33,6 +33,10 @@ type DropdownPopupRenderCompatProps = {
   popupRender?: (originNode: React.ReactNode) => React.ReactNode;
 };
 
+type DropdownDestroyOnHiddenCompatProps = {
+  destroyOnHidden?: boolean;
+};
+
 const JumpToChart: FC<
   {
     vizs?: VizType[];
@@ -69,6 +73,9 @@ const JumpToChart: FC<
       />
     ),
   } as DropdownPopupRenderCompatProps;
+  const dropdownDestroyOnHiddenProps = {
+    destroyOnHidden: true,
+  } as DropdownDestroyOnHiddenCompatProps;
   const selectPopupMatchWidthProps = {
     popupMatchSelectWidth: false,
   } as SelectPopupMatchSelectWidthCompatProps;
@@ -108,7 +115,7 @@ const JumpToChart: FC<
         </Select.Option>
       </Select>
       <Dropdown
-        destroyPopupOnHide
+        {...(dropdownDestroyOnHiddenProps as any)}
         overlayStyle={{ margin: 4 }}
         disabled={
           value?.relation !== InteractionFieldRelation.Customize ||

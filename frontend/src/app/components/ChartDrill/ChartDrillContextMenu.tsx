@@ -41,6 +41,10 @@ import { FONT_WEIGHT_MEDIUM, SPACE_SM } from 'styles/StyleConstants';
 import { isEmpty } from 'utils/object';
 import { InteractionMouseEvent } from '../FormGenerator/constants';
 
+type DropdownDestroyOnHiddenCompatProps = {
+  destroyOnHidden?: boolean;
+};
+
 const ChartDrillContextMenu: FC<{
   children?: ReactNode;
   chartConfig?: ChartConfig;
@@ -48,6 +52,9 @@ const ChartDrillContextMenu: FC<{
 }> = memo(({ children, metas, chartConfig }) => {
   const t = useI18NPrefix(`viz.palette.drill`);
   const td = useI18NPrefix(`viz.workbench.dataview`);
+  const dropdownDestroyOnHiddenProps = {
+    destroyOnHidden: true,
+  } as DropdownDestroyOnHiddenCompatProps;
   const {
     drillOption,
     availableSourceFunctions,
@@ -298,7 +305,7 @@ const ChartDrillContextMenu: FC<{
           onClick: handleMenuClick,
           style: { minWidth: 200 },
         }}
-        destroyPopupOnHide={true}
+        {...(dropdownDestroyOnHiddenProps as any)}
         trigger={['contextMenu']}
       >
         <div style={{ height: '100%' }}>{children}</div>

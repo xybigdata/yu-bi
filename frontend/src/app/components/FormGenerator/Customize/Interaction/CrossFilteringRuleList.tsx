@@ -32,6 +32,10 @@ type DropdownPopupRenderCompatProps = {
   popupRender?: (originNode: React.ReactNode) => React.ReactNode;
 };
 
+type DropdownDestroyOnHiddenCompatProps = {
+  destroyOnHidden?: boolean;
+};
+
 const CrossFilteringRuleList: FC<
   {
     widgetId: string;
@@ -51,6 +55,9 @@ const CrossFilteringRuleList: FC<
   translate: t,
 }) => {
   const viewMap = useSelector(selectViewMap);
+  const dropdownDestroyOnHiddenProps = {
+    destroyOnHidden: true,
+  } as DropdownDestroyOnHiddenCompatProps;
 
   const currentRules = useMemo(() => {
     return (boardVizs || [])
@@ -107,7 +114,7 @@ const CrossFilteringRuleList: FC<
                 </Select.Option>
               </Select>
               <Dropdown
-                destroyPopupOnHide
+                {...(dropdownDestroyOnHiddenProps as any)}
                 overlayStyle={{ margin: 4 }}
                 disabled={
                   record?.relation !== InteractionFieldRelation.Customize ||

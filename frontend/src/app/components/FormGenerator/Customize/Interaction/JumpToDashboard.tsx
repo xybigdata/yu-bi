@@ -32,6 +32,10 @@ type DropdownPopupRenderCompatProps = {
   popupRender?: (originNode: React.ReactNode) => React.ReactNode;
 };
 
+type DropdownDestroyOnHiddenCompatProps = {
+  destroyOnHidden?: boolean;
+};
+
 const JumpToDashboard: FC<
   {
     vizs?: VizType[];
@@ -68,6 +72,9 @@ const JumpToDashboard: FC<
       />
     ),
   } as DropdownPopupRenderCompatProps;
+  const dropdownDestroyOnHiddenProps = {
+    destroyOnHidden: true,
+  } as DropdownDestroyOnHiddenCompatProps;
   const selectPopupMatchWidthProps = {
     popupMatchSelectWidth: false,
   } as SelectPopupMatchSelectWidthCompatProps;
@@ -95,7 +102,7 @@ const JumpToDashboard: FC<
           })}
       </Select>
       <Dropdown
-        destroyPopupOnHide
+        {...(dropdownDestroyOnHiddenProps as any)}
         overlayStyle={{ margin: 4 }}
         {...(dropdownPopupRenderProps as any)}
         placement="bottomLeft"

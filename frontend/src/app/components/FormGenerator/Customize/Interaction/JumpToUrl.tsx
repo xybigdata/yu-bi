@@ -28,6 +28,10 @@ type DropdownPopupRenderCompatProps = {
   popupRender?: (originNode: React.ReactNode) => React.ReactNode;
 };
 
+type DropdownDestroyOnHiddenCompatProps = {
+  destroyOnHidden?: boolean;
+};
+
 const JumpToUrl: FC<
   {
     vizs?: VizType[];
@@ -76,6 +80,9 @@ const JumpToUrl: FC<
       />
     ),
   } as DropdownPopupRenderCompatProps;
+  const dropdownDestroyOnHiddenProps = {
+    destroyOnHidden: true,
+  } as DropdownDestroyOnHiddenCompatProps;
 
   return (
     <Space>
@@ -86,7 +93,7 @@ const JumpToUrl: FC<
         onChange={e => handleUpdateUrl(e.target.value)}
       />
       <Dropdown
-        destroyPopupOnHide
+        {...(dropdownDestroyOnHiddenProps as any)}
         overlayStyle={{ margin: 4 }}
         {...(dropdownPopupRenderProps as any)}
         placement="bottomLeft"
