@@ -16,8 +16,7 @@
  * limitations under the License.
  */
 
-import { CompatRoute } from 'app/components/CompatRoute';
-import { CompatRoutes } from 'app/components/CompatRoutes';
+import { useParams } from 'app/routerCompat';
 import styled from 'styled-components/macro';
 import { MemberDetailPage } from './pages/MemberDetailPage';
 import { RoleDetailPage } from './pages/RoleDetailPage';
@@ -26,20 +25,13 @@ import { useMemberSlice } from './slice';
 
 export function MemberPage() {
   useMemberSlice();
+  const { memberId, roleId } = useParams<{ memberId?: string; roleId?: string }>();
 
   return (
     <Container>
       <Sidebar />
-      <CompatRoutes>
-        <CompatRoute
-          path="/organizations/:orgId/members/:memberId"
-          element={<MemberDetailPage />}
-        />
-        <CompatRoute
-          path="/organizations/:orgId/roles/:roleId"
-          element={<RoleDetailPage />}
-        />
-      </CompatRoutes>
+      {memberId ? <MemberDetailPage /> : null}
+      {roleId ? <RoleDetailPage /> : null}
     </Container>
   );
 }

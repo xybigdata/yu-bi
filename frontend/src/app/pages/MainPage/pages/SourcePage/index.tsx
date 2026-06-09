@@ -17,9 +17,9 @@
  */
 
 import { Split } from 'app/components';
-import { CompatRoute } from 'app/components/CompatRoute';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useSplitSizes } from 'app/hooks/useSplitSizes';
+import { useParams } from 'app/routerCompat';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import { useCallback, useState } from 'react';
 import styled from 'styled-components/macro';
@@ -32,6 +32,7 @@ import { SourceDetailPage } from './SourceDetailPage';
 export function SourcePage() {
   useSourceSlice();
   const saveFormContextValue = useSaveFormContext();
+  const { sourceId } = useParams<{ sourceId?: string }>();
 
   const [sliderVisible, setSliderVisible] = useState<boolean>(false);
 
@@ -84,10 +85,7 @@ export function SourcePage() {
           handleSliderVisible={handleSliderVisible}
         />
         <DetailPageWrapper className={sliderVisible ? 'close' : ''}>
-          <CompatRoute
-            path="/organizations/:orgId/sources/:sourceId"
-            element={<SourceDetailPage />}
-          />
+          {sourceId ? <SourceDetailPage /> : null}
         </DetailPageWrapper>
         <SaveForm
           formProps={{

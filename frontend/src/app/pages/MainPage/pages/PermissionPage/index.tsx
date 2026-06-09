@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 import { EmptyFiller, Split } from 'app/components';
-import { CompatRoute } from 'app/components/CompatRoute';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useLocation, useParams } from 'app/routerCompat';
 import { useSplitSizes } from 'app/hooks/useSplitSizes';
@@ -79,10 +78,7 @@ export function PermissionPage() {
         viewpointId={detailParams?.id}
       />
       {detailParams ? (
-        <CompatRoute
-          path="/organizations/:orgId/permissions/:viewpoint/:type/:id"
-          element={<Main />}
-        />
+        <Main />
       ) : (
         <EmptyFiller
           title={`${t('empty1')}${
