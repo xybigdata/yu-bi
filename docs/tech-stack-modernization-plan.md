@@ -756,3 +756,9 @@
 - `core` 与 `server` 已删除未被实际代码使用的 `phantomjsdriver` 依赖，避免继续保留已退出主流维护链的历史驱动。
 - `selenium-java` 已从两个模块各自声明的 3.x 版本统一到父 POM 的 `${selenium.version}`，当前收敛为 `4.31.0`。
 - 现有截图代码 `WebUtils` 只使用 `ChromeDriver` / `RemoteWebDriver`，没有任何 PhantomJS 专属分支，因此这一步属于依赖树现代化，不改变当前截图运行语义。
+
+### 并行治理：MySQL JDBC 驱动坐标收口
+
+- `core/pom.xml` 已将旧坐标 `mysql:mysql-connector-java` 切换为当前官方 Maven 坐标 `com.mysql:mysql-connector-j`。
+- 驱动类和 JDBC URL 仍保持 `com.mysql.cj.jdbc.Driver` 与 `jdbc:mysql://`，因此这一步是依赖声明现代化，不改变现有连接语义。
+- 版本号交由 Spring Boot 父 POM 管理，减少 JDBC 驱动版本继续手写漂移的风险。
