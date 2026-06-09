@@ -17,8 +17,8 @@
  */
 
 import { Badge, BadgeProps } from 'antd';
-import moment from 'moment';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { datartDayjs } from 'app/utils/date';
 import styled from 'styled-components';
 import { FONT_SIZE_LABEL } from 'styles/StyleConstants';
 
@@ -30,6 +30,14 @@ interface ChronographProps {
 export function Chronograph({ running, status }: ChronographProps) {
   const [label, setLabel] = useState('00:00:00.00');
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
+
+  const formatElapsed = useCallback((elapsed: number) => {
+    const centiseconds = String(Math.floor((elapsed % 1000) / 10)).padStart(
+      2,
+      '0',
+    );
+    return `${datartDayjs.utc(elapsed).format('HH:mm:ss')}.${centiseconds}`;
+  }, []);
 
   const clear = useCallback(() => {
     if (intervalRef.current) {
@@ -43,17 +51,13 @@ export function Chronograph({ running, status }: ChronographProps) {
       const start = Number(new Date());
       intervalRef.current = setInterval(() => {
         const current = Number(new Date());
-        setLabel(
-          moment(current - start)
-            .utc()
-            .format('HH:mm:ss.SS'),
-        );
+        setLabel(formatElapsed(current - start));
       }, 10);
     } else {
       clear();
     }
     return clear;
-  }, [running, clear]);
+  }, [running, clear, formatElapsed]);
 
   return <StyledBadge status={status} text={label} />;
 }

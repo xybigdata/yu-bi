@@ -24,6 +24,7 @@ import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useParams } from 'app/routerCompat';
 import { useAccess, useCascadeAccess } from 'app/pages/MainPage/Access';
+import { datartDayjs } from 'app/utils/date';
 import {
   PermissionLevels,
   ResourceTypes,
@@ -35,7 +36,6 @@ import {
   DEFAULT_DEBOUNCE_WAIT,
   TIME_FORMATTER,
 } from 'globalConstants';
-import moment from 'moment';
 import React, {
   useCallback,
   useContext,
@@ -406,7 +406,7 @@ export function SourceDetailPage() {
       return;
     }
     await dispatch(syncSourceSchema({ sourceId: editingSource.id }));
-    setLastUpdateTime(moment().format(TIME_FORMATTER));
+    setLastUpdateTime(datartDayjs().format(TIME_FORMATTER));
     message.success(t('syncDatabaseSchemaSuccess'));
   };
 

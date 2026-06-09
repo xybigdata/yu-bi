@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
+import { datartDayjs } from 'app/utils/date';
 import { TIME_FORMATTER } from 'globalConstants';
-import moment from 'moment';
 import { memo, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { IFontDefault } from '../../../../../../types';
@@ -30,12 +30,12 @@ export const TimerWidgetCore: React.FC = memo(() => {
     widget.config.customConfig.props,
   );
   const [currentTime, setCurrentTime] = useState(
-    moment().format(time?.format || TIME_FORMATTER),
+    datartDayjs().format(time?.format || TIME_FORMATTER),
   );
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(moment().format(time?.format || TIME_FORMATTER));
+      setCurrentTime(datartDayjs().format(time?.format || TIME_FORMATTER));
     }, time?.duration);
     return () => {
       clearInterval(timer);
