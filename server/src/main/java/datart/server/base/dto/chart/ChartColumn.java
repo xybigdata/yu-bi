@@ -1,8 +1,12 @@
 package datart.server.base.dto.chart;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import datart.core.entity.poi.format.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import datart.core.entity.poi.format.CurrencyFormat;
+import datart.core.entity.poi.format.NumericFormat;
+import datart.core.entity.poi.format.PercentageFormat;
+import datart.core.entity.poi.format.PoiNumFormat;
+import datart.core.entity.poi.format.ScientificNotationFormat;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,6 +15,8 @@ import java.util.List;
 
 @Data
 public class ChartColumn {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private String uid = "";
 
@@ -32,7 +38,7 @@ public class ChartColumn {
 
     private List<ChartColumn> children = new ArrayList<>();
 
-    private JSONObject format;
+    private JsonNode format;
 
     private int leafNum = 0;
 
@@ -51,22 +57,26 @@ public class ChartColumn {
 
     public PoiNumFormat getNumFormat(){
         PoiNumFormat numFormat = new PoiNumFormat();
-        if (format == null || !format.containsKey("type")){
+        if (format == null || !format.hasNonNull("type")){
             return numFormat;
         }
-        String type = format.getString("type");
+        String type = format.path("type").asText();
+        JsonNode formatNode = format.get(type);
+        if (formatNode == null || formatNode.isNull()) {
+            return numFormat;
+        }
         switch (type) {
             case NumericFormat.type:
-                numFormat = JSON.parseObject(format.getString(type), NumericFormat.class);
+                numFormat = OBJECT_MAPPER.convertValue(formatNode, NumericFormat.class);
                 break;
             case CurrencyFormat.type:
-                numFormat = JSON.parseObject(format.getString(type), CurrencyFormat.class);
+                numFormat = OBJECT_MAPPER.convertValue(formatNode, CurrencyFormat.class);
                 break;
             case PercentageFormat.type:
-                numFormat = JSON.parseObject(format.getString(type), PercentageFormat.class);
+                numFormat = OBJECT_MAPPER.convertValue(formatNode, PercentageFormat.class);
                 break;
             case ScientificNotationFormat.type:
-                numFormat = JSON.parseObject(format.getString(type), ScientificNotationFormat.class);
+                numFormat = OBJECT_MAPPER.convertValue(formatNode, ScientificNotationFormat.class);
                 break;
             default:
                 break;

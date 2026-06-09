@@ -1,7 +1,8 @@
 package datart.server.common;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONValidator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import datart.core.base.consts.ValueType;
 import datart.core.data.provider.Column;
@@ -24,9 +25,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PoiConvertUtils {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     public static POISettings covertToPoiSetting(String chartConfigStr, Dataframe dataframe) {
-        ChartConfigDTO chartConfigDTO = JSONValidator.from(chartConfigStr).validate() ?
-                JSON.parseObject(chartConfigStr, ChartConfigDTO.class) : new ChartConfigDTO();
+        ChartConfigDTO chartConfigDTO = parseChartConfig(chartConfigStr);
         boolean isNormalTable = "mingxi-table".equals(chartConfigDTO.getChartGraphId());
         List<ChartColumn> chartColumns = getColumnsFromConfig(chartConfigDTO.getChartConfig().getDatas()); //获取列信息
 
@@ -141,8 +143,16 @@ public class PoiConvertUtils {
         List<ChartColumn> groupColumns = new ArrayList<>();
         List<ChartStyleConfigDTO> styles = chartConfigDTO.getChartConfig().getStyles();
         ChartStyleConfigDTO tableHeaders = getTableStyleMap(new HashMap<>(), styles).getOrDefault("tableHeaders", new ChartStyleConfigDTO());
-        if (null != tableHeaders.getValue() && JSONValidator.Type.Array.equals(JSONValidator.from(tableHeaders.getValue().toString()).getType())) {
-            groupColumns = JSON.parseArray(tableHeaders.getValue().toString(), ChartColumn.class);
+        if (tableHeaders.getValue() instanceof List<?>) {
+            groupColumns = OBJECT_MAPPER.convertValue(tableHeaders.getValue(), new TypeReference<List<ChartColumn>>() {
+            });
+        } else if (tableHeaders.getValue() instanceof String value && StringUtils.isNotBlank(value)) {
+            try {
+                groupColumns = OBJECT_MAPPER.readValue(value, new TypeReference<List<ChartColumn>>() {
+                });
+            } catch (JsonProcessingException e) {
+                log.warn("parse table header group config failed, fallback to flat header.", e);
+            }
         }
         List<ChartColumn> leafNode = new ArrayList<>();
         for (ChartColumn groupColumn : groupColumns) {
@@ -250,5 +260,17 @@ public class PoiConvertUtils {
         column.setType(ValueType.STRING);
         rowMap.get(key).add(column);
         return rowMap.get(key).size() - 1;
+    }
+
+    private static ChartConfigDTO parseChartConfig(String chartConfigStr) {
+        if (StringUtils.isBlank(chartConfigStr)) {
+            return new ChartConfigDTO();
+        }
+        try {
+            return OBJECT_MAPPER.readValue(chartConfigStr, ChartConfigDTO.class);
+        } catch (JsonProcessingException e) {
+            log.warn("parse chart config failed, fallback to default export settings.", e);
+            return new ChartConfigDTO();
+        }
     }
 }

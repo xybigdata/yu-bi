@@ -821,3 +821,10 @@
 - `server/src/main/java/datart/server/config/CustomConfigValidateBean.java` 已删除 `@JSONField` 注解，改为显式声明配置 key 常量。
 - `server/src/main/java/datart/server/config/CustomPropertiesValidate.java` 已不再依赖 `fastjson` 将 `Properties` 映射到校验 bean，而是改为本地显式映射。
 - 校验失败时返回给用户的配置项名称仍保持 `datasource.ip`、`datasource.port`、`datasource.database`、`datasource.username`、`datasource.password` 这组外部配置 key，不改变原有提示语义。
+
+### 并行治理：导出表头与数字格式树模型切到 Jackson
+
+- `server/src/main/java/datart/server/base/dto/chart/ChartColumn.java` 已将 `format` 字段从 `fastjson JSONObject` 切到 Jackson `JsonNode`，数字、货币、百分比、科学计数法导出格式改为使用 `ObjectMapper.convertValue` 解析。
+- `server/src/main/java/datart/server/common/PoiConvertUtils.java` 已移除 `JSONValidator`、`JSON.parseObject`、`JSON.parseArray`，图表导出配置改为使用 Jackson 反序列化。
+- `tableHeaders` 分组表头配置现在同时兼容运行期已经反序列化成 `List<?>` 的值，以及历史字符串 JSON 值；解析失败时继续回退到无分组表头导出，保持原有兜底语义。
+- 2026-06-09 验证：`mvn -pl server -am -DskipTests compile` 通过。
