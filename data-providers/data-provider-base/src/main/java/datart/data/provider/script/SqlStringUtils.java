@@ -18,7 +18,6 @@
 
 package datart.data.provider.script;
 
-import com.google.common.collect.Iterables;
 import datart.core.base.consts.ValueType;
 import datart.core.base.exception.Exceptions;
 import datart.core.common.ReflectUtils;
@@ -36,6 +35,7 @@ import org.apache.commons.lang3.CharUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Stack;
 import java.util.regex.Matcher;
@@ -62,11 +62,12 @@ public class SqlStringUtils {
         }
         for (ScriptVariable variable : variables) {
             if (ValueType.FRAGMENT.equals(variable.getValueType())) {
-                int size = Iterables.size(variable.getValues());
+                Collection<String> values = variable.getValues();
+                int size = values == null ? 0 : values.size();
                 if (size != 1) {
-                    Exceptions.tr(DataProviderException.class, "message.provider.variable.expression.size", size + ":" + variable.getValues());
+                    Exceptions.tr(DataProviderException.class, "message.provider.variable.expression.size", size + ":" + values);
                 }
-                sql = sql.replace(variable.getNameWithQuote(), Iterables.get(variable.getValues(), 0));
+                sql = sql.replace(variable.getNameWithQuote(), values.iterator().next());
             }
         }
         return sql;

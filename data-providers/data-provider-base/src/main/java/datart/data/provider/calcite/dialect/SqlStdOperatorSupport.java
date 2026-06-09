@@ -17,7 +17,6 @@
  */
 package datart.data.provider.calcite.dialect;
 
-import com.google.common.collect.ImmutableSet;
 import datart.core.base.exception.Exceptions;
 import datart.core.data.provider.StdSqlOperator;
 import org.apache.calcite.sql.*;
@@ -42,7 +41,7 @@ public interface SqlStdOperatorSupport {
     }
 
     default Set<StdSqlOperator> supportedOperators() {
-        return ImmutableSet.copyOf(SUPPORTED);
+        return Set.copyOf(SUPPORTED);
     }
 
     default Set<StdSqlOperator> unSupportedOperators() {

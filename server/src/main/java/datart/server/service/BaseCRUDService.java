@@ -1,10 +1,10 @@
 package datart.server.service;
 
-import com.google.common.base.CaseFormat;
 import datart.core.base.consts.Const;
 import datart.core.base.exception.BaseException;
 import datart.core.base.exception.Exceptions;
 import datart.core.common.Application;
+import datart.core.common.NamingUtils;
 import datart.core.common.UUIDGenerator;
 import datart.core.entity.BaseEntity;
 import datart.core.entity.User;
@@ -194,7 +194,7 @@ public interface BaseCRUDService<E extends BaseEntity, M extends CRUDMapper> {
 
     default String getResourcePropertyName() {
         String simpleName = getEntityClz().getSimpleName();
-        return String.format("resource.%s", CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_HYPHEN, simpleName));
+        return String.format("resource.%s", NamingUtils.lowerCamelToLowerHyphen(simpleName));
     }
 
     default void notFoundException() {

@@ -3,7 +3,6 @@ package datart.server.job;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import datart.core.base.consts.AttachmentType;
 import datart.core.base.consts.FileOwner;
 import datart.core.common.Application;
@@ -39,6 +38,7 @@ import org.springframework.util.CollectionUtils;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -171,7 +171,7 @@ public abstract class ScheduleJob implements Job, Closeable {
             ViewExecuteParam viewExecuteParam = new ViewExecuteParam();
             viewExecuteParam.setVizId(folder.getId());
             viewExecuteParam.setVizType(ResourceType.DASHBOARD);
-            result.setDownloadParams(Lists.newArrayList(viewExecuteParam));
+            result.setDownloadParams(new ArrayList<>(List.of(viewExecuteParam)));
         }
         return result;
     }

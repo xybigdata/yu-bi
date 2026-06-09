@@ -3,7 +3,6 @@ package datart.server.common;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import datart.core.base.consts.ValueType;
 import datart.core.data.provider.Column;
 import datart.core.data.provider.Dataframe;
@@ -43,7 +42,7 @@ public class PoiConvertUtils {
                     .filter(chartColumn -> nameMap.containsKey(chartColumn.getDisplayName()))
                     .collect(Collectors.toList());
         }
-        List<ChartColumn> groupColumns = Lists.newArrayList();
+        List<ChartColumn> groupColumns = new ArrayList<>();
         Map<Integer, ColumnSetting> columnSetting = new HashMap<>();
         if (isNormalTable) { // 若为普通表格，获取表头分组信息
             groupColumns = getTableGroupList(chartConfigDTO, chartColumns);
@@ -71,7 +70,7 @@ public class PoiConvertUtils {
      * 获取图表列信息
      */
     private static List<ChartColumn> getColumnsFromConfig(List<ChartDataConfigDTO> configData) {
-        List<ChartColumn> results = Lists.newArrayList();
+        List<ChartColumn> results = new ArrayList<>();
         CaseInsensitiveMap<String, Integer> map = new CaseInsensitiveMap<>();
         for (ChartDataConfigDTO data : configData) {
             for (ChartColumn row : data.getRows()) {

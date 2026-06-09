@@ -74,11 +74,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>21.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>
@@ -101,10 +96,6 @@
             <artifactId>selenium-java</artifactId>
             <version>${selenium.version}</version>
             <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
                 <exclusion>
                     <artifactId>httpclient5</artifactId>
                     <groupId>org.apache.httpcomponents.client5</groupId>

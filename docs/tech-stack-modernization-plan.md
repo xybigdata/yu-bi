@@ -800,8 +800,8 @@
 
 1. 收口 AntD 5 升级前最后一批热点：复杂 `Menu.*` JSX、`visible`、深路径导入和主题 token 入口。
 2. 把测试栈从 Jest 27 + `react-app` 系配置推进到较新稳定线。
-3. 启动 `httpclient 4 -> 5` 专项，先做依赖面和 API 映射，再落代码。
-4. 设计 `jjwt 0.7 -> 0.12+` 的兼容 secret 方案，避免升级后默认配置失效。
+3. 继续推进 `poi-ooxml 5.0.0 -> 较新 5.x` 专项，优先补导出与样式转换链回归。
+4. 在已完成 JWT、HttpClient、Commons 系列和 Guava 生产使用面清理后，开始评估 H2 2.x / 安全框架 / 连接池等中长期专项。
 
 ## 2026-06-10 老旧技术栈盘点
 
@@ -828,9 +828,10 @@
    - 风险判断：改动面跨 `core`、`server`，不适合和 JWT/HTTP 客户端升级混做。
 
 4. Guava 21.0
-   - 现状：生产代码仍有少量 `CaseFormat`、`Lists`、`Sets`、`ImmutableSet`、`Iterables` 使用点。
-   - 更现代替代：优先用 JDK 集合工厂、`StringJoiner`、自定义小工具替换；若保留，再升级到较新的 Guava 稳定线。
-   - 风险判断：这一项适合先“减使用面”，再决定是否整体升版本。
+   - 现状：项目自有生产代码中的 `CaseFormat`、`Lists`、`Sets`、`ImmutableSet`、`Iterables` 使用点已全部替换为 JDK 集合工厂或本地 `NamingUtils`；`core/pom.xml` 中 `guava 21.0` 直连依赖已删除。
+   - 更现代替代：当前策略是不再为自有代码保留 Guava API 依赖，后续若要进一步压缩传递依赖，再分别评估 Calcite 与 Selenium 升级路径。
+   - 调研结论：当前依赖树中仍有 Guava，但来源已经收敛为上游组件传递依赖，其中 `calcite-core` 带入 `29.0-jre`，`selenium-remote-driver` 带入 `33.4.6-jre`。
+   - 风险判断：这批迁移已经完成；剩余风险不在项目代码，而在上游组件版本联动。
 
 5. `commons-csv 1.8` 与 `commons-text 1.9`
    - 现状：`commons-csv` 已从 `1.8` 升级到 `1.14.1`；`commons-text` 已确认在生产代码中无使用面，并已移除直接依赖。
@@ -1029,6 +1030,30 @@
   - `commons-text` 已不再出现在 `server` 联动依赖树中
   - `aspectjweaver` 已统一到 `1.9.25.1`
 - 2026-06-10 验证：`mvn -pl server -am -DskipTests compile` 与 `mvn -pl server -am dependency:tree -Dincludes=org.apache.commons:commons-csv,org.apache.commons:commons-text,org.aspectj:aspectjweaver -DskipTests` 通过。
+
+### 并行治理：清理生产代码中的 Guava 依赖
+
+- `core/src/main/java/datart/core/common/NamingUtils.java` 已新增本地命名转换工具，用于替代原来的 `CaseFormat`。
+- 以下生产代码使用点已替换为 JDK 21 原生实现：
+  - `core/src/main/java/datart/core/mappers/ext/CRUDMapper.java`
+  - `server/src/main/java/datart/server/service/BaseCRUDService.java`
+  - `server/src/main/java/datart/server/job/ScheduleJob.java`
+  - `server/src/main/java/datart/server/common/PoiConvertUtils.java`
+  - `server/src/main/java/datart/server/service/impl/DataProviderServiceImpl.java`
+  - `server/src/main/java/datart/server/service/impl/ShareServiceImpl.java`
+  - `security/src/main/java/datart/security/util/JwkUtils.java`
+  - `security/src/main/java/datart/security/oauth2/CustomOauth2Client.java`
+  - `data-providers/data-provider-base/src/main/java/datart/data/provider/calcite/SqlValidateUtils.java`
+  - `data-providers/data-provider-base/src/main/java/datart/data/provider/calcite/dialect/SqlStdOperatorSupport.java`
+  - `data-providers/data-provider-base/src/main/java/datart/data/provider/script/SqlStringUtils.java`
+- `core/pom.xml` 已删除 `com.google.guava:guava:21.0` 直连依赖。
+- 迁移过程中确认：`core` 模块截图链上的 Selenium 编译面仍需要 Guava 类型签名，因此不能继续把 `selenium-java` 的 Guava 传递依赖手工排除；当前保留 Selenium 自带的现代 Guava 传递依赖，不再用旧版直连 Guava 兜底。
+- 2026-06-10 复核：
+  - 生产代码检索 `com.google.common` / `CaseFormat` / `Lists` / `Sets` / `ImmutableSet` / `Iterables` 结果已清零，仅剩 `jdbc-data-provider` 测试代码使用点。
+  - `mvn -pl server -am dependency:tree -Dincludes=com.google.guava:guava -DskipTests` 显示当前剩余来源只有：
+    - `org.apache.calcite:calcite-core -> guava:29.0-jre`
+    - `org.seleniumhq.selenium:selenium-remote-driver -> guava:33.4.6-jre`
+  - `mvn -pl server -am -DskipTests compile` 通过；该命令联动触发的 `npm run build:task` 与 `vite build` 也通过。
 
 ### 并行治理：移除未使用的 cglib 直接依赖
 

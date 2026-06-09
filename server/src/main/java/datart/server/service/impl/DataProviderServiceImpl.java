@@ -21,7 +21,6 @@ package datart.server.service.impl;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Sets;
 import datart.core.base.PageInfo;
 import datart.core.base.consts.Const;
 import datart.core.base.consts.ValueType;
@@ -349,24 +348,28 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
         variables.add(new ScriptVariable(VARIABLE_NAME,
                 VariableTypeEnum.PERMISSION,
                 ValueType.STRING,
-                getCurrentUser().getName() == null ? Collections.emptySet() : Sets.newHashSet(getCurrentUser().getName()),
+                singletonSetIfPresent(getCurrentUser().getName()),
                 false));
         variables.add(new ScriptVariable(VARIABLE_EMAIL,
                 VariableTypeEnum.PERMISSION,
                 ValueType.STRING,
-                Sets.newHashSet(getCurrentUser().getEmail()),
+                singletonSetIfPresent(getCurrentUser().getEmail()),
                 false));
         variables.add(new ScriptVariable(VARIABLE_ID,
                 VariableTypeEnum.PERMISSION,
                 ValueType.STRING,
-                Sets.newHashSet(getCurrentUser().getId()),
+                singletonSetIfPresent(getCurrentUser().getId()),
                 false));
         variables.add(new ScriptVariable(VARIABLE_USERNAME,
                 VariableTypeEnum.PERMISSION,
                 ValueType.STRING,
-                Sets.newHashSet(getCurrentUser().getUsername()),
+                singletonSetIfPresent(getCurrentUser().getUsername()),
                 false));
         return variables;
+    }
+
+    private Set<String> singletonSetIfPresent(String value) {
+        return value == null ? Collections.emptySet() : Collections.singleton(value);
     }
 
     private List<ScriptVariable> getViewVariables(String viewId) {

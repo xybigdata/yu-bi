@@ -18,7 +18,6 @@
 
 package datart.server.service.impl;
 
-import com.google.common.collect.Sets;
 import datart.core.base.consts.Const;
 import datart.core.base.consts.ShareAuthenticationMode;
 import datart.core.base.consts.ShareRowPermissionBy;
@@ -455,7 +454,7 @@ public class ShareServiceImpl extends BaseService implements ShareService {
                 } else {
                     permittedRoles = Collections.emptyList();
                 }
-                if (Sets.intersection(roleIdList, new HashSet<>(permittedRoles)).isEmpty()) {
+                if (Collections.disjoint(roleIdList, permittedRoles)) {
                     Exceptions.tr(BaseException.class, "message.share.permission.denied");
                 }
                 break;

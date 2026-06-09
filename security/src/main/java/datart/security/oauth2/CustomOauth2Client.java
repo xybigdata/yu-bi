@@ -17,11 +17,11 @@
  */
 package datart.security.oauth2;
 
-import com.google.common.collect.Sets;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Set;
 import java.util.Set;
 
 public interface CustomOauth2Client {
@@ -34,8 +34,10 @@ public interface CustomOauth2Client {
 
     String REGISTRATION_ID = "registrationId";
 
-    Set<String> CUSTOM_OAUTH2_CLIENTS = Sets.newHashSet(DingTalkOauth2Client.REGISTRATION_ID
-            , WeChartOauth2Client.REGISTRATION_ID);
+    Set<String> CUSTOM_OAUTH2_CLIENTS = Set.of(
+            DingTalkOauth2Client.REGISTRATION_ID,
+            WeChartOauth2Client.REGISTRATION_ID
+    );
 
     void authorizationRequest(HttpServletRequest request, HttpServletResponse response);
 

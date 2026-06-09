@@ -17,7 +17,6 @@
  */
 package datart.data.provider.calcite;
 
-import com.google.common.collect.Sets;
 import datart.core.base.exception.Exceptions;
 import datart.data.provider.base.DataProviderException;
 import datart.data.provider.script.SqlStringUtils;
@@ -57,11 +56,9 @@ public class SqlValidateUtils {
             SqlKind.SET_OPTION, SqlKind.OTHER_DDL
     );
 
-    private static final Set<String> QUERY_SQL = Sets.newHashSet(
-            "SELECT", "WITH"
-    );
+    private static final Set<String> QUERY_SQL = Set.of("SELECT", "WITH");
 
-    private static final Set<String> DISABLED_SQL = Sets.newHashSet(
+    private static final Set<String> DISABLED_SQL = Set.of(
             "CREATE", "DROP", "ALTER", "COMMIT", "ROLLBACK", "INSERT", "DELETE", "UPDATE", "MERGE"
     );
 

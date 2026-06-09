@@ -1,6 +1,5 @@
 package datart.security.util;
 
-import com.google.common.collect.Lists;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSObject;
@@ -37,6 +36,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECGenParameterSpec;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -253,7 +253,7 @@ public class JwkUtils {
     }
 
     public static List<Key> getJwKFromFile(String jwkSetFilePath) {
-        List<Key> keys = Lists.newArrayList();
+        List<Key> keys = new ArrayList<>();
         File file = new File(jwkSetFilePath);
         try {
             JWKSet jwkSet = JWKSet.load(file);
@@ -284,7 +284,7 @@ public class JwkUtils {
     }
 
     public static List<Key> getJwKFromUrl(String jwkSetUrl) {
-        List<Key> keys = Lists.newArrayList();
+        List<Key> keys = new ArrayList<>();
         try {
             RemoteJWKSet remoteJWKSet = new RemoteJWKSet(new URL(jwkSetUrl));
             JWKMatcher jwkMatcher = (new JWKMatcher.Builder()).keyUses(KeyUse.SIGNATURE, KeyUse.ENCRYPTION, null).keyTypes(KeyType.OCT, KeyType.RSA, KeyType.EC).build();

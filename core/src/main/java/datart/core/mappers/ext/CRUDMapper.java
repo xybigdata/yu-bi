@@ -18,7 +18,7 @@
 
 package datart.core.mappers.ext;
 
-import com.google.common.base.CaseFormat;
+import datart.core.common.NamingUtils;
 import datart.core.common.ReflectUtils;
 import datart.core.entity.BaseEntity;
 import org.apache.ibatis.jdbc.SQL;
@@ -88,7 +88,7 @@ public interface CRUDMapper extends BaseMapper {
     }
 
     default String format(String field) {
-        return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, field);
+        return NamingUtils.lowerCamelToLowerUnderscore(field);
     }
 
 }
