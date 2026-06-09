@@ -53,6 +53,8 @@ module.exports = {
   moduleNameMapper: {
     '^react-native$': 'react-native-web',
     '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
+    '^redux/(.*)$': '<rootDir>/src/redux/$1',
+    '^uuid$': require.resolve('uuid'),
   },
   moduleFileExtensions: [
     'web.js',
@@ -70,5 +72,9 @@ module.exports = {
     'jest-watch-typeahead/filename',
     'jest-watch-typeahead/testname',
   ],
+  snapshotFormat: {
+    escapeString: true,
+    printBasicPrototype: true,
+  },
   resetMocks: true,
 };

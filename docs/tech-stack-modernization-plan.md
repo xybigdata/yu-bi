@@ -983,6 +983,16 @@
 - `frontend/jest/` 已新增本地 `babelTransform.js`、`cssTransform.js`、`fileTransform.js`，测试链不再依赖 `react-scripts/config/jest/*`。
 - `frontend/package.json` 与 lockfile 已显式声明 `jest`、`jest-environment-jsdom`、`babel-jest`、`@babel/preset-env`、`@babel/preset-react`、`@babel/preset-typescript`、`identity-obj-proxy`、`jest-watch-typeahead`，并移除 `react-scripts` 与 `babel-preset-react-app`。
 
+### 并行治理：Jest 测试链升级到 29 稳定线
+
+- `frontend/package.json` 与 lockfile 已将 `jest`、`babel-jest`、`jest-environment-jsdom`、`@types/jest` 升级到 29 稳定线，并同步把 `jest-watch-typeahead` 升级到兼容版本。
+- 升级过程中顺带暴露出 `@types/node 14.14.31` 与当前 `vite 5.4.x` 的 peer 约束冲突，因此一并提升到现代稳定线，避免继续让前端工具链停留在 Node 14 类型时代。
+- 这一步继续保持现有 `babel-jest + jsdom` 运行模型，不引入 `ts-jest` 或 Vitest，避免和现有大批 JSX/TSX 测试一起漂移。
+- `frontend/jest.config.js` 新增 `snapshotFormat` 显式配置，用来维持既有 snapshot 输出格式，避免 Jest 29 默认格式变化造成无意义快照噪音。
+- 适配过程中还补齐了 Jest 28+ 的自定义 transformer 返回协议，并为 `uuid` 与 `redux/*` 这类在新解析规则下更敏感的导入补了显式映射，避免把升级噪音误判成业务回归。
+- 升级后的目标是让前端测试栈从“CRA 时代遗留的 Jest 27”迈到当前仍广泛使用的稳定线，为后续继续评估 Jest 30 或 Vitest 迁移先打稳基础。
+- 在本机 `Node 26.0.0 / npm 11.15.0` 下，本批 `npm test -- --runInBand --watchAll=false` 与 `npm run build` 已通过；`npm run checkTs` 仍会暴露前端既有的 Redux thunk dispatch 类型债，这一批没有继续扩大该专项范围。
+
 ### 并行治理：删除 CRACO 回退外壳
 
 - `frontend/package.json` 已删除 `start:cra`、`build:cra`、`eject` 等只服务 CRA/CRACO 的历史脚本。
