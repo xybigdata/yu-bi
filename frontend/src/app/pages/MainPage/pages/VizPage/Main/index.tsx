@@ -7,13 +7,10 @@ import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import BoardEditor from 'app/pages/DashBoardPage/pages/BoardEditor';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
+import { useLocation, useParams } from 'app/routerCompat';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  useLocation,
-  useParams,
-} from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { LEVEL_1 } from 'styles/StyleConstants';
 import { useVizSlice } from '../slice';

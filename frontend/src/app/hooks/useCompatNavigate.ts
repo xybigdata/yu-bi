@@ -17,7 +17,7 @@
  */
 
 import { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory } from 'app/routerCompat';
 
 export const useCompatNavigate = () => {
   const history = useHistory();

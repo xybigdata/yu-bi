@@ -27,7 +27,7 @@ import { useEffect, useLayoutEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'app/routerCompat';
 import { GlobalStyles } from 'styles/globalStyles';
 import { getToken } from 'utils/auth';
 import useI18NPrefix from './hooks/useI18NPrefix';

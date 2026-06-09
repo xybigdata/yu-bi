@@ -348,6 +348,7 @@
 - React Router 预迁移第二十一批：新增 `CompatRoute` / `CompatRoutes`，并将 `AppRouter`、三个分享页 Router、成员页和 `VizPage/Main` 改写为 `element` 风格声明，先把低风险路由容器从 v5 的 children 形态迁到更接近 Router 6 `Routes + Route element` 的结构。
 - React Router 预迁移第二十二批：`MainPage` 主路由容器和 `LoginAuthRoute` 已切到 `CompatRoutes + CompatRoute + element` 形态，主应用入口不再直接依赖 `Switch` 和 `Route` children 声明，为后续真正切换到 Router 6/7 的 `Routes` 打通主干。
 - React Router 预迁移第二十三批：`SourcePage`、`SchedulePage`、`PermissionPage` 内部详情路由已统一切到 `CompatRoute`，`MainPage` 里最后一个 `useRouteMatch` 也已移除，继续把页面容器层对 Router v5 `Route` / `useRouteMatch` 的直接依赖压缩到兼容层本身。
+- React Router 预迁移第二十四批：新增本地 `routerCompat` 出口，并将 `AppRouter`、分享页 Router、`Compat*` 组件、`useCompatNavigate`、`useRouteQuery` 以及部分主入口/测试页的路由导入统一收口到项目内部模块，为后续真正替换到底层 Router 6/7 实现先缩小 import 改动面。
 
 验收门槛：
 - 全部路由可访问。
@@ -539,6 +540,7 @@
   - `frontend/src/app/hooks/useCompatNavigate.ts`
   - `frontend/src/app/components/CompatSwitch.tsx`
 - 剩余页面容器层直接 `Route` 基本只剩少量授权/布局封装，主应用内容页容器已大多切到 `CompatRoute`。
+- 路由能力的 import 源已开始从 `react-router-dom` / `react-router` 向本地 `routerCompat` 收口，后续可以按批次继续把剩余页面切到同一出口。
 - 剩余需要继续处理的重点不是“全局搜索更多旧 API”，而是：
   1. 让 `CompatSwitch` / `CompatRoute` / `CompatRoutes` 真实接管到 Router 6/7。
   2. 让 `useCompatNavigate` 从 `useHistory` 切到 `useNavigate`。

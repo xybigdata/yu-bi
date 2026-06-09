@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, RouteProps } from 'react-router-dom';
+import { Route, type RouteProps } from 'app/routerCompat';
 import { CompatRedirect } from '../CompatRedirect';
 import { Authorized } from './Authorized';
 

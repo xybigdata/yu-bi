@@ -18,9 +18,9 @@
 
 import { EmptyFiller } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { useParams } from 'app/routerCompat';
 import React, { memo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { selectOrgId } from '../../../slice/selectors';
 import { useMemberSlice } from '../../MemberPage/slice';

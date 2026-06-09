@@ -18,9 +18,9 @@
 import { EmptyFiller, Split } from 'app/components';
 import { CompatRoute } from 'app/components/CompatRoute';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { useLocation, useParams } from 'app/routerCompat';
 import { useSplitSizes } from 'app/hooks/useSplitSizes';
 import { useCallback, useMemo } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { useMemberSlice } from '../MemberPage/slice';
 import { useScheduleSlice } from '../SchedulePage/slice';

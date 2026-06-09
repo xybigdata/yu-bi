@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'app/routerCompat';
 
 const useRouteQuery = ({ key }: { key?: string }) => {
   const query = function useQuery() {

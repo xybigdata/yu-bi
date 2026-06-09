@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Route, RouteProps } from 'react-router-dom';
+import { Route, type RouteProps } from 'app/routerCompat';
 
 interface CompatRedirectProps {
   to: string;

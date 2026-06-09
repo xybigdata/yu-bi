@@ -24,7 +24,7 @@ import { registerTheme } from 'echarts';
 import { PUBLIC_URL } from 'globalConstants';
 import { antdLocales } from 'locales/i18n';
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter } from 'app/routerCompat';
 import { GlobalStyles } from 'styles/globalStyles';
 import HelmetPageTitle from '../components/HelmetPageTitle';
 import { LazyShareStoryPlayer } from './Loadable';

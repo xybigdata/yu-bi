@@ -1,6 +1,6 @@
 import React from 'react';
 import { HelmetProvider } from 'react-helmet-async';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'app/routerCompat';
 import renderer from 'react-test-renderer';
 import { NotFoundPage } from '..';
 
