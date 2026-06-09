@@ -21,8 +21,9 @@ import {
   MoreOutlined,
   ReloadOutlined,
 } from '@ant-design/icons';
-import { Menu, message, Popconfirm, TreeDataNode } from 'antd';
-import { MenuListItem, Popup, Tree, TreeTitle } from 'app/components';
+import { Menu, MenuProps, message, Popconfirm, TreeDataNode } from 'antd';
+import { Popup, Tree, TreeTitle } from 'app/components';
+import { MenuItemContent } from 'app/components/Popup/MenuListItem';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
@@ -139,6 +140,27 @@ export const Recycle = memo(({ sourceId, list }: RecycleProps) => {
 
   const renderTreeTitle = useCallback(
     ({ key, title }) => {
+      const items: MenuProps['items'] = [
+        {
+          key: 'reset',
+          label: (
+            <MenuItemContent prefix={<ReloadOutlined className="icon" />}>
+              {t('restore')}
+            </MenuItemContent>
+          ),
+        },
+        {
+          key: 'delete',
+          label: (
+            <MenuItemContent prefix={<DeleteOutlined className="icon" />}>
+              <Popconfirm title={t('sureToDelete')} onConfirm={del(key)}>
+                {t('delete')}
+              </Popconfirm>
+            </MenuItemContent>
+          ),
+        },
+      ];
+
       return (
         <TreeTitle>
           <h4>{`${title}`}</h4>
@@ -151,22 +173,8 @@ export const Recycle = memo(({ sourceId, list }: RecycleProps) => {
                   prefixCls="ant-dropdown-menu"
                   selectable={false}
                   onClick={moreMenuClick(key, title)}
-                >
-                  <MenuListItem
-                    key="reset"
-                    prefix={<ReloadOutlined className="icon" />}
-                  >
-                    {t('restore')}
-                  </MenuListItem>
-                  <MenuListItem
-                    key="delete"
-                    prefix={<DeleteOutlined className="icon" />}
-                  >
-                    <Popconfirm title={t('sureToDelete')} onConfirm={del(key)}>
-                      {t('delete')}
-                    </Popconfirm>
-                  </MenuListItem>
-                </Menu>
+                  items={items}
+                />
               }
             >
               <span className="action" onClick={stopPPG}>

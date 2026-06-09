@@ -1,6 +1,7 @@
 import { DeleteOutlined, EditOutlined, MoreOutlined } from '@ant-design/icons';
-import { Menu, message, Popconfirm } from 'antd';
-import { MenuListItem, Popup, Tree, TreeTitle } from 'app/components';
+import { Menu, MenuProps, message, Popconfirm } from 'antd';
+import { Popup, Tree, TreeTitle } from 'app/components';
+import { MenuItemContent } from 'app/components/Popup/MenuListItem';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { CascadeAccess } from 'app/pages/MainPage/Access';
@@ -109,6 +110,33 @@ export const List = memo(({ list, selectedId }: StoryboardListProps) => {
   const renderTreeTitle = useCallback(
     node => {
       const { isFolder, title, path, id } = node;
+      const items: MenuProps['items'] = [
+        {
+          key: 'info',
+          label: (
+            <MenuItemContent prefix={<EditOutlined className="icon" />}>
+              {tg('button.info')}
+            </MenuItemContent>
+          ),
+        },
+        {
+          key: 'delete',
+          label: (
+            <MenuItemContent prefix={<DeleteOutlined className="icon" />}>
+              <Popconfirm
+                title={`${
+                  isFolder
+                    ? tg('operation.deleteConfirm')
+                    : tg('operation.archiveConfirm')
+                }`}
+                onConfirm={archiveStoryboard(isFolder, id)}
+              >
+                {isFolder ? tg('button.delete') : tg('button.archive')}
+              </Popconfirm>
+            </MenuItemContent>
+          ),
+        },
+      ];
 
       return (
         <TreeTitle>
@@ -126,29 +154,8 @@ export const List = memo(({ list, selectedId }: StoryboardListProps) => {
                   prefixCls="ant-dropdown-menu"
                   selectable={false}
                   onClick={moreMenuClick(node)}
-                >
-                  <MenuListItem
-                    key="info"
-                    prefix={<EditOutlined className="icon" />}
-                  >
-                    {tg('button.info')}
-                  </MenuListItem>
-                  <MenuListItem
-                    key="delete"
-                    prefix={<DeleteOutlined className="icon" />}
-                  >
-                    <Popconfirm
-                      title={`${
-                        isFolder
-                          ? tg('operation.deleteConfirm')
-                          : tg('operation.archiveConfirm')
-                      }`}
-                      onConfirm={archiveStoryboard(isFolder, id)}
-                    >
-                      {isFolder ? tg('button.delete') : tg('button.archive')}
-                    </Popconfirm>
-                  </MenuListItem>
-                </Menu>
+                  items={items}
+                />
               }
             >
               <span className="action" onClick={stopPPG}>

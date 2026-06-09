@@ -1097,6 +1097,21 @@
   - `npm test -- --runInBand --watchAll=false` 通过
   - `npm run build` 通过
 
+### 并行治理：收口侧边栏回收站与故事板里的 Ant Design 旧菜单 API
+
+- 主应用侧边栏里同属导航域的回收站与故事板更多菜单，已继续从 `MenuListItem` / `Menu.Item` JSX 子节点模式切到 `Menu items` 数组模式，覆盖：
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/Sidebar/Recycle.tsx`
+  - `frontend/src/app/pages/MainPage/pages/SourcePage/Sidebar/Recycle.tsx`
+  - `frontend/src/app/pages/MainPage/pages/SchedulePage/Sidebar/Recycle.tsx`
+  - `frontend/src/app/pages/MainPage/pages/VizPage/Sidebar/Recycle.tsx`
+  - `frontend/src/app/pages/MainPage/pages/VizPage/Sidebar/Storyboards/List.tsx`
+- 这一批沿用 `MenuItemContent` 作为统一 label 渲染容器，保留原有 icon、文案、`Popconfirm` 确认和点击事件传播控制，不改变回收站恢复/彻底删除以及故事板编辑/归档逻辑。
+- 这一步的价值是把主导航域里剩余一组高频树菜单继续收口到 `items` 数据模型，让后续 Ant Design 5 升级时，侧边栏相关的 `Menu children -> items` 散点进一步减少。
+- 2026-06-10 验证：
+  - `npm run checkTs` 通过
+  - `npm test -- --runInBand --watchAll=false` 通过
+  - `npm run build` 通过
+
 ### 2026-06-10 全项目老旧技术栈复核结论
 
 这一轮不是只看版本号，而是按“是否仍在主维护线、是否已经被现代替代方案覆盖、是否值得继续在当前架构上扩展”三条标准重新复核。
