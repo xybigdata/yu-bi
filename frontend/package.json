@@ -34,12 +34,6 @@
     "prepare": "cd .. && husky install frontend/.husky",
     "doc:types": "tsc --project tsconfig.dHelper.json"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -61,32 +55,6 @@
     "*.{css,md,json}": [
       "prettier --write"
     ]
-  },
-  "jest": {
-    "testMatch": [
-      "<rootDir>/src/**/__tests__/**/*.{spec,test}.{js,jsx,ts,tsx}"
-    ],
-    "coverageReporters": [
-      "html",
-      "lcov",
-      "text-summary"
-    ],
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx,ts,tsx}",
-      "!src/**/*/*.d.ts",
-      "!src/**/*/Loadable.{js,jsx,ts,tsx}",
-      "!src/**/*/messages.ts",
-      "!src/**/*/types.ts",
-      "!src/index.tsx"
-    ],
-    "coverageThreshold": {
-      "global": {
-        "branches": 90,
-        "functions": 90,
-        "lines": 90,
-        "statements": 90
-      }
-    }
   },
   "dependencies": {
     "@ant-design/icons": "4.8.3",

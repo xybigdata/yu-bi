@@ -933,6 +933,15 @@
 - `frontend/jsdoc.config.json` 已删除；该配置原本指向不存在的 `types/chartHelper.js`，仓库内也没有生成后的 `types/docs` 产物，因此属于失效文档链而不是仍在使用的工程能力。
 - 这一步不改变前端运行、构建、测试或类型检查主链，只是去掉 Node 26 下会产生 `engine` 告警的无效历史壳。
 
+### 并行治理：收口 `package.json` 中重复的 Jest 与 ESLint 历史配置
+
+- `frontend/package.json` 已删除包级 `eslintConfig` 与 `jest` 配置块。
+- 当前前端真实生效的入口已经明确收口为：
+  - ESLint 使用 `frontend/.eslintrc.js`
+  - Jest 使用 `frontend/jest.config.js`
+- 删除前已复核：`package.json` 里的 `jest` 配置内容只是对 `frontend/jest.config.js` 的重复镜像，并不提供额外行为。
+- 这一步的目标不是升级 Jest 版本，而是先去掉 CRA 时代遗留的重复配置源，降低后续继续推进 Jest 30 或 Vitest 迁移时的配置歧义。
+
 ### React Router 预迁移第四十批：切到 Router 6 经典运行时底座
 
 - `frontend/package.json` 已将 `react-router-dom` 切换到 `^6.30.1`，并删除只服务于 v5 的 `@types/react-router-dom`。
