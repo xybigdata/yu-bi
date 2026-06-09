@@ -1191,6 +1191,17 @@
   - `npm test -- --runInBand --watchAll=false` 通过
   - `npm run build` 通过
 
+### 并行治理：收口看板选图与故事板加页弹层的 visible/open 兼容层
+
+- 两个直接承接 AntD Modal 的选择弹层组件已把对外控制属性从 `visible` 收口到 `open`，覆盖：
+  - `frontend/src/app/pages/StoryBoardPage/components/StoryPageAddModal.tsx`
+  - `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/ChartSelectModal.tsx`
+- 对应调用点也已同步切换到 `open`，覆盖：
+  - `frontend/src/app/pages/StoryBoardPage/Editor/StoryToolBar.tsx`
+  - `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/BoardToolBar/AddChart/AddChart.tsx`
+- 这两个弹层内部本来就已经把 AntD Modal 的真实属性写成 `open`；本批只清理组件边界上的历史 `visible` 命名，不改变故事板加页、看板导入已有图表、树搜索和已选中图表禁用等业务行为。
+- 这一步把 `visible -> open` 清障继续推进到故事板与看板编辑核心流程，进一步减少 AntD 5 主升级前仍保留的历史弹层兼容边界。
+
 ### 2026-06-10 全项目老旧技术栈复核结论
 
 这一轮不是只看版本号，而是按“是否仍在主维护线、是否已经被现代替代方案覆盖、是否值得继续在当前架构上扩展”三条标准重新复核。

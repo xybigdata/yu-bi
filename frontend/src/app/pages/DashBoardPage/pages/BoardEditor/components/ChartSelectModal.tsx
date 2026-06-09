@@ -30,14 +30,14 @@ import { listToTree } from 'utils/utils';
 export interface IProps {
   // dataCharts: DataChart[];
   dataCharts: Folder[];
-  visible: boolean;
+  open: boolean;
   onSelectedCharts: (selectedIds: string[]) => void;
   onCancel: () => void;
 }
 
 const ChartSelectModalModal: React.FC<IProps> = props => {
   const t = useI18NPrefix(`viz.board.action`);
-  const { visible, onSelectedCharts, onCancel, dataCharts } = props;
+  const { open, onSelectedCharts, onCancel, dataCharts } = props;
   const [selectedDataChartIds, setSelectedDataChartIds] = useState<string[]>(
     [],
   );
@@ -118,15 +118,15 @@ const ChartSelectModalModal: React.FC<IProps> = props => {
   let defaultChartsIds = useMemo(setDefaultChartsIds, [treeData]);
 
   useEffect(() => {
-    if (!visible) {
+    if (!open) {
       setSelectedDataChartIds([]);
     }
-  }, [visible]);
+  }, [open]);
 
   return (
     <Modal
       title={t('importExistingDataCharts')}
-      open={visible}
+      open={open}
       onOk={onOk}
       centered
       onCancel={onCancel}

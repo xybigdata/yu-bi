@@ -75,7 +75,7 @@ export const StoryToolBar: React.FC<{ onCloseEditor?: () => void }> = memo(
         </Settings>
         <StoryPageAddModal
           pageContents={chartOptions}
-          visible={visible}
+          open={visible}
           onSelectedPages={onSelectedPages}
           onCancel={() => setVisible(false)}
         />

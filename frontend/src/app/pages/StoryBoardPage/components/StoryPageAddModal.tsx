@@ -24,14 +24,14 @@ import React, { useEffect, useState } from 'react';
 export interface IProps {
   // dataCharts: DataChart[];
   pageContents: Folder[];
-  visible: boolean;
+  open: boolean;
   onSelectedPages: (selectedIds: string[]) => void;
   onCancel: () => void;
 }
 
 const StoryPageAddModal: React.FC<IProps> = props => {
   const {
-    visible,
+    open,
     onSelectedPages,
     onCancel,
     pageContents: dataCharts,
@@ -43,10 +43,10 @@ const StoryPageAddModal: React.FC<IProps> = props => {
     onSelectedPages(selectedDataChartIds);
   };
   useEffect(() => {
-    if (!visible) {
+    if (!open) {
       setSelectedDataChartIds([]);
     }
-  }, [visible]);
+  }, [open]);
   const columns = [
     {
       title: i18next.t('viz.board.setting.storyName'),
@@ -70,7 +70,7 @@ const StoryPageAddModal: React.FC<IProps> = props => {
   return (
     <Modal
       title="Add Story Page"
-      open={visible}
+      open={open}
       onOk={onOk}
       centered
       onCancel={onCancel}
