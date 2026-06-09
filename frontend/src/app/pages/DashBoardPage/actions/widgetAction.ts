@@ -137,10 +137,10 @@ export const widgetClickJumpAction =
     renderMode: VizRenderMode;
     widget: Widget;
     params: ChartMouseEventParams;
-    history: any;
+    navigate: { push: (target: any) => void };
   }) =>
   (dispatch, getState) => {
-    const { renderMode, widget, params, history } = obj;
+    const { renderMode, widget, params, navigate } = obj;
     const state = getState() as RootState;
     const orgId = state?.main?.orgId || '';
     const folderIds = state.viz?.vizs?.map(v => v.relId) || [];
@@ -186,7 +186,7 @@ export const widgetClickJumpAction =
         const searchParamsStr = urlSearchTransfer.toUrlString({
           [jumpConfig?.filter?.filterId]: rowDataValue,
         });
-        history.push(
+        navigate.push(
           `/organizations/${orgId}/vizs/${targetId}?${searchParamsStr}`,
         );
       }
@@ -441,7 +441,7 @@ export const widgetChartClickAction =
     renderMode: VizRenderMode;
     widget: Widget;
     params: ChartMouseEventParams;
-    history: any;
+    navigate: { push: (target: any) => void };
   }) =>
   dispatch => {
     const { boardId, editing, renderMode, widget, params } = obj;

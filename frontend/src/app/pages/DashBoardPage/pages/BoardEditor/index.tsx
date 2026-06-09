@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 import ChartEditor from 'app/components/ChartEditor';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { BOARD_SELF_CHART_PREFIX } from 'globalConstants';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { LEVEL_10 } from 'styles/StyleConstants';
 import { uuidv4 } from 'utils/utils';
@@ -56,7 +56,7 @@ export const BoardEditor: React.FC<{
 }> = memo(({ boardId }) => {
   useEditBoardSlice();
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const board = useSelector(selectEditBoard);
   const boardLoading = useSelector(selectEditBoardLoading);
   const boardChartEditorProps = useSelector(selectBoardChartEditorProps);
@@ -117,7 +117,7 @@ export const BoardEditor: React.FC<{
   ]);
   const initialization = useCallback(async () => {
     await dispatch(fetchEditBoardDetail(boardId));
-    const histState = history.location.state as any;
+    const histState = navigate.location.state as any;
     try {
       if (histState?.widgetInfo) {
         // TODO(Stephen): to be confirm if use history state widget info and for what
@@ -146,7 +146,7 @@ export const BoardEditor: React.FC<{
     } catch (error) {
       console.log(error);
     }
-  }, [dispatch, history.location.state, boardId]);
+  }, [dispatch, navigate.location.state, boardId]);
 
   useEffect(() => {
     initialization();

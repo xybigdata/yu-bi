@@ -4,6 +4,7 @@ import {
   MenuUnfoldOutlined,
 } from '@ant-design/icons';
 import { ListNav, ListPane, ListTitle } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useGetVizIcon from 'app/hooks/useGetVizIcon';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
@@ -12,7 +13,6 @@ import { dispatchResize } from 'app/utils/dispatchResize';
 import { CommonFormTypes } from 'globalConstants';
 import React, { memo, useCallback, useContext, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
 import styled from 'styled-components/macro';
 import { SPACE_XS } from 'styles/StyleConstants';
 import { useAddViz } from '../../hooks/useAddViz';
@@ -51,7 +51,7 @@ export const Folders = memo(
     const orgId = useSelector(selectOrgId);
     const selectVizTree = useMemo(makeSelectVizTree, []);
     const t = useI18NPrefix(i18nPrefix);
-    const history = useHistory();
+    const navigate = useCompatNavigate();
     const { showSaveForm } = useContext(SaveFormContext);
     const addVizFn = useAddViz({ showSaveForm });
 
@@ -111,7 +111,7 @@ export const Folders = memo(
     const add = useCallback(
       ({ key }) => {
         if (key === 'DATACHART') {
-          history.push({
+          navigate.push({
             pathname: `/organizations/${orgId}/vizs/chartEditor`,
             search: `dataChartId=&chartType=dataChart&container=dataChart`,
           });
@@ -125,7 +125,7 @@ export const Folders = memo(
           initialValues: undefined,
         });
       },
-      [orgId, history, addVizFn],
+      [orgId, navigate, addVizFn],
     );
 
     const titles = useMemo(

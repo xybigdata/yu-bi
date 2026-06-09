@@ -245,6 +245,7 @@
 - React Router 预迁移第十五批：成员与角色详情页、图表工作台数据视图入口，以及故事板预览/编辑页中的导航已切到 `useCompatNavigate`，覆盖删除后的 replace 回退、故事板预览切编辑、编辑器关闭回跳和基于 `location.state` 的故事板加页事务清理。
 - React Router 预迁移第十六批：`MainPage` 主入口和 `VizPage/Main` 标签页导航已切到 `useCompatNavigate`，覆盖图表编辑器关闭回退、保存后跳转、标签切换、关闭当前/其他/全部标签后的回跳，以及保留 `search` 参数的可视化页签导航。
 - React Router 预迁移第十七批：`ChartEditor`、`ChartPreviewBoard` 和 Dashboard 头部/动作入口中的对象导航已切到 `useCompatNavigate`，覆盖保存后跳转、加入仪表板时携带 `location.state` 的跳转、可视化预览页回退，以及 Dashboard 编辑入口、关闭编辑器和加入故事板事务传参。
+- React Router 预迁移第十八批：`VizPage` 文件夹侧边栏、`BoardEditor` 初始化流程和 Dashboard widget action 中透传的导航对象已切到 `useCompatNavigate`，覆盖新建分析入口、仪表板编辑态从 `location.state` 读取挂件信息，以及图表跳转动作对兼容导航对象的依赖收口。
 
 验收门槛：
 - 全部路由可访问。

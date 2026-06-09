@@ -17,12 +17,12 @@
  */
 
 import { ControllerFacadeTypes } from 'app/constants';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { ChartMouseEventParams } from 'app/types/Chart';
 import { ChartConfig } from 'app/types/ChartConfig';
 import debounce from 'lodash/debounce';
 import { createContext, FC, PropsWithChildren, memo, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import {
   changeGroupRectAction,
   refreshWidgetsByControllerAction,
@@ -73,7 +73,7 @@ export const WidgetActionProvider: FC<PropsWithChildren<{
 }>> = memo(
   ({ boardEditing, boardId, orgId, boardType, renderMode, children }) => {
     const dispatch = useDispatch();
-    const history = useHistory<any>();
+    const navigate = useCompatNavigate();
     const methods = useMemo(() => {
       const contextValue: WidgetActionContextProps = {
         onEditLayerToTop: () => {
@@ -211,7 +211,7 @@ export const WidgetActionProvider: FC<PropsWithChildren<{
               renderMode,
               widget,
               params,
-              history,
+              navigate,
             }),
           );
         },
@@ -302,7 +302,7 @@ export const WidgetActionProvider: FC<PropsWithChildren<{
       };
       return contextValue;
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [boardEditing, boardId, boardType, dispatch, orgId, renderMode]);
+    }, [boardEditing, boardId, boardType, dispatch, orgId, renderMode, navigate]);
 
     return (
       <WidgetActionContext.Provider value={methods}>
