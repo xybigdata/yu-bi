@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { EllipsisOutlined } from '@ant-design/icons';
-import { Button, ButtonProps, Dropdown, Menu } from 'antd';
+import { Button, ButtonProps, Dropdown, MenuProps } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import widgetManager from 'app/pages/DashBoardPage/components/WidgetManager';
 import useWidgetAction from 'app/pages/DashBoardPage/hooks/useWidgetAction';
@@ -48,8 +48,8 @@ export const WidgetDropdownList: React.FC<{
     [widgetAction, widget],
   );
 
-  const dropdownList = useMemo(() => {
-    const menuItems = actionList
+  const dropdownItems = useMemo<MenuProps['items']>(() => {
+    return actionList
       .filter(item => {
         if (item.key === 'lock') {
           return !widget?.config?.lock;
@@ -58,24 +58,19 @@ export const WidgetDropdownList: React.FC<{
         }
         return true;
       })
-      .map(item => {
-        return (
-          <React.Fragment key={item.key}>
-            {item.divider && <Menu.Divider />}
-            <Menu.Item
-              danger={item.danger}
-              icon={item.icon}
-              disabled={item.disabled}
-              key={item.key}
-            >
-              {t(item.label || '')}
-            </Menu.Item>
-          </React.Fragment>
-        );
+      .flatMap<NonNullable<MenuProps['items']>[number]>(item => {
+        const menuItem: NonNullable<MenuProps['items']>[number] = {
+          key: item.key,
+          danger: item.danger,
+          icon: item.icon,
+          disabled: item.disabled,
+          label: t(item.label || ''),
+        };
+        return item.divider
+          ? [{ key: `${item.key}Divider`, type: 'divider' }, menuItem]
+          : [menuItem];
       });
-
-    return <Menu onClick={menuClick}>{menuItems}</Menu>;
-  }, [actionList, widget?.config?.lock, menuClick, t]);
+  }, [actionList, widget?.config?.lock, t]);
 
   if (actionList.length === 0) {
     return null;
@@ -83,7 +78,7 @@ export const WidgetDropdownList: React.FC<{
   return (
     <Dropdown
       className="widget-tool-dropdown"
-      dropdownRender={() => dropdownList}
+      menu={{ items: dropdownItems, onClick: menuClick }}
       placement="bottomCenter"
       trigger={['click']}
       arrow
