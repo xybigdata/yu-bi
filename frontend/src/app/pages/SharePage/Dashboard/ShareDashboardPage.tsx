@@ -217,11 +217,11 @@ function ShareDashboardPage() {
   return (
     <StyledWrapper className="datart-viz">
       <ShareLoginModal
-        visible={Boolean(needVerify) && shareType === 'LOGIN'}
+        open={Boolean(needVerify) && shareType === 'LOGIN'}
         onChange={handleLogin}
       />
       <PasswordModal
-        visible={Boolean(needVerify) && shareType === 'CODE'}
+        open={Boolean(needVerify) && shareType === 'CODE'}
         onChange={sharePassword => {
           fetchShareVizInfoImpl(shareToken, sharePassword, searchParams);
         }}

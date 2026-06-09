@@ -24,7 +24,7 @@ import styled from 'styled-components';
 import { selectLoginLoading, selectOauth2Clients } from '../slice/selectors';
 import { getOauth2Clients } from '../slice/thunks';
 
-function ShareLoginModal({ visible, onChange }) {
+function ShareLoginModal({ open, onChange }) {
   const dispatch = useAppDispatch();
   const loading = useSelector(selectLoginLoading);
   const oauth2Clients = useSelector(selectOauth2Clients);
@@ -34,7 +34,7 @@ function ShareLoginModal({ visible, onChange }) {
   }, [dispatch]);
 
   return (
-    visible && (
+    open && (
       <LoginWrapper>
         <LoginForm
           loading={loading}

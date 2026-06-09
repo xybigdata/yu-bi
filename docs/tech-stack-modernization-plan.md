@@ -1140,6 +1140,22 @@
   - `npm test -- --runInBand --watchAll=false` 通过
   - `npm run build` 通过
 
+### 并行治理：收口分享页认证弹层的 visible/open 兼容层
+
+- 分享页认证链路中直接承接 Ant Design 弹层的两个组件已把对外控制属性从 `visible` 收口到 `open`，覆盖：
+  - `frontend/src/app/pages/SharePage/components/PasswordModal.tsx`
+  - `frontend/src/app/pages/SharePage/components/ShareLoginModal.tsx`
+  - `frontend/src/app/pages/SharePage/Dashboard/ShareDashboardPage.tsx`
+  - `frontend/src/app/pages/SharePage/Chart/ShareChartPage.tsx`
+  - `frontend/src/app/pages/SharePage/StoryPlayer/ShareStoryPlayerPage.tsx`
+- `PasswordModal` 本身已经在内部使用 AntD Modal 的 `open`，这一批进一步把组件外层调用面也统一到了 `open`，不再继续沿用历史 `visible` 命名。
+- `ShareLoginModal` 虽然不是 AntD Modal，但它和 `PasswordModal` 共同组成分享认证入口，这里一并把外层开关语义统一到 `open`，减少后续分享页弹层 API 的双轨状态。
+- 这一步不改变登录/口令校验逻辑，只是把分享页这组最贴近 AntD Modal 的兼容层提前收拢，为后续继续处理其它真实 `visible -> open` 存量打样。
+- 2026-06-10 验证：
+  - `npm run checkTs` 通过
+  - `npm test -- --runInBand --watchAll=false` 通过
+  - `npm run build` 通过
+
 ### 2026-06-10 全项目老旧技术栈复核结论
 
 这一轮不是只看版本号，而是按“是否仍在主维护线、是否已经被现代替代方案覆盖、是否值得继续在当前架构上扩展”三条标准重新复核。

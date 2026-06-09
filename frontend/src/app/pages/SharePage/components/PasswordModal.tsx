@@ -23,9 +23,9 @@ import { FC, memo, useRef } from 'react';
 const INPUT_PASSWORD_KEY = 'password-input';
 
 const PasswordModal: FC<{
-  visible: boolean;
+  open: boolean;
   onChange: (password: string) => void;
-}> = memo(({ visible, onChange }) => {
+}> = memo(({ open, onChange }) => {
   const t = useI18NPrefix(`share.modal`);
   const tg = useI18NPrefix(`global`);
   const formInstance = useRef<FormInstance>(null);
@@ -33,7 +33,7 @@ const PasswordModal: FC<{
   return (
     <Modal
       title={t('password')}
-      open={visible}
+      open={open}
       closable={false}
       footer={[
         <Button

@@ -172,11 +172,11 @@ export function ShareChartPage() {
   return (
     <StyledWrapper className="datart-viz">
       <ShareLoginModal
-        visible={shareType === 'LOGIN' && Boolean(needVerify)}
+        open={shareType === 'LOGIN' && Boolean(needVerify)}
         onChange={handleLogin}
       />
       <PasswordModal
-        visible={Boolean(needVerify) && shareType === 'CODE'}
+        open={Boolean(needVerify) && shareType === 'CODE'}
         onChange={sharePassword => {
           fetchShareVizInfoImpl(shareToken, sharePassword, searchParams);
         }}
