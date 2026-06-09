@@ -1,10 +1,10 @@
 import { EditableProTable, ProColumns } from '@ant-design/pro-table';
 import { useCallback, useMemo, useState } from 'react';
-import { css } from 'styled-components';
+import { createGlobalStyle } from 'styled-components';
 import { uuidv4 } from 'utils/utils';
 
-const tableStyle = css`
-  .ant-card-body {
+const ConfigurationTableStyle = createGlobalStyle`
+  .configuration-table .ant-card-body {
     padding: 0;
   }
 `;
@@ -44,22 +44,24 @@ export function Configuration<T extends { id: string }>({
   );
 
   return (
-    <EditableProTable<T>
-      size="small"
-      rowKey="id"
-      columns={columns}
-      value={value}
-      onChange={setValue}
-      recordCreatorProps={
-        disabled
-          ? false
-          : {
-              record: () => getDefaultRecord(),
-              ...(creatorButtonText && { creatorButtonText }),
-            }
-      }
-      css={tableStyle}
-      bordered
-    />
+    <div className="configuration-table">
+      <ConfigurationTableStyle />
+      <EditableProTable<T>
+        size="small"
+        rowKey="id"
+        columns={columns}
+        value={value}
+        onChange={setValue}
+        recordCreatorProps={
+          disabled
+            ? false
+            : {
+                record: () => getDefaultRecord(),
+                ...(creatorButtonText && { creatorButtonText }),
+              }
+        }
+        bordered
+      />
+    </div>
   );
 }

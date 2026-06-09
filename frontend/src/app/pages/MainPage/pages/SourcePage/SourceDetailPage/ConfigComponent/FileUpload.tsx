@@ -21,6 +21,7 @@ import { Button, Form, FormInstance, Input, Upload } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { BASE_API_URL } from 'globalConstants';
 import { useCallback, useState } from 'react';
+import styled from 'styled-components';
 import { APIResponse } from 'types';
 import { getToken } from 'utils/auth';
 
@@ -133,22 +134,16 @@ export function FileUpload({
           </Button>
         </Upload>
       </Form.Item>
-      <Form.Item
-        name={['config', 'path']}
-        css={`
-          display: none;
-        `}
-      >
+      <HiddenFormItem name={['config', 'path']}>
         <Input />
-      </Form.Item>
-      <Form.Item
-        name={['config', 'format']}
-        css={`
-          display: none;
-        `}
-      >
+      </HiddenFormItem>
+      <HiddenFormItem name={['config', 'format']}>
         <Input />
-      </Form.Item>
+      </HiddenFormItem>
     </>
   );
 }
+
+const HiddenFormItem = styled(Form.Item)`
+  display: none;
+`;

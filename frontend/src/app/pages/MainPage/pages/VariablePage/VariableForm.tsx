@@ -26,6 +26,7 @@ import { DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
 import moment from 'moment';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SPACE_XS } from 'styles/StyleConstants';
+import styled from 'styled-components';
 import { errorHandle } from 'utils/utils';
 import { VariableHierarchy } from '../ViewPage/slice/types';
 import { VariableScopes, VariableTypes, VariableValueTypes } from './constants';
@@ -227,20 +228,14 @@ export const VariableForm = memo(
             </Radio.Group>
           </Form.Item>
         )}
-        <Form.Item
-          name="defaultValue"
-          label={t('defaultValue')}
-          css={`
-            margin-bottom: ${SPACE_XS};
-          `}
-        >
+        <CompactFormItem name="defaultValue" label={t('defaultValue')}>
           <DefaultValue
             type={valueType}
             expression={expression}
             onChangeDateFormat={onChangeDateFormat}
             dateFormat={dateFormat}
           />
-        </Form.Item>
+        </CompactFormItem>
 
         {valueType !== VariableValueTypes.Expression && (
           <Form.Item
@@ -257,3 +252,7 @@ export const VariableForm = memo(
     );
   },
 );
+
+const CompactFormItem = styled(Form.Item)`
+  margin-bottom: ${SPACE_XS};
+`;

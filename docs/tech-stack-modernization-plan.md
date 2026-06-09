@@ -863,10 +863,10 @@
    - 风险判断：建议先做测试配置去 CRA 化，再决定直接上 Jest 30 还是迁 Vitest。
 
 3. `styled-components 5.3.3` + `styled-components/macro` 兼容壳
-   - 现状：源码导入已经从 `styled-components/macro` 全量收口到 `styled-components`，但运行时与类型层仍停留在 `styled-components 5.3.3` + `@types/styled-components` 组合。
-   - 更现代替代：`styled-components` 6 原生 TypeScript 版本，或后续再评估更轻的样式方案。
-   - 调研结论：当前已经先清掉只服务 CRA 迁移期的 macro 导入与 Vite alias，后续真正升级到 v6 时，重点会落在移除社区 `@types/styled-components`、更新 `stylis` 与处理运行时类型差异。
-   - 风险判断：macro 壳清理已完成；真正的大版本升级仍不适合作为零散小改，最好与测试链或 AntD 主题链调整错峰推进。
+   - 现状：源码导入已经从 `styled-components/macro` 全量收口到 `styled-components`，并已继续升级到 `styled-components 6.1.19`；社区 `@types/styled-components` 也已移除。
+   - 更现代替代：当前已落到 `styled-components` 6 原生 TypeScript 主线，后续是否继续迁到更轻的样式方案属于另一个方向性决策，不再是“版本老旧”问题。
+   - 调研结论：v6 升级的主要适配点不是样式语法本身，而是移除 `@types` 后对本地 `media.ts` 辅助类型和少量 `css` prop 历史写法的收口。
+   - 风险判断：这批升级已完成；当前剩余风险主要是测试输出里少量 React warning，与 `styled-components` 版本升级本身无关。
 
 4. `moment`
    - 现状：时间格式化、时间控件默认值、仪表板控制器等仍广泛依赖 `moment`。
@@ -1000,6 +1000,17 @@
 - `frontend/src/utils/@reduxjs/injectReducer/index.tsx` 已改为使用 typed store hook，并把 HOC 场景下的 `context.store` 显式收口到 `AppStore`，让动态 reducer 注入链和当前 store 扩展类型保持一致。
 - `frontend/src/app/pages/DashBoardPage/pages/Board/slice/thunk.ts` 中 `renderedWidgetAsync` 的 thunk state 泛型已从局部 `{ board: BoardState }` 收口到统一 `RootState`，避免 RTK 2 thunk 与全局 `AppDispatch` 的状态签名分叉。
 - 这一批解决的是前一批 Jest/类型工具链升级后暴露出来的集中类型债：`dispatch(AsyncThunkAction | thunk function)` 不再被误判成 `UnknownAction`。
+- 2026-06-10 验证：`npm run checkTs`、`npm test -- --runInBand --watchAll=false`、`npm run build` 均通过。
+
+### 并行治理：升级 styled-components 到 6 原生 TypeScript 主线
+
+- `frontend/package.json` 与 lockfile 已将 `styled-components` 从 `5.3.3` 升级到 `6.1.19`，并删除 `@types/styled-components`，不再依赖社区类型包补洞。
+- `frontend/src/styles/media.ts` 已改用 v6 原生导出的 `RuleSet`、`StyleFunction`、`Interpolation` 等类型，保留项目当前媒体查询 helper 的调用方式不变。
+- 本批还顺手收口了 3 处只在旧 `css` prop 类型壳下才能通过的历史写法：
+  - `frontend/src/app/components/Configuration.tsx`
+  - `frontend/src/app/pages/MainPage/pages/SourcePage/SourceDetailPage/ConfigComponent/FileUpload.tsx`
+  - `frontend/src/app/pages/MainPage/pages/VariablePage/VariableForm.tsx`
+- 适配策略保持保守：不改主题结构，不动运行时样式语义，只把类型入口和少量依赖 `css` prop 魔法的节点改成显式 styled/class 包装。
 - 2026-06-10 验证：`npm run checkTs`、`npm test -- --runInBand --watchAll=false`、`npm run build` 均通过。
 
 ### 并行治理：删除 CRACO 回退外壳

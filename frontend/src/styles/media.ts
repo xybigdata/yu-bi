@@ -6,10 +6,9 @@ import {
   css,
   CSSObject,
   DefaultTheme,
-  FlattenInterpolation,
   Interpolation,
-  InterpolationFunction,
-  ThemedStyledProps,
+  RuleSet,
+  StyleFunction,
 } from 'styled-components';
 
 /*
@@ -39,17 +38,16 @@ export const media = (Object.keys(sizes) as Array<keyof typeof sizes>).reduce(
 );
 
 /*
- * @types/styled-component is not working properly as explained in the github issue referenced above.
- * We must overcome this with custom typings, however, this might not work in time as the styled-components update.
- * Be carefull and keep an eye on the issue and the possible improvements
+ * The helper keeps a stable typed API for media query templates across
+ * styled-components major versions.
  */
 type MediaFunction = <P extends object>(
   first:
     | TemplateStringsArray
     | CSSObject
-    | InterpolationFunction<ThemedStyledProps<P, DefaultTheme>>,
-  ...interpolations: Array<Interpolation<ThemedStyledProps<P, DefaultTheme>>>
-) => FlattenInterpolation<ThemedStyledProps<P, DefaultTheme>>;
+    | StyleFunction<P & { theme: DefaultTheme }>,
+  ...interpolations: Array<Interpolation<P & { theme: DefaultTheme }>>
+) => RuleSet<P & { theme: DefaultTheme }>;
 
 /* Example
 const SomeDiv = styled.div`
