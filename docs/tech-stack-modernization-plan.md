@@ -1173,6 +1173,24 @@
   - `npm test -- --runInBand --watchAll=false` 通过
   - `npm run build` 通过
 
+### 并行治理：收口局部配置弹层的 visible/open 兼容层
+
+- 三个局部配置弹层组件已把对外控制属性从 `visible` 收口到 `open`，覆盖：
+  - `frontend/src/app/components/FormGenerator/Customize/ConditionalStyle/add.tsx`
+  - `frontend/src/app/components/FormGenerator/Customize/ScorecardConditionalStyle/add.tsx`
+  - `frontend/src/app/components/ChartGraph/BasicRichText/RichTextPluginLoader/CustomColor.tsx`
+- 对应调用点也已同步切换到 `open`，覆盖：
+  - `frontend/src/app/components/FormGenerator/Customize/ConditionalStyle/ConditionalStyle.tsx`
+  - `frontend/src/app/components/FormGenerator/Customize/ScorecardConditionalStyle/ScorecardConditionalStyle.tsx`
+  - `frontend/src/app/components/ChartGraph/BasicRichText/ChartRichTextAdapter.tsx`
+  - `frontend/src/app/pages/DashBoardPage/components/Widgets/RichTextWidget/RichTextWidgetCore.tsx`
+- 这三类弹层都属于局部配置与富文本编辑场景，内部本来就已经把 AntD Modal 的真实控制属性写成 `open`；本批只把组件边界上的历史 `visible` 命名清掉，不改条件样式、评分卡条件样式和自定义颜色选择逻辑。
+- 这一步把 `visible -> open` 清障从全局入口继续推进到配置面板和富文本工具链，进一步缩小 AntD 5 主升级前需要继续兼容的弹层边界。
+- 2026-06-10 验证：
+  - `npm run checkTs` 通过
+  - `npm test -- --runInBand --watchAll=false` 通过
+  - `npm run build` 通过
+
 ### 2026-06-10 全项目老旧技术栈复核结论
 
 这一轮不是只看版本号，而是按“是否仍在主维护线、是否已经被现代替代方案覆盖、是否值得继续在当前架构上扩展”三条标准重新复核。

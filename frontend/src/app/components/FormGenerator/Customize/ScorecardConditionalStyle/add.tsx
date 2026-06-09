@@ -34,7 +34,7 @@ interface AddProps {
   context?: any;
   allItems?: any[];
   translate?: (title: string, options?: any) => string;
-  visible: boolean;
+  open: boolean;
   values: ScorecardConditionalStyleFormValues;
   onOk: (values: ScorecardConditionalStyleFormValues) => void;
   onCancel: () => void;
@@ -43,7 +43,7 @@ interface AddProps {
 export default function Add({
   translate: t = title => title,
   values,
-  visible,
+  open,
   onOk,
   onCancel,
   context,
@@ -85,7 +85,7 @@ export default function Add({
 
   useEffect(() => {
     // !重置form
-    if (visible) {
+    if (open) {
       const result: Partial<ScorecardConditionalStyleFormValues> =
         Object.keys(values).length === 0
           ? {
@@ -100,7 +100,7 @@ export default function Add({
       form.setFieldsValue(result);
       setOperatorValue(result.operator ?? OperatorTypes.Equal);
     }
-  }, [form, visible, values, allItems]);
+  }, [form, open, values, allItems]);
 
   const modalOk = () => {
     form.validateFields().then(values => {
@@ -151,7 +151,7 @@ export default function Add({
     <Modal
       destroyOnClose
       title={t('conditionalStyleTable.modal.title')}
-      open={visible}
+      open={open}
       onOk={modalOk}
       onCancel={onCancel}
     >

@@ -257,7 +257,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
         readOnly={true}
       />
       <CustomColor
-        visible={customColorVisible}
+        open={customColorVisible}
         onCancel={() => setCustomColorVisible(false)}
         color={customColor?.[customColorType]}
         colorChange={customColorChange}

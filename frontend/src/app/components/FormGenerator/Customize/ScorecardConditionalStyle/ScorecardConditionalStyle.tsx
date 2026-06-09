@@ -192,7 +192,7 @@ const ScorecardConditionalStyle: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
         </Row>
         <AddModal
           context={context}
-          visible={visible}
+          open={visible}
           translate={t}
           values={currentItem}
           allItems={allItems}

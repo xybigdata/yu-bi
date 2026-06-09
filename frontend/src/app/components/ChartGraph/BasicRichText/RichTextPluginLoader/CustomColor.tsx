@@ -273,12 +273,12 @@ export class QuillPalette {
 }
 
 export function CustomColor({
-  visible,
+  open,
   onCancel,
   color,
   colorChange,
 }: {
-  visible: boolean;
+  open: boolean;
   onCancel: () => void;
   color: string;
   colorChange: (color: string | boolean) => void;
@@ -287,7 +287,7 @@ export function CustomColor({
     <Modal
       width={273}
       mask={false}
-      open={visible}
+      open={open}
       footer={null}
       closable={false}
       onCancel={onCancel}
