@@ -822,10 +822,10 @@
    - 风险判断：需要同步改造请求/响应模型、URI 构造、SSL 配置和实体读取逻辑，建议单列为下一批后端专项。
 
 3. `poi-ooxml 5.0.0`
-   - 现状：Excel 导入导出、样式转换链仍依赖这条主链，并带出较老的 `xmlgraphics-commons`。
-   - 更现代替代：升级到较新的 POI 5.x 稳定线。
-   - 调研结论：这是值得继续推进的一类，但必须连同导出、图像、SVG 转换链一起回归验证。
-   - 风险判断：改动面跨 `core`、`server`，不适合和 JWT/HTTP 客户端升级混做。
+   - 现状：Excel 导入导出、样式转换链已从 `5.0.0` 升级到 `5.5.1`，`core` 模块补了最小 Excel 写入/读取回归测试。
+   - 更现代替代：当前先稳定在 POI `5.5.1` 这条活跃 5.x 正式版主线，后续再按上游发布节奏做小版本跟进。
+   - 调研结论：项目自有代码只用到了 `Workbook` / `Sheet` / `CellStyle` 等基础 API，升级本身风险可控；真正暴露出的兼容点不是 POI API 变更，而是 `server` 的 PDF 导出链一直直接使用 PDFBox，却没有显式声明依赖。
+   - 风险判断：这一批已完成；后续若继续治理图像 / SVG / PDF 导出链，应把 `batik`、`pdfbox` 与截图链一起作为一个更明确的导出专项。
 
 4. Guava 21.0
    - 现状：项目自有生产代码中的 `CaseFormat`、`Lists`、`Sets`、`ImmutableSet`、`Iterables` 使用点已全部替换为 JDK 集合工厂或本地 `NamingUtils`；`core/pom.xml` 中 `guava 21.0` 直连依赖已删除。
@@ -1053,6 +1053,20 @@
   - `mvn -pl server -am dependency:tree -Dincludes=com.google.guava:guava -DskipTests` 显示当前剩余来源只有：
     - `org.apache.calcite:calcite-core -> guava:29.0-jre`
     - `org.seleniumhq.selenium:selenium-remote-driver -> guava:33.4.6-jre`
+  - `mvn -pl server -am -DskipTests compile` 通过；该命令联动触发的 `npm run build:task` 与 `vite build` 也通过。
+
+### 并行治理：升级 Apache POI 并补齐 PDF 导出显式依赖
+
+- `core/pom.xml` 已将 `org.apache.poi:poi-ooxml` 从 `5.0.0` 升级到 `5.5.1`。
+- `core/src/test/java/datart/core/common/POIUtilsTest.java` 已新增定向回归测试，覆盖 `POIUtils.createEmpty -> withSheet -> save -> loadExcel` 这条项目自有 Excel 生成/读取主链。
+- 升级过程中确认：`server/src/main/java/datart/server/service/impl/AttachmentPdfServiceImpl.java` 一直直接使用 PDFBox API 生成 PDF，但项目此前没有显式声明 `org.apache.pdfbox:pdfbox`，只是依赖旧传递依赖“侥幸可编译”。
+- `server/pom.xml` 现已补充 `org.apache.pdfbox:pdfbox:3.0.7` 直接依赖，保证 PDF 导出链不再依赖 POI / Batik 的偶然传递行为。
+- 2026-06-10 依赖树复核：
+  - `mvn -pl server -am dependency:tree -Dincludes=org.apache.poi:poi-ooxml,org.apache.pdfbox:pdfbox -DskipTests` 显示：
+    - `datart-core -> org.apache.poi:poi-ooxml:5.5.1`
+    - `datart-server -> org.apache.pdfbox:pdfbox:3.0.7`
+- 2026-06-10 验证：
+  - `mvn -pl core -am -Dtest=datart.core.common.POIUtilsTest -Dsurefire.failIfNoSpecifiedTests=false test` 通过。
   - `mvn -pl server -am -DskipTests compile` 通过；该命令联动触发的 `npm run build:task` 与 `vite build` 也通过。
 
 ### 并行治理：移除未使用的 cglib 直接依赖
