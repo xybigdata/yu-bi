@@ -85,8 +85,8 @@ import { loadTasks } from './service';
 
 export function Navbar() {
   const { actions } = useMainSlice();
-  const [profileVisible, setProfileVisible] = useState(false);
-  const [modifyPasswordVisible, setModifyPasswordVisible] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [modifyPasswordOpen, setModifyPasswordOpen] = useState(false);
   const lang = getLang();
   const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
@@ -169,15 +169,15 @@ export function Navbar() {
   );
 
   const hideProfile = useCallback(() => {
-    setProfileVisible(false);
+    setProfileOpen(false);
   }, []);
   const hideModifyPassword = useCallback(() => {
-    setModifyPasswordVisible(false);
+    setModifyPasswordOpen(false);
   }, []);
 
-  const organizationListVisibleChange = useCallback(
-    visible => {
-      if (visible && !organizationListLoading) {
+  const handleOrganizationListOpenChange = useCallback(
+    open => {
+      if (open && !organizationListLoading) {
         dispatch(getOrganizations());
       }
     },
@@ -289,7 +289,7 @@ export function Navbar() {
     ({ key }) => {
       switch (key) {
         case 'profile':
-          setProfileVisible(true);
+          setProfileOpen(true);
           break;
         case 'logout':
           dispatch(
@@ -299,7 +299,7 @@ export function Navbar() {
           );
           break;
         case 'password':
-          setModifyPasswordVisible(true);
+          setModifyPasswordOpen(true);
           break;
         case 'zh':
         case 'en':
@@ -374,7 +374,7 @@ export function Navbar() {
               content={<OrganizationList />}
               trigger={['click']}
               placement="rightBottom"
-              onOpenChange={organizationListVisibleChange}
+              onOpenChange={handleOrganizationListOpenChange}
             >
               <li>
                 <Tooltip title={t('nav.organization.title')} placement="right">
@@ -407,8 +407,8 @@ export function Navbar() {
             </li>
           </Popup>
         </Toolbar>
-        <Profile open={profileVisible} onCancel={hideProfile} />
-        <ModifyPassword open={modifyPasswordVisible} onCancel={hideModifyPassword} />
+        <Profile open={profileOpen} onCancel={hideProfile} />
+        <ModifyPassword open={modifyPasswordOpen} onCancel={hideModifyPassword} />
       </MainNav>
       {showSubNav && (
         <SubNav>

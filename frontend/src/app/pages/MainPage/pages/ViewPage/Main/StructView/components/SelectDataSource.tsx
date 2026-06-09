@@ -93,7 +93,7 @@ const SelectDataSource = memo(
         : null,
     );
     const [sources, setSources] = useState<Source[]>(propsSources);
-    const [visible, setVisible] = useState<boolean>(false);
+    const [open, setOpen] = useState<boolean>(false);
 
     const currentTableAllColumns = useMemo(() => {
       if (type === 'JOINS') {
@@ -244,13 +244,13 @@ const SelectDataSource = memo(
         }
         setSelectedTableSchema(tableSchema);
         onChange?.(tableSchema, type);
-        setVisible(false);
+        setOpen(false);
       },
       [type, onChange, allDatabaseSchemas, currentSources],
     );
 
-    const handleVisibleChange = useCallback(visible => {
-      setVisible(visible);
+    const handleOpenChange = useCallback(nextOpen => {
+      setOpen(nextOpen);
     }, []);
 
     useEffect(() => {
@@ -308,10 +308,8 @@ const SelectDataSource = memo(
           trigger={['click']}
           placement="bottomLeft"
           overlayClassName="datart-popup"
-          open={allowManage && visible}
-          onOpenChange={
-            renderType === 'MANAGE' ? handleVisibleChange : undefined
-          }
+          open={allowManage && open}
+          onOpenChange={renderType === 'MANAGE' ? handleOpenChange : undefined}
           content={
             currentSources ? (
               <PopoverBody>
