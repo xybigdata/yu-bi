@@ -355,6 +355,8 @@
 - React Router 预迁移第二十八批：`AuthorizedRoute` 已切到 `CompatRoute`，兼容层外部最后一个直接渲染 `Route` 的授权封装也已收回到本地路由组件；当前应用内的路由声明旧实现进一步集中到 `CompatRoute` 与 `routerCompat.ts` 两个底座点。
 - React Router 预迁移第二十九批：删除仅做空转发的 `CompatSwitch`，让 `CompatRoutes` 直接承接 `Switch`；兼容路由容器层级继续压缩，为后续把 `CompatRoutes` 直接替换到 Router 6/7 `Routes` 减少一层过渡包装。
 - React Router 预迁移第三十批：`CompatRoute` 与 `CompatRedirect` 已脱离 `RouteProps` 类型耦合，改为项目内部只暴露 `path` / `exact` / `element` / `to` 的窄接口；`routerCompat.ts` 也不再向外导出 `RouteProps`，进一步压缩 Router v5 类型面对业务层的渗透。
+- React Router 预迁移第三十一批：新增 `CompatNavLink`，先承接 Navbar 中唯一仍依赖 `activeClassName` / `isActive` 的 v5 `NavLink` 历史 API；主导航和设置子导航已切到本地兼容组件，为后续把底层 `NavLink` 切到 Router 6 写法继续缩小业务改动面。
+- React Router 预迁移第三十二批：`useRouteMatch` 已从 `routerCompat.ts` 出口移除，确认应用层与兼容层公开接口都不再依赖该 v5 历史 API；`CompatNavLink` 的自定义激活判断也改为只消费当前业务实际需要的 `pathname`。
 
 验收门槛：
 - 全部路由可访问。
@@ -553,6 +555,8 @@
 - `useCompatNavigate` 和 `CompatRedirect` 已不再直接把 v5 `history.push/replace` 与 `Route render` 透传给业务层，下一步可以继续推进 `CompatSwitch` / `CompatRoutes` 的真实底座替换。
 - `CompatSwitch` 已删除，`CompatRoutes` 不再经过额外空包装层，兼容路由容器已进一步收敛。
 - `CompatRoute` / `CompatRedirect` 已不再依赖 `RouteProps`，兼容层对外只暴露当前业务实际使用到的最小路由声明能力。
+- `NavLink` 的 v5 历史 API 已收口到 `CompatNavLink`，当前业务层不再直接依赖 `activeClassName` / `isActive`。
+- `useRouteMatch` 已从兼容出口移除，当前公开路由能力里已不存在该历史 API。
 - 当前仍保留旧 Router 5 运行时语义的核心点，已经压缩到：
   1. `frontend/src/app/routerCompat.ts`
   2. `frontend/src/app/components/CompatRoute.tsx`

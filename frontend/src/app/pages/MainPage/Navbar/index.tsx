@@ -31,6 +31,7 @@ import {
 } from '@ant-design/icons';
 import { List, Menu, Tooltip } from 'antd';
 import logo from 'app/assets/images/logo.svg';
+import { CompatNavLink } from 'app/components/CompatNavLink';
 import { Avatar, MenuListItem, Popup } from 'app/components';
 import { TenantManagementMode } from 'app/constants';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
@@ -42,7 +43,7 @@ import {
   selectOrgId,
 } from 'app/pages/MainPage/slice/selectors';
 import { getOrganizations } from 'app/pages/MainPage/slice/thunks';
-import { NavLink, useLocation } from 'app/routerCompat';
+import { useLocation } from 'app/routerCompat';
 import { selectLoggedInUser, selectSystemInfo } from 'app/slice/selectors';
 import { logout } from 'app/slice/thunks';
 import { downloadFile } from 'app/utils/fetch';
@@ -447,7 +448,7 @@ const Nav = styled.nav`
   padding: 0 ${SPACE_LG};
 `;
 
-const NavItem = styled(NavLink)`
+const NavItem = styled(CompatNavLink)`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -506,7 +507,7 @@ const SubNav = styled.div`
   border-right: 1px solid ${p => p.theme.borderColorSplit};
 `;
 
-const SubNavTitle = styled(NavLink)`
+const SubNavTitle = styled(CompatNavLink)`
   display: flex;
   align-items: center;
   padding: ${SPACE_XS} ${SPACE_LG} ${SPACE_XS} ${SPACE_LG};

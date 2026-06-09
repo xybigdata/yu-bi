@@ -9,4 +9,3 @@ export {
   useLocation,
   useParams,
 } from 'react-router-dom';
-export { useRouteMatch } from 'react-router';
