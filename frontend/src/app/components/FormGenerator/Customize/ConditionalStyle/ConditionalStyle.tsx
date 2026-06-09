@@ -38,7 +38,7 @@ const ConditionalStyle: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
     context,
   }) => {
     const [myData] = useState(() => CloneValueDeep(data));
-    const [visible, setVisible] = useState<boolean>(false);
+    const [open, setOpen] = useState<boolean>(false);
     const [dataSource, setDataSource] = useState<ConditionalStyleFormValues[]>(
       myData.value || [],
     );
@@ -119,10 +119,10 @@ const ConditionalStyle: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
     ];
 
     const openConditionalStyle = () => {
-      setVisible(true);
+      setOpen(true);
     };
     const closeConditionalStyleModal = () => {
-      setVisible(false);
+      setOpen(false);
       setCurrentItem({} as ConditionalStyleFormValues);
     };
     const submitConditionalStyleModal = (
@@ -168,7 +168,7 @@ const ConditionalStyle: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
         </Row>
         <AddModal
           context={context}
-          open={visible}
+          open={open}
           translate={t}
           values={currentItem}
           onOk={submitConditionalStyleModal}

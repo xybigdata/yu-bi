@@ -97,10 +97,10 @@ const ControllerWidgetPanel: React.FC<WidgetControllerPanelParams> = memo(
       [],
     );
 
-    const [visible, setVisible] = useState(false);
+    const [open, setOpen] = useState(false);
     useEffect(() => {
       const hide = !type || type === 'hide';
-      setVisible(!hide);
+      setOpen(!hide);
     }, [type]);
     const [form] = Form.useForm<ControllerWidgetContent>();
 
@@ -205,7 +205,7 @@ const ControllerWidgetPanel: React.FC<WidgetControllerPanelParams> = memo(
     const onFinish = useCallback(
       (values: ControllerWidgetContent) => {
         if (!controllerType) return;
-        setVisible(false);
+        setOpen(false);
         const { relatedViews, config, name } = values;
         if (type === 'add') {
           let newRelations = makeControlRelations({
@@ -306,13 +306,13 @@ const ControllerWidgetPanel: React.FC<WidgetControllerPanelParams> = memo(
     return (
       <Modal
         title={`${tGMT(type)}${t(controllerType || '')}`}
-        open={visible}
+        open={open}
         onOk={onSubmit}
         centered
         destroyOnClose
         width={1160}
         afterClose={afterClose}
-        onCancel={() => setVisible(false)}
+        onCancel={() => setOpen(false)}
       >
         <Form
           form={form}
@@ -324,7 +324,7 @@ const ControllerWidgetPanel: React.FC<WidgetControllerPanelParams> = memo(
         >
           <Container className="datart-split">
             <div>
-              {visible && (
+              {open && (
                 <WidgetControlForm
                   controllerType={controllerType!}
                   otherStrFilterWidgets={otherStrTypeController}

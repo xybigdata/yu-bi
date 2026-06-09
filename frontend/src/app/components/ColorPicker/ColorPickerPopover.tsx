@@ -23,11 +23,11 @@ export const ColorPickerPopover: FC<ColorPickerPopoverProps> = ({
   onChange,
   colorPickerClass,
 }) => {
-  const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
   const [color] = useState<string | undefined>(defaultValue);
 
   const onCancel = useCallback(() => {
-    setVisible(false);
+    setOpen(false);
   }, []);
   const onColorChange = useCallback(
     color => {
@@ -43,8 +43,8 @@ export const ColorPickerPopover: FC<ColorPickerPopoverProps> = ({
   return (
     <Popover
       {..._popoverProps}
-      open={visible}
-      onOpenChange={setVisible}
+      open={open}
+      onOpenChange={setOpen}
       content={<SingleColorSelection color={color} onChange={onColorChange} />}
       trigger="click"
       placement="right"

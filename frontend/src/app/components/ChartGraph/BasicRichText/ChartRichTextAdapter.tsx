@@ -77,7 +77,7 @@ const ChartRichTextAdapter: FC<{
   }) => {
     const [containerId, setContainerId] = useState<string>();
     const [quillModules, setQuillModules] = useState<any>(null);
-    const [visible, setVisible] = useState<boolean>(false);
+    const [open, setOpen] = useState<boolean>(false);
     const [quillValue, setQuillValue] = useState<DeltaStatic | string>('');
     const [translate, setTranslate] = useState<DeltaStatic | string>('');
 
@@ -207,7 +207,7 @@ const ChartRichTextAdapter: FC<{
 
     const reactQuillView = useMemo(
       () =>
-        (!isEditing || visible) && (
+        (!isEditing || open) && (
           <ReactQuill
             ref={quillRef}
             className="react-quill-view"
@@ -218,7 +218,7 @@ const ChartRichTextAdapter: FC<{
             readOnly={true}
           />
         ),
-      [translate, quillRef, isEditing, visible],
+      [translate, quillRef, isEditing, open],
     );
 
     const selectField = useCallback(
@@ -322,7 +322,7 @@ const ChartRichTextAdapter: FC<{
             <Row align="middle" justify="end" style={{ paddingTop: 16 }}>
               <Button
                 onClick={() => {
-                  setVisible(true);
+                  setOpen(true);
                 }}
                 type="primary"
               >
@@ -346,12 +346,12 @@ const ChartRichTextAdapter: FC<{
         </QuillBox>
         <Modal
           title={t?.('common.richTextPreview')}
-          open={visible}
+          open={open}
           footer={null}
           width="80%"
           getContainer={false}
           onCancel={() => {
-            setVisible(false);
+            setOpen(false);
           }}
         >
           {isEditing && reactQuillView}

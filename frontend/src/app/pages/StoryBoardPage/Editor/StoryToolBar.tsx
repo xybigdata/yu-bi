@@ -44,7 +44,7 @@ export const StoryToolBar: React.FC<{ onCloseEditor?: () => void }> = memo(
       onCloseEditor?.();
     }, [onCloseEditor]);
     const { storyId, name } = useContext(StoryContext);
-    const [visible, setVisible] = useState(false);
+    const [open, setOpen] = useState(false);
     const chartOptionsMock = useSelector(selectVizs);
     const chartOptions = chartOptionsMock.filter(
       item => item.relType === 'DASHBOARD',
@@ -53,7 +53,7 @@ export const StoryToolBar: React.FC<{ onCloseEditor?: () => void }> = memo(
     const onSelectedPages = useCallback(
       (relIds: string[]) => {
         dispatch(addStoryPages({ storyId, relIds }));
-        setVisible(false);
+        setOpen(false);
       },
       [storyId, dispatch],
     );
@@ -67,7 +67,7 @@ export const StoryToolBar: React.FC<{ onCloseEditor?: () => void }> = memo(
         <AddButton
           type="primary"
           icon={<PlusOutlined />}
-          onClick={() => setVisible(true)}
+          onClick={() => setOpen(true)}
         />
         <Settings>
           <StoryPageSetting />
@@ -75,9 +75,9 @@ export const StoryToolBar: React.FC<{ onCloseEditor?: () => void }> = memo(
         </Settings>
         <StoryPageAddModal
           pageContents={chartOptions}
-          open={visible}
+          open={open}
           onSelectedPages={onSelectedPages}
-          onCancel={() => setVisible(false)}
+          onCancel={() => setOpen(false)}
         />
       </Wrapper>
     );
