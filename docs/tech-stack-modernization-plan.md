@@ -1028,6 +1028,24 @@
 - `.github/workflows/dev-ut-stage.js.yml` 已将前端 CI 的 Node 版本矩阵从 `14.x/16.x` 切到 `26.x`，并补上 `npm run checkTs` 与 `npm run build:task`，让 CI 至少覆盖当前前端真实主链。
 - 这一步不引入新的构建工具，也不改变前端运行语义，目标只是把“本机已跑通的 Node 26 基线”真正下沉到仓库级工程化约束里。
 
+### 并行治理：收口图表工作台里的 Ant Design 旧菜单 API
+
+- `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/SizeAction.tsx` 已将 `Slider.tooltipVisible` 切到 `tooltip={{ open: true }}`，对齐 AntD 4.24+ 推荐写法，也为后续 AntD 5 的 `open` 语义收口提前清障。
+- 图表工作台字段操作菜单相关文件已从旧的 `Menu.Item` / `Menu.SubMenu` JSX 子节点模式切到 `Menu items` 数组模式，覆盖：
+  - `ChartDataConfigSectionActionMenu.tsx`
+  - `SortAction/SortAction.tsx`
+  - `AggregationAction.tsx`
+  - `AggregationLimitAction.tsx`
+- 这一批只处理图表工作台内部、且已经由 `Dropdown dropdownRender` 承载的局部菜单，不混入通用 `Popup/MenuListItem` 或自定义组件的 `visible` prop 约定，避免扩大行为面。
+- 适配策略保持保守：
+  - 仍保留现有 `dropdownRender` 容器与工作台交互结构
+  - 只是把菜单项构造收口到 `items` 数组
+  - 原有 `onConfigChange` / `onOpenModal` 行为保持不变
+- 2026-06-10 验证：
+  - `npm run checkTs` 通过
+  - `npm test -- --runInBand --watchAll=false` 通过
+  - `npm run build` 通过
+
 ### 2026-06-10 全项目老旧技术栈复核结论
 
 这一轮不是只看版本号，而是按“是否仍在主维护线、是否已经被现代替代方案覆盖、是否值得继续在当前架构上扩展”三条标准重新复核。

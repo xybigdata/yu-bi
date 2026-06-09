@@ -17,7 +17,7 @@
  */
 
 import { CheckOutlined } from '@ant-design/icons';
-import { Menu, Radio, Space } from 'antd';
+import { Menu, MenuProps, Radio, Space } from 'antd';
 import {
   AggregateFieldSubAggregateType,
   ChartDataSectionFieldActionType,
@@ -26,6 +26,27 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ChartDataSectionField } from 'app/types/ChartConfig';
 import { updateBy } from 'app/utils/mutation';
 import { FC, useState } from 'react';
+
+interface AggregationActionMenuItemsArgs {
+  actionType;
+  aggregate;
+  onChange;
+  t: (key: string) => string;
+}
+
+export const buildAggregationMenuItems = ({
+  actionType,
+  aggregate,
+  onChange,
+  t,
+}: AggregationActionMenuItemsArgs): MenuProps['items'] => {
+  return AggregateFieldSubAggregateType[actionType]?.map(agg => ({
+    key: agg,
+    icon: aggregate === agg ? <CheckOutlined /> : undefined,
+    label: t(agg),
+    onClick: () => onChange(agg),
+  }));
+};
 
 const AggregationAction: FC<{
   config: ChartDataSectionField;
@@ -50,22 +71,15 @@ const AggregationAction: FC<{
   const renderOptions = mode => {
     if (mode === 'menu') {
       return (
-        <>
-          {AggregateFieldSubAggregateType[
-            ChartDataSectionFieldActionType.Aggregate
-          ]?.map(agg => {
-            return (
-              <Menu.Item
-                key={agg}
-                eventKey={agg}
-                icon={aggregate === agg ? <CheckOutlined /> : ''}
-                onClick={() => onChange(agg)}
-              >
-                {t(agg)}
-              </Menu.Item>
-            );
+        <Menu
+          selectable={false}
+          items={buildAggregationMenuItems({
+            actionType: ChartDataSectionFieldActionType.Aggregate,
+            aggregate,
+            onChange,
+            t,
           })}
-        </>
+        />
       );
     }
 

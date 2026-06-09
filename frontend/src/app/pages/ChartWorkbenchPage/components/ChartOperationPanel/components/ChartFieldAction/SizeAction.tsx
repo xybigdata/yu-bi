@@ -42,7 +42,7 @@ const SizeAction: FC<{
   return (
     <Slider
       dots
-      tooltipVisible
+      tooltip={{ open: true }}
       value={size}
       onChange={handleChange}
       min={1}

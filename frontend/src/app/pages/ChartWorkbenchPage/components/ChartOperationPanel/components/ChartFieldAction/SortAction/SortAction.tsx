@@ -17,7 +17,7 @@
  */
 
 import { CheckOutlined } from '@ant-design/icons';
-import { Col, Menu, Radio, Row, Space } from 'antd';
+import { Col, Menu, MenuProps, Radio, Row, Space } from 'antd';
 import { SortActionType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ChartDataSectionField } from 'app/types/ChartConfig';
@@ -26,6 +26,27 @@ import { updateBy } from 'app/utils/mutation';
 import { FC, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'utils/object';
+
+interface SortActionMenuItemsArgs {
+  direction;
+  onChange;
+  t: (key: string) => string;
+}
+
+export const buildSortActionMenuItems = ({
+  direction,
+  onChange,
+  t,
+}: SortActionMenuItemsArgs): MenuProps['items'] => {
+  return [SortActionType.None, SortActionType.ASC, SortActionType.DESC].map(
+    sort => ({
+      key: sort,
+      icon: direction === sort ? <CheckOutlined /> : undefined,
+      label: t(`sort.${sort?.toLowerCase()}`),
+      onClick: () => onChange(sort),
+    }),
+  );
+};
 
 const SortAction: FC<{
   config: ChartDataSectionField;
@@ -62,22 +83,14 @@ const SortAction: FC<{
   const renderOptions = mode => {
     if (mode === 'menu') {
       return (
-        <>
-          {[SortActionType.None, SortActionType.ASC, SortActionType.DESC].map(
-            sort => {
-              return (
-                <Menu.Item
-                  key={sort}
-                  eventKey={sort}
-                  icon={direction === sort ? <CheckOutlined /> : ''}
-                  onClick={() => handleSortTypeChange(sort)}
-                >
-                  {t(`sort.${sort?.toLowerCase()}`)}
-                </Menu.Item>
-              );
-            },
-          )}
-        </>
+        <Menu
+          selectable={false}
+          items={buildSortActionMenuItems({
+            direction,
+            onChange: handleSortTypeChange,
+            t,
+          })}
+        />
       );
     }
 

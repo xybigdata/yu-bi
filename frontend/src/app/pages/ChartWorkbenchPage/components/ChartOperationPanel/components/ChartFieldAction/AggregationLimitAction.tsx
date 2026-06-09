@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { Menu, Radio, Space } from 'antd';
+import { Menu, MenuProps, Radio, Space } from 'antd';
 import {
   AggregateFieldSubAggregateType,
   ChartDataSectionFieldActionType,
@@ -25,6 +25,24 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ChartDataSectionField } from 'app/types/ChartConfig';
 import { updateBy } from 'app/utils/mutation';
 import { FC, useState } from 'react';
+
+interface AggregationLimitActionMenuItemsArgs {
+  actionType;
+  onChange;
+  t: (key: string) => string;
+}
+
+export const buildAggregationLimitMenuItems = ({
+  actionType,
+  onChange,
+  t,
+}: AggregationLimitActionMenuItemsArgs): MenuProps['items'] => {
+  return AggregateFieldSubAggregateType[actionType]?.map(agg => ({
+    key: agg,
+    label: t(agg),
+    onClick: () => onChange(agg),
+  }));
+};
 
 const AggregationLimitAction: FC<{
   config: ChartDataSectionField;
@@ -48,17 +66,14 @@ const AggregationLimitAction: FC<{
   const renderOptions = mode => {
     if (mode === 'menu') {
       return (
-        <>
-          {AggregateFieldSubAggregateType[
-            ChartDataSectionFieldActionType.AggregateLimit
-          ]?.map(agg => {
-            return (
-              <Menu.Item key={agg} onClick={() => onChange(agg)}>
-                {t(agg)}
-              </Menu.Item>
-            );
+        <Menu
+          selectable={false}
+          items={buildAggregationLimitMenuItems({
+            actionType: ChartDataSectionFieldActionType.AggregateLimit,
+            onChange,
+            t,
           })}
-        </>
+        />
       );
     }
 

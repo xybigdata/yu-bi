@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { Menu } from 'antd';
+import { Menu, MenuProps } from 'antd';
 import {
   ChartDataSectionFieldActionType,
   ChartDataViewFieldCategory,
@@ -25,11 +25,12 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ChartDataSectionField } from 'app/types/ChartConfig';
 import { ChartDataConfigSectionProps } from 'app/types/ChartDataConfigSection';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
+import { updateBy } from 'app/utils/mutation';
 import { FC } from 'react';
-import AggregationAction from '../ChartFieldAction/AggregationAction';
-import AggregationLimitAction from '../ChartFieldAction/AggregationLimitAction';
-import DateLevelAction from '../ChartFieldAction/DateLevelAction/DateLevelAction';
-import SortAction from '../ChartFieldAction/SortAction';
+import { buildAggregationMenuItems } from '../ChartFieldAction/AggregationAction';
+import { buildAggregationLimitMenuItems } from '../ChartFieldAction/AggregationLimitAction';
+import { buildDateLevelMenuItems } from '../ChartFieldAction/DateLevelAction/DateLevelMenuItems';
+import { buildSortActionMenuItems } from '../ChartFieldAction/SortAction/SortAction';
 import { updateDataConfigByField } from './utils';
 
 const ChartDataConfigSectionActionMenu: FC<
@@ -52,6 +53,9 @@ const ChartDataConfigSectionActionMenu: FC<
   onConfigChanged,
 }) => {
   const t = useI18NPrefix(`viz.palette.data.enum.actionType`);
+  const sortT = useI18NPrefix(`viz.palette.data.actions`);
+  const aggregateT = useI18NPrefix(`viz.common.enum.aggregateTypes`);
+  const dateLevelT = useI18NPrefix(`viz.workbench.dataview`);
   const subMenuAction = [
     ChartDataSectionFieldActionType.Sortable,
     ChartDataSectionFieldActionType.Aggregate,
@@ -123,78 +127,84 @@ const ChartDataConfigSectionActionMenu: FC<
     return modalActions;
   };
 
-  const getSubMenuActionComponent = (actionName, uid) => {
+  const getSubMenuActionItems = (actionName, uid): MenuProps['items'] => {
     const fieldConfig = config.rows?.find(c => c.uid === uid);
     if (!fieldConfig) {
       return;
     }
     const options = config?.options?.[actionName];
     if (actionName === ChartDataSectionFieldActionType.Sortable) {
-      return (
-        <SortAction
-          config={fieldConfig}
-          onConfigChange={(config, needRefresh) => {
-            handleFieldConfigChanged(uid, config, needRefresh);
-          }}
-          options={options}
-          mode="menu"
-        />
-      );
+      return buildSortActionMenuItems({
+        direction: fieldConfig?.sort?.type,
+        onChange: direction => {
+          const nextConfig = updateBy(fieldConfig, draft => {
+            draft.sort = { type: direction };
+          });
+          const needRefresh = options?.backendSort
+            ? Boolean(options?.backendSort)
+            : true;
+          handleFieldConfigChanged(uid, nextConfig, needRefresh);
+        },
+        t: sortT,
+      });
     }
     if (actionName === ChartDataSectionFieldActionType.Aggregate) {
-      return (
-        <AggregationAction
-          config={fieldConfig}
-          onConfigChange={(config, needRefresh) => {
-            handleFieldConfigChanged(uid, config, needRefresh);
-          }}
-          mode="menu"
-        />
-      );
+      return buildAggregationMenuItems({
+        actionType: ChartDataSectionFieldActionType.Aggregate,
+        aggregate: fieldConfig?.aggregate,
+        onChange: selectedValue => {
+          const nextConfig = updateBy(fieldConfig, draft => {
+            draft.aggregate = selectedValue;
+          });
+          handleFieldConfigChanged(uid, nextConfig, true);
+        },
+        t: aggregateT,
+      });
     }
     if (actionName === ChartDataSectionFieldActionType.AggregateLimit) {
-      return (
-        <AggregationLimitAction
-          config={fieldConfig}
-          onConfigChange={(config, needRefresh) => {
-            handleFieldConfigChanged(uid, config, needRefresh);
-          }}
-          mode="menu"
-        />
-      );
+      return buildAggregationLimitMenuItems({
+        actionType: ChartDataSectionFieldActionType.AggregateLimit,
+        onChange: selectedValue => {
+          const nextConfig = updateBy(fieldConfig, draft => {
+            draft.aggregate = selectedValue;
+          });
+          handleFieldConfigChanged(uid, nextConfig, true);
+        },
+        t: aggregateT,
+      });
     }
     if (actionName === ChartDataSectionFieldActionType.DateLevel) {
-      return (
-        <DateLevelAction
-          metas={metas}
-          availableSourceFunctions={availableSourceFunctions}
-          config={fieldConfig}
-          onConfigChange={(config, needRefresh, replacedConfig) => {
-            handleFieldConfigChanged(uid, config, needRefresh, replacedConfig);
-          }}
-          mode="menu"
-        />
-      );
+      return buildDateLevelMenuItems({
+        metas,
+        availableSourceFunctions,
+        config: fieldConfig,
+        onChange: (nextConfig, needRefresh, replacedConfig) => {
+          handleFieldConfigChanged(
+            uid,
+            nextConfig,
+            needRefresh,
+            replacedConfig || fieldConfig,
+          );
+        },
+        t: dateLevelT,
+      });
     }
   };
 
-  return (
-    <Menu>
-      {getModalActions(config?.actions, type, category).map(actionName => (
-        <Menu.Item
-          key={actionName}
-          onClick={() => onOpenModal(uid)(actionName)}
-        >
-          {t(actionName)}
-        </Menu.Item>
-      ))}
-      {getSubMenuActions(config?.actions, type, category).map(actionName => (
-        <Menu.SubMenu key={actionName} title={t(actionName)}>
-          {getSubMenuActionComponent(actionName, uid)}
-        </Menu.SubMenu>
-      ))}
-    </Menu>
-  );
+  const items = [
+    ...getModalActions(config?.actions, type, category).map(actionName => ({
+      key: actionName,
+      label: t(actionName),
+      onClick: () => onOpenModal(uid)(actionName),
+    })),
+    ...getSubMenuActions(config?.actions, type, category).map(actionName => ({
+      key: actionName,
+      label: t(actionName),
+      children: getSubMenuActionItems(actionName, uid),
+    })),
+  ];
+
+  return <Menu selectable={false} items={items} />;
 };
 
 export default ChartDataConfigSectionActionMenu;
