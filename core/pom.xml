@@ -79,9 +79,9 @@
 
 
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.14</version>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>5.5</version>
         </dependency>
 
         <dependency>
@@ -100,8 +100,8 @@
                     <artifactId>guava</artifactId>
                 </exclusion>
                 <exclusion>
-                    <artifactId>httpclient</artifactId>
-                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient5</artifactId>
+                    <groupId>org.apache.httpcomponents.client5</groupId>
                 </exclusion>
             </exclusions>
         </dependency>

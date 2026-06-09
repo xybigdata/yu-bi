@@ -25,9 +25,10 @@ import datart.core.base.exception.Exceptions;
 import datart.core.data.provider.Column;
 import datart.core.data.provider.Dataframe;
 import datart.data.provider.jdbc.DataTypeUtils;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
@@ -44,8 +45,13 @@ public class ResponseJsonParser implements HttpResponseParser {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Override
-    public Dataframe parseResponse(String targetPropertyName, HttpResponse response, List<Column> columns) throws IOException {
-        String jsonString = EntityUtils.toString(response.getEntity());
+    public Dataframe parseResponse(String targetPropertyName, ClassicHttpResponse response, List<Column> columns) throws IOException {
+        String jsonString;
+        try {
+            jsonString = EntityUtils.toString(response.getEntity());
+        } catch (ParseException e) {
+            throw new IOException("Failed to parse http response entity", e);
+        }
 
         JsonNode arrayNode;
         if (StringUtils.isEmpty(targetPropertyName)) {

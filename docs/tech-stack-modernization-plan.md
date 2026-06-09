@@ -1041,6 +1041,22 @@
     - `security/src/main/java/datart/security/oauth2/DingTalkOauth2Client.java`
   - 风险判断：若升级到 `httpclient5`，需要同步改造请求/响应模型、URI 构造、SSL 配置与实体读取 API，不适合作为“顺手清理”批次，需要单独专项推进。
 
+### 并行治理：运行时 HTTP 客户端迁到 HttpClient 5
+
+- `core/pom.xml` 已将 `org.apache.httpcomponents:httpclient:4.5.14` 替换为 `org.apache.httpcomponents.client5:httpclient5:5.5`。
+- `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java` 已切到 HttpClient 5 classic API：
+  - 请求基类从 `HttpRequestBase` 切到 `HttpUriRequestBase`
+  - `RequestConfig` 超时改为 `Timeout.ofMilliseconds(...)`
+  - `URIBuilder` 切到 `org.apache.hc.core5.net.URIBuilder`
+  - 响应读取改为 `ClassicHttpResponse`
+- `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpResponseParser.java` 与 `ResponseJsonParser.java` 已同步切到 HttpClient 5 的 `ClassicHttpResponse` / `EntityUtils`。
+- `security/src/main/java/datart/security/oauth2/WeChartOauth2Client.java` 与 `security/src/main/java/datart/security/oauth2/DingTalkOauth2Client.java` 已完成 5.x 包名迁移，OAuth 授权 URI 拼装改为使用新的 `URIBuilder`。
+- 2026-06-10 验证：`mvn -pl server -am -DskipTests compile` 通过。
+- 2026-06-10 依赖树复核：项目自有主运行时代码已经切到 `httpclient5`，但 `data-provider-base -> calcite-core -> avatica-core` 仍会传递带入 `org.apache.httpcomponents:httpclient:4.5.9:runtime`；这属于上游分析栈残留，不能视为“仓库已经完全清零 HttpClient 4”。
+- 当前兼容取舍：
+  - 本批先保证主运行时链完成 5.x 升级并保持构建通过。
+  - 旧实现里对“自签名证书 + 忽略 hostname 校验”的放宽 SSL 策略，当前未继续沿用到新实现；若 HTTP 数据源或第三方 OAuth 需要保留这一行为，应在后续单独做一批“HttpClient 5 TLS 策略补齐”并补回归验证。
+
 ### 并行治理：清理 commons-lang 2 与直连 commons-io 1.x 使用点
 
 - `core/pom.xml` 已删除 `commons-lang:commons-lang:2.6` 与 `commons-io:commons-io:1.3.1` 两个直接依赖。

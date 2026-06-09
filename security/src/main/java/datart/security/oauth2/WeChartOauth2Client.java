@@ -27,16 +27,12 @@ import datart.security.util.AESUtil;
 import datart.security.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -53,17 +49,7 @@ public class WeChartOauth2Client implements CustomOauth2Client {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     static {
-        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-        try {
-            // trust self-signed certificate and ignore hostname verification
-            SSLConnectionSocketFactory scsf = new SSLConnectionSocketFactory(
-                    SSLContexts.custom().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build(),
-                    NoopHostnameVerifier.INSTANCE);
-            httpClientBuilder.setSSLSocketFactory(scsf);
-        } catch (Exception e) {
-            log.warn("HttpClient config ssl failed, and used default config.");
-        }
-        httpClient = httpClientBuilder.build();
+        httpClient = HttpClients.createDefault();
     }
 
     public static final String REGISTRATION_ID = "wechart";
@@ -164,28 +150,28 @@ public class WeChartOauth2Client implements CustomOauth2Client {
     }
 
     private String getAccessToken(String code) throws Exception {
-        HttpGet httpRequest = new HttpGet();
         URIBuilder uriBuilder = new URIBuilder(tokenUri);
         uriBuilder.addParameter("grant_type", "authorization_code");
         uriBuilder.addParameter("appid", clientRegistration.getClientId());
         uriBuilder.addParameter("secret", clientRegistration.getClientSecret());
         uriBuilder.addParameter("code", code);
-        httpRequest.setURI(uriBuilder.build());
-        HttpResponse response = httpClient.execute(httpRequest);
-        String entity = EntityUtils.toString(response.getEntity());
-        JsonNode jsonNode = OBJECT_MAPPER.readTree(entity);
-        return jsonNode.path("access_token").asText(null);
+        HttpGet httpRequest = new HttpGet(uriBuilder.build());
+        try (ClassicHttpResponse response = (ClassicHttpResponse) httpClient.executeOpen(null, httpRequest, null)) {
+            String entity = EntityUtils.toString(response.getEntity());
+            JsonNode jsonNode = OBJECT_MAPPER.readTree(entity);
+            return jsonNode.path("access_token").asText(null);
+        }
     }
 
     private OAuth2AuthenticationToken getUserinfo(String accessToken) throws Exception {
-        HttpGet httpRequest = new HttpGet();
         URIBuilder uriBuilder = new URIBuilder(userInfoUri);
         uriBuilder.addParameter("access_token", accessToken);
         uriBuilder.addParameter("scope", "snsapi_userinfo");
-        httpRequest.setURI(uriBuilder.build());
-        HttpResponse response = httpClient.execute(httpRequest);
-        String entity = EntityUtils.toString(response.getEntity());
-        OBJECT_MAPPER.readTree(entity);
+        HttpGet httpRequest = new HttpGet(uriBuilder.build());
+        try (ClassicHttpResponse response = (ClassicHttpResponse) httpClient.executeOpen(null, httpRequest, null)) {
+            String entity = EntityUtils.toString(response.getEntity());
+            OBJECT_MAPPER.readTree(entity);
+        }
 
         return null;
 

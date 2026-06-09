@@ -21,20 +21,21 @@ import datart.core.data.provider.Dataframe;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.*;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.ssl.SSLContexts;
+import org.apache.hc.client5.http.classic.HttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpPut;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.io.entity.StringEntity;
+import org.apache.hc.core5.net.URIBuilder;
+import org.apache.hc.core5.util.Timeout;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.CollectionUtils;
 
@@ -52,17 +53,7 @@ public class HttpDataFetcher {
     private final HttpRequestParam param;
 
     static {
-        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-        try {
-            // trust self-signed certificate and ignore hostname verification
-            SSLConnectionSocketFactory scsf = new SSLConnectionSocketFactory(
-                    SSLContexts.custom().loadTrustMaterial(null, new TrustSelfSignedStrategy()).build(),
-                    NoopHostnameVerifier.INSTANCE);
-            httpClientBuilder.setSSLSocketFactory(scsf);
-        } catch (Exception e) {
-            log.warn("HttpClient config ssl failed, and used default config.");
-        }
-        httpClient = httpClientBuilder.build();
+        httpClient = HttpClients.createDefault();
     }
 
     public HttpDataFetcher(HttpRequestParam param) {
@@ -71,9 +62,9 @@ public class HttpDataFetcher {
 
     public Dataframe fetchAndParse() throws IOException, URISyntaxException {
 
-        HttpRequestBase httpRequest = createHttpRequest(param);
+        HttpUriRequestBase httpRequest = createHttpRequest(param);
 
-        HttpResponse response = httpClient.execute(httpRequest);
+        ClassicHttpResponse response = (ClassicHttpResponse) httpClient.executeOpen(null, httpRequest, null);
 
         HttpResponseParser parser;
         try {
@@ -81,33 +72,35 @@ public class HttpDataFetcher {
         } catch (Exception e) {
             parser = new ResponseJsonParser();
         }
-        return parser.parseResponse(param.getTargetPropertyName(), response, param.getColumns());
+        try (response) {
+            return parser.parseResponse(param.getTargetPropertyName(), response, param.getColumns());
+        }
 
     }
 
-    private HttpRequestBase createHttpRequest(HttpRequestParam param) throws URISyntaxException {
-        HttpRequestBase httpRequest;
+    private HttpUriRequestBase createHttpRequest(HttpRequestParam param) throws URISyntaxException {
         HttpEntity entity = createHttpEntity(param);
+        URI uri = createUri(param);
+        HttpUriRequestBase httpRequest;
         if (HttpMethod.POST.matches(param.getMethod().name())) {
-            HttpPost httpPost = new HttpPost();
+            HttpPost httpPost = new HttpPost(uri);
             httpPost.setEntity(entity);
             httpRequest = httpPost;
         } else if (HttpMethod.PUT.matches(param.getMethod().name())) {
-            HttpPut httpPut = new HttpPut();
+            HttpPut httpPut = new HttpPut(uri);
             httpPut.setEntity(entity);
             httpRequest = httpPut;
         } else if (HttpMethod.DELETE.matches(param.getMethod().name())) {
-            httpRequest = new HttpDelete();
+            httpRequest = new HttpDelete(uri);
         } else {
-            httpRequest = new HttpGet();
+            httpRequest = new HttpGet(uri);
         }
         RequestConfig config = RequestConfig.custom()
-                .setConnectTimeout(param.getTimeout())
+                .setConnectTimeout(Timeout.ofMilliseconds(param.getTimeout()))
+                .setResponseTimeout(Timeout.ofMilliseconds(param.getTimeout()))
                 .build();
 
         httpRequest.setConfig(config);
-
-        httpRequest.setURI(createUri(param));
 
         withHeaders(param, httpRequest);
 
@@ -139,7 +132,7 @@ public class HttpDataFetcher {
         return uriBuilder.build();
     }
 
-    private void withHeaders(HttpRequestParam param, HttpRequestBase httpRequest) {
+    private void withHeaders(HttpRequestParam param, HttpUriRequestBase httpRequest) {
         if (CollectionUtils.isEmpty(param.getHeaders())) return;
         for (Map.Entry<String, String> entry : param.getHeaders().entrySet()) {
             httpRequest.addHeader(entry.getKey(), entry.getValue());
