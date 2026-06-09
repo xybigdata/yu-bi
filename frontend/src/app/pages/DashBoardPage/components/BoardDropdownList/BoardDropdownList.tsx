@@ -27,7 +27,7 @@ import { Menu, MenuProps, Popconfirm } from 'antd';
 import { DownloadFileType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useSaveAsViz } from 'app/pages/MainPage/pages/VizPage/hooks/useSaveAsViz';
-import { FC, memo, useContext } from 'react';
+import { FC, memo, useContext, useMemo } from 'react';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import { useRecycleViz } from '../../../../hooks/useRecycleViz';
 import { usePublishBoard } from '../../hooks/usePublishBoard';
@@ -40,27 +40,32 @@ interface Props {
   openStoryList: () => void;
   openMockData: () => void;
 }
-export const BoardDropdownList: FC<Props> = memo(
-  ({ onOpenShareLink, openStoryList, openMockData }) => {
-    const t = useI18NPrefix(`viz.action`);
-    const tg = useI18NPrefix(`global`);
-    const dispatch = useAppDispatch();
-    const {
-      allowDownload,
-      allowShare,
-      allowManage,
-      renderMode,
-      status,
-      orgId,
-      boardId,
-    } = useContext(BoardContext);
-    const recycleViz = useRecycleViz(orgId, boardId, 'DASHBOARD');
-    const saveAsViz = useSaveAsViz();
+export const useBoardDropdownItems = ({
+  onOpenShareLink,
+  openStoryList,
+  openMockData,
+}: Props) => {
+  const t = useI18NPrefix(`viz.action`);
+  const tg = useI18NPrefix(`global`);
+  const dispatch = useAppDispatch();
+  const {
+    allowDownload,
+    allowShare,
+    allowManage,
+    renderMode,
+    status,
+    orgId,
+    boardId,
+  } = useContext(BoardContext);
+  const recycleViz = useRecycleViz(orgId, boardId, 'DASHBOARD');
+  const saveAsViz = useSaveAsViz();
+  const { onBoardToDownLoad } = useContext(BoardActionContext);
+  const { publishBoard } = usePublishBoard(boardId, 'DASHBOARD', status);
+
+  return useMemo<MenuProps['items']>(() => {
     const reloadData = () => {
       dispatch(widgetsQueryAction({ boardId, renderMode }));
     };
-    const { onBoardToDownLoad } = useContext(BoardActionContext);
-    const { publishBoard } = usePublishBoard(boardId, 'DASHBOARD', status);
     const confirmLabel = (label: string, onConfirm: () => void | undefined) => (
       <Popconfirm
         placement="left"
@@ -72,7 +77,8 @@ export const BoardDropdownList: FC<Props> = memo(
         {label}
       </Popconfirm>
     );
-    const menuItems: MenuProps['items'] = [
+
+    return [
       {
         key: 'reloadData',
         onClick: reloadData,
@@ -155,6 +161,29 @@ export const BoardDropdownList: FC<Props> = memo(
           ]
         : []),
     ];
+  }, [
+    allowDownload,
+    allowManage,
+    allowShare,
+    boardId,
+    dispatch,
+    onBoardToDownLoad,
+    onOpenShareLink,
+    openMockData,
+    openStoryList,
+    publishBoard,
+    recycleViz,
+    renderMode,
+    saveAsViz,
+    status,
+    t,
+    tg,
+  ]);
+};
+
+export const BoardDropdownList: FC<Props> = memo(
+  props => {
+    const menuItems = useBoardDropdownItems(props);
     return <Menu items={menuItems} />;
   },
 );

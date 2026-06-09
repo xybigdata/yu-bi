@@ -28,10 +28,10 @@ import {
 import { Menu, MenuProps, Popconfirm } from 'antd';
 import { DownloadFileType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { FC, memo } from 'react';
+import { FC, memo, useMemo } from 'react';
 import styled from 'styled-components';
 
-const VizOperationMenu: FC<{
+interface VizOperationMenuProps {
   onShareLinkClick?;
   onDownloadDataLinkClick?;
   onSaveAsVizs?;
@@ -43,23 +43,25 @@ const VizOperationMenu: FC<{
   allowDownload?: boolean;
   allowShare?: boolean;
   allowManage?: boolean;
-}> = memo(
-  ({
-    onShareLinkClick,
-    onDownloadDataLinkClick,
-    openMockData,
-    onSaveAsVizs,
-    onReloadData,
-    onAddToDashBoard,
-    onPublish,
-    allowDownload,
-    allowShare,
-    allowManage,
-    onRecycleViz,
-  }) => {
-    const t = useI18NPrefix(`viz.action`);
-    const tg = useI18NPrefix(`global`);
+}
 
+export const useVizOperationMenuItems = ({
+  onShareLinkClick,
+  onDownloadDataLinkClick,
+  openMockData,
+  onSaveAsVizs,
+  onReloadData,
+  onAddToDashBoard,
+  onPublish,
+  allowDownload,
+  allowShare,
+  allowManage,
+  onRecycleViz,
+}: VizOperationMenuProps) => {
+  const t = useI18NPrefix(`viz.action`);
+  const tg = useI18NPrefix(`global`);
+
+  return useMemo<MenuProps['items']>(() => {
     const confirmLabel = (
       label: string,
       onConfirm: (() => void) | undefined,
@@ -75,7 +77,8 @@ const VizOperationMenu: FC<{
         {label}
       </Popconfirm>
     );
-    const menuItems: MenuProps['items'] = [
+
+    return [
       ...(onReloadData
         ? [
             {
@@ -174,6 +177,28 @@ const VizOperationMenu: FC<{
           ]
         : []),
     ];
+  }, [
+    allowDownload,
+    allowManage,
+    allowShare,
+    onAddToDashBoard,
+    onDownloadDataLinkClick,
+    onPublish,
+    onRecycleViz,
+    onReloadData,
+    onSaveAsVizs,
+    onShareLinkClick,
+    openMockData,
+    t,
+    tg,
+  ]);
+};
+
+const VizOperationMenu: FC<VizOperationMenuProps> = memo(
+  ({
+    ...props
+  }) => {
+    const menuItems = useVizOperationMenuItems(props);
 
     return (
       <StyleVizOperationMenu>

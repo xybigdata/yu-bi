@@ -19,3 +19,4 @@
 export { default as ShareLinkModal } from './components/ShareLinkModal';
 export { default as ShareManageModal } from './components/ShareManageModal';
 export { default as VizOperationMenu } from './VizOperationMenu';
+export { useVizOperationMenuItems } from './VizOperationMenu';

@@ -26,7 +26,7 @@ import { Button, Dropdown } from 'antd';
 import SaveToDashboard from 'app/components/SaveToDashboard';
 import {
   ShareManageModal,
-  VizOperationMenu,
+  useVizOperationMenuItems,
 } from 'app/components/VizOperationMenu';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { TITLE_SUFFIX } from 'globalConstants';
@@ -117,23 +117,19 @@ const VizHeader: FC<{
       setIsModalVisible(true);
     }, []);
 
-    const getOverlays = () => {
-      return (
-        <VizOperationMenu
-          onShareLinkClick={onGenerateShareLink && handleOpenShareLinkModal}
-          onDownloadDataLinkClick={onDownloadData}
-          onSaveAsVizs={onSaveAsVizs}
-          onReloadData={onReloadData}
-          onAddToDashBoard={onAddToDashBoard && setIsModalVisible}
-          allowDownload={allowDownload}
-          allowShare={allowShare}
-          allowManage={allowManage}
-          openMockData={() => setMockDataModal(true)}
-          onPublish={Number(status) === 2 ? onPublish : ''}
-          onRecycleViz={onRecycleViz}
-        />
-      );
-    };
+    const operationMenuItems = useVizOperationMenuItems({
+      onShareLinkClick: onGenerateShareLink && handleOpenShareLinkModal,
+      onDownloadDataLinkClick: onDownloadData,
+      onSaveAsVizs: onSaveAsVizs,
+      onReloadData: onReloadData,
+      onAddToDashBoard: onAddToDashBoard && setIsModalVisible,
+      allowDownload,
+      allowShare,
+      allowManage,
+      openMockData: () => setMockDataModal(true),
+      onPublish: Number(status) === 2 ? onPublish : '',
+      onRecycleViz: onRecycleViz,
+    });
 
     const title = useMemo(() => {
       const base = chartName || '';
@@ -172,7 +168,7 @@ const VizHeader: FC<{
                 </Button>
               )}
               {!isArchived && (
-                <Dropdown key="more" arrow dropdownRender={getOverlays}>
+                <Dropdown key="more" arrow menu={{ items: operationMenuItems }}>
                   <Button icon={<MoreOutlined />} />
                 </Dropdown>
               )}

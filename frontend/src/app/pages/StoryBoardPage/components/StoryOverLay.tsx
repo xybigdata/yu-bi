@@ -34,63 +34,71 @@ export interface BoardOverLayProps {
   allowShare?: boolean;
   allowManage?: boolean;
 }
+export const useStoryOverlayItems = ({
+  onOpenShareLink,
+  allowShare,
+  allowManage,
+  onPublish,
+}: BoardOverLayProps) => {
+  const t = useI18NPrefix(`viz.action`);
+  const tg = useI18NPrefix(`global`);
+  const { storyId: stroyId, orgId } = useContext(StoryContext);
+  const recycleViz = useRecycleViz(orgId, stroyId, 'STORYBOARD');
+
+  return useMemo<MenuProps['items']>(() => {
+    const renderList = [
+      {
+        key: 'shareLink',
+        icon: <ShareAltOutlined />,
+        onClick: onOpenShareLink,
+        disabled: false,
+        render: allowShare,
+        content: t('share.shareLink'),
+        className: 'line',
+      },
+      {
+        key: 'publish',
+        icon: <VerticalAlignBottomOutlined />,
+        onClick: onPublish,
+        disabled: false,
+        render: allowManage && onPublish,
+        content: t('unpublish'),
+      },
+      {
+        key: 'delete',
+        icon: <DeleteOutlined />,
+        disabled: false,
+        render: allowManage,
+        content: (
+          <Popconfirm
+            title={tg('operation.archiveConfirm')}
+            onConfirm={recycleViz}
+          >
+            {tg('button.archive')}
+          </Popconfirm>
+        ),
+      },
+    ];
+
+    return renderList
+      .filter(item => item.render)
+      .flatMap<NonNullable<MenuProps['items']>[number]>(item => {
+        const menuItem: NonNullable<MenuProps['items']>[number] = {
+          key: item.key,
+          icon: item.icon,
+          label: item.content,
+          onClick: item.onClick,
+        };
+        return item.className
+          ? [menuItem, { key: `${item.key}Line`, type: 'divider' }]
+          : [menuItem];
+      });
+  }, [allowManage, allowShare, onOpenShareLink, onPublish, recycleViz, t, tg]);
+};
+
 export const StoryOverLay: React.FC<BoardOverLayProps> = memo(
-  ({ onOpenShareLink, allowShare, allowManage, onPublish }) => {
-    const t = useI18NPrefix(`viz.action`);
-    const tg = useI18NPrefix(`global`);
-    const { storyId: stroyId, orgId } = useContext(StoryContext);
-    const recycleViz = useRecycleViz(orgId, stroyId, 'STORYBOARD');
-    const renderList = useMemo(
-      () => [
-        {
-          key: 'shareLink',
-          icon: <ShareAltOutlined />,
-          onClick: onOpenShareLink,
-          disabled: false,
-          render: allowShare,
-          content: t('share.shareLink'),
-          className: 'line',
-        },
-        {
-          key: 'publish',
-          icon: <VerticalAlignBottomOutlined />,
-          onClick: onPublish,
-          disabled: false,
-          render: allowManage && onPublish,
-          content: t('unpublish'),
-        },
-        {
-          key: 'delete',
-          icon: <DeleteOutlined />,
-          disabled: false,
-          render: allowManage,
-          content: (
-            <Popconfirm
-              title={tg('operation.archiveConfirm')}
-              onConfirm={recycleViz}
-            >
-              {tg('button.archive')}
-            </Popconfirm>
-          ),
-        },
-      ],
-      [onOpenShareLink, allowShare, t, onPublish, allowManage, tg, recycleViz],
-    );
-    const actionItems = useMemo<MenuProps['items']>(() => {
-      return renderList
-        .filter(item => item.render)
-        .flatMap<NonNullable<MenuProps['items']>[number]>(item => {
-          const menuItem: NonNullable<MenuProps['items']>[number] = {
-            key: item.key,
-            icon: item.icon,
-            label: item.content,
-            onClick: item.onClick,
-          };
-          return item.className
-            ? [menuItem, { key: `${item.key}Line`, type: 'divider' }]
-            : [menuItem];
-        });
-    }, [renderList]);
+  props => {
+    const actionItems = useStoryOverlayItems(props);
     return <Menu items={actionItems} />;
   },
 );

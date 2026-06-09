@@ -36,7 +36,7 @@ import {
 import { usePublishBoard } from '../../hooks/usePublishBoard';
 import { useStatusTitle } from '../../hooks/useStatusTitle';
 import { BoardActionContext } from '../ActionProvider/BoardActionProvider';
-import { BoardDropdownList } from '../BoardDropdownList/BoardDropdownList';
+import { useBoardDropdownItems } from '../BoardDropdownList/BoardDropdownList';
 import { BoardContext } from '../BoardProvider/BoardProvider';
 import { MockDataPanel } from '../MockDataPanel';
 import SaveToStoryBoard from '../SaveToStoryBoard';
@@ -81,6 +81,11 @@ export const TitleHeader: FC = memo(() => {
     },
     [boardId, navigate, orgId],
   );
+  const boardDropdownItems = useBoardDropdownItems({
+    onOpenShareLink,
+    openStoryList: () => setShowSaveToStory(true),
+    openMockData: () => setMockDataModal(true),
+  });
 
   return (
     <Wrapper>
@@ -105,13 +110,7 @@ export const TitleHeader: FC = memo(() => {
         )}
         {!isArchived && (
           <Dropdown
-            dropdownRender={() => (
-              <BoardDropdownList
-                onOpenShareLink={onOpenShareLink}
-                openStoryList={() => setShowSaveToStory(true)}
-                openMockData={() => setMockDataModal(true)}
-              />
-            )}
+            menu={{ items: boardDropdownItems }}
             placement="bottomRight"
             arrow
           >

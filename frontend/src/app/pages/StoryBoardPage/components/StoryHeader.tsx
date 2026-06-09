@@ -25,7 +25,7 @@ import { useStatusTitle } from 'app/pages/DashBoardPage/hooks/useStatusTitle';
 import { generateShareLinkAsync } from 'app/utils/fetch';
 import React, { FC, memo, useCallback, useContext, useState } from 'react';
 import { StoryContext } from '../contexts/StoryContext';
-import { StoryOverLay } from './StoryOverLay';
+import { useStoryOverlayItems } from './StoryOverLay';
 
 interface StoryHeaderProps {
   orgId: string;
@@ -86,6 +86,12 @@ export const StoryHeader: FC<StoryHeaderProps> = memo(
       },
       [stroyBoardId],
     );
+    const storyOverlayItems = useStoryOverlayItems({
+      allowShare,
+      allowManage,
+      onOpenShareLink,
+      onPublish: Number(status) === 2 ? onPublish : '',
+    });
 
     if (isArchived) {
       return <div></div>;
@@ -116,17 +122,7 @@ export const StoryHeader: FC<StoryHeaderProps> = memo(
               {t('play')}
             </Button>
             {(allowManage || allowShare) && (
-              <Dropdown
-                dropdownRender={() => (
-                  <StoryOverLay
-                    allowShare={allowShare}
-                    allowManage={allowManage}
-                    onOpenShareLink={onOpenShareLink}
-                    onPublish={Number(status) === 2 ? onPublish : ''}
-                  />
-                )}
-                arrow
-              >
+              <Dropdown menu={{ items: storyOverlayItems }} arrow>
                 <Button icon={<MoreOutlined />} />
               </Dropdown>
             )}
