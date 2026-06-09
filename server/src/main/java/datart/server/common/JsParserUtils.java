@@ -1,7 +1,8 @@
 package datart.server.common;
 
-import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import datart.core.base.exception.Exceptions;
 import datart.core.common.JavascriptUtils;
 import datart.server.base.params.DownloadCreateParam;
@@ -13,13 +14,19 @@ public class JsParserUtils {
 
     private static Invocable parser;
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    static {
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
     public static DownloadCreateParam parseExecuteParam(String type, String json) throws ScriptException, NoSuchMethodException, JsonProcessingException {
         Invocable parser = getParser();
         if (parser == null) {
             Exceptions.msg("param parser load error");
         }
         Object result = parser.invokeFunction("getQueryData", type, json);
-        return JSON.parseObject(result.toString(), DownloadCreateParam.class);
+        return OBJECT_MAPPER.readValue(result.toString(), DownloadCreateParam.class);
     }
 
     private static synchronized Invocable getParser() {

@@ -18,7 +18,6 @@
 
 package datart.server.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import datart.core.base.consts.VariableTypeEnum;
 import datart.core.base.exception.Exceptions;
 import datart.core.base.exception.ParamException;
@@ -320,13 +319,13 @@ public class VariableServiceImpl extends BaseService implements VariableService 
                         values = rels.stream().flatMap(rel -> {
                             if (rel.getUseDefaultValue()) {
                                 try {
-                                    return new HashSet<>(JSON.parseArray(var.getDefaultValue(), String.class)).stream();
+                                    return readStringArray(var.getDefaultValue()).stream();
                                 } catch (Exception e) {
                                     return Stream.empty();
                                 }
                             } else {
                                 try {
-                                    return new HashSet<>(JSON.parseArray(rel.getValue(), String.class)).stream();
+                                    return readStringArray(rel.getValue()).stream();
                                 } catch (Exception e) {
                                     return Stream.empty();
                                 }
@@ -334,10 +333,7 @@ public class VariableServiceImpl extends BaseService implements VariableService 
                         }).collect(Collectors.toSet());
                     } else {
                         if (var.getDefaultValue() != null) {
-                            values = JSON.parseArray(var.getDefaultValue())
-                                    .stream()
-                                    .map(Object::toString)
-                                    .collect(Collectors.toSet());
+                            values = readStringArray(var.getDefaultValue());
                         }
                     }
                     variableValue.setValues(values);
@@ -350,6 +346,14 @@ public class VariableServiceImpl extends BaseService implements VariableService 
         Set<String> subjectIds = roles.stream().map(Role::getId).collect(Collectors.toSet());
         subjectIds.add(getCurrentUser().getId());
         return subjectIds;
+    }
+
+    private Set<String> readStringArray(String json) {
+        try {
+            return new HashSet<>(OBJECT_MAPPER.readerForListOf(String.class).readValue(json));
+        } catch (Exception e) {
+            return Collections.emptySet();
+        }
     }
 
 }

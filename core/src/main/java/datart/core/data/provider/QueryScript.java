@@ -18,7 +18,6 @@
 
 package datart.core.data.provider;
 
-import com.alibaba.fastjson.JSON;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -50,7 +49,11 @@ public class QueryScript implements Serializable {
     private Map<String, Column> schema;
 
     public String toQueryKey() {
-        return 'Q' + DigestUtils.md5Hex(JSON.toJSONString(this));
+        try {
+            return 'Q' + DigestUtils.md5Hex(DataProvider.MAPPER.writeValueAsString(this));
+        } catch (Exception e) {
+            return 'Q' + DigestUtils.md5Hex(String.valueOf(this));
+        }
     }
 
 }

@@ -18,7 +18,8 @@
 
 package datart.security.util;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import datart.core.base.exception.Exceptions;
 import datart.core.common.Application;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,12 @@ import java.security.SecureRandom;
 
 @Slf4j
 public class AESUtil {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    static {
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
 
     public static String encrypt(String src, String securityKey) {
         try {
@@ -62,13 +69,18 @@ public class AESUtil {
     }
 
     public static String encrypt(Object obj, String securityKey) {
-        return encrypt(JSON.toJSONString(obj), securityKey);
+        try {
+            return encrypt(OBJECT_MAPPER.writeValueAsString(obj), securityKey);
+        } catch (Exception e) {
+            Exceptions.e(e);
+        }
+        return null;
     }
 
     public static <T> T decrypt(String src, String securityKey, Class<T> clz) {
         try {
             String json = decrypt(src, securityKey);
-            return JSON.parseObject(json, clz);
+            return OBJECT_MAPPER.readValue(json, clz);
         } catch (Exception e) {
             Exceptions.e(e);
         }

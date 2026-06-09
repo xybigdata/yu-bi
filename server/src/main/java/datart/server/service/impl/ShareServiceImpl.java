@@ -18,7 +18,6 @@
 
 package datart.server.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Sets;
 import datart.core.base.consts.Const;
 import datart.core.base.consts.ShareAuthenticationMode;
@@ -48,6 +47,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -133,7 +133,7 @@ public class ShareServiceImpl extends BaseService implements ShareService {
             }
         }
 
-        share.setRoles(JSON.toJSONString(roles));
+        share.setRoles(writeRoles(roles));
         share.setVizType(createParam.getVizType().name());
         share.setAuthenticationMode(createParam.getAuthenticationMode().name());
         share.setRowPermissionBy(createParam.getRowPermissionBy().name());
@@ -179,7 +179,7 @@ public class ShareServiceImpl extends BaseService implements ShareService {
             }
         }
 
-        update.setRoles(JSON.toJSONString(roleIds));
+        update.setRoles(writeRoles(roleIds));
         update.setUpdateBy(getCurrentUser().getId());
         update.setUpdateTime(new Date());
         shareMapper.updateByPrimaryKey(update);
@@ -226,7 +226,7 @@ public class ShareServiceImpl extends BaseService implements ShareService {
             shareInfo.setRoles(new LinkedHashSet<>());
             shareInfo.setUsers(new LinkedHashSet<>());
             if (StringUtils.isNotBlank(share.getRoles())) {
-                List<String> roles = JSON.parseArray(share.getRoles(), String.class);
+                List<String> roles = readRoles(share.getRoles());
                 for (String str : roles) {
                     if (str.charAt(0) == 'r') {
                         shareInfo.getRoles().add(str.substring(1));
@@ -238,6 +238,24 @@ public class ShareServiceImpl extends BaseService implements ShareService {
             }
             return shareInfo;
         }).collect(Collectors.toList());
+    }
+
+    private String writeRoles(Set<String> roles) {
+        try {
+            return OBJECT_MAPPER.writeValueAsString(roles);
+        } catch (IOException e) {
+            Exceptions.e(e);
+        }
+        return null;
+    }
+
+    private List<String> readRoles(String roles) {
+        try {
+            return OBJECT_MAPPER.readerForListOf(String.class).readValue(roles);
+        } catch (IOException e) {
+            Exceptions.e(e);
+        }
+        return Collections.emptyList();
     }
 
     @Override
@@ -431,7 +449,7 @@ public class ShareServiceImpl extends BaseService implements ShareService {
                     Exceptions.tr(BaseException.class, "message.share.permission.denied");
                 }
                 Set<String> roleIdList = roles.stream().map(BaseEntity::getId).collect(Collectors.toSet());
-                List<String> permittedRoles = JSON.parseArray(share.getRoles(), String.class);
+                List<String> permittedRoles = readRoles(share.getRoles());
                 if (!CollectionUtils.isEmpty(permittedRoles)) {
                     permittedRoles = permittedRoles.stream().map(id -> id.substring(1)).collect(Collectors.toList());
                 } else {

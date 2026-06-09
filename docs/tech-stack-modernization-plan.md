@@ -801,3 +801,11 @@
 - `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/slice/events.ts` 已从 Node `events` 切换为浏览器友好的本地事件总线实现。
 - 新增 `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts`，覆盖 `widgetMove`、`widgetMoveEnd`、`boardScroll` 的订阅、取消订阅和按 boardId 隔离行为。
 - 重新验证 `npm run build` 后，Vite 构建日志中不再出现 `events` 模块被浏览器外置化的告警。
+
+### 并行治理：fastjson 低风险使用面第一批收口
+
+- `server/src/main/java/datart/server/common/JsParserUtils.java` 已改为使用 Jackson 反序列化 `DownloadCreateParam`。
+- `security/src/main/java/datart/security/util/AESUtil.java` 已改为使用 Jackson 进行加密前序列化和解密后反序列化。
+- `server/src/main/java/datart/server/service/impl/ShareServiceImpl.java`、`server/src/main/java/datart/server/service/impl/VariableServiceImpl.java` 已将字符串数组/集合这类低风险 JSON 路径切到 Jackson。
+- `core/src/main/java/datart/core/data/provider/ExecuteParam.java`、`core/src/main/java/datart/core/data/provider/QueryScript.java` 已改为复用 `DataProvider.MAPPER` 生成 JSON 字符串和查询 key。
+- 这一步之后，`fastjson` 在后端仍主要残留于两类高风险面：`WebMvcConfig` 的 `FastJsonHttpMessageConverter`，以及 `JSONObject` / `JSONArray` 驱动的动态树模型处理，后续需要分批继续替换。

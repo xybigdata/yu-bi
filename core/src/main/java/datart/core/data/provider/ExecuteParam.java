@@ -18,7 +18,6 @@
 
 package datart.core.data.provider;
 
-import com.alibaba.fastjson.JSON;
 import datart.core.base.PageInfo;
 import datart.core.data.provider.sql.*;
 import lombok.AllArgsConstructor;
@@ -65,7 +64,11 @@ public class ExecuteParam implements Serializable {
 
     @Override
     public String toString() {
-        return JSON.toJSONString(JSON.toJSONString(this));
+        try {
+            return DataProvider.MAPPER.writeValueAsString(DataProvider.MAPPER.writeValueAsString(this));
+        } catch (Exception e) {
+            return super.toString();
+        }
     }
 
     public static ExecuteParam empty() {
