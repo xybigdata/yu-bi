@@ -28,7 +28,7 @@ import {
   selectSaveStoryboardLoading,
 } from './slice/selectors';
 
-type SaveFormProps = Omit<ModalFormProps, 'type' | 'visible' | 'onSave'>;
+type SaveFormProps = Omit<ModalFormProps, 'type' | 'open' | 'onSave'>;
 
 export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
   const {
@@ -107,7 +107,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
       {...modalProps}
       title={t(`vizType.${vizType.toLowerCase()}`)}
       type={type}
-      visible={visible}
+      open={visible}
       confirmLoading={saveFolderLoading || saveStoryboardLoading}
       onSave={save}
       onCancel={onCancel}

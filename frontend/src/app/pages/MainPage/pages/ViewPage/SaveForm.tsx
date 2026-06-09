@@ -59,7 +59,7 @@ import {
   selectCurrentEditingView,
 } from './slice/selectors';
 
-type SaveFormProps = Omit<ModalFormProps, 'type' | 'visible' | 'onSave'>;
+type SaveFormProps = Omit<ModalFormProps, 'type' | 'open' | 'onSave'>;
 
 export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
   const [advancedVisible, setAdvancedVisible] = useState(false);
@@ -142,7 +142,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
       {...modalProps}
       title={t(simple ? 'folder' : 'title')}
       type={type}
-      visible={visible}
+      open={visible}
       confirmLoading={currentEditingView?.stage === ViewViewModelStages.Saving}
       onSave={save}
       onCancel={onCancel}

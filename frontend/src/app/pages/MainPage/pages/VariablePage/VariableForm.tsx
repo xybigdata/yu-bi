@@ -47,7 +47,7 @@ export const VariableForm = memo(
     orgId,
     editingVariable,
     variables,
-    visible,
+    open,
     formProps,
     onSave,
     afterClose,
@@ -68,7 +68,7 @@ export const VariableForm = memo(
     const tg = useI18NPrefix('global');
 
     useEffect(() => {
-      if (visible && editingVariable) {
+      if (open && editingVariable) {
         try {
           const { type, valueType, expression, dateFormat } = editingVariable;
           let defaultValue = editingVariable.defaultValue
@@ -90,7 +90,7 @@ export const VariableForm = memo(
           throw error;
         }
       }
-    }, [visible, editingVariable, formRef]);
+    }, [open, editingVariable, formRef]);
 
     const onAfterClose = useCallback(() => {
       setType(
@@ -161,7 +161,7 @@ export const VariableForm = memo(
     return (
       <ModalForm
         {...modalProps}
-        visible={visible}
+        open={open}
         formProps={{
           labelAlign: 'left',
           labelCol: { offset: 1, span: 6 },

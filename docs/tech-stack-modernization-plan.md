@@ -1336,6 +1336,22 @@
 - 这两个弹层内部本来就已经把 AntD Modal 的真实属性写成 `open`；本批只清理组件边界上的历史 `visible` 命名，不改变故事板加页、看板导入已有图表、树搜索和已选中图表禁用等业务行为。
 - 这一步把 `visible -> open` 清障继续推进到故事板与看板编辑核心流程，进一步减少 AntD 5 主升级前仍保留的历史弹层兼容边界。
 
+### 并行治理：收口资源保存与变量权限弹层的 visible/open 兼容层
+
+- 四个资源保存弹层组件已把对外控制属性从 `visible` 收口到 `open`，覆盖：
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/SaveForm.tsx`
+  - `frontend/src/app/pages/MainPage/pages/SchedulePage/SaveForm.tsx`
+  - `frontend/src/app/pages/MainPage/pages/SourcePage/SaveForm.tsx`
+  - `frontend/src/app/pages/MainPage/pages/VizPage/SaveForm.tsx`
+- 两个变量相关弹层组件也已把对外控制属性从 `visible` 收口到 `open`，覆盖：
+  - `frontend/src/app/pages/MainPage/pages/VariablePage/VariableForm.tsx`
+  - `frontend/src/app/pages/MainPage/pages/VariablePage/SubjectForm/index.tsx`
+- 对应调用点已同步切换到 `open`，覆盖：
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/Main/Properties/Variables.tsx`
+  - `frontend/src/app/pages/MainPage/pages/VariablePage/index.tsx`
+- 这一步只清理承接 `ModalForm` / `Modal` 的组件边界命名，不改资源保存、变量默认值、行权限编辑等业务逻辑，也不触碰 `ModalForm` 通用兼容壳里仍需继续兼容的更广泛历史调用面。
+- 这一步把 `visible -> open` 清障继续推进到主资源管理与变量权限主链，为后续进一步缩小 `ModalForm` 通用兼容壳的使用面做准备。
+
 ### 2026-06-10 全项目老旧技术栈复核结论
 
 这一轮不是只看版本号，而是按“是否仍在主维护线、是否已经被现代替代方案覆盖、是否值得继续在当前架构上扩展”三条标准重新复核。

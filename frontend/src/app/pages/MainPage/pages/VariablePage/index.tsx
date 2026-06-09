@@ -383,7 +383,7 @@ export function VariablePage() {
           scope={VariableScopes.Public}
           orgId={orgId}
           editingVariable={editingVariable}
-          visible={formVisible}
+          open={formVisible}
           title={t('public')}
           type={formType}
           confirmLoading={saveLoading}
@@ -398,7 +398,7 @@ export function VariablePage() {
           editingVariable={editingVariable}
           loading={rowPermissionLoading}
           rowPermissions={rowPermissions}
-          visible={subjectFormVisible}
+          open={subjectFormVisible}
           confirmLoading={updateRowPermissionLoading}
           onSave={saveRelations}
           onCancel={hideSubjectForm}

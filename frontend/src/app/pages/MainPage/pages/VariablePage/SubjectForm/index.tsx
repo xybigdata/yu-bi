@@ -51,6 +51,7 @@ export const SubjectForm = memo(
     rowPermissions,
     afterClose,
     onSave,
+    open,
     ...modalProps
   }: SubjectFormProps) => {
     const [tab, setTab] = useState('role');
@@ -183,6 +184,7 @@ export const SubjectForm = memo(
     return (
       <StyledModal
         {...modalProps}
+        open={open}
         width={768}
         title={
           scope === VariableScopes.Public ? (

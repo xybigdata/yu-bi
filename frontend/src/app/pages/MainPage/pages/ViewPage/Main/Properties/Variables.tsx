@@ -387,7 +387,7 @@ export const Variables = memo(() => {
         orgId={orgId}
         editingVariable={editingVariable}
         variables={variables}
-        visible={formVisible}
+        open={formVisible}
         title={t('formTitle')}
         type={formType}
         onSave={save}
@@ -399,7 +399,7 @@ export const Variables = memo(() => {
       <SubjectForm
         scope={VariableScopes.Private}
         editingVariable={editingVariable}
-        visible={subjectFormVisible}
+        open={subjectFormVisible}
         rowPermissions={rowPermissions}
         onSave={saveRelations}
         onCancel={hideSubjectForm}
