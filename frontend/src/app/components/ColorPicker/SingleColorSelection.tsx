@@ -90,7 +90,9 @@ function SingleColorSelection({ color, onChange }: colorSelectionPropTypes) {
         trigger="click"
         placement="bottom"
         autoAdjustOverflow
-        content={<ChromeColorPicker color={color} onChange={moreCallBackFn} />}
+        content={
+          <ChromeColorPicker color={selectColor} onChange={moreCallBackFn} />
+        }
       >
         <MoreColor
           onClick={() => {

@@ -2,9 +2,9 @@ import { ReactNode } from 'react';
 
 export interface colorSelectionPropTypes {
   color?: string;
-  onChange?: (color) => void;
+  onChange?: (color?: string) => void;
 }
 export interface themeColorPropTypes {
   children: ReactNode;
-  callbackFn: (Array) => void;
+  callbackFn: (colors: string[]) => void;
 }

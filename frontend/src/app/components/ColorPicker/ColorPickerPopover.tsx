@@ -1,6 +1,5 @@
 import { Popover, PopoverProps } from 'antd';
 import { FC, ReactNode, useCallback, useMemo, useState } from 'react';
-import { SketchPickerProps } from 'react-color';
 import { ColorPicker } from './ColorTag';
 import SingleColorSelection from './SingleColorSelection';
 
@@ -12,7 +11,7 @@ interface ColorPickerPopoverProps {
   onSubmit?: (color) => void;
   onChange?: (color) => void;
   colorPickerClass?: string;
-  colors?: SketchPickerProps['presetColors'];
+  colors?: string[];
 }
 export const ColorPickerPopover: FC<ColorPickerPopoverProps> = ({
   children,
