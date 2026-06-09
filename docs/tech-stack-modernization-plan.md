@@ -796,7 +796,8 @@
 - `frontend/package.json` 与 lockfile 已移除 `@craco/craco`，并同步删除只服务旧 webpack/CRACO 外壳的 `cross-env`、`monaco-editor-webpack-plugin`、`webpackbar`、`webpack-cli`、`@types/webpack`、`@types/webpack-env`。
 - `frontend/craco.config.js` 已删除，前端运行与构建主链只保留 Vite 配置作为单一入口。
 
-### 并行治理：Vite 浏览器兼容告警暴露
+### 并行治理：收口 BoardEditor 的 Node events 残留
 
-- 在删除 `react-scripts` 后重新验证 Vite 构建时，`src/app/pages/DashBoardPage/pages/BoardEditor/slice/events.ts` 引入的 Node `events` 模块触发了浏览器外置化告警。
-- 当前构建仍然成功，这说明它不是本批的阻断项，但需要后续单独评估是改为浏览器友好的事件实现，还是在 Vite 侧显式补兼容策略。
+- `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/slice/events.ts` 已从 Node `events` 切换为浏览器友好的本地事件总线实现。
+- 新增 `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts`，覆盖 `widgetMove`、`widgetMoveEnd`、`boardScroll` 的订阅、取消订阅和按 boardId 隔离行为。
+- 重新验证 `npm run build` 后，Vite 构建日志中不再出现 `events` 模块被浏览器外置化的告警。
