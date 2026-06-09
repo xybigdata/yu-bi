@@ -28,6 +28,7 @@ import {
 } from 'app/pages/DashBoardPage/constants';
 import { VariableValueTypes } from 'app/pages/MainPage/pages/VariablePage/constants';
 import { RelationFilterValue } from 'app/types/ChartConfig';
+import { datartDayjs } from 'app/utils/date';
 import { FilterSqlOperator, TIME_FORMATTER } from 'globalConstants';
 import i18next from 'i18next';
 import moment, { Moment } from 'moment';
@@ -37,6 +38,10 @@ import {
   RangeControlTypes,
 } from './constants';
 import { ControllerConfig, PickerType } from './types';
+
+type FormattableDateValue = {
+  format: (template?: string) => string;
+};
 
 export const getStringFacadeOptions = (type: ValueOptionType) => {
   switch (type) {
@@ -146,15 +151,22 @@ export const formatControlDateToStr = (config: ControllerConfig) => {
   if (config.controllerDate) {
     const filterDate = config.controllerDate;
     if (filterDate.startTime && filterDate.startTime.exactValue) {
-      if ((filterDate.startTime.exactValue as Moment).format) {
-        let exactTime = filterDate.startTime.exactValue as Moment;
+      if (
+        typeof filterDate.startTime.exactValue !== 'string' &&
+        (filterDate.startTime.exactValue as FormattableDateValue).format
+      ) {
+        let exactTime =
+          filterDate.startTime.exactValue as FormattableDateValue;
         let newExactTime = exactTime.format(TIME_FORMATTER);
         config.controllerDate.startTime.exactValue = newExactTime;
       }
     }
     if (filterDate.endTime && filterDate.endTime.exactValue) {
-      if ((filterDate.endTime.exactValue as Moment).format) {
-        let exactTime = filterDate.endTime.exactValue as Moment;
+      if (
+        typeof filterDate.endTime.exactValue !== 'string' &&
+        (filterDate.endTime.exactValue as FormattableDateValue).format
+      ) {
+        let exactTime = filterDate.endTime.exactValue as FormattableDateValue;
         let newExactTime = exactTime.format(TIME_FORMATTER);
         config.controllerDate.endTime!.exactValue = newExactTime;
       }
@@ -319,20 +331,19 @@ export const formatDateByPickType = (
     return null;
   }
 
+  const dateValue = datartDayjs(momentTime as any);
   switch (pickerType) {
     case 'dateTime':
-      return momentTime.format(formatTemp);
+      return dateValue.format(formatTemp);
     case 'date':
-      return momentTime.startOf('day').format(formatTemp);
+      return dateValue.startOf('day').format(formatTemp);
     case 'week':
-      let year = String(momentTime.year());
-      let week = String(momentTime.week() - 1);
-      return moment(year).add(week, 'weeks').startOf('week').format(formatTemp);
+      return dateValue.startOf('week').format(formatTemp);
     case 'quarter':
     case 'month':
-      return momentTime.startOf('month').format(formatTemp);
+      return dateValue.startOf('month').format(formatTemp);
     case 'year':
-      return momentTime.startOf('year').format(formatTemp);
+      return dateValue.startOf('year').format(formatTemp);
     default:
       return null;
   }
