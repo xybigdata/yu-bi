@@ -292,7 +292,6 @@
 遗留风险：
 - CRA5 自身仍会打印 webpack-dev-server `onBeforeSetupMiddleware`/`onAfterSetupMiddleware` 弃用警告，长期应通过阶段 2 迁出 CRA 解决。
 - Monaco 开发构建会打印缺失 `marked.umd.js.map` 的 source map 警告，不影响构建和运行。
-- `eslint-plugin-jsdoc` 仍声明只支持 Node 12-17，安装时在 Node 26 下有 engine warning；后续放入阶段 5 的 lint 工具链升级。
 - `npm audit` 仍有历史漏洞，需随后续前后端依赖升级分批处理。
 
 验收门槛：
@@ -926,6 +925,13 @@
 - `frontend/src/entryPointFactory.tsx`、`frontend/src/task.ts`、`frontend/src/setupTests.ts` 已删除 `react-app-polyfill/stable` 显式引入。
 - `frontend/package.json` 与 `frontend/package-lock.json` 已移除 `react-app-polyfill` 依赖声明。
 - 这一步保留了当前仍在使用的 `core-js/features/string/replace-all`，只删除已不再需要的整包浏览器兼容壳。
+
+### 并行治理：移除无效的前端 JSDoc 与 `eslint-plugin-jsdoc` 壳
+
+- `frontend/.eslintrc.js` 已删除未被任何规则实际使用的 `jsdoc` 插件声明，避免继续安装只支持 Node 12-17 的 `eslint-plugin-jsdoc`。
+- `frontend/package.json` 与 `frontend/package-lock.json` 已移除 `eslint-plugin-jsdoc`、`jsdoc`、`docdash` 三个开发依赖，并删除无效的 `doc:html` 脚本。
+- `frontend/jsdoc.config.json` 已删除；该配置原本指向不存在的 `types/chartHelper.js`，仓库内也没有生成后的 `types/docs` 产物，因此属于失效文档链而不是仍在使用的工程能力。
+- 这一步不改变前端运行、构建、测试或类型检查主链，只是去掉 Node 26 下会产生 `engine` 告警的无效历史壳。
 
 ### React Router 预迁移第四十批：切到 Router 6 经典运行时底座
 
