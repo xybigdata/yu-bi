@@ -25,6 +25,10 @@ import { InteractionFieldRelation } from '../../constants';
 import ChartRelationList from './ChartRelationList';
 import { I18nTranslator, JumpToChartRule, VizType } from './types';
 
+type SelectPopupMatchSelectWidthCompatProps = {
+  popupMatchSelectWidth?: boolean | number;
+};
+
 type DropdownPopupRenderCompatProps = {
   popupRender?: (originNode: React.ReactNode) => React.ReactNode;
 };
@@ -65,6 +69,9 @@ const JumpToChart: FC<
       />
     ),
   } as DropdownPopupRenderCompatProps;
+  const selectPopupMatchWidthProps = {
+    popupMatchSelectWidth: false,
+  } as SelectPopupMatchSelectWidthCompatProps;
 
   return (
     <Space>
@@ -73,7 +80,7 @@ const JumpToChart: FC<
         showSearch
         optionFilterProp="children"
         style={{ minWidth: 100, maxWidth: 200 }}
-        dropdownMatchSelectWidth={false}
+        {...(selectPopupMatchWidthProps as any)}
         value={value?.relId}
         placeholder={t('drillThrough.rule.reference.title')}
         onChange={relId => onValueChange({ ...value, ...{ relId } })}
