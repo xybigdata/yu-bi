@@ -17,8 +17,9 @@
  */
 
 import { useSelector } from 'react-redux';
-import { Redirect, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import { getToken } from 'utils/auth';
+import { CompatRedirect } from './components/CompatRedirect';
 import { LazyMainPage } from './pages/MainPage/Loadable';
 import { selectSystemInfo } from './slice/selectors';
 
@@ -35,7 +36,9 @@ export function LoginAuthRoute() {
   }
 
   if (systemInfo) {
-    return <Redirect to={systemInfo.initialized ? '/login' : '/setup'} />;
+    return (
+      <CompatRedirect to={systemInfo.initialized ? '/login' : '/setup'} />
+    );
   } else {
     // TODO: add system info load fail page
     return null;

@@ -17,6 +17,7 @@
  */
 
 import ChartEditor, { ChartEditorBaseProps } from 'app/components/ChartEditor';
+import { CompatRedirect } from 'app/components/CompatRedirect';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useMount from 'app/hooks/useMount';
 import ChartManager from 'app/models/ChartManager';
@@ -24,7 +25,6 @@ import { useAppSlice } from 'app/slice';
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  Redirect,
   Route,
   Switch,
   useLocation,
@@ -141,13 +141,13 @@ export function MainPage() {
       {orgId && (
         <Switch>
           <Route path="/" exact>
-            <Redirect to={`/organizations/${orgId}`} />
+            <CompatRedirect to={`/organizations/${orgId}`} />
           </Route>
           <Route path="/confirminvite">
             <ConfirmInvitePage />
           </Route>
           <Route path="/organizations/:orgId" exact>
-            <Redirect
+            <CompatRedirect
               to={`/organizations/${organizationMatch?.params.orgId}/vizs`}
             />
           </Route>
@@ -192,7 +192,7 @@ export function MainPage() {
             </AccessRoute>
           </Route>
           <Route path="/organizations/:orgId/permissions" exact>
-            <Redirect
+            <CompatRedirect
               to={`/organizations/${organizationMatch?.params.orgId}/permissions/subject`}
             />
           </Route>

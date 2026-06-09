@@ -1,11 +1,12 @@
 import React from 'react';
-import { Redirect, RedirectProps, Route, RouteProps } from 'react-router-dom';
+import { Route, RouteProps } from 'react-router-dom';
+import { CompatRedirect } from '../CompatRedirect';
 import { Authorized } from './Authorized';
 
 interface AuthorizedRouteProps {
   authority: boolean;
   routeProps: RouteProps;
-  redirectProps: RedirectProps;
+  redirectProps: { to: string };
 }
 
 export function AuthorizedRoute({
@@ -14,7 +15,10 @@ export function AuthorizedRoute({
   redirectProps,
 }: AuthorizedRouteProps) {
   return (
-    <Authorized authority={authority} denied={<Redirect {...redirectProps} />}>
+    <Authorized
+      authority={authority}
+      denied={<CompatRedirect to={redirectProps.to} />}
+    >
       <Route {...routeProps} />
     </Authorized>
   );
