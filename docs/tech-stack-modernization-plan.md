@@ -92,6 +92,120 @@
 - 发布包内静态资源、parser.js、配置目录和启动参数都可复现
 - 服务启动、前端代理、后端 API、截图导出、分享页、多入口 HTML 都有自动或半自动验收路径
 
+## 目标版本矩阵（2026-06）
+
+这一节把“现代化替代方案”落到可执行版本线上。不是所有项都要求立刻追到最新大版本，但必须进入仍活跃维护、与当前架构相容、且后续可持续升级的主线。
+
+### 已完成并锁定的基线
+
+- JDK：`21 LTS`
+- Spring Boot：`3.5.x` 稳定线
+- Spring Cloud：`2025.0.x` 稳定线
+- MyBatis Spring Boot Starter：`3.0.x`
+- MySQL JDBC 坐标：`com.mysql:mysql-connector-j`
+- Selenium：`4.31.0`
+- Node：`26.x`
+- Vite：`5.x`
+- React：`18.3.x`
+- React Router：`6.30.x`
+- Redux Toolkit：`2.x`
+- React Redux：`9.x`
+- Axios：`1.x`
+- TypeScript：`5.9.x`
+
+### 已确定目标线，但尚未完成迁移
+
+- Ant Design：`4.24.x -> 5.x`，6.x 暂不作为本轮硬目标
+- `@ant-design/icons`：随 Ant Design 5 同步进入当前主线
+- Jest：`27.5.x -> 30.x`，若验证成本更低可改为 Vitest，但二选一后必须收敛为单栈
+- `styled-components`：`5.3.x -> 6.x`
+- `jjwt`：`0.7.0 -> 0.12+`
+- Apache HttpClient：`4.5.14 -> 5.x`
+- Apache POI：`5.0.0 -> 较新 5.x 稳定线`
+- Guava：`21.0 -> 较新稳定线`，或先清理使用面后择机移除
+- Commons CSV：`1.8 -> 较新稳定线`
+- Commons Text：`1.9 -> 较新稳定线`
+- AspectJ Weaver：`1.9.8.M1 -> 正式 GA 版本`
+- H2：`1.4.200 -> 2.x`
+
+### 中长期演进项
+
+- 安全框架：`Shiro 2 -> Spring Security`，本轮只做评估与前置拆障，不承诺一次完成
+- 连接池：`Druid -> HikariCP`，需要在多数据源行为、监控诉求和 JDBC provider 实现稳定后推进
+- 脚本引擎：`Nashorn -> GraalJS`，属于单独专项
+- 代码生成链：`mybatis-generator-core` 独立治理，避免继续污染主运行时依赖面
+
+## 项目总控路线图
+
+这一节定义整个大型迁移项目的控制方式，确保后续每个 checkpoint 都在收敛到同一个终态，而不是零散升级。
+
+### 里程碑状态
+
+- `M0 已完成`：JDK 21、Spring Boot 3、Spring Cloud 2025、Node 26、Vite 5、React 18、Router 6 依赖切换、RTK 2、React Redux 9、Selenium 4、后端生产代码 `fastjson` 清零。
+- `M1 进行中`：前端 Router 兼容层收口、Ant Design 5 升级前清障、测试工具链去 CRA 化、CI/Docker 与当前基线对齐。
+- `M2 待开始`：JWT 升级、HttpClient 5、POI/Guava/Commons 系列老基础库清理。
+- `M3 待开始`：H2 2.x demo 数据重建、连接池与安全框架长期演进策略落地。
+
+### 每个 checkpoint 的强制约束
+
+- 一个 checkpoint 只解决一个主题，禁止把前端大版本、后端基础设施和构建链变更混在同一提交。
+- 每个 checkpoint 必须同时更新本文档中的“当前状态”“风险”和“验收证据”。
+- 每个 checkpoint 都要保留可回退点，优先通过兼容层、局部替换和双写期收口，而不是一次硬切。
+- 所有 checkpoint 都在分支 `codex-jdk21-migration` 上串行推进，并保留中文 commit 作为阶段锚点。
+
+### 统一验收与回退策略
+
+- 前端 checkpoint 至少验证：`npm run checkTs`、`npm run build`；涉及 task 解析链时额外跑 `npm run build:task`。
+- 后端 checkpoint 至少验证：`mvn -pl server -am -DskipTests compile`；涉及 JDBC/SQL 解析链时额外跑 `mvn test -pl data-providers/jdbc-data-provider -am`。
+- 集成 checkpoint 至少验证：
+  - `mvn -DskipTests -Dexec.skip=false package -pl server -am`
+  - `GET /api/v1/sys/info` 返回 200
+  - 首页和至少一个 share 入口可访问
+- 回退策略统一遵循：
+  - 先回退当前 checkpoint 提交
+  - 再恢复上一个已验证 tag/commit 的构建路径
+  - 不通过“保留半迁移状态”作为长期运行方案
+
+## 工程化差距与收敛计划
+
+这一节专门处理“本机已跑通，但工程化链路还没跟上”的问题。目标不是额外扩展范围，而是确保最终现代化结论在 CI、Docker 和发布包上都成立。
+
+### 当前差距
+
+1. GitHub Actions 仍停留在旧 Node 基线
+   - 当前 `.github/workflows/dev-ut-stage.js.yml` 仍使用 `node-version: [14.x, 16.x]`。
+   - 这与当前前端 `package.json` 已声明的 `node >=22`、`npm >=11` 不一致，也无法证明 Node 26 下的真实兼容性。
+
+2. CI 只覆盖前端构建与测试，没有覆盖后端现代化主链
+   - 当前 workflow 仅执行前端 `npm ci`、`build`、`test:ci`、stylelint。
+   - 还没有统一纳入：
+     - `npm run checkTs`
+     - `npm run build:task`
+     - `mvn -pl server -am -DskipTests compile`
+     - `mvn test -pl data-providers/jdbc-data-provider -am`
+     - 启动后的 `/api/v1/sys/info` 健康验证
+
+3. Docker 运行时虽已切到 JDK 21，但还未证明与当前构建链一致
+   - `Dockerfile` 运行时已经使用 `eclipse-temurin:21-jre`。
+   - 但 Dockerfile 仍依赖外部预先准备好的 `bin/`、`config/`、`lib/`、`static/` 目录复制，尚未把“如何由当前 Maven/Vite 构建生成这些产物”闭环写入统一工程化验证链。
+
+### 收敛策略
+
+1. CI 先对齐当前真实基线
+   - Node 版本统一到 26。
+   - 增加 `npm run checkTs`、`npm run build:task`、`npm run build`。
+   - 增加后端 compile / test / package 最小主链验证。
+
+2. 再补集成启动验证
+   - 以 demo 或最小配置启动 server。
+   - 验证 `/api/v1/sys/info` 返回 200。
+   - 必要时增加一个 share 入口或静态资源检查。
+
+3. 最后闭环 Docker / 发布包一致性
+   - 明确发布包由哪个 Maven phase 生成。
+   - 让 Docker 镜像消费同一套发布产物，而不是额外的人手工准备目录。
+   - 验证发布包与 Docker 镜像启动参数一致。
+
 ## 升级依赖矩阵
 
 这一节定义哪些升级可以并行，哪些必须按顺序推进，避免后续把多个高风险改动混在一个阶段里。
@@ -552,38 +666,30 @@
 - 主应用业务代码里的 `useRouteMatch`、`Route component=`、`Route render=`、业务层 `Redirect` 已基本清空。
 - 剩余 Router 5 依赖主要集中在兼容层自身：
   - `frontend/src/app/hooks/useCompatNavigate.ts`
-  - `frontend/src/app/components/CompatSwitch.tsx`
-- 剩余页面容器层直接 `Route` 基本只剩少量授权/布局封装，主应用内容页容器已大多切到 `CompatRoute`。
+  - `frontend/src/app/components/CompatRoute.tsx`
+  - `frontend/src/app/components/CompatRoutes.tsx`
+  - `frontend/src/app/components/CompatRedirect.tsx`
+- 剩余页面容器层直接 `Route` 已基本清空，主应用内容页容器主要通过 `CompatRoute` / `CompatRoutes` 承接。
 - `AuthorizedRoute` 已收口到 `CompatRoute`，兼容层外部最后一个直接渲染 `Route` 的授权封装已移除。
 - 路由能力的 import 源已开始从 `react-router-dom` / `react-router` 向本地 `routerCompat` 收口，后续可以按批次继续把剩余页面切到同一出口。
 - 当前剩余直接依赖已经集中到少量详情页、故事板编辑/播放页和兼容层本身，后续更适合继续按模块批次清理，而不是全局撒网式替换。
-- 当前应用层对外部路由包的直接依赖已经清空，只剩 `routerCompat.ts` 作为单点出口；下一阶段重点应转向 `useCompatNavigate`、`CompatSwitch`、`CompatRoutes` 和 `CompatRedirect` 的真实底座迁移。
-- `useCompatNavigate` 和 `CompatRedirect` 已不再直接把 v5 `history.push/replace` 与 `Route render` 透传给业务层，下一步可以继续推进 `CompatSwitch` / `CompatRoutes` 的真实底座替换。
-- `CompatSwitch` 已删除，`CompatRoutes` 不再经过额外空包装层，兼容路由容器已进一步收敛。
+- 当前应用层对外部路由包的直接依赖已经清空，只剩 `routerCompat.ts` 作为单点出口；下一阶段重点应转向 `useCompatNavigate`、`CompatRoutes` 和 `CompatRedirect` 的回归验证与最终简化。
+- `useCompatNavigate` 已改为包装 `useNavigate`，`CompatRedirect` 已不再透传 v5 `Route render` 语义；当前重点不再是继续“去 v5 hook”，而是确认默认跳转、replace、对象导航和 `location.state` 的行为一致性。
 - `CompatRoute` / `CompatRedirect` 已不再依赖 `RouteProps`，兼容层对外只暴露当前业务实际使用到的最小路由声明能力。
 - `NavLink` 的 v5 历史 API 已收口到 `CompatNavLink`，当前业务层不再直接依赖 `activeClassName` / `isActive`。
 - `useRouteMatch` 已从兼容出口移除，当前公开路由能力里已不存在该历史 API。
-- 公开 `routerCompat.ts` 已不再暴露 `Route` / `Switch` / `NavLink` / `useHistory`，这些 v5 旧能力只保留在兼容层内部的 `routerCompatLegacy.ts`。
-- `CompatNavLink` 已不再依赖底层 `NavLink`，当前兼容层内部剩余的 Router 5 旧能力已进一步收缩到 `Route` / `Switch` / `useHistory`。
+- 公开 `routerCompat.ts` 已直接回到 Router 6 稳定能力：`BrowserRouter`、`MemoryRouter`、`Link`、`useLocation`、`useNavigate`、`useParams`。
+- `CompatNavLink` 已不再依赖底层 `NavLink`，当前兼容层内部也不再保留 `routerCompatLegacy.ts` 这类 Router 5 runtime 过渡层。
 - 成员、来源、调度、权限这些“详情区条件显示”页面已不再依赖 `CompatRoute`，当前 `Route` 的主要残留压力已经收敛到主入口和少数真正需要互斥匹配的容器。
-- `CompatRoutes` 已从分享页 Router、Viz 看板编辑器入口和 `LoginAuthRoute` 的特殊子项场景中退出，当前 `Switch` 的主要残留压力已经收敛到主应用和少量真正需要多分支互斥的容器。
-- `CompatRoute` / `CompatRoutes` 已不再依赖底层 `Route` / `Switch`，当前兼容层内部剩余的 Router 5 运行时依赖只剩 `useHistory`。
-- `useCompatNavigate` 已改为消费兼容层自持的 history 上下文，`useHistory` hook 依赖已移除；当前兼容层对 Router 5 的运行时依赖已经不再通过 v5 hooks 暴露。
-- 当前仍保留旧 Router 5 运行时语义的核心点，已经压缩到：
-  1. `frontend/src/app/routerCompatRuntime.tsx`
-  2. `frontend/src/app/routerCompatLegacy.ts`
 - 剩余需要继续处理的重点不是“全局搜索更多旧 API”，而是：
-  1. 让 `CompatRoute` / `CompatRoutes` 真实接管到 Router 6/7。
-  2. 让 `useCompatNavigate` 从 `useHistory` 切到 `useNavigate`。
-  3. 让 `CompatRedirect` 最终对齐到 Router 6 `Navigate` 语义。
-  4. 补齐嵌套路由、默认跳转、参数路由和分享页的回归验证。
+  1. 评估 `CompatRoute` / `CompatRoutes` 是否还有长期保留价值。
+  2. 补齐嵌套路由、默认跳转、参数路由和分享页的回归验证。
+  3. 逐步把兼容组件继续缩小到纯薄封装，避免长期背负自定义路由层。
 
 工作包拆分：
-1. 兼容导航层主替换：`useCompatNavigate` 从 `useHistory` 切到 `useNavigate`。
-2. 兼容重定向替换：`CompatRedirect` 对齐 `Navigate` 语义。
-3. 兼容路由容器替换：`CompatRoutes` / `CompatRoute`。
-4. 主入口验收：`AppRouter`、`LoginAuthRoute`、`MainPage`、share routers。
-5. 复杂页面回归：`VizPage`、`ViewPage`、成员页、权限页、故事板。
+1. 主入口验收：`AppRouter`、`LoginAuthRoute`、`MainPage`、share routers。
+2. 复杂页面回归：`VizPage`、`ViewPage`、成员页、权限页、故事板。
+3. 兼容层瘦身：评估 `CompatRoute`、`CompatRoutes`、`CompatRedirect` 是否可继续向 Router 6 原生组件收缩。
 
 ### B. Ant Design 5 backlog
 
@@ -612,15 +718,15 @@
   - `@cfaester/enzyme-adapter-react-18`
 - 当前残留主要是：
   - Jest 版本仍停留在 27.5.1
-  - `react-app-polyfill` 在 `entryPointFactory.tsx`、`task.ts`、`setupTests.ts` 中仍有显式引入
+  - `eslintConfig` 仍继承 `react-app` / `react-app/jest`
+  - `babel-preset-react-app` 仍在 Jest transform 链中使用
   - ESLint 工具链仍依赖 `eslint-config-react-app`
 
 工作包拆分：
-1. Enzyme 测试盘点与替换优先级排序。
-2. `setupTests.ts` 迁到纯 Testing Library。
-3. Jest 27 升级到较新稳定线，或迁到 Vitest。
-4. `react-app-polyfill` 的浏览器支持策略确认与移除。
-5. 继续清理 `eslint-config-react-app` 等 CRA 历史工具链残留。
+1. Jest 27 升级到较新稳定线，或迁到 Vitest。
+2. 将 Jest transform 与 ESLint 配置彻底脱离 `react-app` 系工具链。
+3. 升级 `@types/node`、`babel-jest`、`jest-environment-jsdom` 与相关测试依赖。
+4. 清理 `eslint-config-react-app` 等 CRA 历史工具链残留。
 
 ### D. 后端现代化 backlog
 
@@ -628,39 +734,38 @@
 - 浏览器自动化：
   - `core/pom.xml`
   - `server/pom.xml`
-  仍声明 `phantomjsdriver` 和旧 `selenium-java`
+  当前只保留 `selenium-java 4.31.0`，`phantomjsdriver` 已移除
 - JSON 栈：
-  - `security/src`
-  - `core/src`
-  - `server/src`
-  仍广泛直接依赖 `fastjson`
-  - `server/src/main/java/datart/server/config/WebMvcConfig.java` 仍直接注册 `FastJsonHttpMessageConverter`
+  - 后端生产代码中的 `fastjson` 使用点已清零
+  - Web 层默认 message converter 已回到 Jackson
 - JWT：
   - `core/pom.xml` 中 `jjwt 0.7.0`
-  - `security/pom.xml` 中 `java-jwt 3.7.0`
+  - `security/pom.xml` 中 `java-jwt` 已删除，当前只剩 `jjwt 0.7.0`
 - 旧基础库：
-  - `commons-lang 2.6`
-  - `commons-io 1.3.1`
   - `guava 21.0`
   - `httpclient 4.5.14`
   - `h2 1.4.200`
+  - `poi-ooxml 5.0.0`
+  - `commons-csv 1.8`
+  - `commons-text 1.9`
+  - `aspectjweaver 1.9.8.M1`
 
 工作包拆分：
-1. PhantomJS / Selenium 3 调用点梳理与替换方案选型。
-2. FastJson 使用面梳理：DTO、配置、message converter、导入导出。
-3. JWT 双栈使用链路梳理。
-4. 旧基础库逐项替换与回归验证。
-5. demo/H2 策略与样例数据迁移。
+1. JWT 升级专项：`jjwt 0.7 -> 0.12+` 与 secret 兼容策略。
+2. HTTP 客户端专项：`httpclient 4 -> 5`，并评估最终是否只保留单一客户端。
+3. 旧基础库逐项替换与回归验证：Guava、POI、Commons CSV、Commons Text、AspectJ。
+4. demo/H2 策略与样例数据迁移。
+5. Druid / Shiro / Nashorn / MyBatis Generator 的中长期专项设计。
 
 ### E. 推荐近期执行队列
 
 基于当前风险和收益，建议接下来的 5 个 checkpoint 按这个顺序推进：
 
-1. Router 兼容层主替换：`useCompatNavigate` / `CompatRoutes` 真正接管到 Router 6/7。
-2. AntD 5 收尾清理：优先处理 `visible` 和剩余 JSX `Menu.*`。
-3. 测试栈现代化：先升级 Jest 或迁到 Vitest，再处理 `react-app-polyfill` 与 ESLint 残留。
-4. 浏览器自动化现状梳理，确定 `Playwright` 还是 `Selenium 4`。
-5. FastJson 使用面梳理并设计 Jackson 迁移边界。
+1. AntD 5 收尾清理：优先处理 `visible`、剩余 JSX `Menu.*` 和 `antd/lib/*` 深路径导入。
+2. 测试栈现代化：升级 Jest 或迁到 Vitest，并去掉 `react-app` 系工具链残留。
+3. `httpclient 4 -> 5` 专项盘点与迁移实现。
+4. `jjwt 0.7 -> 0.12+` 兼容设计与代码落地。
+5. POI / Guava / Commons 系列老基础库分批升级。
 
 ## 最终完成定义
 
@@ -691,11 +796,12 @@
 
 ## 当前下一步
 
-阶段 3 已完成，下一步进入阶段 4 的 UI 与路由现代化准备：
+阶段 3 已完成，阶段 4 和阶段 5、6 已进入并行推进态。下一步建议按以下顺序执行：
 
-1. 继续预处理 AntD 5 API 迁移热点：复杂 `Menu.Item`/`Menu.SubMenu` JSX 菜单、Tooltip/Popover 的 `overlay` 内容和项目封装层 legacy `visible` 入参。
-2. 继续 React Router 5 -> 6/7 预迁移，优先清理剩余 `Route component=` / `Route render=`、`Redirect`、`useHistory` 和嵌套路由旧写法。
-3. 继续升级前端测试栈到较新稳定线，并处理 `react-app-polyfill` 与 `eslint-config-react-app` 残留。
+1. 收口 AntD 5 升级前最后一批热点：复杂 `Menu.*` JSX、`visible`、深路径导入和主题 token 入口。
+2. 把测试栈从 Jest 27 + `react-app` 系配置推进到较新稳定线。
+3. 启动 `httpclient 4 -> 5` 专项，先做依赖面和 API 映射，再落代码。
+4. 设计 `jjwt 0.7 -> 0.12+` 的兼容 secret 方案，避免升级后默认配置失效。
 
 ## 2026-06-10 老旧技术栈盘点
 
