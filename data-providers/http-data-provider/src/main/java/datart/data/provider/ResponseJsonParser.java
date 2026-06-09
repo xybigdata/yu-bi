@@ -17,9 +17,8 @@
  */
 package datart.data.provider;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import datart.core.base.consts.ValueType;
 import datart.core.base.exception.BaseException;
 import datart.core.base.exception.Exceptions;
@@ -42,72 +41,84 @@ public class ResponseJsonParser implements HttpResponseParser {
 
     private static final String PROPERTY_SPLIT = "\\.";
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     @Override
     public Dataframe parseResponse(String targetPropertyName, HttpResponse response, List<Column> columns) throws IOException {
         String jsonString = EntityUtils.toString(response.getEntity());
 
-        JSONArray array;
+        JsonNode arrayNode;
         if (StringUtils.isEmpty(targetPropertyName)) {
-            array = JSON.parseArray(jsonString);
+            arrayNode = OBJECT_MAPPER.readTree(jsonString);
         } else {
-            JSONObject jsonObject = JSON.parseObject(jsonString);
+            JsonNode jsonNode = OBJECT_MAPPER.readTree(jsonString);
             String[] split = targetPropertyName.split(PROPERTY_SPLIT);
             for (int i = 0; i < split.length - 1; i++) {
-                jsonObject = jsonObject.getJSONObject(split[i]);
-                if (jsonObject == null) {
+                jsonNode = jsonNode.path(split[i]);
+                if (jsonNode.isMissingNode() || jsonNode.isNull() || !jsonNode.isObject()) {
                     Exceptions.tr(BaseException.class, "message.provider.http.property.miss", targetPropertyName);
                 }
             }
-            array = jsonObject.getJSONArray(split[split.length - 1]);
-            if (array == null) {
+            arrayNode = jsonNode.path(split[split.length - 1]);
+            if (arrayNode.isMissingNode() || arrayNode.isNull()) {
                 Exceptions.tr(BaseException.class, "message.provider.http.property.miss", targetPropertyName);
             }
         }
         Dataframe dataframe = new Dataframe();
-        if (array == null || array.size() == 0) {
+        if (arrayNode == null || arrayNode.isNull() || !arrayNode.isArray() || arrayNode.size() == 0) {
             return dataframe;
         }
 
         if (CollectionUtils.isEmpty(columns)) {
-            columns = getSchema(array.getJSONObject(0));
+            columns = getSchema(arrayNode.get(0));
         }
 
         dataframe.setColumns(columns);
 
-        Set<String> columnKeySet = columns.stream().map(Column::columnName)
-                .collect(Collectors.toSet());
-
-        List<List<Object>> rows = array.toJavaList(JSONObject.class).parallelStream()
-                .map(item -> {
-                    return columnKeySet.stream().map(key -> {
-                        Object val = item.get(key);
-                        if (val instanceof JSONObject || val instanceof JSONArray) {
-                            val = val.toString();
-                        }
-                        return val;
-                    }).collect(Collectors.toList());
+        List<List<Object>> rows = new ArrayList<>();
+        for (JsonNode itemNode : arrayNode) {
+            JsonNode objectNode = itemNode.isObject() ? itemNode : OBJECT_MAPPER.createObjectNode();
+            List<Object> row = columns.stream()
+                .map(column -> {
+                    JsonNode valueNode = objectNode.get(column.columnName());
+                    return nodeToValue(valueNode);
                 }).collect(Collectors.toList());
+            rows.add(row);
+        }
         dataframe.setRows(rows);
         return dataframe;
     }
 
-    private ArrayList<Column> getSchema(JSONObject jsonObject) {
+    private ArrayList<Column> getSchema(JsonNode jsonObject) {
         ArrayList<Column> columns = new ArrayList<>();
-        for (String key : jsonObject.keySet()) {
+        if (jsonObject == null || !jsonObject.isObject()) {
+            return columns;
+        }
+        jsonObject.fieldNames().forEachRemaining(key -> {
             Column column = new Column();
             column.setName(key);
-            Object val = jsonObject.get(key);
+            Object val = nodeToValue(jsonObject.get(key));
             if (val != null) {
-                if (val instanceof JSONObject || val instanceof JSONArray) {
-                    val = val.toString();
-                }
                 column.setType(DataTypeUtils.javaType2DataType(val));
             } else {
                 column.setType(ValueType.STRING);
             }
             columns.add(column);
-        }
+        });
         return columns;
+    }
+
+    private Object nodeToValue(JsonNode valueNode) {
+        if (valueNode == null || valueNode.isNull() || valueNode.isMissingNode()) {
+            return null;
+        }
+        if (valueNode.isContainerNode()) {
+            return valueNode.toString();
+        }
+        if (valueNode.isTextual()) {
+            return valueNode.asText();
+        }
+        return OBJECT_MAPPER.convertValue(valueNode, Object.class);
     }
 
 }

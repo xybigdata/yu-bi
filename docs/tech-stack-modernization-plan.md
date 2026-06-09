@@ -839,8 +839,16 @@
 ### fastjson 后续残留重点
 
 - 当前后端剩余较集中的 `fastjson` 使用，主要在：
-  - `data-providers/http-data-provider/src/main/java/datart/data/provider/ResponseJsonParser.java`
   - `security/src/main/java/datart/security/oauth2/WeChartOauth2Client.java`
-  - `server/src/main/java/datart/server/base/dto/chart/WidgetConfig.java`
-  - `server/src/main/java/datart/server/service/impl/VizServiceImpl.java`
-- 另外 `data-providers/data-provider-base`、`jdbc-data-provider` 中仍有少量脚本/适配器层 `JSON.parseObject`，以及测试代码中的 `org.json` 使用，后续需要按主链优先级继续分批收口。
+  - `data-providers/data-provider-base/src/main/java/datart/data/provider/script/StructScript.java`
+  - `data-providers/data-provider-base/src/main/java/datart/data/provider/calcite/StructScriptProcessor.java`
+  - `data-providers/jdbc-data-provider/src/main/java/datart/data/provider/jdbc/adapters/JdbcDataProviderAdapter.java`
+- 另外 `server` 里 `UserServiceImpl`、`ExternalRegisterServiceImpl` 仍有把 OAuth 属性 `Map` 包成 `JSONObject` 的低风险残留，测试代码里也还有 `org.json` 使用，后续需要按主链优先级继续分批收口。
+
+### 并行治理：HTTP JSON 解析与 widget 配置链切到 Jackson
+
+- `data-providers/http-data-provider/src/main/java/datart/data/provider/ResponseJsonParser.java` 已移除 `fastjson`，改为使用 Jackson `JsonNode` 解析 HTTP 响应 JSON。
+- 现有行为保持不变：支持顶层数组响应、支持按 `a.b.c` 点路径定位目标数组、嵌套对象/数组值仍序列化为 JSON 字符串写入结果集、未显式给列定义时仍按首行对象自动推断 schema。
+- `server/src/main/java/datart/server/base/dto/chart/WidgetConfig.java` 已将 `content` 从 `fastjson JSONObject` 切到 Jackson `JsonNode`。
+- `server/src/main/java/datart/server/service/impl/VizServiceImpl.java` 读取 widget 图表配置时，已改为使用 Jackson 反序列化 `WidgetConfig`。
+- 2026-06-09 验证：`mvn -pl server -am -DskipTests compile` 通过。

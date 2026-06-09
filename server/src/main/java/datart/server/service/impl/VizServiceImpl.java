@@ -17,7 +17,6 @@
  */
 package datart.server.service.impl;
 
-import com.alibaba.fastjson.JSON;
 import datart.core.base.consts.Const;
 import datart.core.base.consts.FileOwner;
 import datart.core.base.consts.TransferFileType;
@@ -267,7 +266,7 @@ public class VizServiceImpl extends BaseService implements VizService {
                     return retrieve(vizId, Datachart.class).getConfig();
                 case WIDGET:
                     String config = retrieve(vizId, Widget.class).getConfig();
-                    WidgetConfig widgetConfig = JSON.parseObject(config, WidgetConfig.class);
+                    WidgetConfig widgetConfig = OBJECT_MAPPER.readValue(config, WidgetConfig.class);
                     return widgetConfig.getChartConfig();
                 default:
                     return result;
