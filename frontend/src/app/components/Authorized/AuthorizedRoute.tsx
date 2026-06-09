@@ -1,11 +1,11 @@
 import React from 'react';
-import { Route, type RouteProps } from 'app/routerCompat';
 import { CompatRedirect } from '../CompatRedirect';
+import { CompatRoute, type CompatRouteProps } from '../CompatRoute';
 import { Authorized } from './Authorized';
 
 interface AuthorizedRouteProps {
   authority: boolean;
-  routeProps: RouteProps;
+  routeProps: CompatRouteProps;
   redirectProps: { to: string };
 }
 
@@ -19,7 +19,7 @@ export function AuthorizedRoute({
       authority={authority}
       denied={<CompatRedirect to={redirectProps.to} />}
     >
-      <Route {...routeProps} />
+      <CompatRoute {...routeProps} />
     </Authorized>
   );
 }

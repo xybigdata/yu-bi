@@ -352,6 +352,7 @@
 - React Router 预迁移第二十五批：登录/找回密码页面、主导航、成员/来源/调度/Viz 侧边栏，以及三个分享页主页面的 `useLocation` / `useParams` / `Link` / `NavLink` 导入已继续切到本地 `routerCompat`，进一步扩大统一出口覆盖面，为下一步替换兼容层底座减少散点改动。
 - React Router 预迁移第二十六批：成员/来源/调度详情页与故事板编辑/播放页的 `useParams` 导入已全部切到本地 `routerCompat`，当前 `frontend/src/app` 内对 `react-router-dom` / `react-router` 的直接依赖已经收口到 `routerCompat.ts` 单点，后续可以开始真正替换兼容层底座实现。
 - React Router 预迁移第二十七批：`useCompatNavigate` 已改为项目内显式包装的导航 API，继续保留字符串和对象导航、`location.state` 与 `go/goBack` 兼容行为；`CompatRedirect` 同时移除了 `Route render` 旧写法，把后续迁移焦点进一步收敛到兼容层底座本身。
+- React Router 预迁移第二十八批：`AuthorizedRoute` 已切到 `CompatRoute`，兼容层外部最后一个直接渲染 `Route` 的授权封装也已收回到本地路由组件；当前应用内的路由声明旧实现进一步集中到 `CompatRoute` 与 `routerCompat.ts` 两个底座点。
 
 验收门槛：
 - 全部路由可访问。
@@ -543,10 +544,17 @@
   - `frontend/src/app/hooks/useCompatNavigate.ts`
   - `frontend/src/app/components/CompatSwitch.tsx`
 - 剩余页面容器层直接 `Route` 基本只剩少量授权/布局封装，主应用内容页容器已大多切到 `CompatRoute`。
+- `AuthorizedRoute` 已收口到 `CompatRoute`，兼容层外部最后一个直接渲染 `Route` 的授权封装已移除。
 - 路由能力的 import 源已开始从 `react-router-dom` / `react-router` 向本地 `routerCompat` 收口，后续可以按批次继续把剩余页面切到同一出口。
 - 当前剩余直接依赖已经集中到少量详情页、故事板编辑/播放页和兼容层本身，后续更适合继续按模块批次清理，而不是全局撒网式替换。
 - 当前应用层对外部路由包的直接依赖已经清空，只剩 `routerCompat.ts` 作为单点出口；下一阶段重点应转向 `useCompatNavigate`、`CompatSwitch`、`CompatRoutes` 和 `CompatRedirect` 的真实底座迁移。
 - `useCompatNavigate` 和 `CompatRedirect` 已不再直接把 v5 `history.push/replace` 与 `Route render` 透传给业务层，下一步可以继续推进 `CompatSwitch` / `CompatRoutes` 的真实底座替换。
+- 当前仍保留旧 Router 5 运行时语义的核心点，已经压缩到：
+  1. `frontend/src/app/routerCompat.ts`
+  2. `frontend/src/app/components/CompatRoute.tsx`
+  3. `frontend/src/app/components/CompatSwitch.tsx`
+  4. `frontend/src/app/components/CompatRoutes.tsx`
+  5. `frontend/src/app/hooks/useCompatNavigate.ts`
 - 剩余需要继续处理的重点不是“全局搜索更多旧 API”，而是：
   1. 让 `CompatSwitch` / `CompatRoute` / `CompatRoutes` 真实接管到 Router 6/7。
   2. 让 `useCompatNavigate` 从 `useHistory` 切到 `useNavigate`。

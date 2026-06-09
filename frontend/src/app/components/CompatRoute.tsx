@@ -1,7 +1,8 @@
 import { FC, ReactNode } from 'react';
 import { Route, type RouteProps } from 'app/routerCompat';
 
-interface CompatRouteProps extends Omit<RouteProps, 'children' | 'component'> {
+export interface CompatRouteProps
+  extends Omit<RouteProps, 'children' | 'component'> {
   element: ReactNode;
 }
 
