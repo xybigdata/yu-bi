@@ -18,7 +18,6 @@
 
 import { useSelector } from 'react-redux';
 import { getToken } from 'utils/auth';
-import { CompatRoute } from './components/CompatRoute';
 import { CompatRedirect } from './components/CompatRedirect';
 import { LazyMainPage } from './pages/MainPage/Loadable';
 import { selectSystemInfo } from './slice/selectors';
@@ -28,7 +27,7 @@ export function LoginAuthRoute() {
   const systemInfo = useSelector(selectSystemInfo);
 
   if (logged) {
-    return <CompatRoute path="/" element={<LazyMainPage />} />;
+    return <LazyMainPage />;
   }
 
   if (systemInfo) {

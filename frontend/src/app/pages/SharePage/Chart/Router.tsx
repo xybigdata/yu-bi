@@ -18,8 +18,6 @@
 
 import { ConfigProvider } from 'antd';
 import echartsDefaultTheme from 'app/assets/theme/echarts_default_theme.json';
-import { CompatRoute } from 'app/components/CompatRoute';
-import { CompatRoutes } from 'app/components/CompatRoutes';
 import { registerTheme } from 'echarts';
 import { PUBLIC_URL } from 'globalConstants';
 import { antdLocales } from 'locales/i18n';
@@ -38,9 +36,7 @@ export function Router() {
     <ConfigProvider locale={antdLocales[i18n.language]}>
       <BrowserRouter basename={PUBLIC_URL}>
         <HelmetPageTitle lang={i18n.language} />
-        <CompatRoutes>
-          <CompatRoute path="/shareChart/:token" element={<LazyShareChart />} />
-        </CompatRoutes>
+        <LazyShareChart />
         <GlobalStyles />
       </BrowserRouter>
     </ConfigProvider>

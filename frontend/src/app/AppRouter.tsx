@@ -88,7 +88,7 @@ export function AppRouter() {
             path="/authorization"
             element={<LazyAuthorizationPage />}
           />
-          <LoginAuthRoute />
+          <CompatRoute path="/" element={<LoginAuthRoute />} />
         </CompatRoutes>
         <GlobalStyles />
       </BrowserRouter>

@@ -360,6 +360,7 @@
 - React Router 预迁移第三十三批：新增内部 `routerCompatLegacy.ts`，把 `Route` / `Switch` / `NavLink` / `useHistory` 全部关回兼容层内部；公开的 `routerCompat.ts` 只再暴露 `BrowserRouter`、`Link`、`MemoryRouter`、`useLocation`、`useParams` 这些 Router 6 仍稳定存在的能力，为真正升级依赖时缩小公开 API 差异。
 - React Router 预迁移第三十四批：`CompatNavLink` 已彻底脱离底层 `NavLink`，改为 `Link + useLocation` 自行计算激活态；`routerCompatLegacy.ts` 因此不再需要保留 `NavLink`，Router 5 的链接级历史 API 已进一步从兼容层底座中清除。
 - React Router 预迁移第三十五批：成员、来源、调度、权限四类详情容器已从 `CompatRoute` 切到 `useParams` / `useLocation` 驱动的条件渲染；这些页面不再把详情区显示逻辑委托给 v5 `Route` 匹配，兼容层底座对 `Route` 的真实依赖面继续缩小。
+- React Router 预迁移第三十六批：`AppRouter` 中的 `LoginAuthRoute` 已回收为普通 `CompatRoute` 的 `element`，分享页三个 Router 和 Viz 看板编辑器入口也已去掉只承载单一路由的 `CompatRoutes` 包装；这些场景不再占用底层 `Switch`，兼容层对 `CompatRoutes` 的真实依赖进一步收敛到少数多分支主容器。
 
 验收门槛：
 - 全部路由可访问。
@@ -563,6 +564,7 @@
 - 公开 `routerCompat.ts` 已不再暴露 `Route` / `Switch` / `NavLink` / `useHistory`，这些 v5 旧能力只保留在兼容层内部的 `routerCompatLegacy.ts`。
 - `CompatNavLink` 已不再依赖底层 `NavLink`，当前兼容层内部剩余的 Router 5 旧能力已进一步收缩到 `Route` / `Switch` / `useHistory`。
 - 成员、来源、调度、权限这些“详情区条件显示”页面已不再依赖 `CompatRoute`，当前 `Route` 的主要残留压力已经收敛到主入口和少数真正需要互斥匹配的容器。
+- `CompatRoutes` 已从分享页 Router、Viz 看板编辑器入口和 `LoginAuthRoute` 的特殊子项场景中退出，当前 `Switch` 的主要残留压力已经收敛到主应用和少量真正需要多分支互斥的容器。
 - 当前仍保留旧 Router 5 运行时语义的核心点，已经压缩到：
   1. `frontend/src/app/routerCompatLegacy.ts`
   2. `frontend/src/app/components/CompatRoute.tsx`

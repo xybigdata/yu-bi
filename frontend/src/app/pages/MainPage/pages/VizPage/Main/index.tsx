@@ -1,7 +1,5 @@
 import { CloseOutlined } from '@ant-design/icons';
 import { Dropdown } from 'antd';
-import { CompatRoute } from 'app/components/CompatRoute';
-import { CompatRoutes } from 'app/components/CompatRoutes';
 import { EmptyFiller, TabPane, Tabs } from 'app/components';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -241,12 +239,9 @@ export function Main({ sliderVisible }: { sliderVisible: boolean }) {
       ))}
       {!tabs.length && <EmptyFiller title={t('empty')} />}
 
-      <CompatRoutes>
-        <CompatRoute
-          path="/organizations/:orgId/vizs/:vizId?/boardEditor"
-          element={vizId ? <BoardEditor boardId={vizId} /> : null}
-        />
-      </CompatRoutes>
+      {location.pathname.endsWith('/boardEditor') && vizId ? (
+        <BoardEditor boardId={vizId} />
+      ) : null}
     </Wrapper>
   );
 }
