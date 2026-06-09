@@ -38,8 +38,9 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import Reveal from 'reveal.js';
-import 'reveal.js/dist/reveal.css';
-import RevealZoom from 'reveal.js/plugin/zoom/plugin';
+import type { RevealApi } from 'reveal.js';
+import 'reveal.js/reveal.css';
+import RevealZoom from 'reveal.js/plugin/zoom';
 import styled from 'styled-components';
 import { LEVEL_20, SPACE_MD } from 'styles/StyleConstants';
 import { uuidv4 } from 'utils/utils';
@@ -74,7 +75,7 @@ export const StoryEditor: React.FC<{}> = memo(() => {
   const navigate = useCompatNavigate();
   const histState = navigate.location.state as any;
   const domId = useMemo(() => uuidv4(), []);
-  const revealRef = useRef<any>();
+  const revealRef = useRef<RevealApi | null>(null);
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const story = useSelector((state: { storyBoard: StoryBoardState }) =>
@@ -110,7 +111,7 @@ export const StoryEditor: React.FC<{}> = memo(() => {
   const onPageClick = useCallback(
     (index: number, pageId: string, multiple: boolean) => {
       if (!multiple) {
-        revealRef.current.slide(index);
+        revealRef.current?.slide(index);
       } else {
         dispatch(
           storyActions.changePageSelected({
@@ -174,11 +175,11 @@ export const StoryEditor: React.FC<{}> = memo(() => {
   }, [navigate, orgId, storyId]);
   useEffect(() => {
     if (sortedPages.length > 0) {
-      revealRef.current = new Reveal(document.getElementById(domId), {
+      revealRef.current = new Reveal(document.getElementById(domId)!, {
         hash: false,
         history: false,
         controls: false,
-        controlsLayout: 'none',
+        controlsLayout: 'bottom-right',
         slideNumber: 'c/t',
         controlsTutorial: false,
         progress: false,
@@ -188,7 +189,7 @@ export const StoryEditor: React.FC<{}> = memo(() => {
         margin: 0,
         minScale: 1,
         maxScale: 1,
-        autoSlide: null,
+        autoSlide: false,
         transition: 'convex',
         // backgroundTransition: 'fade',
         transitionSpeed: 'slow',
@@ -199,11 +200,12 @@ export const StoryEditor: React.FC<{}> = memo(() => {
         },
       });
       revealRef.current?.initialize();
-      if (revealRef.current) {
-        revealRef.current.addEventListener('slidechanged', changePage);
-      }
+      revealRef.current?.addEventListener('slidechanged', changePage);
+
       return () => {
-        revealRef.current.removeEventListener('slidechanged', changePage);
+        revealRef.current?.removeEventListener('slidechanged', changePage);
+        revealRef.current?.destroy();
+        revealRef.current = null;
       };
     }
 

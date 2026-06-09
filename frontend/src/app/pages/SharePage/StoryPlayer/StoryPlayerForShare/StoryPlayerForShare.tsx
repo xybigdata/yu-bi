@@ -30,8 +30,9 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import Reveal from 'reveal.js';
-import 'reveal.js/dist/reveal.css';
-import RevealZoom from 'reveal.js/plugin/zoom/plugin';
+import type { RevealApi } from 'reveal.js';
+import 'reveal.js/reveal.css';
+import RevealZoom from 'reveal.js/plugin/zoom';
 import styled from 'styled-components';
 import { LEVEL_20, WHITE } from 'styles/StyleConstants';
 import { uuidv4 } from 'utils/utils';
@@ -53,7 +54,7 @@ export const StoryPlayerForShare: React.FC<{
 }> = memo(({ storyBoard, shareToken }) => {
   const { id: storyId } = storyBoard;
   const domId = useMemo(() => uuidv4(), []);
-  const revealRef = useRef<any>();
+  const revealRef = useRef<RevealApi | null>(null);
   const dispatch = useAppDispatch();
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const fullRef: RefObject<HTMLDivElement> = useRef(null);
@@ -102,15 +103,15 @@ export const StoryPlayerForShare: React.FC<{
     if (storyBoard?.config?.autoPlay?.auto) {
       return storyBoard?.config?.autoPlay?.delay * 1000;
     }
-    return null;
+    return false;
   }, [storyBoard?.config?.autoPlay?.auto, storyBoard?.config?.autoPlay?.delay]);
   useEffect(() => {
     if (sortedPages.length > 0) {
-      revealRef.current = new Reveal(document.getElementById(domId), {
+      revealRef.current = new Reveal(document.getElementById(domId)!, {
         hash: false,
         history: false,
         controls: true,
-        controlsLayout: 'none',
+        controlsLayout: 'bottom-right',
         slideNumber: 'c/t',
         controlsTutorial: false,
         progress: false,
@@ -133,11 +134,12 @@ export const StoryPlayerForShare: React.FC<{
         },
       });
       revealRef.current?.initialize();
-      if (revealRef.current) {
-        revealRef.current.addEventListener('slidechanged', changePage);
-      }
+      revealRef.current?.addEventListener('slidechanged', changePage);
+
       return () => {
-        revealRef.current.removeEventListener('slidechanged', changePage);
+        revealRef.current?.removeEventListener('slidechanged', changePage);
+        revealRef.current?.destroy();
+        revealRef.current = null;
       };
     }
   }, [domId, changePage, sortedPages.length, autoSlide, dispatch]);
