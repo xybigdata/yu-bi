@@ -808,4 +808,10 @@
 - `security/src/main/java/datart/security/util/AESUtil.java` 已改为使用 Jackson 进行加密前序列化和解密后反序列化。
 - `server/src/main/java/datart/server/service/impl/ShareServiceImpl.java`、`server/src/main/java/datart/server/service/impl/VariableServiceImpl.java` 已将字符串数组/集合这类低风险 JSON 路径切到 Jackson。
 - `core/src/main/java/datart/core/data/provider/ExecuteParam.java`、`core/src/main/java/datart/core/data/provider/QueryScript.java` 已改为复用 `DataProvider.MAPPER` 生成 JSON 字符串和查询 key。
-- 这一步之后，`fastjson` 在后端仍主要残留于两类高风险面：`WebMvcConfig` 的 `FastJsonHttpMessageConverter`，以及 `JSONObject` / `JSONArray` 驱动的动态树模型处理，后续需要分批继续替换。
+- 这一步之后，`fastjson` 在后端仍主要残留于两类高风险面：`JSONObject` / `JSONArray` 驱动的动态树模型处理，以及带 `@JSONField` 注解的配置绑定路径，后续需要分批继续替换。
+
+### 并行治理：Web 层默认 JSON 输出回收至 Jackson
+
+- `server/src/main/java/datart/server/config/WebMvcConfig.java` 已删除 `FastJsonHttpMessageConverter` 注册逻辑，Web 层默认 JSON 输出重新回到 Spring Boot 3 的 Jackson 主链。
+- 为了保持原先 `SerializerFeature.WriteEnumUsingToString` 的关键语义，`WebMvcConfig` 中新增了 `Jackson2ObjectMapperBuilderCustomizer`，显式开启 `SerializationFeature.WRITE_ENUMS_USING_TO_STRING`。
+- `spring.jackson.date-format`、`time-zone` 和 `FAIL_ON_EMPTY_BEANS` 等现有配置继续由 `server/src/main/resources/application.yml` 生效。

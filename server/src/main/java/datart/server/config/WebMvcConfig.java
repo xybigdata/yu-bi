@@ -18,21 +18,19 @@
 
 package datart.server.config;
 
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.fastjson.support.config.FastJsonConfig;
-import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import datart.server.config.interceptor.BasicValidRequestInterceptor;
 import datart.server.config.interceptor.LoginInterceptor;
 import datart.server.controller.BaseController;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.util.List;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -63,16 +61,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
         return StringUtils.removeEnd(pathPrefix, "/");
     }
 
-    @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        FastJsonHttpMessageConverter fastConverter = new FastJsonHttpMessageConverter();
-        FastJsonConfig fastJsonConfig = new FastJsonConfig();
-        fastJsonConfig.setSerializerFeatures(SerializerFeature.QuoteFieldNames,
-                SerializerFeature.WriteEnumUsingToString,
-                SerializerFeature.WriteMapNullValue,
-                SerializerFeature.WriteDateUseDateFormat,
-                SerializerFeature.DisableCircularReferenceDetect);
-        fastConverter.setFastJsonConfig(fastJsonConfig);
-        converters.add(0, fastConverter);
+    @Bean
+    public Jackson2ObjectMapperBuilderCustomizer datartJacksonCustomizer() {
+        return (Jackson2ObjectMapperBuilder builder) ->
+                builder.featuresToEnable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
     }
 }
