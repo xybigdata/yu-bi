@@ -1079,6 +1079,24 @@
   - `npm test -- --runInBand --watchAll=false` 通过
   - `npm run build` 通过
 
+### 并行治理：收口侧边栏树节点里的 Ant Design 旧菜单 API
+
+- `View`、`Source`、`Schedule`、`Viz` 四个主业务侧边栏中的树节点/列表更多菜单，已从 `MenuListItem` + `Menu.Item` JSX 子节点模式切到 `Menu items` 数组模式，覆盖：
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/Sidebar/FolderTree.tsx`
+  - `frontend/src/app/pages/MainPage/pages/SourcePage/Sidebar/SourceList.tsx`
+  - `frontend/src/app/pages/MainPage/pages/SchedulePage/Sidebar/ScheduleList.tsx`
+  - `frontend/src/app/pages/MainPage/pages/VizPage/Sidebar/Folders/FolderTree.tsx`
+- 这一批复用了前一批在 `frontend/src/app/components/Popup/MenuListItem.tsx` 中补出的 `MenuItemContent`，保留现有 prefix icon、loading icon 和文案布局，不再继续依赖旧的 `Menu.Item` JSX 包装。
+- 保留语义：
+  - `info`、`saveAs`、`startAnalysis`、`addNewView`、`start`、`stop`、`execute`、`delete/archive` 等原有菜单动作保持不变
+  - `Popconfirm` 删除/归档确认逻辑保持不变
+  - 调度启动、停止、立即执行以及来源/调度删除中的 loading icon 保持不变
+- 这一步的价值是把主应用最常用的一组侧边栏更多菜单也收口到 `items` 数据模型，继续缩小 Ant Design 5 升级时 `Menu children -> items` 的散点存量。
+- 2026-06-10 验证：
+  - `npm run checkTs` 通过
+  - `npm test -- --runInBand --watchAll=false` 通过
+  - `npm run build` 通过
+
 ### 2026-06-10 全项目老旧技术栈复核结论
 
 这一轮不是只看版本号，而是按“是否仍在主维护线、是否已经被现代替代方案覆盖、是否值得继续在当前架构上扩展”三条标准重新复核。

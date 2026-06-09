@@ -22,8 +22,9 @@ import {
   LoadingOutlined,
   MoreOutlined,
 } from '@ant-design/icons';
-import { Menu, message, Popconfirm, TreeDataNode } from 'antd';
-import { MenuListItem, Popup, Tree, TreeTitle } from 'app/components';
+import { Menu, MenuProps, message, Popconfirm, TreeDataNode } from 'antd';
+import { Popup, Tree, TreeTitle } from 'app/components';
+import { MenuItemContent } from 'app/components/Popup/MenuListItem';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
@@ -170,6 +171,70 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
             path={path}
             level={PermissionLevels.Manage}
           >
+            {(() => {
+              const items: MenuProps['items'] = [
+                ...(isAuthorized
+                  ? [
+                      {
+                        key: 'info',
+                        label: (
+                          <MenuItemContent
+                            prefix={<EditOutlined className="icon" />}
+                          >
+                            {tg('button.info')}
+                          </MenuItemContent>
+                        ),
+                      },
+                    ]
+                  : []),
+                ...(isAuthorized && type !== 'FOLDER'
+                  ? [
+                      {
+                        key: 'addNewView',
+                        label: (
+                          <MenuItemContent
+                            prefix={<EditOutlined className="icon" />}
+                          >
+                            {t('creatView')}
+                          </MenuItemContent>
+                        ),
+                      },
+                    ]
+                  : []),
+                ...(isAuthorized
+                  ? [
+                      {
+                        key: 'delete',
+                        label: (
+                          <MenuItemContent
+                            prefix={
+                              deleteLoading ? (
+                                <LoadingOutlined className="icon" />
+                              ) : (
+                                <DeleteOutlined className="icon" />
+                              )
+                            }
+                          >
+                            <Popconfirm
+                              title={
+                                isFolder
+                                  ? tg('operation.deleteConfirm')
+                                  : tg('operation.archiveConfirm')
+                              }
+                              onConfirm={del(id, isFolder)}
+                            >
+                              {isFolder
+                                ? tg('button.delete')
+                                : tg('button.archive')}
+                            </Popconfirm>
+                          </MenuItemContent>
+                        ),
+                      },
+                    ]
+                  : []),
+              ];
+
+              return (
             <Popup
               trigger={['click']}
               placement="bottom"
@@ -178,55 +243,16 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
                   prefixCls="ant-dropdown-menu"
                   selectable={false}
                   onClick={moreMenuClick(node)}
-                >
-                  {isAuthorized && (
-                    <MenuListItem
-                      key="info"
-                      prefix={<EditOutlined className="icon" />}
-                    >
-                      {tg('button.info')}
-                    </MenuListItem>
-                  )}
-
-                  {isAuthorized && type !== 'FOLDER' && (
-                    <MenuListItem
-                      key="addNewView"
-                      prefix={<EditOutlined className="icon" />}
-                    >
-                      {t('creatView')}
-                    </MenuListItem>
-                  )}
-
-                  {isAuthorized && (
-                    <MenuListItem
-                      key="delete"
-                      prefix={
-                        deleteLoading ? (
-                          <LoadingOutlined className="icon" />
-                        ) : (
-                          <DeleteOutlined className="icon" />
-                        )
-                      }
-                    >
-                      <Popconfirm
-                        title={
-                          isFolder
-                            ? tg('operation.deleteConfirm')
-                            : tg('operation.archiveConfirm')
-                        }
-                        onConfirm={del(id, isFolder)}
-                      >
-                        {isFolder ? tg('button.delete') : tg('button.archive')}
-                      </Popconfirm>
-                    </MenuListItem>
-                  )}
-                </Menu>
+                  items={items}
+                />
               }
             >
               <span className="action" onClick={stopPPG}>
                 <MoreOutlined />
               </span>
             </Popup>
+              );
+            })()}
           </CascadeAccess>
         </TreeTitle>
       );

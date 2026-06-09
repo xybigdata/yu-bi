@@ -4,8 +4,9 @@ import {
   EditOutlined,
   MoreOutlined,
 } from '@ant-design/icons';
-import { Menu, message, Popconfirm } from 'antd';
-import { MenuListItem, Popup, Tree, TreeTitle } from 'app/components';
+import { Menu, MenuProps, message, Popconfirm } from 'antd';
+import { Popup, Tree, TreeTitle } from 'app/components';
+import { MenuItemContent } from 'app/components/Popup/MenuListItem';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import { CascadeAccess } from 'app/pages/MainPage/Access';
@@ -161,6 +162,56 @@ export function FolderTree({
             path={path}
             level={PermissionLevels.Manage}
           >
+            {(() => {
+              const items: MenuProps['items'] = [
+                {
+                  key: 'info',
+                  label: (
+                    <MenuItemContent
+                      prefix={<EditOutlined className="icon" />}
+                    >
+                      {tg('button.info')}
+                    </MenuItemContent>
+                  ),
+                },
+                ...(!isFolder
+                  ? [
+                      {
+                        key: 'saveAs',
+                        label: (
+                          <MenuItemContent
+                            prefix={<CopyFilled className="icon" />}
+                          >
+                            {tg('button.saveAs')}
+                          </MenuItemContent>
+                        ),
+                      },
+                    ]
+                  : []),
+                {
+                  key: 'delete',
+                  label: (
+                    <MenuItemContent
+                      prefix={<DeleteOutlined className="icon" />}
+                    >
+                      <Popconfirm
+                        title={`${
+                          relType === 'FOLDER'
+                            ? tg('operation.deleteConfirm')
+                            : tg('operation.archiveConfirm')
+                        }`}
+                        onConfirm={archiveViz(node)}
+                      >
+                        {relType === 'FOLDER'
+                          ? tg('button.delete')
+                          : tg('button.archive')}
+                      </Popconfirm>
+                    </MenuItemContent>
+                  ),
+                },
+              ];
+
+              return (
             <Popup
               trigger={['click']}
               placement="bottom"
@@ -169,47 +220,16 @@ export function FolderTree({
                   prefixCls="ant-dropdown-menu"
                   selectable={false}
                   onClick={moreMenuClick(node)}
-                >
-                  <MenuListItem
-                    key="info"
-                    prefix={<EditOutlined className="icon" />}
-                  >
-                    {tg('button.info')}
-                  </MenuListItem>
-
-                  {!isFolder && (
-                    <MenuListItem
-                      key="saveAs"
-                      prefix={<CopyFilled className="icon" />}
-                    >
-                      {tg('button.saveAs')}
-                    </MenuListItem>
-                  )}
-
-                  <MenuListItem
-                    key="delete"
-                    prefix={<DeleteOutlined className="icon" />}
-                  >
-                    <Popconfirm
-                      title={`${
-                        relType === 'FOLDER'
-                          ? tg('operation.deleteConfirm')
-                          : tg('operation.archiveConfirm')
-                      }`}
-                      onConfirm={archiveViz(node)}
-                    >
-                      {relType === 'FOLDER'
-                        ? tg('button.delete')
-                        : tg('button.archive')}
-                    </Popconfirm>
-                  </MenuListItem>
-                </Menu>
+                  items={items}
+                />
               }
             >
               <span className="action" onClick={stopPPG}>
                 <MoreOutlined />
               </span>
             </Popup>
+              );
+            })()}
           </CascadeAccess>
         </TreeTitle>
       );
