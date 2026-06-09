@@ -198,6 +198,13 @@
 
 目标：退出维护模式的 `moment`，统一到 AntD 5 兼容、按需引入、后续可持续升级的时间栈。
 
+当前阶段补充：
+
+- 仓库已新增统一时间适配入口 `frontend/src/app/utils/date.ts`，开始收口 `dayjs` 插件与 locale 初始化。
+- `frontend/src/locales/i18n.ts` 的时间 locale 初始化已从 `moment.locale(...)` 切到 `dayjs` 适配层。
+- `frontend/src/app/utils/time.ts`、`frontend/src/app/utils/chartHelper.ts` 以及部分只依赖“当前时间格式化”的调用点，已开始从 `moment` 迁到 `dayjs`。
+- 这一步仍然刻意不碰 DatePicker / RangePicker 值类型和表单状态，以便把时间工具层与控件层的风险拆开治理。
+
 - 目标替代方案
   - 默认目标：`moment -> dayjs`
   - 仅在出现复杂不可兼容场景时，再评估局部保留或改用 `date-fns`

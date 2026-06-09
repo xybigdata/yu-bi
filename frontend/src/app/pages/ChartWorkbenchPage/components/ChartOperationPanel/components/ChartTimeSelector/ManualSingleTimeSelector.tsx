@@ -20,9 +20,9 @@ import { Select, Space } from 'antd';
 import { TimeFilterValueCategory } from 'app/constants';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import { TimeFilterConditionValue } from 'app/types/ChartConfig';
+import { datartDayjs } from 'app/utils/date';
 import { formatTime } from 'app/utils/time';
 import { TIME_FORMATTER } from 'globalConstants';
-import moment from 'moment';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
 import ExactTimeSelector from './ExactTimeSelector';
@@ -45,7 +45,7 @@ const ManualSingleTimeSelector: FC<
   const handleTimeCategoryChange = type => {
     setType(type);
     if (type === TimeFilterValueCategory.Exact) {
-      onTimeChange?.(formatTime(moment(), TIME_FORMATTER));
+      onTimeChange?.(formatTime(datartDayjs(), TIME_FORMATTER));
     } else if (type === TimeFilterValueCategory.Relative) {
       onTimeChange?.({ unit: 'd', amount: 1, direction: '-' });
     } else {

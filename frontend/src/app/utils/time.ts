@@ -18,20 +18,25 @@
 
 import { DataViewFieldType } from 'app/constants';
 import { ChartDataRequestFilter } from 'app/types/ChartDataRequest';
+import { datartDayjs, DatartDayjs } from 'app/utils/date';
 import {
   FilterSqlOperator,
   RECOMMEND_TIME,
   TIME_FORMATTER,
 } from 'globalConstants';
-import moment, { Moment, unitOfTime } from 'moment';
+import { ManipulateType, OpUnitType } from 'dayjs';
 
 export function getTimeRange(
   amount?: [number, number],
   unit?,
 ): (unitTime, dateFormat?) => [string, string] {
-  return (unitOfTime, dateFormat?) => {
-    const startTime = moment().add(amount?.[0], unit).startOf(unitOfTime);
-    const endTime = moment().add(amount?.[1], unit).endOf(unitOfTime);
+  return (timeUnit, dateFormat?) => {
+    const startTime = datartDayjs()
+      .add(amount?.[0] || 0, unit)
+      .startOf(timeUnit as OpUnitType);
+    const endTime = datartDayjs()
+      .add(amount?.[1] || 0, unit)
+      .endOf(timeUnit as OpUnitType);
     return [
       startTime.format(dateFormat || TIME_FORMATTER),
       endTime.format(dateFormat || TIME_FORMATTER),
@@ -41,18 +46,26 @@ export function getTimeRange(
 
 export function getTime(
   amount?: number | string,
-  unit?: unitOfTime.DurationConstructor,
-): (unitTime, isStart?: boolean) => Moment {
-  return (unitOfTime: unitOfTime.StartOf, isStart?: boolean) => {
+  unit?: ManipulateType,
+): (unitTime, isStart?: boolean) => DatartDayjs {
+  return (timeUnit: OpUnitType, isStart?: boolean) => {
+    const amountValue = Number(amount ?? 0);
     if (!!isStart) {
-      return moment().add(amount, unit).startOf(unitOfTime);
+      return datartDayjs().add(amountValue, unit).startOf(timeUnit);
     }
-    return moment().add(amount, unit).add(1, unit).startOf(unitOfTime);
+    return datartDayjs()
+      .add(amountValue, unit)
+      .add(1, unit)
+      .startOf(timeUnit);
   };
 }
 
-export function formatTime(time: string | Moment, format?): string {
-  return moment(time).format(format || TIME_FORMATTER);
+export function formatTime(time: string | DatartDayjs, format?): string {
+  const dayValue = datartDayjs(time);
+  if (!dayValue.isValid()) {
+    return 'Invalid date';
+  }
+  return dayValue.format(format || TIME_FORMATTER);
 }
 
 export function recommendTimeRangeConverter(relativeTimeRange, dateFormat?) {

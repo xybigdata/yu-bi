@@ -22,13 +22,13 @@ import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import ChartFilterCondition, {
   ConditionBuilder,
 } from 'app/models/ChartFilterCondition';
+import { datartDayjs } from 'app/utils/date';
 import { formatTime } from 'app/utils/time';
 import {
   FilterSqlOperator,
   RECOMMEND_TIME,
   TIME_FORMATTER,
 } from 'globalConstants';
-import moment from 'moment';
 import {
   forwardRef,
   ForwardRefRenderFunction,
@@ -81,8 +81,8 @@ const DateConditionConfiguration: ForwardRefRenderFunction<
     } else if (conditionType === FilterConditionType.RangeTime) {
       const filterRow = new ConditionBuilder(condition)
         .setValue([
-          formatTime(moment(), TIME_FORMATTER),
-          formatTime(moment(), TIME_FORMATTER),
+          formatTime(datartDayjs(), TIME_FORMATTER),
+          formatTime(datartDayjs(), TIME_FORMATTER),
         ])
         .asRangeTime();
       onConditionChange?.(filterRow);
