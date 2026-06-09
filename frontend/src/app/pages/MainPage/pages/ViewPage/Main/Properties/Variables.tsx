@@ -29,6 +29,7 @@ import { monaco } from 'app/components/MonacoEditor';
 import { ListItem } from 'app/components';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { datartDayjs } from 'app/utils/date';
 import { getRoles } from 'app/pages/MainPage/pages/MemberPage/slice/thunks';
 import {
   VariableScopes,
@@ -45,7 +46,6 @@ import { VariableForm } from 'app/pages/MainPage/pages/VariablePage/VariableForm
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import classnames from 'classnames';
 import { CommonFormTypes, TIME_FORMATTER } from 'globalConstants';
-import { Moment } from 'moment';
 import {
   memo,
   ReactElement,
@@ -183,7 +183,7 @@ export const Variables = memo(() => {
       let defaultValue: any = values.defaultValue;
       if (values.valueType === VariableValueTypes.Date && !values.expression) {
         defaultValue = values.defaultValue.map(d =>
-          (d as Moment).format(values.dateFormat),
+          datartDayjs(d as any).format(values.dateFormat),
         );
       }
 
@@ -246,7 +246,7 @@ export const Variables = memo(() => {
             value: JSON.stringify(
               cr.value &&
                 (editingVariable?.valueType === VariableValueTypes.Date
-                  ? cr.value.map(d => (d as Moment).format(dateFormat))
+                  ? cr.value.map(d => datartDayjs(d as any).format(dateFormat))
                   : cr.value),
             ),
           };
