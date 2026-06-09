@@ -175,9 +175,11 @@
   - 仓库已新增统一健康检查脚本 `scripts/check-demo-health.sh`，直接消费 `mvn package` 产出的安装包，使用 demo profile 启动 `datart.DatartServerApplication` 并轮询 `GET /api/v1/sys/info`。
   - CI 已接入 `bash ./scripts/check-demo-health.sh`，把“编译通过”扩展到“服务可启动且系统信息接口可返回成功”。
   - Workflow 已显式声明 Temurin JDK `21`，并启用 npm / Maven 缓存。
+  - `Dockerfile` 已改为直接消费 `mvn package` 产出的 `datart-server-*-install.zip`，不再手工复制 `bin/`、`config/`、`lib/`、`static/` 目录。
+  - `Dockerfile` 启动参数已与当前 JDK 21 运行事实对齐，补入 `--add-opens=java.base/java.lang=ALL-UNNAMED`。
 - 仍未完成
-  - Dockerfile 仍直接消费仓库内 `bin/`、`config/`、`lib/`、`static/` 目录，尚未切到“由统一构建链生成再打包”的闭环模式。
   - `mvn test -pl data-providers/jdbc-data-provider -am` 这种全量上游联动测试当前还不适合作为 CI 默认命令；本机复核显示它会先触发 `core` 的 `POIUtilsTest`，并在当前 JDK 21 环境下出现 surefire fork crash，需要后续单独收口该测试稳定性。
+  - 当前环境未提供 Docker CLI，尚未做镜像级构建实测；现阶段证据来自安装包结构、Dockerfile 静态复核和安装包健康检查链路。
 
 ### Phase B：Ant Design 5 主升级
 
@@ -308,22 +310,18 @@
 
 ### 当前差距
 
-1. GitHub Actions 仍停留在旧 Node 基线
-   - 当前 `.github/workflows/dev-ut-stage.js.yml` 仍使用 `node-version: [14.x, 16.x]`。
-   - 这与当前前端 `package.json` 已声明的 `node >=22`、`npm >=11` 不一致，也无法证明 Node 26 下的真实兼容性。
+1. CI 与安装包健康检查已基本对齐真实基线
+   - 当前 `.github/workflows/dev-ut-stage.js.yml` 已统一到 `node-version: [26.x]`，并显式声明 Temurin JDK 21。
+   - workflow 已覆盖前端 `checkTs`、`build:task`、`build`、`test:ci`、stylelint，后端 `mvn -pl server -am -DskipTests package`、JDBC provider 定向测试，以及启动后的 `/api/v1/sys/info` 健康检查。
 
-2. CI 只覆盖前端构建与测试，没有覆盖后端现代化主链
-   - 当前 workflow 仅执行前端 `npm ci`、`build`、`test:ci`、stylelint。
-   - 还没有统一纳入：
-     - `npm run checkTs`
-     - `npm run build:task`
-     - `mvn -pl server -am -DskipTests compile`
-     - `mvn test -pl data-providers/jdbc-data-provider -am`
-     - 启动后的 `/api/v1/sys/info` 健康验证
+2. JDBC provider 全量上游联动测试仍待专项收口
+   - `mvn test -pl data-providers/jdbc-data-provider -am` 当前会先触发 `core` 的 `POIUtilsTest`，并在本机 JDK 21 环境下出现 surefire fork crash。
+   - 当前已先用定向测试保证 JDBC / SQL 主链验证，但这还不是最终形态。
 
-3. Docker 运行时虽已切到 JDK 21，但还未证明与当前构建链一致
-   - `Dockerfile` 运行时已经使用 `eclipse-temurin:21-jre`。
-   - 但 Dockerfile 仍依赖外部预先准备好的 `bin/`、`config/`、`lib/`、`static/` 目录复制，尚未把“如何由当前 Maven/Vite 构建生成这些产物”闭环写入统一工程化验证链。
+3. Docker 与发布包已切到同一套产物链，但镜像级实测还缺一环
+   - `Dockerfile` 已改为直接消费 `mvn package` 生成的安装包，而不是额外手工准备目录。
+   - 运行参数也已与当前 JDK 21 真实启动要求对齐。
+   - 但当前环境没有 Docker CLI，尚未完成镜像 build/run 的最终实测。
 
 ### 收敛策略
 
@@ -338,9 +336,9 @@
    - 必要时增加一个 share 入口或静态资源检查。
 
 3. 最后闭环 Docker / 发布包一致性
-   - 明确发布包由哪个 Maven phase 生成。
-   - 让 Docker 镜像消费同一套发布产物，而不是额外的人手工准备目录。
-   - 验证发布包与 Docker 镜像启动参数一致。
+   - 已明确发布包由 `mvn -pl server -am -DskipTests package` 生成。
+   - 已让 Docker 镜像消费同一套安装包产物。
+   - 剩余动作是补镜像级 build/run 实测，验证容器启动参数与安装包启动参数完全一致。
 
 ## 升级依赖矩阵
 

@@ -1,0 +1,10 @@
+.git
+.github
+.tmp
+.agents
+.codex
+frontend/node_modules
+frontend/build
+**/target
+node_modules
+scripts
