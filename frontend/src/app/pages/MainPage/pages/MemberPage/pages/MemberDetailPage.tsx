@@ -25,7 +25,7 @@ import { selectSystemInfo } from 'app/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { BORDER_RADIUS, SPACE_LG } from 'styles/StyleConstants';
 import { getPasswordValidator } from 'utils/validators';
@@ -67,9 +67,7 @@ export function MemberDetailPage() {
   const roles = useSelector(selectRoles);
   const roleListLoading = useSelector(selectRoleListLoading);
   const grantLoading = useSelector(selectGrantOwnerLoading);
-  const {
-    params: { memberId },
-  } = useRouteMatch<{ memberId: string }>();
+  const { memberId } = useParams<{ memberId: string }>();
   const [form] = Form.useForm();
   const isPlatformMode =
     systemInfo?.tenantManagementMode === TenantManagementMode.Platform;

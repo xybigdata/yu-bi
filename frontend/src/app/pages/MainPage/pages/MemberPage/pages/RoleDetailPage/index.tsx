@@ -25,7 +25,7 @@ import debounce from 'debounce-promise';
 import { CommonFormTypes, DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { BORDER_RADIUS, SPACE_LG, SPACE_MD } from 'styles/StyleConstants';
 import { selectOrgId } from '../../../../slice/selectors';
@@ -62,8 +62,7 @@ export function RoleDetailPage() {
   const saveRoleLoading = useSelector(selectSaveRoleLoading);
   const t = useI18NPrefix('member.roleDetail');
   const tg = useI18NPrefix('global');
-  const { params } = useRouteMatch<{ roleId: string }>();
-  const { roleId } = params;
+  const { roleId } = useParams<{ roleId: string }>();
   const [form] = Form.useForm<Pick<Role, 'name' | 'description'>>();
 
   const resetForm = useCallback(() => {

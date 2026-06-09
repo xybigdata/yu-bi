@@ -32,7 +32,7 @@ import {
   useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { SPACE_MD } from 'styles/StyleConstants';
 import { selectOrgId } from '../../../slice/selectors';
@@ -48,15 +48,13 @@ export const MemberList = memo(() => {
   const [inviteFormVisible, setInviteFormVisible] = useState(false);
   const dispatch = useDispatch();
   const history = useHistory();
+  const location = useLocation();
   const systemInfo = useSelector(selectSystemInfo);
   const orgId = useSelector(selectOrgId);
   const list = useSelector(selectMembers);
   const listLoading = useSelector(selectMemberListLoading);
   const inviteLoading = useSelector(selectInviteMemberLoading);
-  const matchRoleDetail = useRouteMatch<{ memberId: string }>(
-    '/organizations/:orgId/members/:memberId',
-  );
-  const memberId = matchRoleDetail?.params.memberId;
+  const { memberId } = useParams<{ memberId?: string }>();
   const t = useI18NPrefix('member.sidebar');
 
   const { filteredData, debouncedSearch } = useDebouncedSearch(
@@ -156,6 +154,7 @@ export const MemberList = memo(() => {
     }),
     [systemInfo, showInviteForm, toAdd, debouncedSearch, t],
   );
+  const currentPath = location.pathname;
   return (
     <Wrapper>
       <ListTitle {...titleProps} />
@@ -165,7 +164,10 @@ export const MemberList = memo(() => {
           loading={listLoading && { indicator: <LoadingOutlined /> }}
           renderItem={({ id, name, email, username, avatar }) => (
             <ListItem
-              selected={memberId === id}
+              selected={
+                currentPath.startsWith(`/organizations/${orgId}/members`) &&
+                memberId === id
+              }
               withAvatar
               onClick={toDetail(id)}
             >

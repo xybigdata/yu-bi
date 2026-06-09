@@ -23,7 +23,7 @@ import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { memo, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { selectOrgId } from '../../../slice/selectors';
 import { selectRoleListLoading, selectRoles } from '../slice/selectors';
@@ -32,13 +32,11 @@ import { getRoles } from '../slice/thunks';
 export const RoleList = memo(() => {
   const dispatch = useDispatch();
   const history = useHistory();
+  const location = useLocation();
   const list = useSelector(selectRoles);
   const listLoading = useSelector(selectRoleListLoading);
   const orgId = useSelector(selectOrgId);
-  const matchRoleDetail = useRouteMatch<{ roleId: string }>(
-    '/organizations/:orgId/roles/:roleId',
-  );
-  const roleId = matchRoleDetail?.params.roleId;
+  const { roleId } = useParams<{ roleId?: string }>();
   const t = useI18NPrefix('member.sidebar');
 
   const { filteredData, debouncedSearch } = useDebouncedSearch(
@@ -75,6 +73,7 @@ export const RoleList = memo(() => {
     }),
     [toAdd, debouncedSearch, t],
   );
+  const currentPath = location.pathname;
 
   return (
     <Wrapper>
@@ -84,7 +83,13 @@ export const RoleList = memo(() => {
           dataSource={filteredData}
           loading={listLoading && { indicator: <LoadingOutlined /> }}
           renderItem={({ id, name, description }) => (
-            <ListItem selected={roleId === id} onClick={toDetail(id)}>
+            <ListItem
+              selected={
+                currentPath.startsWith(`/organizations/${orgId}/roles`) &&
+                roleId === id
+              }
+              onClick={toDetail(id)}
+            >
               <List.Item.Meta title={name} description={description || '-'} />
             </ListItem>
           )}

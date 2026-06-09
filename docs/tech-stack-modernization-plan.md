@@ -224,6 +224,8 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 - React Router 预迁移第四批：`VizPage/Main` 的看板编辑路由已移除 `Route render=`，并将 `vizId` 读取从 `useRouteMatch` 切到 `useParams`；`frontend/src/app` 下 React Router 旧路由声明热点已收敛到 `Redirect` 与 `useHistory` 为主。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
+- React Router 预迁移第五批：成员页详情与侧边栏列表中的 `memberId` / `roleId` 读取已从 `useRouteMatch` 迁到 `useParams`，并结合 `useLocation().pathname` 保留成员与角色列表的选中态判断逻辑。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 
 验收门槛：
 - 全部路由可访问。
