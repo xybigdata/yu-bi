@@ -17,7 +17,7 @@
  */
 
 import { SelectOutlined } from '@ant-design/icons';
-import { Button, Dropdown, Menu, Modal, Row } from 'antd';
+import { Button, Dropdown, Menu, MenuProps, Modal, Row } from 'antd';
 import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
 import debounce from 'lodash/debounce';
 import { DeltaStatic } from 'quill';
@@ -56,8 +56,6 @@ Quill.register(size, true);
 const font = Quill.import('attributors/style/font');
 font.whitelist = FONT_FAMILIES.map(font => font.value);
 Quill.register(font, true);
-
-const MenuItem = Menu.Item;
 
 const ChartRichTextAdapter: FC<{
   dataList: Array<{ id: string | undefined; name: string; value: string }>;
@@ -250,22 +248,22 @@ const ChartRichTextAdapter: FC<{
       [quillEditRef],
     );
 
-    const fieldItems = useMemo(() => {
-      return dataList?.length ? (
-        <Menu>
-          {dataList.map(fieldName => (
-            <MenuItem key={fieldName.name}>
+    const fieldItems = useMemo<MenuProps['items']>(() => {
+      return dataList?.length
+        ? dataList.map(fieldName => ({
+            key: fieldName.name,
+            label: (
               <a onClick={selectField(fieldName)} href="#javascript;">
                 {fieldName.name}
               </a>
-            </MenuItem>
-          ))}
-        </Menu>
-      ) : (
-        <Menu>
-          <MenuItem key="nodata">{t?.('common.noData')}</MenuItem>
-        </Menu>
-      );
+            ),
+          }))
+        : [
+            {
+              key: 'nodata',
+              label: t?.('common.noData'),
+            },
+          ];
     }, [dataList, selectField, t]);
 
     const toolbar = useMemo(
@@ -275,7 +273,7 @@ const ChartRichTextAdapter: FC<{
           extendNodes: {
             4: (
               <Dropdown
-                dropdownRender={() => fieldItems}
+                dropdownRender={() => <Menu items={fieldItems} />}
                 trigger={['click']}
                 key="ql-selectLink"
               >
