@@ -19,8 +19,11 @@
 import { InputNumber, Select, Space } from 'antd';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import { TimeFilterConditionValue } from 'app/types/ChartConfig';
-import { TIME_DIRECTION, TIME_UNIT_OPTIONS } from 'globalConstants';
-import { unitOfTime } from 'moment';
+import {
+  RelativeTimeUnit,
+  TIME_DIRECTION,
+  TIME_UNIT_OPTIONS,
+} from 'globalConstants';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -32,7 +35,7 @@ const RelativeTimeSelector: FC<
 > = memo(({ time, i18nPrefix, onChange }) => {
   const t = useI18NPrefix(i18nPrefix);
   const [amount, setAmount] = useState(() => (time as any)?.amount || 1);
-  const [unit, setUnit] = useState<unitOfTime.DurationConstructor>(
+  const [unit, setUnit] = useState<RelativeTimeUnit>(
     () => (time as any)?.unit || 'd',
   );
   const [direction, setDirection] = useState(
@@ -40,7 +43,7 @@ const RelativeTimeSelector: FC<
   );
 
   const handleTimeChange = (
-    unit: unitOfTime.DurationConstructor,
+    unit: RelativeTimeUnit,
     amount: number,
     direction: string,
   ) => {
@@ -51,7 +54,7 @@ const RelativeTimeSelector: FC<
     });
   };
 
-  const handleUnitChange = (newUnit: unitOfTime.DurationConstructor) => {
+  const handleUnitChange = (newUnit: RelativeTimeUnit) => {
     setUnit(newUnit);
     handleTimeChange(newUnit, amount, direction);
   };

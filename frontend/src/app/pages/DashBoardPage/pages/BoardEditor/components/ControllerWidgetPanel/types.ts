@@ -5,9 +5,9 @@ import {
   ValueOptionType,
 } from 'app/pages/DashBoardPage/constants';
 import { RelationFilterValue } from 'app/types/ChartConfig';
-import { FilterSqlOperator } from 'globalConstants';
+import { FilterSqlOperator, RelativeTimeUnit } from 'globalConstants';
 import i18next from 'i18next';
-import { Moment, unitOfTime } from 'moment';
+import { Moment } from 'moment';
 import { VariableValueTypes } from '../../../../../MainPage/pages/VariablePage/constants';
 
 export interface ControllerVisibility {
@@ -100,6 +100,6 @@ export interface ControllerDateType {
 
 export interface RelativeDate {
   amount: number;
-  unit: unitOfTime.DurationConstructor;
+  unit: RelativeTimeUnit;
   direction: '-' | '+' | '+0';
 }

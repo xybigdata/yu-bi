@@ -134,6 +134,8 @@ export const CHART_DRAG_ELEMENT_TYPE = {
   DATASET_COLUMN_GROUP: 'dataset_column_group',
 };
 
+export type RelativeTimeUnit = 's' | 'm' | 'h' | 'd' | 'W' | 'M' | 'y' | 'Q';
+
 export const TIME_UNIT_OPTIONS = [
   { name: 'seconds', value: 's' },
   { name: 'minutes', value: 'm' },
