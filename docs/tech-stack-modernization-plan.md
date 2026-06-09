@@ -747,6 +747,12 @@
    - 风险判断：这类升级适合拆成多个小批次，不应与 JSON/JWT/浏览器自动化迁移混做。
 
 10. H2 1.4.200 demo 库
-    - 现状：仅用于 demo/内置样例，但版本过旧。
-    - 更现代替代：H2 2.x，或测试环境改用 Testcontainers。
-    - 风险判断：需要同步准备可读的新 demo 数据或迁移脚本，不能只升版本号。
+   - 现状：仅用于 demo/内置样例，但版本过旧。
+   - 更现代替代：H2 2.x，或测试环境改用 Testcontainers。
+   - 风险判断：需要同步准备可读的新 demo 数据或迁移脚本，不能只升版本号。
+
+### React Router 预迁移第三十九批之外的并行治理：浏览器自动化依赖收口
+
+- `core` 与 `server` 已删除未被实际代码使用的 `phantomjsdriver` 依赖，避免继续保留已退出主流维护链的历史驱动。
+- `selenium-java` 已从两个模块各自声明的 3.x 版本统一到父 POM 的 `${selenium.version}`，当前收敛为 `4.31.0`。
+- 现有截图代码 `WebUtils` 只使用 `ChromeDriver` / `RemoteWebDriver`，没有任何 PhantomJS 专属分支，因此这一步属于依赖树现代化，不改变当前截图运行语义。
