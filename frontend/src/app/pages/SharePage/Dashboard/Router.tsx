@@ -18,11 +18,12 @@
 
 import { ConfigProvider } from 'antd';
 import echartsDefaultTheme from 'app/assets/theme/echarts_default_theme.json';
+import { CompatSwitch } from 'app/components/CompatSwitch';
 import { registerTheme } from 'echarts';
 import { PUBLIC_URL } from 'globalConstants';
 import { antdLocales } from 'locales/i18n';
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Route } from 'react-router-dom';
 import { GlobalStyles } from 'styles/globalStyles';
 import HelmetPageTitle from '../components/HelmetPageTitle';
 import { LazyShareDashboard } from './Loadable';
@@ -36,11 +37,11 @@ export function Router() {
     <ConfigProvider locale={antdLocales[i18n.language]}>
       <BrowserRouter basename={PUBLIC_URL}>
         <HelmetPageTitle lang={i18n.language} />
-        <Switch>
+        <CompatSwitch>
           <Route path="/shareDashboard/:token">
             <LazyShareDashboard />
           </Route>
-        </Switch>
+        </CompatSwitch>
         <GlobalStyles />
       </BrowserRouter>
     </ConfigProvider>

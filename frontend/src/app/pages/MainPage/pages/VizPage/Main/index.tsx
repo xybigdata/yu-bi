@@ -1,5 +1,6 @@
 import { CloseOutlined } from '@ant-design/icons';
 import { Dropdown } from 'antd';
+import { CompatSwitch } from 'app/components/CompatSwitch';
 import { EmptyFiller, TabPane, Tabs } from 'app/components';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -10,7 +11,6 @@ import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   Route,
-  Switch,
   useLocation,
   useParams,
 } from 'react-router-dom';
@@ -244,11 +244,11 @@ export function Main({ sliderVisible }: { sliderVisible: boolean }) {
       ))}
       {!tabs.length && <EmptyFiller title={t('empty')} />}
 
-      <Switch>
+      <CompatSwitch>
         <Route path="/organizations/:orgId/vizs/:vizId?/boardEditor">
           {vizId && <BoardEditor boardId={vizId} />}
         </Route>
-      </Switch>
+      </CompatSwitch>
     </Wrapper>
   );
 }

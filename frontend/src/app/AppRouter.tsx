@@ -18,6 +18,7 @@
 
 import { ConfigProvider, message } from 'antd';
 import echartsDefaultTheme from 'app/assets/theme/echarts_default_theme.json';
+import { CompatSwitch } from 'app/components/CompatSwitch';
 import { registerTheme } from 'echarts';
 import { PUBLIC_URL, StorageKeys } from 'globalConstants';
 import { antdLocales } from 'locales/i18n';
@@ -25,7 +26,7 @@ import { useEffect, useLayoutEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { BrowserRouter, Route } from 'react-router-dom';
 import { GlobalStyles } from 'styles/globalStyles';
 import { getToken } from 'utils/auth';
 import useI18NPrefix from './hooks/useI18NPrefix';
@@ -73,7 +74,7 @@ export function AppRouter() {
         >
           <meta name="description" content="Data Art" />
         </Helmet>
-        <Switch>
+        <CompatSwitch>
           <Route path="/setup">
             <LazySetupPage />
           </Route>
@@ -93,7 +94,7 @@ export function AppRouter() {
             <LazyAuthorizationPage />
           </Route>
           <LoginAuthRoute />
-        </Switch>
+        </CompatSwitch>
         <GlobalStyles />
       </BrowserRouter>
     </ConfigProvider>
