@@ -7,12 +7,12 @@
 - Java 运行时：JDK 21。
 - 后端主框架：Spring Boot 3.5.12，Spring Cloud 2025.0.1。
 - 构建工具：Maven，`maven-compiler-plugin` 3.14.1，`maven-assembly-plugin` 3.8.0，`exec-maven-plugin` 3.6.3。
-- 前端运行时：本机 Node 26 可启动，CRA5/Webpack5 已不再依赖 `NODE_OPTIONS=--openssl-legacy-provider`。
-- 前端主框架：React 17、React Router 5、Ant Design 4、CRACO 7、TypeScript 4.5。
+- 前端运行时：本机 Node 26 可启动，默认开发和生产构建已切换到 Vite 5。
+- 前端主框架：React 17、React Router 5、Ant Design 4、TypeScript 4.5；CRACO 7/CRA5 仅作为回退脚本保留。
 - 已验证基线：
   - `npm run checkTs` 通过。
   - `npm run build:task` 通过。
-  - `npm run build` 通过。
+  - `npm run build` 通过，默认使用 Vite 输出 `frontend/build`。
   - `mvn test -pl data-providers/jdbc-data-provider -am` 通过。
   - `GET /api/v1/sys/info` 返回 200。
   - `http://127.0.0.1:3001` 返回 200，`/api/v1/plugins/custom/charts` 返回成功。
@@ -96,27 +96,29 @@
 
 已完成：
 - 新增并行 Vite 5 构建链：`dev:vite`、`build:vite`。
+- 默认 `start`、`build` 已切换到 Vite；保留 `start:cra`、`build:cra` 作为 CRA5 回退脚本。
 - 新增 Vite 多页面 HTML 入口：`index.html`、`shareChart.html`、`shareDashboard.html`、`shareStoryPlayer.html`。
 - 迁移 Vite dev proxy 和 custom chart plugins middleware。
 - 适配 CRA 兼容层：`process.env.NODE_ENV`、`process.env.PUBLIC_URL`、`module.hot`/`import.meta.hot`、`styled-components/macro`、SVG `ReactComponent` 导入、Ant Design Less 的 `~` import。
 - 消除 Vite/Rollup 对 `app/components/index.tsx` barrel 循环 re-export 的分包警告。
-- 保持 CRA5 的 `start`/`build` 作为默认主构建，Vite 先以并行脚本验证。
 - Vite 配置已改为 `.mts`，消除 CJS Node API 弃用警告。
+- Vite 默认输出目录已切换为 `frontend/build`，兼容后端 Maven `package` 阶段的静态资源复制路径。
 
 风险：
 - `process.env.PUBLIC_URL`、`BrowserRouter basename`、资源路径可能需要统一处理。
-- CRA 的 Jest 配置不能直接复用。
+- CRA 的 Jest 配置仍暂时通过 CRACO 保留，后续测试栈迁移时需要替换。
 - Vite 产物仍有大 chunk 提示，替换默认构建前需要继续优化分包和动态加载策略。
 
 验收门槛：
-- `npm run dev` 成功。
-- `npm run build` 生成可被后端托管的 `frontend/build` 或等价产物。
-- `npm run build:task` 生成 `frontend/build/task/index.js` 或更新 Maven 复制路径。
+- `npm start` 成功，默认启动 Vite dev server。
+- `npm run build` 生成可被后端托管的 `frontend/build`。
+- `npm run build:task` 生成 `frontend/build/task/index.js`。
 - 端到端访问后端托管静态资源成功。
 
 当前并行验收：
-- `npm run build:vite` 成功，产出 `build-vite/index.html` 和三个 share HTML。
-- `npm run dev:vite` 成功，首页 200，`/api/v1/plugins/custom/charts` 返回成功，`/shareChart.html` 返回 200。
+- `npm run build:all` 成功，产出 `build/index.html`、三个 share HTML 和 `build/task/index.js`。
+- `npm start` 成功，首页 200，`/api/v1/plugins/custom/charts` 返回成功，`/shareChart/test-token` 返回 share chart 入口。
+- `npm run build:cra` 仍可成功，用于短期回退和差异对比。
 
 ### 阶段 3：React 17 升级到 React 18
 
@@ -238,6 +240,7 @@
 
 阶段 1 已完成，下一步优先处理阶段 2 的迁出 CRA 预研和准备工作：
 
-1. 对比 CRA5 与 Vite 产物静态资源路径、动态主题、Monaco worker 和 share 页面运行时行为。
-2. 优化 Vite 大 chunk 分包策略，避免替换默认构建后首屏包体积明显回退。
-3. 确认后端 Maven `package` 阶段如何接入 Vite 默认产物，再替换 `start/build`。
+1. 对比 Vite 产物的动态主题、Monaco worker 和主要页面运行时行为。
+2. 优化 Vite 大 chunk 分包策略，避免首屏包体积明显回退。
+3. 运行 Maven `package` 路径验证后端发布包确实复制 Vite 产物和 parser task。
+4. 确认测试栈迁移方案，再逐步移除 CRA/CRACO。
