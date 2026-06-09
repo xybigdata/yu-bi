@@ -406,7 +406,7 @@
 当前 review 结论：
 - `Selenium 3 + PhantomJSDriver` 是当前后端最老旧、风险最高的自动化组合。PhantomJS 已停止活跃维护，现代替代应优先考虑 `Playwright`，如必须保留 JVM 内集成则退而求其次迁到 `Selenium 4 + Chromium WebDriver`。
 - `fastjson 1.2.x` 仍在多个模块承担 JSON 解析、HTTP message converter 和配置反序列化，属于历史包袱。对 Spring Boot 3 项目，更现代且收敛的方向是统一到 `Jackson`；如果必须保留阿里系 API，则至少迁到 `fastjson2`，但不建议继续双栈长期共存。
-- JWT 目前同时存在 `jjwt 0.7.0` 和 `java-jwt 3.7.0` 两套老版本实现，维护成本高且安全面分散。建议统一到单一现代库，优先 `jjwt 0.12+`，也可评估是否完全交给 Spring Security OAuth2/JOSE 能力。
+- JWT 主链当前运行时仍基于 `jjwt 0.7.0`，历史上还残留过未使用的 `java-jwt 3.7.0` 依赖。建议继续统一到单一现代库，优先评估升级到 `jjwt 0.12+`，也可评估是否完全交给 Spring Security OAuth2/JOSE 能力。
 - `Apache HttpClient 4.5.x` 与 `OkHttp` 并存，HTTP 客户端重复。JDK 21 下更现代的方向是统一到 `java.net.http.HttpClient` 或只保留一套活跃客户端；若短期兼容成本最低，可先升级到 `HttpClient 5` 并逐步收口。
 - `commons-lang 2.6`、`commons-io 1.3.1`、`guava 21.0`、`poi-ooxml 5.0.0`、`commons-csv 1.8` 都明显偏旧，其中 `commons-lang 2` 和 `commons-io 1.x` 优先级更高，因为现代代码大多已可用 `commons-lang3`、`commons-io 2.x` 或 JDK 标准库替换。
 - `H2 1.4.200` 仍适合作为兼容 demo 库，但不应视作长期现代化终态。若继续维护 demo / 测试数据，应补一套可在 `H2 2.x` 下运行的数据脚本或改为容器化测试数据库。
@@ -847,6 +847,12 @@
 
 - `core/pom.xml` 已删除 `com.alibaba:fastjson:1.2.83` 直接依赖。
 - 2026-06-09 复核：后端生产代码检索 `fastjson` 结果为空，当前仅剩测试代码中的 `org.json` 使用，不再有生产主链的 `fastjson` 依赖入口。
+
+### 并行治理：收口 JWT 双栈中的未使用依赖
+
+- `security/pom.xml` 已删除未使用的 `com.auth0:java-jwt:3.7.0` 依赖。
+- 2026-06-09 复核：当前仓库的 JWT 主链调用均来自 `security/src/main/java/datart/security/util/JwtUtils.java` 与 `security/src/main/java/datart/security/util/JwkUtils.java`，运行时实际仍基于 `io.jsonwebtoken:jjwt:0.7.0`。
+- 这一步先完成“去冗余”，后续仍需单独把 `jjwt 0.7.0` 升级到现代版本，并处理其 API 变更。
 
 ### 并行治理：清理 commons-lang 2 与直连 commons-io 1.x 使用点
 
