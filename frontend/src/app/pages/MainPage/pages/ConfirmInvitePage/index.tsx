@@ -18,24 +18,24 @@
 
 import { message } from 'antd';
 import { EmptyFiller } from 'app/components/EmptyFiller';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useCallback, useEffect } from 'react';
-import { useHistory } from 'react-router';
 import styled from 'styled-components';
 import { confirmInvite } from './service';
 
 export const ConfirmInvitePage = () => {
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const t = useI18NPrefix('confirmInvite');
 
   const onConfirm = useCallback(
     token => {
       confirmInvite(token).then(() => {
         message.success(t('join'));
-        history.replace('/');
+        navigate.replace('/');
       });
     },
-    [history, t],
+    [navigate, t],
   );
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);

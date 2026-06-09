@@ -232,6 +232,8 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 - React Router 预迁移第八批：新增 `useCompatNavigate` 兼容 hook，认证、登录、注册、激活和重置密码等固定跳转页面已不再直接依赖 `useHistory`，为后续切换到 `useNavigate` 预留统一替换点。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
+- React Router 预迁移第九批：`OrganizationForm`、组织删除确认、邀请确认页和 `SchedulePage` 的详情跳转 hook 已切到 `useCompatNavigate`，同时补齐兼容 hook 的稳定引用，避免作为 hook 依赖时触发重复副作用。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 
 验收门槛：
 - 全部路由可访问。

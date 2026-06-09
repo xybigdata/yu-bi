@@ -1,4 +1,5 @@
 import { Button, Form, Input, message, Modal, ModalProps } from 'antd';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
   selectCurrentOrganization,
@@ -6,13 +7,12 @@ import {
 } from 'app/pages/MainPage/slice/selectors';
 import { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { deleteOrganization } from '../../slice/thunks';
 
 export const DeleteConfirm = ({ visible, open, ...props }: ModalProps) => {
   const [inputValue, setInputValue] = useState('');
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const currentOrganization = useSelector(selectCurrentOrganization);
   const loading = useSelector(selectDeleteOrganizationLoading);
   const confirmDisabled = inputValue !== currentOrganization?.name;
@@ -26,11 +26,11 @@ export const DeleteConfirm = ({ visible, open, ...props }: ModalProps) => {
   const deleteOrg = useCallback(() => {
     dispatch(
       deleteOrganization(() => {
-        history.replace('/');
+        navigate.replace('/');
         message.success(tg('operation.deleteSuccess'));
       }),
     );
-  }, [dispatch, history, tg]);
+  }, [dispatch, navigate, tg]);
 
   return (
     <Modal

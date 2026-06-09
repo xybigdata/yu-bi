@@ -1,12 +1,12 @@
-import { useHistory } from 'react-router';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 export const useToScheduleDetails = () => {
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   return {
     toDetails: (orgId: string, scheduleId?: string) => {
       if (scheduleId) {
-        history.push(`/organizations/${orgId}/schedules/${scheduleId}`);
+        navigate.push(`/organizations/${orgId}/schedules/${scheduleId}`);
       } else {
-        history.replace(`/organizations/${orgId}/schedules`);
+        navigate.replace(`/organizations/${orgId}/schedules`);
       }
     },
   };

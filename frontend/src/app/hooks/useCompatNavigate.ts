@@ -16,16 +16,19 @@
  * limitations under the License.
  */
 
+import { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
 export const useCompatNavigate = () => {
   const history = useHistory();
 
-  return {
-    push: history.push,
-    replace: history.replace,
-    goBack: history.goBack,
-    go: history.go,
-  };
+  return useMemo(
+    () => ({
+      push: history.push,
+      replace: history.replace,
+      goBack: history.goBack,
+      go: history.go,
+    }),
+    [history],
+  );
 };
-
