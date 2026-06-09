@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { ControlOutlined } from '@ant-design/icons';
-import { Dropdown, Menu, Tooltip } from 'antd';
+import { Dropdown, MenuProps, Tooltip } from 'antd';
 import { ToolbarButton } from 'app/components';
 import { ControllerFacadeTypes } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -129,47 +129,45 @@ export const AddController: React.FC<AddControlBtnProps> = () => {
   const renderTitle = (text: string) => {
     return <span style={{ color: G60, fontWeight: 500 }}>{text}</span>;
   };
-  const controlerItems = (
-    <Menu onClick={onAddController}>
-      <Menu.ItemGroup
-        key="conventionalControllers"
-        title={renderTitle(tType('common'))}
-      >
-        {conventionalControllers.map(({ icon, type }) => (
-          <Menu.Item key={type} icon={icon}>
-            {tFilterName(type)}
-          </Menu.Item>
-        ))}
-      </Menu.ItemGroup>
-      <Menu.ItemGroup key="dateControllers" title={renderTitle(tType('date'))}>
-        {dateControllers.map(({ icon, type }) => (
-          <Menu.Item key={type} icon={icon}>
-            {tFilterName(type)}
-          </Menu.Item>
-        ))}
-      </Menu.ItemGroup>
-      <Menu.ItemGroup
-        key="numericalControllers"
-        title={renderTitle(tType('numeric'))}
-      >
-        {numericalControllers.map(({ icon, type, disabled }) => (
-          <Menu.Item key={type} icon={icon} disabled={disabled}>
-            {tFilterName(type)}
-          </Menu.Item>
-        ))}
-      </Menu.ItemGroup>
-      <Menu.ItemGroup key="buttons" title={renderTitle(tType('button'))}>
-        {buttons.map(({ icon, type, disabled }) => (
-          <Menu.Item key={type} icon={icon} disabled={disabled}>
-            {tWt(type)}
-          </Menu.Item>
-        ))}
-      </Menu.ItemGroup>
-    </Menu>
-  );
+  const buildControllerItems = <T,>(
+    items: ButtonItemType<T>[],
+    labelRenderer: (type: T) => string,
+  ) =>
+    items.map(({ icon, type, disabled }) => ({
+      key: String(type),
+      icon,
+      disabled,
+      label: labelRenderer(type),
+    }));
+  const controllerItems: MenuProps['items'] = [
+    {
+      key: 'conventionalControllers',
+      type: 'group',
+      label: renderTitle(tType('common')),
+      children: buildControllerItems(conventionalControllers, tFilterName),
+    },
+    {
+      key: 'dateControllers',
+      type: 'group',
+      label: renderTitle(tType('date')),
+      children: buildControllerItems(dateControllers, tFilterName),
+    },
+    {
+      key: 'numericalControllers',
+      type: 'group',
+      label: renderTitle(tType('numeric')),
+      children: buildControllerItems(numericalControllers, tFilterName),
+    },
+    {
+      key: 'buttons',
+      type: 'group',
+      label: renderTitle(tType('button')),
+      children: buildControllerItems(buttons, tWt),
+    },
+  ];
   return (
     <Dropdown
-      dropdownRender={() => controlerItems}
+      menu={{ items: controllerItems, onClick: onAddController }}
       placement="bottomLeft"
       trigger={['click']}
     >
