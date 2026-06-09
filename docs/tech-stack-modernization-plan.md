@@ -170,12 +170,15 @@
 
 已完成：
 - `react-helmet-async 1.2.2 -> 3.0.0`，先消除 React 18 类型迁移中 Helmet/HelmetProvider `children` 类型不完整的问题。
+- `antd 4.16.13 -> 4.24.16`，先升级到 Ant Design 4 最后稳定线，避免一次性跨到 5 带来大面积 API 和主题回归。
+- 保留现有浏览器端 Less 动态主题链，并在主题生成脚本中兼容 AntD 4.24 的 `@{root-entry-name}` 动态主题入口。
+- 修复 AntD 4.24 暴露的类型收紧问题，包括 `InputRef`、`InputNumber` 的 `number | null`、Tree/Cascader 节点类型和 FormList `fieldKey` 可选值。
+- 修复 Vite 生产构建中 CRA HMR 兼容分支被折叠成裸 `module.hot` 后导致预览页空白的问题。
 
 预研结果：
 - Ant Design 相关调用点约 358 个文件，`visible`/`onVisibleChange`/`overlay`/`Menu.Item` 等 AntD 5 迁移热点分布广，不能直接大版本替换。
-- `antd 4.16.13 -> 4.24.16` 预演会触发若干类型变化，包括 `Input` 类型引用、`InputNumber` 的 `number | null`、Tree/Cascader 类型收紧等。
-- `antd 4.24.16` 还会阻断当前 `antd-theme-generator 1.2.11`：主题生成尝试读取 `antd/lib/style/themes/@{root-entry-name}.less`，导致 `npm run build:theme` 失败。
-- 因此 UI 阶段的实际顺序应先替换或移除 `antd-theme-generator` 动态 Less 主题链，再把 Ant Design 升到 4.24.x，最后迁移到 Ant Design 5 token 主题。
+- `antd-theme-generator 1.2.11` 仍是过渡依赖：AntD 4.24 下需要项目脚本兼容动态 Less import，后续迁移 Ant Design 5 前仍应替换为 token/CSS 变量方案。
+- 因此 UI 阶段后续顺序应先替换或移除 `antd-theme-generator` 和浏览器端 Less 动态主题链，再迁移到 Ant Design 5 token 主题。
 
 风险：
 - Ant Design 5/6 token、Less 变量和组件 API 变化较大。
@@ -269,8 +272,7 @@
 
 阶段 3 已完成，下一步进入阶段 4 的 UI 与路由现代化准备：
 
-1. 替换 `antd-theme-generator` 和浏览器端 Less 动态主题链，为 Ant Design 4.24.x/5 铺路。
-2. 在主题链替换后，先把 Ant Design 升到 4.24.x，并修复 Tree/Cascader/InputNumber 等类型收紧问题。
-3. 梳理 `@types/react@18` 的阻塞点，优先补齐公共组件和上下文组件的 `children` 类型。
-4. 评估 React Router 5 -> 6/7 的路由声明、`useHistory`、`Redirect` 和嵌套路由替换方案。
-5. 保持 CRA5/CRACO 回退脚本，直到 Jest/测试栈迁出 CRA。
+1. 替换 `antd-theme-generator` 和浏览器端 Less 动态主题链，为 Ant Design 5 token 主题铺路。
+2. 梳理 `@types/react@18` 的阻塞点，优先补齐公共组件和上下文组件的 `children` 类型。
+3. 评估 React Router 5 -> 6/7 的路由声明、`useHistory`、`Redirect` 和嵌套路由替换方案。
+4. 保持 CRA5/CRACO 回退脚本，直到 Jest/测试栈迁出 CRA。

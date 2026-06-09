@@ -25,7 +25,7 @@ import {
   Tree,
   TreeSelect,
 } from 'antd';
-import { CascaderOptionType } from 'antd/lib/cascader';
+import type { DefaultOptionType } from 'antd/lib/cascader';
 import { ControllerFacadeTypes } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import migrationViewConfig from 'app/migration/ViewConfig/migrationViewConfig';
@@ -74,7 +74,7 @@ const ValuesOptionsSetter: FC<{
   const [optionValues, setOptionValues] = useState<RelationFilterValue[]>([]);
   const [targetKeys, setTargetKeys] = useState<string[]>([]);
   const [labelOptions, setLabelOptions] = useState<
-    CascaderOptionType[] | undefined
+    DefaultOptionType[] | undefined
   >([]);
   const [labelKey, setLabelKey] = useState<string | undefined>();
   const [viewList, setViewList] = useState<optionProps[]>([]);
@@ -144,7 +144,7 @@ const ValuesOptionsSetter: FC<{
       ) || [];
 
     if (!meta) return { option: [], dataView: undefined };
-    const option: CascaderOptionType[] = meta
+    const option: DefaultOptionType[] = meta
       .concat(viewComputedField)
       .map(item => {
         return {
@@ -453,6 +453,7 @@ const ValuesOptionsSetter: FC<{
                                 checkable
                                 checkStrictly
                                 titleRender={node => {
+                                  const option = node as RelationFilterValue;
                                   return (
                                     <div
                                       style={{
@@ -461,8 +462,8 @@ const ValuesOptionsSetter: FC<{
                                         justifyContent: 'space-between',
                                       }}
                                     >
-                                      <span>{node.title || node.key}</span>
-                                      <FieldKey>{node.key}</FieldKey>
+                                      <span>{option.label || option.key}</span>
+                                      <FieldKey>{option.key}</FieldKey>
                                     </div>
                                   );
                                 }}

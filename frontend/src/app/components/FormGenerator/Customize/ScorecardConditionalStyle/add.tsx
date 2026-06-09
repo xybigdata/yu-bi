@@ -278,8 +278,10 @@ const InputNumberScope = memo(
       }
     };
 
-    const minChange = (value: number) => inputNumberScopeChange([value, max]);
-    const maxChange = (value: number) => inputNumberScopeChange([min, value]);
+    const minChange = (value: number | null) =>
+      inputNumberScopeChange([value, max]);
+    const maxChange = (value: number | null) =>
+      inputNumberScopeChange([min, value]);
 
     return (
       <Row gutter={24} align="middle" key={index}>

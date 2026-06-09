@@ -53,9 +53,9 @@ export const generateEntryPoint = EntryPointComponent => {
   );
 
   // Hot reLoadable translation json files
-  const hotModule =
-    import.meta.hot ||
-    (typeof module !== 'undefined' ? module.hot : undefined);
+  const hotModule = IS_DEVELOPMENT
+    ? import.meta.hot || (globalThis as any).module?.hot
+    : undefined;
   if (hotModule) {
     hotModule.accept(['./locales/i18n'], () => {
       // No need to render the App again because i18next works with the hooks

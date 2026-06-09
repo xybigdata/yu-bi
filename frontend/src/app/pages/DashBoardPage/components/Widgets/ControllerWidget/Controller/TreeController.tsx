@@ -77,7 +77,8 @@ export const TreeSelectController: React.FC<TreeControllerFormProps> = memo(
               checkable
               checkStrictly
               titleRender={node => {
-                return node.title || node.key;
+                const option = node as RelationFilterValue;
+                return option.label || option.key;
               }}
               treeData={treeData}
             />

@@ -1,7 +1,8 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import { Empty, Tree as AntTree, TreeProps as AntTreeProps } from 'antd';
+import type { DataNode } from 'antd/lib/tree';
 import classnames from 'classnames';
-import { MutableRefObject } from 'react';
+import { ComponentType, MutableRefObject } from 'react';
 import styled from 'styled-components/macro';
 import {
   FONT_SIZE_BODY,
@@ -13,7 +14,7 @@ import {
   SPACE_XS,
 } from 'styles/StyleConstants';
 
-interface TreeProps extends AntTreeProps {
+interface TreeProps extends AntTreeProps<DataNode> {
   loading: boolean;
   wrapperRef?: MutableRefObject<HTMLDivElement> | null;
 }
@@ -61,7 +62,9 @@ const Wrapper = styled.div`
   }
 `;
 
-const StyledDirectoryTree = styled(AntTree)`
+const StyledDirectoryTree = styled(
+  AntTree as ComponentType<AntTreeProps<DataNode>>,
+)`
   &.ant-tree {
     font-weight: ${FONT_WEIGHT_MEDIUM};
     color: ${p => p.theme.textColorSnd};
