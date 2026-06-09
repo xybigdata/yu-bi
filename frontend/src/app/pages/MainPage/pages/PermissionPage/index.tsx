@@ -16,10 +16,11 @@
  * limitations under the License.
  */
 import { EmptyFiller, Split } from 'app/components';
+import { CompatRoute } from 'app/components/CompatRoute';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useSplitSizes } from 'app/hooks/useSplitSizes';
 import { useCallback, useMemo } from 'react';
-import { Route, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { useMemberSlice } from '../MemberPage/slice';
 import { useScheduleSlice } from '../SchedulePage/slice';
@@ -78,9 +79,10 @@ export function PermissionPage() {
         viewpointId={detailParams?.id}
       />
       {detailParams ? (
-        <Route path={`/organizations/:orgId/permissions/:viewpoint/:type/:id`}>
-          <Main />
-        </Route>
+        <CompatRoute
+          path="/organizations/:orgId/permissions/:viewpoint/:type/:id"
+          element={<Main />}
+        />
       ) : (
         <EmptyFiller
           title={`${t('empty1')}${

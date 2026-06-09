@@ -17,11 +17,11 @@
  */
 
 import { Split } from 'app/components';
+import { CompatRoute } from 'app/components/CompatRoute';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useSplitSizes } from 'app/hooks/useSplitSizes';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import { useCallback, useState } from 'react';
-import { Route } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { SaveForm } from './SaveForm';
 import { SaveFormContext, useSaveFormContext } from './SaveFormContext';
@@ -84,9 +84,10 @@ export function SourcePage() {
           handleSliderVisible={handleSliderVisible}
         />
         <DetailPageWrapper className={sliderVisible ? 'close' : ''}>
-          <Route path="/organizations/:orgId/sources/:sourceId">
-            <SourceDetailPage />
-          </Route>
+          <CompatRoute
+            path="/organizations/:orgId/sources/:sourceId"
+            element={<SourceDetailPage />}
+          />
         </DetailPageWrapper>
         <SaveForm
           formProps={{

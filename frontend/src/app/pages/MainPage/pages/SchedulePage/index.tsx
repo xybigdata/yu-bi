@@ -1,9 +1,9 @@
 import { Split } from 'app/components';
+import { CompatRoute } from 'app/components/CompatRoute';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useSplitSizes } from 'app/hooks/useSplitSizes';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import { useCallback, useState } from 'react';
-import { Route } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { useVizSlice } from '../VizPage/slice';
 import { EditorPage } from './EditorPage';
@@ -69,9 +69,10 @@ export function SchedulePage() {
           handleSliderVisible={handleSliderVisible}
         />
         <EditorPageWrapper className={sliderVisible ? 'close' : ''}>
-          <Route path="/organizations/:orgId/schedules/:scheduleId">
-            <EditorPage />
-          </Route>
+          <CompatRoute
+            path="/organizations/:orgId/schedules/:scheduleId"
+            element={<EditorPage />}
+          />
         </EditorPageWrapper>
         <SaveForm
           formProps={{

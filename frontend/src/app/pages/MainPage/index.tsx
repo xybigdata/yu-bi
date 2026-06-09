@@ -26,7 +26,7 @@ import ChartManager from 'app/models/ChartManager';
 import { useAppSlice } from 'app/slice';
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation, useRouteMatch } from 'react-router';
+import { useLocation } from 'react-router';
 import styled from 'styled-components/macro';
 import { NotFoundPage } from '../NotFoundPage';
 import { StoryEditor } from '../StoryBoardPage/Editor';
@@ -63,9 +63,6 @@ export function MainPage() {
   const { actions: vizActions } = useVizSlice();
   const { actions: viewActions } = useViewSlice();
   const dispatch = useDispatch();
-  const organizationMatch = useRouteMatch<MainPageRouteParams>(
-    '/organizations/:orgId',
-  );
   const orgId = useSelector(selectOrgId);
   const navigate = useCompatNavigate();
   // loaded first time
@@ -77,7 +74,7 @@ export function MainPage() {
         .catch(err =>
           console.error('Fail to load customize charts with ', err),
         );
-      dispatch(getUserSettings(organizationMatch?.params.orgId));
+      dispatch(getUserSettings(orgId));
       dispatch(getDataProviders());
     },
     () => {
@@ -149,11 +146,7 @@ export function MainPage() {
           <CompatRoute
             path="/organizations/:orgId"
             exact
-            element={
-              <CompatRedirect
-                to={`/organizations/${organizationMatch?.params.orgId}/vizs`}
-              />
-            }
+            element={<CompatRedirect to={`/organizations/${orgId}/vizs`} />}
           />
           <CompatRoute
             path="/organizations/:orgId/vizs/chartEditor"
@@ -219,9 +212,7 @@ export function MainPage() {
             path="/organizations/:orgId/permissions"
             exact
             element={
-              <CompatRedirect
-                to={`/organizations/${organizationMatch?.params.orgId}/permissions/subject`}
-              />
+              <CompatRedirect to={`/organizations/${orgId}/permissions/subject`} />
             }
           />
           <CompatRoute
