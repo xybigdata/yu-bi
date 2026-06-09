@@ -13,6 +13,14 @@ dayjs.extend(utc);
 dayjs.extend(weekday);
 
 export type DatartDayjs = Dayjs;
+export type DatartDateLike =
+  | Dayjs
+  | Date
+  | string
+  | {
+      format: (template?: string) => string;
+      toString: () => string;
+    };
 
 export const datartDayjs = dayjs;
 

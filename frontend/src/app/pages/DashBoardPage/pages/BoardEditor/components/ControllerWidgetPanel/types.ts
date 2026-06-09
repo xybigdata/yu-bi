@@ -4,10 +4,10 @@ import {
   ControllerVisibleType,
   ValueOptionType,
 } from 'app/pages/DashBoardPage/constants';
+import { DatartDateLike } from 'app/utils/date';
 import { RelationFilterValue } from 'app/types/ChartConfig';
 import { FilterSqlOperator, RelativeTimeUnit } from 'globalConstants';
 import i18next from 'i18next';
-import { Moment } from 'moment';
 import { VariableValueTypes } from '../../../../../MainPage/pages/VariablePage/constants';
 
 export interface ControllerVisibility {
@@ -95,7 +95,7 @@ export const PickerTypeOptions = [
 export interface ControllerDateType {
   relativeOrExact: TimeFilterValueCategory;
   relativeValue?: RelativeDate;
-  exactValue?: Moment | string | null;
+  exactValue?: DatartDateLike | null;
 }
 
 export interface RelativeDate {

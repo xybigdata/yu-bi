@@ -18,7 +18,8 @@
 
 import { DatePicker } from 'antd';
 import { updateBy } from 'app/utils/mutation';
-import moment, { Moment } from 'moment';
+import { DatartDateLike } from 'app/utils/date';
+import moment from 'moment';
 import { FC, memo, useState } from 'react';
 import { PresentControllerFilterProps } from '.';
 
@@ -28,7 +29,7 @@ const TimeFilter: FC<PresentControllerFilterProps> = memo(
       String(condition?.value || ''),
     );
 
-    function onChange(time: Moment | null) {
+    function onChange(time: DatartDateLike | null) {
       const newCondition = updateBy(condition!, draft => {
         draft.value = time?.toString() || '';
       });

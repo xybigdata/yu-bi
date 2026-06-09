@@ -1,4 +1,4 @@
-import { Moment } from 'moment';
+import { DatartDateLike } from 'app/utils/date';
 import { FileTypes, JobTypes, TimeModes } from './constants';
 import { VizContentsItem } from './slice/types';
 
@@ -17,7 +17,7 @@ export interface FormValues {
   cronExpression?: string;
   webHookUrl?: string;
   textContent: string;
-  dateRange?: Moment[];
+  dateRange?: DatartDateLike[];
   subject?: string;
   to?: string;
   cc?: string;

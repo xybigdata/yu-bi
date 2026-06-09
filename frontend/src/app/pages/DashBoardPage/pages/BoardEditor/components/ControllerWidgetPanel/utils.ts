@@ -28,10 +28,10 @@ import {
 } from 'app/pages/DashBoardPage/constants';
 import { VariableValueTypes } from 'app/pages/MainPage/pages/VariablePage/constants';
 import { RelationFilterValue } from 'app/types/ChartConfig';
-import { datartDayjs } from 'app/utils/date';
+import { datartDayjs, DatartDateLike } from 'app/utils/date';
 import { FilterSqlOperator, TIME_FORMATTER } from 'globalConstants';
 import i18next from 'i18next';
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 import {
   DateControllerTypes,
   NumericalControllerTypes,
@@ -39,8 +39,14 @@ import {
 } from './constants';
 import { ControllerConfig, PickerType } from './types';
 
-type FormattableDateValue = {
+type FormattableDateValue = Exclude<DatartDateLike, string | Date> & {
   format: (template?: string) => string;
+};
+
+const isFormattableDateValue = (
+  value: DatartDateLike | null | undefined,
+): value is FormattableDateValue => {
+  return !!value && typeof value !== 'string' && 'format' in value;
 };
 
 export const getStringFacadeOptions = (type: ValueOptionType) => {
@@ -151,22 +157,15 @@ export const formatControlDateToStr = (config: ControllerConfig) => {
   if (config.controllerDate) {
     const filterDate = config.controllerDate;
     if (filterDate.startTime && filterDate.startTime.exactValue) {
-      if (
-        typeof filterDate.startTime.exactValue !== 'string' &&
-        (filterDate.startTime.exactValue as FormattableDateValue).format
-      ) {
-        let exactTime =
-          filterDate.startTime.exactValue as FormattableDateValue;
+      if (isFormattableDateValue(filterDate.startTime.exactValue)) {
+        let exactTime = filterDate.startTime.exactValue;
         let newExactTime = exactTime.format(TIME_FORMATTER);
         config.controllerDate.startTime.exactValue = newExactTime;
       }
     }
     if (filterDate.endTime && filterDate.endTime.exactValue) {
-      if (
-        typeof filterDate.endTime.exactValue !== 'string' &&
-        (filterDate.endTime.exactValue as FormattableDateValue).format
-      ) {
-        let exactTime = filterDate.endTime.exactValue as FormattableDateValue;
+      if (isFormattableDateValue(filterDate.endTime.exactValue)) {
+        let exactTime = filterDate.endTime.exactValue;
         let newExactTime = exactTime.format(TIME_FORMATTER);
         config.controllerDate.endTime!.exactValue = newExactTime;
       }
@@ -324,7 +323,7 @@ export const filterValueTypeByControl = (
 
 export const formatDateByPickType = (
   pickerType: PickerType,
-  momentTime: Moment,
+  momentTime: DatartDateLike | null | undefined,
 ) => {
   const formatTemp = TIME_FORMATTER;
   if (!momentTime) {
