@@ -20,12 +20,13 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Input, message, Popconfirm, Select } from 'antd';
 import { DetailPageHeader } from 'app/components/DetailPageHeader';
 import { TenantManagementMode } from 'app/constants';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectSystemInfo } from 'app/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { BORDER_RADIUS, SPACE_LG } from 'styles/StyleConstants';
 import { getPasswordValidator } from 'utils/validators';
@@ -56,7 +57,7 @@ export function MemberDetailPage() {
   const [passwordVisible, setPasswordVisible] = useState(true);
   const { actions } = useMemberSlice();
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const systemInfo = useSelector(selectSystemInfo);
   const orgId = useSelector(selectOrgId);
   const members = useSelector(selectMembers);
@@ -162,11 +163,11 @@ export function MemberDetailPage() {
         orgId,
         resolve: () => {
           message.success(t('removeSuccess'));
-          history.replace(`/organizations/${orgId}/members`);
+          navigate.replace(`/organizations/${orgId}/members`);
         },
       }),
     );
-  }, [dispatch, history, orgId, editingMember, t]);
+  }, [dispatch, navigate, orgId, editingMember, t]);
 
   const del = useCallback(() => {
     dispatch(
@@ -175,11 +176,11 @@ export function MemberDetailPage() {
         orgId,
         resolve: () => {
           message.success(t('deleteSuccess'));
-          history.replace(`/organizations/${orgId}/members`);
+          navigate.replace(`/organizations/${orgId}/members`);
         },
       }),
     );
-  }, [dispatch, history, orgId, editingMember, t]);
+  }, [dispatch, navigate, orgId, editingMember, t]);
 
   const grantOrgOwner = useCallback(
     (grant: boolean) => () => {

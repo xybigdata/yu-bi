@@ -242,6 +242,7 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 - React Router 预迁移第十三批：`useDrillThrough`、`useRecycleViz`、顶部导航和权限页侧边栏中的字符串跳转已切到 `useCompatNavigate`，覆盖品牌首页跳转、组织切换、登出回跳和权限页视角详情导航，继续收敛应用级公共入口对 `useHistory` 的直接依赖。
 - React Router 预迁移第十四批：`SourcePage` 详情页、资源树、回收站和侧边栏新增入口中的导航已切到 `useCompatNavigate`，覆盖数据源创建后回跳、归档/恢复后的列表回退、资源树详情跳转以及带 `location.state` 的新建视图入口。
+- React Router 预迁移第十五批：成员与角色详情页、图表工作台数据视图入口，以及故事板预览/编辑页中的导航已切到 `useCompatNavigate`，覆盖删除后的 replace 回退、故事板预览切编辑、编辑器关闭回跳和基于 `location.state` 的故事板加页事务清理。
 
 验收门槛：
 - 全部路由可访问。

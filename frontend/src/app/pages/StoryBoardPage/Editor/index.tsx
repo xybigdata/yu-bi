@@ -17,6 +17,7 @@
  */
 import { Layout, Modal } from 'antd';
 import { Split } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useSplitSizes } from 'app/hooks/useSplitSizes';
 import { useBoardSlice } from 'app/pages/DashBoardPage/pages/Board/slice';
@@ -34,7 +35,6 @@ import React, {
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
 import { useParams } from 'react-router-dom';
 import Reveal from 'reveal.js';
 import 'reveal.js/dist/reveal.css';
@@ -70,8 +70,8 @@ export const StoryEditor: React.FC<{}> = memo(() => {
     dispatch(getStoryDetail(storyId));
   }, [dispatch, storyId]);
   const t = useI18NPrefix(`viz.board.setting`);
-  const history = useHistory();
-  const histState = history.location.state as any;
+  const navigate = useCompatNavigate();
+  const histState = navigate.location.state as any;
   const domId = useMemo(() => uuidv4(), []);
   const revealRef = useRef<any>();
 
@@ -169,8 +169,8 @@ export const StoryEditor: React.FC<{}> = memo(() => {
   }, [dispatch, currentPageIndex, sortedPages, storyId]);
 
   const onCloseEditor = useCallback(() => {
-    history.push(`/organizations/${orgId}/vizs/${storyId}`);
-  }, [history, orgId, storyId]);
+    navigate.push(`/organizations/${orgId}/vizs/${storyId}`);
+  }, [navigate, orgId, storyId]);
   useEffect(() => {
     if (sortedPages.length > 0) {
       revealRef.current = new Reveal(document.getElementById(domId), {
@@ -225,13 +225,13 @@ export const StoryEditor: React.FC<{}> = memo(() => {
       );
 
       //react router remove location state
-      if (history.location.state && histState.transaction) {
+      if (navigate.location.state && histState.transaction) {
         let state = { ...histState };
         delete state.transaction;
-        history.replace({ ...history.location, state });
+        navigate.replace({ ...navigate.location, state });
       }
     }
-  }, [dispatch, histState, storyId, history]);
+  }, [dispatch, histState, storyId, navigate]);
 
   const handleMoveCard = useCallback(
     async (dragId, dropId) => {

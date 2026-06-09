@@ -35,6 +35,7 @@ import {
 import { MenuListItem, ToolbarButton } from 'app/components';
 import { Confirm, ConfirmProps } from 'app/components/Confirm';
 import { ChartDataViewFieldCategory } from 'app/constants';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import useMount from 'app/hooks/useMount';
@@ -68,7 +69,6 @@ import {
   useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
 import styled from 'styled-components/macro';
 import {
   ORANGE,
@@ -91,7 +91,7 @@ const ChartDataViewPanel: FC<{
   const t = useI18NPrefix(`viz.workbench.dataview`);
   const tView = useI18NPrefix('view');
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const [showModal, modalContextHolder] = useStateModal({});
   const { availableSourceFunctions } = useContext(ChartDataViewContext);
   const dataviewTreeSelector = useMemo(makeDataviewTreeSelector, []);
@@ -417,8 +417,8 @@ const ChartDataViewPanel: FC<{
   const editView = useCallback(() => {
     let orgId = dataView?.orgId as string;
     let viewId = dataView?.id as string;
-    history.push(`/organizations/${orgId}/views/${viewId}`);
-  }, [dataView?.id, dataView?.orgId, history]);
+    navigate.push(`/organizations/${orgId}/views/${viewId}`);
+  }, [dataView?.id, dataView?.orgId, navigate]);
 
   const handleConfirmVisible = useCallback(() => {
     (showModal as Function)({

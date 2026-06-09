@@ -18,6 +18,7 @@
 
 import { Button, Card, Form, Input, message, Popconfirm } from 'antd';
 import { DetailPageHeader } from 'app/components/DetailPageHeader';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { User } from 'app/slice/types';
 import { fetchCheckName } from 'app/utils/fetch';
@@ -25,7 +26,7 @@ import debounce from 'debounce-promise';
 import { CommonFormTypes, DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { BORDER_RADIUS, SPACE_LG, SPACE_MD } from 'styles/StyleConstants';
 import { selectOrgId } from '../../../../slice/selectors';
@@ -54,7 +55,7 @@ export function RoleDetailPage() {
   );
   const { actions } = useMemberSlice();
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const orgId = useSelector(selectOrgId);
   const roles = useSelector(selectRoles);
   const editingRole = useSelector(selectEditingRole);
@@ -142,11 +143,11 @@ export function RoleDetailPage() {
         id: editingRole!.info.id,
         resolve: () => {
           message.success(tg('operation.deleteSuccess'));
-          history.replace(`/organizations/${orgId}/roles`);
+          navigate.replace(`/organizations/${orgId}/roles`);
         },
       }),
     );
-  }, [dispatch, history, orgId, editingRole, tg]);
+  }, [dispatch, navigate, orgId, editingRole, tg]);
 
   return (
     <Wrapper>

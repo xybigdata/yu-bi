@@ -17,6 +17,7 @@
  */
 import { Layout } from 'antd';
 import { Split } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { useSplitSizes } from 'app/hooks/useSplitSizes';
 import { usePublishBoard } from 'app/pages/DashBoardPage/hooks/usePublishBoard';
 import { selectPublishLoading } from 'app/pages/MainPage/pages/VizPage/slice/selectors';
@@ -26,7 +27,6 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
 import 'reveal.js/dist/reveal.css';
 import styled from 'styled-components/macro';
 import { SPACE_MD } from 'styles/StyleConstants';
@@ -50,7 +50,7 @@ export const StoryPagePreview: React.FC<{
   allowManage?: boolean;
 }> = memo(({ orgId, storyId, allowShare, allowManage }) => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const publishLoading = useSelector(selectPublishLoading);
   const story = useSelector((state: { storyBoard: StoryBoardState }) =>
@@ -87,8 +87,8 @@ export const StoryPagePreview: React.FC<{
   );
 
   const toggleEdit = useCallback(() => {
-    history.push(`/organizations/${orgId}/vizs/storyEditor/${storyId}`);
-  }, [history, orgId, storyId]);
+    navigate.push(`/organizations/${orgId}/vizs/storyEditor/${storyId}`);
+  }, [navigate, orgId, storyId]);
 
   const playStory = useCallback(() => {
     window.open(`storyPlayer/${storyId}`, '_blank');
