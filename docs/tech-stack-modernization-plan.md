@@ -860,6 +860,12 @@
 - `core/pom.xml` 已删除未使用的 `cglib:cglib:3.3.0` 直接依赖。
 - 2026-06-09 复核：主代码检索 `cglib` / `Enhancer` / `MethodInterceptor` 结果为空，当前项目没有实际运行时代码依赖该库。
 
+### 并行治理：移除 asciitable 旧展示依赖
+
+- `core/src/main/java/datart/core/migration/DatabaseMigration.java` 已去除 `de.vandermeer.asciitable`，数据库迁移版本输出改为本地 ASCII 表格渲染逻辑。
+- `core/pom.xml` 已删除 `de.vandermeer:asciitable:0.3.2` 直接依赖。
+- 这一步不改变迁移流程和成功/失败判定，只替换控制台展示实现。
+
 ### 并行治理：清理 commons-lang 2 与直连 commons-io 1.x 使用点
 
 - `core/pom.xml` 已删除 `commons-lang:commons-lang:2.6` 与 `commons-io:commons-io:1.3.1` 两个直接依赖。

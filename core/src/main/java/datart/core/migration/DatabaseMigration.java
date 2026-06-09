@@ -19,8 +19,6 @@
 package datart.core.migration;
 
 import datart.core.base.consts.Const;
-import de.vandermeer.asciitable.AT_Context;
-import de.vandermeer.asciitable.AsciiTable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.ibatis.jdbc.SQL;
@@ -293,18 +291,38 @@ public class DatabaseMigration {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        AT_Context at_context = new AT_Context();
-        AsciiTable asciiTable = new AsciiTable(at_context);
-        asciiTable.addRule();
-        asciiTable.addRow("Last Script Version ", lastVersion + "");
-        asciiTable.addRule();
-        asciiTable.addRow("Current Database Version ", currentVersion + "");
-        asciiTable.addRule();
+        String asciiTable = buildVersionTable(lastVersion, currentVersion);
         if (Objects.equals(lastVersion, currentVersion)) {
-            System.out.println(asciiTable.render());
+            System.out.println(asciiTable);
         } else {
-            System.err.println(asciiTable.render());
+            System.err.println(asciiTable);
         }
+    }
+
+    private String buildVersionTable(String lastVersion, String currentVersion) {
+        List<String[]> rows = List.of(
+                new String[]{"Last Script Version", String.valueOf(lastVersion)},
+                new String[]{"Current Database Version", String.valueOf(currentVersion)}
+        );
+        int labelWidth = rows.stream().mapToInt(row -> row[0].length()).max().orElse(0);
+        int valueWidth = rows.stream().mapToInt(row -> row[1].length()).max().orElse(0);
+        String horizontal = "+" + "-".repeat(labelWidth + 2) + "+" + "-".repeat(valueWidth + 2) + "+";
+        StringBuilder builder = new StringBuilder(horizontal).append('\n');
+        for (String[] row : rows) {
+            builder.append("| ")
+                    .append(padRight(row[0], labelWidth))
+                    .append(" | ")
+                    .append(padRight(row[1], valueWidth))
+                    .append(" |")
+                    .append('\n')
+                    .append(horizontal)
+                    .append('\n');
+        }
+        return builder.toString();
+    }
+
+    private String padRight(String value, int width) {
+        return String.format("%-" + width + "s", value);
     }
 
     private TreeSet<Migration> queryMigrationHistory() {
