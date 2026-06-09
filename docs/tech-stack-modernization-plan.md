@@ -8,7 +8,7 @@
 - 后端主框架：Spring Boot 3.5.12，Spring Cloud 2025.0.1。
 - 构建工具：Maven，`maven-compiler-plugin` 3.14.1，`maven-assembly-plugin` 3.8.0，`exec-maven-plugin` 3.6.3。
 - 前端运行时：本机 Node 26 可启动，默认开发和生产构建已切换到 Vite 5。
-- 前端主框架：React 18、React Router 5、Ant Design 4.24、TypeScript 4.5；CRACO 7/CRA5 仅作为回退脚本保留。
+- 前端主框架：React 18、React Router 5、Ant Design 4.24、TypeScript 5.9；CRACO 7/CRA5 仅作为回退脚本保留。
 - 已验证基线：
   - `npm run checkTs` 通过。
   - `npm run build:task` 通过。
@@ -240,6 +240,7 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 - React Router 预迁移第十二批：`VizPage` 与成员页侧边栏中的纯路径跳转已切到 `useCompatNavigate`，覆盖可视化回收站、文件夹树、故事板列表以及成员/角色列表与切换导航，继续缩小主应用侧边栏层对 `useHistory` 的直接依赖。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
+- React Router 预迁移第十三批：`useDrillThrough`、`useRecycleViz`、顶部导航和权限页侧边栏中的字符串跳转已切到 `useCompatNavigate`，覆盖品牌首页跳转、组织切换、登出回跳和权限页视角详情导航，继续收敛应用级公共入口对 `useHistory` 的直接依赖。
 
 验收门槛：
 - 全部路由可访问。
@@ -341,3 +342,57 @@
 1. 继续预处理 AntD 5 API 迁移热点：复杂 `Menu.Item`/`Menu.SubMenu` JSX 菜单、Tooltip/Popover 的 `overlay` 内容和项目封装层 legacy `visible` 入参。
 2. 继续 React Router 5 -> 6/7 预迁移，优先清理剩余 `Route component=` / `Route render=`、`Redirect`、`useHistory` 和嵌套路由旧写法。
 3. 保持 CRA5/CRACO 回退脚本，直到 Jest/测试栈迁出 CRA。
+
+## 2026-06-09 老旧技术栈盘点
+
+本轮全项目 review 后，仍然建议继续现代化的重点如下，按优先级由高到低排列：
+
+1. React Router 5
+   - 现状：主应用仍残留一批 `useHistory`、`Redirect` 和 v5 风格路由声明。
+   - 更现代替代：React Router 6/7。
+   - 当前动作：先继续用 `useCompatNavigate` 收口导航调用点，再统一升级路由声明与重定向。
+
+2. CRA/CRACO 测试链
+   - 现状：运行与构建已迁到 Vite，但 `react-scripts`、CRACO、Jest 27 仍作为测试与回退链保留。
+   - 更现代替代：Vitest，或独立 Jest 29/30 配置。
+   - 升级前提：先完成 React Router 与 AntD 主迁移，避免多个高风险面同时变化。
+
+3. Enzyme 过渡适配层
+   - 现状：`frontend/src/setupTests.ts` 仍依赖 `enzyme` 和社区 React 18 adapter。
+   - 更现代替代：React Testing Library。
+   - 风险判断：Enzyme 目前只是勉强兼容 React 18，不适合作为长期测试基线。
+
+4. Ant Design 4.24
+   - 现状：已经在 AntD 4 最后稳定线，但仍不是当前主线。
+   - 更现代替代：Ant Design 5。
+   - 当前阻塞：复杂 Dropdown/Menu/Modal/Popover 历史 API 仍需继续清理。
+
+5. `react-app-polyfill`
+   - 现状：`frontend/src/setupTests.ts` 和运行时仍显式引入 `ie11`/`stable` polyfill。
+   - 更现代替代：按浏览器支持矩阵精简到 Vite + `browserslist`/按需 polyfill。
+   - 风险判断：需要先确认产品是否还要求兼容 IE 11。
+
+6. `fastjson 1.x`
+   - 现状：后端多个模块和 Web MVC message converter 仍直接依赖 `fastjson`。
+   - 更现代替代：优先统一到 Jackson；如必须保留阿里生态特性，再评估 `fastjson2`。
+   - 风险判断：这是后端最敏感的基础设施替换之一，需要按 DTO/配置/导入导出链路分批验证。
+
+7. `jjwt 0.7.0`
+   - 现状：JWT 依赖明显偏老。
+   - 更现代替代：JJWT 0.12+，或统一到单一现代 JWT 库。
+   - 风险判断：会影响 token 签发、解析和兼容性验证。
+
+8. Selenium 3 + PhantomJS Driver
+   - 现状：`core` 与 `server` 仍保留 `selenium-java 3.x` 和 `phantomjsdriver`。
+   - 更现代替代：Selenium 4 + Headless Chrome/Edge，或 Playwright。
+   - 风险判断：会影响截图、导出和服务器浏览器依赖安装方式。
+
+9. 后端通用基础库老版本
+   - 现状：仍有 `commons-lang 2.6`、`commons-io 1.3.1`、`guava 21.0`、`httpclient 4.5.x`、`poi-ooxml 5.0.0`、`commons-csv 1.8`、`aspectjweaver 1.9.8.M1`、`mysql-connector-java 8.0.29` 旧坐标等。
+   - 更现代替代：优先迁到 Boot 3 生态兼容的较新稳定线，并尽量使用 BOM 或父 POM 管理。
+   - 风险判断：这类升级适合拆成多个小批次，不应与 JSON/JWT/浏览器自动化迁移混做。
+
+10. H2 1.4.200 demo 库
+    - 现状：仅用于 demo/内置样例，但版本过旧。
+    - 更现代替代：H2 2.x，或测试环境改用 Testcontainers。
+    - 风险判断：需要同步准备可读的新 demo 数据或迁移脚本，不能只升版本号。

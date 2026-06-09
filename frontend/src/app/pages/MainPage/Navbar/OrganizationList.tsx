@@ -23,6 +23,7 @@ import {
 } from '@ant-design/icons';
 import { Menu } from 'antd';
 import { Avatar, MenuListItem, ToolbarButton } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
   selectOrganizationListLoading,
@@ -33,7 +34,6 @@ import classnames from 'classnames';
 import { BASE_RESOURCE_URL } from 'globalConstants';
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import {
   FONT_SIZE_TITLE,
@@ -48,7 +48,7 @@ import { switchOrganization } from '../slice/thunks';
 export function OrganizationList() {
   const [formVisible, setFormVisible] = useState(false);
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const organizations = useSelector(selectOrganizations);
   const orgId = useSelector(selectOrgId);
   const listLoading = useSelector(selectOrganizationListLoading);
@@ -66,10 +66,10 @@ export function OrganizationList() {
     ({ key }) => {
       if (key !== orgId) {
         dispatch(switchOrganization(key));
-        history.push(`/organizations/${key}`);
+        navigate.push(`/organizations/${key}`);
       }
     },
-    [dispatch, history, orgId],
+    [dispatch, navigate, orgId],
   );
 
   let list;

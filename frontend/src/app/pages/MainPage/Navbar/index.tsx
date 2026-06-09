@@ -33,6 +33,7 @@ import { List, Menu, Tooltip } from 'antd';
 import logo from 'app/assets/images/logo.svg';
 import { Avatar, MenuListItem, Popup } from 'app/components';
 import { TenantManagementMode } from 'app/constants';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
   selectCurrentOrganization,
@@ -49,7 +50,7 @@ import { changeLang, getLang } from 'locales/i18n';
 import { cloneElement, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { NavLink, useHistory, useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import {
   BLACK,
@@ -85,7 +86,7 @@ export function Navbar() {
   const [modifyPasswordVisible, setModifyPasswordVisible] = useState(false);
   const lang = getLang();
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const location = useLocation();
   const { i18n } = useTranslation();
   const systemInfo = useSelector(selectSystemInfo);
@@ -98,8 +99,8 @@ export function Navbar() {
 
   const t = useI18NPrefix('main');
   const brandClick = useCallback(() => {
-    history.push('/');
-  }, [history]);
+    navigate.push('/');
+  }, [navigate]);
 
   const hideProfile = useCallback(() => {
     setProfileVisible(false);
@@ -230,7 +231,7 @@ export function Navbar() {
         case 'logout':
           dispatch(
             logout(() => {
-              history.replace('/');
+              navigate.replace('/');
             }),
           );
           break;
@@ -251,7 +252,7 @@ export function Navbar() {
           break;
       }
     },
-    [dispatch, history, i18n, handleChangeThemeFn],
+    [dispatch, navigate, i18n, handleChangeThemeFn],
   );
 
   const onSetPolling = useCallback(

@@ -17,6 +17,7 @@
  */
 
 import { message } from 'antd';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
   deleteViz,
@@ -25,21 +26,20 @@ import {
 import { VizType } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router';
 
 export const useRecycleViz = (orgId: string, vizId: string, type: VizType) => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const tg = useI18NPrefix('global');
   const redirect = useCallback(
     tabKey => {
       if (tabKey) {
-        history.push(`/organizations/${orgId}/vizs/${tabKey}`);
+        navigate.push(`/organizations/${orgId}/vizs/${tabKey}`);
       } else {
-        history.push(`/organizations/${orgId}/vizs`);
+        navigate.push(`/organizations/${orgId}/vizs`);
       }
     },
-    [history, orgId],
+    [navigate, orgId],
   );
   const recycleViz = useCallback(() => {
     dispatch(

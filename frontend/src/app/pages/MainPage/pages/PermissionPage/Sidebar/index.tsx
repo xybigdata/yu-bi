@@ -18,11 +18,11 @@
 
 import { FileProtectOutlined, TeamOutlined } from '@ant-design/icons';
 import { ListSwitch } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { memo, useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
 import styled from 'styled-components/macro';
 import { SPACE_XS } from 'styles/StyleConstants';
 import { ResourceTypes, SubjectTypes, Viewpoints } from '../constants';
@@ -39,7 +39,7 @@ interface SidebarProps {
 export const Sidebar = memo(
   ({ viewpoint, viewpointType, viewpointId }: SidebarProps) => {
     const dispatch = useDispatch();
-    const history = useHistory();
+    const navigate = useCompatNavigate();
     const orgId = useSelector(selectOrgId);
     const t = useI18NPrefix('permission');
 
@@ -51,9 +51,9 @@ export const Sidebar = memo(
 
     const changeViewpoint = useCallback(
       key => {
-        history.push(`/organizations/${orgId}/permissions/${key}`);
+        navigate.push(`/organizations/${orgId}/permissions/${key}`);
       },
-      [history, orgId],
+      [navigate, orgId],
     );
 
     const togglePanel = useCallback(
@@ -67,11 +67,11 @@ export const Sidebar = memo(
 
     const toDetail = useCallback(
       (id, type) => () => {
-        history.push(
+        navigate.push(
           `/organizations/${orgId}/permissions/${viewpoint}/${type}/${id}`,
         );
       },
-      [history, orgId, viewpoint],
+      [navigate, orgId, viewpoint],
     );
 
     const titles = useMemo(

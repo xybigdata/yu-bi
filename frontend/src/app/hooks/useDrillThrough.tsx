@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { useHistory } from 'react-router-dom';
+import { useCompatNavigate } from './useCompatNavigate';
 
 const defaultBodyStyle: React.CSSProperties = {
   height: 600,
@@ -26,7 +26,7 @@ const defaultBodyStyle: React.CSSProperties = {
 };
 
 const useDrillThrough = () => {
-  const history = useHistory();
+  const navigate = useCompatNavigate();
 
   const urlSchemeCheck = (url: string) => {
     if (!/^http(s)?/.test(url)) {
@@ -46,7 +46,7 @@ const useDrillThrough = () => {
   };
 
   const openNewTab = (orgId, relId, params?: string) => {
-    history.push(`/organizations/${orgId}/vizs/${relId}?${params}`);
+    navigate.push(`/organizations/${orgId}/vizs/${relId}?${params}`);
   };
 
   const openBrowserTab = (orgId, relId, params?: string) => {
