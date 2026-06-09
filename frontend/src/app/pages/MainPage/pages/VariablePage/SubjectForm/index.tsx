@@ -69,6 +69,16 @@ export const SubjectForm = memo(
     const roleListLoading = useSelector(selectRoleListLoading);
     const memberListLoading = useSelector(selectMemberListLoading);
     const t = useI18NPrefix('variable');
+    const subjectTabItems = [
+      {
+        key: 'role',
+        label: t('relatedRole'),
+      },
+      {
+        key: 'member',
+        label: t('relatedMember'),
+      },
+    ];
 
     useEffect(() => {
       if (editingVariable && rowPermissions && roles) {
@@ -189,10 +199,11 @@ export const SubjectForm = memo(
         title={
           scope === VariableScopes.Public ? (
             <>
-              <StyledTabs defaultActiveKey={tab} onChange={setTab}>
-                <Tabs.TabPane key="role" tab={t('relatedRole')} />
-                <Tabs.TabPane key="member" tab={t('relatedMember')} />
-              </StyledTabs>
+              <StyledTabs
+                defaultActiveKey={tab}
+                items={subjectTabItems}
+                onChange={setTab}
+              />
             </>
           ) : (
             t('relatedRole')

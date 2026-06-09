@@ -188,7 +188,7 @@ export const MemberList = memo(() => {
       </ListWrapper>
       <InviteForm
         title={t('inviteMember')}
-        visible={inviteFormVisible}
+        open={inviteFormVisible}
         confirmLoading={inviteLoading}
         onSave={invite}
         onCancel={hideInviteForm}

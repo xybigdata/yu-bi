@@ -92,27 +92,33 @@ const DateConditionConfiguration: ForwardRefRenderFunction<
   return (
     <StyledDateConditionConfiguration
       activeKey={type}
+      items={[
+        {
+          key: String(FilterConditionType.RecommendTime),
+          label: t('recommend'),
+          children: (
+            <TimeSelector.RecommendRangeTimeSelector
+              i18nPrefix={i18nPrefix}
+              condition={condition}
+              onConditionChange={onConditionChange}
+            />
+          ),
+        },
+        {
+          key: String(FilterConditionType.RangeTime),
+          label: t('manual'),
+          children: (
+            <TimeSelector.ManualRangeTimeSelector
+              i18nPrefix={i18nPrefix}
+              condition={condition}
+              onConditionChange={onConditionChange}
+            />
+          ),
+        },
+      ]}
       onChange={clearFilterWhenTypeChange}
       destroyInactiveTabPane={true}
-    >
-      <Tabs.TabPane
-        tab={t('recommend')}
-        key={FilterConditionType.RecommendTime}
-      >
-        <TimeSelector.RecommendRangeTimeSelector
-          i18nPrefix={i18nPrefix}
-          condition={condition}
-          onConditionChange={onConditionChange}
-        />
-      </Tabs.TabPane>
-      <Tabs.TabPane tab={t('manual')} key={FilterConditionType.RangeTime}>
-        <TimeSelector.ManualRangeTimeSelector
-          i18nPrefix={i18nPrefix}
-          condition={condition}
-          onConditionChange={onConditionChange}
-        />
-      </Tabs.TabPane>
-    </StyledDateConditionConfiguration>
+    />
   );
 };
 

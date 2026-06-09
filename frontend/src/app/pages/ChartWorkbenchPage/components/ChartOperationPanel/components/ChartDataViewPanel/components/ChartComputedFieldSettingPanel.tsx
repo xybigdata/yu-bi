@@ -164,6 +164,45 @@ const ChartComputedFieldSettingPanel: FC<{
     },
     [handleFieldSelected],
   );
+  const tabItems = [
+    {
+      key: 'field',
+      label: `${t('field')}`,
+      children:
+        viewType === 'STRUCT' ? (
+          <Tree
+            className="medium"
+            loading={false}
+            showIcon={false}
+            treeData={fields as TreeDataNode[]}
+            defaultExpandAll={true}
+            height={500}
+            onSelect={handleOnSelectValue}
+          />
+        ) : (
+          <ChartSearchableList
+            source={(fields || []).map(f => ({
+              value: f.name,
+              label: f.name,
+            }))}
+            onItemSelected={handleFieldSelected}
+          />
+        ),
+    },
+    {
+      key: 'variable',
+      label: `${t('variable')}`,
+      children: (
+        <ChartSearchableList
+          source={(variables || []).map(f => ({
+            value: f.name,
+            label: f.name,
+          }))}
+          onItemSelected={handleVariableSelected}
+        />
+      ),
+    },
+  ];
 
   return (
     <StyledChartComputedFieldSettingPanel direction="vertical">
@@ -204,38 +243,7 @@ const ChartComputedFieldSettingPanel: FC<{
       </Row>
       <Row gutter={24}>
         <Col span={4}>
-          <Tabs defaultActiveKey="field" onChange={() => {}}>
-            <Tabs.TabPane tab={`${t('field')}`} key="field">
-              {viewType === 'STRUCT' ? (
-                <Tree
-                  className="medium"
-                  loading={false}
-                  showIcon={false}
-                  treeData={fields as TreeDataNode[]}
-                  defaultExpandAll={true}
-                  height={500}
-                  onSelect={handleOnSelectValue}
-                />
-              ) : (
-                <ChartSearchableList
-                  source={(fields || []).map(f => ({
-                    value: f.name,
-                    label: f.name,
-                  }))}
-                  onItemSelected={handleFieldSelected}
-                />
-              )}
-            </Tabs.TabPane>
-            <Tabs.TabPane tab={`${t('variable')}`} key="variable">
-              <ChartSearchableList
-                source={(variables || []).map(f => ({
-                  value: f.name,
-                  label: f.name,
-                }))}
-                onItemSelected={handleVariableSelected}
-              />
-            </Tabs.TabPane>
-          </Tabs>
+          <Tabs defaultActiveKey="field" items={tabItems} onChange={() => {}} />
         </Col>
         <Col span={16}>
           <ChartComputedFieldEditor

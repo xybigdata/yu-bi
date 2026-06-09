@@ -1358,6 +1358,21 @@
 - 这一步只清理承接 `ModalForm` / `Modal` 的组件边界命名，不改资源保存、变量默认值、行权限编辑等业务逻辑，也不触碰 `ModalForm` 通用兼容壳里仍需继续兼容的更广泛历史调用面。
 - 这一步把 `visible -> open` 清障继续推进到主资源管理与变量权限主链，为后续进一步缩小 `ModalForm` 通用兼容壳的使用面做准备。
 
+### 并行治理：收口 Tabs.TabPane、TreeSelect.TreeNode 与局部成员配置弹层旧 API
+
+- 以下使用 `Tabs.TabPane` 的界面已改为 `Tabs items` 配置，覆盖：
+  - `frontend/src/app/pages/MainPage/pages/VariablePage/SubjectForm/index.tsx`
+  - `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartDataViewPanel/components/ChartComputedFieldSettingPanel.tsx`
+  - `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterControlPanel/CategoryConditionConfiguration.tsx`
+  - `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterControlPanel/DateConditionConfiguration.tsx`
+- `frontend/src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/MultiDropdownListFilter.tsx` 已把 `TreeSelect.TreeNode` 子节点写法改为 `treeData`。
+- 以下局部弹层调用边界已继续从 `visible` 收口到 `open`，覆盖：
+  - `frontend/src/app/pages/MainPage/pages/SourcePage/SourceDetailPage/ConfigComponent/ArrayConfig.tsx`
+  - `frontend/src/app/pages/MainPage/pages/MemberPage/pages/RoleDetailPage/index.tsx`
+  - `frontend/src/app/pages/MainPage/pages/MemberPage/pages/RoleDetailPage/MemberForm.tsx`
+  - `frontend/src/app/pages/MainPage/pages/MemberPage/Sidebar/MemberList.tsx`
+- 这一步集中清理 AntD 4 仍被官方标记为 legacy 的标签页与树选择器写法，同时继续缩小成员管理和数据源配置弹层上的历史 `visible` 控制面，为 Ant Design 5 主升级继续清掉一批明确阻塞项。
+
 ### 2026-06-10 全项目老旧技术栈复核结论
 
 这一轮不是只看版本号，而是按“是否仍在主维护线、是否已经被现代替代方案覆盖、是否值得继续在当前架构上扩展”三条标准重新复核。

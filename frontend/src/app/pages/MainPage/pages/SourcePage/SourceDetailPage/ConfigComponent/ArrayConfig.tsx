@@ -238,7 +238,7 @@ export function ArrayConfig({
       />
       <ModalForm
         title={t('form.editConfig')}
-        visible={formVisible}
+        open={formVisible}
         width={SPACE_TIMES(240)}
         formProps={{
           labelAlign: 'left',

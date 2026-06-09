@@ -256,89 +256,83 @@ const CategoryConditionConfiguration: ForwardRefRenderFunction<
     setListDatas([]);
     onConditionChange(filter);
   };
-
-  return (
-    <StyledTabs activeKey={curTab.toString()} onChange={handleTabChange}>
-      <Tabs.TabPane
-        tab={t('general')}
-        key={FilterConditionType.List.toString()}
-      >
-        <Row>
-          <Space>
-            <Button type="primary" onClick={handleFetchData}>
-              {t('load')}
-            </Button>
-            {/* <Checkbox
-                checked={isTree}
-                disabled
-                onChange={e => setIsTree(e.target.checked)}
-              >
-                {t('useTree')}
-              </Checkbox> */}
-          </Space>
-        </Row>
-        <Row>
-          <Space>
-            {isTree && (
-              <>
-                {t('associateField')}
-                <Select
-                  value={treeOptions?.[0]}
-                  options={getDataOptionFields()?.map(f => ({
-                    label: f.name,
-                    value: f.name,
-                  }))}
-                  onChange={value =>
-                    handleTreeOptionChange(value, treeOptions?.[1])
-                  }
-                />
-                {t('labelField')}
-                <Select
-                  value={treeOptions?.[1]}
-                  options={getDataOptionFields()?.map(f => ({
-                    label: f.name,
-                    value: f.name,
-                  }))}
-                  onChange={value =>
-                    handleTreeOptionChange(treeOptions?.[0], value)
-                  }
-                />
-              </>
-            )}
-          </Space>
-        </Row>
-        {isTree && (
-          <Tree
-            blockNode
-            checkable
-            checkStrictly
-            defaultExpandAll
-            checkedKeys={targetKeys}
-            treeData={treeDatas}
-            onCheck={handleGeneralTreeChange}
-            onSelect={handleGeneralTreeChange}
-          />
-        )}
-        {!isTree && (
-          <Transfer
-            operations={[t('moveToRight'), t('moveToLeft')]}
-            dataSource={listDatas}
-            titles={[`${t('sourceList')}`, `${t('targetList')}`]}
-            targetKeys={targetKeys}
-            selectedKeys={selectedKeys}
-            onChange={handleGeneralListChange}
-            onSelectChange={onSelectChange}
-            render={item => item.label}
-            filterOption={filterGeneralListOptions}
-            showSearch
-            pagination
-          />
-        )}
-      </Tabs.TabPane>
-      <Tabs.TabPane
-        tab={t('customize')}
-        key={FilterConditionType.Customize.toString()}
-      >
+  const tabItems = [
+    {
+      key: FilterConditionType.List.toString(),
+      label: t('general'),
+      children: (
+        <>
+          <Row>
+            <Space>
+              <Button type="primary" onClick={handleFetchData}>
+                {t('load')}
+              </Button>
+            </Space>
+          </Row>
+          <Row>
+            <Space>
+              {isTree && (
+                <>
+                  {t('associateField')}
+                  <Select
+                    value={treeOptions?.[0]}
+                    options={getDataOptionFields()?.map(f => ({
+                      label: f.name,
+                      value: f.name,
+                    }))}
+                    onChange={value =>
+                      handleTreeOptionChange(value, treeOptions?.[1])
+                    }
+                  />
+                  {t('labelField')}
+                  <Select
+                    value={treeOptions?.[1]}
+                    options={getDataOptionFields()?.map(f => ({
+                      label: f.name,
+                      value: f.name,
+                    }))}
+                    onChange={value =>
+                      handleTreeOptionChange(treeOptions?.[0], value)
+                    }
+                  />
+                </>
+              )}
+            </Space>
+          </Row>
+          {isTree && (
+            <Tree
+              blockNode
+              checkable
+              checkStrictly
+              defaultExpandAll
+              checkedKeys={targetKeys}
+              treeData={treeDatas}
+              onCheck={handleGeneralTreeChange}
+              onSelect={handleGeneralTreeChange}
+            />
+          )}
+          {!isTree && (
+            <Transfer
+              operations={[t('moveToRight'), t('moveToLeft')]}
+              dataSource={listDatas}
+              titles={[`${t('sourceList')}`, `${t('targetList')}`]}
+              targetKeys={targetKeys}
+              selectedKeys={selectedKeys}
+              onChange={handleGeneralListChange}
+              onSelectChange={onSelectChange}
+              render={item => item.label}
+              filterOption={filterGeneralListOptions}
+              showSearch
+              pagination
+            />
+          )}
+        </>
+      ),
+    },
+    {
+      key: FilterConditionType.Customize.toString(),
+      label: t('customize'),
+      children: (
         <CategoryConditionEditableTable
           dataView={dataView}
           i18nPrefix={i18nPrefix}
@@ -346,17 +340,26 @@ const CategoryConditionConfiguration: ForwardRefRenderFunction<
           onConditionChange={onConditionChange}
           fetchDataByField={fetchDataByField}
         />
-      </Tabs.TabPane>
-      <Tabs.TabPane
-        tab={t('condition')}
-        key={FilterConditionType.Condition.toString()}
-      >
+      ),
+    },
+    {
+      key: FilterConditionType.Condition.toString(),
+      label: t('condition'),
+      children: (
         <CategoryConditionRelationSelector
           condition={condition}
           onConditionChange={onConditionChange}
         />
-      </Tabs.TabPane>
-    </StyledTabs>
+      ),
+    },
+  ];
+
+  return (
+    <StyledTabs
+      activeKey={curTab.toString()}
+      items={tabItems}
+      onChange={handleTabChange}
+    />
   );
 };
 

@@ -70,15 +70,14 @@ const MultiDropdownListFilter: FC<PresentControllerFilterProps> = memo(
         multiple
         treeCheckable
         treeDefaultExpandAll
+        treeData={originalNodes?.map((n: RelationFilterValue) => ({
+          key: n.key,
+          value: n.key,
+          title: n.label,
+        }))}
         value={selectedNodes as any}
         onChange={handleSelectedChange}
-      >
-        {originalNodes?.map((n: RelationFilterValue) => {
-          return (
-            <TreeSelect.TreeNode key={n.key} value={n.key} title={n.label} />
-          );
-        })}
-      </StyledMultiDropdownListFilter>
+      />
     );
   },
 );
