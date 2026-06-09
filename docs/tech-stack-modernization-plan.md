@@ -249,6 +249,7 @@
 - React Router 预迁移第十九批：前端主应用内剩余 `Redirect` 已统一替换为本地 `CompatRedirect` 组件，覆盖登录鉴权跳转、模块访问拒绝跳转以及 `MainPage` 根路径、组织首页和权限首页的默认跳转，先消除 `Redirect` 对 Router v5 的直接依赖。
 - React Router 预迁移第二十批：`AppRouter`、三个分享页 Router、成员页和 `VizPage/Main` 中的 `Switch` 已统一替换为本地 `CompatSwitch` 组件，先把 Router 容器组件的升级入口收敛到单点，降低后续切换到 Router 6 `Routes` 时的改动面。
 - React Router 预迁移第二十一批：新增 `CompatRoute` / `CompatRoutes`，并将 `AppRouter`、三个分享页 Router、成员页和 `VizPage/Main` 改写为 `element` 风格声明，先把低风险路由容器从 v5 的 children 形态迁到更接近 Router 6 `Routes + Route element` 的结构。
+- React Router 预迁移第二十二批：`MainPage` 主路由容器和 `LoginAuthRoute` 已切到 `CompatRoutes + CompatRoute + element` 形态，主应用入口不再直接依赖 `Switch` 和 `Route` children 声明，为后续真正切换到 Router 6/7 的 `Routes` 打通主干。
 
 验收门槛：
 - 全部路由可访问。
@@ -288,6 +289,23 @@
 ### 阶段 6：后端库现代化
 
 目标：删除老旧、高风险或重复的后端基础库。
+
+当前 review 结论：
+- `Selenium 3 + PhantomJSDriver` 是当前后端最老旧、风险最高的自动化组合。PhantomJS 已停止活跃维护，现代替代应优先考虑 `Playwright`，如必须保留 JVM 内集成则退而求其次迁到 `Selenium 4 + Chromium WebDriver`。
+- `fastjson 1.2.x` 仍在多个模块承担 JSON 解析、HTTP message converter 和配置反序列化，属于历史包袱。对 Spring Boot 3 项目，更现代且收敛的方向是统一到 `Jackson`；如果必须保留阿里系 API，则至少迁到 `fastjson2`，但不建议继续双栈长期共存。
+- JWT 目前同时存在 `jjwt 0.7.0` 和 `java-jwt 3.7.0` 两套老版本实现，维护成本高且安全面分散。建议统一到单一现代库，优先 `jjwt 0.12+`，也可评估是否完全交给 Spring Security OAuth2/JOSE 能力。
+- `Apache HttpClient 4.5.x` 与 `OkHttp` 并存，HTTP 客户端重复。JDK 21 下更现代的方向是统一到 `java.net.http.HttpClient` 或只保留一套活跃客户端；若短期兼容成本最低，可先升级到 `HttpClient 5` 并逐步收口。
+- `commons-lang 2.6`、`commons-io 1.3.1`、`guava 21.0`、`poi-ooxml 5.0.0`、`commons-csv 1.8` 都明显偏旧，其中 `commons-lang 2` 和 `commons-io 1.x` 优先级更高，因为现代代码大多已可用 `commons-lang3`、`commons-io 2.x` 或 JDK 标准库替换。
+- `H2 1.4.200` 仍适合作为兼容 demo 库，但不应视作长期现代化终态。若继续维护 demo / 测试数据，应补一套可在 `H2 2.x` 下运行的数据脚本或改为容器化测试数据库。
+- `Shiro 2` 现在已经能在 Boot 3 上运行，但从 Spring 生态一致性看，长期仍弱于 `Spring Security` 原生体系。这个迁移收益很高，但改动面极大，不应排在 Router、测试栈和 JSON/JWT 清理之前。
+
+建议升级顺序：
+1. 浏览器自动化：`PhantomJS` / `Selenium 3` -> `Playwright` 或 `Selenium 4`。
+2. 后端 JSON 栈：`fastjson 1.x` -> `Jackson` 单栈。
+3. JWT 栈统一：移除 `jjwt 0.7` 与 `java-jwt 3.7` 双实现。
+4. 基础工具库清理：`commons-lang 2`、`commons-io 1.x`、`guava 21`、`httpclient 4`。
+5. 数据与 demo 兼容：`H2 1.4` 升级路线。
+6. 安全框架长期演进：评估 `Shiro -> Spring Security`。
 
 升级项：
 - `fastjson 1.x` 迁移到 `fastjson2` 或统一到 Jackson。

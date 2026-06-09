@@ -17,19 +17,16 @@
  */
 
 import ChartEditor, { ChartEditorBaseProps } from 'app/components/ChartEditor';
+import { CompatRoute } from 'app/components/CompatRoute';
 import { CompatRedirect } from 'app/components/CompatRedirect';
+import { CompatRoutes } from 'app/components/CompatRoutes';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useMount from 'app/hooks/useMount';
 import ChartManager from 'app/models/ChartManager';
 import { useAppSlice } from 'app/slice';
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-  Route,
-  Switch,
-  useLocation,
-  useRouteMatch,
-} from 'react-router';
+import { useLocation, useRouteMatch } from 'react-router';
 import styled from 'styled-components/macro';
 import { NotFoundPage } from '../NotFoundPage';
 import { StoryEditor } from '../StoryBoardPage/Editor';
@@ -139,87 +136,128 @@ export function MainPage() {
       <Background />
       <Navbar />
       {orgId && (
-        <Switch>
-          <Route path="/" exact>
-            <CompatRedirect to={`/organizations/${orgId}`} />
-          </Route>
-          <Route path="/confirminvite">
-            <ConfirmInvitePage />
-          </Route>
-          <Route path="/organizations/:orgId" exact>
-            <CompatRedirect
-              to={`/organizations/${organizationMatch?.params.orgId}/vizs`}
-            />
-          </Route>
-          <Route path="/organizations/:orgId/vizs/chartEditor">
-            <ChartEditorRoute />
-          </Route>
-
-          <Route path="/organizations/:orgId/vizs/storyPlayer/:storyId">
-            <StoryPlayer />
-          </Route>
-          <Route path="/organizations/:orgId/vizs/storyEditor/:storyId">
-            <StoryEditor />
-          </Route>
-          <Route path="/organizations/:orgId/vizs/:vizId?">
-            <AccessRoute module={ResourceTypes.Viz}>
-              <VizPage />
-            </AccessRoute>
-          </Route>
-          <Route path="/organizations/:orgId/views/:viewId?">
-            <AccessRoute module={ResourceTypes.View}>
-              <ViewPage />
-            </AccessRoute>
-          </Route>
-          <Route path="/organizations/:orgId/sources">
-            <AccessRoute module={ResourceTypes.Source}>
-              <SourcePage />
-            </AccessRoute>
-          </Route>
-          <Route path="/organizations/:orgId/schedules">
-            <AccessRoute module={ResourceTypes.Schedule}>
-              <SchedulePage />
-            </AccessRoute>
-          </Route>
-          <Route path="/organizations/:orgId/members">
-            <AccessRoute module={ResourceTypes.User}>
-              <MemberPage />
-            </AccessRoute>
-          </Route>
-          <Route path="/organizations/:orgId/roles">
-            <AccessRoute module={ResourceTypes.User}>
-              <MemberPage />
-            </AccessRoute>
-          </Route>
-          <Route path="/organizations/:orgId/permissions" exact>
-            <CompatRedirect
-              to={`/organizations/${organizationMatch?.params.orgId}/permissions/subject`}
-            />
-          </Route>
-          <Route path="/organizations/:orgId/permissions/:viewpoint">
-            <AccessRoute module={ResourceTypes.Manager}>
-              <PermissionPage />
-            </AccessRoute>
-          </Route>
-          <Route path="/organizations/:orgId/variables">
-            <AccessRoute module={ResourceTypes.Manager}>
-              <VariablePage />
-            </AccessRoute>
-          </Route>
-          <Route path="/organizations/:orgId/orgSettings">
-            <AccessRoute module={ResourceTypes.Manager}>
-              <OrgSettingPage />
-            </AccessRoute>
-          </Route>
-          <Route path="/organizations/:orgId/resourceMigration">
-            <AccessRoute module={ResourceTypes.Manager}>
-              <ResourceMigrationPage />
-            </AccessRoute>
-          </Route>
-          <Route path="*">
-            <NotFoundPage />
-          </Route>
-        </Switch>
+        <CompatRoutes>
+          <CompatRoute
+            path="/"
+            exact
+            element={<CompatRedirect to={`/organizations/${orgId}`} />}
+          />
+          <CompatRoute
+            path="/confirminvite"
+            element={<ConfirmInvitePage />}
+          />
+          <CompatRoute
+            path="/organizations/:orgId"
+            exact
+            element={
+              <CompatRedirect
+                to={`/organizations/${organizationMatch?.params.orgId}/vizs`}
+              />
+            }
+          />
+          <CompatRoute
+            path="/organizations/:orgId/vizs/chartEditor"
+            element={<ChartEditorRoute />}
+          />
+          <CompatRoute
+            path="/organizations/:orgId/vizs/storyPlayer/:storyId"
+            element={<StoryPlayer />}
+          />
+          <CompatRoute
+            path="/organizations/:orgId/vizs/storyEditor/:storyId"
+            element={<StoryEditor />}
+          />
+          <CompatRoute
+            path="/organizations/:orgId/vizs/:vizId?"
+            element={
+              <AccessRoute module={ResourceTypes.Viz}>
+                <VizPage />
+              </AccessRoute>
+            }
+          />
+          <CompatRoute
+            path="/organizations/:orgId/views/:viewId?"
+            element={
+              <AccessRoute module={ResourceTypes.View}>
+                <ViewPage />
+              </AccessRoute>
+            }
+          />
+          <CompatRoute
+            path="/organizations/:orgId/sources"
+            element={
+              <AccessRoute module={ResourceTypes.Source}>
+                <SourcePage />
+              </AccessRoute>
+            }
+          />
+          <CompatRoute
+            path="/organizations/:orgId/schedules"
+            element={
+              <AccessRoute module={ResourceTypes.Schedule}>
+                <SchedulePage />
+              </AccessRoute>
+            }
+          />
+          <CompatRoute
+            path="/organizations/:orgId/members"
+            element={
+              <AccessRoute module={ResourceTypes.User}>
+                <MemberPage />
+              </AccessRoute>
+            }
+          />
+          <CompatRoute
+            path="/organizations/:orgId/roles"
+            element={
+              <AccessRoute module={ResourceTypes.User}>
+                <MemberPage />
+              </AccessRoute>
+            }
+          />
+          <CompatRoute
+            path="/organizations/:orgId/permissions"
+            exact
+            element={
+              <CompatRedirect
+                to={`/organizations/${organizationMatch?.params.orgId}/permissions/subject`}
+              />
+            }
+          />
+          <CompatRoute
+            path="/organizations/:orgId/permissions/:viewpoint"
+            element={
+              <AccessRoute module={ResourceTypes.Manager}>
+                <PermissionPage />
+              </AccessRoute>
+            }
+          />
+          <CompatRoute
+            path="/organizations/:orgId/variables"
+            element={
+              <AccessRoute module={ResourceTypes.Manager}>
+                <VariablePage />
+              </AccessRoute>
+            }
+          />
+          <CompatRoute
+            path="/organizations/:orgId/orgSettings"
+            element={
+              <AccessRoute module={ResourceTypes.Manager}>
+                <OrgSettingPage />
+              </AccessRoute>
+            }
+          />
+          <CompatRoute
+            path="/organizations/:orgId/resourceMigration"
+            element={
+              <AccessRoute module={ResourceTypes.Manager}>
+                <ResourceMigrationPage />
+              </AccessRoute>
+            }
+          />
+          <CompatRoute path="*" element={<NotFoundPage />} />
+        </CompatRoutes>
       )}
     </AppContainer>
   );
