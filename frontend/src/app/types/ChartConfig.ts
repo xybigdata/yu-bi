@@ -215,6 +215,7 @@ export type ChartStyleSectionRow = {
   value?: any;
   disabled?: boolean;
   hide?: boolean;
+  rows?: ChartStyleSectionRow[];
   options?: ChartStyleSectionRowOption;
   watcher?: ChartStyleSectionRowWatcher;
   template?: ChartStyleSectionRow;

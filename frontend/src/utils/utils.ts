@@ -264,36 +264,43 @@ export function getPath<T extends { id: string; parentId: string | null }>(
   }
 }
 
-export function filterListOrTree<T extends { children?: T[] }>(
+export function filterListOrTree<T>(
   dataSource: T[],
   keywords: string,
   filterFunc: (keywords: string, data: T) => boolean,
   filterLeaf?: boolean, // 是否展示所有叶子节点
-) {
+): T[] {
   return keywords
     ? dataSource.reduce<T[]>((filtered, d) => {
+        const treeNode = d as T & { children?: T[] };
         const isMatch = filterFunc(keywords, d);
         let isChildrenMatch: T[] | undefined;
-        if (filterLeaf && d.children?.every(c => (c as any).isLeaf)) {
+        if (filterLeaf && treeNode.children?.every(c => (c as any).isLeaf)) {
           isChildrenMatch =
-            isMatch || d.children.some(c => filterFunc(keywords, c))
-              ? d.children
+            isMatch || treeNode.children.some(c => filterFunc(keywords, c))
+              ? treeNode.children
               : void 0;
         } else {
           isChildrenMatch =
-            d.children &&
-            filterListOrTree(d.children, keywords, filterFunc, filterLeaf);
+            treeNode.children &&
+            filterListOrTree(
+              treeNode.children,
+              keywords,
+              filterFunc,
+              filterLeaf,
+            );
         }
         if (isMatch || (isChildrenMatch && isChildrenMatch.length > 0)) {
-          filtered.push({ ...d, children: isChildrenMatch });
+          filtered.push({ ...treeNode, children: isChildrenMatch } as T);
         }
         return filtered;
       }, [])
     : dataSource;
 }
 
-export function getExpandedKeys<T extends TreeDataNode>(nodes: T[]) {
-  return nodes.reduce<string[]>((keys, { key, children }) => {
+export function getExpandedKeys<T>(nodes: T[]) {
+  return nodes.reduce<string[]>((keys, node) => {
+    const { key, children } = node as T & TreeDataNode;
     if (Array.isArray(children) && children.length) {
       return keys
         .concat(key as string)

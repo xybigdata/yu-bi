@@ -26,6 +26,7 @@ const isMatchedTheCondition = (
   conditionValues: string | number | (string | number)[],
 ) => {
   let matchTheCondition = false;
+  const numericValue = typeof value === 'number' ? value : Number(value);
 
   switch (operatorType) {
     case OperatorTypes.Equal:
@@ -56,19 +57,30 @@ const isMatchedTheCondition = (
       break;
     case OperatorTypes.Between:
       const [min, max] = conditionValues as number[];
-      matchTheCondition = value >= min && value <= max;
+      matchTheCondition =
+        !Number.isNaN(numericValue) &&
+        numericValue >= min &&
+        numericValue <= max;
       break;
     case OperatorTypes.LessThan:
-      matchTheCondition = value < conditionValues;
+      matchTheCondition =
+        !Number.isNaN(numericValue) &&
+        numericValue < Number(conditionValues);
       break;
     case OperatorTypes.GreaterThan:
-      matchTheCondition = value > conditionValues;
+      matchTheCondition =
+        !Number.isNaN(numericValue) &&
+        numericValue > Number(conditionValues);
       break;
     case OperatorTypes.LessThanOrEqual:
-      matchTheCondition = value <= conditionValues;
+      matchTheCondition =
+        !Number.isNaN(numericValue) &&
+        numericValue <= Number(conditionValues);
       break;
     case OperatorTypes.GreaterThanOrEqual:
-      matchTheCondition = value >= conditionValues;
+      matchTheCondition =
+        !Number.isNaN(numericValue) &&
+        numericValue >= Number(conditionValues);
       break;
     case OperatorTypes.IsNull:
       if (typeof value === 'object' && value === null) {

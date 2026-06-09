@@ -7,6 +7,8 @@ import {
 export type SeriesData = {
   itemStyle?: {
     color?: string | undefined;
+    opacity?: number | undefined;
+    [key: string]: any;
   };
   name: string;
   rowData: { [key: string]: any };

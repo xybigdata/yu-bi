@@ -111,7 +111,7 @@ describe('MigrationEventDispatcher Tests', () => {
       dispatcher.process({ version: '', id: 1 } as any, {
         version: 'drawback version',
         id: 999,
-      }),
+      } as any),
     ).toEqual({
       id: 999,
       version: 'drawback version',

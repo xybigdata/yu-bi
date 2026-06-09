@@ -2,9 +2,20 @@ import invariant from 'invariant';
 import isEmpty from 'lodash/isEmpty';
 import isFunction from 'lodash/isFunction';
 import isString from 'lodash/isString';
+import { Reducer } from '@reduxjs/toolkit';
+import { InjectedReducersType } from 'utils/types/injector-typings';
 import checkStore from './checkStore';
 
-export function injectReducerFactory(store, isValid?) {
+interface ReducerInjectStore {
+  injectedReducers: InjectedReducersType;
+  createReducer: (injectedReducers?: InjectedReducersType) => Reducer;
+  replaceReducer: (nextReducer: Reducer) => void;
+}
+
+export function injectReducerFactory(
+  store: ReducerInjectStore,
+  isValid?: boolean,
+) {
   return function injectReducer(key, reducer) {
     if (!isValid) checkStore(store);
 
@@ -25,7 +36,7 @@ export function injectReducerFactory(store, isValid?) {
   };
 }
 
-export default function getInjectors(store) {
+export default function getInjectors(store: ReducerInjectStore) {
   checkStore(store);
 
   return {

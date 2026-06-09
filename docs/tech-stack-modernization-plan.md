@@ -242,6 +242,8 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 - `react-beautiful-dnd` 已从数据模型树场景迁出到维护中的 `@hello-pangea/dnd 18.0.1`，保留现有拖拽排序、组合建层级和层级内移动逻辑；补齐 `Draggable index` 的 number 约束。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
+- `typescript 4.5.4 -> 5.9.3`，`@reduxjs/toolkit 1.8.0 -> 2.12.0`，`react-redux 7.2.6 -> 9.3.0`；同步移除 `@types/react-redux`，按 RTK 2 的 `enhancers` 新签名调整 store 配置，并修复 TS5 暴露的公共树型 helper、图表样式和迁移测试类型问题。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 
 验收门槛：
 - `npm run checkTs` 通过。

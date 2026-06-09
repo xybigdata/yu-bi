@@ -27,10 +27,8 @@ function configureStore() {
       ...injectedReducers,
       nonInjected: (s = {}) => s,
     });
-
-  const enhancers = [injectReducerEnhancer(createReducer)];
-
-  const store = createStore(createReducer(), {}, compose(...enhancers));
+  const enhancer = injectReducerEnhancer(createReducer);
+  const store = createStore(createReducer(), {}, compose(enhancer));
 
   return store;
 }
@@ -66,7 +64,7 @@ describe('reducer injectors', () => {
     });
 
     it('should check a store if the second argument is falsy', () => {
-      const inject = injectReducerFactory({});
+      const inject = injectReducerFactory({} as any);
 
       expect(() => inject('test', reducer)).toThrow();
     });

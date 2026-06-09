@@ -16,13 +16,12 @@
  * limitations under the License.
  */
 
-import { TreeDataNode } from 'antd';
 import { DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
 import { useCallback, useMemo, useState } from 'react';
 import { getExpandedKeys } from 'utils/utils';
 import { useDebouncedSearch } from './useDebouncedSearch';
 
-export function useSearchAndExpand<T extends TreeDataNode>(
+export function useSearchAndExpand<T>(
   dataSource: T[] | undefined,
   filterFunc: (keywords: string, data: T) => boolean,
   wait: number = DEFAULT_DEBOUNCE_WAIT,

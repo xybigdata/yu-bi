@@ -1,6 +1,9 @@
-import { StoreEnhancer } from '@reduxjs/toolkit';
+import { Reducer, StoreEnhancer } from '@reduxjs/toolkit';
+import { InjectedReducersType } from 'utils/types/injector-typings';
 
-const injectReducerEnhancer = (createReducer): StoreEnhancer => {
+type CreateReducer = (injectedReducers?: InjectedReducersType) => Reducer;
+
+const injectReducerEnhancer = (createReducer: CreateReducer): StoreEnhancer => {
   return createStore =>
     (...args) => {
       const store = createStore(...args);

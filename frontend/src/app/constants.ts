@@ -151,7 +151,7 @@ export enum FilterConditionType {
     RecommendTime |
     Time |
     Tree,
-  Relation = 1 << 50,
+  Relation = 2 ** 50,
 }
 
 export const ChartDataSectionFieldActionType = {
