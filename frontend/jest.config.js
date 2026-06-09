@@ -40,13 +40,10 @@ module.exports = {
   testMatch: ['<rootDir>/src/**/__tests__/**/*.{spec,test}.{js,jsx,ts,tsx}'],
   testEnvironment: 'jsdom',
   transform: {
-    '^.+\\.(js|jsx|mjs|cjs|ts|tsx)$': require.resolve(
-      'react-scripts/config/jest/babelTransform',
-    ),
-    '^.+\\.css$': require.resolve('react-scripts/config/jest/cssTransform'),
-    '^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)': require.resolve(
-      'react-scripts/config/jest/fileTransform',
-    ),
+    '^.+\\.(js|jsx|mjs|cjs|ts|tsx)$': '<rootDir>/jest/babelTransform.js',
+    '^.+\\.css$': '<rootDir>/jest/cssTransform.js',
+    '^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)':
+      '<rootDir>/jest/fileTransform.js',
   },
   transformIgnorePatterns: [
     '[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$',

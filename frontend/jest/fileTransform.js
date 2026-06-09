@@ -1,0 +1,53 @@
+/**
+ * Datart
+ *
+ * Copyright 2021
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+'use strict';
+
+const path = require('path');
+const camelcase = require('camelcase');
+
+module.exports = {
+  process(src, filename) {
+    const assetFilename = JSON.stringify(path.basename(filename));
+
+    if (filename.match(/\.svg$/)) {
+      const pascalCaseFilename = camelcase(path.parse(filename).name, {
+        pascalCase: true,
+      });
+      const componentName = `Svg${pascalCaseFilename}`;
+      return `const React = require('react');
+      module.exports = {
+        __esModule: true,
+        default: ${assetFilename},
+        ReactComponent: React.forwardRef(function ${componentName}(props, ref) {
+          return {
+            $$typeof: Symbol.for('react.element'),
+            type: 'svg',
+            ref: ref,
+            key: null,
+            props: Object.assign({}, props, {
+              children: ${assetFilename}
+            })
+          };
+        }),
+      };`;
+    }
+
+    return `module.exports = ${assetFilename};`;
+  },
+};

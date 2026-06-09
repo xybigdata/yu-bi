@@ -8,7 +8,7 @@
 - 后端主框架：Spring Boot 3.5.12，Spring Cloud 2025.0.1。
 - 构建工具：Maven，`maven-compiler-plugin` 3.14.1，`maven-assembly-plugin` 3.8.0，`exec-maven-plugin` 3.6.3。
 - 前端运行时：本机 Node 26 可启动，默认开发和生产构建已切换到 Vite 5。
-- 前端主框架：React 18、React Router 5、Ant Design 4.24、TypeScript 5.9；CRACO 7/CRA5 仅作为回退脚本保留。
+- 前端主框架：React 18、React Router 6.30.1、Ant Design 4.24、TypeScript 5.9；CRA/CRACO 已退出前端主工作流。
 - 已验证基线：
   - `npm run checkTs` 通过。
   - `npm run build:task` 通过。
@@ -473,7 +473,7 @@
 ### 阶段 1-2 交付物
 
 - Vite 成为默认开发与生产构建链。
-- CRA / CRACO 仅作为短期回退链存在，并有明确移除计划。
+- CRA / CRACO 退出前端开发、构建与测试主链。
 - 多入口 HTML、静态资源复制、parser task 生成链稳定。
 
 完成定义：
@@ -605,22 +605,22 @@
 ### C. 前端测试栈 backlog
 
 当前扫描结论：
-- `frontend/package.json` 仍保留：
+- `frontend/package.json` 已不再保留：
   - `react-scripts`
   - `@craco/craco`
   - `enzyme`
   - `@cfaester/enzyme-adapter-react-18`
-- 代码仍保留：
-  - `frontend/src/setupTests.ts` 中的 Enzyme 初始化
-  - `frontend/src/react-app-env.d.ts` 对 `react-scripts` 的引用
-  - `react-app-polyfill` 在 `entryPointFactory.tsx`、`task.ts`、`setupTests.ts` 中的显式引入
+- 当前残留主要是：
+  - Jest 版本仍停留在 27.5.1
+  - `react-app-polyfill` 在 `entryPointFactory.tsx`、`task.ts`、`setupTests.ts` 中仍有显式引入
+  - ESLint 工具链仍依赖 `eslint-config-react-app`
 
 工作包拆分：
 1. Enzyme 测试盘点与替换优先级排序。
 2. `setupTests.ts` 迁到纯 Testing Library。
-3. Jest/测试运行链从 CRA 拆出，或迁到 Vitest。
+3. Jest 27 升级到较新稳定线，或迁到 Vitest。
 4. `react-app-polyfill` 的浏览器支持策略确认与移除。
-5. 删除 `react-scripts` / `@craco/craco`。
+5. 继续清理 `eslint-config-react-app` 等 CRA 历史工具链残留。
 
 ### D. 后端现代化 backlog
 
@@ -658,7 +658,7 @@
 
 1. Router 兼容层主替换：`useCompatNavigate` / `CompatRoutes` 真正接管到 Router 6/7。
 2. AntD 5 收尾清理：优先处理 `visible` 和剩余 JSX `Menu.*`。
-3. 测试栈预清理：先移除 Enzyme 依赖面，再处理 CRA 测试链。
+3. 测试栈现代化：先升级 Jest 或迁到 Vitest，再处理 `react-app-polyfill` 与 ESLint 残留。
 4. 浏览器自动化现状梳理，确定 `Playwright` 还是 `Selenium 4`。
 5. FastJson 使用面梳理并设计 Jackson 迁移边界。
 
@@ -695,7 +695,7 @@
 
 1. 继续预处理 AntD 5 API 迁移热点：复杂 `Menu.Item`/`Menu.SubMenu` JSX 菜单、Tooltip/Popover 的 `overlay` 内容和项目封装层 legacy `visible` 入参。
 2. 继续 React Router 5 -> 6/7 预迁移，优先清理剩余 `Route component=` / `Route render=`、`Redirect`、`useHistory` 和嵌套路由旧写法。
-3. 继续把 Jest 对 `react-scripts` transform 的借用替换成独立配置，完成前端测试链彻底去 CRA 化。
+3. 继续升级前端测试栈到较新稳定线，并处理 `react-app-polyfill` 与 `eslint-config-react-app` 残留。
 
 ## 2026-06-09 老旧技术栈盘点
 
@@ -707,7 +707,7 @@
    - 当前动作：先继续用 `useCompatNavigate` 收口导航调用点，再统一升级路由声明与重定向。
 
 2. CRA 测试链残留
-   - 现状：运行与构建已迁到 Vite，`@craco/craco` 已删除，但 Jest 27 仍借用 `react-scripts` 提供的 transform。
+   - 现状：运行、构建、测试链已全部脱离 CRA/CRACO，但 Jest 仍停留在 27.5.1，ESLint 仍借用 `eslint-config-react-app` 这类 CRA 时代工具配置。
    - 更现代替代：Vitest，或独立 Jest 29/30 配置。
    - 升级前提：先完成 React Router 与 AntD 主迁移，避免多个高风险面同时变化。
 
@@ -787,10 +787,16 @@
 
 - `frontend/package.json` 的 `test` 脚本已从 `craco test` 切到 `jest --config jest.config.js`。
 - `frontend/jest.config.js` 已改为静态独立配置，测试执行入口已经不再依赖 CRACO 配置生成。
-- 当前测试链仍暂时借用 `react-scripts/config/jest/*` 下的 transform 与 mock，后续再继续把这部分替换为完全独立的 Jest 或 Vitest 方案。
+- `frontend/jest/` 已新增本地 `babelTransform.js`、`cssTransform.js`、`fileTransform.js`，测试链不再依赖 `react-scripts/config/jest/*`。
+- `frontend/package.json` 与 lockfile 已显式声明 `jest`、`jest-environment-jsdom`、`babel-jest`、`babel-preset-react-app`、`identity-obj-proxy`、`jest-watch-typeahead`，并移除 `react-scripts`。
 
 ### 并行治理：删除 CRACO 回退外壳
 
 - `frontend/package.json` 已删除 `start:cra`、`build:cra`、`eject` 等只服务 CRA/CRACO 的历史脚本。
 - `frontend/package.json` 与 lockfile 已移除 `@craco/craco`，并同步删除只服务旧 webpack/CRACO 外壳的 `cross-env`、`monaco-editor-webpack-plugin`、`webpackbar`、`webpack-cli`、`@types/webpack`、`@types/webpack-env`。
 - `frontend/craco.config.js` 已删除，前端运行与构建主链只保留 Vite 配置作为单一入口。
+
+### 并行治理：Vite 浏览器兼容告警暴露
+
+- 在删除 `react-scripts` 后重新验证 Vite 构建时，`src/app/pages/DashBoardPage/pages/BoardEditor/slice/events.ts` 引入的 Node `events` 模块触发了浏览器外置化告警。
+- 当前构建仍然成功，这说明它不是本批的阻断项，但需要后续单独评估是改为浏览器友好的事件实现，还是在 Vite 侧显式补兼容策略。
