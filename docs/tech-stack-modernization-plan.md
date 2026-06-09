@@ -170,19 +170,19 @@
 - `react-helmet-async 1.2.2 -> 3.0.0`，先消除 React 18 类型迁移中 Helmet/HelmetProvider `children` 类型不完整的问题。
 - `antd 4.16.13 -> 4.24.16`，先升级到 Ant Design 4 最后稳定线，避免一次性跨到 5 带来大面积 API 和主题回归。
 - React 18 类型定义已落地，UI 组件中依赖 React 17 隐式 `children` 的写法已清理到可编译状态。
-- 保留现有浏览器端 Less 动态主题链，并在主题生成脚本中兼容 AntD 4.24 的 `@{root-entry-name}` 动态主题入口。
+- 移除 `antd-theme-generator`、`frontend/scripts/extractAntdTheme.js` 和浏览器端 `less.min.js` 动态编译链。
+- AntD 4.24 样式入口切换为 `antd.variable.min.css`，运行时主题切换改用 `ConfigProvider.config({ theme })` 写入 CSS variables，为 Ant Design 5 token 主题迁移铺路。
 - 修复 AntD 4.24 暴露的类型收紧问题，包括 `InputRef`、`InputNumber` 的 `number | null`、Tree/Cascader 节点类型和 FormList `fieldKey` 可选值。
 - 修复 Vite 生产构建中 CRA HMR 兼容分支被折叠成裸 `module.hot` 后导致预览页空白的问题。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
 
 预研结果：
 - Ant Design 相关调用点约 358 个文件，`visible`/`onVisibleChange`/`overlay`/`Menu.Item` 等 AntD 5 迁移热点分布广，不能直接大版本替换。
-- `antd-theme-generator 1.2.11` 仍是过渡依赖：AntD 4.24 下需要项目脚本兼容动态 Less import，后续迁移 Ant Design 5 前仍应替换为 token/CSS 变量方案。
-- 因此 UI 阶段后续顺序应先替换或移除 `antd-theme-generator` 和浏览器端 Less 动态主题链，再迁移到 Ant Design 5 token 主题。
+- 动态主题链已从浏览器端 Less 编译迁到 AntD CSS variables；后续迁移 Ant Design 5 时需要把 `ConfigProvider.config` 迁到组件级 `ConfigProvider` token 配置。
 
 风险：
 - Ant Design 5/6 token、Less 变量和组件 API 变化较大。
-- 当前动态主题依赖 Ant Design 4 Less 变量和浏览器端 `less.min.js`，这是迁移 Ant Design 5/6 的主要阻塞。
+- 当前仍有大量 AntD 4 API 调用点，包括 `visible`/`onVisibleChange`/`overlay`/`Menu.Item`，这是迁移 Ant Design 5/6 的主要阻塞。
 - React Router 6/7 的路由声明和导航 API 有破坏性变化。
 
 验收门槛：
@@ -272,7 +272,6 @@
 
 阶段 3 已完成，下一步进入阶段 4 的 UI 与路由现代化准备：
 
-1. 替换 `antd-theme-generator` 和浏览器端 Less 动态主题链，为 Ant Design 5 token 主题铺路。
-2. 梳理 `@types/react@18` 的阻塞点，优先补齐公共组件和上下文组件的 `children` 类型。
-3. 评估 React Router 5 -> 6/7 的路由声明、`useHistory`、`Redirect` 和嵌套路由替换方案。
-4. 保持 CRA5/CRACO 回退脚本，直到 Jest/测试栈迁出 CRA。
+1. 批量梳理并预处理 AntD 5 API 迁移热点：`visible`/`onVisibleChange`/`overlay`/`Menu.Item`。
+2. 评估 React Router 5 -> 6/7 的路由声明、`useHistory`、`Redirect` 和嵌套路由替换方案。
+3. 保持 CRA5/CRACO 回退脚本，直到 Jest/测试栈迁出 CRA。

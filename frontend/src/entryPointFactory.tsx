@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import 'antd/dist/antd.min.css';
+import 'antd/dist/antd.variable.min.css';
 import 'app/assets/fonts/iconfont.css';
 import 'core-js/features/string/replace-all';
 import React, { Fragment } from 'react';

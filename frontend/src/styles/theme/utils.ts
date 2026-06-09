@@ -1,5 +1,4 @@
-import darkTheme from 'antd/dist/dark-theme';
-import lightTheme from 'antd/dist/default-theme';
+import { ConfigProvider } from 'antd';
 import { StorageKeys } from 'globalConstants';
 import { ThemeKeyType } from './slice/types';
 import { themes } from './themes';
@@ -28,35 +27,25 @@ export function getThemeFromStorage(): ThemeKeyType {
   return theme;
 }
 
-export function getTokenVariableMapping(themeKey: string) {
-  const currentTheme = themes[themeKey];
+export function getAntdThemeVariables(themeKey: string) {
+  const currentTheme =
+    themeKey === 'system'
+      ? isSystemDark
+        ? themes.dark
+        : themes.light
+      : themes[themeKey];
   return {
-    '@primary-color': currentTheme.primary,
-    '@success-color': currentTheme.success,
-    '@processing-color': currentTheme.processing,
-    '@error-color': currentTheme.error,
-    '@highlight-color': currentTheme.highlight,
-    '@warning-color': currentTheme.warning,
-    '@body-background': currentTheme.bodyBackground,
-    '@text-color': currentTheme.textColor,
-    '@text-color-secondary': currentTheme.textColorLight,
-    '@heading-color': currentTheme.textColor,
-    '@disabled-color': currentTheme.textColorDisabled,
+    primaryColor: currentTheme.primary,
+    infoColor: currentTheme.info,
+    successColor: currentTheme.success,
+    processingColor: currentTheme.processing,
+    errorColor: currentTheme.error,
+    warningColor: currentTheme.warning,
   };
 }
 
-export function getVarsToBeModified(themeKey: string) {
-  const tokenVariableMapping = getTokenVariableMapping(themeKey);
-  return {
-    ...(themeKey === 'light' ? lightTheme : darkTheme),
-    ...tokenVariableMapping,
-  };
-}
-
-export async function changeAntdTheme(themeKey: string) {
-  try {
-    await (window as any).less.modifyVars(getVarsToBeModified(themeKey));
-  } catch (error) {
-    console.log(error);
-  }
+export function changeAntdTheme(themeKey: string) {
+  ConfigProvider.config({
+    theme: getAntdThemeVariables(themeKey),
+  });
 }
