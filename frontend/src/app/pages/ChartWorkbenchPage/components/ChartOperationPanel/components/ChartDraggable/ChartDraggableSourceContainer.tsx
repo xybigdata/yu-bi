@@ -27,7 +27,7 @@ import {
   NumberOutlined,
   TableOutlined,
 } from '@ant-design/icons';
-import { Collapse, Dropdown, Menu, Row } from 'antd';
+import { Collapse, Dropdown, Row } from 'antd';
 import { IW, ToolbarButton } from 'app/components';
 import { ChartDataViewFieldCategory, DataViewFieldType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -158,16 +158,17 @@ export const ChartDraggableSourceContainer: FC<
       }
     };
 
-    const _getExtraActionMenus = () => {
-      return (
-        <Menu onClick={e => _handleMenuClick(e, colName)}>
-          <Menu.Item key="edit">{t('editField')}</Menu.Item>
-          <Menu.Item disabled={isViewComputedFields} key="delete">
-            {t('deleteField')}
-          </Menu.Item>
-        </Menu>
-      );
-    };
+    const extraActionMenuItems = [
+      {
+        key: 'edit',
+        label: t('editField'),
+      },
+      {
+        key: 'delete',
+        label: t('deleteField'),
+        disabled: isViewComputedFields,
+      },
+    ];
 
     let icon = <FileUnknownOutlined />;
     const props = {
@@ -281,7 +282,10 @@ export const ChartDraggableSourceContainer: FC<
           <div onClick={stopPPG}>
             <Dropdown
               disabled={_isAllowMoreAction()}
-              dropdownRender={_getExtraActionMenus}
+              menu={{
+                items: extraActionMenuItems,
+                onClick: e => _handleMenuClick(e, colName),
+              }}
               trigger={['click']}
             >
               <ToolbarButton
