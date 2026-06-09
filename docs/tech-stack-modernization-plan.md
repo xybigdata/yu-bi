@@ -1046,6 +1046,22 @@
   - `npm test -- --runInBand --watchAll=false` 通过
   - `npm run build` 通过
 
+### 并行治理：收口主导航里的 Ant Design 旧菜单 API
+
+- 主导航和组织切换菜单这一批已从旧的 `Menu.Item` / `Menu.SubMenu` / `Menu.Divider` JSX 子节点模式切到 `Menu items` 数组模式，覆盖：
+  - `frontend/src/app/pages/MainPage/Navbar/index.tsx`
+  - `frontend/src/app/pages/MainPage/Navbar/OrganizationList.tsx`
+- `frontend/src/app/components/Popup/MenuListItem.tsx` 新增了可复用的 `MenuItemContent` 渲染组件，用于保留现有 prefix / suffix / 对齐样式，同时让新的 `items` 数据结构不必再依赖 `Menu.SubMenu` JSX 包装。
+- 这一步仍然没有硬切整个 `Popup/MenuListItem` 生态，只先收口“主导航”这一块业务域，避免把所有树、列表、侧边栏右键菜单一次性卷入。
+- 保留语义：
+  - 语言切换和主题切换仍保持二级子菜单结构
+  - 个人资料 / 修改密码 / 退出登录行为保持不变
+  - 组织切换列表的当前项高亮与勾选图标保持不变
+- 2026-06-10 验证：
+  - `npm run checkTs` 通过
+  - `npm test -- --runInBand --watchAll=false` 通过
+  - `npm run build` 通过
+
 ### 2026-06-10 全项目老旧技术栈复核结论
 
 这一轮不是只看版本号，而是按“是否仍在主维护线、是否已经被现代替代方案覆盖、是否值得继续在当前架构上扩展”三条标准重新复核。

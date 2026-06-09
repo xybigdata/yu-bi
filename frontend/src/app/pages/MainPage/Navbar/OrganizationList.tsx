@@ -21,8 +21,9 @@ import {
   LoadingOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
-import { Menu } from 'antd';
-import { Avatar, MenuListItem, ToolbarButton } from 'app/components';
+import { Menu, MenuProps } from 'antd';
+import { Avatar, ToolbarButton } from 'app/components';
+import { MenuItemContent } from 'app/components/Popup/MenuListItem';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
@@ -82,34 +83,38 @@ export function OrganizationList() {
       </LoadingWrapper>
     );
   } else {
+    const items: MenuProps['items'] = organizations.map(o => {
+      const itemClass = classnames({
+        selected: orgId === o.id,
+      });
+
+      return {
+        key: o.id,
+        className: itemClass,
+        label: (
+          <MenuItemContent
+            prefix={
+              <Avatar size="small" src={`${BASE_RESOURCE_URL}${o.avatar}`}>
+                {o.name.substr(0, 1).toUpperCase()}
+              </Avatar>
+            }
+            suffix={
+              orgId === o.id ? <CheckOutlined className="icon" /> : undefined
+            }
+          >
+            <p>{o.name}</p>
+          </MenuItemContent>
+        ),
+      };
+    });
+
     list = (
       <StyledMenu
         prefixCls="ant-dropdown-menu"
         selectable={false}
         onClick={menuSelect}
-      >
-        {organizations.map(o => {
-          const itemClass = classnames({
-            selected: orgId === o.id,
-          });
-          return (
-            <MenuListItem
-              key={o.id}
-              className={itemClass}
-              prefix={
-                <Avatar size="small" src={`${BASE_RESOURCE_URL}${o.avatar}`}>
-                  {o.name.substr(0, 1).toUpperCase()}
-                </Avatar>
-              }
-              {...(orgId === o.id && {
-                suffix: <CheckOutlined className="icon" />,
-              })}
-            >
-              <p>{o.name}</p>
-            </MenuListItem>
-          );
-        })}
-      </StyledMenu>
+        items={items}
+      />
     );
   }
 

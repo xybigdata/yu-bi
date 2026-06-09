@@ -33,18 +33,18 @@ export function MenuListItem({
       css={WrapperStyle}
       {...menuProps}
       title={
-        <ListItem prefix={prefix} suffix={suffix}>
+        <MenuItemContent prefix={prefix} suffix={suffix}>
           {menuProps.title}
-        </ListItem>
+        </MenuItemContent>
       }
     >
       {menuProps.children}
     </Menu.SubMenu>
   ) : (
     <Menu.Item css={WrapperStyle} {...menuProps}>
-      <ListItem prefix={prefix} suffix={suffix}>
+      <MenuItemContent prefix={prefix} suffix={suffix}>
         {menuProps.children}
-      </ListItem>
+      </MenuItemContent>
     </Menu.Item>
   );
 }
@@ -55,7 +55,7 @@ interface ListItemProps {
   children?: ReactNode;
 }
 
-function ListItem({ prefix, suffix, children }: ListItemProps) {
+export function MenuItemContent({ prefix, suffix, children }: ListItemProps) {
   return (
     <StyledListItem>
       {prefix &&

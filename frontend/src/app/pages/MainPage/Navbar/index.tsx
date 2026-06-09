@@ -29,10 +29,11 @@ import {
   SkinOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { List, Menu, Tooltip } from 'antd';
+import { List, Menu, MenuProps, Tooltip } from 'antd';
 import logo from 'app/assets/images/logo.svg';
 import { CompatNavLink } from 'app/components/CompatNavLink';
-import { Avatar, MenuListItem, Popup } from 'app/components';
+import { Avatar, Popup } from 'app/components';
+import { MenuItemContent } from 'app/components/Popup/MenuListItem';
 import { TenantManagementMode } from 'app/constants';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -103,6 +104,69 @@ export function Navbar() {
   const brandClick = useCallback(() => {
     navigate.push('/');
   }, [navigate]);
+
+  const accountMenuItems = useMemo<MenuProps['items']>(
+    () => [
+      {
+        key: 'language',
+        icon: <GlobalOutlined className="icon" />,
+        label: <p>{t('nav.account.switchLanguage.title')}</p>,
+        children: [
+          { key: 'zh', label: '中文' },
+          { key: 'en', label: 'English' },
+        ],
+      },
+      {
+        key: 'theme',
+        icon: <SkinOutlined className="icon" />,
+        label: <p>{t('nav.account.switchTheme.title')}</p>,
+        children: [
+          {
+            key: 'light',
+            label: (
+              <MenuItemContent prefix={<ThemeBadge />}>
+                {t('nav.account.switchTheme.light')}
+              </MenuItemContent>
+            ),
+          },
+          {
+            key: 'dark',
+            label: (
+              <MenuItemContent prefix={<ThemeBadge background={BLACK} />}>
+                {t('nav.account.switchTheme.dark')}
+              </MenuItemContent>
+            ),
+          },
+        ],
+      },
+      { type: 'divider' },
+      {
+        key: 'profile',
+        label: (
+          <MenuItemContent prefix={<ProfileOutlined className="icon" />}>
+            <p>{t('nav.account.profile.title')}</p>
+          </MenuItemContent>
+        ),
+      },
+      {
+        key: 'password',
+        label: (
+          <MenuItemContent prefix={<FormOutlined className="icon" />}>
+            <p>{t('nav.account.changePassword.title')}</p>
+          </MenuItemContent>
+        ),
+      },
+      {
+        key: 'logout',
+        label: (
+          <MenuItemContent prefix={<ExportOutlined className="icon" />}>
+            <p>{t('nav.account.logout.title')}</p>
+          </MenuItemContent>
+        ),
+      },
+    ],
+    [t],
+  );
 
   const hideProfile = useCallback(() => {
     setProfileVisible(false);
@@ -330,52 +394,8 @@ export function Navbar() {
                 selectable={false}
                 selectedKeys={[lang!, themeKey]}
                 onClick={userMenuSelect}
-              >
-                <MenuListItem
-                  key="language"
-                  prefix={<GlobalOutlined className="icon" />}
-                  title={<p>{t('nav.account.switchLanguage.title')}</p>}
-                  sub
-                >
-                  <MenuListItem key="zh">中文</MenuListItem>
-                  <MenuListItem key="en">English</MenuListItem>
-                </MenuListItem>
-                <MenuListItem
-                  key="theme"
-                  prefix={<SkinOutlined className="icon" />}
-                  title={<p>{t('nav.account.switchTheme.title')}</p>}
-                  sub
-                >
-                  <MenuListItem key="light" prefix={<ThemeBadge />}>
-                    {t('nav.account.switchTheme.light')}
-                  </MenuListItem>
-                  <MenuListItem
-                    key="dark"
-                    prefix={<ThemeBadge background={BLACK} />}
-                  >
-                    {t('nav.account.switchTheme.dark')}
-                  </MenuListItem>
-                </MenuListItem>
-                <Menu.Divider />
-                <MenuListItem
-                  key="profile"
-                  prefix={<ProfileOutlined className="icon" />}
-                >
-                  <p>{t('nav.account.profile.title')}</p>
-                </MenuListItem>
-                <MenuListItem
-                  key="password"
-                  prefix={<FormOutlined className="icon" />}
-                >
-                  <p>{t('nav.account.changePassword.title')}</p>
-                </MenuListItem>
-                <MenuListItem
-                  key="logout"
-                  prefix={<ExportOutlined className="icon" />}
-                >
-                  <p>{t('nav.account.logout.title')}</p>
-                </MenuListItem>
-              </Menu>
+                items={accountMenuItems}
+              />
             }
             trigger={['click']}
             placement="rightBottom"
