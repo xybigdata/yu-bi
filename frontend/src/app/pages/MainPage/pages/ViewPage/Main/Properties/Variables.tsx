@@ -25,6 +25,7 @@ import {
   TeamOutlined,
 } from '@ant-design/icons';
 import { Button, List, Popconfirm } from 'antd';
+import { monaco } from 'app/components/MonacoEditor';
 import { ListItem } from 'app/components';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -54,7 +55,6 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { monaco } from 'react-monaco-editor';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';

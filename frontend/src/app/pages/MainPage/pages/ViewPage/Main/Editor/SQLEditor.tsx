@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import MonacoEditor, { monaco } from 'app/components/MonacoEditor';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import classnames from 'classnames';
 import { CommonFormTypes } from 'globalConstants';
@@ -29,7 +30,6 @@ import React, {
   useMemo,
 } from 'react';
 import { useHotkeys } from 'react-hotkeys-hook';
-import MonacoEditor, { monaco } from 'react-monaco-editor';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';

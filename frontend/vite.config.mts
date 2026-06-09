@@ -126,13 +126,6 @@ export default defineConfig(({ mode }) => ({
       { find: 'styles', replacement: path.resolve(srcRoot, 'styles') },
       { find: 'types', replacement: path.resolve(srcRoot, 'types') },
       { find: 'utils', replacement: path.resolve(srcRoot, 'utils') },
-      {
-        find: 'react-monaco-editor',
-        replacement: path.resolve(
-          appRoot,
-          'node_modules/react-monaco-editor/lib/index.js',
-        ),
-      },
     ],
   },
   define: {

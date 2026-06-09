@@ -249,7 +249,6 @@
   - `react-resize-detector` 已退出，统一切到仓库自有 `useResizeObserver`，底层直接使用浏览器原生 `ResizeObserver`，并保留 `window.resize` fallback。
   - 这一批不改调用方 API，只替换底层实现，确保布局测量、看板尺寸计算、分享页预览和资源树高度计算继续按原接口工作。
 - 下一批优先候选
-  - `react-monaco-editor -> @monaco-editor/react`
   - `react-color -> 原生 `<input type="color">` 或更轻量、仍活跃维护的色板组件`
   - `react-window` 保留观望；若现有虚拟表格性能与 API 满足需求，可继续保留，不强制为“为了新而新”迁移
 - 完成定义
@@ -265,7 +264,7 @@
 | 前端 UI 基座 | `antd 4.24.x` | 仍在主运行时，已完成多批 API 清障 | 升级到 `antd 5.x`，同步升级 `@ant-design/icons` | 高 |
 | 时间体系 | `moment` | 仍有较大残留，已建立 `dayjs` 适配层 | 全面迁到 `dayjs`，仅在控件值类型阶段做局部适配 | 高 |
 | 富文本 | `react-quill 1.3.5` + `quilljs-markdown` | 偏旧，且与 Quill 2 生态脱节 | 优先评估 `react-quill 2.x` / Quill 2 原生封装 | 高 |
-| 代码编辑器 | `react-monaco-editor 0.59.0` | 历史封装，生态活跃度弱于新方案 | `@monaco-editor/react` | 中高 |
+| 代码编辑器 | `react-monaco-editor 0.59.0` | 已退出；改为仓库自有 Monaco React 适配层 | 直接基于 `monaco-editor` 维护自有适配组件 | 已完成 |
 | 故事播放 | `reveal.js 4.1.0` | 仍可用，但版本较旧 | 先升级到较新稳定线，长期再评估 React 原生故事方案 | 中 |
 | 颜色选择器 | `react-color 2.19.3` | 老牌库，长期维护信号一般 | 原生色彩输入或更轻的现代封装 | 中 |
 | 尺寸监听 | `react-resize-detector` | 已退出 | 原生 `ResizeObserver` + 自有 hook | 已完成 |

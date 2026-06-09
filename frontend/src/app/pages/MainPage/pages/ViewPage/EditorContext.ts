@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import { monaco } from 'app/components/MonacoEditor';
 import {
   createContext,
   MutableRefObject,
@@ -24,7 +25,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import { monaco } from 'react-monaco-editor';
 
 interface EditorContextValue {
   editorInstance: monaco.editor.IStandaloneCodeEditor | undefined;

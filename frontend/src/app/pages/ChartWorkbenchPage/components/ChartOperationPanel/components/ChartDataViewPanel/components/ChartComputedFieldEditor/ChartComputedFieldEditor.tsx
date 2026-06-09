@@ -17,6 +17,9 @@
  */
 
 import { Divider, Row } from 'antd';
+import MonacoEditor, {
+  MonacoEditorHandle,
+} from 'app/components/MonacoEditor';
 import {
   ChartComputedFieldHandle,
   FunctionDescription,
@@ -29,7 +32,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import MonacoEditor, { MonacoEditorHandle } from 'react-monaco-editor';
 import styled from 'styled-components';
 import ChartComputedFieldEditorDarkTheme from './ChartComputedFieldEditorDarkTheme';
 import DatartQueryLanguageSpecification from './DatartQueryLanguageSpecification';

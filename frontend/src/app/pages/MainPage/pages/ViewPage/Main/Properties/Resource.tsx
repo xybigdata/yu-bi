@@ -25,6 +25,7 @@ import {
   TableOutlined,
 } from '@ant-design/icons';
 import { Button, Col, Dropdown, Input, Row, Space, TreeDataNode } from 'antd';
+import { monaco } from 'app/components/MonacoEditor';
 import { Tree } from 'app/components';
 import { DataViewFieldType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -40,7 +41,6 @@ import {
   useMemo,
   useState,
 } from 'react';
-import { monaco } from 'react-monaco-editor';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';

@@ -17,10 +17,10 @@
  */
 // import JSONFormatter from 'json-formatter-js';
 // import {languages} from 'monaco-editor/esm/vs/language/json/fillers/monaco-editor-core.js';
+import MonacoEditor, { monaco } from 'app/components/MonacoEditor';
 import debounce from 'lodash/debounce';
 import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution';
 import { FC, memo, useCallback, useMemo } from 'react';
-import MonacoEditor, { monaco } from 'react-monaco-editor';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { FONT_SIZE_BASE } from 'styles/StyleConstants';
