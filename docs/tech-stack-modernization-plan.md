@@ -853,6 +853,12 @@
 - `security/pom.xml` 已删除未使用的 `com.auth0:java-jwt:3.7.0` 依赖。
 - 2026-06-09 复核：当前仓库的 JWT 主链调用均来自 `security/src/main/java/datart/security/util/JwtUtils.java` 与 `security/src/main/java/datart/security/util/JwkUtils.java`，运行时实际仍基于 `io.jsonwebtoken:jjwt:0.7.0`。
 - 这一步先完成“去冗余”，后续仍需单独把 `jjwt 0.7.0` 升级到现代版本，并处理其 API 变更。
+- 当前已确认一个升级风险点：现有默认 `datart.security.token.secret` 是短字符串，若直接升级到现代 `jjwt 0.12+`，HMAC 密钥长度校验可能导致默认配置无法继续用于 `HS256`，需要在升级批次里一并处理兼容策略。
+
+### 并行治理：移除未使用的 cglib 直接依赖
+
+- `core/pom.xml` 已删除未使用的 `cglib:cglib:3.3.0` 直接依赖。
+- 2026-06-09 复核：主代码检索 `cglib` / `Enhancer` / `MethodInterceptor` 结果为空，当前项目没有实际运行时代码依赖该库。
 
 ### 并行治理：清理 commons-lang 2 与直连 commons-io 1.x 使用点
 
