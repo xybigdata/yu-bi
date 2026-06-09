@@ -195,17 +195,18 @@
 
 已完成：
 - 新增并行 Vite 5 构建链：`dev:vite`、`build:vite`。
-- 默认 `start`、`build` 已切换到 Vite；保留 `start:cra`、`build:cra` 作为 CRA5 回退脚本。
+- 默认 `start`、`build` 已切换到 Vite，并已删除 `start:cra`、`build:cra` 这类 CRA5 回退脚本。
 - 新增 Vite 多页面 HTML 入口：`index.html`、`shareChart.html`、`shareDashboard.html`、`shareStoryPlayer.html`。
 - 迁移 Vite dev proxy 和 custom chart plugins middleware。
 - 适配 CRA 兼容层：`process.env.NODE_ENV`、`process.env.PUBLIC_URL`、`module.hot`/`import.meta.hot`、`styled-components/macro`、SVG `ReactComponent` 导入、Ant Design Less 的 `~` import。
 - 消除 Vite/Rollup 对 `app/components/index.tsx` barrel 循环 re-export 的分包警告。
 - Vite 配置已改为 `.mts`，消除 CJS Node API 弃用警告。
 - Vite 默认输出目录已切换为 `frontend/build`，兼容后端 Maven `package` 阶段的静态资源复制路径。
+- 已删除失去运行职责的 `@craco/craco` 与 `frontend/craco.config.js`，前端运行/构建主链不再保留 CRACO 外壳。
 
 风险：
 - `process.env.PUBLIC_URL`、`BrowserRouter basename`、资源路径可能需要统一处理。
-- CRA 的 Jest 配置仍暂时通过 CRACO 保留，后续测试栈迁移时需要替换。
+- Jest 当前仍暂时借用 `react-scripts` 提供的 transform 与样式/file mock，后续测试栈迁移时需要替换为独立方案。
 - Vite 产物仍有大 chunk 提示，替换默认构建前需要继续优化分包和动态加载策略。
 
 验收门槛：
@@ -217,7 +218,6 @@
 当前并行验收：
 - `npm run build:all` 成功，产出 `build/index.html`、三个 share HTML 和 `build/task/index.js`。
 - `npm start` 成功，首页 200，`/api/v1/plugins/custom/charts` 返回成功，`/shareChart/test-token` 返回 share chart 入口。
-- `npm run build:cra` 仍可成功，用于短期回退和差异对比。
 - `mvn -DskipTests -Dexec.skip=false package -pl server -am` 成功，`copy-resource` 从 `frontend/build` 复制 57 个资源到 `static`，并将 `frontend/build/task/index.js` 重命名为 `server/src/main/resources/javascript/parser.js`。
 
 ### 阶段 3：React 17 升级到 React 18
@@ -695,7 +695,7 @@
 
 1. 继续预处理 AntD 5 API 迁移热点：复杂 `Menu.Item`/`Menu.SubMenu` JSX 菜单、Tooltip/Popover 的 `overlay` 内容和项目封装层 legacy `visible` 入参。
 2. 继续 React Router 5 -> 6/7 预迁移，优先清理剩余 `Route component=` / `Route render=`、`Redirect`、`useHistory` 和嵌套路由旧写法。
-3. 保持 CRA5/CRACO 回退脚本，直到 Jest/测试栈迁出 CRA。
+3. 继续把 Jest 对 `react-scripts` transform 的借用替换成独立配置，完成前端测试链彻底去 CRA 化。
 
 ## 2026-06-09 老旧技术栈盘点
 
@@ -706,8 +706,8 @@
    - 更现代替代：React Router 6/7。
    - 当前动作：先继续用 `useCompatNavigate` 收口导航调用点，再统一升级路由声明与重定向。
 
-2. CRA/CRACO 测试链
-   - 现状：运行与构建已迁到 Vite，但 `react-scripts`、CRACO、Jest 27 仍作为测试与回退链保留。
+2. CRA 测试链残留
+   - 现状：运行与构建已迁到 Vite，`@craco/craco` 已删除，但 Jest 27 仍借用 `react-scripts` 提供的 transform。
    - 更现代替代：Vitest，或独立 Jest 29/30 配置。
    - 升级前提：先完成 React Router 与 AntD 主迁移，避免多个高风险面同时变化。
 
@@ -786,5 +786,11 @@
 ### 并行治理：测试执行入口脱离 `craco test`
 
 - `frontend/package.json` 的 `test` 脚本已从 `craco test` 切到 `jest --config jest.config.js`。
-- 当前 Jest 配置仍由 `frontend/jest.config.js` 通过 CRACO 配置对象生成，但测试执行入口已经不再依赖 CRA dev server / `react-scripts test` 这条工作流。
-- 这一步先把“测试怎么跑”从 CRA/CRACO 壳里拆出来，后续再继续把 `jest.config.js` 对 `@craco/craco` 的配置生成依赖替换掉。
+- `frontend/jest.config.js` 已改为静态独立配置，测试执行入口已经不再依赖 CRACO 配置生成。
+- 当前测试链仍暂时借用 `react-scripts/config/jest/*` 下的 transform 与 mock，后续再继续把这部分替换为完全独立的 Jest 或 Vitest 方案。
+
+### 并行治理：删除 CRACO 回退外壳
+
+- `frontend/package.json` 已删除 `start:cra`、`build:cra`、`eject` 等只服务 CRA/CRACO 的历史脚本。
+- `frontend/package.json` 与 lockfile 已移除 `@craco/craco`，并同步删除只服务旧 webpack/CRACO 外壳的 `cross-env`、`monaco-editor-webpack-plugin`、`webpackbar`、`webpack-cli`、`@types/webpack`、`@types/webpack-env`。
+- `frontend/craco.config.js` 已删除，前端运行与构建主链只保留 Vite 配置作为单一入口。
