@@ -1112,6 +1112,19 @@
   - `npm test -- --runInBand --watchAll=false` 通过
   - `npm run build` 通过
 
+### 并行治理：收口数据模型与数据源选择里的 Ant Design 旧菜单 API
+
+- `View` 领域里两处仍在使用 `MenuListItem` 的局部菜单已切到 `Menu items` 数组模式，覆盖：
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/Main/Properties/DataModelTree/DataModelComputerFieldNode.tsx`
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/Main/StructView/components/SelectDataSource.tsx`
+- `DataModelComputerFieldNode` 继续保留原有“编辑/删除计算字段”行为，只把菜单 label 构造收口到 `MenuItemContent`。
+- `SelectDataSource` 除了切换到 `items` 模式，还把数据源菜单项 key 从历史数组下标收口到 `source.id`，避免后续再依赖位置索引与 `Menu` 事件 key 的隐式耦合。
+- 这一步把 `View` 主工作流内剩余一组局部旧菜单 API 再往前清掉，为后续真正进入 Ant Design 5 升级时减少散点适配。
+- 2026-06-10 验证：
+  - `npm run checkTs` 通过
+  - `npm test -- --runInBand --watchAll=false` 通过
+  - `npm run build` 通过
+
 ### 2026-06-10 全项目老旧技术栈复核结论
 
 这一轮不是只看版本号，而是按“是否仍在主维护线、是否已经被现代替代方案覆盖、是否值得继续在当前架构上扩展”三条标准重新复核。

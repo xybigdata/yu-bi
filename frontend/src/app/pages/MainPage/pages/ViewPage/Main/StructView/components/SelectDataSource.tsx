@@ -21,8 +21,18 @@ import {
   DatabaseOutlined,
   TableOutlined,
 } from '@ant-design/icons';
-import { Button, Checkbox, Divider, Empty, Input, Menu, Popover } from 'antd';
-import { MenuListItem, Tree } from 'app/components';
+import {
+  Button,
+  Checkbox,
+  Divider,
+  Empty,
+  Input,
+  Menu,
+  MenuProps,
+  Popover,
+} from 'antd';
+import { Tree } from 'app/components';
+import { MenuItemContent } from 'app/components/Popup/MenuListItem';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useSearchAndExpand } from 'app/hooks/useSearchAndExpand';
 import classnames from 'classnames';
@@ -107,12 +117,26 @@ const SelectDataSource = memo(
 
     const handleCurrentSources = useCallback(
       ({ key }) => {
-        const selectSources = sources?.[key];
+        const selectSources = sources?.find(source => source.id === key);
+        if (!selectSources) {
+          return;
+        }
         setCurrentSources(selectSources);
         dispatch(getSchemaBySourceId(selectSources.id));
       },
       [sources, dispatch],
     );
+
+    const sourceItems = useMemo<MenuProps['items']>(() => {
+      return sources?.map(v => ({
+        key: v.id,
+        label: (
+          <MenuItemContent prefix={<DatabaseOutlined className="list-icon" />}>
+            {v.name}
+          </MenuItemContent>
+        ),
+      }));
+    }, [sources]);
 
     const filterSources = useCallback(
       e => {
@@ -329,22 +353,11 @@ const SelectDataSource = memo(
                   <Menu
                     prefixCls="ant-dropdown-menu"
                     onClick={handleCurrentSources}
-                  >
-                    {sources && sources.length > 0 ? (
-                      sources.map((v, i) => {
-                        return (
-                          <MenuListItem
-                            key={i}
-                            prefix={<DatabaseOutlined className="list-icon" />}
-                          >
-                            {v.name}
-                          </MenuListItem>
-                        );
-                      })
-                    ) : (
-                      <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
-                    )}
-                  </Menu>
+                    items={sourceItems}
+                  />
+                  {(!sourceItems || sourceItems.length === 0) && (
+                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                  )}
                 </SourceList>
               </PopoverBody>
             )

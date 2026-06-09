@@ -25,8 +25,9 @@ import {
   MoreOutlined,
   NumberOutlined,
 } from '@ant-design/icons';
-import { Menu, Popconfirm, Tooltip } from 'antd';
-import { IW, MenuListItem, Popup } from 'app/components';
+import { Menu, MenuProps, Popconfirm, Tooltip } from 'antd';
+import { IW, Popup } from 'app/components';
+import { MenuItemContent } from 'app/components/Popup/MenuListItem';
 import { DataViewFieldType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
@@ -49,6 +50,30 @@ const DataModelComputerFieldNode: FC<{
   const t = useI18NPrefix('view.model');
 
   const renderNode = (node: ChartDataViewMeta) => {
+    const items: MenuProps['items'] = [
+      {
+        key: 'exit',
+        label: (
+          <MenuItemContent prefix={<EditOutlined className="icon" />}>
+            {t('edit')}
+          </MenuItemContent>
+        ),
+      },
+      {
+        key: 'del',
+        label: (
+          <MenuItemContent prefix={<DeleteOutlined className="icon" />}>
+            <Popconfirm
+              title={t('deleteSure')}
+              onConfirm={() => menuClick(node, 'delete')}
+            >
+              {t('delete')}
+            </Popconfirm>
+          </MenuItemContent>
+        ),
+      },
+    ];
+
     let icon;
     switch (node.type) {
       case DataViewFieldType.NUMERIC:
@@ -94,25 +119,8 @@ const DataModelComputerFieldNode: FC<{
                 prefixCls="ant-dropdown-menu"
                 selectable={false}
                 onClick={({ key }) => menuClick(node, key)}
-              >
-                <MenuListItem
-                  key="exit"
-                  prefix={<EditOutlined className="icon" />}
-                >
-                  {t('edit')}
-                </MenuListItem>
-                <MenuListItem
-                  key="del"
-                  prefix={<DeleteOutlined className="icon" />}
-                >
-                  <Popconfirm
-                    title={t('deleteSure')}
-                    onConfirm={() => menuClick(node, 'delete')}
-                  >
-                    {t('delete')}
-                  </Popconfirm>
-                </MenuListItem>
-              </Menu>
+                items={items}
+              />
             }
           >
             <MoreOutlined />
