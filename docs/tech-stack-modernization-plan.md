@@ -240,6 +240,8 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 - `axios 0.21.1 -> 1.17.0`，完成请求库主线升级；按 `AxiosError<APIResponse<any>>` 补齐错误响应类型，保持现有拦截器和错误提示行为不变。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
+- `react-beautiful-dnd` 已从数据模型树场景迁出到维护中的 `@hello-pangea/dnd 18.0.1`，保留现有拖拽排序、组合建层级和层级内移动逻辑；补齐 `Draggable index` 的 number 约束。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 
 验收门槛：
 - `npm run checkTs` 通过。

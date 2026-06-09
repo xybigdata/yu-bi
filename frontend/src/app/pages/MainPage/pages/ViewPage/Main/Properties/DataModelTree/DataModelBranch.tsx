@@ -26,7 +26,7 @@ import { Button, Tooltip } from 'antd';
 import { IW } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { FC, memo, useState } from 'react';
-import { Draggable, Droppable } from 'react-beautiful-dnd';
+import { Draggable, Droppable } from '@hello-pangea/dnd';
 import styled from 'styled-components/macro';
 import {
   BLUE,
@@ -134,7 +134,7 @@ const DataModelBranch: FC<{
       <Draggable
         key={node?.name}
         draggableId={node?.name}
-        index={node?.index}
+        index={node?.index ?? 0}
         isDragDisabled={true}
       >
         {(draggableProvided, draggableSnapshot) => {

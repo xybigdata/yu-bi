@@ -26,7 +26,7 @@ import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { checkComputedFieldAsync } from 'app/utils/fetch';
 import { updateBy, updateByKey } from 'app/utils/mutation';
 import { FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components/macro';
 import { SPACE_LG } from 'styles/StyleConstants';
