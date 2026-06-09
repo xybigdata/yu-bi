@@ -358,6 +358,7 @@
 - React Router 预迁移第三十一批：新增 `CompatNavLink`，先承接 Navbar 中唯一仍依赖 `activeClassName` / `isActive` 的 v5 `NavLink` 历史 API；主导航和设置子导航已切到本地兼容组件，为后续把底层 `NavLink` 切到 Router 6 写法继续缩小业务改动面。
 - React Router 预迁移第三十二批：`useRouteMatch` 已从 `routerCompat.ts` 出口移除，确认应用层与兼容层公开接口都不再依赖该 v5 历史 API；`CompatNavLink` 的自定义激活判断也改为只消费当前业务实际需要的 `pathname`。
 - React Router 预迁移第三十三批：新增内部 `routerCompatLegacy.ts`，把 `Route` / `Switch` / `NavLink` / `useHistory` 全部关回兼容层内部；公开的 `routerCompat.ts` 只再暴露 `BrowserRouter`、`Link`、`MemoryRouter`、`useLocation`、`useParams` 这些 Router 6 仍稳定存在的能力，为真正升级依赖时缩小公开 API 差异。
+- React Router 预迁移第三十四批：`CompatNavLink` 已彻底脱离底层 `NavLink`，改为 `Link + useLocation` 自行计算激活态；`routerCompatLegacy.ts` 因此不再需要保留 `NavLink`，Router 5 的链接级历史 API 已进一步从兼容层底座中清除。
 
 验收门槛：
 - 全部路由可访问。
@@ -559,6 +560,7 @@
 - `NavLink` 的 v5 历史 API 已收口到 `CompatNavLink`，当前业务层不再直接依赖 `activeClassName` / `isActive`。
 - `useRouteMatch` 已从兼容出口移除，当前公开路由能力里已不存在该历史 API。
 - 公开 `routerCompat.ts` 已不再暴露 `Route` / `Switch` / `NavLink` / `useHistory`，这些 v5 旧能力只保留在兼容层内部的 `routerCompatLegacy.ts`。
+- `CompatNavLink` 已不再依赖底层 `NavLink`，当前兼容层内部剩余的 Router 5 旧能力已进一步收缩到 `Route` / `Switch` / `useHistory`。
 - 当前仍保留旧 Router 5 运行时语义的核心点，已经压缩到：
   1. `frontend/src/app/routerCompatLegacy.ts`
   2. `frontend/src/app/components/CompatRoute.tsx`

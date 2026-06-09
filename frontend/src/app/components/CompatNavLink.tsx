@@ -1,7 +1,6 @@
 import classnames from 'classnames';
 import React, { FC, ReactNode, useMemo } from 'react';
-import { useLocation } from 'app/routerCompat';
-import { NavLink } from 'app/routerCompatLegacy';
+import { Link, useLocation } from 'app/routerCompat';
 
 interface CompatNavLinkProps {
   activeClassName?: string;
@@ -19,22 +18,21 @@ export const CompatNavLink: FC<CompatNavLinkProps> = ({
   to,
 }) => {
   const location = useLocation();
-  const overrideActive = useMemo(() => {
-    if (!isActive) {
-      return false;
+  const active = useMemo(() => {
+    if (isActive) {
+      return isActive(undefined, { pathname: location.pathname });
     }
-    return isActive(undefined, { pathname: location.pathname });
-  }, [isActive, location]);
+    return location.pathname === to;
+  }, [isActive, location.pathname, to]);
 
   return (
-    <NavLink
+    <Link
       className={classnames(className, {
-        [activeClassName || 'active']: overrideActive,
+        [activeClassName || 'active']: active,
       })}
-      isActive={isActive}
       to={to}
     >
       {children}
-    </NavLink>
+    </Link>
   );
 };

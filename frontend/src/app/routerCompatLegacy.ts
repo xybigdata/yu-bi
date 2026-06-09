@@ -1,1 +1,1 @@
-export { NavLink, Route, Switch, useHistory } from 'react-router-dom';
+export { Route, Switch, useHistory } from 'react-router-dom';
