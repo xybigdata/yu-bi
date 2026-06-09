@@ -718,14 +718,14 @@
   - 包级 `eslintConfig`
 - 当前残留主要是：
   - Jest 版本仍停留在 27.5.1
-  - ESLint 工具链仍依赖 `eslint-config-react-app`
   - Jest 运行时与 watch 插件仍停留在 Jest 27 生态版本
+  - ESLint 主链已切到项目自有显式依赖与 `.eslintrc.js`，但当前 lint 结果仍有一批存量 warning 需要后续分批清理
 
 工作包拆分：
 1. Jest 27 升级到较新稳定线，或迁到 Vitest。
 2. 将 Jest transform 与 ESLint 配置彻底脱离 `react-app` 系工具链。
 3. 升级 `@types/node`、`babel-jest`、`jest-environment-jsdom` 与相关测试依赖。
-4. 清理 `eslint-config-react-app` 等 CRA 历史工具链残留。
+4. 继续清理 lint 存量 warning，并在条件成熟后再评估 ESLint 9 / flat config 迁移。
 
 ### D. 后端现代化 backlog
 
@@ -857,7 +857,7 @@
    - 当前阻塞：复杂 Dropdown/Menu/Modal/Popover 历史 API 和 less 主题链仍需继续清理。
 
 2. Jest 27 测试链
-   - 现状：运行、构建已完全脱离 CRA；测试转译链也已经脱离 `babel-preset-react-app`，但整体仍停留在 `jest 27.5.1`，并且 ESLint 工具链还依赖 `eslint-config-react-app`。
+   - 现状：运行、构建已完全脱离 CRA；测试转译链也已经脱离 `babel-preset-react-app`，但整体仍停留在 `jest 27.5.1`。ESLint 主链则已脱离 `eslint-config-react-app`，进入项目自有显式依赖模式。
    - 更现代替代：独立升级到 Jest 29/30，或评估迁到 Vitest。
    - 调研结论：Jest 官方已在 2025-06-04 发布 Jest 30，说明上游仍积极维护；当前项目属于“已脱离 CRA 但测试栈仍留在 CRA 时代”的典型状态。
    - 风险判断：建议先做测试配置去 CRA 化，再决定直接上 Jest 30 还是迁 Vitest。
@@ -948,6 +948,18 @@
 - `frontend/package.json` 与 `frontend/package-lock.json` 已新增 `@babel/preset-react`、`@babel/preset-typescript` 直接依赖，并移除 `babel-preset-react-app`。
 - 当前 Jest 转译策略已经明确收口为“项目自有 Babel 预设”，不再继续借用 CRA 打包时代的预设黑盒。
 - 这一步仍然不改变 Jest 27 版本本身；目标是先把测试转译链与 CRA 历史预设解耦，降低后续升级到 Jest 30 或迁到 Vitest 时的联动复杂度。
+
+### 并行治理：恢复前端 ESLint 主链的显式运行时
+
+- `frontend/.eslintrc.js` 已不再依赖 `react-app` 扩展，改为项目自有的显式配置，当前最小收口包括：
+  - `@typescript-eslint/parser`
+  - `eslint-plugin-prettier`
+  - `eslint-plugin-react`
+  - `eslint-plugin-react-hooks`
+  - `eslint-plugin-import`
+- `frontend/package.json` 与 `frontend/package-lock.json` 已补齐 `eslint`、`@typescript-eslint/parser`、`@typescript-eslint/eslint-plugin`、`eslint-plugin-react`、`eslint-plugin-import` 等前端 lint 运行时依赖。
+- 当前 `npm run lint` 已恢复为真实可执行状态，不再出现 `eslint: command not found` 或规则定义缺失错误。
+- 本批目标是恢复和显式化 ESLint 运行时，不是顺手清空所有历史 warning；当前 lint 结果仍存在一批 `prettier/prettier` 与 `react-hooks/exhaustive-deps` 存量 warning，后续应按主题分批治理。
 
 ### React Router 预迁移第四十批：切到 Router 6 经典运行时底座
 

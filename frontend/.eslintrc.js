@@ -6,8 +6,16 @@ const prettierOptions = JSON.parse(
 );
 
 module.exports = {
-  extends: ['react-app', 'prettier'],
-  plugins: ['prettier'],
+  root: true,
+  env: {
+    browser: true,
+    es2022: true,
+    jest: true,
+    node: true,
+  },
+  parser: '@typescript-eslint/parser',
+  extends: ['prettier'],
+  plugins: ['@typescript-eslint', 'import', 'prettier', 'react', 'react-hooks'],
   rules: {
     'prettier/prettier': ['error', prettierOptions],
     'no-restricted-imports': [
@@ -21,15 +29,15 @@ module.exports = {
         ],
       },
     ],
+    'react-hooks/rules-of-hooks': 'error',
+    'react-hooks/exhaustive-deps': 'warn',
   },
   parserOptions: {
-    ecmaVersion: 2018,
+    ecmaVersion: 'latest',
     sourceType: 'module',
     ecmaFeatures: {
       jsx: true,
     },
-    project: './tsconfig.json',
-    tsconfigRootDir: __dirname,
   },
   overrides: [
     {
