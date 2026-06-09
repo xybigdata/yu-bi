@@ -19,9 +19,9 @@
 import { CheckCircleOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import * as AuthLayout from 'app/components/styles/AuthLayout';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { FC, useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { SPACE_MD, SPACE_TIMES, SPACE_XS } from 'styles/StyleConstants';
 
@@ -32,12 +32,12 @@ interface WithoutActivationProps {
 export const WithoutActivation: FC<WithoutActivationProps> = ({
   onContinue,
 }) => {
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const t = useI18NPrefix('register');
 
   const toLogin = useCallback(() => {
-    history.push('/login');
-  }, [history]);
+    navigate.push('/login');
+  }, [navigate]);
 
   return (
     <AuthLayout.Form>

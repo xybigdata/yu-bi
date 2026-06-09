@@ -18,6 +18,7 @@
 
 import { LayoutWithBrand } from 'app/components';
 import { Version } from 'app/components/Version';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import {
   selectLoggedInUser,
   selectLoginLoading,
@@ -27,12 +28,11 @@ import {
 import { getOauth2Clients, login } from 'app/slice/thunks';
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { LoginForm } from './LoginForm';
 
 export function LoginPage() {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const systemInfo = useSelector(selectSystemInfo);
   const loading = useSelector(selectLoginLoading);
   const loggedInUser = useSelector(selectLoggedInUser);
@@ -48,12 +48,12 @@ export function LoginPage() {
         login({
           params: values,
           resolve: () => {
-            history.replace('/');
+            navigate.replace('/');
           },
         }),
       );
     },
-    [dispatch, history],
+    [dispatch, navigate],
   );
   return (
     <LayoutWithBrand>

@@ -18,11 +18,12 @@
 
 import { Button, Form, Input } from 'antd';
 import * as AuthLayout from 'app/components/styles/AuthLayout';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import usePrefixI18N from 'app/hooks/useI18NPrefix';
 import { User } from 'app/slice/types';
 import { StorageKeys } from 'globalConstants';
 import React, { useCallback, useState } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import {
   BORDER_RADIUS,
@@ -53,15 +54,15 @@ export function LoginForm({
   onLogin,
 }: LoginFormProps) {
   const [switchUser, setSwitchUser] = useState(false);
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const [form] = Form.useForm();
   const logged = !!getToken();
   const t = usePrefixI18N('login');
   const tg = usePrefixI18N('global');
 
   const toApp = useCallback(() => {
-    history.replace('/');
-  }, [history]);
+    navigate.replace('/');
+  }, [navigate]);
 
   const onSwitch = useCallback(() => {
     setSwitchUser(true);

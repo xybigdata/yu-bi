@@ -18,12 +18,12 @@
 
 import { Button, Form, Input } from 'antd';
 import * as AuthLayout from 'app/components/styles/AuthLayout';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectRegisterLoading } from 'app/slice/selectors';
 import { register } from 'app/slice/thunks';
 import React, { FC, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { LINE_HEIGHT_ICON_LG } from 'styles/StyleConstants';
 import { getPasswordValidator } from 'utils/validators';
@@ -33,7 +33,7 @@ interface RegisterFormProps {
 }
 export const RegisterForm: FC<RegisterFormProps> = ({ onRegisterSuccess }) => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const loading = useSelector(selectRegisterLoading);
   const [form] = Form.useForm();
   const t = useI18NPrefix('register');
@@ -55,8 +55,8 @@ export const RegisterForm: FC<RegisterFormProps> = ({ onRegisterSuccess }) => {
   );
 
   const toLogin = useCallback(() => {
-    history.push('/login');
-  }, [history]);
+    navigate.push('/login');
+  }, [navigate]);
 
   return (
     <AuthLayout.Form>

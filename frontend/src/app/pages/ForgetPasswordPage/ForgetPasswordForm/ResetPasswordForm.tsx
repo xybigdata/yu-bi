@@ -17,9 +17,9 @@
  */
 
 import { Button, Form, Input, message } from 'antd';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { FC, useCallback, useState } from 'react';
-import { useHistory } from 'react-router';
 import {
   getConfirmPasswordValidator,
   getPasswordValidator,
@@ -31,7 +31,7 @@ interface ResetPasswordFormProps {
 }
 export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({ token }) => {
   const [form] = Form.useForm();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const [submiting, setSubmiting] = useState(false);
   const t = useI18NPrefix('forgotPassword');
   const tg = useI18NPrefix('global');
@@ -48,14 +48,14 @@ export const ResetPasswordForm: FC<ResetPasswordFormProps> = ({ token }) => {
         .then(res => {
           if (res) {
             message.success(t('resetSuccess'));
-            history.replace('/login');
+            navigate.replace('/login');
           }
         })
         .finally(() => {
           setSubmiting(false);
         });
     },
-    [token, history, t],
+    [token, navigate, t],
   );
 
   return (

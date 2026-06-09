@@ -1,10 +1,10 @@
 import { Alert } from 'app/components/Alert';
 import { AuthorizationStatus } from 'app/constants';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { getUserInfoByToken } from 'app/slice/thunks';
 import { StorageKeys } from 'globalConstants';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router';
 import persistence from 'utils/persistence';
 
 export const AuthorizationPage = () => {
@@ -13,7 +13,7 @@ export const AuthorizationPage = () => {
   );
   const [errorMessage, setErrorMessage] = useState('');
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -35,7 +35,7 @@ export const AuthorizationPage = () => {
               persistence.session.remove(StorageKeys.AuthRedirectUrl);
               window.location.href = redirectUrl;
             } else {
-              history.replace('/');
+              navigate.replace('/');
             }
           },
           reject: () => {
@@ -49,7 +49,7 @@ export const AuthorizationPage = () => {
       setStatus(AuthorizationStatus.Error);
       setErrorMessage(errorMessage);
     }
-  }, [dispatch, history]);
+  }, [dispatch, navigate]);
 
   return <Alert status={status} errorMessage={errorMessage} />;
 };

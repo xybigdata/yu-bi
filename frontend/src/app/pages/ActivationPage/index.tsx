@@ -1,17 +1,17 @@
 import { Alert } from 'app/components/Alert';
 import { AuthorizationStatus } from 'app/constants';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { getUserInfoByToken } from 'app/slice/thunks';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router';
 import { request2 } from 'utils/request';
 
 export const ActivationPage = () => {
   const [status, setStatus] = useState<AuthorizationStatus>(
     AuthorizationStatus.Initialized,
   );
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const dispatch = useDispatch();
   const t = useI18NPrefix('authorization');
 
@@ -28,7 +28,7 @@ export const ActivationPage = () => {
           getUserInfoByToken({
             token: data,
             resolve: () => {
-              history.replace('/');
+              navigate.replace('/');
             },
             reject: () => {
               setStatus(AuthorizationStatus.Error);
@@ -39,7 +39,7 @@ export const ActivationPage = () => {
         setStatus(AuthorizationStatus.Error);
       }
     },
-    [dispatch, history],
+    [dispatch, navigate],
   );
 
   useEffect(() => {
