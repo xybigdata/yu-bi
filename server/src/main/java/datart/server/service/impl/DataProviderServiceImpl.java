@@ -18,12 +18,8 @@
 
 package datart.server.service.impl;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.parser.Feature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import datart.core.base.PageInfo;
@@ -434,50 +430,43 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
             return schema;
         }
 
-        JSONObject jsonObject = JSON.parseObject(model, Feature.OrderedField);
         try {
-            if (jsonObject.containsKey("columns")) {
-                jsonObject = jsonObject.getJSONObject("columns");
-                for (String key : jsonObject.keySet()) {
-                    JSONObject item = jsonObject.getJSONObject(key);
-                    String[] names;
-                    if (item.get("name") instanceof JSONArray) {
-                        if (item.getJSONArray("name").size() == 1) {
-                            String nameString = item.getJSONArray("name").getString(0);
-                            try {
-                                names = JSONObject.parseArray(nameString).toArray(new String[0]);
-                            } catch (JSONException e) {
-                                names = new String[]{nameString};
-                            }
-                        } else {
-                            names = item.getJSONArray("name").toArray(new String[0]);
-                        }
-                    } else {
-                        names = new String[]{Optional.ofNullable(item.getString("name")).orElse(key)};
-                    }
-                    Column column = Column.of(ValueType.valueOf(item.getString("type")), names);
+            JsonNode root = objectMapper.readTree(model);
+            JsonNode columnsNode = root.get("columns");
+            if (columnsNode != null && columnsNode.isObject()) {
+                Iterator<Map.Entry<String, JsonNode>> iterator = columnsNode.fields();
+                while (iterator.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = iterator.next();
+                    String key = entry.getKey();
+                    JsonNode item = entry.getValue();
+                    String[] names = parseColumnNames(item, key);
+                    Column column = Column.of(ValueType.valueOf(item.path("type").asText()), names);
                     schema.put(column.columnKey(), column);
                 }
-            } else if (jsonObject.containsKey("hierarchy")) {
-                jsonObject = jsonObject.getJSONObject("hierarchy");
-                for (String key : jsonObject.keySet()) {
-                    JSONObject item = jsonObject.getJSONObject(key);
-                    if (item.containsKey("children")) {
-                        JSONArray children = item.getJSONArray("children");
-                        if (children != null && children.size() > 0) {
-                            for (int i = 0; i < children.size(); i++) {
-                                JSONObject child = children.getJSONObject(i);
-                                schema.put(child.getString("name"), Column.of(ValueType.valueOf(child.getString("type")), child.getString("name").split("\\.")));
-                            }
+            } else if (root.has("hierarchy") && root.get("hierarchy").isObject()) {
+                JsonNode hierarchyNode = root.get("hierarchy");
+                Iterator<Map.Entry<String, JsonNode>> iterator = hierarchyNode.fields();
+                while (iterator.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = iterator.next();
+                    String key = entry.getKey();
+                    JsonNode item = entry.getValue();
+                    JsonNode children = item.get("children");
+                    if (children != null && children.isArray() && children.size() > 0) {
+                        for (JsonNode child : children) {
+                            String name = child.path("name").asText();
+                            schema.put(name, Column.of(ValueType.valueOf(child.path("type").asText()), name.split("\\.")));
                         }
                     } else {
-                        schema.put(key, Column.of(ValueType.valueOf(item.getString("type")), key.split("\\.")));
+                        schema.put(key, Column.of(ValueType.valueOf(item.path("type").asText()), key.split("\\.")));
                     }
                 }
             } else {
                 // 兼容1.0.0-beta.1以前的版本
-                for (String key : jsonObject.keySet()) {
-                    ValueType type = ValueType.valueOf(jsonObject.getJSONObject(key).getString("type"));
+                Iterator<Map.Entry<String, JsonNode>> iterator = root.fields();
+                while (iterator.hasNext()) {
+                    Map.Entry<String, JsonNode> entry = iterator.next();
+                    String key = entry.getKey();
+                    ValueType type = ValueType.valueOf(entry.getValue().path("type").asText());
                     schema.put(key, Column.of(type, key));
                 }
             }
@@ -485,6 +474,29 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
             log.error("view model parse error", e);
         }
         return schema;
+    }
+
+    private String[] parseColumnNames(JsonNode item, String fallbackName) throws IOException {
+        JsonNode nameNode = item.get("name");
+        if (nameNode == null || nameNode.isNull()) {
+            return new String[]{fallbackName};
+        }
+        if (nameNode.isArray()) {
+            if (nameNode.size() == 1 && nameNode.get(0).isTextual()) {
+                String nameString = nameNode.get(0).asText();
+                try {
+                    JsonNode nestedArray = objectMapper.readTree(nameString);
+                    if (nestedArray.isArray()) {
+                        return objectMapper.convertValue(nestedArray, String[].class);
+                    }
+                } catch (IOException ignored) {
+                    // 历史数据里这里既可能是 JSON 数组字符串，也可能只是普通列名。
+                }
+                return new String[]{nameString};
+            }
+            return objectMapper.convertValue(nameNode, String[].class);
+        }
+        return new String[]{nameNode.asText(fallbackName)};
     }
 
 }

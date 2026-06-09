@@ -828,3 +828,19 @@
 - `server/src/main/java/datart/server/common/PoiConvertUtils.java` 已移除 `JSONValidator`、`JSON.parseObject`、`JSON.parseArray`，图表导出配置改为使用 Jackson 反序列化。
 - `tableHeaders` 分组表头配置现在同时兼容运行期已经反序列化成 `List<?>` 的值，以及历史字符串 JSON 值；解析失败时继续回退到无分组表头导出，保持原有兜底语义。
 - 2026-06-09 验证：`mvn -pl server -am -DskipTests compile` 通过。
+
+### 并行治理：视图模型 schema 与数据源配置加密切到 Jackson
+
+- `server/src/main/java/datart/server/service/impl/DataProviderServiceImpl.java` 的 `parseSchema` 已移除 `fastjson JSONObject/JSONArray` 与 `Feature.OrderedField` 依赖，改为用 Jackson `JsonNode` 解析 `columns`、`hierarchy` 和历史 beta 版本的 schema 结构。
+- `name` 字段的历史兼容逻辑仍保留：既支持数组值，也支持单元素数组里嵌套 JSON 数组字符串的旧数据形态；解析失败时继续按普通列名处理。
+- `server/src/main/java/datart/server/service/impl/SourceServiceImpl.java` 的 `encryptConfig` 已改为基于 Jackson `ObjectNode` 遍历和回写配置项，加密字段仍保持原有 `ENC(...)` 语义，不改变外部配置格式。
+- 2026-06-09 验证：`mvn -pl server -am -DskipTests compile` 通过。
+
+### fastjson 后续残留重点
+
+- 当前后端剩余较集中的 `fastjson` 使用，主要在：
+  - `data-providers/http-data-provider/src/main/java/datart/data/provider/ResponseJsonParser.java`
+  - `security/src/main/java/datart/security/oauth2/WeChartOauth2Client.java`
+  - `server/src/main/java/datart/server/base/dto/chart/WidgetConfig.java`
+  - `server/src/main/java/datart/server/service/impl/VizServiceImpl.java`
+- 另外 `data-providers/data-provider-base`、`jdbc-data-provider` 中仍有少量脚本/适配器层 `JSON.parseObject`，以及测试代码中的 `org.json` 使用，后续需要按主链优先级继续分批收口。

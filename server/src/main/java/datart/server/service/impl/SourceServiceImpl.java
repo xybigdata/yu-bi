@@ -19,8 +19,8 @@
 package datart.server.service.impl;
 
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import datart.core.base.consts.Const;
 import datart.core.base.consts.FileOwner;
 import datart.core.base.exception.Exceptions;
@@ -408,12 +408,16 @@ public class SourceServiceImpl extends BaseService implements SourceService {
         }
         DataProviderConfigTemplate configTemplate = getDataProviderService().getSourceConfigTemplate(type);
         if (!CollectionUtils.isEmpty(configTemplate.getAttributes())) {
-            JSONObject jsonObject = JSON.parseObject(config);
+            JsonNode configNode = OBJECT_MAPPER.readTree(config);
+            if (!(configNode instanceof ObjectNode jsonObject)) {
+                return config;
+            }
             for (DataProviderConfigTemplate.Attribute attribute : configTemplate.getAttributes()) {
                 if (attribute.isEncrypt()
-                        && jsonObject.containsKey(attribute.getName())
-                        && StringUtils.isNotBlank(jsonObject.get(attribute.getName()).toString())) {
-                    String val = jsonObject.get(attribute.getName()).toString();
+                        && jsonObject.has(attribute.getName())
+                        && !jsonObject.path(attribute.getName()).isNull()
+                        && StringUtils.isNotBlank(jsonObject.path(attribute.getName()).asText())) {
+                    String val = jsonObject.path(attribute.getName()).asText();
                     if (val.startsWith(Const.ENCRYPT_FLAG)) {
                         jsonObject.put(attribute.getName(), val);
                     } else {
@@ -421,7 +425,7 @@ public class SourceServiceImpl extends BaseService implements SourceService {
                     }
                 }
             }
-            return jsonObject.toJSONString();
+            return OBJECT_MAPPER.writeValueAsString(jsonObject);
         }
         return config;
     }
