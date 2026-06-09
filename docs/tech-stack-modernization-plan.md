@@ -101,11 +101,11 @@
 - 适配 CRA 兼容层：`process.env.NODE_ENV`、`process.env.PUBLIC_URL`、`module.hot`/`import.meta.hot`、`styled-components/macro`、SVG `ReactComponent` 导入、Ant Design Less 的 `~` import。
 - 消除 Vite/Rollup 对 `app/components/index.tsx` barrel 循环 re-export 的分包警告。
 - 保持 CRA5 的 `start`/`build` 作为默认主构建，Vite 先以并行脚本验证。
+- Vite 配置已改为 `.mts`，消除 CJS Node API 弃用警告。
 
 风险：
 - `process.env.PUBLIC_URL`、`BrowserRouter basename`、资源路径可能需要统一处理。
 - CRA 的 Jest 配置不能直接复用。
-- Vite 配置文件当前为 TypeScript CJS 加载路径，会打印 Vite CJS Node API 弃用警告；后续可改为 ESM 配置或设置前端 package type。
 - Vite 产物仍有大 chunk 提示，替换默认构建前需要继续优化分包和动态加载策略。
 
 验收门槛：
@@ -238,7 +238,6 @@
 
 阶段 1 已完成，下一步优先处理阶段 2 的迁出 CRA 预研和准备工作：
 
-1. 将 Vite 配置切到 ESM 加载，消除 CJS Node API 弃用警告。
-2. 对比 CRA5 与 Vite 产物静态资源路径、动态主题、Monaco worker 和 share 页面运行时行为。
-3. 优化 Vite 大 chunk 分包策略，避免替换默认构建后首屏包体积明显回退。
-4. 确认后端 Maven `package` 阶段如何接入 Vite 默认产物，再替换 `start/build`。
+1. 对比 CRA5 与 Vite 产物静态资源路径、动态主题、Monaco worker 和 share 页面运行时行为。
+2. 优化 Vite 大 chunk 分包策略，避免替换默认构建后首屏包体积明显回退。
+3. 确认后端 Maven `package` 阶段如何接入 Vite 默认产物，再替换 `start/build`。
