@@ -25,7 +25,7 @@ import { selectPublishLoading } from 'app/pages/MainPage/pages/VizPage/slice/sel
 import classnames from 'classnames';
 import { FC, memo, useCallback, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import {
   FONT_SIZE_ICON_SM,
   FONT_WEIGHT_MEDIUM,

@@ -2,7 +2,7 @@ import { List } from 'antd';
 import { ListItemProps } from 'antd/lib/list/Item';
 import classnames from 'classnames';
 import { memo, ReactNode } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import {
   FONT_WEIGHT_MEDIUM,
   SPACE_LG,

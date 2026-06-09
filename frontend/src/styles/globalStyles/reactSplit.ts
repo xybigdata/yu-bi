@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { createGlobalStyle } from 'styled-components/macro';
+import { createGlobalStyle } from 'styled-components';
 import { LEVEL_10, SPACE_TIMES } from 'styles/StyleConstants';
 
 export const ReactSplit = createGlobalStyle`

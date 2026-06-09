@@ -3,7 +3,7 @@ import { Empty, Tree as AntTree, TreeProps as AntTreeProps } from 'antd';
 import type { DataNode } from 'antd/lib/tree';
 import classnames from 'classnames';
 import { ComponentType, MutableRefObject } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import {
   FONT_SIZE_BODY,
   FONT_SIZE_TITLE,

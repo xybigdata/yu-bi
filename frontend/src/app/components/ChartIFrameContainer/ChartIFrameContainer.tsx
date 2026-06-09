@@ -27,7 +27,7 @@ import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { setRuntimeDateLevelFieldsInChartConfig } from 'app/utils/chartHelper';
 import { FC, memo } from 'react';
-import styled, { StyleSheetManager } from 'styled-components/macro';
+import styled, { StyleSheetManager } from 'styled-components';
 import { LEVEL_1000 } from 'styles/StyleConstants';
 import { isEmpty } from 'utils/object';
 import ChartIFrameLifecycleAdapter from './ChartIFrameLifecycleAdapter';

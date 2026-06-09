@@ -22,7 +22,7 @@ import { useSplitSizes } from 'app/hooks/useSplitSizes';
 import { useParams } from 'app/routerCompat';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import { useCallback, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { SaveForm } from './SaveForm';
 import { SaveFormContext, useSaveFormContext } from './SaveFormContext';
 import { Sidebar } from './Sidebar';

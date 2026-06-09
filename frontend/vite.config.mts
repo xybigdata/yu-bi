@@ -126,7 +126,6 @@ export default defineConfig(({ mode }) => ({
       { find: 'styles', replacement: path.resolve(srcRoot, 'styles') },
       { find: 'types', replacement: path.resolve(srcRoot, 'types') },
       { find: 'utils', replacement: path.resolve(srcRoot, 'utils') },
-      { find: 'styled-components/macro', replacement: 'styled-components' },
       {
         find: 'react-monaco-editor',
         replacement: path.resolve(

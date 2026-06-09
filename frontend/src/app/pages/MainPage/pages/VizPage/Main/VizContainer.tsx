@@ -3,7 +3,7 @@ import { useCascadeAccess } from 'app/pages/MainPage/Access';
 import { StoryPagePreview } from 'app/pages/StoryBoardPage/Preview/Preview';
 import classnames from 'classnames';
 import { memo, useMemo } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { getPath } from 'utils/utils';
 import {
   PermissionLevels,

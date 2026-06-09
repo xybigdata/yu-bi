@@ -27,7 +27,7 @@ import { VirtualTable } from 'app/components/VirtualTable';
 import { DataViewFieldType } from 'app/constants';
 import { TABLE_DATA_INDEX } from 'globalConstants';
 import { memo, ReactElement, useMemo } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import {
   FONT_SIZE_BASE,
   SPACE,

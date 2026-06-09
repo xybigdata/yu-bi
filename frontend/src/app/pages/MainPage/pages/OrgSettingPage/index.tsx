@@ -10,7 +10,7 @@ import {
 } from 'globalConstants';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import {
   BORDER_RADIUS,
   SPACE_LG,

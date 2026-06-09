@@ -28,7 +28,7 @@ import React, {
   useState,
 } from 'react';
 import { VariableSizeGrid as Grid } from 'react-window';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { SPACE_TIMES } from 'styles/StyleConstants';
 
 interface VirtualTableProps extends TableProps<object> {

@@ -5,7 +5,7 @@ import { AuthorizationStatus } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { lighten } from 'polished';
 import { ReactNode, useEffect, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { FONT_SIZE_BASE } from 'styles/StyleConstants';
 
 interface AlertProps {

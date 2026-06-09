@@ -2,7 +2,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import React from 'react';
 import { Resizable } from 'react-resizable';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { BLUE, LEVEL_1 } from 'styles/StyleConstants';
 
 export const TableComponentsTd = ({

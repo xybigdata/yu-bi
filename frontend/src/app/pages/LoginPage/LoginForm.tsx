@@ -24,7 +24,7 @@ import { Link } from 'app/routerCompat';
 import { User } from 'app/slice/types';
 import { StorageKeys } from 'globalConstants';
 import React, { useCallback, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import {
   BORDER_RADIUS,
   LINE_HEIGHT_ICON_LG,

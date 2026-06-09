@@ -21,7 +21,7 @@ import {
   WidgetPadding,
 } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { PropsWithChildren, memo } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { getWidgetSomeStyle } from '../../utils/widget';
 
 export const WidgetWrapper: React.FC<PropsWithChildren<{

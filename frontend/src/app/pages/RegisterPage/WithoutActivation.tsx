@@ -22,7 +22,7 @@ import * as AuthLayout from 'app/components/styles/AuthLayout';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { FC, useCallback } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { SPACE_MD, SPACE_TIMES, SPACE_XS } from 'styles/StyleConstants';
 
 interface WithoutActivationProps {

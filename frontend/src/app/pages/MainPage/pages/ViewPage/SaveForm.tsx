@@ -43,7 +43,7 @@ import {
   useState,
 } from 'react';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { SPACE_MD } from 'styles/StyleConstants';
 import { getCascadeAccess } from '../../Access';
 import {

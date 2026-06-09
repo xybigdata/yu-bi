@@ -17,7 +17,7 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { BoardConfigValContext } from './BoardProvider/BoardConfigProvider';
 import { BoardContext } from './BoardProvider/BoardProvider';
 import StyledBackground from './WidgetComponents/StyledBackground';

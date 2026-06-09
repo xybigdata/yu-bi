@@ -18,7 +18,7 @@
 
 import { darken, getLuminance, lighten } from 'polished';
 import { memo, useContext } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { WidgetActionContext } from '../../ActionProvider/WidgetActionProvider';
 import {
   getWidgetBaseStyle,

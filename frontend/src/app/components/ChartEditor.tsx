@@ -73,7 +73,7 @@ import { updateBy } from 'app/utils/mutation';
 import { CommonFormTypes } from 'globalConstants';
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { LEVEL_100 } from 'styles/StyleConstants';
 import { CloneValueDeep, isEmptyArray } from 'utils/object';
 import ChartWorkbench from '../pages/ChartWorkbenchPage/components/ChartWorkbench/ChartWorkbench';

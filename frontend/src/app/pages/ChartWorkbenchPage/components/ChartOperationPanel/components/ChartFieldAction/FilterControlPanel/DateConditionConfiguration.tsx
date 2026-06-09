@@ -35,7 +35,7 @@ import {
   useImperativeHandle,
   useState,
 } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { isEmpty, isEmptyArray } from 'utils/object';
 import { FilterOptionForwardRef } from '.';
 import TimeSelector from '../../ChartTimeSelector';

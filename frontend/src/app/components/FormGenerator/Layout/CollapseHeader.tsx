@@ -17,7 +17,7 @@
  */
 
 import { FC, memo } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import {
   FONT_FAMILY,
   FONT_SIZE_BODY,

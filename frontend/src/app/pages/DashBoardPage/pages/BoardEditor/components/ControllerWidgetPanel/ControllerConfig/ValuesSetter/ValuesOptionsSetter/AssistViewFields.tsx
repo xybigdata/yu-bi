@@ -18,7 +18,7 @@
 import { Select, Space } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 export interface AssistViewFieldsProps {
   onChange?: (value: string[], type) => void;

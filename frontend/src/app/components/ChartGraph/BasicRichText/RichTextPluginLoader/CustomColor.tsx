@@ -4,7 +4,7 @@ import ChromeColorPicker from 'app/components/ColorPicker/ChromeColorPicker';
 import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
 import { ReactNode } from 'react';
 import ReactQuill from 'react-quill';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 
 export interface RichTextCustomColorType {
   background: string;

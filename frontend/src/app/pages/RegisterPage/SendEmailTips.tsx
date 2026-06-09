@@ -21,7 +21,7 @@ import { Button } from 'antd';
 import * as AuthLayout from 'app/components/styles/AuthLayout';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { FC, useCallback } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { SPACE_MD, SPACE_TIMES, SPACE_XS } from 'styles/StyleConstants';
 
 interface SendEmailTipsProps {

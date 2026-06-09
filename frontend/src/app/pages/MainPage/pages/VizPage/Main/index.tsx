@@ -9,7 +9,7 @@ import { useLocation, useParams } from 'app/routerCompat';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { LEVEL_1 } from 'styles/StyleConstants';
 import { useVizSlice } from '../slice';
 import {

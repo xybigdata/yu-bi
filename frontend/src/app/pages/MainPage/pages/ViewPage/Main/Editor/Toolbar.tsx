@@ -34,7 +34,7 @@ import { CommonFormTypes } from 'globalConstants';
 import React, { memo, useCallback, useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { format } from 'sql-formatter';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import {
   INFO,
   LEVEL_1,

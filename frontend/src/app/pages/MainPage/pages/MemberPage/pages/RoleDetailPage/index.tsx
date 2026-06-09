@@ -27,7 +27,7 @@ import debounce from 'debounce-promise';
 import { CommonFormTypes, DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { BORDER_RADIUS, SPACE_LG, SPACE_MD } from 'styles/StyleConstants';
 import { selectOrgId } from '../../../../slice/selectors';
 import { useMemberSlice } from '../../slice';

@@ -4,7 +4,7 @@ import { useSplitSizes } from 'app/hooks/useSplitSizes';
 import { useParams } from 'app/routerCompat';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import { useCallback, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { useVizSlice } from '../VizPage/slice';
 import { EditorPage } from './EditorPage';
 import { SaveForm } from './SaveForm';

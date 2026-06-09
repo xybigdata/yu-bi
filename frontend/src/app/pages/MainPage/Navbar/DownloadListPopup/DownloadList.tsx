@@ -20,7 +20,7 @@ import { List, Tag } from 'antd';
 import { ListItem } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { FC, ReactNode, memo, useMemo } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import {
   ERROR,
   FONT_SIZE_TITLE,

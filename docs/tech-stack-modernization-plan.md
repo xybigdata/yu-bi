@@ -311,7 +311,7 @@
 - 默认 `start`、`build` 已切换到 Vite，并已删除 `start:cra`、`build:cra` 这类 CRA5 回退脚本。
 - 新增 Vite 多页面 HTML 入口：`index.html`、`shareChart.html`、`shareDashboard.html`、`shareStoryPlayer.html`。
 - 迁移 Vite dev proxy 和 custom chart plugins middleware。
-- 适配 CRA 兼容层：`process.env.NODE_ENV`、`process.env.PUBLIC_URL`、`module.hot`/`import.meta.hot`、`styled-components/macro`、SVG `ReactComponent` 导入、Ant Design Less 的 `~` import。
+- 适配 CRA 兼容层：`process.env.NODE_ENV`、`process.env.PUBLIC_URL`、`module.hot`/`import.meta.hot`、SVG `ReactComponent` 导入、Ant Design Less 的 `~` import。
 - 消除 Vite/Rollup 对 `app/components/index.tsx` barrel 循环 re-export 的分包警告。
 - Vite 配置已改为 `.mts`，消除 CJS Node API 弃用警告。
 - Vite 默认输出目录已切换为 `frontend/build`，兼容后端 Maven `package` 阶段的静态资源复制路径。
@@ -863,10 +863,10 @@
    - 风险判断：建议先做测试配置去 CRA 化，再决定直接上 Jest 30 还是迁 Vitest。
 
 3. `styled-components 5.3.3` + `styled-components/macro` 兼容壳
-   - 现状：项目大量使用 `styled-components/macro`，并且仍保留 `@types/styled-components`。
+   - 现状：源码导入已经从 `styled-components/macro` 全量收口到 `styled-components`，但运行时与类型层仍停留在 `styled-components 5.3.3` + `@types/styled-components` 组合。
    - 更现代替代：`styled-components` 6 原生 TypeScript 版本，或后续再评估更轻的样式方案。
-   - 调研结论：官方 v6 迁移说明要求同时移除社区 `@types/styled-components`，并更新 `stylis`；这意味着当前仓库的 macro 别名、类型声明和样式工具链都要一起调。
-   - 风险判断：可以做，但不适合作为零散小改；最好与测试链或 AntD 主题链调整错峰推进。
+   - 调研结论：当前已经先清掉只服务 CRA 迁移期的 macro 导入与 Vite alias，后续真正升级到 v6 时，重点会落在移除社区 `@types/styled-components`、更新 `stylis` 与处理运行时类型差异。
+   - 风险判断：macro 壳清理已完成；真正的大版本升级仍不适合作为零散小改，最好与测试链或 AntD 主题链调整错峰推进。
 
 4. `moment`
    - 现状：时间格式化、时间控件默认值、仪表板控制器等仍广泛依赖 `moment`。

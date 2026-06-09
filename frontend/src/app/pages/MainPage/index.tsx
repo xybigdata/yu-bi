@@ -27,7 +27,7 @@ import { useLocation } from 'app/routerCompat';
 import { useAppSlice } from 'app/slice';
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { NotFoundPage } from '../NotFoundPage';
 import { StoryEditor } from '../StoryBoardPage/Editor';
 import { StoryPlayer } from '../StoryBoardPage/Player';

@@ -6,7 +6,7 @@ import {
 } from '@ant-design/icons';
 import ChartManager from 'app/models/ChartManager';
 import { useCallback } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { FONT_SIZE_TITLE } from 'styles/StyleConstants';
 
 function useGetVizIcon() {

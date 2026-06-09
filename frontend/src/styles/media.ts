@@ -10,7 +10,7 @@ import {
   Interpolation,
   InterpolationFunction,
   ThemedStyledProps,
-} from 'styled-components/macro';
+} from 'styled-components';
 
 /*
  * Taken from https://github.com/DefinitelyTyped/DefinitelyTyped/issues/32914

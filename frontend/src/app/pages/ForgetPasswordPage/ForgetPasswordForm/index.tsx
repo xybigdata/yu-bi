@@ -20,7 +20,7 @@ import * as AuthLayout from 'app/components/styles/AuthLayout';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { Link } from 'app/routerCompat';
 import React, { useCallback, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { LINE_HEIGHT_ICON_LG } from 'styles/StyleConstants';
 import { CheckCodeForm } from './CheckCodeForm';
 import { ResetPasswordForm } from './ResetPasswordForm';

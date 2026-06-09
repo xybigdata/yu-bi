@@ -32,7 +32,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { LEVEL_1 } from 'styles/StyleConstants';
 import { EditorContext } from '../../EditorContext';
 import { ColumnPermissions } from './ColumnPermissions';

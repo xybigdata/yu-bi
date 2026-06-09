@@ -25,7 +25,7 @@ import ChartI18NContext from 'app/pages/ChartWorkbenchPage/contexts/Chart18NCont
 import { WidgetContext } from 'app/pages/DashBoardPage/components/WidgetProvider/WidgetProvider';
 import { ChartDataConfig, ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo, useContext } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import widgetManagerInstance from '../../../../components/WidgetManager';
 
 const StyledWrapper = styled.div`

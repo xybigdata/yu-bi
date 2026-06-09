@@ -28,7 +28,7 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { memo, useCallback, useContext, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled, { css } from 'styled-components/macro';
+import styled, { css } from 'styled-components';
 import { LEVEL_1, ORANGE } from 'styles/StyleConstants';
 import { ViewViewModelStages } from '../constants';
 import { EditorContext } from '../EditorContext';

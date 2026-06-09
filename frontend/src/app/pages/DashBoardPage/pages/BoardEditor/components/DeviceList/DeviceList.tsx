@@ -19,7 +19,7 @@ import { CloseOutlined } from '@ant-design/icons';
 import { InputNumber, Select, Space } from 'antd';
 import { DEVICE_LIST } from 'app/pages/DashBoardPage/constants';
 import React, { memo, useEffect, useState } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 const { Option } = Select;
 
 const ListKeys = Object.keys(DEVICE_LIST);

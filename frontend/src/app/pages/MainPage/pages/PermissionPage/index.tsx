@@ -20,7 +20,7 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useLocation, useParams } from 'app/routerCompat';
 import { useSplitSizes } from 'app/hooks/useSplitSizes';
 import { useCallback, useMemo } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { useMemberSlice } from '../MemberPage/slice';
 import { useScheduleSlice } from '../SchedulePage/slice';
 import { useSourceSlice } from '../SourcePage/slice';

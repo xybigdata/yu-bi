@@ -24,7 +24,7 @@ import { selectRegisterLoading } from 'app/slice/selectors';
 import { register } from 'app/slice/thunks';
 import React, { FC, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { LINE_HEIGHT_ICON_LG } from 'styles/StyleConstants';
 import { getPasswordValidator } from 'utils/validators';
 

@@ -20,7 +20,7 @@ import {
   BorderConfig,
 } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { getBackgroundImage } from 'app/pages/DashBoardPage/utils';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 export interface StyledBackgroundProps {
   bg: BackgroundConfig;
   bd?: BorderConfig;

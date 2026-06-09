@@ -28,7 +28,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useDispatch, useSelector } from 'react-redux';
 import 'reveal.js/dist/reveal.css';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { SPACE_MD } from 'styles/StyleConstants';
 import PageThumbnailList from '../components/PageThumbnailList';
 import StoryHeader from '../components/StoryHeader';

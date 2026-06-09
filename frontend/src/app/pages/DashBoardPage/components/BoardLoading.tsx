@@ -17,7 +17,7 @@
  */
 import { Spin } from 'antd';
 import React from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 export const BoardLoading: React.FC<{ tip?: string }> = ({
   tip = 'Loading',
 }) => {

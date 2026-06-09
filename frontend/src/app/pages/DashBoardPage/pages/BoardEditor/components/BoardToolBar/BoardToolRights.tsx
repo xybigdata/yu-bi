@@ -17,7 +17,7 @@
  */
 import { Space } from 'antd';
 import { memo } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { ShortcutKeys } from './ShortcutKeys';
 export const BoardToolRights: React.FC<{}> = memo(() => {
   const ssp = e => {

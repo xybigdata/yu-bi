@@ -20,7 +20,7 @@ import { ArrowDownOutlined } from '@ant-design/icons';
 import ChartDrillContext from 'app/contexts/ChartDrillContext';
 import classnames from 'classnames';
 import { FC, memo, useContext } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { FONT_SIZE_HEADING } from 'styles/StyleConstants';
 import { IW } from '../IconWrapper';
 

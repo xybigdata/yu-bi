@@ -22,7 +22,7 @@ import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { LEVEL_10 } from 'styles/StyleConstants';
 import { uuidv4 } from 'utils/utils';
 import {

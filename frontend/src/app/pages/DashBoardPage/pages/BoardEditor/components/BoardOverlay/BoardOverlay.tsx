@@ -17,7 +17,7 @@
  */
 
 import { FC, memo } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { LEVEL_DASHBOARD_EDIT_OVERLAY } from 'styles/StyleConstants';
 
 const BoardOverlay: FC = memo(() => {

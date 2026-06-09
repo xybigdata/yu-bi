@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { createGlobalStyle } from 'styled-components/macro';
+import { createGlobalStyle } from 'styled-components';
 import { BORDER_RADIUS } from 'styles/StyleConstants';
 
 export const Form = createGlobalStyle`

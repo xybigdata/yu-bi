@@ -51,7 +51,7 @@ import {
   useMemo,
   useState,
 } from 'react';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { request2 } from 'utils/request';
 import { convertToTree } from '../../../../../../../utils/widget';
 import { ControllerConfig } from '../../../types';

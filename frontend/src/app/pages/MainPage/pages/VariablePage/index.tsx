@@ -38,7 +38,7 @@ import { CommonFormTypes, TIME_FORMATTER } from 'globalConstants';
 import { Moment } from 'moment';
 import { Key, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import {
   BORDER_RADIUS,
   FONT_SIZE_TITLE,

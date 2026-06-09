@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { createGlobalStyle } from 'styled-components/macro';
+import { createGlobalStyle } from 'styled-components';
 
 export const Viz = createGlobalStyle`
   /* 覆盖antd 默认样式 */

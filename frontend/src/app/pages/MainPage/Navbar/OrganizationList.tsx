@@ -34,7 +34,7 @@ import classnames from 'classnames';
 import { BASE_RESOURCE_URL } from 'globalConstants';
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import {
   FONT_SIZE_TITLE,
   LINE_HEIGHT_TITLE,

@@ -56,7 +56,7 @@ import {
 } from 'react';
 import { monaco } from 'react-monaco-editor';
 import { useDispatch, useSelector } from 'react-redux';
-import styled from 'styled-components/macro';
+import styled from 'styled-components';
 import { SPACE_MD, SPACE_XS } from 'styles/StyleConstants';
 import { errorHandle, uuidv4 } from 'utils/utils';
 import { selectVariables } from '../../../VariablePage/slice/selectors';
