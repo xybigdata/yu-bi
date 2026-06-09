@@ -1,7 +1,7 @@
 import { prefixI18N } from 'app/hooks/useI18NPrefix';
 import Quill from 'quill';
 import { ImageDrop } from 'quill-image-drop-module';
-import { FC } from 'react';
+import { FC, ReactNode } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import styled from 'styled-components/macro';
@@ -25,6 +25,7 @@ export const Formats = [
   'image',
 ];
 interface CommonRichTextProps {
+  children?: ReactNode;
   value?: string;
   onChange?: (v?: string) => void;
   placeholder?: string;

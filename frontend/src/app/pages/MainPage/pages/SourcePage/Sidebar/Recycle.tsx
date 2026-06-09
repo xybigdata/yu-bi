@@ -183,7 +183,7 @@ export const Recycle = memo(({ sourceId, list }: RecycleProps) => {
     <Tree
       loading={loading}
       treeData={list}
-      titleRender={renderTreeTitle}
+      titleRender={node => renderTreeTitle(node as any)}
       onSelect={treeSelect}
     />
   );

@@ -646,28 +646,29 @@ const ChartPreviewBoard: FC<{
 
     return (
       <StyledChartPreviewBoard>
-        {!hideTitle && (
-          <VizHeader
-            chartName={chartPreview?.backendChart?.name}
-            status={chartPreview?.backendChart?.status}
-            publishLoading={publishLoading}
-            onGotoEdit={handleGotoWorkbenchPage}
-            onPublish={handlePublish}
-            onGenerateShareLink={handleGenerateShareLink}
-            onDownloadData={handleCreateDownloadDataTask}
-            onSaveAsVizs={handleSaveAsVizs}
-            onReloadData={handleReloadData}
-            onAddToDashBoard={handleAddToDashBoard}
-            onRecycleViz={handleRecycleViz}
-            allowDownload={allowDownload}
-            allowShare={allowShare}
-            allowManage={allowManage}
-            orgId={orgId}
-            backendChartId={backendChartId}
-          />
-        )}
-        <PreviewBlock>
-          <ChartDrillContext.Provider
+        <>
+          {!hideTitle && (
+            <VizHeader
+              chartName={chartPreview?.backendChart?.name}
+              status={chartPreview?.backendChart?.status}
+              publishLoading={publishLoading}
+              onGotoEdit={handleGotoWorkbenchPage}
+              onPublish={handlePublish}
+              onGenerateShareLink={handleGenerateShareLink}
+              onDownloadData={handleCreateDownloadDataTask}
+              onSaveAsVizs={handleSaveAsVizs}
+              onReloadData={handleReloadData}
+              onAddToDashBoard={handleAddToDashBoard}
+              onRecycleViz={handleRecycleViz}
+              allowDownload={allowDownload}
+              allowShare={allowShare}
+              allowManage={allowManage}
+              orgId={orgId}
+              backendChartId={backendChartId}
+            />
+          )}
+          <PreviewBlock>
+            <ChartDrillContext.Provider
             value={{
               drillOption: drillOptionRef.current,
               availableSourceFunctions,
@@ -713,9 +714,10 @@ const ChartPreviewBoard: FC<{
             </StyledChartDrillPathsContainer>
           </ChartDrillContext.Provider>
         </PreviewBlock>
-        {viewDetailPanelContextHolder}
-        {jumpDialogContextHolder}
-        {openJumpVizDialogModalContextHolder}
+          {viewDetailPanelContextHolder}
+          {jumpDialogContextHolder}
+          {openJumpVizDialogModalContextHolder}
+        </>
       </StyledChartPreviewBoard>
     );
   },

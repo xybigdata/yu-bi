@@ -37,6 +37,7 @@ import {
 } from 'styles/StyleConstants';
 
 interface TitleHeaderProps {
+  children?: React.ReactNode;
   name?: string;
   onShareDownloadData?: () => void;
   loadVizData?: () => void;

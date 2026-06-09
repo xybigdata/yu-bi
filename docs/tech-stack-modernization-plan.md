@@ -8,7 +8,7 @@
 - 后端主框架：Spring Boot 3.5.12，Spring Cloud 2025.0.1。
 - 构建工具：Maven，`maven-compiler-plugin` 3.14.1，`maven-assembly-plugin` 3.8.0，`exec-maven-plugin` 3.6.3。
 - 前端运行时：本机 Node 26 可启动，默认开发和生产构建已切换到 Vite 5。
-- 前端主框架：React 18、React Router 5、Ant Design 4、TypeScript 4.5；CRACO 7/CRA5 仅作为回退脚本保留。
+- 前端主框架：React 18、React Router 5、Ant Design 4.24、TypeScript 4.5；CRACO 7/CRA5 仅作为回退脚本保留。
 - 已验证基线：
   - `npm run checkTs` 通过。
   - `npm run build:task` 通过。
@@ -141,15 +141,13 @@
 - HMR 判断已兼容 Vite ESM 产物，避免 production preview 中访问未定义的 `module`。
 - Testing Library 已升级到 React 18 兼容线：`@testing-library/react 14.3.1`、`@testing-library/user-event 14.6.1`。
 - Enzyme 短期改用社区 React 18 adapter：`@cfaester/enzyme-adapter-react-18 0.8.0`，移除 React 17 adapter。
-
-当前过渡策略：
-- 运行时已进入 React 18，但 `@types/react` 暂保留在 17.0.38，`@types/react-dom` 升级到 18.0.11 以提供 `createRoot` 类型。
-- 原因：当前 Ant Design 4、react-helmet-async 1.x、styled-components 5 以及大量 `React.FC` 写法依赖 React 17 的隐式 `children` 类型。直接切到 `@types/react@18` 会触发大范围类型错误，适合与 Ant Design 5/6、测试栈迁移一起分阶段收口。
+- React 类型定义已升级到 React 18：`@types/react 17.0.38 -> 18.3.12`。
+- 显式补齐 React 18 不再隐式提供的 `children` 类型，覆盖 Provider、Wrapper、FormGenerator、ListTitle、ChartDrill、Dashboard Widget 等调用点。
+- 适配 AntD Tree/Icon 回调、i18next 与 AntD message 内容类型、Chart iframe 容器返回类型等 React 18 类型收紧暴露的问题。
 
 风险：
 - 旧组件库可能依赖 React 17 行为。
 - Enzyme 对 React 18 支持弱，当前 adapter 只是过渡方案，测试栈仍需迁移到 Testing Library。
-- `@types/react` 仍是过渡状态，后续 UI/路由/测试栈现代化阶段需要升级到 React 18 类型并显式补齐 `children`。
 
 验收门槛：
 - `npm run checkTs` 通过。
@@ -171,9 +169,11 @@
 已完成：
 - `react-helmet-async 1.2.2 -> 3.0.0`，先消除 React 18 类型迁移中 Helmet/HelmetProvider `children` 类型不完整的问题。
 - `antd 4.16.13 -> 4.24.16`，先升级到 Ant Design 4 最后稳定线，避免一次性跨到 5 带来大面积 API 和主题回归。
+- React 18 类型定义已落地，UI 组件中依赖 React 17 隐式 `children` 的写法已清理到可编译状态。
 - 保留现有浏览器端 Less 动态主题链，并在主题生成脚本中兼容 AntD 4.24 的 `@{root-entry-name}` 动态主题入口。
 - 修复 AntD 4.24 暴露的类型收紧问题，包括 `InputRef`、`InputNumber` 的 `number | null`、Tree/Cascader 节点类型和 FormList `fieldKey` 可选值。
 - 修复 Vite 生产构建中 CRA HMR 兼容分支被折叠成裸 `module.hot` 后导致预览页空白的问题。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
 
 预研结果：
 - Ant Design 相关调用点约 358 个文件，`visible`/`onVisibleChange`/`overlay`/`Menu.Item` 等 AntD 5 迁移热点分布广，不能直接大版本替换。

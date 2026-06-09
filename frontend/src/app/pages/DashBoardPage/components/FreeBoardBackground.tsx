@@ -24,6 +24,7 @@ import StyledBackground from './WidgetComponents/StyledBackground';
 
 export const BoardScaleContext = createContext<[number, number]>([1, 1]);
 export interface IProps {
+  children?: React.ReactNode;
   scale: [number, number];
   slideTranslate: [number, number];
 }

@@ -18,7 +18,14 @@
 
 import { DataChart } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import ChartDataView from 'app/types/ChartDataView';
-import { createContext, FC, memo, useContext, useEffect } from 'react';
+import {
+  createContext,
+  FC,
+  PropsWithChildren,
+  memo,
+  useContext,
+  useEffect,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setWidgetSampleDataAction } from '../../actions/widgetAction';
 import {
@@ -62,11 +69,11 @@ export const WidgetChartContext = createContext<{
   supportTrigger: true,
 });
 
-export const WidgetChartProvider: FC<{
+export const WidgetChartProvider: FC<PropsWithChildren<{
   boardId: string;
   boardEditing: boolean;
   widgetId: string;
-}> = memo(({ boardId, boardEditing, widgetId, children }) => {
+}>> = memo(({ boardId, boardEditing, widgetId, children }) => {
   const { datachartId } = useContext(WidgetContext);
   const dispatch = useDispatch();
   useEffect(() => {

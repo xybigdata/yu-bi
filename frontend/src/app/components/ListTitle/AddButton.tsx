@@ -7,7 +7,7 @@ interface AddButtonProps {
   dataSource: {
     items: Array<{ key: string; text: string }>;
     icon?: ReactElement;
-    callback: () => void;
+    callback: (menuClickHandler?: any) => void | false;
   };
 }
 
@@ -19,7 +19,7 @@ export function AddButton({
       <ToolbarButton
         size="small"
         icon={icon || <PlusOutlined />}
-        onClick={callback}
+        onClick={() => callback()}
       />
     </Tooltip>
   ) : (

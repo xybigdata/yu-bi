@@ -2,7 +2,7 @@ import {
   DownloadListPopup,
   OnLoadTasksType,
 } from 'app/pages/MainPage/Navbar/DownloadListPopup';
-import { FC, useCallback } from 'react';
+import { FC, ReactNode, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components/macro';
 import { SPACE_MD } from 'styles/StyleConstants';
@@ -12,6 +12,7 @@ import { selectShareDownloadPolling } from '../slice/selectors';
 const SHARE_HEADER_HEIGHT = 50;
 
 interface DownloadTaskContainerProps {
+  children?: ReactNode;
   onLoadTasks: OnLoadTasksType;
   onDownloadFile: (item: DownloadTask) => void;
 }

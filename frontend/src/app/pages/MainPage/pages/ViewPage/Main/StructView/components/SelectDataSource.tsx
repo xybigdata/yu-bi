@@ -140,7 +140,8 @@ const SelectDataSource = memo(
       };
     };
 
-    const renderIcon = useCallback(({ value }) => {
+    const renderIcon = useCallback(node => {
+      const { value } = node as any;
       if (Array.isArray(value)) {
         switch (value.length) {
           case 1:

@@ -119,7 +119,7 @@ export const makeDownloadDataTask =
       },
     });
     if (res?.success) {
-      message.success(i18next.t('viz.action.downloadTaskSuccess'));
+      message.success(String(i18next.t('viz.action.downloadTaskSuccess')));
     }
     resolve();
   };
@@ -159,7 +159,7 @@ export const makeShareDownloadDataTask =
       },
     });
     if (success) {
-      message.success(i18next.t('viz.action.downloadTaskSuccess'));
+      message.success(String(i18next.t('viz.action.downloadTaskSuccess')));
     }
     resolve();
   };

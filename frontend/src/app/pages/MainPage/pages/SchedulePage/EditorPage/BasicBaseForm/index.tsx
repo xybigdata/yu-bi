@@ -2,12 +2,13 @@ import { DatePicker, Form, Input, Radio } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { fetchCheckName } from 'app/utils/fetch';
 import { TIME_FORMATTER } from 'globalConstants';
-import { FC, useCallback } from 'react';
+import { FC, ReactNode, useCallback } from 'react';
 import { JobTypes, JOB_TYPES_OPTIONS } from '../../constants';
 import { ExecuteFormItem, ExecuteFormItemProps } from './ExecuteFormItem';
 const { RangePicker } = DatePicker;
 
 interface BasicBaseFormProps extends ExecuteFormItemProps {
+  children?: ReactNode;
   orgId: string;
   isAdd?: boolean;
   initialName?: string;

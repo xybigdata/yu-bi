@@ -20,7 +20,7 @@ import { ControllerFacadeTypes } from 'app/constants';
 import { ChartMouseEventParams } from 'app/types/Chart';
 import { ChartConfig } from 'app/types/ChartConfig';
 import debounce from 'lodash/debounce';
-import { createContext, FC, memo, useMemo } from 'react';
+import { createContext, FC, PropsWithChildren, memo, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import {
@@ -64,13 +64,13 @@ import { editWidgetsQueryAction } from '../../pages/BoardEditor/slice/actions/co
 import { renderedEditWidgetAsync } from '../../pages/BoardEditor/slice/thunk';
 import { Widget, WidgetConf } from '../../types/widgetTypes';
 
-export const WidgetActionProvider: FC<{
+export const WidgetActionProvider: FC<PropsWithChildren<{
   orgId: string;
   boardId: string;
   boardEditing: boolean;
   renderMode: VizRenderMode;
   boardType: BoardType;
-}> = memo(
+}>> = memo(
   ({ boardEditing, boardId, orgId, boardType, renderMode, children }) => {
     const dispatch = useDispatch();
     const history = useHistory<any>();

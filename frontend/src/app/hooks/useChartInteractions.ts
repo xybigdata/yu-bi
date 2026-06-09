@@ -42,6 +42,43 @@ import { useCallback } from 'react';
 import { isEmpty, isEmptyArray } from 'utils/object';
 import { urlSearchTransfer } from 'utils/urlSearchTransfer';
 
+interface DrillThroughEventParams {
+  drillOption?: any;
+  drillThroughSetting?: DrillThroughSetting | null;
+  clickEventParams?: any;
+  targetEvent?: any;
+  ruleId?: any;
+  orgId?: any;
+  view?: any;
+  queryVariables?: any;
+  computedFields?: any;
+  aggregation?: any;
+  chartConfig?: any;
+  isJumpUrlOnly?: any;
+}
+
+interface ViewDataEventParams {
+  drillOption?: any;
+  clickEventParams?: any;
+  targetEvent?: any;
+  viewDetailSetting?: ViewDetailSetting | null;
+  chartConfig?: any;
+  view?: any;
+  authToken?: any;
+}
+
+interface CrossFilteringEventParams {
+  drillOption?: any;
+  crossFilteringSetting?: CrossFilteringSetting | null;
+  clickEventParams?: any;
+  targetEvent?: any;
+  view?: any;
+  queryVariables?: any;
+  computedFields?: any;
+  aggregation?: any;
+  chartConfig?: any;
+}
+
 const useChartInteractions = (props: {
   openViewDetailPanel?: Function;
   openJumpVizDialogModal?: Function;
@@ -154,7 +191,7 @@ const useChartInteractions = (props: {
       aggregation,
       chartConfig,
       isJumpUrlOnly,
-    }) => {
+    }: DrillThroughEventParams) => {
       if (drillThroughSetting) {
         const sourceChartFilters = new ChartDataRequestBuilder(
           {
@@ -307,7 +344,7 @@ const useChartInteractions = (props: {
         computedFields,
         aggregation,
         chartConfig,
-      },
+      }: CrossFilteringEventParams,
       callback,
     ) => {
       if (
@@ -373,7 +410,7 @@ const useChartInteractions = (props: {
       chartConfig,
       view,
       authToken,
-    }) => {
+    }: ViewDataEventParams) => {
       if (viewDetailSetting?.event === targetEvent) {
         const clickFilters = buildClickEventBaseFilters(
           clickEventParams?.selectedItems?.map(item => item?.data?.rowData),

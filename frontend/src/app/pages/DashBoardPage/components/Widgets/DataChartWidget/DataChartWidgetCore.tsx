@@ -620,11 +620,13 @@ export const DataChartWidgetCore: React.FC<{}> = memo(() => {
         metas={chartDataView?.meta}
       >
         <StyledWrapper>
-          <ChartFrameBox ref={cacheWhRef}>{chartFrame}</ChartFrameBox>
-          <ChartDrillPaths chartConfig={dataChart?.config.chartConfig} />
-          {viewDetailPanelContextHolder}
-          {jumpDialogContextHolder}
-          {openJumpVizDialogModalContextHolder}
+          <>
+            <ChartFrameBox ref={cacheWhRef}>{chartFrame}</ChartFrameBox>
+            <ChartDrillPaths chartConfig={dataChart?.config.chartConfig} />
+            {viewDetailPanelContextHolder}
+            {jumpDialogContextHolder}
+            {openJumpVizDialogModalContextHolder}
+          </>
         </StyledWrapper>
       </ChartDrillContextMenu>
     </ChartDrillContext.Provider>

@@ -77,16 +77,18 @@ const GroupLayout: FC<FormGeneratorLayoutProps<ChartStyleConfig>> = memo(
       if (comType === FormItemComponentType.MODAL) {
         return (
           <BW label={data.options?.title ? t(data.options?.title, true) : ''}>
-            <Button
-              className="datart-modal-button"
-              type="ghost"
-              block={true}
-              title={t(data.label, true)}
-              onClick={handleOpenStateModal}
-            >
-              <CollapseHeader title={t(data.label, true)} />
-            </Button>
-            {contextHolder}
+            <>
+              <Button
+                className="datart-modal-button"
+                type="ghost"
+                block={true}
+                title={t(data.label, true)}
+                onClick={handleOpenStateModal}
+              >
+                <CollapseHeader title={t(data.label, true)} />
+              </Button>
+              {contextHolder}
+            </>
           </BW>
         );
       }

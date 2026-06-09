@@ -1,7 +1,9 @@
 import { ChartDataConfig } from 'app/types/ChartConfig';
+import { ReactNode } from 'react';
 import { FormGroupLayoutMode } from './constants';
 
 export interface ItemLayoutProps<T> {
+  children?: ReactNode;
   ancestors: number[];
   data: T;
   translate?: (title: string, disablePrefix?: boolean, options?: any) => string;

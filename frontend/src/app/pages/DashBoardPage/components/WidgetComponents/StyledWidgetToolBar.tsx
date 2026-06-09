@@ -15,10 +15,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { memo } from 'react';
+import { PropsWithChildren, memo } from 'react';
 import styled from 'styled-components/macro';
 import { LEVEL_50 } from 'styles/StyleConstants';
-export const StyledWidgetToolBar: React.FC<{}> = memo(props => {
+export const StyledWidgetToolBar: React.FC<PropsWithChildren<{}>> = memo(props => {
   return <StyleWrap>{props.children} </StyleWrap>;
 });
 const StyleWrap = styled.div`

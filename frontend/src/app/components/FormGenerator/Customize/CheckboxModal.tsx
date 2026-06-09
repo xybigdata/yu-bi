@@ -80,22 +80,24 @@ const CheckboxModal: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
 
     return (
       <StyledCheckboxModal>
-        <Checkbox checked={enable} onChange={handleCheckboxClick}></Checkbox>
-        <Button
-          block
-          disabled={!enable}
-          size={'middle'}
-          type="link"
-          onClick={handleOpenModal}
-        >
-          {t(data.label)}
-        </Button>
-        {hasOriginal && (
-          <Tooltip title={t('viz.tips.hasChartConfig', true)}>
-            <InfoCircleOutlined />
-          </Tooltip>
-        )}
-        {contextHolder}
+        <>
+          <Checkbox checked={enable} onChange={handleCheckboxClick}></Checkbox>
+          <Button
+            block
+            disabled={!enable}
+            size={'middle'}
+            type="link"
+            onClick={handleOpenModal}
+          >
+            {t(data.label)}
+          </Button>
+          {hasOriginal && (
+            <Tooltip title={t('viz.tips.hasChartConfig', true)}>
+              <InfoCircleOutlined />
+            </Tooltip>
+          )}
+          {contextHolder}
+        </>
       </StyledCheckboxModal>
     );
   },
@@ -104,7 +106,7 @@ const CheckboxModal: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
 
 export default CheckboxModal;
 
-const StyledCheckboxModal = styled(Button)`
+const StyledCheckboxModal = styled.div`
   display: flex;
   align-items: center;
   width: 100%;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { createContext, FC, memo, useMemo } from 'react';
+import { createContext, FC, PropsWithChildren, memo, useMemo } from 'react';
 import { Dashboard, VizRenderMode } from '../../pages/Board/slice/types';
 import { BoardActionProvider } from '../ActionProvider/BoardActionProvider';
 import { WidgetActionProvider } from '../ActionProvider/WidgetActionProvider';
@@ -37,7 +37,7 @@ export interface BoardInitContextProps {
 export const BoardInitContext = createContext<BoardInitContextProps>(
   {} as BoardInitContextProps,
 );
-export const BoardInitProvider: FC<BoardInitContextProps> = memo(
+export const BoardInitProvider: FC<PropsWithChildren<BoardInitContextProps>> = memo(
   ({
     board,
     editing,

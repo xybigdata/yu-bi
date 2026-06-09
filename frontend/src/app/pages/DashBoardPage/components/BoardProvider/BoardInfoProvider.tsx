@@ -16,14 +16,16 @@
  * limitations under the License.
  */
 
-import React, { createContext, FC, memo } from 'react';
+import React, { PropsWithChildren, createContext, FC, memo } from 'react';
 import { useSelector } from 'react-redux';
 import { selectBoardInfoById } from '../../pages/Board/slice/selector';
 import { BoardInfo, BoardState } from '../../pages/Board/slice/types';
 import { boardInfoState } from '../../pages/BoardEditor/slice/selectors';
 
 export const BoardInfoContext = createContext<BoardInfo>({} as BoardInfo);
-export const BoardInfoProvider: FC<{ id: string; editing: boolean }> = memo(
+export const BoardInfoProvider: FC<
+  PropsWithChildren<{ id: string; editing: boolean }>
+> = memo(
   ({ id, editing, children }) => {
     const editBoardInfo = useSelector(boardInfoState);
     const viewBoardInfo = useSelector((state: { board: BoardState }) =>

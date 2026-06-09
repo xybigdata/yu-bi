@@ -20,15 +20,15 @@ import {
   BorderConfig,
   WidgetPadding,
 } from 'app/pages/DashBoardPage/pages/Board/slice/types';
-import { memo } from 'react';
+import { PropsWithChildren, memo } from 'react';
 import styled from 'styled-components/macro';
 import { getWidgetSomeStyle } from '../../utils/widget';
 
-export const WidgetWrapper: React.FC<{
+export const WidgetWrapper: React.FC<PropsWithChildren<{
   background: BackgroundConfig;
   padding: WidgetPadding;
   border: BorderConfig;
-}> = memo(props => {
+}>> = memo(props => {
   const { children, ...rest } = props;
   const style = getWidgetSomeStyle(rest);
   return <Wrapper style={style}>{children}</Wrapper>;

@@ -360,58 +360,60 @@ const ChartPreviewBoardForShare: FC<{
 
     return (
       <StyledChartPreviewBoardForShare>
-        <div ref={controlRef}>
-          <ControllerPanel
-            viewId={chartPreview?.backendChart?.viewId}
-            chartConfig={chartPreview?.chartConfig}
-            onChange={handleFilterChange}
-            view={chartPreview?.backendChart?.view}
-            executeToken={shareExecuteTokenMap}
-          />
-        </div>
-        <ChartDrillContext.Provider
-          value={{
-            drillOption: drillOptionRef.current,
-            availableSourceFunctions,
-            viewDetailSetting: chartRightClickViewDetailSetting,
-            drillThroughSetting: chartRightClickDrillThroughSetting,
-            onDrillOptionChange: handleDrillOptionChange,
-            onDateLevelChange: handleDateLevelChange,
-            onDrillThroughChange: handleDrillThroughChange(),
-            onViewDataChange: handleViewDataChange(),
-          }}
-        >
-          <div style={{ width: '100%', height: '100%' }} ref={ref}>
-            <ChartDrillContextMenu
+        <>
+          <div ref={controlRef}>
+            <ControllerPanel
+              viewId={chartPreview?.backendChart?.viewId}
               chartConfig={chartPreview?.chartConfig}
-              metas={chartPreview?.backendChart?.view?.meta}
-            >
-              <ChartIFrameContainer
-                key={chartPreview?.backendChart?.id!}
-                containerId={chartPreview?.backendChart?.id!}
-                dataset={dataset}
-                chart={chart!}
-                config={chartPreview?.chartConfig!}
-                drillOption={drillOptionRef.current}
-                selectedItems={selectedItems}
-                width={width}
-                height={height}
-                isLoadingData={isLoadingData}
-              />
-            </ChartDrillContextMenu>
+              onChange={handleFilterChange}
+              view={chartPreview?.backendChart?.view}
+              executeToken={shareExecuteTokenMap}
+            />
           </div>
-          <StyledChartDrillPathsContainer>
-            <ChartDrillPaths chartConfig={chartPreview?.chartConfig} />
-          </StyledChartDrillPathsContainer>
-        </ChartDrillContext.Provider>
-        {viewDetailPanelContextHolder}
-        {jumpDialogContextHolder}
-        {openJumpVizDialogModalContextHolder}
-        <HeadlessBrowserIdentifier
-          renderSign={headlessBrowserRenderSign}
-          width={Number(width) || 0}
-          height={Number(width) + Number(controlH) + TitleHeight || 0}
-        />
+          <ChartDrillContext.Provider
+            value={{
+              drillOption: drillOptionRef.current,
+              availableSourceFunctions,
+              viewDetailSetting: chartRightClickViewDetailSetting,
+              drillThroughSetting: chartRightClickDrillThroughSetting,
+              onDrillOptionChange: handleDrillOptionChange,
+              onDateLevelChange: handleDateLevelChange,
+              onDrillThroughChange: handleDrillThroughChange(),
+              onViewDataChange: handleViewDataChange(),
+            }}
+          >
+            <div style={{ width: '100%', height: '100%' }} ref={ref}>
+              <ChartDrillContextMenu
+                chartConfig={chartPreview?.chartConfig}
+                metas={chartPreview?.backendChart?.view?.meta}
+              >
+                <ChartIFrameContainer
+                  key={chartPreview?.backendChart?.id!}
+                  containerId={chartPreview?.backendChart?.id!}
+                  dataset={dataset}
+                  chart={chart!}
+                  config={chartPreview?.chartConfig!}
+                  drillOption={drillOptionRef.current}
+                  selectedItems={selectedItems}
+                  width={width}
+                  height={height}
+                  isLoadingData={isLoadingData}
+                />
+              </ChartDrillContextMenu>
+            </div>
+            <StyledChartDrillPathsContainer>
+              <ChartDrillPaths chartConfig={chartPreview?.chartConfig} />
+            </StyledChartDrillPathsContainer>
+          </ChartDrillContext.Provider>
+          {viewDetailPanelContextHolder}
+          {jumpDialogContextHolder}
+          {openJumpVizDialogModalContextHolder}
+          <HeadlessBrowserIdentifier
+            renderSign={headlessBrowserRenderSign}
+            width={Number(width) || 0}
+            height={Number(width) + Number(controlH) + TitleHeight || 0}
+          />
+        </>
       </StyledChartPreviewBoardForShare>
     );
   },

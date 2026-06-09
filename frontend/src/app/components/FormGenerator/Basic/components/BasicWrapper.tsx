@@ -1,7 +1,8 @@
 import { Form, FormItemProps } from 'antd';
+import { ReactNode } from 'react';
 import styled from 'styled-components/macro';
 
-export function BW(props: FormItemProps) {
+export function BW(props: FormItemProps & { children?: ReactNode }) {
   return <Wrapper {...props} colon={false} />;
 }
 

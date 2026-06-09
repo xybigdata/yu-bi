@@ -18,7 +18,7 @@
 
 import { DownloadFileType } from 'app/constants';
 import { generateShareLinkAsync } from 'app/utils/fetch';
-import { createContext, FC, memo, useMemo } from 'react';
+import { createContext, FC, PropsWithChildren, memo, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router';
 import { BOARD_UNDO } from '../../constants';
@@ -53,9 +53,9 @@ export interface BoardActionContextProps {
 export const BoardActionContext = createContext<BoardActionContextProps>(
   {} as BoardActionContextProps,
 );
-export const BoardActionProvider: FC<{
+export const BoardActionProvider: FC<PropsWithChildren<{
   boardId: string;
-}> = memo(({ boardId, children }) => {
+}>> = memo(({ boardId, children }) => {
   const dispatch = useDispatch();
   const history = useHistory();
 

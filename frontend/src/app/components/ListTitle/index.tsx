@@ -29,7 +29,7 @@ export interface ListTitleProps {
   add?: {
     items: Array<{ key: string; text: string }>;
     icon?: ReactElement;
-    callback: (menuClickHandler?: { key: string }) => void;
+    callback: (menuClickHandler?: any) => void | false;
   };
   more?: {
     items: Array<{

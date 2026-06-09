@@ -16,17 +16,17 @@
  * limitations under the License.
  */
 
-import { FC, memo } from 'react';
+import { FC, PropsWithChildren, memo } from 'react';
 import { WidgetChartProvider } from './WidgetChartProvider';
 import { WidgetInfoProvider } from './WidgetInfoProvider';
 import { WidgetProvider } from './WidgetProvider';
 import { WidgetSelectionProvider } from './WidgetSelectionProvider';
 
-export const WidgetWrapProvider: FC<{
+export const WidgetWrapProvider: FC<PropsWithChildren<{
   id: string;
   boardId: string;
   boardEditing: boolean;
-}> = memo(({ id, boardEditing, boardId, children }) => {
+}>> = memo(({ id, boardEditing, boardId, children }) => {
   return (
     <WidgetProvider boardId={boardId} boardEditing={boardEditing} widgetId={id}>
       <WidgetInfoProvider

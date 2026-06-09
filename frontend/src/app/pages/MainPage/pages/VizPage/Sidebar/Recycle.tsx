@@ -165,7 +165,7 @@ export const Recycle = memo(
       <Tree
         loading={listLoading}
         treeData={list}
-        titleRender={renderTreeTitle}
+        titleRender={node => renderTreeTitle(node as any)}
         onSelect={treeSelect}
       />
     );

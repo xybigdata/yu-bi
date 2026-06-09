@@ -18,7 +18,7 @@
 
 import { ConfigProvider, Table } from 'antd';
 import { antdLocales } from 'locales/i18n';
-import { FC, memo } from 'react';
+import { FC, ReactNode, memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components/macro';
 
@@ -43,6 +43,7 @@ interface TableStyleConfigProps {
 }
 
 const AntdTableWrapper: FC<{
+  children?: ReactNode;
   dataSource: [];
   columns: [];
   tableStyleConfig?: TableStyleConfigProps | undefined;

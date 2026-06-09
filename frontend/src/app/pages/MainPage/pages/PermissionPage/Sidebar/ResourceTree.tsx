@@ -65,7 +65,8 @@ export const ResourceTree = memo(
       [onSelect],
     );
 
-    const renderTreeTitle = useCallback(({ id, title }) => {
+    const renderTreeTitle = useCallback(node => {
+      const { title } = node as DataSourceTreeNode;
       return (
         <TreeTitle>
           <h4>{`${title}`}</h4>

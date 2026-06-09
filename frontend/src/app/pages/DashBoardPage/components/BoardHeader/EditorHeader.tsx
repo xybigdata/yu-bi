@@ -20,7 +20,7 @@ import { CloseOutlined, LeftOutlined, SaveOutlined } from '@ant-design/icons';
 import { Button, Space } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import classnames from 'classnames';
-import { FC, memo, useContext } from 'react';
+import { FC, PropsWithChildren, memo, useContext } from 'react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router';
 import styled from 'styled-components/macro';
@@ -38,7 +38,7 @@ import { WidgetActionContext } from '../ActionProvider/WidgetActionProvider';
 import { BoardInfoContext } from '../BoardProvider/BoardInfoProvider';
 import { BoardContext } from '../BoardProvider/BoardProvider';
 
-const EditorHeader: FC = memo(({ children }) => {
+const EditorHeader: FC<PropsWithChildren<{}>> = memo(({ children }) => {
   const dispatch = useDispatch();
   const history = useHistory();
   const t = useI18NPrefix(`viz.action`);

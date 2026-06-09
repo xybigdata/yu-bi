@@ -1,10 +1,11 @@
 import { Popover, PopoverProps } from 'antd';
-import { FC, useCallback, useMemo, useState } from 'react';
+import { FC, ReactNode, useCallback, useMemo, useState } from 'react';
 import { SketchPickerProps } from 'react-color';
 import { ColorPicker } from './ColorTag';
 import SingleColorSelection from './SingleColorSelection';
 
 interface ColorPickerPopoverProps {
+  children?: ReactNode;
   popoverProps?: PopoverProps;
   defaultValue?: string;
   size?: number;

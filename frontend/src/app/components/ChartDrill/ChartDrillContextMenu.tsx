@@ -35,13 +35,14 @@ import { getRuntimeDateLevelFields } from 'app/utils/chartHelper';
 import { updateBy } from 'app/utils/mutation';
 import classnames from 'classnames';
 import { DATARTSEPERATOR } from 'globalConstants';
-import { FC, memo, useCallback, useContext, useMemo } from 'react';
+import { FC, ReactNode, memo, useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components/macro';
 import { FONT_WEIGHT_MEDIUM, SPACE_SM } from 'styles/StyleConstants';
 import { isEmpty } from 'utils/object';
 import { InteractionMouseEvent } from '../FormGenerator/constants';
 
 const ChartDrillContextMenu: FC<{
+  children?: ReactNode;
   chartConfig?: ChartConfig;
   metas?: ChartDataViewMeta[];
 }> = memo(({ children, metas, chartConfig }) => {

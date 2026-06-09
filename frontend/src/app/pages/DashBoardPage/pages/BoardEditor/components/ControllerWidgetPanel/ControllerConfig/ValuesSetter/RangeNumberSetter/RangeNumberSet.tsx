@@ -32,7 +32,7 @@ export const RangeNumberSetter: React.FC<{}> = memo(() => {
   };
   return <RangeNumberSetForm {...itemProps} />;
 });
-export interface RangeNumberSetFormProps {
+export interface RangeNumberSetFormProps extends FormItemProps<any> {
   onChange?: () => any;
   value?: any[];
 }

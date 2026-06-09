@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { createContext, FC, memo, useMemo } from 'react';
+import { createContext, FC, PropsWithChildren, memo, useMemo } from 'react';
 import {
   BoardType,
   Dashboard,
@@ -43,7 +43,7 @@ export interface BoardContextProps {
 export const BoardContext = createContext<BoardContextProps>(
   {} as BoardContextProps,
 );
-export const BoardProvider: FC<BoardContextProps> = memo(
+export const BoardProvider: FC<PropsWithChildren<BoardContextProps>> = memo(
   ({
     orgId,
     boardId,

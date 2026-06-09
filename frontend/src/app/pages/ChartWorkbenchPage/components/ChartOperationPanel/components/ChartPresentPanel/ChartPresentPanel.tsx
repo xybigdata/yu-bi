@@ -31,7 +31,7 @@ import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
 import ChartDataSetDTO from 'app/types/ChartDataSet';
 import ChartDataView from 'app/types/ChartDataView';
 import { setRuntimeDateLevelFieldsInChartConfig } from 'app/utils/chartHelper';
-import { FC, memo, useContext, useState } from 'react';
+import { FC, memo, ReactNode, useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components/macro';
 import {
@@ -98,8 +98,8 @@ const ChartPresentPanel: FC<{
       chartConfig = setRuntimeDateLevelFieldsInChartConfig(chartConfig);
 
       return (
-        !!chart &&
-        chartDispatcher.getContainers(
+        (!!chart &&
+          chartDispatcher.getContainers(
           containerId,
           chart,
           dataset,
@@ -108,7 +108,7 @@ const ChartPresentPanel: FC<{
           drillOption,
           selectedItems,
           isLoadingData,
-        )
+          )) as ReactNode
       );
     };
 

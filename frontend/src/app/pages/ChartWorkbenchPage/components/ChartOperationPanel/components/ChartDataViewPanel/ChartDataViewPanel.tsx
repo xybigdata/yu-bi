@@ -483,66 +483,72 @@ const ChartDataViewPanel: FC<{
   return (
     <StyledChartDataViewPanel>
       <Header>
-        <Tooltip placement="topLeft" title={t('editView')}>
-          <ToolbarButton
-            disabled={!(allowEnableView && allowManage && dataView)}
-            iconSize={14}
-            icon={<FormOutlined />}
-            size="small"
-            onClick={handleConfirmVisible}
+        <>
+          <Tooltip placement="topLeft" title={t('editView')}>
+            <ToolbarButton
+              disabled={!(allowEnableView && allowManage && dataView)}
+              iconSize={14}
+              icon={<FormOutlined />}
+              size="small"
+              onClick={handleConfirmVisible}
+            />
+          </Tooltip>
+          <TreeSelect
+            showSearch
+            placeholder={t('plsSelectDataView')}
+            className="view-selector"
+            treeData={dataviewTreeData}
+            value={dataView?.id}
+            onChange={handleDataViewChange}
+            filterTreeNode={filterDateViewTreeNode}
+            bordered={false}
           />
-        </Tooltip>
-        <TreeSelect
-          showSearch
-          placeholder={t('plsSelectDataView')}
-          className="view-selector"
-          treeData={dataviewTreeData}
-          value={dataView?.id}
-          onChange={handleDataViewChange}
-          filterTreeNode={filterDateViewTreeNode}
-          bordered={false}
-        />
-        <Popover
-          placement="bottomRight"
-          visible={isDisplayAddNewModal}
-          onVisibleChange={() => setIsDisplayAddNewModal()}
-          trigger="click"
-          overlayClassName="datart-popup"
-          content={
-            <Menu
-              onClick={handleClickMenu}
-              defaultSelectedKeys={[
-                'byNameSort',
-                isGroup ? 'byGroup' : 'byNoGroup',
-              ]}
-            >
-              <MenuListItem key="searchField">{t('searchField')}</MenuListItem>
-              <MenuListItem key="createComputedFields">
-                {t('createComputedFields')}
-              </MenuListItem>
-              <MenuListItem
-                disabled={dataView?.type !== 'STRUCT'}
-                title={t('Group')}
-                key="group"
-                sub
+          <Popover
+            placement="bottomRight"
+            visible={isDisplayAddNewModal}
+            onVisibleChange={() => setIsDisplayAddNewModal()}
+            trigger="click"
+            overlayClassName="datart-popup"
+            content={
+              <Menu
+                onClick={handleClickMenu}
+                defaultSelectedKeys={[
+                  'byNameSort',
+                  isGroup ? 'byGroup' : 'byNoGroup',
+                ]}
               >
-                <MenuListItem key="byGroup">
-                  {t('byDataBaseGroup')}
+                <MenuListItem key="searchField">
+                  {t('searchField')}
                 </MenuListItem>
-                <MenuListItem key="byNoGroup">{t('noGroup')}</MenuListItem>
-              </MenuListItem>
-              <MenuListItem title={t('Sort')} key="sort" sub>
-                <MenuListItem key="byNameSort">{t('byNameSort')}</MenuListItem>
-                <MenuListItem key="byOriginalFieldSort">
-                  {t('noSort')}
+                <MenuListItem key="createComputedFields">
+                  {t('createComputedFields')}
                 </MenuListItem>
-              </MenuListItem>
-            </Menu>
-          }
-        >
-          <ToolbarButton icon={<MoreOutlined />} size="small" />
-        </Popover>
-        {modalContextHolder}
+                <MenuListItem
+                  disabled={dataView?.type !== 'STRUCT'}
+                  title={t('Group')}
+                  key="group"
+                  sub
+                >
+                  <MenuListItem key="byGroup">
+                    {t('byDataBaseGroup')}
+                  </MenuListItem>
+                  <MenuListItem key="byNoGroup">{t('noGroup')}</MenuListItem>
+                </MenuListItem>
+                <MenuListItem title={t('Sort')} key="sort" sub>
+                  <MenuListItem key="byNameSort">
+                    {t('byNameSort')}
+                  </MenuListItem>
+                  <MenuListItem key="byOriginalFieldSort">
+                    {t('noSort')}
+                  </MenuListItem>
+                </MenuListItem>
+              </Menu>
+            }
+          >
+            <ToolbarButton icon={<MoreOutlined />} size="small" />
+          </Popover>
+          {modalContextHolder}
+        </>
       </Header>
       <StyleSearchbar visible={isShowSearch}>
         <Input

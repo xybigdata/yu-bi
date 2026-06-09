@@ -132,7 +132,8 @@ export const Resource = memo(() => {
     }
   }, [dispatch, sourceId, databaseTreeModel, editorCompletionItemProviderRef]);
 
-  const renderIcon = useCallback(({ value, type }) => {
+  const renderIcon = useCallback(node => {
+    const { value, type } = node as any;
     if (Array.isArray(value)) {
       switch (value.length) {
         case 1:

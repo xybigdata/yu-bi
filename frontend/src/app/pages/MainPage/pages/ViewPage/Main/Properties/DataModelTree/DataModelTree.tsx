@@ -575,7 +575,7 @@ const DataModelTree: FC = memo(() => {
         f => f.name === field?.name,
       );
       if (isNameConflict) {
-        const errorMsg = message.error(t('computedFieldNameExistWarning'));
+        const errorMsg = t('computedFieldNameExistWarning');
         message.error(errorMsg);
         return Promise.reject(errorMsg);
       }
@@ -682,56 +682,58 @@ const DataModelTree: FC = memo(() => {
       add={titleAdd}
       loading={stage === ViewViewModelStages.Running}
     >
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Droppable
-          droppableId={ROOT_CONTAINER_ID}
-          type={TreeNodeHierarchy.Root}
-          isCombineEnabled={true}
-        >
-          {(droppableProvided, droppableSnapshot) => (
-            <StyledDroppableContainer
-              ref={droppableProvided.innerRef}
-              isDraggingOver={droppableSnapshot.isDraggingOver}
-            >
-              {GroupTableColumn(tableColumns, viewType).map(col => {
-                return col.role === ColumnRole.Hierarchy ||
-                  col.role === ColumnRole.Table ? (
-                  <DataModelBranch
-                    node={col}
-                    key={col.name}
-                    onNodeTypeChange={handleNodeTypeChange}
-                    onMoveToHierarchy={openMoveToHierarchyModal}
-                    onEditBranch={openEditBranchModal}
-                    onDelete={handleDeleteBranch}
-                    onDeleteFromHierarchy={handleDeleteFromBranch}
-                    onCreateHierarchy={openCreateHierarchyModal}
-                  />
-                ) : (
-                  <DataModelNode
-                    node={col}
-                    key={col.name}
-                    onCreateHierarchy={openCreateHierarchyModal}
-                    onNodeTypeChange={handleNodeTypeChange}
-                    onMoveToHierarchy={openMoveToHierarchyModal}
-                  />
-                );
-              })}
-              {droppableProvided.placeholder}
-            </StyledDroppableContainer>
-          )}
-        </Droppable>
-      </DragDropContext>
-      {computedFields?.map((v, i) => {
-        return (
-          <DataModelComputerFieldNode
-            key={i}
-            node={v}
-            menuClick={handleComputedFieldMenuClick}
-          ></DataModelComputerFieldNode>
-        );
-      })}
-      {contextHolder}
-      {modalContextHolder}
+      <>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable
+            droppableId={ROOT_CONTAINER_ID}
+            type={TreeNodeHierarchy.Root}
+            isCombineEnabled={true}
+          >
+            {(droppableProvided, droppableSnapshot) => (
+              <StyledDroppableContainer
+                ref={droppableProvided.innerRef}
+                isDraggingOver={droppableSnapshot.isDraggingOver}
+              >
+                {GroupTableColumn(tableColumns, viewType).map(col => {
+                  return col.role === ColumnRole.Hierarchy ||
+                    col.role === ColumnRole.Table ? (
+                    <DataModelBranch
+                      node={col}
+                      key={col.name}
+                      onNodeTypeChange={handleNodeTypeChange}
+                      onMoveToHierarchy={openMoveToHierarchyModal}
+                      onEditBranch={openEditBranchModal}
+                      onDelete={handleDeleteBranch}
+                      onDeleteFromHierarchy={handleDeleteFromBranch}
+                      onCreateHierarchy={openCreateHierarchyModal}
+                    />
+                  ) : (
+                    <DataModelNode
+                      node={col}
+                      key={col.name}
+                      onCreateHierarchy={openCreateHierarchyModal}
+                      onNodeTypeChange={handleNodeTypeChange}
+                      onMoveToHierarchy={openMoveToHierarchyModal}
+                    />
+                  );
+                })}
+                {droppableProvided.placeholder}
+              </StyledDroppableContainer>
+            )}
+          </Droppable>
+        </DragDropContext>
+        {computedFields?.map((v, i) => {
+          return (
+            <DataModelComputerFieldNode
+              key={i}
+              node={v}
+              menuClick={handleComputedFieldMenuClick}
+            ></DataModelComputerFieldNode>
+          );
+        })}
+        {contextHolder}
+        {modalContextHolder}
+      </>
     </Container>
   );
 });

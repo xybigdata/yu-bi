@@ -14,7 +14,13 @@ function useGetVizIcon() {
   const chartIcons = chartManager.getAllChartIcons();
 
   return useCallback(
-    ({ relType, avatar, subType }) => {
+    (option: {
+      relType?: string;
+      avatar?: string;
+      subType?: string | null;
+      [key: string]: any;
+    }) => {
+      const { relType, avatar, subType } = option;
       switch (relType) {
         case 'DASHBOARD':
           return subType !== null ? (

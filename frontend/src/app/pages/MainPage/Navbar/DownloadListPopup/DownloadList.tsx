@@ -19,7 +19,7 @@
 import { List, Tag } from 'antd';
 import { ListItem } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { FC, memo, useMemo } from 'react';
+import { FC, ReactNode, memo, useMemo } from 'react';
 import styled from 'styled-components/macro';
 import {
   ERROR,
@@ -43,6 +43,7 @@ const DOWNLOAD_STATUS_COLORS = {
 };
 
 interface DownloadFileItemProps extends DownloadTask {
+  children?: ReactNode;
   onDownloadFile: (task: DownloadTask) => void;
 }
 const DownloadFileItem: FC<DownloadFileItemProps> = ({

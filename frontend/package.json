@@ -100,7 +100,7 @@
     "@antv/s2-react": "1.18.0",
     "@dinero.js/currencies": "^2.0.0-alpha.8",
     "@reduxjs/toolkit": "^1.8.0",
-    "@types/react": "17.0.38",
+    "@types/react": "18.3.12",
     "antd": "4.24.16",
     "antd-theme-generator": "1.2.11",
     "axios": "^0.21.1",

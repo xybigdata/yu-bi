@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { createContext, FC, memo } from 'react';
+import { createContext, FC, PropsWithChildren, memo } from 'react';
 import { ScaleModeType } from '../../constants';
 import { BackgroundConfig, BoardType } from '../../pages/Board/slice/types';
 import { BoardConfig } from '../../types/boardTypes';
@@ -41,10 +41,10 @@ export const BoardConfigValContext = createContext<BoardConfigValue>(
   {} as BoardConfigValue,
 );
 
-export const BoardConfigProvider: FC<{
+export const BoardConfigProvider: FC<PropsWithChildren<{
   config: BoardConfig;
   boardId: string;
-}> = memo(({ config, boardId, children }) => {
+}>> = memo(({ config, boardId, children }) => {
   const props = config.jsonConfig.props;
   const [initialQuery, allowOverlap, scaleMode] = getJsonConfigs(
     props,

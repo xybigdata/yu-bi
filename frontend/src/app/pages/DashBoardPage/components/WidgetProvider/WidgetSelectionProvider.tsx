@@ -17,7 +17,7 @@
  */
 
 import { SelectedItem } from 'app/types/ChartConfig';
-import { createContext, FC, memo, useMemo } from 'react';
+import { createContext, FC, PropsWithChildren, memo, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { makeSelectSelectedItems } from '../../pages/Board/slice/selector';
 import { BoardState } from '../../pages/Board/slice/types';
@@ -28,10 +28,10 @@ export const WidgetSelectionContext = createContext<SelectedItem[]>(
   [] as SelectedItem[],
 );
 
-export const WidgetSelectionProvider: FC<{
+export const WidgetSelectionProvider: FC<PropsWithChildren<{
   boardEditing: boolean;
   widgetId: string;
-}> = memo(({ widgetId, boardEditing, children }) => {
+}>> = memo(({ widgetId, boardEditing, children }) => {
   // 浏览模式
   const selectSelectedItems = useMemo(makeSelectSelectedItems, []);
   const selectedItemsInBoard = useSelector((state: { board: BoardState }) =>
