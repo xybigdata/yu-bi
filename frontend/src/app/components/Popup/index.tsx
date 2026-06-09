@@ -11,7 +11,6 @@ import { mergeClassNames } from 'utils/utils';
 export function Popup({
   content,
   overlayClassName,
-  onVisibleChange,
   onOpenChange,
   ...rest
 }: PopoverProps) {
@@ -20,10 +19,9 @@ export function Popup({
   const openChange = useCallback(
     v => {
       setOpen(v);
-      onVisibleChange && onVisibleChange(v);
       onOpenChange && onOpenChange(v);
     },
-    [onOpenChange, onVisibleChange],
+    [onOpenChange],
   );
 
   const onClose = useCallback(() => {
