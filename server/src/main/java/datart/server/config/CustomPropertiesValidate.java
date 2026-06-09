@@ -1,7 +1,5 @@
 package datart.server.config;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.annotation.JSONField;
 import datart.core.base.exception.Exceptions;
 import datart.core.common.FileUtils;
 import datart.core.common.UrlUtils;
@@ -16,7 +14,6 @@ import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.data.util.ReflectionUtils;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -75,12 +72,12 @@ public class CustomPropertiesValidate implements EnvironmentPostProcessor {
     }
 
     private void validateConfig(Properties properties) {
-        CustomConfigValidateBean customConfigValidateBean = JSON.parseObject(JSON.toJSONString(properties), CustomConfigValidateBean.class);
+        CustomConfigValidateBean customConfigValidateBean = toValidateBean(properties);
         Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
         Set<ConstraintViolation<CustomConfigValidateBean>> validate = validator.validate(customConfigValidateBean);
         LinkedList<String> errorMessages = new LinkedList<>();
         for (ConstraintViolation<CustomConfigValidateBean> violation : validate) {
-            String configName = getConfigName(violation.getRootBeanClass(), violation.getPropertyPath().toString());
+            String configName = getConfigName(violation.getPropertyPath().toString());
             errorMessages.add(configName + violation.getMessage());
         }
         if (errorMessages.size() > 0) {
@@ -92,13 +89,31 @@ public class CustomPropertiesValidate implements EnvironmentPostProcessor {
         }
     }
 
-    private String getConfigName(Class clazz, String fieldName) {
-        Field field = ReflectionUtils.findRequiredField(clazz, fieldName);
-        JSONField annotation = field.getAnnotation(JSONField.class);
-        if (annotation != null) {
-            return annotation.name();
+    private CustomConfigValidateBean toValidateBean(Properties properties) {
+        CustomConfigValidateBean validateBean = new CustomConfigValidateBean();
+        validateBean.setDatasourceIp(properties.getProperty(CustomConfigValidateBean.DATASOURCE_IP));
+        validateBean.setDatasourcePort(properties.getProperty(CustomConfigValidateBean.DATASOURCE_PORT));
+        validateBean.setDatasourceDatabase(properties.getProperty(CustomConfigValidateBean.DATASOURCE_DATABASE));
+        validateBean.setDatasourceUsername(properties.getProperty(CustomConfigValidateBean.DATASOURCE_USERNAME));
+        validateBean.setDatasourcePassword(properties.getProperty(CustomConfigValidateBean.DATASOURCE_PASSWORD));
+        return validateBean;
+    }
+
+    private String getConfigName(String fieldName) {
+        switch (fieldName) {
+            case "datasourceIp":
+                return CustomConfigValidateBean.DATASOURCE_IP;
+            case "datasourcePort":
+                return CustomConfigValidateBean.DATASOURCE_PORT;
+            case "datasourceDatabase":
+                return CustomConfigValidateBean.DATASOURCE_DATABASE;
+            case "datasourceUsername":
+                return CustomConfigValidateBean.DATASOURCE_USERNAME;
+            case "datasourcePassword":
+                return CustomConfigValidateBean.DATASOURCE_PASSWORD;
+            default:
+                return fieldName;
         }
-        return fieldName;
     }
 
     private void switchProfile(ConfigurableEnvironment environment) {

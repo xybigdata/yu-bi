@@ -1,6 +1,5 @@
 package datart.server.config;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 
@@ -13,24 +12,29 @@ import jakarta.validation.constraints.NotBlank;
 @Validated
 public class CustomConfigValidateBean {
 
+    public static final String DATASOURCE_IP = "datasource.ip";
+
+    public static final String DATASOURCE_PORT = "datasource.port";
+
+    public static final String DATASOURCE_DATABASE = "datasource.database";
+
+    public static final String DATASOURCE_USERNAME = "datasource.username";
+
+    public static final String DATASOURCE_PASSWORD = "datasource.password";
+
     @NotBlank
-    @JSONField(name = "datasource.ip")
     private String datasourceIp;
 
     @NotBlank
-    @JSONField(name = "datasource.port")
     private String datasourcePort;
 
     @NotBlank
-    @JSONField(name = "datasource.database")
     private String datasourceDatabase;
 
     @NotBlank
-    @JSONField(name = "datasource.username")
     private String datasourceUsername;
 
     @NotBlank
-    @JSONField(name = "datasource.password")
     private String datasourcePassword;
 
 }
