@@ -715,11 +715,11 @@
   - `@craco/craco`
   - `enzyme`
   - `@cfaester/enzyme-adapter-react-18`
+  - 包级 `eslintConfig`
 - 当前残留主要是：
   - Jest 版本仍停留在 27.5.1
-  - `eslintConfig` 仍继承 `react-app` / `react-app/jest`
-  - `babel-preset-react-app` 仍在 Jest transform 链中使用
   - ESLint 工具链仍依赖 `eslint-config-react-app`
+  - Jest 运行时与 watch 插件仍停留在 Jest 27 生态版本
 
 工作包拆分：
 1. Jest 27 升级到较新稳定线，或迁到 Vitest。
@@ -857,7 +857,7 @@
    - 当前阻塞：复杂 Dropdown/Menu/Modal/Popover 历史 API 和 less 主题链仍需继续清理。
 
 2. Jest 27 测试链
-   - 现状：运行、构建已完全脱离 CRA，但测试仍停留在 `jest 27.5.1`，同时借用 `babel-preset-react-app` 与 `eslint-config-react-app` 的历史配置。
+   - 现状：运行、构建已完全脱离 CRA；测试转译链也已经脱离 `babel-preset-react-app`，但整体仍停留在 `jest 27.5.1`，并且 ESLint 工具链还依赖 `eslint-config-react-app`。
    - 更现代替代：独立升级到 Jest 29/30，或评估迁到 Vitest。
    - 调研结论：Jest 官方已在 2025-06-04 发布 Jest 30，说明上游仍积极维护；当前项目属于“已脱离 CRA 但测试栈仍留在 CRA 时代”的典型状态。
    - 风险判断：建议先做测试配置去 CRA 化，再决定直接上 Jest 30 还是迁 Vitest。
@@ -942,6 +942,13 @@
 - 删除前已复核：`package.json` 里的 `jest` 配置内容只是对 `frontend/jest.config.js` 的重复镜像，并不提供额外行为。
 - 这一步的目标不是升级 Jest 版本，而是先去掉 CRA 时代遗留的重复配置源，降低后续继续推进 Jest 30 或 Vitest 迁移时的配置歧义。
 
+### 并行治理：让 Jest Babel 转译链脱离 `babel-preset-react-app`
+
+- `frontend/jest/babelTransform.js` 已从 `babel-preset-react-app` 切到显式的 `@babel/preset-env`、`@babel/preset-react`、`@babel/preset-typescript` 组合。
+- `frontend/package.json` 与 `frontend/package-lock.json` 已新增 `@babel/preset-react`、`@babel/preset-typescript` 直接依赖，并移除 `babel-preset-react-app`。
+- 当前 Jest 转译策略已经明确收口为“项目自有 Babel 预设”，不再继续借用 CRA 打包时代的预设黑盒。
+- 这一步仍然不改变 Jest 27 版本本身；目标是先把测试转译链与 CRA 历史预设解耦，降低后续升级到 Jest 30 或迁到 Vitest 时的联动复杂度。
+
 ### React Router 预迁移第四十批：切到 Router 6 经典运行时底座
 
 - `frontend/package.json` 已将 `react-router-dom` 切换到 `^6.30.1`，并删除只服务于 v5 的 `@types/react-router-dom`。
@@ -961,7 +968,7 @@
 - `frontend/package.json` 的 `test` 脚本已从 `craco test` 切到 `jest --config jest.config.js`。
 - `frontend/jest.config.js` 已改为静态独立配置，测试执行入口已经不再依赖 CRACO 配置生成。
 - `frontend/jest/` 已新增本地 `babelTransform.js`、`cssTransform.js`、`fileTransform.js`，测试链不再依赖 `react-scripts/config/jest/*`。
-- `frontend/package.json` 与 lockfile 已显式声明 `jest`、`jest-environment-jsdom`、`babel-jest`、`babel-preset-react-app`、`identity-obj-proxy`、`jest-watch-typeahead`，并移除 `react-scripts`。
+- `frontend/package.json` 与 lockfile 已显式声明 `jest`、`jest-environment-jsdom`、`babel-jest`、`@babel/preset-env`、`@babel/preset-react`、`@babel/preset-typescript`、`identity-obj-proxy`、`jest-watch-typeahead`，并移除 `react-scripts` 与 `babel-preset-react-app`。
 
 ### 并行治理：删除 CRACO 回退外壳
 
