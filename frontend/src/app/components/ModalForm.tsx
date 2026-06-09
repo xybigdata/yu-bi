@@ -3,7 +3,7 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { CommonFormTypes } from 'globalConstants';
 import { forwardRef, ReactNode, useCallback, useImperativeHandle } from 'react';
 
-export interface ModalFormProps extends ModalProps {
+export interface ModalFormProps extends Omit<ModalProps, 'visible'> {
   type?: CommonFormTypes;
   formProps?: FormProps;
   onSave: (values) => void;
@@ -18,7 +18,6 @@ export const ModalForm = forwardRef(
       onSave,
       afterClose,
       children,
-      visible,
       open,
       ...rest
     }: ModalFormProps,
@@ -40,7 +39,7 @@ export const ModalForm = forwardRef(
     return (
       <Modal
         {...rest}
-        open={open ?? visible}
+        open={open}
         title={
           type === CommonFormTypes.SaveAs
             ? tg('button.saveAs')
