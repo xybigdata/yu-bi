@@ -49,7 +49,7 @@ import { changeLang, getLang } from 'locales/i18n';
 import { cloneElement, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { NavLink, useHistory, useRouteMatch } from 'react-router-dom';
+import { NavLink, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import {
   BLACK,
@@ -86,6 +86,7 @@ export function Navbar() {
   const lang = getLang();
   const dispatch = useDispatch();
   const history = useHistory();
+  const location = useLocation();
   const { i18n } = useTranslation();
   const systemInfo = useSelector(selectSystemInfo);
   const orgId = useSelector(selectOrgId);
@@ -94,9 +95,6 @@ export function Navbar() {
   const organizationListLoading = useSelector(selectOrganizationListLoading);
   const downloadPolling = useSelector(selectDownloadPolling);
   const themeKey = useSelector(selectThemeKey);
-  const matchModules = useRouteMatch<{ moduleName: string }>(
-    '/organizations/:orgId/:moduleName',
-  );
 
   const t = useI18NPrefix('main');
   const brandClick = useCallback(() => {
@@ -204,8 +202,12 @@ export function Navbar() {
   );
 
   const showSubNav = useMemo(
-    () => subNavs.some(({ name }) => name === matchModules?.params.moduleName),
-    [matchModules?.params.moduleName, subNavs],
+    () => {
+      const urlArr = location.pathname.split('/');
+      const moduleName = urlArr[3];
+      return subNavs.some(({ name }) => name === moduleName);
+    },
+    [location.pathname, subNavs],
   );
 
   const handleChangeThemeFn = useCallback(

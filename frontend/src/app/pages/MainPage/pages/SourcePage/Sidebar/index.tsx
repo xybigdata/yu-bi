@@ -30,8 +30,7 @@ import { dispatchResize } from 'app/utils/dispatchResize';
 import { CommonFormTypes } from 'globalConstants';
 import { memo, useCallback, useContext, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useRouteMatch } from 'react-router';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { LEVEL_5, SPACE_TIMES, SPACE_XS } from 'styles/StyleConstants';
 import { getInsertedNodeIndex } from 'utils/utils';
@@ -60,10 +59,7 @@ export const Sidebar = memo(
     const orgId = useSelector(selectOrgId);
     const archived = useSelector(selectArchived);
     const sourceData = useSelector(selectSources);
-    const matchSourceDetail = useRouteMatch<{ sourceId: string }>(
-      '/organizations/:orgId/sources/:sourceId',
-    );
-    const sourceId = matchSourceDetail?.params.sourceId;
+    const { sourceId } = useParams<{ sourceId?: string }>();
     const t = useI18NPrefix('source');
     const selectSourceTree = useMemo(makeSelectSourceTree, []);
     const { showSaveForm } = useContext(SaveFormContext);

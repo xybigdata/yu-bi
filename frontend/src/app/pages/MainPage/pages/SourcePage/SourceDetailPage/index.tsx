@@ -42,7 +42,7 @@ import React, {
   useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, useRouteMatch } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import {
   BORDER_RADIUS,
@@ -110,8 +110,7 @@ export function SourceDetailPage() {
   const deleteSourceLoading = useSelector(selectDeleteSourceLoading);
   const syncSourceSchemaLoading = useSelector(selectSyncSourceSchemaLoading);
   const sourceData = useSelector(selectSources);
-  const { params } = useRouteMatch<{ sourceId: string }>();
-  const { sourceId } = params;
+  const { sourceId } = useParams<{ sourceId: string }>();
   const [form] = Form.useForm<SourceFormModel>();
   const { showSaveForm } = useContext(SaveFormContext);
   const t = useI18NPrefix('source');
