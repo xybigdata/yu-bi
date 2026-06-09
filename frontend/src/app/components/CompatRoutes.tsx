@@ -1,6 +1,6 @@
 import { FC, PropsWithChildren } from 'react';
-import { CompatSwitch } from './CompatSwitch';
+import { Switch } from 'app/routerCompat';
 
 export const CompatRoutes: FC<PropsWithChildren<{}>> = ({ children }) => {
-  return <CompatSwitch>{children}</CompatSwitch>;
+  return <Switch>{children}</Switch>;
 };
