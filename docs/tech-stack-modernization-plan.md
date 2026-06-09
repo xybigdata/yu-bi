@@ -234,6 +234,8 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 - React Router 预迁移第九批：`OrganizationForm`、组织删除确认、邀请确认页和 `SchedulePage` 的详情跳转 hook 已切到 `useCompatNavigate`，同时补齐兼容 hook 的稳定引用，避免作为 hook 依赖时触发重复副作用。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
+- React Router 预迁移第十批：`ViewPage` 和 `SchedulePage` 中的字符串路径跳转已切到 `useCompatNavigate`，覆盖视图 Tab/树/回收站以及调度列表/回收站，继续压缩主应用内对 `useHistory` 的直接依赖面。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 
 验收门槛：
 - 全部路由可访问。

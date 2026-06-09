@@ -5,6 +5,7 @@ import {
 } from '@ant-design/icons';
 import { Menu, message, Popconfirm, TreeDataNode } from 'antd';
 import { MenuListItem, Popup, Tree, TreeTitle } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
   selectIsOrgOwner,
@@ -13,7 +14,6 @@ import {
 import { CommonFormTypes } from 'globalConstants';
 import { memo, useCallback, useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router';
 import { getInsertedNodeIndex, stopPPG } from 'utils/utils';
 import { useToScheduleDetails } from '../hooks';
 import { SaveFormContext } from '../SaveFormContext';
@@ -36,7 +36,7 @@ interface RecycleProps {
 
 export const Recycle = memo(({ scheduleId, list }: RecycleProps) => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const loading = useSelector(selectArchivedListLoading);
   const orgId = useSelector(selectOrgId);
   const t = useI18NPrefix('schedule.editor.index');
@@ -144,10 +144,10 @@ export const Recycle = memo(({ scheduleId, list }: RecycleProps) => {
   const treeSelect = useCallback(
     (_, { node }) => {
       if (!node.isFolder && node.id !== scheduleId) {
-        history.push(`/organizations/${orgId}/schedules/${node.id}`);
+        navigate.push(`/organizations/${orgId}/schedules/${node.id}`);
       }
     },
-    [history, orgId, scheduleId],
+    [navigate, orgId, scheduleId],
   );
 
   return (

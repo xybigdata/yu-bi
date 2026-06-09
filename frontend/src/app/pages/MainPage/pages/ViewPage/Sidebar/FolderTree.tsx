@@ -25,6 +25,7 @@ import {
 } from '@ant-design/icons';
 import { Menu, message, Popconfirm, TreeDataNode } from 'antd';
 import { MenuListItem, Popup, Tree, TreeTitle } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { getCascadeAccess, useAccess } from 'app/pages/MainPage/Access';
 import {
@@ -41,7 +42,6 @@ import React, {
   useState,
 } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { getInsertedNodeIndex, onDropTreeFn, stopPPG } from 'utils/utils';
 import { isParentIdEqual } from '../../../slice/utils';
 import {
@@ -70,7 +70,7 @@ interface FolderTreeProps {
 export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
   const dispatch = useDispatch();
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const { showSaveForm } = useContext(SaveFormContext);
   const loading = useSelector(selectViewListLoading);
   const currentEditingViewKey = useSelector(selectCurrentEditingViewKey);
@@ -96,12 +96,12 @@ export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
   const redirect = useCallback(
     currentEditingViewKey => {
       if (currentEditingViewKey) {
-        history.push(`/organizations/${orgId}/views/${currentEditingViewKey}`);
+        navigate.push(`/organizations/${orgId}/views/${currentEditingViewKey}`);
       } else {
-        history.push(`/organizations/${orgId}/views`);
+        navigate.push(`/organizations/${orgId}/views`);
       }
     },
-    [history, orgId],
+    [navigate, orgId],
   );
 
   const archive = useCallback(
@@ -268,10 +268,10 @@ export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
         }
       }
       if (!node.isFolder && node.id !== currentEditingViewKey) {
-        history.push(`/organizations/${orgId}/views/${node.id}`);
+        navigate.push(`/organizations/${orgId}/views/${node.id}`);
       }
     },
-    [history, orgId, currentEditingViewKey, expandedKeys],
+    [navigate, orgId, currentEditingViewKey, expandedKeys],
   );
 
   const onDrop = info => {

@@ -25,13 +25,13 @@ import {
   MenuUnfoldOutlined,
 } from '@ant-design/icons';
 import { ListNav, ListPane, ListTitle } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
 import React, { memo, useCallback, useContext, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { LEVEL_10, SPACE_TIMES, SPACE_XS, WHITE } from 'styles/StyleConstants';
 import { getInsertedNodeIndex, uuidv4 } from 'utils/utils';
@@ -56,7 +56,7 @@ interface SidebarProps {
 
 export const Sidebar = memo(
   ({ isDragging, width, sliderVisible, handleSliderVisible }: SidebarProps) => {
-    const history = useHistory();
+    const navigate = useCompatNavigate();
     const dispatch = useDispatch();
     const { showSaveForm } = useContext(SaveFormContext);
     const orgId = useSelector(selectOrgId);
@@ -107,7 +107,7 @@ export const Sidebar = memo(
       ({ key }) => {
         switch (key) {
           case 'view':
-            history.push(
+            navigate.push(
               `/organizations/${orgId}/views/${`${UNPERSISTED_ID_PREFIX}${uuidv4()}`}`,
             );
             break;
@@ -137,7 +137,7 @@ export const Sidebar = memo(
             break;
         }
       },
-      [dispatch, history, orgId, showSaveForm, viewsData, t],
+      [dispatch, navigate, orgId, showSaveForm, viewsData, t],
     );
 
     const titles = useMemo(

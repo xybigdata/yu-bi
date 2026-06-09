@@ -9,11 +9,11 @@ import {
 } from '@ant-design/icons';
 import { Menu, message, Popconfirm, TreeDataNode } from 'antd';
 import { MenuListItem, Popup, Tree, TreeTitle } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { CommonFormTypes } from 'globalConstants';
 import { FC, memo, useCallback, useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { onDropTreeFn, stopPPG } from 'utils/utils';
 import { CascadeAccess, getCascadeAccess } from '../../../Access';
 import {
@@ -63,7 +63,7 @@ export const ScheduleList: FC<{
     onUpdateScheduleList();
   }, [onUpdateScheduleList]);
 
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const { showSaveForm } = useContext(SaveFormContext);
   const isOwner = useSelector(selectIsOrgOwner);
   const permissionMap = useSelector(selectPermissionMap);
@@ -331,10 +331,10 @@ export const ScheduleList: FC<{
           setExpandedKeys([node.key].concat(expandedKeys));
         }
       } else {
-        history.push(`/organizations/${orgId}/schedules/${node.id}`);
+        navigate.push(`/organizations/${orgId}/schedules/${node.id}`);
       }
     },
-    [expandedKeys, history, orgId],
+    [expandedKeys, navigate, orgId],
   );
 
   const onDrop = info => {

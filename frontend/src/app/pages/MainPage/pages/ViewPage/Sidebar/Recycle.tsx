@@ -23,6 +23,7 @@ import {
 } from '@ant-design/icons';
 import { Menu, message, Popconfirm, TreeDataNode } from 'antd';
 import { MenuListItem, Popup, Tree, TreeTitle } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
   selectIsOrgOwner,
@@ -31,7 +32,6 @@ import {
 import { CommonFormTypes } from 'globalConstants';
 import { memo, useCallback, useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import { getInsertedNodeIndex, stopPPG } from 'utils/utils';
 import { SaveFormContext } from '../SaveFormContext';
 import {
@@ -52,7 +52,7 @@ interface RecycleProps {
 
 export const Recycle = memo(({ list }: RecycleProps) => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const { showSaveForm } = useContext(SaveFormContext);
   const loading = useSelector(selectArchivedListLoading);
   const orgId = useSelector(selectOrgId);
@@ -69,12 +69,12 @@ export const Recycle = memo(({ list }: RecycleProps) => {
   const redirect = useCallback(
     currentEditingViewKey => {
       if (currentEditingViewKey) {
-        history.push(`/organizations/${orgId}/views/${currentEditingViewKey}`);
+        navigate.push(`/organizations/${orgId}/views/${currentEditingViewKey}`);
       } else {
-        history.push(`/organizations/${orgId}/views`);
+        navigate.push(`/organizations/${orgId}/views`);
       }
     },
-    [history, orgId],
+    [navigate, orgId],
   );
 
   const del = useCallback(
@@ -178,10 +178,10 @@ export const Recycle = memo(({ list }: RecycleProps) => {
   const treeSelect = useCallback(
     (_, { node }) => {
       if (!node.isFolder && node.key !== currentEditingViewKey) {
-        history.push(`/organizations/${orgId}/views/${node.key}`);
+        navigate.push(`/organizations/${orgId}/views/${node.key}`);
       }
     },
-    [history, orgId, currentEditingViewKey],
+    [navigate, orgId, currentEditingViewKey],
   );
 
   return (

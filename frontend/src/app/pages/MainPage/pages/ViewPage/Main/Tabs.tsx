@@ -23,11 +23,11 @@ import {
 } from '@ant-design/icons';
 import { Button, Dropdown, Space } from 'antd';
 import { Confirm, TabPane, Tabs as TabsComponent } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { memo, useCallback, useContext, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 import styled, { css } from 'styled-components/macro';
 import { LEVEL_1, ORANGE } from 'styles/StyleConstants';
 import { ViewViewModelStages } from '../constants';
@@ -54,7 +54,7 @@ export const Tabs = memo(() => {
   );
   const [confirmVisible, setConfirmVisible] = useState(false);
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const { editorInstance } = useContext(EditorContext);
   const orgId = useSelector(selectOrgId);
   const editingViews = useSelector(selectEditingViews);
@@ -67,21 +67,21 @@ export const Tabs = memo(() => {
   const redirect = useCallback(
     (currentEditingViewKey?: string) => {
       if (currentEditingViewKey) {
-        history.push(`/organizations/${orgId}/views/${currentEditingViewKey}`);
+        navigate.push(`/organizations/${orgId}/views/${currentEditingViewKey}`);
       } else {
-        history.push(`/organizations/${orgId}/views`);
+        navigate.push(`/organizations/${orgId}/views`);
       }
     },
-    [history, orgId],
+    [navigate, orgId],
   );
 
   const tabChange = useCallback(
     activeKey => {
       if (id !== activeKey) {
-        history.push(`/organizations/${orgId}/views/${activeKey}`);
+        navigate.push(`/organizations/${orgId}/views/${activeKey}`);
       }
     },
-    [history, id, orgId],
+    [navigate, id, orgId],
   );
 
   const tabEdit = useCallback(
