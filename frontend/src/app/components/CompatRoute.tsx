@@ -1,5 +1,5 @@
 import { FC, ReactNode } from 'react';
-import { Route } from 'app/routerCompat';
+import { Route } from 'app/routerCompatLegacy';
 
 type CompatRoutePath = string | readonly string[];
 

@@ -1,6 +1,7 @@
 import classnames from 'classnames';
 import React, { FC, ReactNode, useMemo } from 'react';
-import { NavLink, useLocation } from 'app/routerCompat';
+import { useLocation } from 'app/routerCompat';
+import { NavLink } from 'app/routerCompatLegacy';
 
 interface CompatNavLinkProps {
   activeClassName?: string;

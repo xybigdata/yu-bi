@@ -17,7 +17,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useHistory } from 'app/routerCompat';
+import { useHistory } from 'app/routerCompatLegacy';
 
 type CompatHistory = ReturnType<typeof useHistory>;
 type CompatLocationState = CompatHistory['location']['state'];
