@@ -37,10 +37,9 @@ export function Router() {
       <BrowserRouter basename={PUBLIC_URL}>
         <HelmetPageTitle lang={i18n.language} />
         <Switch>
-          <Route
-            path="/shareStoryPlayer/:token"
-            component={LazyShareStoryPlayer}
-          />
+          <Route path="/shareStoryPlayer/:token">
+            <LazyShareStoryPlayer />
+          </Route>
         </Switch>
         <GlobalStyles />
       </BrowserRouter>

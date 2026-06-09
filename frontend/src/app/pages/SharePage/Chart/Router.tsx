@@ -37,7 +37,9 @@ export function Router() {
       <BrowserRouter basename={PUBLIC_URL}>
         <HelmetPageTitle lang={i18n.language} />
         <Switch>
-          <Route path="/shareChart/:token" component={LazyShareChart} />
+          <Route path="/shareChart/:token">
+            <LazyShareChart />
+          </Route>
         </Switch>
         <GlobalStyles />
       </BrowserRouter>

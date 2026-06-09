@@ -27,7 +27,11 @@ export function LoginAuthRoute() {
   const systemInfo = useSelector(selectSystemInfo);
 
   if (logged) {
-    return <Route path="/" component={LazyMainPage} />;
+    return (
+      <Route path="/">
+        <LazyMainPage />
+      </Route>
+    );
   }
 
   if (systemInfo) {

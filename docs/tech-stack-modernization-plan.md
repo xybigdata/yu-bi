@@ -218,6 +218,8 @@
 继续推进：
 - React Router 预迁移第一批：分享页 token 路由和成员页 sidebar 选择态已从 `useRouteMatch` 的 `params/url` 读取迁到 `useParams` / `useLocation`，先减少 `useRouteMatch` 依赖，为后续 `Switch`、`Redirect`、`useHistory` 迁移铺路。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
+- React Router 预迁移第二批：登录入口和三个分享页 Router 已从 `Route component=` 切换到 children element 写法，先减少 v5 旧版路由声明 API，为后续 `render`、`Redirect`、`Switch` 迁移铺路。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 
 验收门槛：
 - 全部路由可访问。
@@ -317,5 +319,5 @@
 阶段 3 已完成，下一步进入阶段 4 的 UI 与路由现代化准备：
 
 1. 继续预处理 AntD 5 API 迁移热点：复杂 `Menu.Item`/`Menu.SubMenu` JSX 菜单、Tooltip/Popover 的 `overlay` 内容和项目封装层 legacy `visible` 入参。
-2. 评估 React Router 5 -> 6/7 的路由声明、`useHistory`、`Redirect` 和嵌套路由替换方案。
+2. 继续 React Router 5 -> 6/7 预迁移，优先清理剩余 `Route component=` / `Route render=`、`Redirect`、`useHistory` 和嵌套路由旧写法。
 3. 保持 CRA5/CRACO 回退脚本，直到 Jest/测试栈迁出 CRA。
