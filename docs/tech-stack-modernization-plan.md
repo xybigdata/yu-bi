@@ -13,6 +13,7 @@
   - `npm run checkTs` 通过。
   - `npm run build:task` 通过。
   - `npm run build` 通过，默认使用 Vite 输出 `frontend/build`。
+  - `mvn -DskipTests -Dexec.skip=false package -pl server -am` 通过，Maven `package` 阶段可复制 Vite 静态资源并生成 parser.js。
   - `mvn test -pl data-providers/jdbc-data-provider -am` 通过。
   - `GET /api/v1/sys/info` 返回 200。
   - `http://127.0.0.1:3001` 返回 200，`/api/v1/plugins/custom/charts` 返回成功。
@@ -119,6 +120,7 @@
 - `npm run build:all` 成功，产出 `build/index.html`、三个 share HTML 和 `build/task/index.js`。
 - `npm start` 成功，首页 200，`/api/v1/plugins/custom/charts` 返回成功，`/shareChart/test-token` 返回 share chart 入口。
 - `npm run build:cra` 仍可成功，用于短期回退和差异对比。
+- `mvn -DskipTests -Dexec.skip=false package -pl server -am` 成功，`copy-resource` 从 `frontend/build` 复制 57 个资源到 `static`，并将 `frontend/build/task/index.js` 重命名为 `server/src/main/resources/javascript/parser.js`。
 
 ### 阶段 3：React 17 升级到 React 18
 
@@ -242,5 +244,4 @@
 
 1. 对比 Vite 产物的动态主题、Monaco worker 和主要页面运行时行为。
 2. 优化 Vite 大 chunk 分包策略，避免首屏包体积明显回退。
-3. 运行 Maven `package` 路径验证后端发布包确实复制 Vite 产物和 parser task。
-4. 确认测试栈迁移方案，再逐步移除 CRA/CRACO。
+3. 确认测试栈迁移方案，再逐步移除 CRA/CRACO。
