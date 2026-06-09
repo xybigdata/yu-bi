@@ -1,4 +1,5 @@
 import { TIME_FORMATTER } from 'globalConstants';
+import { datartDayjs } from 'app/utils/date';
 import moment from 'moment';
 import { PermissionLevels, ResourceTypes } from '../PermissionPage/constants';
 import { JobTypes, TimeModes, VizTypes } from './constants';
@@ -107,8 +108,12 @@ export const toScheduleSubmitParams = (
       ? cronExpression
       : getCronExpressionByPartition(values),
     type: jobType as JobTypes,
-    startDate: dateRange[0] ? dateRange[0].format(TIME_FORMATTER) : undefined,
-    endDate: dateRange[1] ? dateRange[1].format(TIME_FORMATTER) : undefined,
+    startDate: dateRange[0]
+      ? datartDayjs(dateRange[0] as any).format(TIME_FORMATTER)
+      : undefined,
+    endDate: dateRange[1]
+      ? datartDayjs(dateRange[1] as any).format(TIME_FORMATTER)
+      : undefined,
     orgId,
     parentId,
     index,
