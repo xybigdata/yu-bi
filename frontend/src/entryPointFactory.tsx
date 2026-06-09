@@ -23,7 +23,7 @@ import React, { Fragment } from 'react';
 import 'react-app-polyfill/ie11'; // TODO(Stephen): check if need it
 import 'react-app-polyfill/stable'; // TODO(Stephen): check if need it
 import { Inspector } from 'react-dev-inspector';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
 import { Provider } from 'react-redux';
 import { configureAppStore } from 'redux/configureStore';
@@ -38,7 +38,7 @@ export const generateEntryPoint = EntryPointComponent => {
   Debugger.instance.setEnable(IS_DEVELOPMENT);
 
   const InspectorWrapper = IS_DEVELOPMENT ? Inspector : Fragment;
-  ReactDOM.render(
+  createRoot(MOUNT_NODE).render(
     <InspectorWrapper>
       <Provider store={store}>
         <ThemeProvider>
@@ -50,11 +50,12 @@ export const generateEntryPoint = EntryPointComponent => {
         </ThemeProvider>
       </Provider>
     </InspectorWrapper>,
-    MOUNT_NODE,
   );
 
   // Hot reLoadable translation json files
-  const hotModule = import.meta.hot || module.hot;
+  const hotModule =
+    import.meta.hot ||
+    (typeof module !== 'undefined' ? module.hot : undefined);
   if (hotModule) {
     hotModule.accept(['./locales/i18n'], () => {
       // No need to render the App again because i18next works with the hooks

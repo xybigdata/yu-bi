@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/extend-expect';
-import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
+import Adapter from '@cfaester/enzyme-adapter-react-18';
 import Enzyme from 'enzyme';
 import 'locales/i18n';
 import 'react-app-polyfill/ie11';

@@ -8,7 +8,7 @@
 - 后端主框架：Spring Boot 3.5.12，Spring Cloud 2025.0.1。
 - 构建工具：Maven，`maven-compiler-plugin` 3.14.1，`maven-assembly-plugin` 3.8.0，`exec-maven-plugin` 3.6.3。
 - 前端运行时：本机 Node 26 可启动，默认开发和生产构建已切换到 Vite 5。
-- 前端主框架：React 17、React Router 5、Ant Design 4、TypeScript 4.5；CRACO 7/CRA5 仅作为回退脚本保留。
+- 前端主框架：React 18、React Router 5、Ant Design 4、TypeScript 4.5；CRACO 7/CRA5 仅作为回退脚本保留。
 - 已验证基线：
   - `npm run checkTs` 通过。
   - `npm run build:task` 通过。
@@ -17,6 +17,7 @@
   - `mvn test -pl data-providers/jdbc-data-provider -am` 通过。
   - `GET /api/v1/sys/info` 返回 200。
   - `http://127.0.0.1:3001` 返回 200，`/api/v1/plugins/custom/charts` 返回成功。
+  - Vite production preview 可渲染登录页。
 
 ## 目标终态
 
@@ -132,13 +133,29 @@
 - 检查 StrictMode 下副作用和组件生命周期问题。
 - 更新 `@types/react`、`@types/react-dom`。
 
+已完成：
+- `react 17.0.2 -> 18.3.1`。
+- `react-dom 17.0.2 -> 18.3.1`。
+- `react-test-renderer 17.0.2 -> 18.3.1`。
+- 应用入口已改用 `react-dom/client` 的 `createRoot`。
+- HMR 判断已兼容 Vite ESM 产物，避免 production preview 中访问未定义的 `module`。
+- Testing Library 已升级到 React 18 兼容线：`@testing-library/react 14.3.1`、`@testing-library/user-event 14.6.1`。
+- Enzyme 短期改用社区 React 18 adapter：`@cfaester/enzyme-adapter-react-18 0.8.0`，移除 React 17 adapter。
+
+当前过渡策略：
+- 运行时已进入 React 18，但 `@types/react` 暂保留在 17.0.38，`@types/react-dom` 升级到 18.0.11 以提供 `createRoot` 类型。
+- 原因：当前 Ant Design 4、react-helmet-async 1.x、styled-components 5 以及大量 `React.FC` 写法依赖 React 17 的隐式 `children` 类型。直接切到 `@types/react@18` 会触发大范围类型错误，适合与 Ant Design 5/6、测试栈迁移一起分阶段收口。
+
 风险：
 - 旧组件库可能依赖 React 17 行为。
-- Enzyme 对 React 18 支持弱，测试栈需要同步迁移。
+- Enzyme 对 React 18 支持弱，当前 adapter 只是过渡方案，测试栈仍需迁移到 Testing Library。
+- `@types/react` 仍是过渡状态，后续 UI/路由/测试栈现代化阶段需要升级到 React 18 类型并显式补齐 `children`。
 
 验收门槛：
 - `npm run checkTs` 通过。
-- 前端核心页面无明显运行时错误。
+- `npm run build` 通过。
+- `npm run build:task` 通过。
+- Vite production preview 登录页可渲染。
 - 登录、组织/资源列表、图表或仪表板基础流程可操作。
 
 ### 阶段 4：UI 与路由现代化
@@ -240,8 +257,9 @@
 
 ## 当前下一步
 
-阶段 1 已完成，下一步优先处理阶段 2 的迁出 CRA 预研和准备工作：
+阶段 3 已完成，下一步进入阶段 4 的 UI 与路由现代化准备：
 
-1. 对比 Vite 产物的动态主题、Monaco worker 和主要页面运行时行为。
-2. 优化 Vite 大 chunk 分包策略，避免首屏包体积明显回退。
-3. 确认测试栈迁移方案，再逐步移除 CRA/CRACO。
+1. 先评估 Ant Design 4 -> 5 的 API、Less 变量、主题 token 和图标类型影响。
+2. 梳理 `@types/react@18` 的阻塞点，优先补齐公共组件和上下文组件的 `children` 类型。
+3. 评估 React Router 5 -> 6/7 的路由声明、`useHistory`、`Redirect` 和嵌套路由替换方案。
+4. 保持 CRA5/CRACO 回退脚本，直到 Jest/测试栈迁出 CRA。
