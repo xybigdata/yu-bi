@@ -869,9 +869,15 @@
 - `data-providers/file-data-provider/src/main/java/datart/data/provider/FileDataProvider.java` 已去除 `commons-io` 的 `FilenameUtils` 依赖，改为使用 `java.nio.file.Path` 处理文件名和父目录。
 - `data-providers/data-provider-base/pom.xml` 已对 `calcite-core` 排除 `aggdesigner-algorithm`，切断其传递引入的 `commons-lang:commons-lang:2.4` 运行时依赖；当前项目代码中未发现对该聚合设计器算法包的直接使用。
 - 2026-06-09 验证：`mvn -pl server -am -DskipTests compile` 通过；`mvn -pl server -am dependency:tree -Dincludes=commons-lang:commons-lang -DskipTests` 不再出现 `commons-lang` 依赖链。
-- 当前剩余的旧 `commons-io` 传递链仍需后续单独治理，已确认至少包括：
-  - `org.apache.calcite:calcite-core:1.26.0 -> commons-io:commons-io:2.4`
-  - `org.apache.poi:poi-ooxml:5.0.0 -> org.apache.xmlgraphics:xmlgraphics-commons:2.4 -> commons-io:commons-io:1.3.1`
+### 并行治理：统一 commons-io 传递依赖版本
+
+- 父 `pom.xml` 的 `dependencyManagement` 已新增 `commons-io:commons-io:2.22.0`，用于把多模块中的旧 `commons-io` 传递依赖统一收口到现代稳定版本。
+- 这一步优先保持 `poi-ooxml:5.0.0` 与 `calcite-core:1.26.0` 现有功能链不变，只做版本对齐，不直接切断其 SVG/图像和 SQL 解析相关依赖路径。
+- 2026-06-09 验证：
+  - `org.apache.calcite:calcite-core:1.26.0 -> commons-io:commons-io:2.22.0`
+  - `org.apache.poi:poi-ooxml:5.0.0 -> org.apache.xmlgraphics:xmlgraphics-commons:2.4 -> commons-io:commons-io:2.22.0`
+  - `mvn -pl server -am dependency:tree -Dincludes=commons-io:commons-io -DskipTests` 已不再出现 `commons-io:1.3.1` 或 `commons-io:2.4`
+  - `mvn -pl server -am -DskipTests compile` 通过
 
 ### 并行治理：HTTP JSON 解析与 widget 配置链切到 Jackson
 
