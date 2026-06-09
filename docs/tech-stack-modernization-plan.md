@@ -194,6 +194,31 @@
   - 不再新增基于 AntD 4 legacy API 的兼容壳。
   - 文档中的 AntD backlog 从“升级前清障”转为“剩余人工回归项”。
 
+当前状态补充：
+
+- 已继续收口并通过回归验证的前置清障项包括：
+  - `visible -> open`、`onVisibleChange/onDropdownVisibleChange -> onOpenChange`
+  - `Collapse.Panel -> items`
+  - `Modal destroyOnClose -> destroyOnHidden`
+  - `Dropdown dropdownRender -> popupRender`
+  - `Dropdown destroyPopupOnHide -> destroyOnHidden`
+  - `Select dropdownMatchSelectWidth -> popupMatchSelectWidth`
+- 以上改动当前大多仍通过局部 compat props 壳承接，这是刻意选择：
+  - 目标是先把业务语义收口到 AntD 5 方向；
+  - 同时保持当前 `antd 4.24.16` 类型链可编译；
+  - 等真正切换到 AntD 5 后，再统一删除这些 compat 壳。
+- 当前不宜零散硬改的残留主要集中在 `TreeSelect`：
+  - 本地依赖复核显示，当前安装的 `antd 4.24.16` / `rc-tree-select` 仍明确暴露 `dropdownMatchSelectWidth`、`dropdownStyle` 等旧接口；
+  - 仓库里剩余 `TreeSelect dropdownRender/dropdownStyle` 命中点，现阶段更适合在正式升级 `antd` 后结合真实类型面一起处理，而不是提前用不充分的替代口径强推。
+- 当前进入 AntD 5 主升级前，剩余更像“真实阻塞”的项主要是：
+  - 少量 `TreeSelect` 旧 popup props
+  - `SetFieldType` 里 submenu 级 `popupClassName` 这类菜单细节
+  - `Popup` / `Popover` / `Dropdown` 上仍保留的 `overlayClassName` 样式挂载点，需要在真实升级时再判断是否迁到 `classNames` / `styles`
+- 因此下一阶段最合理的动作不是继续无限清零搜索结果，而是：
+  1. 保持当前已验证清障成果；
+  2. 发起一次受控的 `antd@5` 试升；
+  3. 根据真实编译报错、类型缺口和页面回归结果反推剩余改动面。
+
 ### Phase C：时间体系现代化
 
 目标：退出维护模式的 `moment`，统一到 AntD 5 兼容、按需引入、后续可持续升级的时间栈。
@@ -888,12 +913,29 @@
   - 若干 `dropdownRender` 自定义菜单入口仍直接拼 `Menu` 结构
   - 少量封装层仍兼容 `visible ?? open` 双入参
   - `antd 4.24.16` 仍未真正切到 v5 token / 时间组件主线
+- 自 2026-06-10 这轮持续清障之后，以下语义已基本完成“升级前收口”：
+  - `Dropdown dropdownRender -> popupRender`
+  - `Dropdown destroyPopupOnHide -> destroyOnHidden`
+  - `Select dropdownMatchSelectWidth -> popupMatchSelectWidth`
+  - 成员、变量、分享页等高频弹层的 `open` / `onOpenChange` 语义
+- 当前剩余 backlog 需要分层看待：
+  - 可在 `antd 4.24` 上继续先清的：
+    - 少量 `Popup` / `Popover` / `Dropdown` 的样式挂载点命名
+    - 个别菜单或子菜单配置上的 `popupClassName`
+  - 不宜脱离主升级单独硬改的：
+    - `TreeSelect dropdownRender/dropdownStyle/dropdownMatchSelectWidth`
+    - 依赖当前 `rc-tree-select` 旧 props 的控制器和结构视图场景
+  - 需要等试升后统一处理的：
+    - token / `ConfigProvider` 主题链
+    - DatePicker / RangePicker 与 `moment` 值对象链联动
+    - 第三方依赖与 AntD 5 的类型兼容细节
 
 工作包拆分：
 1. 清理内部组件与样式层把 `visible` 当作私有属性的历史命名，降低对 AntD 旧 API 的搜索噪音。
-2. 收口剩余 `dropdownRender`、`visible ?? open` 兼容壳与少量 Popup/ColorPicker 封装。
-3. 预处理 AntD 5 token / ConfigProvider / 时间组件迁移需要的主题与时间值链边界。
-4. AntD 5 真正升级与回归。
+2. 收口少量仍能在 `antd 4.24` 上明确替代的 `Popup/Popover/Dropdown` 样式与菜单细节。
+3. 发起 `antd 5` 试升，拿到真实编译错误、类型报错和页面回归清单。
+4. 基于试升结果集中处理 `TreeSelect`、token 主题链和时间组件值链。
+5. AntD 5 真正升级与回归。
 
 ### C. 前端测试栈 backlog
 
