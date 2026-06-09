@@ -241,6 +241,43 @@
   - 富文本编辑、只读渲染、仪表板富文本组件、故事播放、视频播放均脱离明显陈旧或低活跃度依赖。
   - 相关功能有定向 smoke test 或人工检查表。
 
+### Phase D.5：前端平台原生能力收口
+
+目标：优先用浏览器和 React 18 已具备的原生能力，替换“小而旧、维护价值低”的包装依赖，减少升级噪音和兼容面。
+
+- 当前阶段补充
+  - `react-resize-detector` 已退出，统一切到仓库自有 `useResizeObserver`，底层直接使用浏览器原生 `ResizeObserver`，并保留 `window.resize` fallback。
+  - 这一批不改调用方 API，只替换底层实现，确保布局测量、看板尺寸计算、分享页预览和资源树高度计算继续按原接口工作。
+- 下一批优先候选
+  - `react-monaco-editor -> @monaco-editor/react`
+  - `react-color -> 原生 `<input type="color">` 或更轻量、仍活跃维护的色板组件`
+  - `react-window` 保留观望；若现有虚拟表格性能与 API 满足需求，可继续保留，不强制为“为了新而新”迁移
+- 完成定义
+  - 这类依赖要么退出，要么被明确标注为“活跃维护且没有更高价值的迁移收益”。
+  - 自有 hook / 适配层优先收敛公共能力，避免再次把第三方 API 扩散到业务组件。
+
+## 老旧技术栈审计与替代建议
+
+这一节作为“全项目 review 结果”持续维护。每一项都明确当前状态、现代替代方向和迁移优先级，避免只凭印象推进升级。
+
+| 类别 | 当前栈 | 当前状态 | 现代化替代方案 | 优先级 |
+| --- | --- | --- | --- | --- |
+| 前端 UI 基座 | `antd 4.24.x` | 仍在主运行时，已完成多批 API 清障 | 升级到 `antd 5.x`，同步升级 `@ant-design/icons` | 高 |
+| 时间体系 | `moment` | 仍有较大残留，已建立 `dayjs` 适配层 | 全面迁到 `dayjs`，仅在控件值类型阶段做局部适配 | 高 |
+| 富文本 | `react-quill 1.3.5` + `quilljs-markdown` | 偏旧，且与 Quill 2 生态脱节 | 优先评估 `react-quill 2.x` / Quill 2 原生封装 | 高 |
+| 代码编辑器 | `react-monaco-editor 0.59.0` | 历史封装，生态活跃度弱于新方案 | `@monaco-editor/react` | 中高 |
+| 故事播放 | `reveal.js 4.1.0` | 仍可用，但版本较旧 | 先升级到较新稳定线，长期再评估 React 原生故事方案 | 中 |
+| 颜色选择器 | `react-color 2.19.3` | 老牌库，长期维护信号一般 | 原生色彩输入或更轻的现代封装 | 中 |
+| 尺寸监听 | `react-resize-detector` | 已退出 | 原生 `ResizeObserver` + 自有 hook | 已完成 |
+| 视频播放 | `video-react` | 已退出 | 原生 `<video>` | 已完成 |
+| 看板历史记录 | `redux-undo` | 仍在使用，但功能面集中 | 可保留；若继续现代化，可评估 RTK reducer 历史层 | 中低 |
+| 网格布局 | `react-grid-layout` | 使用面集中在看板编辑/播放 | 先保留；若出现 React 18/AntD5 兼容问题再专项治理 | 中低 |
+| 虚拟列表 | `react-window` | 使用面小，运行风险可控 | 若性能与 API 满足需求可保留 | 低 |
+| 后端安全 | `Shiro` | 明显历史架构包袱 | `Spring Security` | 高，但单独专项 |
+| 后端连接池 | `Druid` | 历史包袱，且偏监控导向 | `HikariCP` | 高，但单独专项 |
+| 后端脚本引擎 | `Nashorn` | 已退场技术 | `GraalJS` | 中高，单独专项 |
+| 浏览器自动化 | `PhantomJS` | 已退出主链 | `Selenium 4` / `Playwright` | 已完成主链退出 |
+
 ### Phase E：后端架构专项现代化
 
 目标：把仍能运行、但已经属于历史架构包袱的后端基础设施列为专项退出对象。

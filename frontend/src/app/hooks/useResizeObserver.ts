@@ -16,6 +16,92 @@
  * limitations under the License.
  */
 
-import { useResizeDetector as useResizeObserver } from 'react-resize-detector';
+import debounce from 'lodash/debounce';
+import throttle from 'lodash/throttle';
+import {
+  MutableRefObject,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
-export default useResizeObserver;
+type RefreshMode = 'throttle' | 'debounce';
+
+interface ResizeObserverOptions<T extends HTMLElement> {
+  refreshMode?: RefreshMode;
+  refreshRate?: number;
+  defaultWidth?: number;
+  defaultHeight?: number;
+}
+
+interface ResizeObserverResult<T extends HTMLElement> {
+  ref: MutableRefObject<T | null>;
+  width?: number;
+  height?: number;
+}
+
+export default function useResizeObserver<T extends HTMLElement = HTMLDivElement>(
+  options: ResizeObserverOptions<T> = {},
+): ResizeObserverResult<T> {
+  const {
+    refreshMode = 'throttle',
+    refreshRate = 1000,
+    defaultWidth,
+    defaultHeight,
+  } = options;
+  const ref = useRef<T | null>(null);
+  const [size, setSize] = useState({
+    width: defaultWidth,
+    height: defaultHeight,
+  });
+
+  const measure = useCallback(() => {
+    const next = ref.current?.getBoundingClientRect();
+    setSize(prev => {
+      const width = next?.width ?? defaultWidth;
+      const height = next?.height ?? defaultHeight;
+      if (prev.width === width && prev.height === height) {
+        return prev;
+      }
+      return { width, height };
+    });
+  }, [defaultHeight, defaultWidth]);
+
+  const scheduleMeasure = useMemo(() => {
+    return refreshMode === 'debounce'
+      ? debounce(measure, refreshRate)
+      : throttle(measure, refreshRate);
+  }, [measure, refreshMode, refreshRate]);
+
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (!element) {
+      return;
+    }
+
+    measure();
+
+    if (typeof ResizeObserver === 'function') {
+      const resizeObserver = new ResizeObserver(scheduleMeasure);
+      resizeObserver.observe(element);
+      return () => {
+        resizeObserver.disconnect();
+        scheduleMeasure.cancel();
+      };
+    }
+
+    window.addEventListener('resize', scheduleMeasure);
+    return () => {
+      window.removeEventListener('resize', scheduleMeasure);
+      scheduleMeasure.cancel();
+    };
+  }, [measure, scheduleMeasure]);
+
+  return {
+    ref,
+    width: size.width,
+    height: size.height,
+  };
+}

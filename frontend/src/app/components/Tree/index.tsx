@@ -16,7 +16,7 @@ import {
 
 interface TreeProps extends AntTreeProps<DataNode> {
   loading: boolean;
-  wrapperRef?: MutableRefObject<HTMLDivElement> | null;
+  wrapperRef?: MutableRefObject<HTMLDivElement | null> | null;
 }
 
 export function Tree({
