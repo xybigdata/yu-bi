@@ -16,9 +16,62 @@
  * limitations under the License.
  */
 
-const { createJestConfig } = require('@craco/craco');
-
-const cracoConfig = require('./craco.config.js');
-const jestConfig = createJestConfig(cracoConfig, {});
-
-module.exports = jestConfig;
+module.exports = {
+  roots: ['<rootDir>/src'],
+  collectCoverageFrom: [
+    'src/**/*.{js,jsx,ts,tsx}',
+    '!src/**/*/*.d.ts',
+    '!src/**/*/Loadable.{js,jsx,ts,tsx}',
+    '!src/**/*/messages.ts',
+    '!src/**/*/types.ts',
+    '!src/index.tsx',
+  ],
+  coverageReporters: ['html', 'lcov', 'text-summary'],
+  coverageThreshold: {
+    global: {
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+  },
+  setupFiles: ['jest-canvas-mock'],
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  testMatch: ['<rootDir>/src/**/__tests__/**/*.{spec,test}.{js,jsx,ts,tsx}'],
+  testEnvironment: 'jsdom',
+  transform: {
+    '^.+\\.(js|jsx|mjs|cjs|ts|tsx)$': require.resolve(
+      'react-scripts/config/jest/babelTransform',
+    ),
+    '^.+\\.css$': require.resolve('react-scripts/config/jest/cssTransform'),
+    '^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)': require.resolve(
+      'react-scripts/config/jest/fileTransform',
+    ),
+  },
+  transformIgnorePatterns: [
+    '[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$',
+    '^.+\\.module\\.(css|sass|scss)$',
+  ],
+  modulePaths: ['<rootDir>/src'],
+  moduleNameMapper: {
+    '^react-native$': 'react-native-web',
+    '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
+  },
+  moduleFileExtensions: [
+    'web.js',
+    'js',
+    'web.ts',
+    'ts',
+    'web.tsx',
+    'tsx',
+    'json',
+    'web.jsx',
+    'jsx',
+    'node',
+  ],
+  watchPlugins: [
+    'jest-watch-typeahead/filename',
+    'jest-watch-typeahead/testname',
+  ],
+  resetMocks: true,
+};
