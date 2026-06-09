@@ -1,5 +1,6 @@
-import { FC } from 'react';
-import { Route, type RouteProps } from 'app/routerCompat';
+import { FC, useEffect } from 'react';
+import { type RouteProps } from 'app/routerCompat';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 
 interface CompatRedirectProps {
   to: string;
@@ -7,15 +8,18 @@ interface CompatRedirectProps {
 
 export const CompatRedirect: FC<CompatRedirectProps & RouteProps> = ({
   to,
-  ...routeProps
+  path,
+  exact,
 }) => {
-  return (
-    <Route
-      {...routeProps}
-      render={({ history }) => {
-        history.replace(to);
-        return null;
-      }}
-    />
-  );
+  const navigate = useCompatNavigate();
+
+  useEffect(() => {
+    navigate.replace(to);
+  }, [navigate, to]);
+
+  if (path || exact) {
+    return null;
+  }
+
+  return null;
 };

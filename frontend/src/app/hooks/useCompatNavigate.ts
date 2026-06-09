@@ -16,20 +16,62 @@
  * limitations under the License.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useHistory } from 'app/routerCompat';
+
+type CompatHistory = ReturnType<typeof useHistory>;
+type CompatLocationState = CompatHistory['location']['state'];
+
+interface CompatLocationTarget {
+  hash?: string;
+  pathname?: string;
+  search?: string;
+  state?: CompatLocationState;
+}
+
+export interface CompatNavigate {
+  push: (to: string | CompatLocationTarget, state?: CompatLocationState) => void;
+  replace: (
+    to: string | CompatLocationTarget,
+    state?: CompatLocationState,
+  ) => void;
+  goBack: () => void;
+  go: (delta: number) => void;
+  location: CompatHistory['location'];
+}
 
 export const useCompatNavigate = () => {
   const history = useHistory();
+  const push = useCallback(
+    (to: string | CompatLocationTarget, state?: CompatLocationState) => {
+      history.push(to, state);
+    },
+    [history],
+  );
+  const replace = useCallback(
+    (to: string | CompatLocationTarget, state?: CompatLocationState) => {
+      history.replace(to, state);
+    },
+    [history],
+  );
+  const goBack = useCallback(() => {
+    history.goBack();
+  }, [history]);
+  const go = useCallback(
+    (delta: number) => {
+      history.go(delta);
+    },
+    [history],
+  );
 
   return useMemo(
     () => ({
-      push: history.push,
-      replace: history.replace,
-      goBack: history.goBack,
-      go: history.go,
+      push,
+      replace,
+      goBack,
+      go,
       location: history.location,
     }),
-    [history],
+    [go, goBack, history.location, push, replace],
   );
 };

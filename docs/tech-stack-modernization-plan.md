@@ -351,6 +351,7 @@
 - React Router 预迁移第二十四批：新增本地 `routerCompat` 出口，并将 `AppRouter`、分享页 Router、`Compat*` 组件、`useCompatNavigate`、`useRouteQuery` 以及部分主入口/测试页的路由导入统一收口到项目内部模块，为后续真正替换到底层 Router 6/7 实现先缩小 import 改动面。
 - React Router 预迁移第二十五批：登录/找回密码页面、主导航、成员/来源/调度/Viz 侧边栏，以及三个分享页主页面的 `useLocation` / `useParams` / `Link` / `NavLink` 导入已继续切到本地 `routerCompat`，进一步扩大统一出口覆盖面，为下一步替换兼容层底座减少散点改动。
 - React Router 预迁移第二十六批：成员/来源/调度详情页与故事板编辑/播放页的 `useParams` 导入已全部切到本地 `routerCompat`，当前 `frontend/src/app` 内对 `react-router-dom` / `react-router` 的直接依赖已经收口到 `routerCompat.ts` 单点，后续可以开始真正替换兼容层底座实现。
+- React Router 预迁移第二十七批：`useCompatNavigate` 已改为项目内显式包装的导航 API，继续保留字符串和对象导航、`location.state` 与 `go/goBack` 兼容行为；`CompatRedirect` 同时移除了 `Route render` 旧写法，把后续迁移焦点进一步收敛到兼容层底座本身。
 
 验收门槛：
 - 全部路由可访问。
@@ -545,16 +546,19 @@
 - 路由能力的 import 源已开始从 `react-router-dom` / `react-router` 向本地 `routerCompat` 收口，后续可以按批次继续把剩余页面切到同一出口。
 - 当前剩余直接依赖已经集中到少量详情页、故事板编辑/播放页和兼容层本身，后续更适合继续按模块批次清理，而不是全局撒网式替换。
 - 当前应用层对外部路由包的直接依赖已经清空，只剩 `routerCompat.ts` 作为单点出口；下一阶段重点应转向 `useCompatNavigate`、`CompatSwitch`、`CompatRoutes` 和 `CompatRedirect` 的真实底座迁移。
+- `useCompatNavigate` 和 `CompatRedirect` 已不再直接把 v5 `history.push/replace` 与 `Route render` 透传给业务层，下一步可以继续推进 `CompatSwitch` / `CompatRoutes` 的真实底座替换。
 - 剩余需要继续处理的重点不是“全局搜索更多旧 API”，而是：
   1. 让 `CompatSwitch` / `CompatRoute` / `CompatRoutes` 真实接管到 Router 6/7。
   2. 让 `useCompatNavigate` 从 `useHistory` 切到 `useNavigate`。
-  3. 补齐嵌套路由、默认跳转、参数路由和分享页的回归验证。
+  3. 让 `CompatRedirect` 最终对齐到 Router 6 `Navigate` 语义。
+  4. 补齐嵌套路由、默认跳转、参数路由和分享页的回归验证。
 
 工作包拆分：
-1. 兼容导航层替换：`useCompatNavigate`。
-2. 兼容路由容器替换：`CompatSwitch` / `CompatRoutes`。
-3. 主入口验收：`AppRouter`、`LoginAuthRoute`、`MainPage`、share routers。
-4. 复杂页面回归：`VizPage`、`ViewPage`、成员页、权限页、故事板。
+1. 兼容导航层主替换：`useCompatNavigate` 从 `useHistory` 切到 `useNavigate`。
+2. 兼容重定向替换：`CompatRedirect` 对齐 `Navigate` 语义。
+3. 兼容路由容器替换：`CompatSwitch` / `CompatRoutes`。
+4. 主入口验收：`AppRouter`、`LoginAuthRoute`、`MainPage`、share routers。
+5. 复杂页面回归：`VizPage`、`ViewPage`、成员页、权限页、故事板。
 
 ### B. Ant Design 5 backlog
 
