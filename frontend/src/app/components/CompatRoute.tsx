@@ -19,10 +19,17 @@ export const isCompatRouteMatched = (
     return true;
   }
 
-  return !!matchPath(pathname, {
-    path: path as string | string[],
-    exact,
-  });
+  const paths = Array.isArray(path) ? path : [path];
+
+  return paths.some(currentPath =>
+    !!matchPath(
+      {
+        path: currentPath,
+        end: !!exact,
+      },
+      pathname,
+    ),
+  );
 };
 
 export const CompatRoute: FC<CompatRouteProps> = ({ element, path, exact }) => {

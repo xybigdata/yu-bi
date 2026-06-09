@@ -17,10 +17,12 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useCompatHistory } from 'app/routerCompatRuntime';
+import {
+  useLocation,
+  useNavigate,
+} from 'app/routerCompat';
 
-type CompatHistory = ReturnType<typeof useCompatHistory>;
-type CompatLocationState = CompatHistory['location']['state'];
+type CompatLocationState = ReturnType<typeof useLocation>['state'];
 
 interface CompatLocationTarget {
   hash?: string;
@@ -37,31 +39,58 @@ export interface CompatNavigate {
   ) => void;
   goBack: () => void;
   go: (delta: number) => void;
-  location: CompatHistory['location'];
+  location: ReturnType<typeof useLocation>;
 }
 
+const normalizeTarget = (
+  to: string | CompatLocationTarget,
+  state?: CompatLocationState,
+) => {
+  if (typeof to === 'string') {
+    return {
+      to,
+      state,
+    };
+  }
+
+  const { state: targetState, ...path } = to;
+
+  return {
+    to: path,
+    state: state === undefined ? targetState : state,
+  };
+};
+
 export const useCompatNavigate = () => {
-  const history = useCompatHistory();
+  const navigate = useNavigate();
+  const location = useLocation();
   const push = useCallback(
     (to: string | CompatLocationTarget, state?: CompatLocationState) => {
-      history.push(to, state);
+      const normalized = normalizeTarget(to, state);
+      navigate(normalized.to, {
+        state: normalized.state,
+      });
     },
-    [history],
+    [navigate],
   );
   const replace = useCallback(
     (to: string | CompatLocationTarget, state?: CompatLocationState) => {
-      history.replace(to, state);
+      const normalized = normalizeTarget(to, state);
+      navigate(normalized.to, {
+        replace: true,
+        state: normalized.state,
+      });
     },
-    [history],
+    [navigate],
   );
   const goBack = useCallback(() => {
-    history.goBack();
-  }, [history]);
+    navigate(-1);
+  }, [navigate]);
   const go = useCallback(
     (delta: number) => {
-      history.go(delta);
+      navigate(delta);
     },
-    [history],
+    [navigate],
   );
 
   return useMemo(
@@ -70,8 +99,8 @@ export const useCompatNavigate = () => {
       replace,
       goBack,
       go,
-      location: history.location,
+      location,
     }),
-    [go, goBack, history.location, push, replace],
+    [go, goBack, location, push, replace],
   );
 };

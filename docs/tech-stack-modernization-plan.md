@@ -768,3 +768,11 @@
 - 运行时与测试入口已删除 `react-app-polyfill/ie11` 显式引入，浏览器兼容策略进一步从 IE11 历史包袱收缩到现代浏览器基线。
 - `frontend/src/react-app-env.d.ts` 已去掉 `react-scripts` 类型引用，改为保留项目真实需要的本地声明。
 - 为 Vite 链路补齐了 `*.svg` / `ReactComponent` 的显式类型声明，避免继续依赖 CRA 类型包做隐式兜底。
+
+### React Router 预迁移第四十批：切到 Router 6 经典运行时底座
+
+- `frontend/package.json` 已将 `react-router-dom` 切换到 `^6.30.1`，并删除只服务于 v5 的 `@types/react-router-dom`。
+- `routerCompat.ts` 已直接回到 `react-router-dom` 的 `BrowserRouter`、`MemoryRouter`、`Link`、`useLocation`、`useNavigate`、`useParams`。
+- 删除了只为 v5 `Router history` 桥接而存在的 `routerCompatRuntime.tsx`，兼容层不再依赖 `react-router-dom/node_modules/history/*` 这类脆弱内部路径。
+- `useCompatNavigate` 已改为包装 `useNavigate + useLocation`，`location` 改为响应式来源，不再透传自持 history 的静态快照。
+- `CompatRoute` 已切到 Router 6 的 `matchPath(pattern, pathname)` 新签名，并把原有 `exact` 语义映射到 v6 的 `end`。
