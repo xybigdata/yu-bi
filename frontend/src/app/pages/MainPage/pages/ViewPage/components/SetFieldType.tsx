@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { Dropdown, Menu, MenuProps, Tooltip } from 'antd';
+import { Dropdown, MenuProps, Tooltip } from 'antd';
 import { DataViewFieldType, DateFormat } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { memo, ReactNode } from 'react';
@@ -80,18 +80,16 @@ const SetFieldType = memo(
     return (
       <Dropdown
         trigger={['click']}
-        dropdownRender={() => (
-          <Menu
-            selectedKeys={[
-              field.type,
-              `category-${field.category}`,
-              field.dateFormat || '',
-            ]}
-            className="datart-schema-table-header-menu"
-            onClick={({ keyPath }) => onChange(keyPath, field?.name)}
-            items={menuItems}
-          />
-        )}
+        menu={{
+          selectedKeys: [
+            field.type,
+            `category-${field.category}`,
+            field.dateFormat || '',
+          ],
+          className: 'datart-schema-table-header-menu',
+          onClick: ({ keyPath }) => onChange(keyPath, field?.name),
+          items: menuItems,
+        }}
       >
         <Tooltip
           title={hasCategory ? t('typeAndCategory') : t('category')}

@@ -17,7 +17,7 @@
  */
 
 import { CheckOutlined } from '@ant-design/icons';
-import { Dropdown, Menu, MenuProps } from 'antd';
+import { Dropdown, MenuProps } from 'antd';
 import {
   ChartDataSectionType,
   ChartDataViewFieldCategory,
@@ -293,12 +293,11 @@ const ChartDrillContextMenu: FC<{
     <StyledChartDrill className="chart-drill-menu-container">
       <Dropdown
         disabled={!enableContextMenu}
-        dropdownRender={() => (
-          <StyledChartDrillMenu
-            items={contextMenuItems}
-            onClick={handleMenuClick}
-          />
-        )}
+        menu={{
+          items: contextMenuItems,
+          onClick: handleMenuClick,
+          style: { minWidth: 200 },
+        }}
         destroyPopupOnHide={true}
         trigger={['contextMenu']}
       >
@@ -313,10 +312,6 @@ export default ChartDrillContextMenu;
 const StyledChartDrill = styled.div`
   position: relative;
   width: 100%;
-`;
-
-const StyledChartDrillMenu = styled(Menu)`
-  min-width: 200px;
 `;
 
 const StyledMenuSwitch = styled.div`

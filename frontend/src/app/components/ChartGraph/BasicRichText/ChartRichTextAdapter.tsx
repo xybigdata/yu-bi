@@ -17,7 +17,7 @@
  */
 
 import { SelectOutlined } from '@ant-design/icons';
-import { Button, Dropdown, Menu, MenuProps, Modal, Row } from 'antd';
+import { Button, Dropdown, MenuProps, Modal, Row } from 'antd';
 import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
 import debounce from 'lodash/debounce';
 import { DeltaStatic } from 'quill';
@@ -252,19 +252,27 @@ const ChartRichTextAdapter: FC<{
       return dataList?.length
         ? dataList.map(fieldName => ({
             key: fieldName.name,
-            label: (
-              <a onClick={selectField(fieldName)} href="#javascript;">
-                {fieldName.name}
-              </a>
-            ),
+            label: fieldName.name,
           }))
         : [
             {
               key: 'nodata',
               label: t?.('common.noData'),
+              disabled: true,
             },
           ];
-    }, [dataList, selectField, t]);
+    }, [dataList, t]);
+
+    const handleFieldMenuClick = useCallback<
+      NonNullable<MenuProps['onClick']>
+    >(
+      ({ key, domEvent }) => {
+        domEvent.preventDefault();
+        const field = dataList?.find(item => item.name === key);
+        field && selectField(field)();
+      },
+      [dataList, selectField],
+    );
 
     const toolbar = useMemo(
       () =>
@@ -273,7 +281,10 @@ const ChartRichTextAdapter: FC<{
           extendNodes: {
             4: (
               <Dropdown
-                dropdownRender={() => <Menu items={fieldItems} />}
+                menu={{
+                  items: fieldItems,
+                  onClick: handleFieldMenuClick,
+                }}
                 trigger={['click']}
                 key="ql-selectLink"
               >
@@ -289,7 +300,7 @@ const ChartRichTextAdapter: FC<{
           },
           t,
         }),
-      [containerId, fieldItems, t],
+      [containerId, fieldItems, handleFieldMenuClick, t],
     );
 
     const reactQuillEdit = useMemo(
