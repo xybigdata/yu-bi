@@ -235,6 +235,10 @@
 - RTK 2 和 React Redux 9 对类型推断和 store 配置有变化。
 - Axios 1 的取消请求、拦截器类型和错误对象可能影响请求封装。
 
+已完成：
+- `js-cookie 2.2.1 -> 3.0.8`，`@types/js-cookie 2.2.6 -> 3.0.6`，先完成低风险认证 cookie 库升级，保持现有 token 读写封装不变。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
+
 验收门槛：
 - `npm run checkTs` 通过。
 - 主要单测通过或迁移完成。
