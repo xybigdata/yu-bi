@@ -762,3 +762,9 @@
 - `core/pom.xml` 已将旧坐标 `mysql:mysql-connector-java` 切换为当前官方 Maven 坐标 `com.mysql:mysql-connector-j`。
 - 驱动类和 JDBC URL 仍保持 `com.mysql.cj.jdbc.Driver` 与 `jdbc:mysql://`，因此这一步是依赖声明现代化，不改变现有连接语义。
 - 版本号交由 Spring Boot 父 POM 管理，减少 JDBC 驱动版本继续手写漂移的风险。
+
+### 并行治理：收紧 CRA 与 IE11 残留类型壳
+
+- 运行时与测试入口已删除 `react-app-polyfill/ie11` 显式引入，浏览器兼容策略进一步从 IE11 历史包袱收缩到现代浏览器基线。
+- `frontend/src/react-app-env.d.ts` 已去掉 `react-scripts` 类型引用，改为保留项目真实需要的本地声明。
+- 为 Vite 链路补齐了 `*.svg` / `ReactComponent` 的显式类型声明，避免继续依赖 CRA 类型包做隐式兜底。
