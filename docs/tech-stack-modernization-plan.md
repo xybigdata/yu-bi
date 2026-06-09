@@ -170,11 +170,12 @@
 - 已完成
   - `.github/workflows/dev-ut-stage.js.yml` 已统一到 Node `26.x`。
   - CI 已纳入前端 `npm ci`、`checkTs`、`build:task`、`build`、`test:ci`、`lint:css`、`lint:style`。
-  - CI 已纳入后端 `mvn -pl server -am -DskipTests compile` 与 JDBC provider 定向测试：
+  - CI 已纳入后端 `mvn -pl server -am -DskipTests package` 与 JDBC provider 定向测试：
     `mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.sql.SqlScriptRenderTest,datart.data.provider.function.SqlFunctionValidateTest -Dsurefire.failIfNoSpecifiedTests=false test`。
+  - 仓库已新增统一健康检查脚本 `scripts/check-demo-health.sh`，直接消费 `mvn package` 产出的安装包，使用 demo profile 启动 `datart.DatartServerApplication` 并轮询 `GET /api/v1/sys/info`。
+  - CI 已接入 `bash ./scripts/check-demo-health.sh`，把“编译通过”扩展到“服务可启动且系统信息接口可返回成功”。
   - Workflow 已显式声明 Temurin JDK `21`，并启用 npm / Maven 缓存。
 - 仍未完成
-  - CI 里还没有启动后的 `/api/v1/sys/info` 健康检查。
   - Dockerfile 仍直接消费仓库内 `bin/`、`config/`、`lib/`、`static/` 目录，尚未切到“由统一构建链生成再打包”的闭环模式。
   - `mvn test -pl data-providers/jdbc-data-provider -am` 这种全量上游联动测试当前还不适合作为 CI 默认命令；本机复核显示它会先触发 `core` 的 `POIUtilsTest`，并在当前 JDK 21 环境下出现 surefire fork crash，需要后续单独收口该测试稳定性。
 

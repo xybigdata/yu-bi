@@ -45,5 +45,6 @@ jobs:
       working-directory: ./frontend
     - run: npm run lint:style
       working-directory: ./frontend
-    - run: mvn -pl server -am -DskipTests compile
+    - run: mvn -pl server -am -DskipTests package
     - run: mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.sql.SqlScriptRenderTest,datart.data.provider.function.SqlFunctionValidateTest -Dsurefire.failIfNoSpecifiedTests=false test
+    - run: bash ./scripts/check-demo-health.sh
