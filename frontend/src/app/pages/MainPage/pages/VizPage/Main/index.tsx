@@ -1,6 +1,7 @@
 import { CloseOutlined } from '@ant-design/icons';
 import { Dropdown } from 'antd';
 import { EmptyFiller, TabPane, Tabs } from 'app/components';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import BoardEditor from 'app/pages/DashBoardPage/pages/BoardEditor';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
@@ -10,7 +11,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   Route,
   Switch,
-  useHistory,
   useLocation,
   useParams,
 } from 'react-router-dom';
@@ -33,7 +33,7 @@ import { VizContainer } from './VizContainer';
 export function Main({ sliderVisible }: { sliderVisible: boolean }) {
   const { actions } = useVizSlice();
   const dispatch = useDispatch();
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   const { vizId } = useParams<{ vizId?: string }>();
   const location = useLocation();
   const vizs = useSelector(selectVizs);
@@ -108,15 +108,15 @@ export function Main({ sliderVisible }: { sliderVisible: boolean }) {
 
   useEffect(() => {
     if (selectedTab && !vizId) {
-      history.push(`/organizations/${orgId}/vizs/${selectedTab.id}`);
+      navigate.push(`/organizations/${orgId}/vizs/${selectedTab.id}`);
     }
-  }, [history, selectedTab, orgId, vizId]);
+  }, [navigate, selectedTab, orgId, vizId]);
 
   const tabChange = useCallback(
     activeKey => {
       const activeTab = tabs.find(v => v.id === activeKey);
       if (activeTab) {
-        history.push(
+        navigate.push(
           `/organizations/${orgId}/vizs/${activeKey}${activeTab.search || ''}`,
         );
       }
@@ -124,7 +124,7 @@ export function Main({ sliderVisible }: { sliderVisible: boolean }) {
         dispatchResize();
       }, 500);
     },
-    [history, orgId, tabs],
+    [navigate, orgId, tabs],
   );
 
   const tabEdit = useCallback(
@@ -137,13 +137,13 @@ export function Main({ sliderVisible }: { sliderVisible: boolean }) {
               resolve: activeKey => {
                 const activeTab = tabs.find(v => v.id === activeKey);
                 if (activeTab) {
-                  history.push(
+                  navigate.push(
                     `/organizations/${orgId}/vizs/${activeKey}${
                       activeTab.search || ''
                     }`,
                   );
                 } else {
-                  history.push(`/organizations/${orgId}/vizs`);
+                  navigate.push(`/organizations/${orgId}/vizs`);
                 }
               },
             }),
@@ -153,7 +153,7 @@ export function Main({ sliderVisible }: { sliderVisible: boolean }) {
           break;
       }
     },
-    [dispatch, history, orgId, tabs],
+    [dispatch, navigate, orgId, tabs],
   );
 
   const handleClickMenu = (e: any, id: string) => {
@@ -162,7 +162,7 @@ export function Main({ sliderVisible }: { sliderVisible: boolean }) {
       dispatch(
         closeAllTabs({
           resolve() {
-            history.push(`/organizations/${orgId}/vizs`);
+            navigate.push(`/organizations/${orgId}/vizs`);
           },
         }),
       );
@@ -174,13 +174,13 @@ export function Main({ sliderVisible }: { sliderVisible: boolean }) {
         resolve: activeKey => {
           const activeTab = tabs.find(v => v.id === activeKey);
           if (activeTab) {
-            history.push(
+            navigate.push(
               `/organizations/${orgId}/vizs/${activeKey}${
                 activeTab.search || ''
               }`,
             );
           } else {
-            history.push(`/organizations/${orgId}/vizs`);
+            navigate.push(`/organizations/${orgId}/vizs`);
           }
         },
       }),

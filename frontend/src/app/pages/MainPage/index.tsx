@@ -17,6 +17,7 @@
  */
 
 import ChartEditor, { ChartEditorBaseProps } from 'app/components/ChartEditor';
+import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useMount from 'app/hooks/useMount';
 import ChartManager from 'app/models/ChartManager';
 import { useAppSlice } from 'app/slice';
@@ -26,7 +27,6 @@ import {
   Redirect,
   Route,
   Switch,
-  useHistory,
   useLocation,
   useRouteMatch,
 } from 'react-router';
@@ -70,7 +70,7 @@ export function MainPage() {
     '/organizations/:orgId',
   );
   const orgId = useSelector(selectOrgId);
-  const history = useHistory();
+  const navigate = useCompatNavigate();
   // loaded first time
 
   useMount(
@@ -104,9 +104,9 @@ export function MainPage() {
           orgId,
         }),
       );
-      history.push(`/organizations/${orgId}/vizs/${backendChartId}`);
+      navigate.push(`/organizations/${orgId}/vizs/${backendChartId}`);
     },
-    [dispatch, history],
+    [dispatch, navigate],
   );
 
   const ChartEditorRoute = () => {
@@ -127,7 +127,7 @@ export function MainPage() {
           chartType={hisState.chartType}
           container={hisState.container}
           defaultViewId={hisState.defaultViewId}
-          onClose={() => history.go(-1)}
+          onClose={() => navigate.go(-1)}
           onSaveInDataChart={onSaveInDataChart}
         />
       </AccessRoute>
