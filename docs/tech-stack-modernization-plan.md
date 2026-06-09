@@ -1159,6 +1159,12 @@
 - `frontend/package.json` 已移除 `enzyme` 与 `@cfaester/enzyme-adapter-react-18`。
 - 当前测试文件已全部使用 Testing Library / Jest 风格断言，Enzyme 仅剩历史初始化残留，因此这一步不会改变现有测试写法。
 
+### 并行治理：移除 `react-test-renderer` 历史残留
+
+- `frontend/src/app/pages/NotFoundPage/__tests__/index.test.tsx` 已从 `react-test-renderer` 的跳过快照测试改为 Testing Library 断言。
+- `frontend/src/app/pages/NotFoundPage/__tests__/__snapshots__/index.test.tsx.snap` 已删除，不再保留无效 snapshot 噪音。
+- `frontend/package.json` 与 lockfile 已移除 `react-test-renderer`、`@types/react-test-renderer`，前端测试栈进一步收口到 `@testing-library/* + jest` 单一路径。
+
 ### 并行治理：测试执行入口脱离 `craco test`
 
 - `frontend/package.json` 的 `test` 脚本已从 `craco test` 切到 `jest --config jest.config.js`。

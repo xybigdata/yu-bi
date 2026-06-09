@@ -23,9 +23,9 @@ import {
   DataViewFieldType,
   FilterConditionType,
 } from 'app/constants';
+import { datartDayjs } from 'app/utils/date';
 import { getChartDrillOption } from 'app/utils/internalChartHelper';
 import { FilterSqlOperator, RECOMMEND_TIME } from 'globalConstants';
-import moment from 'moment';
 import { ChartDataRequestBuilder } from '../ChartDataRequestBuilder';
 
 describe('ChartDataRequestBuild Test', () => {
@@ -790,7 +790,7 @@ describe('ChartDataRequestBuild Test', () => {
     const pageInfo = {};
     const enableScript = false;
     const enableAggregation = true;
-    const today = moment().format('YYYY-MM-DD');
+    const today = datartDayjs().format('YYYY-MM-DD');
 
     const builder = new ChartDataRequestBuilder(
       dataView,
@@ -1092,7 +1092,7 @@ describe('ChartDataRequestBuild Test', () => {
     const pageInfo = {};
     const enableScript = false;
     const enableAggregation = true;
-    const today = moment().format('YYYY-MM-DD');
+    const today = datartDayjs().format('YYYY-MM-DD');
 
     const builder = new ChartDataRequestBuilder(
       dataView,

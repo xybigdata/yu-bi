@@ -1,11 +1,10 @@
-import React from 'react';
 import { HelmetProvider } from 'react-helmet-async';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'app/routerCompat';
-import renderer from 'react-test-renderer';
 import { NotFoundPage } from '..';
 
 const renderPage = () =>
-  renderer.create(
+  render(
     <MemoryRouter>
       <HelmetProvider>
         <NotFoundPage />
@@ -14,11 +13,11 @@ const renderPage = () =>
   );
 
 describe('<NotFoundPage />', () => {
-  // TODO(Owner): fix app tests...
-  it.skip('should match snapshot', () => {
-    const notFoundPage = renderPage();
-    expect(notFoundPage.toJSON()).toMatchSnapshot();
+  it('should render 404 title', () => {
+    renderPage();
+    expect(
+      screen.getByRole('heading', { level: 1, name: /404/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Page not found')).toBeInTheDocument();
   });
-
-  it('should should contain Link', () => {});
 });

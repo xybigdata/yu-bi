@@ -27,9 +27,9 @@ import {
   Tag,
 } from 'antd';
 import { DateFormat } from 'app/constants';
+import { datartDayjs } from 'app/utils/date';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { TIME_FORMATTER } from 'globalConstants';
-import moment from 'moment';
 import { memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { SPACE, SPACE_TIMES } from 'styles/StyleConstants';
@@ -182,7 +182,7 @@ export const DefaultValue = memo(
                   const label =
                     type !== VariableValueTypes.Date
                       ? val
-                      : moment(val).format(dateFormat);
+                      : datartDayjs(val).format(dateFormat);
                   return (
                     <Tag
                       key={label}
