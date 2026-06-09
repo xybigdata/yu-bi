@@ -55,7 +55,7 @@ export function Background() {
     setFormVisible(false);
   }, []);
 
-  let visible = true;
+  let isVisible = true;
   let content;
 
   if (userSettingLoading) {
@@ -89,10 +89,10 @@ export function Background() {
       </>
     );
   } else {
-    visible = false;
+    isVisible = false;
   }
 
-  return <Container visible={visible}>{content}</Container>;
+  return <Container $isVisible={isVisible}>{content}</Container>;
 }
 
 const loadingAnimation = keyframes`
@@ -101,14 +101,14 @@ const loadingAnimation = keyframes`
   100% { transform: rotate(360deg); }
 `;
 
-const Container = styled.div<{ visible: boolean }>`
+const Container = styled.div<{ $isVisible: boolean }>`
   position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
   z-index: ${LEVEL_1000};
-  display: ${p => (p.visible ? 'flex' : 'none')};
+  display: ${p => (p.$isVisible ? 'flex' : 'none')};
   flex: 1;
   align-items: center;
   justify-content: center;

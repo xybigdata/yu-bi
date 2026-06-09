@@ -575,7 +575,7 @@ const ChartDataViewPanel: FC<{
           {modalContextHolder}
         </>
       </Header>
-      <StyleSearchbar visible={isShowSearch}>
+      <StyleSearchbar $isVisible={isShowSearch}>
         <Input
           autoFocus
           className="search-input"
@@ -617,8 +617,8 @@ const Header = styled.div`
   }
 `;
 
-const StyleSearchbar = styled.div<{ visible: boolean }>`
-  display: ${p => (p.visible ? 'block' : 'none')};
+const StyleSearchbar = styled.div<{ $isVisible: boolean }>`
+  display: ${p => (p.$isVisible ? 'block' : 'none')};
   padding: ${SPACE} 0;
 
   .search-input {

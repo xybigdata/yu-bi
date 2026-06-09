@@ -883,19 +883,17 @@
 ### B. Ant Design 5 backlog
 
 当前扫描结论：
-- 仍有一批 `visible=` 历史 API，集中在分享页验证码弹窗、保存表单、Profile/Password、变量与成员管理、富文本颜色选择器等位置。
-- 仍有一批 JSX `Menu.Item` / `Menu.SubMenu` / `Menu.Divider` 遗留，主要集中在：
-  - 图表工作台字段动作菜单
-  - Popup/MenuListItem 封装
-  - Navbar/Profile 菜单
-  - StoryHeader / VizHeader 等自定义 dropdownRender 入口
+- 主业务弹窗和分享页的 `Modal` / `Drawer` / `Popover` 已基本收口到 `open` / `onOpenChange`，`visible` 的搜索结果里目前有相当一部分只是内部状态字段或 styled-components 私有属性，并非 AntD 4 旧 API。
+- JSX `Menu.Item` / `Menu.SubMenu` / `Menu.Divider` 在业务代码里已基本清零；当前更真实的阻塞点变成：
+  - 若干 `dropdownRender` 自定义菜单入口仍直接拼 `Menu` 结构
+  - 少量封装层仍兼容 `visible ?? open` 双入参
+  - `antd 4.24.16` 仍未真正切到 v5 token / 时间组件主线
 
 工作包拆分：
-1. `visible` -> `open` / `onOpenChange` 收尾。
-2. JSX Menu API -> `items` 配置收尾。
-3. 自定义 `dropdownRender` / Popup 封装统一。
-4. 主题 token / ConfigProvider 迁移准备。
-5. AntD 5 真正升级与回归。
+1. 清理内部组件与样式层把 `visible` 当作私有属性的历史命名，降低对 AntD 旧 API 的搜索噪音。
+2. 收口剩余 `dropdownRender`、`visible ?? open` 兼容壳与少量 Popup/ColorPicker 封装。
+3. 预处理 AntD 5 token / ConfigProvider / 时间组件迁移需要的主题与时间值链边界。
+4. AntD 5 真正升级与回归。
 
 ### C. 前端测试栈 backlog
 
@@ -907,15 +905,14 @@
   - `@cfaester/enzyme-adapter-react-18`
   - 包级 `eslintConfig`
 - 当前残留主要是：
-  - Jest 版本仍停留在 27.5.1
-  - Jest 运行时与 watch 插件仍停留在 Jest 27 生态版本
+  - Jest 主链已升级到 `29.7.0`，`babel-jest`、`jest-environment-jsdom`、`@types/jest` 与 `@types/node` 也已同步到现代稳定线
+  - 测试入口已经脱离 `react-app` / CRA transform，当前仍保留的是 Jest 运行模型本身，以及 `jest-watch-typeahead` 这类配套插件
   - ESLint 主链已切到项目自有显式依赖与 `.eslintrc.js`，但当前 lint 结果仍有一批存量 warning 需要后续分批清理
 
 工作包拆分：
-1. Jest 27 升级到较新稳定线，或迁到 Vitest。
-2. 将 Jest transform 与 ESLint 配置彻底脱离 `react-app` 系工具链。
-3. 升级 `@types/node`、`babel-jest`、`jest-environment-jsdom` 与相关测试依赖。
-4. 继续清理 lint 存量 warning，并在条件成熟后再评估 ESLint 9 / flat config 迁移。
+1. 评估是否继续保留 Jest 29，还是在覆盖面和运行速度都可接受时迁到 Vitest。
+2. 继续清理测试 warning、`act(...)` 警告和 React Router future flag 噪音，让测试输出更干净。
+3. 继续清理 lint 存量 warning，并在条件成熟后再评估 ESLint 9 / flat config 迁移。
 
 ### D. 后端现代化 backlog
 
@@ -928,33 +925,27 @@
   - 后端生产代码中的 `fastjson` 使用点已清零
   - Web 层默认 message converter 已回到 Jackson
 - JWT：
-  - `core/pom.xml` 中 `jjwt 0.7.0`
-  - `security/pom.xml` 中 `java-jwt` 已删除，当前只剩 `jjwt 0.7.0`
+  - `core/pom.xml` 已切到 `jjwt-api` / `jjwt-impl` / `jjwt-jackson 0.12.7`
+  - `security/pom.xml` 中 `java-jwt` 已删除
 - 旧基础库：
-  - `guava 21.0`
-  - `httpclient 4.5.14`
-  - `h2 1.4.200`
-  - `poi-ooxml 5.0.0`
-  - `commons-csv 1.8`
-  - `commons-text 1.9`
-  - `aspectjweaver 1.9.8.M1`
+  - `httpclient 4.x` 已退出，当前主链为 `httpclient5 5.5`
+  - `h2`、`poi-ooxml`、`commons-csv` 已升级到现代稳定线
+  - 剩余更值得继续关注的是 `guava`、`commons-text`、`aspectjweaver` 以及更长线的 `Druid / Shiro / Nashorn / Calcite`
 
 工作包拆分：
-1. JWT 升级专项：`jjwt 0.7 -> 0.12+` 与 secret 兼容策略。
-2. HTTP 客户端专项：`httpclient 4 -> 5`，并评估最终是否只保留单一客户端。
-3. 旧基础库逐项替换与回归验证：Guava、POI、Commons CSV、Commons Text、AspectJ。
-4. demo/H2 策略与样例数据迁移。
-5. Druid / Shiro / Nashorn / MyBatis Generator 的中长期专项设计。
+1. 继续收口仍停留在旧生态的基础库：Guava、Commons Text、AspectJ。
+2. 补齐 demo/H2 策略与样例数据迁移的验证闭环。
+3. Druid / Shiro / Nashorn / Calcite / MyBatis Generator 的中长期专项设计。
 
 ### E. 推荐近期执行队列
 
 基于当前风险和收益，建议接下来的 5 个 checkpoint 按这个顺序推进：
 
-1. AntD 5 收尾清理：优先处理 `visible`、剩余 JSX `Menu.*` 和 `antd/lib/*` 深路径导入。
-2. 测试栈现代化：升级 Jest 或迁到 Vitest，并去掉 `react-app` 系工具链残留。
-3. `httpclient 4 -> 5` 专项盘点与迁移实现。
-4. `jjwt 0.7 -> 0.12+` 兼容设计与代码落地。
-5. POI / Guava / Commons 系列老基础库分批升级。
+1. AntD 5 前置清障：优先处理真实的 `dropdownRender` / Popup 兼容壳、主题链和时间组件边界。
+2. `moment -> dayjs`：继续沿“格式化出口 -> 类型残留 -> 值链专题”分批收口。
+3. 富文本与故事播放专题：评估 `react-quill 1.x` 和 `reveal.js 4.1.x` 的现代替代或升级路径。
+4. 测试输出治理：清理 Jest warning、React Router future flag 和历史测试噪音。
+5. 后端长期基础库专题：Guava / Commons Text / AspectJ，以及 Druid / Shiro / Nashorn 的专项设计。
 
 ## 最终完成定义
 

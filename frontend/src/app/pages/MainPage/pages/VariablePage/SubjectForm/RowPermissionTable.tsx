@@ -28,7 +28,7 @@ import { RowPermissionSubject, Variable } from '../slice/types';
 
 interface SubjectFormProps {
   type: 'role' | 'member';
-  visible: boolean;
+  isVisible: boolean;
   editingVariable: undefined | Variable;
   loading: boolean;
   listLoading: boolean;
@@ -43,7 +43,7 @@ interface SubjectFormProps {
 export const RowPermissionTable = memo(
   ({
     type,
-    visible,
+    isVisible,
     editingVariable,
     loading,
     listLoading,
@@ -125,7 +125,7 @@ export const RowPermissionTable = memo(
 
     return (
       <LoadingMask loading={loading}>
-        <TableWrapper visible={visible}>
+        <TableWrapper $isVisible={isVisible}>
           <Table
             rowKey="id"
             size="small"
@@ -145,8 +145,8 @@ export const RowPermissionTable = memo(
   },
 );
 
-const TableWrapper = styled.div<{ visible: boolean }>`
-  display: ${p => (p.visible ? 'block' : 'none')};
+const TableWrapper = styled.div<{ $isVisible: boolean }>`
+  display: ${p => (p.$isVisible ? 'block' : 'none')};
 
   .disabled-row {
     color: ${p => p.theme.textColorDisabled};

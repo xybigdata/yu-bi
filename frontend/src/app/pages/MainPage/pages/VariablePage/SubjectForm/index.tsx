@@ -215,7 +215,7 @@ export const SubjectForm = memo(
       >
         <RowPermissionTable
           type="role"
-          visible={tab === 'role'}
+          isVisible={tab === 'role'}
           editingVariable={editingVariable}
           loading={!!loading}
           listLoading={roleListLoading}
@@ -227,7 +227,7 @@ export const SubjectForm = memo(
         {scope === VariableScopes.Public && (
           <RowPermissionTable
             type="member"
-            visible={tab === 'member'}
+            isVisible={tab === 'member'}
             editingVariable={editingVariable}
             loading={!!loading}
             listLoading={memberListLoading}

@@ -130,7 +130,7 @@ export function ListTitle({
           )}
         </Space>
       </Title>
-      <Searchbar visible={searchbarVisible}>
+      <Searchbar $isVisible={searchbarVisible}>
         <Input
           className="search-input"
           prefix={<SearchOutlined className="icon" />}
@@ -199,8 +199,8 @@ const Title = styled.div`
   }
 `;
 
-const Searchbar = styled.div<{ visible: boolean }>`
-  display: ${p => (p.visible ? 'block' : 'none')};
+const Searchbar = styled.div<{ $isVisible: boolean }>`
+  display: ${p => (p.$isVisible ? 'block' : 'none')};
   padding: ${SPACE} 0;
 
   .search-input {
