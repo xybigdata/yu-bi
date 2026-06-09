@@ -31,6 +31,103 @@
 - JSON/JWT/HTTP/工具库统一到仍维护的现代库，删除重复和过时依赖。
 - 构建和 CI 明确 Node、npm、Maven 最低版本，避免依赖开发者本机偶然状态。
 
+## 最终现代化技术栈清单
+
+这一节定义“项目最终完成现代化替代”时应达到的目标清单。后续每个阶段都要朝这个清单收敛，而不是只做局部兼容。
+
+### 后端目标清单
+
+- 运行时与框架
+  - JDK 21 LTS
+  - Spring Boot 3 稳定主线
+  - Spring Framework 6 / Jakarta EE 10 兼容链
+- 数据与服务基础设施
+  - MyBatis Spring Boot 3 主线
+  - MySQL 驱动使用当前坐标 `com.mysql:mysql-connector-j`
+  - Quartz 保持 Spring Boot 当前稳定主线
+  - Redis、LDAP、Mail、Thymeleaf 维持 Boot BOM 管理
+- 安全与认证
+  - JWT 收敛到单一现代实现
+  - 长期评估从 Shiro 迁到 Spring Security 原生安全体系
+- JSON 与 HTTP
+  - Web 层统一使用 Jackson
+  - 自定义 JSON 解析尽量统一到 Jackson tree/model API
+  - HTTP 客户端收敛到单一现代实现：JDK HttpClient / HttpClient 5 / OkHttp 三选一
+- 浏览器自动化与导出
+  - 不再依赖 PhantomJS
+  - 使用 Playwright 或 Selenium 4 + Chromium Headless
+- 旧基础库治理
+  - 淘汰 `commons-lang 2`
+  - 淘汰 `commons-io 1.x`
+  - 收敛或升级 Guava、POI、Commons CSV、Calcite、MyBatis Generator、Nashorn
+
+### 前端目标清单
+
+- 构建与运行
+  - Node 26 可稳定开发、构建、测试
+  - Vite 作为唯一主构建链
+  - CRA / CRACO 完全退出主工作流
+- 核心框架
+  - React 18 稳定运行，后续再评估 React 19
+  - React Router 升级到 6/7
+  - Ant Design 升级到 5，之后再评估 6
+- 状态与数据
+  - Redux Toolkit 2
+  - React Redux 9
+  - Axios 1
+- 样式与主题
+  - 继续使用 `styled-components`，但升级到当前主线时需补齐 SSR、类型和 macro 兼容策略
+  - AntD 主题能力统一到 token / CSS variables，不保留浏览器端 Less 动态编译链
+- 测试与工具链
+  - Testing Library 作为主测试方案
+  - Enzyme 完全退出
+  - Lint / Format / Type Check 与 Node 26 兼容
+- 兼容与运行策略
+  - 明确是否放弃 IE 11；若放弃，则移除 `react-app-polyfill` 和相关历史兼容代码
+
+### 构建、发布与工程化目标清单
+
+- Maven / npm / Node / Java 版本约束全部显式化
+- 本地、CI、Docker、发布包使用同一套产物生成链
+- 发布包内静态资源、parser.js、配置目录和启动参数都可复现
+- 服务启动、前端代理、后端 API、截图导出、分享页、多入口 HTML 都有自动或半自动验收路径
+
+## 升级依赖矩阵
+
+这一节定义哪些升级可以并行，哪些必须按顺序推进，避免后续把多个高风险改动混在一个阶段里。
+
+- React Router 6/7 依赖于：
+  - `useHistory`、`Redirect`、`Switch`、`Route component/render` 基本清空
+  - 主路由容器先迁到兼容层
+- Ant Design 5 依赖于：
+  - React 18 已完成
+  - Dropdown/Menu/Modal/Popover 等旧 API 基本收口
+  - 主题链已切到 CSS variables / token 思路
+- 测试栈从 CRA/Enzyme 迁出依赖于：
+  - React Router 与 AntD 大面积结构改动先稳定
+  - Vite 主构建链可长期作为唯一入口
+- 后端 Jackson 单栈化依赖于：
+  - 先识别 `fastjson` 在 DTO、配置校验、HTTP message converter、数据导入导出中的边界
+  - 先把自动化/截图链与 JSON 栈解耦，避免多种基础设施同时变动
+- JWT 单栈化依赖于：
+  - 先确认现有 token 生成、刷新、校验和第三方登录链路
+  - 最好在 JSON 栈趋稳之后推进
+- PhantomJS / Selenium 3 迁移依赖于：
+  - 明确当前截图、导出、分享缩略图等所有实际调用点
+  - 明确服务器运行环境是否允许安装 Chromium 及其依赖
+- H2 2.x 或 Testcontainers 依赖于：
+  - demo 数据、初始化 SQL、兼容模式和文档同步调整
+  - 最好放在后端核心库升级后期
+
+## 执行原则
+
+- 每次提交只解决一个明确升级主题。
+- 每个阶段先做“兼容层收口”，再做真正的大版本切换。
+- 尽量先消除重复实现，再做库替换。
+- 优先替换已经停止维护、明显过时或高安全风险的依赖。
+- 高风险基础设施变更必须带验证路径，不能只升级版本号。
+- 文档中的“最终技术栈清单”是完成定义，阶段成果只是通往终态的中间站。
+
 ## 官方依据
 
 - React 官方已宣布 Create React App 退场，新项目应使用框架或现代构建工具；本项目需要从 CRA 迁出。
@@ -343,6 +440,200 @@
 - 干净环境可以一键构建。
 - Docker 镜像可启动。
 - 发布包包含正确静态资源和 parser.js。
+
+## 阶段交付物与完成定义
+
+这一节用于把升级路线变成可执行项目计划。每个阶段只有在“交付物”和“完成定义”都满足时，才算真正完成。
+
+### 阶段 0 交付物
+
+- 根 `pom.xml`、前端 `package.json`、`Dockerfile` 中的基础运行时版本声明完成统一。
+- 文档中明确最低 Java / Maven / Node / npm 要求。
+- 本地与发布包的启动路径可复现。
+
+完成定义：
+- 新同事按文档准备环境后，能在不额外猜测版本的情况下完成构建和启动。
+
+### 阶段 1-2 交付物
+
+- Vite 成为默认开发与生产构建链。
+- CRA / CRACO 仅作为短期回退链存在，并有明确移除计划。
+- 多入口 HTML、静态资源复制、parser task 生成链稳定。
+
+完成定义：
+- 后端 Maven `package` 产物不再依赖 CRA 链。
+- 前端开发、生产构建和后端托管结果一致。
+
+### 阶段 3 交付物
+
+- React 18 主升级完成。
+- React 18 类型收口完成。
+- React 18 下主流程可运行。
+
+完成定义：
+- 不再保留任何为了兼容 React 17 而存在的临时实现。
+
+### 阶段 4 交付物
+
+- React Router 6/7 升级完成。
+- Ant Design 5 升级完成。
+- 主题、弹层、菜单和复杂工作区页面人工验收完成。
+
+完成定义：
+- 前端主应用不再直接依赖 Router 5 API。
+- AntD 4 专属 API 和样式补丁收敛到可删除状态。
+
+### 阶段 5 交付物
+
+- Enzyme 完全移除。
+- CRA 测试链完全退出。
+- Testing Library 与独立测试运行器稳定。
+- Lint / Format / Type Check 工具链与 Node 26 稳定兼容。
+
+完成定义：
+- `frontend/package.json` 中不再保留 `enzyme`、`@cfaester/enzyme-adapter-react-18`、`react-scripts`、`@craco/craco`。
+
+### 阶段 6 交付物
+
+- PhantomJS / Selenium 3 替换完成。
+- `fastjson 1.x` 清理完成。
+- JWT 双栈统一完成。
+- 旧基础库分批替换完成。
+- demo / 内置样例数据库策略明确。
+
+完成定义：
+- `pom.xml` 各模块中不再出现 `phantomjsdriver`、`selenium-java 3.x`、`fastjson 1.x`、`jjwt 0.7.0`、`java-jwt 3.7.0`、`commons-lang 2.x`、`commons-io 1.x`。
+
+### 阶段 7 交付物
+
+- CI 流水线覆盖后端测试、前端检查、前端构建、集成启动验证。
+- Docker 镜像和发布包都能在干净环境运行。
+- 关键业务验收有稳定脚本或检查表。
+
+完成定义：
+- 同一提交在本地、CI、Docker 和发布包中的构建行为一致。
+
+## 建议执行顺序
+
+基于当前状态，后续执行建议按下面顺序推进：
+
+1. 完成 React Router 预迁移收口并切换到 Router 6/7。
+2. 继续清理 AntD 4 历史 API，完成 AntD 5 升级。
+3. 清理 CRA / Enzyme 测试链，迁到现代测试方案。
+4. 替换 PhantomJS / Selenium 3。
+5. 推进后端 JSON 栈单栈化。
+6. 统一 JWT 实现。
+7. 分批替换旧基础库。
+8. 处理 H2/demo 与长期安全框架演进。
+
+## 当前 backlog 量化视图
+
+这一节用于把计划落到当前代码面，避免后续升级只凭感觉推进。
+
+### A. React Router 主升级 backlog
+
+当前扫描结论：
+- 主应用业务代码里的 `useRouteMatch`、`Route component=`、`Route render=`、业务层 `Redirect` 已基本清空。
+- 剩余 Router 5 依赖主要集中在兼容层自身：
+  - `frontend/src/app/hooks/useCompatNavigate.ts`
+  - `frontend/src/app/components/CompatSwitch.tsx`
+- 剩余需要继续处理的重点不是“全局搜索更多旧 API”，而是：
+  1. 让 `CompatSwitch` / `CompatRoute` / `CompatRoutes` 真实接管到 Router 6/7。
+  2. 让 `useCompatNavigate` 从 `useHistory` 切到 `useNavigate`。
+  3. 补齐嵌套路由、默认跳转、参数路由和分享页的回归验证。
+
+工作包拆分：
+1. 兼容导航层替换：`useCompatNavigate`。
+2. 兼容路由容器替换：`CompatSwitch` / `CompatRoutes`。
+3. 主入口验收：`AppRouter`、`LoginAuthRoute`、`MainPage`、share routers。
+4. 复杂页面回归：`VizPage`、`ViewPage`、成员页、权限页、故事板。
+
+### B. Ant Design 5 backlog
+
+当前扫描结论：
+- 仍有一批 `visible=` 历史 API，集中在分享页验证码弹窗、保存表单、Profile/Password、变量与成员管理、富文本颜色选择器等位置。
+- 仍有一批 JSX `Menu.Item` / `Menu.SubMenu` / `Menu.Divider` 遗留，主要集中在：
+  - 图表工作台字段动作菜单
+  - Popup/MenuListItem 封装
+  - Navbar/Profile 菜单
+  - StoryHeader / VizHeader 等自定义 dropdownRender 入口
+
+工作包拆分：
+1. `visible` -> `open` / `onOpenChange` 收尾。
+2. JSX Menu API -> `items` 配置收尾。
+3. 自定义 `dropdownRender` / Popup 封装统一。
+4. 主题 token / ConfigProvider 迁移准备。
+5. AntD 5 真正升级与回归。
+
+### C. 前端测试栈 backlog
+
+当前扫描结论：
+- `frontend/package.json` 仍保留：
+  - `react-scripts`
+  - `@craco/craco`
+  - `enzyme`
+  - `@cfaester/enzyme-adapter-react-18`
+- 代码仍保留：
+  - `frontend/src/setupTests.ts` 中的 Enzyme 初始化
+  - `frontend/src/react-app-env.d.ts` 对 `react-scripts` 的引用
+  - `react-app-polyfill` 在 `entryPointFactory.tsx`、`task.ts`、`setupTests.ts` 中的显式引入
+
+工作包拆分：
+1. Enzyme 测试盘点与替换优先级排序。
+2. `setupTests.ts` 迁到纯 Testing Library。
+3. Jest/测试运行链从 CRA 拆出，或迁到 Vitest。
+4. `react-app-polyfill` 的浏览器支持策略确认与移除。
+5. 删除 `react-scripts` / `@craco/craco`。
+
+### D. 后端现代化 backlog
+
+当前扫描结论：
+- 浏览器自动化：
+  - `core/pom.xml`
+  - `server/pom.xml`
+  仍声明 `phantomjsdriver` 和旧 `selenium-java`
+- JSON 栈：
+  - `security/src`
+  - `core/src`
+  - `server/src`
+  仍广泛直接依赖 `fastjson`
+  - `server/src/main/java/datart/server/config/WebMvcConfig.java` 仍直接注册 `FastJsonHttpMessageConverter`
+- JWT：
+  - `core/pom.xml` 中 `jjwt 0.7.0`
+  - `security/pom.xml` 中 `java-jwt 3.7.0`
+- 旧基础库：
+  - `commons-lang 2.6`
+  - `commons-io 1.3.1`
+  - `guava 21.0`
+  - `httpclient 4.5.14`
+  - `h2 1.4.200`
+
+工作包拆分：
+1. PhantomJS / Selenium 3 调用点梳理与替换方案选型。
+2. FastJson 使用面梳理：DTO、配置、message converter、导入导出。
+3. JWT 双栈使用链路梳理。
+4. 旧基础库逐项替换与回归验证。
+5. demo/H2 策略与样例数据迁移。
+
+### E. 推荐近期执行队列
+
+基于当前风险和收益，建议接下来的 5 个 checkpoint 按这个顺序推进：
+
+1. Router 兼容层主替换：`useCompatNavigate` / `CompatRoutes` 真正接管到 Router 6/7。
+2. AntD 5 收尾清理：优先处理 `visible` 和剩余 JSX `Menu.*`。
+3. 测试栈预清理：先移除 Enzyme 依赖面，再处理 CRA 测试链。
+4. 浏览器自动化现状梳理，确定 `Playwright` 还是 `Selenium 4`。
+5. FastJson 使用面梳理并设计 Jackson 迁移边界。
+
+## 最终完成定义
+
+当且仅当以下条件同时成立，才可视为“整个技术栈清单都是现代化替代方案”已经完成：
+
+- 文档中的“最终现代化技术栈清单”全部落地，而不是只完成一部分。
+- 前端不再依赖 Router 5、CRA/CRACO、Enzyme、AntD 4 历史 API。
+- 后端不再依赖 PhantomJS、Selenium 3、fastjson 1.x、双 JWT 老实现、`commons-lang 2`、`commons-io 1.x` 等已认定为老旧的核心依赖。
+- 本地、CI、Docker、发布包都能使用同一套现代化构建链。
+- 关键业务流程、分享页、登录鉴权、图表/仪表板、截图导出都完成验收。
 
 ## 不建议一次性升级的项目
 
