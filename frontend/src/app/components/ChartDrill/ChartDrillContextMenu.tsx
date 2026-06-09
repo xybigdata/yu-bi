@@ -17,7 +17,7 @@
  */
 
 import { CheckOutlined } from '@ant-design/icons';
-import { Dropdown, Menu } from 'antd';
+import { Dropdown, Menu, MenuProps } from 'antd';
 import {
   ChartDataSectionType,
   ChartDataViewFieldCategory,
@@ -27,7 +27,7 @@ import {
 import ChartDrillContext from 'app/contexts/ChartDrillContext';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { DrillMode } from 'app/models/ChartDrillOption';
-import DateLevelMenuItems from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/DateLevelAction/DateLevelMenuItems';
+import { buildDateLevelMenuItems } from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/DateLevelAction/DateLevelMenuItems';
 import { handleDateLevelsName } from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/utils';
 import { ChartConfig, ChartDataSectionField } from 'app/types/ChartConfig';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
@@ -47,6 +47,7 @@ const ChartDrillContextMenu: FC<{
   metas?: ChartDataViewMeta[];
 }> = memo(({ children, metas, chartConfig }) => {
   const t = useI18NPrefix(`viz.palette.drill`);
+  const td = useI18NPrefix(`viz.workbench.dataview`);
   const {
     drillOption,
     availableSourceFunctions,
@@ -116,8 +117,9 @@ const ChartDrillContextMenu: FC<{
   );
 
   const selectDrillStatusMenu = useMemo(() => {
-    return (
-      <Menu.Item key="selectDrillStatus">
+    return {
+      key: 'selectDrillStatus',
+      label: (
         <StyledMenuSwitch
           className={classnames({ on: !!drillOption?.isSelectedDrill })}
         >
@@ -128,8 +130,8 @@ const ChartDrillContextMenu: FC<{
           </p>
           <CheckOutlined className="icon" />
         </StyledMenuSwitch>
-      </Menu.Item>
-    );
+      ),
+    };
   }, [drillOption?.isSelectedDrill, t]);
 
   const drillThroughRules = useMemo(() => {
@@ -148,99 +150,101 @@ const ChartDrillContextMenu: FC<{
     hasDrillThroughSetting ||
     hasViewDetailSetting;
 
-  const contextMenu = useMemo(() => {
-    return (
-      <StyledChartDrillMenu
-        onClick={({ key }) => {
-          if (drillOption && key === 'selectDrillStatus') {
-            drillOption?.toggleSelectedDrill(!drillOption?.isSelectedDrill);
-            onDrillOptionChange?.(drillOption);
-          } else if (drillOption && key === DrillMode.Drill) {
-            drillOption?.drillDown();
-            onDrillOptionChange?.(drillOption);
-          } else if (drillOption && key === DrillMode.Expand) {
-            drillOption?.expandDown();
-            onDrillOptionChange?.(drillOption);
-          } else if (drillOption && key === 'rollUp') {
-            drillOption?.rollUp();
-            onDrillOptionChange?.(drillOption);
-          } else if (key.includes('drillThrough')) {
-            onDrillThroughChange?.(key.split(DATARTSEPERATOR)?.[1]);
-          } else if (key === 'viewData') {
-            onViewDataChange?.();
-          } else if (key === 'crossFiltering') {
-            onCrossFilteringChange?.();
-          }
-        }}
-      >
-        {onDrillThroughChange && hasDrillThroughSetting && (
-          <Menu.SubMenu key={'drillThrough'} title={t('drillThrough')}>
-            {(drillThroughRules || []).map(rule => {
-              return (
-                <Menu.Item key={`drillThrough${DATARTSEPERATOR}${rule.id}`}>
-                  {rule?.name || rule.id}
-                </Menu.Item>
-              );
-            })}
-          </Menu.SubMenu>
-        )}
-        {onCrossFilteringChange && hasCrossFiltering && (
-          <Menu.Item key={'crossFiltering'}>{t('crossFiltering')}</Menu.Item>
-        )}
-        {onViewDataChange && hasViewDetailSetting && (
-          <Menu.Item key={'viewData'}>{t('viewData')}</Menu.Item>
-        )}
-        {drillOption && drillOption?.getCurrentDrillLevel() > 0 && (
-          <Menu.Item key={'rollUp'}>{t('rollUp')}</Menu.Item>
-        )}
-        {drillOption &&
-          drillOption?.mode !== DrillMode.Expand &&
-          !drillOption?.isBottomLevel && (
-            <Menu.Item key={DrillMode.Drill}>{t('showNextLevel')}</Menu.Item>
-          )}
-        {drillOption &&
-          drillOption?.mode !== DrillMode.Drill &&
-          !drillOption?.isBottomLevel && (
-            <Menu.Item key={DrillMode.Expand}>{t('expandNextLevel')}</Menu.Item>
-          )}
-        {drillOption &&
-          drillOption?.mode !== DrillMode.Expand &&
-          drillOption?.isDrillable &&
-          selectDrillStatusMenu}
-        {runtimeDateLevelFields
-          ?.filter(
-            f =>
-              f.type === DataViewFieldType.DATE &&
-              [
-                ChartDataViewFieldCategory.Field,
-                ChartDataViewFieldCategory.DateLevelComputedField,
-              ].includes(f.category),
-          )
-          ?.map((v, i) => {
-            const config = v[RUNTIME_DATE_LEVEL_KEY] || v;
-            return (
-              <Menu.SubMenu
-                key={i}
-                title={handleDateLevelsName({
-                  ...config,
-                  name: config.colName,
-                })}
-              >
-                <DateLevelMenuItems
-                  metas={metas}
-                  availableSourceFunctions={availableSourceFunctions}
-                  config={config}
-                  onChange={handleDateLevelChange}
-                />
-              </Menu.SubMenu>
-            );
-          })}
-      </StyledChartDrillMenu>
-    );
+  const contextMenuItems = useMemo<MenuProps['items']>(() => {
+    return [
+      ...(onDrillThroughChange && hasDrillThroughSetting
+        ? [
+            {
+              key: 'drillThrough',
+              label: t('drillThrough'),
+              children: (drillThroughRules || []).map(rule => ({
+                key: `drillThrough${DATARTSEPERATOR}${rule.id}`,
+                label: rule?.name || rule.id,
+              })),
+            },
+          ]
+        : []),
+      ...(onCrossFilteringChange && hasCrossFiltering
+        ? [
+            {
+              key: 'crossFiltering',
+              label: t('crossFiltering'),
+            },
+          ]
+        : []),
+      ...(onViewDataChange && hasViewDetailSetting
+        ? [
+            {
+              key: 'viewData',
+              label: t('viewData'),
+            },
+          ]
+        : []),
+      ...(drillOption && drillOption?.getCurrentDrillLevel() > 0
+        ? [
+            {
+              key: 'rollUp',
+              label: t('rollUp'),
+            },
+          ]
+        : []),
+      ...(drillOption &&
+      drillOption?.mode !== DrillMode.Expand &&
+      !drillOption?.isBottomLevel
+        ? [
+            {
+              key: DrillMode.Drill,
+              label: t('showNextLevel'),
+            },
+          ]
+        : []),
+      ...(drillOption &&
+      drillOption?.mode !== DrillMode.Drill &&
+      !drillOption?.isBottomLevel
+        ? [
+            {
+              key: DrillMode.Expand,
+              label: t('expandNextLevel'),
+            },
+          ]
+        : []),
+      ...(drillOption &&
+      drillOption?.mode !== DrillMode.Expand &&
+      drillOption?.isDrillable
+        ? [selectDrillStatusMenu]
+        : []),
+      ...(runtimeDateLevelFields
+        ?.filter(
+          f =>
+            f.type === DataViewFieldType.DATE &&
+            [
+              ChartDataViewFieldCategory.Field,
+              ChartDataViewFieldCategory.DateLevelComputedField,
+            ].includes(f.category),
+        )
+        ?.map((v, i) => {
+          const config = v[RUNTIME_DATE_LEVEL_KEY] || v;
+          return {
+            key: `dateLevel-${i}`,
+            label: handleDateLevelsName({
+              ...config,
+              name: config.colName,
+            }),
+            children: buildDateLevelMenuItems({
+              metas,
+              availableSourceFunctions,
+              config,
+              onChange: handleDateLevelChange,
+              t: td,
+            }),
+          };
+        }) || []),
+    ];
   }, [
     onDrillThroughChange,
     metas,
     t,
+    td,
     drillThroughRules,
     onCrossFilteringChange,
     hasCrossFiltering,
@@ -255,11 +259,47 @@ const ChartDrillContextMenu: FC<{
     hasDrillThroughSetting,
   ]);
 
+  const handleMenuClick = useCallback(
+    ({ key }) => {
+      if (drillOption && key === 'selectDrillStatus') {
+        drillOption?.toggleSelectedDrill(!drillOption?.isSelectedDrill);
+        onDrillOptionChange?.(drillOption);
+      } else if (drillOption && key === DrillMode.Drill) {
+        drillOption?.drillDown();
+        onDrillOptionChange?.(drillOption);
+      } else if (drillOption && key === DrillMode.Expand) {
+        drillOption?.expandDown();
+        onDrillOptionChange?.(drillOption);
+      } else if (drillOption && key === 'rollUp') {
+        drillOption?.rollUp();
+        onDrillOptionChange?.(drillOption);
+      } else if (String(key).includes('drillThrough')) {
+        onDrillThroughChange?.(String(key).split(DATARTSEPERATOR)?.[1]);
+      } else if (key === 'viewData') {
+        onViewDataChange?.();
+      } else if (key === 'crossFiltering') {
+        onCrossFilteringChange?.();
+      }
+    },
+    [
+      drillOption,
+      onCrossFilteringChange,
+      onDrillOptionChange,
+      onDrillThroughChange,
+      onViewDataChange,
+    ],
+  );
+
   return (
     <StyledChartDrill className="chart-drill-menu-container">
       <Dropdown
         disabled={!enableContextMenu}
-        dropdownRender={() => contextMenu}
+        dropdownRender={() => (
+          <StyledChartDrillMenu
+            items={contextMenuItems}
+            onClick={handleMenuClick}
+          />
+        )}
         destroyPopupOnHide={true}
         trigger={['contextMenu']}
       >

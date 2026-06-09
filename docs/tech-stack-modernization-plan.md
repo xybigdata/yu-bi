@@ -203,6 +203,8 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
 - 预处理日期层级菜单片段：`DateLevelMenuItems` 已从 JSX `Menu.Item` 切换到 `Menu items` 配置，保留默认值和日期层级计算字段切换逻辑。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
+- 预处理图表钻取右键菜单：`ChartDrillContextMenu` 已从 JSX `Menu.Item`/`Menu.SubMenu` 切换到 `Menu items` 配置，日期层级子菜单复用共享的 `buildDateLevelMenuItems`，保留钻取、联动、查看数据和日期层级切换逻辑。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
 
 预研结果：
 - Ant Design 相关调用点约 358 个文件，`visible`/`onVisibleChange`/`overlay`/`Menu.Item` 等 AntD 5 迁移热点分布广，不能直接大版本替换。

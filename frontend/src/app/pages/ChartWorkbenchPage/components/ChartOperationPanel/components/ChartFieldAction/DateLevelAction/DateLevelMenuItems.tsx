@@ -36,6 +36,90 @@ interface DateLevelMenuItemsProps {
   onChange;
 }
 
+export const buildDateLevelMenuItems = ({
+  availableSourceFunctions,
+  config,
+  metas,
+  onChange,
+  t,
+}: DateLevelMenuItemsProps & { t: (key: string) => any }): MenuProps['items'] => {
+  const handleChangeFn = selectedConfig => {
+    if (config.category === ChartDataViewFieldCategory.DateLevelComputedField) {
+      if (selectedConfig.category === ChartDataViewFieldCategory.Field) {
+        return onChange(
+          updateBy(config, draft => {
+            delete draft.expression;
+            delete draft.field;
+            draft.category = selectedConfig.category;
+            draft.colName = selectedConfig.colName;
+            draft[RUNTIME_DATE_LEVEL_KEY] = null;
+          }),
+        );
+      }
+
+      return onChange({
+        ...config,
+        colName: selectedConfig.colName,
+        expression: selectedConfig.expression,
+        [RUNTIME_DATE_LEVEL_KEY]: null,
+      });
+    } else {
+      if (
+        selectedConfig.category ===
+        ChartDataViewFieldCategory.DateLevelComputedField
+      ) {
+        return onChange(
+          updateBy(config, draft => {
+            draft.expression = selectedConfig.expression;
+            draft.field = config.colName;
+            draft.category =
+              ChartDataViewFieldCategory.DateLevelComputedField;
+            draft.colName = selectedConfig.colName;
+            draft[RUNTIME_DATE_LEVEL_KEY] = null;
+          }),
+        );
+      }
+    }
+  };
+
+  return [
+    {
+      key: 'defaultDateComputerField',
+      icon: !config.expression ? <CheckOutlined /> : '',
+      label: t('default'),
+      onClick: () => {
+        config.field &&
+          handleChangeFn({
+            category: ChartDataViewFieldCategory.Field,
+            colName: config.field,
+          });
+      },
+    },
+    ...DATE_LEVELS.map(item => {
+      if (!availableSourceFunctions?.includes(item.expression)) {
+        return null;
+      }
+      const configColName =
+        config.category === ChartDataViewFieldCategory.Field
+          ? config.colName
+          : config.field;
+      const row = getAllColumnInMeta(metas)?.find(v => v.name === configColName);
+      const expression = `${item.expression}(${FieldTemplate(row?.path)})`;
+      return {
+        key: expression,
+        icon: config.expression === expression ? <CheckOutlined /> : '',
+        label: item.name,
+        onClick: () =>
+          handleChangeFn({
+            category: ChartDataViewFieldCategory.DateLevelComputedField,
+            colName: configColName + DATE_LEVEL_DELIMITER + item.expression,
+            expression,
+          }),
+      };
+    }).filter(Boolean),
+  ];
+};
+
 const DateLevelMenuItems = memo(
   ({
     availableSourceFunctions,
@@ -44,95 +128,17 @@ const DateLevelMenuItems = memo(
     onChange,
   }: DateLevelMenuItemsProps) => {
     const t = useI18NPrefix(`viz.workbench.dataview`);
-    const handleChangeFn = useCallback(
-      selectedConfig => {
-        /**
-         * If the current category is DateLevelComputedField
-         */
-        if (
-          config.category === ChartDataViewFieldCategory.DateLevelComputedField
-        ) {
-          /**
-           * If default is selected
-           */
-          if (selectedConfig.category === ChartDataViewFieldCategory.Field) {
-            return onChange(
-              updateBy(config, draft => {
-                delete draft.expression;
-                delete draft.field;
-                draft.category = selectedConfig.category;
-                draft.colName = selectedConfig.colName;
-                draft[RUNTIME_DATE_LEVEL_KEY] = null;
-              }),
-            );
-          }
-
-          return onChange({
-            ...config,
-            colName: selectedConfig.colName,
-            expression: selectedConfig.expression,
-            [RUNTIME_DATE_LEVEL_KEY]: null,
-          });
-        } else {
-          /**
-           * If the current category is Field, only the selected category is judged to be DateLevelComputedField
-           */
-          if (
-            selectedConfig.category ===
-            ChartDataViewFieldCategory.DateLevelComputedField
-          ) {
-            return onChange(
-              updateBy(config, draft => {
-                draft.expression = selectedConfig.expression;
-                draft.field = config.colName;
-                draft.category =
-                  ChartDataViewFieldCategory.DateLevelComputedField;
-                draft.colName = selectedConfig.colName;
-                draft[RUNTIME_DATE_LEVEL_KEY] = null;
-              }),
-            );
-          }
-        }
-      },
-      [config, onChange],
-    );
-
-    const items: MenuProps['items'] = [
-      {
-        key: 'defaultDateComputerField',
-        icon: !config.expression ? <CheckOutlined /> : '',
-        label: t('default'),
-        onClick: () => {
-          config.field &&
-            handleChangeFn({
-              category: ChartDataViewFieldCategory.Field,
-              colName: config.field,
-            });
-        },
-      },
-      ...DATE_LEVELS.map(item => {
-        if (!availableSourceFunctions?.includes(item.expression)) {
-          return null;
-        }
-        const configColName =
-          config.category === ChartDataViewFieldCategory.Field
-            ? config.colName
-            : config.field;
-        const row = getAllColumnInMeta(metas)?.find(v => v.name === configColName);
-        const expression = `${item.expression}(${FieldTemplate(row?.path)})`;
-        return {
-          key: expression,
-          icon: config.expression === expression ? <CheckOutlined /> : '',
-          label: item.name,
-          onClick: () =>
-            handleChangeFn({
-              category: ChartDataViewFieldCategory.DateLevelComputedField,
-              colName: configColName + DATE_LEVEL_DELIMITER + item.expression,
-              expression,
-            }),
-        };
-      }).filter(Boolean),
-    ];
+    const items = useCallback(
+      () =>
+        buildDateLevelMenuItems({
+          availableSourceFunctions,
+          config,
+          metas,
+          onChange,
+          t,
+        }),
+      [availableSourceFunctions, config, metas, onChange, t],
+    )();
 
     return <Menu selectable={false} items={items} />;
   },
