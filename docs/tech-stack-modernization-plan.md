@@ -222,6 +222,8 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 - React Router 预迁移第三批：`AppRouter`、`MainPage` 以及成员、来源、调度、权限子页中的 `Route component=` / 简单 `render=` 已切换到 children element 写法；图表编辑路由改为局部组件内使用 `useLocation` 读取 query，保留原有导航与权限包装逻辑。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
+- React Router 预迁移第四批：`VizPage/Main` 的看板编辑路由已移除 `Route render=`，并将 `vizId` 读取从 `useRouteMatch` 切到 `useParams`；`frontend/src/app` 下 React Router 旧路由声明热点已收敛到 `Redirect` 与 `useHistory` 为主。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build` 均通过。
 
 验收门槛：
 - 全部路由可访问。

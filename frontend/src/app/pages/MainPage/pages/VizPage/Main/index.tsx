@@ -12,7 +12,7 @@ import {
   Switch,
   useHistory,
   useLocation,
-  useRouteMatch,
+  useParams,
 } from 'react-router-dom';
 import styled from 'styled-components/macro';
 import { LEVEL_1 } from 'styles/StyleConstants';
@@ -34,9 +34,7 @@ export function Main({ sliderVisible }: { sliderVisible: boolean }) {
   const { actions } = useVizSlice();
   const dispatch = useDispatch();
   const history = useHistory();
-  const {
-    params: { vizId },
-  } = useRouteMatch<{ vizId: string }>();
+  const { vizId } = useParams<{ vizId?: string }>();
   const location = useLocation();
   const vizs = useSelector(selectVizs);
   const storyboards = useSelector(selectStoryboards);
@@ -247,10 +245,9 @@ export function Main({ sliderVisible }: { sliderVisible: boolean }) {
       {!tabs.length && <EmptyFiller title={t('empty')} />}
 
       <Switch>
-        <Route
-          path="/organizations/:orgId/vizs/:vizId?/boardEditor"
-          render={() => <BoardEditor boardId={vizId} />}
-        />
+        <Route path="/organizations/:orgId/vizs/:vizId?/boardEditor">
+          {vizId && <BoardEditor boardId={vizId} />}
+        </Route>
       </Switch>
     </Wrapper>
   );
