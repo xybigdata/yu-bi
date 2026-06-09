@@ -1,9 +1,12 @@
 import { FC, ReactNode } from 'react';
-import { Route, type RouteProps } from 'app/routerCompat';
+import { Route } from 'app/routerCompat';
 
-export interface CompatRouteProps
-  extends Omit<RouteProps, 'children' | 'component'> {
+type CompatRoutePath = string | readonly string[];
+
+export interface CompatRouteProps {
   element: ReactNode;
+  path?: CompatRoutePath;
+  exact?: boolean;
 }
 
 export const CompatRoute: FC<CompatRouteProps> = ({ element, ...routeProps }) => {

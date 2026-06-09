@@ -1,12 +1,13 @@
 import { FC, useEffect } from 'react';
-import { type RouteProps } from 'app/routerCompat';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 
 interface CompatRedirectProps {
   to: string;
+  path?: string | readonly string[];
+  exact?: boolean;
 }
 
-export const CompatRedirect: FC<CompatRedirectProps & RouteProps> = ({
+export const CompatRedirect: FC<CompatRedirectProps> = ({
   to,
   path,
   exact,
