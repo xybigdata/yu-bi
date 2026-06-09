@@ -838,11 +838,10 @@
 
 ### fastjson 后续残留重点
 
-- 当前后端剩余较集中的 `fastjson` 使用，主要在：
-  - `server/src/main/java/datart/server/service/impl/UserServiceImpl.java`
-  - `server/src/main/java/datart/server/service/impl/ExternalRegisterServiceImpl.java`
-- 这两处目前都只是把 Spring OAuth 返回的属性 `Map` 包成 `JSONObject` 供下游字段读取，属于低风险残留。
-- 另外测试代码里仍有 `org.json` 使用，后续可以和服务端最后一批低风险收口一起清理。
+- 2026-06-09 当前状态：后端生产代码中的 `fastjson` 使用点已经清零。
+- 目前剩余的是测试代码中的 `org.json` 使用，例如：
+  - `security/src/test/java/datart/security/test/jwt/JwkSetCreator.java`
+- 这部分不再阻塞后端生产主链从 `fastjson` 退出，但后续仍建议和 JWT 技术栈统一时一起清理。
 
 ### 并行治理：HTTP JSON 解析与 widget 配置链切到 Jackson
 
@@ -859,3 +858,9 @@
 - `data-providers/data-provider-base/src/main/java/datart/data/provider/calcite/StructScriptProcessor.java` 已改为复用 `StructScript.ofScript()`，脚本模型解析入口收敛为单点。
 - `data-providers/jdbc-data-provider/src/main/java/datart/data/provider/jdbc/adapters/JdbcDataProviderAdapter.java` 生成 query key 时，`includeColumns` 与 `pageInfo` 的 JSON 序列化已从 `fastjson` 切到 Jackson。
 - 2026-06-09 验证：`mvn -pl server -am -DskipTests compile` 通过。
+
+### 并行治理：清理服务端最后两处 fastjson 低风险残留
+
+- `server/src/main/java/datart/server/service/impl/UserServiceImpl.java` 与 `server/src/main/java/datart/server/service/impl/ExternalRegisterServiceImpl.java` 已不再把 `OAuth2User.getAttributes()` 包成 `fastjson JSONObject`，而是直接对原始属性 `Map` 使用 `JsonPath.read(...)`。
+- 这一步完成后，后端生产代码中的 `fastjson` 使用面已经收口为 0，后续只剩测试代码中的 `org.json` 残留需要按优先级处理。
+- 2026-06-09 验证：`mvn -pl server -am -DskipTests compile` 通过；对 `security/src/main/java`、`server/src/main/java`、`data-providers/*/src/main/java`、`core/src/main/java` 的 `fastjson` 检索结果为空。

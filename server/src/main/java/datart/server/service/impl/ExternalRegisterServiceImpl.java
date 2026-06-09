@@ -18,7 +18,6 @@
 
 package datart.server.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.jayway.jsonpath.JsonPath;
 import datart.core.base.exception.Exceptions;
 import datart.core.base.exception.ParamException;
@@ -122,13 +121,13 @@ public class ExternalRegisterServiceImpl implements ExternalRegisterService {
         }
 
         String emailMapping = getProperty(String.format("spring.security.oauth2.client.provider.%s.userMapping.email", oauthAuthToken.getAuthorizedClientRegistrationId()));
-        JSONObject jsonObj = new JSONObject(oauthUser.getAttributes());
+        Object attributeDocument = oauthUser.getAttributes();
 
         UserRegisterParam userRegisterParam = new UserRegisterParam();
         userRegisterParam.setUsername(oauthUser.getName());
         userRegisterParam.setPassword(RandomStringUtils.randomAscii(32));
         if (emailMapping != null) {
-            userRegisterParam.setEmail(JsonPath.read(jsonObj, emailMapping));
+            userRegisterParam.setEmail(JsonPath.read(attributeDocument, emailMapping));
         }
         if (userService.register(userRegisterParam, false)) {
             PasswordToken passwordToken = new PasswordToken(userRegisterParam.getUsername(),

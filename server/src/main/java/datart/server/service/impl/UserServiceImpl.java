@@ -18,7 +18,6 @@
 
 package datart.server.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.jayway.jsonpath.JsonPath;
 import datart.core.base.consts.Const;
 import datart.core.base.consts.TenantManagementMode;
@@ -374,21 +373,21 @@ public class UserServiceImpl extends BaseService implements UserService {
         String emailMapping = getProperty(String.format("spring.security.oauth2.client.provider.%s.userMapping.email", oauthAuthToken.getAuthorizedClientRegistrationId()));
         String nameMapping = getProperty(String.format("spring.security.oauth2.client.provider.%s.userMapping.name", oauthAuthToken.getAuthorizedClientRegistrationId()));
         String avatarMapping = getProperty(String.format("spring.security.oauth2.client.provider.%s.userMapping.avatar", oauthAuthToken.getAuthorizedClientRegistrationId()));
-        JSONObject jsonObj = new JSONObject(oauthUser.getAttributes());
+        Object attributeDocument = oauthUser.getAttributes();
 
         user.setId(UUIDGenerator.generate());
         user.setCreateBy(user.getId());
         user.setCreateTime(new Date());
-        user.setName(JsonPath.read(jsonObj, nameMapping));
+        user.setName(JsonPath.read(attributeDocument, nameMapping));
         user.setUsername(oauthUser.getName());
         user.setActive(true);
         //todo: oauth2登录后需要设置随机密码，此字段作为密文，显然无法对应原文，即不会有任何密码对应以下值
         user.setPassword(BCrypt.hashpw("xxx", BCrypt.gensalt()));
         if (emailMapping != null) {
-            user.setEmail(JsonPath.read(jsonObj, emailMapping));
+            user.setEmail(JsonPath.read(attributeDocument, emailMapping));
         }
         if (avatarMapping != null) {
-            user.setAvatar(JsonPath.read(jsonObj, avatarMapping));
+            user.setAvatar(JsonPath.read(attributeDocument, avatarMapping));
         }
         int insert = userMapper.insert(user);
         if (insert > 0) {
