@@ -2,7 +2,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import React from 'react';
 import { Resizable } from 'react-resizable';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { BLUE, LEVEL_1 } from 'styles/StyleConstants';
 
 export const TableComponentsTd = ({
@@ -86,19 +86,19 @@ const ResizableHandleStyle = styled.span`
 const Td = styled.td<any>`
   ${p =>
     p.isLinkCell
-      ? `
-    :hover {
-      color: ${BLUE};
-      cursor: pointer;
-    }
-    `
+      ? css({
+          ':hover': {
+            color: BLUE,
+            cursor: 'pointer',
+          },
+        })
       : p.isJumpCell
-      ? `
-        :hover {
-          color: ${BLUE};
-          cursor: pointer;
-          text-decoration: underline;
-        }
-      `
+      ? css({
+          ':hover': {
+            color: BLUE,
+            textDecoration: 'underline',
+            cursor: 'pointer',
+          },
+        })
       : null}
 `;

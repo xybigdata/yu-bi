@@ -1165,6 +1165,12 @@
 - `frontend/src/app/pages/NotFoundPage/__tests__/__snapshots__/index.test.tsx.snap` 已删除，不再保留无效 snapshot 噪音。
 - `frontend/package.json` 与 lockfile 已移除 `react-test-renderer`、`@types/react-test-renderer`，前端测试栈进一步收口到 `@testing-library/* + jest` 单一路径。
 
+### 并行治理：更新 Stylelint 的 CSS-in-JS 语法栈
+
+- `frontend/.stylelintrc.json` 已把 JS/TS 文件的 `customSyntax` 从 `@stylelint/postcss-css-in-js` 切到 `postcss-styled-syntax`，收口到 `styled-components` 的库专用语法解析。
+- 同时把原先仅由 `stylelint-config-styled-components` 提供的少量规则直接内联进本地配置，不再依赖这个历史配置包。
+- `frontend/package.json` 与 lockfile 已移除 `@stylelint/postcss-css-in-js`、`postcss-syntax`、`stylelint-config-prettier`、`stylelint-config-styled-components`，并新增 `postcss-styled-syntax`。
+
 ### 并行治理：测试执行入口脱离 `craco test`
 
 - `frontend/package.json` 的 `test` 脚本已从 `craco test` 切到 `jest --config jest.config.js`。
