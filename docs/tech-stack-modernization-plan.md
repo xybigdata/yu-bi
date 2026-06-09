@@ -197,6 +197,8 @@
 - 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
 - 预处理仪表板组件操作菜单：Widget 更多操作菜单已从 `dropdownRender` + JSX `Menu.Item` 切换到 `Dropdown menu.items`，保留分割线、危险态、禁用态和点击动作。
 - 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
+- 预处理仪表板更多操作菜单：`BoardDropdownList` 已从 JSX `Menu.Item`/`Menu.Divider` 切换到 `Menu items` 配置，保留分享、下载确认、发布、另存、添加故事板和归档动作。
+- 2026-06-09 验证：`npm run checkTs`、`npm run build`、`npm run build:task` 均通过。
 
 预研结果：
 - Ant Design 相关调用点约 358 个文件，`visible`/`onVisibleChange`/`overlay`/`Menu.Item` 等 AntD 5 迁移热点分布广，不能直接大版本替换。
