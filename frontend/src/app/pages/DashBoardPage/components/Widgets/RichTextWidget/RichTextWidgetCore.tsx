@@ -22,6 +22,9 @@ import {
 } from 'app/components/ChartGraph/BasicRichText/RichTextPluginLoader/CustomColor';
 import { ImageDropModule } from 'app/components/ChartGraph/BasicRichText/modules/ImageDropModule';
 import MarkdownModule from 'app/components/ChartGraph/BasicRichText/modules/MarkdownModule';
+import RichTextEditor, {
+  RichTextEditorHandle,
+} from 'app/components/ChartGraph/BasicRichText/RichTextEditor';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { WidgetInfo } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { editBoardStackActions } from 'app/pages/DashBoardPage/pages/BoardEditor/slice';
@@ -39,10 +42,7 @@ import React, {
 // DeltaStatic
 import 'react-quill/dist/quill.snow.css';
 import { useAppDispatch } from 'app/hooks/useRedux';
-import ReactQuill, {
-  DeltaStatic,
-  Quill,
-} from 'app/components/ChartGraph/BasicRichText/quillCompat';
+import { DeltaStatic, Quill } from 'app/components/ChartGraph/BasicRichText/quillCompat';
 import styled from 'styled-components';
 import { SPACE_TIMES } from 'styles/StyleConstants';
 import { WidgetActionContext } from '../../ActionProvider/WidgetActionProvider';
@@ -157,7 +157,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
     setQuillModules(modules);
   }, [widgetInfo.id]);
 
-  const quillRef = useRef<ReactQuill>(null);
+  const quillRef = useRef<RichTextEditorHandle>(null);
 
   useLayoutEffect(() => {
     if (quillRef.current) {
@@ -250,7 +250,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
 
   return (
     <TextWrap onClick={ssp}>
-      <ReactQuill
+      <RichTextEditor
         className="react-quill"
         value={initContent}
         modules={{ toolbar: null }}
@@ -275,7 +275,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
         {quillModules && (
           <ModalBody>
             {toolbar}
-            <ReactQuill
+            <RichTextEditor
               ref={quillRef}
               className="react-quill"
               placeholder={t('viz.board.setting.enterHere')}

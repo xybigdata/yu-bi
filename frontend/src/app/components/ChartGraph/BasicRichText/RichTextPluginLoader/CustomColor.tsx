@@ -4,7 +4,7 @@ import ChromeColorPicker from 'app/components/ColorPicker/ChromeColorPicker';
 import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
 import { ReactNode } from 'react';
 import styled from 'styled-components';
-import ReactQuill from '../quillCompat';
+import type { RichTextEditorHandle } from '../RichTextEditor';
 
 export interface RichTextCustomColorType {
   background: string;
@@ -30,7 +30,7 @@ interface QuillPaletteOptions {
  * 实际配置方式可参考 src/app/components/ChartGraph/BasicRichText/ChartRichTextAdapter.tsx
  */
 export class QuillPalette {
-  protected quillJS: ReactQuill;
+  protected quillJS: RichTextEditorHandle;
   protected options: QuillPaletteOptions;
   protected styleNode: HTMLStyleElement | null;
 
@@ -40,7 +40,7 @@ export class QuillPalette {
     color: '#000',
   };
 
-  constructor(quillJS, options = {} as QuillPaletteOptions) {
+  constructor(quillJS: RichTextEditorHandle, options = {} as QuillPaletteOptions) {
     this.quillJS = quillJS;
     this.options = options;
     this.styleNode = null;

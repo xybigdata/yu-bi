@@ -1,8 +1,7 @@
 import { prefixI18N } from 'app/hooks/useI18NPrefix';
-import ReactQuill, {
-  Quill,
-} from 'app/components/ChartGraph/BasicRichText/quillCompat';
 import { ImageDropModule } from 'app/components/ChartGraph/BasicRichText/modules/ImageDropModule';
+import RichTextEditor from 'app/components/ChartGraph/BasicRichText/RichTextEditor';
+import { Quill } from 'app/components/ChartGraph/BasicRichText/quillCompat';
 import { FC, ReactNode } from 'react';
 import 'react-quill/dist/quill.snow.css';
 import styled from 'styled-components';
@@ -40,7 +39,7 @@ export const CommonRichText: FC<CommonRichTextProps> = ({
 }) => {
   return (
     <ReactQuillWrapper>
-      <ReactQuill
+      <RichTextEditor
         theme="snow"
         placeholder={placeholder}
         formats={Formats}

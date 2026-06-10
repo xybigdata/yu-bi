@@ -36,7 +36,8 @@ import styled from 'styled-components';
 import { BLUE } from 'styles/StyleConstants';
 import './RichTextPluginLoader';
 import MarkdownModule from './modules/MarkdownModule';
-import ReactQuill, { DeltaStatic, Quill } from './quillCompat';
+import RichTextEditor, { RichTextEditorHandle } from './RichTextEditor';
+import { DeltaStatic, Quill } from './quillCompat';
 import { ImageDropModule } from './modules/ImageDropModule';
 import { CustomColor, QuillPalette } from './RichTextPluginLoader/CustomColor';
 import {
@@ -80,8 +81,8 @@ const ChartRichTextAdapter: FC<{
     const [translate, setTranslate] = useState<DeltaStatic | string>('');
 
     const quillMarkdownConfigRef = useRef<any>(null);
-    const quillRef = useRef<ReactQuill>(null);
-    const quillEditRef = useRef<ReactQuill>(null);
+    const quillRef = useRef<RichTextEditorHandle>(null);
+    const quillEditRef = useRef<RichTextEditorHandle>(null);
 
     const [customColorVisible, setCustomColorVisible] =
       useState<boolean>(false);
@@ -206,7 +207,7 @@ const ChartRichTextAdapter: FC<{
     const reactQuillView = useMemo(
       () =>
         (!isEditing || open) && (
-          <ReactQuill
+          <RichTextEditor
             ref={quillRef}
             className="react-quill-view"
             placeholder=""
@@ -306,7 +307,7 @@ const ChartRichTextAdapter: FC<{
         isEditing && (
           <>
             {toolbar}
-            <ReactQuill
+            <RichTextEditor
               ref={quillEditRef}
               className="react-quill"
               placeholder={t?.('viz.board.setting.enterHere')}
