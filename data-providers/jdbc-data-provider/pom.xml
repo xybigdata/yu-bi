@@ -20,9 +20,8 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid</artifactId>
-            <version>${druid.version}</version>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
             <scope>compile</scope>
         </dependency>
     </dependencies>

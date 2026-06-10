@@ -339,9 +339,14 @@
   - 目标方案：统一认证、鉴权、remember-me、OAuth2 登录和过滤器链到 Spring Security 体系。
   - 前提：JWT、OAuth 客户端、分享页认证链已经稳定。
 - 数据源专项：`Druid -> HikariCP`
-  - 当前证据：仓库内 `druid` 使用面约 `21` 处，但集中在 server 主数据源和 JDBC provider 工厂，属于“使用面不大、耦合度不低”的典型专项。
+  - 当前证据：原始使用面主要集中在 server 主数据源和 JDBC provider 工厂，属于“使用面不大、耦合度不低”的典型专项。
   - 目标方案：服务端主链统一池化到 HikariCP，仅在确有必要的 provider 子域保留局部适配层。
-  - 前提：多数据源配置、监控项、连接参数语义和 JDBC provider 行为全部盘清。
+  - 2026-06-10 最新推进：`server/pom.xml` 已移除 `druid-spring-boot-3-starter`，demo 配置不再显式指定 `com.alibaba.druid.pool.DruidDataSource`；`datart-jdbc-data-provider` 已把 `DataSourceFactoryDruidImpl` 替换为 `DataSourceFactoryHikariImpl`，并切换到 `HikariCP` 依赖。
+  - 最新验收证据：
+    - `mvn -pl data-providers/jdbc-data-provider -am -DskipTests compile`
+    - `mvn -pl server -am -DskipTests compile`
+    两条主编译链均已通过，证明当前第一批迁移没有打断 JDBC provider 和 server 主运行时构建。
+  - 下一步重点：补充启动级验证，继续确认 demo profile、数据库迁移链和连接参数语义没有出现行为回退。
 - 脚本专项：`Nashorn -> GraalJS`
   - 当前证据：脚本引擎相关使用面约 `8` 处，当前核心实现集中在 [JavascriptUtils.java](/Users/chencongyu/WorkHome/VSProjects/open-project/datart/core/src/main/java/datart/core/common/JavascriptUtils.java:1)。
   - 目标方案：先建立自有脚本执行边界，再替换底层引擎实现。
@@ -1617,9 +1622,10 @@
    - 本仓库判断：Shiro 不是“坏掉了”，但它已经属于架构级历史包袱；适合单列安全专项，而不是在基础库升级时顺手搀带。
 
 2. `Druid 1.2.28`
-   - 当前状态：服务端主数据源和 JDBC provider 仍使用 Druid。
+   - 当前状态：这一项已开始退出。服务端主数据源已回到 Spring Boot 默认连接池选择策略，JDBC provider 也已切到本地 `DataSourceFactoryHikariImpl`。
    - 更现代替代：主方向仍是 HikariCP 统一池化。
-   - 本仓库判断：连接池迁移会影响监控、连接参数和多数据源工厂，不适合拆成微小提交，必须作为独立基础设施主题推进。
+   - 2026-06-10 最新推进：`server` 已移除 `druid-spring-boot-3-starter`，`datart-jdbc-data-provider` 已移除 `druid` 依赖并改接 `HikariCP`。
+   - 本仓库判断：迁移已经从“前置设计”进入“正式落地第一批”；剩余工作主要是启动级验证和参数语义回归，而不是再停留在专项评估。
 
 3. `nashorn-core 15.4`
    - 当前状态：脚本执行与表达式能力仍依赖 Nashorn 兼容层。
@@ -1678,11 +1684,12 @@
    - `reveal.js 6.x` 保持当前版本，但继续确认编辑、预览、分享页行为。
 5. 后端长期专项
    - `Shiro -> Spring Security`
-   - `Druid -> HikariCP`
    - `Nashorn -> GraalJS`
 6. 代码生成链专项
    - 继续把 `mybatis-generator-core` 维持在独立 profile / 工具链内，默认运行时不再直接携带。
    - 后续若仍需保留生成能力，再单独评估是否升级生成器版本和驱动适配。
+7. 数据源迁移收尾
+   - 在当前已切到 Hikari 的基础上，继续补齐服务启动、demo profile、数据库迁移链和连接参数映射验证。
 
 ### 并行治理：删除 CRACO 回退外壳
 
