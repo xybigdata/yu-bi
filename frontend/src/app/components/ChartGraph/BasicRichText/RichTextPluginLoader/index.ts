@@ -1,8 +1,33 @@
 import type { Quill as QuillInstance, RangeStatic } from 'quill';
+import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
+import { ImageDropModule } from '../modules/ImageDropModule';
 import { Quill } from '../quillCompat';
 import CalcFieldBlot from './CalcFieldBlot';
+import TagBlot from './TagBlot';
 
-Quill.register(CalcFieldBlot);
+let pluginsRegistered = false;
+
+function registerRichTextPlugins() {
+  if (pluginsRegistered) {
+    return;
+  }
+
+  Quill.register(CalcFieldBlot);
+  Quill.register('modules/imageDrop', ImageDropModule);
+  Quill.register('formats/tag', TagBlot);
+
+  const size = Quill.import('attributors/style/size');
+  size.whitelist = FONT_SIZES.map(fontSize => `${fontSize}px`);
+  Quill.register(size, true);
+
+  const font = Quill.import('attributors/style/font');
+  font.whitelist = FONT_FAMILIES.map(font => font.value);
+  Quill.register(font, true);
+
+  pluginsRegistered = true;
+}
+
+registerRichTextPlugins();
 
 const Keys = {
   TAB: 9,

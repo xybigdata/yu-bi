@@ -18,7 +18,6 @@
 
 import { SelectOutlined } from '@ant-design/icons';
 import { Button, Dropdown, MenuProps, Modal, Row } from 'antd';
-import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
 import debounce from 'lodash/debounce';
 import {
   FC,
@@ -36,24 +35,12 @@ import styled from 'styled-components';
 import { BLUE } from 'styles/StyleConstants';
 import './RichTextPluginLoader';
 import RichTextEditor, { RichTextEditorHandle } from './RichTextEditor';
-import { DeltaStatic, Quill } from './quillCompat';
-import { ImageDropModule } from './modules/ImageDropModule';
+import { DeltaStatic } from './quillCompat';
 import { CustomColor, QuillPalette } from './RichTextPluginLoader/CustomColor';
 import {
   Formats,
   MarkdownOptions,
 } from './RichTextPluginLoader/RichTextConfig';
-import TagBlot from './RichTextPluginLoader/TagBlot';
-
-Quill.register('modules/imageDrop', ImageDropModule);
-Quill.register('formats/tag', TagBlot);
-const size = Quill.import('attributors/style/size');
-size.whitelist = FONT_SIZES.map(fontSize => `${fontSize}px`);
-Quill.register(size, true);
-
-const font = Quill.import('attributors/style/font');
-font.whitelist = FONT_FAMILIES.map(font => font.value);
-Quill.register(font, true);
 
 const ChartRichTextAdapter: FC<{
   dataList: Array<{ id: string | undefined; name: string; value: string }>;

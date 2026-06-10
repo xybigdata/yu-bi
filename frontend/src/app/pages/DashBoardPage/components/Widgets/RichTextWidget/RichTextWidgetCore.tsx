@@ -16,11 +16,11 @@
  * limitations under the License.
  */
 import { Modal } from 'antd';
+import 'app/components/ChartGraph/BasicRichText/RichTextPluginLoader';
 import {
   CustomColor,
   QuillPalette,
 } from 'app/components/ChartGraph/BasicRichText/RichTextPluginLoader/CustomColor';
-import { ImageDropModule } from 'app/components/ChartGraph/BasicRichText/modules/ImageDropModule';
 import RichTextEditor, {
   RichTextEditorHandle,
 } from 'app/components/ChartGraph/BasicRichText/RichTextEditor';
@@ -41,13 +41,11 @@ import React, {
 // DeltaStatic
 import 'react-quill/dist/quill.snow.css';
 import { useAppDispatch } from 'app/hooks/useRedux';
-import { DeltaStatic, Quill } from 'app/components/ChartGraph/BasicRichText/quillCompat';
+import { DeltaStatic } from 'app/components/ChartGraph/BasicRichText/quillCompat';
 import styled from 'styled-components';
 import { SPACE_TIMES } from 'styles/StyleConstants';
 import { WidgetActionContext } from '../../ActionProvider/WidgetActionProvider';
 import { Formats, MarkdownOptions } from './config';
-
-Quill.register('modules/imageDrop', ImageDropModule);
 
 type RichTextWidgetProps = {
   widget: Widget;
