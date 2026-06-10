@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Quill from 'quill';
+import { Quill } from '../quillCompat';
 
 const Embed = Quill.import('blots/embed');
 class CalcFieldBlot extends Embed {

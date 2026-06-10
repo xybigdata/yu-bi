@@ -25,7 +25,6 @@ import { WidgetInfo } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { editBoardStackActions } from 'app/pages/DashBoardPage/pages/BoardEditor/slice';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
 import produce from 'immer';
-import { DeltaStatic } from 'quill';
 import { ImageDrop } from 'quill-image-drop-module'; // 拖动加载图片组件。
 import QuillMarkdown from 'quilljs-markdown';
 import 'quilljs-markdown/dist/quilljs-markdown-common-style.css';
@@ -38,10 +37,13 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import ReactQuill, { Quill } from 'react-quill';
 // DeltaStatic
 import 'react-quill/dist/quill.snow.css';
 import { useAppDispatch } from 'app/hooks/useRedux';
+import ReactQuill, {
+  DeltaStatic,
+  Quill,
+} from 'app/components/ChartGraph/BasicRichText/quillCompat';
 import styled from 'styled-components';
 import { SPACE_TIMES } from 'styles/StyleConstants';
 import { WidgetActionContext } from '../../ActionProvider/WidgetActionProvider';

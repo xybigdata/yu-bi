@@ -20,7 +20,6 @@ import { SelectOutlined } from '@ant-design/icons';
 import { Button, Dropdown, MenuProps, Modal, Row } from 'antd';
 import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
 import debounce from 'lodash/debounce';
-import { DeltaStatic } from 'quill';
 import { ImageDrop } from 'quill-image-drop-module'; // 拖动加载图片组件。
 // NOTE: source from: https://github.com/cloverhearts/quilljs-markdown
 import QuillMarkdown from 'quilljs-markdown';
@@ -34,12 +33,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.bubble.css';
 import 'react-quill/dist/quill.core.css';
 import styled from 'styled-components';
 import { BLUE } from 'styles/StyleConstants';
 import './RichTextPluginLoader';
+import ReactQuill, { DeltaStatic, Quill } from './quillCompat';
 import { CustomColor, QuillPalette } from './RichTextPluginLoader/CustomColor';
 import {
   Formats,

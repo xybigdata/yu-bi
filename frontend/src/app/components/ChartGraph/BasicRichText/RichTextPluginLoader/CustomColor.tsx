@@ -3,8 +3,8 @@ import { defaultPalette, defaultThemes } from 'app/assets/theme/colorsConfig';
 import ChromeColorPicker from 'app/components/ColorPicker/ChromeColorPicker';
 import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
 import { ReactNode } from 'react';
-import ReactQuill from 'react-quill';
 import styled from 'styled-components';
+import ReactQuill from '../quillCompat';
 
 export interface RichTextCustomColorType {
   background: string;

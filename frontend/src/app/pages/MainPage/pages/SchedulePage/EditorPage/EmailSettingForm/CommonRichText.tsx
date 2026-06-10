@@ -1,8 +1,9 @@
 import { prefixI18N } from 'app/hooks/useI18NPrefix';
-import Quill from 'quill';
+import ReactQuill, {
+  Quill,
+} from 'app/components/ChartGraph/BasicRichText/quillCompat';
 import { ImageDrop } from 'quill-image-drop-module';
 import { FC, ReactNode } from 'react';
-import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import styled from 'styled-components';
 Quill.register('modules/imageDrop', ImageDrop);

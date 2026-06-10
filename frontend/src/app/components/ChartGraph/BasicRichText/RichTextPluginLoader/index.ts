@@ -1,5 +1,5 @@
 //@ts-nocheck
-import Quill from 'quill';
+import { Quill } from '../quillCompat';
 import CalcFieldBlot from './CalcFieldBlot';
 
 Quill.register(CalcFieldBlot);

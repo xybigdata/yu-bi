@@ -1,4 +1,4 @@
-import { Quill } from 'react-quill';
+import { Quill } from '../quillCompat';
 
 const Embed = Quill.import('blots/embed');
 class TagBlot extends Embed {
