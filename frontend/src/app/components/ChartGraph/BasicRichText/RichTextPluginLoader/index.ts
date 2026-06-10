@@ -1,204 +1,134 @@
-//@ts-nocheck
+import type { Quill as QuillInstance, RangeStatic } from 'quill';
 import { Quill } from '../quillCompat';
 import CalcFieldBlot from './CalcFieldBlot';
 
 Quill.register(CalcFieldBlot);
-function _classCallCheck(instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError('Cannot call a class as a function');
-  }
-}
 
-function _defineProperties(target, props) {
-  for (var i = 0; i < props.length; i++) {
-    var descriptor = props[i];
-    descriptor.enumerable = descriptor.enumerable || false;
-    descriptor.configurable = true;
-    if ('value' in descriptor) descriptor.writable = true;
-    Object.defineProperty(target, descriptor.key, descriptor);
-  }
-}
-
-function _createClass(Constructor, protoProps, staticProps) {
-  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
-  if (staticProps) _defineProperties(Constructor, staticProps);
-  return Constructor;
-}
-
-function _extends() {
-  const _extends =
-    Object.assign ||
-    function (target) {
-      for (var i = 1; i < arguments.length; i++) {
-        var source = arguments[i];
-
-        for (var key in source) {
-          if (Object.prototype.hasOwnProperty.call(source, key)) {
-            target[key] = source[key];
-          }
-        }
-      }
-
-      return target;
-    };
-
-  return _extends.apply(this, arguments);
-}
-
-function _unsupportedIterableToArray(o, minLen) {
-  if (!o) return;
-  if (typeof o === 'string') return _arrayLikeToArray(o, minLen);
-  var n = Object.prototype.toString.call(o).slice(8, -1);
-  if (n === 'Object' && o.constructor) n = o.constructor.name;
-  if (n === 'Map' || n === 'Set') return Array.from(o);
-  if (n === 'Arguments' || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n))
-    return _arrayLikeToArray(o, minLen);
-}
-
-function _arrayLikeToArray(arr, len) {
-  if (len == null || len > arr.length) len = arr.length;
-
-  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
-
-  return arr2;
-}
-
-function _createForOfIteratorHelper(o, allowArrayLike) {
-  var it;
-
-  if (typeof Symbol === 'undefined' || o[Symbol.iterator] == null) {
-    if (
-      Array.isArray(o) ||
-      (it = _unsupportedIterableToArray(o)) ||
-      (allowArrayLike && o && typeof o.length === 'number')
-    ) {
-      if (it) o = it;
-      var i = 0;
-
-      var F = function () {};
-
-      return {
-        s: F,
-        n: function () {
-          if (i >= o.length)
-            return {
-              done: true,
-            };
-          return {
-            done: false,
-            value: o[i++],
-          };
-        },
-        e: function (e) {
-          throw e;
-        },
-        f: F,
-      };
-    }
-
-    throw new TypeError(
-      'Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.',
-    );
-  }
-
-  var normalCompletion = true,
-    didErr = false,
-    err;
-  return {
-    s: function () {
-      it = o[Symbol.iterator]();
-    },
-    n: function () {
-      var step = it.next();
-      normalCompletion = step.done;
-      return step;
-    },
-    e: function (e) {
-      didErr = true;
-      err = e;
-    },
-    f: function () {
-      try {
-        if (!normalCompletion && it.return != null) it.return();
-      } finally {
-        if (didErr) throw err;
-      }
-    },
-  };
-}
-
-var Keys = {
+const Keys = {
   TAB: 9,
   ENTER: 13,
   ESCAPE: 27,
   UP: 38,
   DOWN: 40,
+} as const;
+
+type CalcFieldData = Record<string, any>;
+const defaultDataAttributes = [
+  'id',
+  'value',
+  'denotationChar',
+  'link',
+  'target',
+  'disabled',
+  'viewId',
+  'model',
+  'text',
+  'agg',
+  'size',
+  'font-size',
+];
+
+type SourceExecutionToken = {
+  abandoned: boolean;
 };
 
-function getFieldCharIndex(text, numberFieldDenotationChars) {
+type AllowedCharsResolver =
+  | RegExp
+  | ((denotationChar: string) => RegExp);
+
+type CalcFieldSource = (
+  searchTerm: string,
+  renderList: (data: CalcFieldData[], searchTerm?: string) => void,
+  denotationChar: string,
+) => void;
+
+type CalcFieldOptions = {
+  source: CalcFieldSource | null;
+  numberFieldDenotationChars: string[];
+  showDenotationChar: boolean;
+  allowedChars: AllowedCharsResolver;
+  minChars: number;
+  maxChars: number;
+  offsetTop: number;
+  offsetLeft: number;
+  isolateCharacter: boolean;
+  fixFieldsToQuill: boolean;
+  positioningStrategy: 'normal' | string;
+  defaultMenuOrientation: 'bottom' | 'top' | string;
+  blotName: string;
+  dataAttributes: string[];
+  linkTarget: string;
+  spaceAfterInsert: boolean;
+  selectKeys: number[];
+};
+
+function getFieldCharIndex(
+  text: string,
+  numberFieldDenotationChars: string[],
+) {
   return numberFieldDenotationChars.reduce(
-    function (prev, numberFieldChar) {
-      var numberFieldCharIndex = text.lastIndexOf(numberFieldChar);
+    (prev, numberFieldChar) => {
+      const numberFieldCharIndex = text.lastIndexOf(numberFieldChar);
 
       if (numberFieldCharIndex > prev.numberFieldCharIndex) {
         return {
-          numberFieldChar: numberFieldChar,
-          numberFieldCharIndex: numberFieldCharIndex,
+          numberFieldChar,
+          numberFieldCharIndex,
         };
       }
 
-      return {
-        numberFieldChar: prev.numberFieldChar,
-        numberFieldCharIndex: prev.numberFieldCharIndex,
-      };
+      return prev;
     },
     {
-      numberFieldChar: null,
+      numberFieldChar: null as string | null,
       numberFieldCharIndex: -1,
     },
   );
 }
 
-function hasValidChars(text, allowedChars) {
+function hasValidChars(text: string, allowedChars: RegExp) {
   return allowedChars.test(text);
 }
 
-function hasValidFieldCharIndex(numberFieldCharIndex, text, isolateChar) {
-  if (numberFieldCharIndex > -1) {
-    if (
-      isolateChar &&
-      !(
-        numberFieldCharIndex === 0 ||
-        !!text[numberFieldCharIndex - 1].match(/\s/g)
-      )
-    ) {
-      return false;
-    }
-
-    return true;
+function hasValidFieldCharIndex(
+  numberFieldCharIndex: number,
+  text: string,
+  isolateChar: boolean,
+) {
+  if (numberFieldCharIndex <= -1) {
+    return false;
   }
 
-  return false;
+  if (
+    isolateChar &&
+    !(
+      numberFieldCharIndex === 0 ||
+      Boolean(text[numberFieldCharIndex - 1]?.match(/\s/g))
+    )
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
-var CalcField = (function () {
-  function CalcField(quill, options) {
-    var _this = this;
+class CalcField {
+  private existingSourceExecutionToken: SourceExecutionToken | null = null;
+  private numberFieldCharPos: number | null = null;
+  private cursorPos: number | null = null;
+  private readonly options: CalcFieldOptions;
+  private readonly quill: QuillInstance;
 
-    _classCallCheck(this, CalcField);
-
-    this.isOpen = false;
-    this.itemIndex = 0;
-    this.numberFieldCharPos = null;
-    this.cursorPos = null;
-    this.values = [];
-    this.suspendMouseEnter = false; //this token is an object that may contains one key "abandoned", set to
-    //true when the previous source call should be ignored in favor or a
-    //more recent execution.  This token will be null unless a source call
-    //is in progress.
-
-    this.existingSourceExecutionToken = null;
+  constructor(quill: QuillInstance, options: Partial<CalcFieldOptions> = {}) {
     this.quill = quill;
+    const dataAttributes = Array.isArray(options.dataAttributes)
+      ? [...defaultDataAttributes, ...options.dataAttributes]
+      : defaultDataAttributes;
+    const mergedOptions = {
+      ...options,
+      dataAttributes,
+    };
+
     this.options = {
       source: null,
       numberFieldDenotationChars: ['@'],
@@ -213,204 +143,162 @@ var CalcField = (function () {
       positioningStrategy: 'normal',
       defaultMenuOrientation: 'bottom',
       blotName: 'calcfield',
-      dataAttributes: [
-        'id',
-        'value',
-        'denotationChar',
-        'link',
-        'target',
-        'disabled',
-        'viewId',
-        'model',
-        'text',
-        'agg',
-        'size',
-        'font-size',
-      ],
       linkTarget: '_blank',
-
-      // Style options
       spaceAfterInsert: true,
       selectKeys: [Keys.ENTER],
+      ...mergedOptions,
     };
-    _extends(this.options, options, {
-      dataAttributes: Array.isArray(options.dataAttributes)
-        ? this.options.dataAttributes.concat(options.dataAttributes)
-        : this.options.dataAttributes,
-    }); //create calcfield container
 
-    quill.on('text-change', this.onTextChange.bind(this));
-    quill.on('selection-change', this.onSelectionChange.bind(this)); //Pasting doesn't fire selection-change after the pasted text is
-    //inserted, so here we manually trigger one
+    quill.on('text-change', this.onTextChange);
+    quill.on('selection-change', this.onSelectionChange);
+    (quill as any).container.addEventListener('paste', this.handlePaste);
 
-    quill.container.addEventListener('paste', function () {
-      setTimeout(function () {
-        var range = quill.getSelection();
-        _this.onSelectionChange(range);
+    this.options.selectKeys.forEach(selectKey => {
+      (quill.keyboard as any).addBinding({
+        key: selectKey,
       });
     });
+  }
 
-    var _iterator = _createForOfIteratorHelper(this.options.selectKeys),
-      _step;
+  insertItem(data: CalcFieldData | null, programmaticInsert?: boolean) {
+    if (data === null || this.cursorPos === null) {
+      return;
+    }
 
-    try {
-      for (_iterator.s(); !(_step = _iterator.n()).done; ) {
-        var selectKey = _step.value;
-        quill.keyboard.addBinding({
-          key: selectKey,
-        });
-      }
-    } catch (err) {
-      _iterator.e(err);
-    } finally {
-      _iterator.f();
+    const render = { ...data };
+
+    if (!this.options.showDenotationChar) {
+      render.denotationChar = '';
+    }
+
+    let insertAtPos: number;
+    if (!programmaticInsert && this.numberFieldCharPos !== null) {
+      insertAtPos = this.numberFieldCharPos;
+      this.quill.deleteText(
+        this.numberFieldCharPos,
+        this.cursorPos - this.numberFieldCharPos,
+        'user',
+      );
+    } else {
+      insertAtPos = this.cursorPos;
+    }
+
+    this.quill.insertEmbed(
+      insertAtPos,
+      this.options.blotName,
+      render,
+      'user',
+    );
+
+    if (this.options.spaceAfterInsert) {
+      this.quill.insertText(insertAtPos + 1, ' ', 'user');
+      this.quill.setSelection(insertAtPos + 2, 0, 'user');
+    } else {
+      this.quill.setSelection(insertAtPos + 1, 0, 'user');
     }
   }
 
-  _createClass(CalcField, [
-    {
-      key: 'insertItem',
-      value: function insertItem(data, programmaticInsert) {
-        var render = data;
+  private getTextBeforeCursor() {
+    const cursorPos = this.cursorPos ?? 0;
+    const startPos = Math.max(0, cursorPos - this.options.maxChars);
+    return this.quill.getText(startPos, cursorPos - startPos);
+  }
 
-        if (render === null) {
+  private readonly handlePaste = () => {
+    setTimeout(() => {
+      this.onSelectionChange(this.quill.getSelection());
+    });
+  };
+
+  private readonly onSomethingChange = () => {
+    const range = this.quill.getSelection();
+    if (!range) {
+      return;
+    }
+
+    this.cursorPos = range.index;
+    const textBeforeCursor = this.getTextBeforeCursor();
+    const { numberFieldChar, numberFieldCharIndex } = getFieldCharIndex(
+      textBeforeCursor,
+      this.options.numberFieldDenotationChars,
+    );
+
+    if (
+      !numberFieldChar ||
+      !hasValidFieldCharIndex(
+        numberFieldCharIndex,
+        textBeforeCursor,
+        this.options.isolateCharacter,
+      )
+    ) {
+      return;
+    }
+
+    const numberFieldCharPos =
+      this.cursorPos - (textBeforeCursor.length - numberFieldCharIndex);
+    this.numberFieldCharPos = numberFieldCharPos;
+
+    const textAfter = textBeforeCursor.substring(
+      numberFieldCharIndex + numberFieldChar.length,
+    );
+
+    if (
+      textAfter.length < this.options.minChars ||
+      !hasValidChars(textAfter, this.getAllowedCharsRegex(numberFieldChar))
+    ) {
+      return;
+    }
+
+    if (!this.options.source) {
+      return;
+    }
+
+    if (this.existingSourceExecutionToken) {
+      this.existingSourceExecutionToken.abandoned = true;
+    }
+
+    const sourceRequestToken: SourceExecutionToken = {
+      abandoned: false,
+    };
+    this.existingSourceExecutionToken = sourceRequestToken;
+
+    this.options.source(
+      textAfter,
+      (_data, _searchTerm) => {
+        if (sourceRequestToken.abandoned) {
           return;
         }
 
-        if (!this.options.showDenotationChar) {
-          render.denotationChar = '';
-        }
-
-        var insertAtPos;
-
-        if (!programmaticInsert) {
-          insertAtPos = this.numberFieldCharPos;
-          this.quill.deleteText(
-            this.numberFieldCharPos,
-            this.cursorPos - this.numberFieldCharPos,
-            Quill.sources.USER,
-          );
-        } else {
-          insertAtPos = this.cursorPos;
-        }
-
-        this.quill.insertEmbed(
-          insertAtPos,
-          this.options.blotName,
-          render,
-          Quill.sources.USER,
-        );
-
-        if (this.options.spaceAfterInsert) {
-          this.quill.insertText(insertAtPos + 1, ' ', Quill.sources.USER); // setSelection here sets cursor position
-
-          this.quill.setSelection(insertAtPos + 2, Quill.sources.USER);
-        } else {
-          this.quill.setSelection(insertAtPos + 1, Quill.sources.USER);
-        }
+        this.existingSourceExecutionToken = null;
       },
-    },
-    {
-      key: 'getTextBeforeCursor',
-      value: function getTextBeforeCursor() {
-        var startPos = Math.max(0, this.cursorPos - this.options.maxChars);
-        var textBeforeCursorPos = this.quill.getText(
-          startPos,
-          this.cursorPos - startPos,
-        );
-        return textBeforeCursorPos;
-      },
-    },
-    {
-      key: 'onSomethingChange',
-      value: function onSomethingChange() {
-        var _this5 = this;
+      numberFieldChar,
+    );
+  };
 
-        var range = this.quill.getSelection();
-        if (range == null) return;
-        this.cursorPos = range.index;
-        var textBeforeCursor = this.getTextBeforeCursor();
+  private getAllowedCharsRegex(denotationChar: string) {
+    if (this.options.allowedChars instanceof RegExp) {
+      return this.options.allowedChars;
+    }
 
-        var _getFieldCharIndex = getFieldCharIndex(
-            textBeforeCursor,
-            this.options.numberFieldDenotationChars,
-          ),
-          numberFieldChar = _getFieldCharIndex.numberFieldChar,
-          numberFieldCharIndex = _getFieldCharIndex.numberFieldCharIndex;
+    return this.options.allowedChars(denotationChar);
+  }
 
-        if (
-          hasValidFieldCharIndex(
-            numberFieldCharIndex,
-            textBeforeCursor,
-            this.options.isolateCharacter,
-          )
-        ) {
-          var numberFieldCharPos =
-            this.cursorPos - (textBeforeCursor.length - numberFieldCharIndex);
-          this.numberFieldCharPos = numberFieldCharPos;
-          var textAfter = textBeforeCursor.substring(
-            numberFieldCharIndex + numberFieldChar.length,
-          );
+  private readonly onTextChange = (
+    _delta: unknown,
+    _oldDelta: unknown,
+    source: string,
+  ) => {
+    if (source === 'user') {
+      this.onSomethingChange();
+    }
+  };
 
-          if (
-            textAfter.length >= this.options.minChars &&
-            hasValidChars(textAfter, this.getAllowedCharsRegex(numberFieldChar))
-          ) {
-            if (this.existingSourceExecutionToken) {
-              this.existingSourceExecutionToken.abandoned = true;
-            }
-
-            var sourceRequestToken = {
-              abandoned: false,
-            };
-            this.existingSourceExecutionToken = sourceRequestToken;
-            this.options.source(
-              textAfter,
-              function (data, searchTerm) {
-                if (sourceRequestToken.abandoned) {
-                  return;
-                }
-
-                _this5.existingSourceExecutionToken = null;
-              },
-              numberFieldChar,
-            );
-          } else {
-          }
-        } else {
-        }
-      },
-    },
-    {
-      key: 'getAllowedCharsRegex',
-      value: function getAllowedCharsRegex(denotationChar) {
-        if (this.options.allowedChars instanceof RegExp) {
-          return this.options.allowedChars;
-        } else {
-          return this.options.allowedChars(denotationChar);
-        }
-      },
-    },
-    {
-      key: 'onTextChange',
-      value: function onTextChange(delta, oldDelta, source) {
-        if (source === 'user') {
-          this.onSomethingChange();
-        }
-      },
-    },
-    {
-      key: 'onSelectionChange',
-      value: function onSelectionChange(range) {
-        if (range && range.length === 0) {
-          this.onSomethingChange();
-        }
-      },
-    },
-  ]);
-
-  return CalcField;
-})();
+  private readonly onSelectionChange = (range: RangeStatic | null) => {
+    if (range && range.length === 0) {
+      this.onSomethingChange();
+    }
+  };
+}
 
 Quill.register('modules/calcfield', CalcField);
 export default CalcField;

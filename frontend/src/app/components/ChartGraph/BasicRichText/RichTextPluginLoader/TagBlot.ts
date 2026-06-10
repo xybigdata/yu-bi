@@ -17,12 +17,10 @@ class TagBlot extends Embed {
     node.setAttribute('data-color', color);
     node.setAttribute('contenteditable', 'false');
 
-    var nodeSpan = document.createElement('span');
+    const nodeSpan = document.createElement('span');
 
     nodeSpan.textContent = name;
     node.appendChild(nodeSpan);
-
-    node.addEventListener('click', event => {});
     return node;
   }
   static value(node): any {

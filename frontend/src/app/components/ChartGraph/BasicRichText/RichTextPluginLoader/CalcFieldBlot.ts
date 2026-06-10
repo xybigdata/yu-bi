@@ -18,6 +18,12 @@
 import { Quill } from '../quillCompat';
 
 const Embed = Quill.import('blots/embed');
+
+type CalcFieldEvent = Event & {
+  value?: Record<string, any>;
+  event?: MouseEvent;
+};
+
 class CalcFieldBlot extends Embed {
   static blotName = 'calcfield';
   static tagName = 'span';
@@ -31,10 +37,8 @@ class CalcFieldBlot extends Embed {
         const event = new Event('mention-clicked', {
           bubbles: true,
           cancelable: true,
-        });
-        // @ts-ignore
+        }) as CalcFieldEvent;
         event.value = data;
-        // @ts-ignore
         event.event = e;
         window.dispatchEvent(event);
         e.preventDefault();
@@ -43,16 +47,16 @@ class CalcFieldBlot extends Embed {
     );
     const denotationChar = document.createElement('span');
     denotationChar.className = 'ql-calcfield-denotation-char';
-    denotationChar.innerHTML = data.denotationChar;
+    denotationChar.textContent = data.denotationChar;
     node.appendChild(denotationChar);
-    node.innerHTML += data.text;
+    node.appendChild(document.createTextNode(data.text || ''));
     return CalcFieldBlot.setDataValues(node, data);
   }
 
   static setDataValues(element, data) {
     const domNode = element;
     Object.keys(data).forEach(key => {
-      domNode.dataset[key] = data[key];
+      domNode.dataset[key] = String(data[key] ?? '');
     });
     return domNode;
   }
