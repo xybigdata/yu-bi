@@ -261,7 +261,7 @@
   - `frontend/package.json` 中的直接 `moment` 依赖已移除，`npm ls moment` 当前为空。
   - 当前剩余问题主要集中在两类：
     1. `rc-picker` 在 lockfile 中仍保留可选 peer 声明；
-    2. `task` 独立打包链的历史产物与源码当前状态不一致，`frontend/public/task/index.js` 仍可见旧 `moment` bundle 片段，需要单独排查 `build:task` 构建链。
+    2. `task` 独立打包链已完成复核：`rollup-plugin-cleanup` 在 Node 26 下会让 `build:task` 长时间挂起并留下旧产物；移除后 `frontend/public/task/index.js` 已重新生成并切到 `dayjs`。
 - 完成定义
   - 前端生产代码检索 `moment` 结果清零，且项目自身依赖声明退出。
   - `task` 独立打包链重新生成后的产物与当前源码一致，不再携带旧 `moment` bundle。
@@ -313,7 +313,7 @@
 | 类别 | 当前栈 | 当前状态 | 现代化替代方案 | 优先级 |
 | --- | --- | --- | --- | --- |
 | 前端 UI 基座 | `antd 5.26.x` | 已进入当前稳定主线，仍需做页面级回归与 compat 壳清理 | 保持 5.x 稳定线，暂不追 6.x | 已完成主升级，持续稳定化 |
-| 时间体系 | `moment` | 生产代码直连调用已清零，项目直接依赖已退出；剩余阻塞在 `task` 独立打包链旧产物与上游可选 peer 声明 | 全面迁到 `dayjs`，仅在控件值类型阶段做局部适配 | 高 |
+| 时间体系 | `moment` | 生产代码直连调用已清零，项目直接依赖已退出；任务页产物也已切到 `dayjs`，剩余仅是上游可选 peer 声明与少量值链回归 | 全面迁到 `dayjs`，仅在控件值类型阶段做局部适配 | 高 |
 | 富文本 | `react-quill 1.3.5` + `quilljs-markdown` | 偏旧，且仓库内使用面约 `110` 处，改动半径大 | 优先评估 `react-quill 2.x` / Quill 2 原生封装 | 高 |
 | 代码编辑器 | `react-monaco-editor 0.59.0` | 已退出；改为仓库自有 Monaco React 适配层 | 直接基于 `monaco-editor` 维护自有适配组件 | 已完成 |
 | 故事播放 | `reveal.js 6.0.1` | 已在较新稳定线，短期无需继续追大版本 | 保持当前主线，长期再评估 React 原生故事方案 | 低 |
@@ -392,9 +392,9 @@
 结合当前真实基线、依赖使用面和回归成本，下一批升级不建议继续追 Router 7 或 AntD 6，而应按下面顺序推进：
 
 1. `moment -> dayjs`
-   - 原因：源码和直接依赖层已经基本收口，当前最值得优先排查的是 `task` 独立打包链为什么仍生成旧 `moment` bundle。
-   - 收益：可以把时间体系迁移从“主应用已完成”推进到“连任务页产物也完全一致”。
-   - 风险：除了 DatePicker / RangePicker、控制器配置、分享页和变量页回归外，还要额外验证 `npm run build:task` 的真实输出链。
+   - 原因：源码、直接依赖和任务页产物都已经收口，剩余工作主要是继续压缩值对象链与回归边界。
+   - 收益：可以把时间体系迁移从“主要链路完成”推进到“专题级收尾”。
+   - 风险：DatePicker / RangePicker、控制器配置、分享页和变量页仍需要持续定向回归。
 
 2. 富文本内核现代化
    - 对象：`react-quill 1.3.5`、`quilljs-markdown`
@@ -1146,10 +1146,10 @@
    - 风险判断：这批升级已完成；当前剩余风险主要是测试输出里少量 React warning，与 `styled-components` 版本升级本身无关。
 
 4. `moment`
-   - 现状：前端生产代码中的直接 `moment` 调用已清零，项目直接依赖也已退出；剩余问题是 `task` 独立打包链产物仍出现旧 `moment` 片段，以及少量局部值对象链仍需继续回归。
+   - 现状：前端生产代码中的直接 `moment` 调用已清零，项目直接依赖也已退出；`task` 独立打包链产物也已重新生成到 `dayjs`，剩余问题主要是少量局部值对象链继续回归。
    - 更现代替代：`dayjs`、`date-fns`，或结合 AntD 5 时间适配策略重构。
    - 调研结论：Moment 官方文档明确标注项目已进入 maintenance mode，属于典型“还能用，但不建议新项目继续扩展”的库。
-   - 风险判断：当前已具备按专题继续收尾的条件，但不能只看主应用源码；还要重点复核 `build:task` 产物、DatePicker / RangePicker、控制器配置、分享页和变量页。
+   - 风险判断：当前已具备按专题继续收尾的条件；重点应继续放在 DatePicker / RangePicker、控制器配置、分享页和变量页。
 
 5. `react-app-polyfill`
    - 现状：此前仅剩运行时与测试 3 个入口的 `stable` 引用。
@@ -1584,10 +1584,10 @@
 #### A. 仍建议尽快推进的前端老旧栈
 
 1. `moment`
-   - 当前状态：前端生产代码中的直接调用已清零，项目直接依赖也已退出；当前主要阻塞是 `task` 独立打包链仍生成旧 `moment` bundle。
+   - 当前状态：前端生产代码中的直接调用已清零，项目直接依赖也已退出，`task` 独立打包链产物也已切到 `dayjs`。
    - 官方状态：Moment 官方已明确将项目定义为 maintenance mode，只保留稳定性与关键安全/时区数据维护，不再建议新项目继续扩展。
    - 更现代替代：`dayjs` 是最自然的低迁移成本替代；若后续要进一步走函数式与按需组合，也可以评估 `date-fns`。
-   - 本仓库判断：当前已经从“大面积散落依赖”进入“专题收尾阶段”，但还不能宣布完全退出；下一步应先把 `build:task` 构建链异常查实。
+   - 本仓库判断：当前已经从“大面积散落依赖”进入“专题收尾阶段”；下一步应继续压缩局部值对象链与边界回归。
 
 2. `react-quill 1.3.5`
    - 当前状态：富文本编辑与展示仍依赖旧版 `react-quill` / Quill 1 生态。
@@ -1655,7 +1655,7 @@
 #### D. 推荐的后续推进顺序
 
 1. `moment -> dayjs`
-   - 优先查清 `task` 独立打包链为什么仍生成旧 `moment` bundle，并继续收口局部值对象链。
+   - 继续收口局部值对象链，并保持 `build:task` / `build` / `checkTs` 同步回归。
    - 当前复核后的重点仍包括：
      - `frontend/src/app/pages/MainPage/pages/SchedulePage/types.ts`、`frontend/src/app/pages/MainPage/pages/SchedulePage/utils.ts`
      - `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types.ts`
