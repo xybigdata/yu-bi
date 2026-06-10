@@ -287,6 +287,7 @@
   - 当前状态：`react-quill 1.3.5`，仓库内 `react-quill` / `Quill` 使用面约 `110` 处。
   - 目标方案：优先评估 `react-quill 2.x`；若自定义 blot、toolbar、导出链和只读渲染不兼容，再评估 Quill 2 的其它 React 封装。
   - 执行策略：先抽出自定义 blot、颜色面板、只读适配层，再升级编辑器内核。
+  - 2026-06-10 最新推进：`RichTextEditorHandle` 已继续收口 markdown 模块构造与 calc field 插入能力；仪表板富文本组件中的重复 `selection-change` 监听已移除，统一复用 `QuillPalette` 处理颜色同步，并补上 markdown 模块的销毁生命周期。这一步继续压缩业务层对底层 Quill 实例细节的感知范围，为后续评估 `react-quill 2.x` / Quill 2 适配减少散点改动。
 - 视频
   - 当前状态：`video-react` 使用面约 `3` 处。
   - 目标方案：优先迁到原生 `<video>` + 轻量控制层，避免继续绑定老 React 包装库。
@@ -328,6 +329,10 @@
 | 看板历史记录 | `redux-undo` | 仍在使用，但功能面集中 | 可保留；若继续现代化，可评估 RTK reducer 历史层 | 中低 |
 | 网格布局 | `react-grid-layout` + `flexlayout-react` | `react-grid-layout` 是核心依赖；`flexlayout-react` 只在图表工作台局部使用 | 暂保留；出现 React 18/AntD5 兼容问题再专项治理 | 中低 |
 | 虚拟列表 | `react-window` | 使用面仅约 `2` 处，运行风险可控 | 若性能与 API 满足需求可保留 | 低 |
+| 测试栈 | `Jest 29 + babel-jest` | 当前稳定可用，但仍带 CRA 时代的转译心智，且与 Vite 主链分离 | 短期保持 Jest 29；后续二选一评估 Jest 30 或 Vitest | 中 |
+| task 独立打包链 | `Rollup 2` | 只服务 `build:task`，Node 26 下的挂起点已清除，但链路本身仍偏旧 | 中期评估迁到 Vite library mode 或较新 Rollup 主线 | 中 |
+| 代码规范链 | `ESLint 8` + `stylelint 14` + `Prettier 2` | 当前与 Node 26 兼容，但主版本都偏旧，且仍有存量 warning | 等富文本/时间体系稳定后，分批迁到 ESLint 9、stylelint 16、Prettier 3 | 中 |
+| 国际化 | `i18next 19` + `react-i18next 11` | 可运行，但版本偏旧 | 评估进入当前稳定主线，并结合 React 18 Suspense/类型签名复核 | 中低 |
 | 后端安全 | `Shiro 2` | 明显历史架构包袱，仓库使用面约 `71` 处 | `Spring Security` | 高，但单独专项 |
 | 后端连接池 | `Druid` | 历史包袱，且偏监控导向，仓库使用面约 `21` 处 | `HikariCP` | 高，但单独专项 |
 | 后端脚本引擎 | `Nashorn` | 已退场技术，当前直接使用面约 `8` 处 | `GraalJS` | 中高，单独专项 |
@@ -1687,17 +1692,26 @@
    - 目前外部 `quill-image-drop-module`、`quilljs-markdown` 都已退出，业务层也已切到本地 `RichTextEditor` 包装层；下一步重点改为核验本地 `MarkdownModule`、`RichTextEditor`、自定义 `TagBlot` / `CalcFieldBlot` 对 Quill 2 的兼容性，再决定是升 `react-quill 2.x` 还是直接切到别的 Quill 2 React 封装。
    - 在真正切 Quill 2 之前，继续把少量仍需直接透传底层实例的链路压缩到 `RichTextEditorHandle`，避免再次出现业务页散改。
    - 每次尝试升级前后，都至少回归 `npm run checkTs`、`npm run build`、`npm run build:task`。
-3. `styled-components 6` 稳定化复核
+3. 前端工具链老旧主版本治理
+   - 当前还偏旧但不应先于业务主链升级的项包括：
+     - `Jest 29 + babel-jest`
+     - `Rollup 2`
+     - `ESLint 8`
+     - `stylelint 14`
+     - `Prettier 2`
+     - `i18next 19` / `react-i18next 11`
+   - 这些栈都有更现代的替代或更高主线，但它们对业务功能的直接收益低于时间体系和富文本专题；更合理的顺序是先保持当前稳定，再分批做“工具链升级 + 存量 warning 清理 + 配置收口”。
+4. `styled-components 6` 稳定化复核
    - 补查 `shouldForwardProp`、iframe / popup target 和测试输出告警。
-4. 故事播放链路复核
+5. 故事播放链路复核
    - `reveal.js 6.x` 保持当前版本，但继续确认编辑、预览、分享页行为。
-5. 后端长期专项
+6. 后端长期专项
    - `Shiro -> Spring Security`
    - `Nashorn -> GraalJS`
-6. 代码生成链专项
+7. 代码生成链专项
    - 继续把 `mybatis-generator-core` 维持在独立 profile / 工具链内，默认运行时不再直接携带。
    - 后续若仍需保留生成能力，再单独评估是否升级生成器版本和驱动适配。
-7. 数据源迁移收尾
+8. 数据源迁移收尾
    - 在当前已切到 Hikari 且 demo 启动链已验证通过的基础上，继续补齐数据库迁移链、连接参数映射和 provider 行为专项回归。
 
 ### 并行治理：删除 CRACO 回退外壳

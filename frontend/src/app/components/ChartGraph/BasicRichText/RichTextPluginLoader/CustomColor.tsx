@@ -63,11 +63,15 @@ export class QuillPalette {
    */
   private selectionChange = (range: { index: number; length: number }) => {
     const { toolbarId, onChange } = this.options;
-    if (!range?.index) return;
+    if (!range || range.index < 0) return;
     if (!toolbarId) return;
     try {
       const index = range.length === 0 ? range.index - 1 : range.index;
       const length = range.length === 0 ? 1 : range.length;
+      if (index < 0) {
+        onChange({ ...QuillPalette.RICH_TEXT_CUSTOM_COLOR_INIT });
+        return;
+      }
       const delta = this.quillJS.getContents(index, length);
 
       if (delta.ops?.length === 1 && delta.ops[0]?.attributes) {

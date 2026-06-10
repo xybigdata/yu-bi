@@ -79,7 +79,7 @@ const ChartRichTextAdapter: FC<{
     const [quillValue, setQuillValue] = useState<DeltaStatic | string>('');
     const [translate, setTranslate] = useState<DeltaStatic | string>('');
 
-    const quillMarkdownConfigRef = useRef<any>(null);
+    const quillMarkdownConfigRef = useRef<{ destroy: () => void } | null>(null);
     const quillRef = useRef<RichTextEditorHandle>(null);
     const quillEditRef = useRef<RichTextEditorHandle>(null);
 
@@ -184,14 +184,19 @@ const ChartRichTextAdapter: FC<{
     useLayoutEffect(() => {
       if (quillEditRef.current) {
         if (openQuillMarkdown) {
+          quillMarkdownConfigRef.current?.destroy();
           quillMarkdownConfigRef.current =
             quillEditRef.current.createMarkdownModule(MarkdownOptions);
         } else {
-          if (quillMarkdownConfigRef.current) {
-            quillMarkdownConfigRef.current.destroy();
-          }
+          quillMarkdownConfigRef.current?.destroy();
+          quillMarkdownConfigRef.current = null;
         }
       }
+
+      return () => {
+        quillMarkdownConfigRef.current?.destroy();
+        quillMarkdownConfigRef.current = null;
+      };
     }, [openQuillMarkdown, quillModules]);
 
     const customColorChange = color => {

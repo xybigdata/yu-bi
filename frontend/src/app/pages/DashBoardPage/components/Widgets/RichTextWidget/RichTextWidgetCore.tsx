@@ -49,11 +49,6 @@ import { Formats, MarkdownOptions } from './config';
 
 Quill.register('modules/imageDrop', ImageDropModule);
 
-const CUSTOM_COLOR_INIT = {
-  background: 'transparent',
-  color: '#000',
-};
-
 type RichTextWidgetProps = {
   widget: Widget;
   widgetInfo: WidgetInfo;
@@ -76,6 +71,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
   );
   const [containerId, setContainerId] = useState<string>();
   const [quillModules, setQuillModules] = useState<any>(null);
+  const markdownModuleRef = useRef<{ destroy: () => void } | null>(null);
 
   const [customColorVisible, setCustomColorVisible] = useState<boolean>(false);
   const [customColor, setCustomColor] = useState<{
@@ -160,41 +156,15 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
 
   useLayoutEffect(() => {
     if (quillRef.current) {
-      quillRef.current.on('selection-change', (r: { index: number; length: number }) => {
-        if (!r?.index) return;
-        try {
-          const index = r.length === 0 ? r.index - 1 : r.index;
-          const length = r.length === 0 ? 1 : r.length;
-          const delta = quillRef.current!.getContents(index, length);
-
-          if (delta.ops?.length === 1 && delta.ops[0]?.attributes) {
-            const { background, color } = delta.ops[0].attributes;
-            setCustomColor({
-              background: background || CUSTOM_COLOR_INIT.background,
-              color: color || CUSTOM_COLOR_INIT.color,
-            });
-
-            const colorNode = document.querySelector(
-              '.ql-color .ql-color-label',
-            );
-            const backgroundNode = document.querySelector(
-              '.ql-background .ql-color-label',
-            );
-            if (color && !colorNode?.getAttribute('style')) {
-              colorNode!.setAttribute('style', `stroke: ${color}`);
-            }
-            if (background && !backgroundNode?.getAttribute('style')) {
-              backgroundNode!.setAttribute('style', `fill: ${background}`);
-            }
-          } else {
-            setCustomColor({ ...CUSTOM_COLOR_INIT });
-          }
-        } catch (error) {
-          console.error('selection-change callback | error', error);
-        }
-      });
-      quillRef.current.createMarkdownModule(MarkdownOptions);
+      markdownModuleRef.current?.destroy();
+      markdownModuleRef.current =
+        quillRef.current.createMarkdownModule(MarkdownOptions);
     }
+
+    return () => {
+      markdownModuleRef.current?.destroy();
+      markdownModuleRef.current = null;
+    };
   }, [quillModules]);
 
   useEffect(() => {

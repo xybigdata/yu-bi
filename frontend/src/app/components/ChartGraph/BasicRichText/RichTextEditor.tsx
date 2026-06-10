@@ -10,9 +10,7 @@ import ReactQuill from './quillCompat';
 
 export interface RichTextEditorHandle {
   blur: () => void;
-  createMarkdownModule: (
-    options?: Record<string, any>,
-  ) => { destroy: () => void };
+  createMarkdownModule: (options?: Record<string, any>) => MarkdownModule;
   focus: () => void;
   format: (name: string, value: unknown, source?: Sources) => DeltaStatic;
   getContents: (index?: number, length?: number) => DeltaStatic;
@@ -51,30 +49,31 @@ function RichTextEditorImpl(
 ) {
   const editorRef = useRef<ReactQuill>(null);
 
+  const getEditorInstance = () => editorRef.current!.getEditor();
+
   useImperativeHandle(
     ref,
     () => ({
       blur: () => editorRef.current?.blur(),
       createMarkdownModule: options =>
-        new MarkdownModule(editorRef.current!.getEditor(), options),
+        new MarkdownModule(getEditorInstance(), options),
       focus: () => editorRef.current?.focus(),
       format: (name, value, source) =>
-        editorRef.current!.getEditor().format(name, value, source),
+        getEditorInstance().format(name, value, source),
       getContents: (index, length) =>
         typeof index === 'number' && typeof length === 'number'
-          ? editorRef.current!.getEditor().getContents(index, length)
-          : editorRef.current!.getEditor().getContents(),
-      getEditor: () => editorRef.current!.getEditor(),
-      getModule: name => editorRef.current!.getEditor().getModule(name),
+          ? getEditorInstance().getContents(index, length)
+          : getEditorInstance().getContents(),
+      getEditor: () => getEditorInstance(),
+      getModule: name => getEditorInstance().getModule(name),
       insertCalcFieldItem: (item, programmaticInsert) =>
-        editorRef.current!
-          .getEditor()
+        getEditorInstance()
           .getModule('calcfield')
           .insertItem(item, programmaticInsert),
       off: (eventName, handler) =>
-        (editorRef.current!.getEditor() as any).off(eventName, handler),
+        (getEditorInstance() as any).off(eventName, handler),
       on: (eventName, handler) =>
-        (editorRef.current!.getEditor() as any).on(eventName, handler),
+        (getEditorInstance() as any).on(eventName, handler),
     }),
     [],
   );
