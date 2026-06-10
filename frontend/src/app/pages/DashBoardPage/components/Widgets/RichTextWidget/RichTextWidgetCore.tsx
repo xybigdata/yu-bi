@@ -21,7 +21,6 @@ import {
   QuillPalette,
 } from 'app/components/ChartGraph/BasicRichText/RichTextPluginLoader/CustomColor';
 import { ImageDropModule } from 'app/components/ChartGraph/BasicRichText/modules/ImageDropModule';
-import MarkdownModule from 'app/components/ChartGraph/BasicRichText/modules/MarkdownModule';
 import RichTextEditor, {
   RichTextEditorHandle,
 } from 'app/components/ChartGraph/BasicRichText/RichTextEditor';
@@ -194,7 +193,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
           console.error('selection-change callback | error', error);
         }
       });
-      new MarkdownModule(quillRef.current.getEditor(), MarkdownOptions);
+      quillRef.current.createMarkdownModule(MarkdownOptions);
     }
   }, [quillModules]);
 

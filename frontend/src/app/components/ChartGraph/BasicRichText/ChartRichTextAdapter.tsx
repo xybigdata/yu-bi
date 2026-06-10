@@ -35,7 +35,6 @@ import 'react-quill/dist/quill.core.css';
 import styled from 'styled-components';
 import { BLUE } from 'styles/StyleConstants';
 import './RichTextPluginLoader';
-import MarkdownModule from './modules/MarkdownModule';
 import RichTextEditor, { RichTextEditorHandle } from './RichTextEditor';
 import { DeltaStatic, Quill } from './quillCompat';
 import { ImageDropModule } from './modules/ImageDropModule';
@@ -185,10 +184,8 @@ const ChartRichTextAdapter: FC<{
     useLayoutEffect(() => {
       if (quillEditRef.current) {
         if (openQuillMarkdown) {
-          quillMarkdownConfigRef.current = new MarkdownModule(
-            quillEditRef.current.getEditor(),
-            MarkdownOptions,
-          );
+          quillMarkdownConfigRef.current =
+            quillEditRef.current.createMarkdownModule(MarkdownOptions);
         } else {
           if (quillMarkdownConfigRef.current) {
             quillMarkdownConfigRef.current.destroy();
@@ -225,7 +222,7 @@ const ChartRichTextAdapter: FC<{
         if (quillEditRef.current) {
           if (field) {
             const text = `[${field.name}]`;
-            quillEditRef.current.getModule('calcfield').insertItem(
+            quillEditRef.current.insertCalcFieldItem(
               {
                 denotationChar: '',
                 id: field.id,

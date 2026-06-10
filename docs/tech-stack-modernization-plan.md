@@ -1607,6 +1607,7 @@
    - 2026-06-10 最新推进：已新增本地兼容出口 `frontend/src/app/components/ChartGraph/BasicRichText/quillCompat.ts`，并把图表富文本、仪表板富文本、调度邮件富文本、自定义 blot 与 palette 的 `ReactQuill` / `Quill` / `DeltaStatic` 入口统一收口到这一层。
    - 2026-06-10 补充推进：已新增本地包装层 `frontend/src/app/components/ChartGraph/BasicRichText/RichTextEditor.tsx`，图表富文本、仪表板富文本、调度邮件富文本已不再直接依赖 `ReactQuill` 组件实例，而统一走仓库内 editor handle。
    - 2026-06-10 继续推进：`RichTextEditorHandle` 已补齐 `format`、`getContents`、`getModule`、`on`、`off` 等常用能力，图表富文本、仪表板富文本与自定义调色板不再散用 `getEditor()` 做基础操作。
+   - 2026-06-10 再次推进：`RichTextEditorHandle` 已继续补齐 `createMarkdownModule` 与 `insertCalcFieldItem`，图表富文本和仪表板富文本已不再直接 `new MarkdownModule(quill.getEditor(), ...)` 或直接操作 `calcfield` module。
    - 本轮收益：业务代码已不再直接依赖 `react-quill` / `quill` 包入口，同时 markdown、图片拖拽/粘贴模块都已切到仓库内维护实现；后续无论升级到 `react-quill 2.x`，还是改接 Quill 2 的其它 React 封装，都可以先在 compat 层、本地模块和 `RichTextEditor` 包装层上集中适配。
    - 更现代替代：优先评估 `react-quill` 2.x 或直接评估仍活跃维护的 Quill 2 React 封装。
    - 本仓库判断：它不一定要先于 AntD 5，但已经属于“仍能跑、后续应替换”的旧编辑器基座，尤其需要关注 React 18 严格模式与自定义 blot 扩展兼容性。
