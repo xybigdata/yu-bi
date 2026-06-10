@@ -21,13 +21,12 @@ import {
   QuillPalette,
 } from 'app/components/ChartGraph/BasicRichText/RichTextPluginLoader/CustomColor';
 import { ImageDropModule } from 'app/components/ChartGraph/BasicRichText/modules/ImageDropModule';
+import MarkdownModule from 'app/components/ChartGraph/BasicRichText/modules/MarkdownModule';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { WidgetInfo } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { editBoardStackActions } from 'app/pages/DashBoardPage/pages/BoardEditor/slice';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
 import produce from 'immer';
-import QuillMarkdown from 'quilljs-markdown';
-import 'quilljs-markdown/dist/quilljs-markdown-common-style.css';
 import React, {
   useCallback,
   useContext,
@@ -199,7 +198,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
             console.error('selection-change callback | error', error);
           }
         });
-      new QuillMarkdown(quillRef.current.getEditor(), MarkdownOptions);
+      new MarkdownModule(quillRef.current.getEditor(), MarkdownOptions);
     }
   }, [quillModules]);
 

@@ -20,8 +20,6 @@ import { SelectOutlined } from '@ant-design/icons';
 import { Button, Dropdown, MenuProps, Modal, Row } from 'antd';
 import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
 import debounce from 'lodash/debounce';
-// NOTE: source from: https://github.com/cloverhearts/quilljs-markdown
-import QuillMarkdown from 'quilljs-markdown';
 import {
   FC,
   memo,
@@ -37,6 +35,7 @@ import 'react-quill/dist/quill.core.css';
 import styled from 'styled-components';
 import { BLUE } from 'styles/StyleConstants';
 import './RichTextPluginLoader';
+import MarkdownModule from './modules/MarkdownModule';
 import ReactQuill, { DeltaStatic, Quill } from './quillCompat';
 import { ImageDropModule } from './modules/ImageDropModule';
 import { CustomColor, QuillPalette } from './RichTextPluginLoader/CustomColor';
@@ -185,7 +184,7 @@ const ChartRichTextAdapter: FC<{
     useLayoutEffect(() => {
       if (quillEditRef.current) {
         if (openQuillMarkdown) {
-          quillMarkdownConfigRef.current = new QuillMarkdown(
+          quillMarkdownConfigRef.current = new MarkdownModule(
             quillEditRef.current.getEditor(),
             MarkdownOptions,
           );
