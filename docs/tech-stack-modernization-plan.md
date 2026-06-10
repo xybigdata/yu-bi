@@ -341,12 +341,14 @@
 - 数据源专项：`Druid -> HikariCP`
   - 当前证据：原始使用面主要集中在 server 主数据源和 JDBC provider 工厂，属于“使用面不大、耦合度不低”的典型专项。
   - 目标方案：服务端主链统一池化到 HikariCP，仅在确有必要的 provider 子域保留局部适配层。
-  - 2026-06-10 最新推进：`server/pom.xml` 已移除 `druid-spring-boot-3-starter`，demo 配置不再显式指定 `com.alibaba.druid.pool.DruidDataSource`；`datart-jdbc-data-provider` 已把 `DataSourceFactoryDruidImpl` 替换为 `DataSourceFactoryHikariImpl`，并切换到 `HikariCP` 依赖。
+  - 2026-06-10 最新推进：`server/pom.xml` 已移除 `druid-spring-boot-3-starter`，`application-demo.yml` 与 `config/profiles/application-config.yml` 均不再显式指定 `com.alibaba.druid.pool.DruidDataSource`；`datart-jdbc-data-provider` 已把 `DataSourceFactoryDruidImpl` 替换为 `DataSourceFactoryHikariImpl`，并切换到 `HikariCP` 依赖。
   - 最新验收证据：
     - `mvn -pl data-providers/jdbc-data-provider -am -DskipTests compile`
     - `mvn -pl server -am -DskipTests compile`
-    两条主编译链均已通过，证明当前第一批迁移没有打断 JDBC provider 和 server 主运行时构建。
-  - 下一步重点：补充启动级验证，继续确认 demo profile、数据库迁移链和连接参数语义没有出现行为回退。
+    - `mvn -pl server -am -DskipTests package`
+    - `bash ./scripts/check-demo-health.sh`
+    编译、打包和基于安装包的 demo 健康检查均已通过，证明当前迁移没有打断 JDBC provider、server 主运行时构建和 demo 启动链。
+  - 下一步重点：继续补充多数据源参数语义、连接池监控诉求和 provider 级行为回归，而不是停留在主链可启动性验证。
 - 脚本专项：`Nashorn -> GraalJS`
   - 当前证据：脚本引擎相关使用面约 `8` 处，当前核心实现集中在 [JavascriptUtils.java](/Users/chencongyu/WorkHome/VSProjects/open-project/datart/core/src/main/java/datart/core/common/JavascriptUtils.java:1)。
   - 目标方案：先建立自有脚本执行边界，再替换底层引擎实现。
@@ -1170,9 +1172,9 @@
    - 风险判断：收益高，但改动面极大，必须晚于 JWT、HTTP、测试链和前端主栈收口。
 
 2. Druid 1.2.28
-   - 现状：服务端和 JDBC 数据源工厂仍依赖 Druid。
-   - 更现代替代：HikariCP 统一池化，或至少继续跟进 Druid 的 Boot 3 兼容稳定线。
-   - 风险判断：涉及连接池参数、监控和多数据源行为，不适合作为零散低风险批次。
+   - 现状：服务端主数据源已经移除 `druid-spring-boot-3-starter`，JDBC 数据源工厂也已切到 `DataSourceFactoryHikariImpl`；当前剩余工作不再是“是否迁移”，而是继续做参数语义和专项回归。
+   - 更现代替代：HikariCP 统一池化。
+   - 风险判断：连接池本身已经开始退出主运行时链，但多数据源参数语义、监控诉求和 provider 行为仍需要后续专项验证。
 
 3. `mybatis-generator-core 1.4.0`
    - 现状：仍在 `core` 中声明，但主要服务代码生成链，不是主运行时链。
@@ -1624,8 +1626,9 @@
 2. `Druid 1.2.28`
    - 当前状态：这一项已开始退出。服务端主数据源已回到 Spring Boot 默认连接池选择策略，JDBC provider 也已切到本地 `DataSourceFactoryHikariImpl`。
    - 更现代替代：主方向仍是 HikariCP 统一池化。
-   - 2026-06-10 最新推进：`server` 已移除 `druid-spring-boot-3-starter`，`datart-jdbc-data-provider` 已移除 `druid` 依赖并改接 `HikariCP`。
-   - 本仓库判断：迁移已经从“前置设计”进入“正式落地第一批”；剩余工作主要是启动级验证和参数语义回归，而不是再停留在专项评估。
+   - 2026-06-10 最新推进：`server` 已移除 `druid-spring-boot-3-starter`，`datart-jdbc-data-provider` 已移除 `druid` 依赖并改接 `HikariCP`，`config/profiles/application-config.yml` 的 Druid 类型残留也已清理。
+   - 验收证据：`mvn -pl server -am -DskipTests package` 与 `bash ./scripts/check-demo-health.sh` 已通过，demo 安装包可在 `http://127.0.0.1:8080/api/v1/sys/info` 返回成功。
+   - 本仓库判断：迁移已经从“前置设计”进入“第一批功能落地并完成启动级验证”；剩余工作主要是参数语义和专项回归，而不是再停留在专项评估。
 
 3. `nashorn-core 15.4`
    - 当前状态：脚本执行与表达式能力仍依赖 Nashorn 兼容层。
@@ -1689,7 +1692,7 @@
    - 继续把 `mybatis-generator-core` 维持在独立 profile / 工具链内，默认运行时不再直接携带。
    - 后续若仍需保留生成能力，再单独评估是否升级生成器版本和驱动适配。
 7. 数据源迁移收尾
-   - 在当前已切到 Hikari 的基础上，继续补齐服务启动、demo profile、数据库迁移链和连接参数映射验证。
+   - 在当前已切到 Hikari 且 demo 启动链已验证通过的基础上，继续补齐数据库迁移链、连接参数映射和 provider 行为专项回归。
 
 ### 并行治理：删除 CRACO 回退外壳
 
