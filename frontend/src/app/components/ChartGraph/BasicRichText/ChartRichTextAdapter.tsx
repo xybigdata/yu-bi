@@ -112,14 +112,14 @@ const ChartRichTextAdapter: FC<{
                   setCustomColorType('color');
                   setCustomColorVisible(true);
                 }
-                quillEditRef.current!.getEditor().format('color', value);
+                quillEditRef.current!.format('color', value);
               },
               background: function (value) {
                 if (value === QuillPalette.RICH_TEXT_CUSTOM_COLOR) {
                   setCustomColorType('background');
                   setCustomColorVisible(true);
                 }
-                quillEditRef.current!.getEditor().format('background', value);
+                quillEditRef.current!.format('background', value);
               },
             },
           },
@@ -139,8 +139,8 @@ const ChartRichTextAdapter: FC<{
     );
 
     const quillChange = useCallback(() => {
-      if (quillEditRef.current && quillEditRef.current?.getEditor()) {
-        const contents = quillEditRef.current!.getEditor().getContents();
+      if (quillEditRef.current) {
+        const contents = quillEditRef.current.getContents();
         setQuillValue(contents);
         contents && debouncedDataChange(JSON.stringify(contents));
       }
@@ -199,7 +199,7 @@ const ChartRichTextAdapter: FC<{
 
     const customColorChange = color => {
       if (color) {
-        quillEditRef.current!.getEditor().format(customColorType, color);
+        quillEditRef.current!.format(customColorType, color);
       }
       setCustomColorVisible(false);
     };
@@ -223,10 +223,9 @@ const ChartRichTextAdapter: FC<{
     const selectField = useCallback(
       (field: any) => () => {
         if (quillEditRef.current) {
-          const quill = quillEditRef.current.getEditor();
           if (field) {
             const text = `[${field.name}]`;
-            quill.getModule('calcfield').insertItem(
+            quillEditRef.current.getModule('calcfield').insertItem(
               {
                 denotationChar: '',
                 id: field.id,
@@ -237,9 +236,7 @@ const ChartRichTextAdapter: FC<{
               true,
             );
             setImmediate(() => {
-              setQuillValue(
-                quillEditRef.current?.getEditor().getContents() || '',
-              );
+              setQuillValue(quillEditRef.current?.getContents() || '');
             });
           }
         }

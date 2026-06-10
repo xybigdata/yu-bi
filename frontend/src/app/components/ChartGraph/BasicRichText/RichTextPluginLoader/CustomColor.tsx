@@ -49,11 +49,11 @@ export class QuillPalette {
   }
 
   protected init() {
-    this.quillJS.getEditor().on('selection-change', this.selectionChange);
+    this.quillJS.on('selection-change', this.selectionChange);
   }
 
   public destroy() {
-    this.quillJS.getEditor()?.off('selection-change', this.selectionChange);
+    this.quillJS.off('selection-change', this.selectionChange);
   }
 
   /**
@@ -68,7 +68,7 @@ export class QuillPalette {
     try {
       const index = range.length === 0 ? range.index - 1 : range.index;
       const length = range.length === 0 ? 1 : range.length;
-      const delta = this.quillJS!.getEditor().getContents(index, length);
+      const delta = this.quillJS.getContents(index, length);
 
       if (delta.ops?.length === 1 && delta.ops[0]?.attributes) {
         const { background, color } = delta.ops[0].attributes;

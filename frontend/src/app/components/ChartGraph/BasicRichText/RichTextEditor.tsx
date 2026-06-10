@@ -1,4 +1,4 @@
-import type { DeltaStatic, Quill } from 'quill';
+import type { DeltaStatic, Quill, Sources } from 'quill';
 import {
   ForwardedRef,
   forwardRef,
@@ -10,7 +10,18 @@ import ReactQuill from './quillCompat';
 export interface RichTextEditorHandle {
   blur: () => void;
   focus: () => void;
+  format: (name: string, value: unknown, source?: Sources) => DeltaStatic;
+  getContents: (index?: number, length?: number) => DeltaStatic;
   getEditor: () => Quill;
+  getModule: (name: string) => any;
+  off: (
+    eventName: 'text-change' | 'selection-change' | 'editor-change',
+    handler: (...args: any[]) => void,
+  ) => void;
+  on: (
+    eventName: 'text-change' | 'selection-change' | 'editor-change',
+    handler: (...args: any[]) => void,
+  ) => void;
 }
 
 export interface RichTextEditorProps {
@@ -37,7 +48,18 @@ function RichTextEditorImpl(
     () => ({
       blur: () => editorRef.current?.blur(),
       focus: () => editorRef.current?.focus(),
+      format: (name, value, source) =>
+        editorRef.current!.getEditor().format(name, value, source),
+      getContents: (index, length) =>
+        typeof index === 'number' && typeof length === 'number'
+          ? editorRef.current!.getEditor().getContents(index, length)
+          : editorRef.current!.getEditor().getContents(),
       getEditor: () => editorRef.current!.getEditor(),
+      getModule: name => editorRef.current!.getEditor().getModule(name),
+      off: (eventName, handler) =>
+        (editorRef.current!.getEditor() as any).off(eventName, handler),
+      on: (eventName, handler) =>
+        (editorRef.current!.getEditor() as any).on(eventName, handler),
     }),
     [],
   );

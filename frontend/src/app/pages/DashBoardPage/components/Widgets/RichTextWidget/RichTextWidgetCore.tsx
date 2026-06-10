@@ -97,7 +97,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
   useEffect(() => {
     if (widgetInfo.editing === false && contentSavable && boardEditing) {
       if (quillRef.current) {
-        let contents = quillRef.current?.getEditor().getContents();
+        let contents = quillRef.current.getContents();
         const strContents = JSON.stringify(contents);
         if (strContents !== JSON.stringify(initContent)) {
           const nextMediaWidgetContent = produce(
@@ -141,14 +141,14 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
               setCustomColorType('color');
               setCustomColorVisible(true);
             }
-            quillRef.current!.getEditor().format('color', value);
+            quillRef.current!.format('color', value);
           },
           background: function (value) {
             if (value === QuillPalette.RICH_TEXT_CUSTOM_COLOR) {
               setCustomColorType('background');
               setCustomColorVisible(true);
             }
-            quillRef.current!.getEditor().format('background', value);
+            quillRef.current!.format('background', value);
           },
         },
       },
@@ -161,43 +161,39 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
 
   useLayoutEffect(() => {
     if (quillRef.current) {
-      quillRef.current
-        .getEditor()
-        .on('selection-change', (r: { index: number; length: number }) => {
-          if (!r?.index) return;
-          try {
-            const index = r.length === 0 ? r.index - 1 : r.index;
-            const length = r.length === 0 ? 1 : r.length;
-            const delta = quillRef
-              .current!.getEditor()
-              .getContents(index, length);
+      quillRef.current.on('selection-change', (r: { index: number; length: number }) => {
+        if (!r?.index) return;
+        try {
+          const index = r.length === 0 ? r.index - 1 : r.index;
+          const length = r.length === 0 ? 1 : r.length;
+          const delta = quillRef.current!.getContents(index, length);
 
-            if (delta.ops?.length === 1 && delta.ops[0]?.attributes) {
-              const { background, color } = delta.ops[0].attributes;
-              setCustomColor({
-                background: background || CUSTOM_COLOR_INIT.background,
-                color: color || CUSTOM_COLOR_INIT.color,
-              });
+          if (delta.ops?.length === 1 && delta.ops[0]?.attributes) {
+            const { background, color } = delta.ops[0].attributes;
+            setCustomColor({
+              background: background || CUSTOM_COLOR_INIT.background,
+              color: color || CUSTOM_COLOR_INIT.color,
+            });
 
-              const colorNode = document.querySelector(
-                '.ql-color .ql-color-label',
-              );
-              const backgroundNode = document.querySelector(
-                '.ql-background .ql-color-label',
-              );
-              if (color && !colorNode?.getAttribute('style')) {
-                colorNode!.setAttribute('style', `stroke: ${color}`);
-              }
-              if (background && !backgroundNode?.getAttribute('style')) {
-                backgroundNode!.setAttribute('style', `fill: ${background}`);
-              }
-            } else {
-              setCustomColor({ ...CUSTOM_COLOR_INIT });
+            const colorNode = document.querySelector(
+              '.ql-color .ql-color-label',
+            );
+            const backgroundNode = document.querySelector(
+              '.ql-background .ql-color-label',
+            );
+            if (color && !colorNode?.getAttribute('style')) {
+              colorNode!.setAttribute('style', `stroke: ${color}`);
             }
-          } catch (error) {
-            console.error('selection-change callback | error', error);
+            if (background && !backgroundNode?.getAttribute('style')) {
+              backgroundNode!.setAttribute('style', `fill: ${background}`);
+            }
+          } else {
+            setCustomColor({ ...CUSTOM_COLOR_INIT });
           }
-        });
+        } catch (error) {
+          console.error('selection-change callback | error', error);
+        }
+      });
       new MarkdownModule(quillRef.current.getEditor(), MarkdownOptions);
     }
   }, [quillModules]);
@@ -221,8 +217,8 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
   };
 
   const quillChange = useCallback(() => {
-    if (quillRef.current && quillRef.current?.getEditor()) {
-      let contents = quillRef.current!.getEditor().getContents();
+    if (quillRef.current) {
+      let contents = quillRef.current.getContents();
       setQuillValue(contents);
     }
   }, []);
@@ -234,7 +230,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
 
   const customColorChange = color => {
     if (color) {
-      quillRef.current!.getEditor().format(customColorType, color);
+      quillRef.current!.format(customColorType, color);
     }
     setCustomColorVisible(false);
   };
