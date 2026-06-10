@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-import { Variable } from './slice/types';
+import { Variable, VariableDefaultValueItem } from './slice/types';
 
 export interface VariableFormModel
   extends Omit<Variable, 'id' | 'defaultValue'> {
-  defaultValue: any[];
+  defaultValue: VariableDefaultValueItem[];
 }

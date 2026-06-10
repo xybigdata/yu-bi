@@ -16,9 +16,12 @@
  * limitations under the License.
  */
 
+import { DatartDayjs } from 'app/utils/date';
 import { DateFormat } from 'app/constants';
 import { SubjectTypes } from '../../PermissionPage/constants';
 import { VariableTypes, VariableValueTypes } from '../constants';
+
+export type VariableDefaultValueItem = string | number | DatartDayjs;
 
 export interface VariableState {
   variables: VariableViewModel[];
@@ -71,7 +74,7 @@ export interface RowPermissionSubject {
   email?: string;
   type: SubjectTypes;
   useDefaultValue: boolean;
-  value?: any[];
+  value?: VariableDefaultValueItem[];
 }
 
 export interface RowPermissionRaw {
@@ -88,5 +91,5 @@ export interface RowPermissionRaw {
   updateTime?: string;
 }
 export interface RowPermission extends Omit<RowPermissionRaw, 'value'> {
-  value?: any[];
+  value?: VariableDefaultValueItem[];
 }

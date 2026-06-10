@@ -33,16 +33,17 @@ import { memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { SPACE, SPACE_TIMES } from 'styles/StyleConstants';
 import { VariableValueTypes } from './constants';
+import { VariableDefaultValueItem } from './slice/types';
 
 interface DefaultValueProps {
   type: VariableValueTypes;
   expression: boolean;
   disabled?: boolean;
-  value?: null | any[];
+  value?: null | VariableDefaultValueItem[];
   dateFormat?: DateFormat;
   hasDateFormat?: boolean;
   onChangeDateFormat?: (value) => void;
-  onChange?: (value) => void;
+  onChange?: (value: VariableDefaultValueItem[]) => void;
 }
 
 export const DefaultValue = memo(
@@ -171,7 +172,7 @@ export const DefaultValue = memo(
           <Input.TextArea
             placeholder={t('enterExpression')}
             autoSize={{ minRows: 4, maxRows: 8 }}
-            value={value ? value[0] : void 0}
+            value={value?.[0] ? String(value[0]) : void 0}
             disabled={!!disabled}
             onChange={saveExpression}
           />
@@ -182,7 +183,7 @@ export const DefaultValue = memo(
                 {value?.map((val, index) => {
                   const label =
                     type !== VariableValueTypes.Date
-                      ? val
+                      ? String(val)
                       : datartDayjs(val).format(resolvedDateFormat);
                   return (
                     <Tag

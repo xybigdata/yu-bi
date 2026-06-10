@@ -73,6 +73,7 @@ import {
   RowPermission,
   RowPermissionRaw,
   Variable,
+  VariableDefaultValueItem,
   VariableViewModel,
 } from './slice/types';
 import { SubjectForm } from './SubjectForm';
@@ -185,10 +186,11 @@ export function VariablePage() {
 
   const save = useCallback(
     (values: VariableFormModel) => {
-      let defaultValue: any = values.defaultValue;
+      let defaultValue: VariableDefaultValueItem[] | string | undefined | null =
+        values.defaultValue;
       if (values.valueType === VariableValueTypes.Date && !values.expression) {
         defaultValue = values.defaultValue.map(d =>
-          datartDayjs(d as any).format(values.dateFormat),
+          datartDayjs(d).format(values.dateFormat),
         );
       }
 
@@ -236,7 +238,7 @@ export function VariablePage() {
           value:
             cr.value &&
             (editingVariable?.valueType === VariableValueTypes.Date
-              ? cr.value.map(m => datartDayjs(m as any).format(dateFormat))
+              ? cr.value.map(m => datartDayjs(m).format(dateFormat))
               : cr.value),
         };
       });
