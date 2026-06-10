@@ -1594,6 +1594,7 @@
    - 补充证据：当前不仅有 `react-quill` 本体，还叠加了自定义 `TagBlot` / `CalcFieldBlot`、调色板和邮件/仪表板双编辑链路；原先低活跃度的 `quill-image-drop-module`、`quilljs-markdown` 已在项目内用本地模块替代并移除依赖。
    - 2026-06-10 最新推进：已新增本地兼容出口 `frontend/src/app/components/ChartGraph/BasicRichText/quillCompat.ts`，并把图表富文本、仪表板富文本、调度邮件富文本、自定义 blot 与 palette 的 `ReactQuill` / `Quill` / `DeltaStatic` 入口统一收口到这一层。
    - 2026-06-10 补充推进：已新增本地包装层 `frontend/src/app/components/ChartGraph/BasicRichText/RichTextEditor.tsx`，图表富文本、仪表板富文本、调度邮件富文本已不再直接依赖 `ReactQuill` 组件实例，而统一走仓库内 editor handle。
+   - 2026-06-10 继续推进：`RichTextEditorHandle` 已补齐 `format`、`getContents`、`getModule`、`on`、`off` 等常用能力，图表富文本、仪表板富文本与自定义调色板不再散用 `getEditor()` 做基础操作。
    - 本轮收益：业务代码已不再直接依赖 `react-quill` / `quill` 包入口，同时 markdown、图片拖拽/粘贴模块都已切到仓库内维护实现；后续无论升级到 `react-quill 2.x`，还是改接 Quill 2 的其它 React 封装，都可以先在 compat 层、本地模块和 `RichTextEditor` 包装层上集中适配。
    - 更现代替代：优先评估 `react-quill` 2.x 或直接评估仍活跃维护的 Quill 2 React 封装。
    - 本仓库判断：它不一定要先于 AntD 5，但已经属于“仍能跑、后续应替换”的旧编辑器基座，尤其需要关注 React 18 严格模式与自定义 blot 扩展兼容性。
@@ -1628,7 +1629,8 @@
 4. `mybatis-generator-core 1.4.0`
    - 当前状态：主要服务代码生成，不是主运行时链。
    - 更现代替代：升级生成器版本，或把生成链迁出主模块到独立 profile / 工具模块。
-   - 本仓库判断：优先级低于前端主栈清障和后端运行时基础设施收口。
+   - 2026-06-10 最新推进：`core/pom.xml` 已移除主依赖里的 `mybatis-generator-core`，并把生成器能力收口到 `mybatis-generator` Maven profile，避免继续污染默认运行时类路径。
+   - 本仓库判断：这类依赖收口的优先级虽然低于前端主栈清障和后端运行时基础设施改造，但它属于低风险、可直接落地的现代化治理项，已经适合先完成。
 
 5. `calcite-core 1.26.0`
    - 当前状态：仍是 SQL 解析与 provider 能力的关键底座，也带入部分旧传递依赖生态。
@@ -1668,6 +1670,7 @@
 2. 富文本专题
    - `react-quill` 继续评估升级或替代。
    - 目前外部 `quill-image-drop-module`、`quilljs-markdown` 都已退出，业务层也已切到本地 `RichTextEditor` 包装层；下一步重点改为核验本地 `MarkdownModule`、`RichTextEditor`、自定义 `TagBlot` / `CalcFieldBlot` 对 Quill 2 的兼容性，再决定是升 `react-quill 2.x` 还是直接切到别的 Quill 2 React 封装。
+   - 在真正切 Quill 2 之前，继续把少量仍需直接透传底层实例的链路压缩到 `RichTextEditorHandle`，避免再次出现业务页散改。
    - 每次尝试升级前后，都至少回归 `npm run checkTs`、`npm run build`、`npm run build:task`。
 3. `styled-components 6` 稳定化复核
    - 补查 `shouldForwardProp`、iframe / popup target 和测试输出告警。
@@ -1677,6 +1680,9 @@
    - `Shiro -> Spring Security`
    - `Druid -> HikariCP`
    - `Nashorn -> GraalJS`
+6. 代码生成链专项
+   - 继续把 `mybatis-generator-core` 维持在独立 profile / 工具链内，默认运行时不再直接携带。
+   - 后续若仍需保留生成能力，再单独评估是否升级生成器版本和驱动适配。
 
 ### 并行治理：删除 CRACO 回退外壳
 
@@ -1832,7 +1838,8 @@
   - 证据：
     - `core/src/main/java/datart/core/common/MybatisGeneratorPlugin.java`
     - `core/src/main/resources/mybatis-generator/generatorConfig.xml`
-  - 处理策略：单独归入“代码生成链专项治理”，后续结合驱动类名、JDK 21 与实体生成策略一起处理。
+  - 2026-06-10 最新状态：`core/pom.xml` 已把它从默认 dependencies 移到 `mybatis-generator` profile 下的 `mybatis-generator-maven-plugin` 依赖中。
+  - 处理策略：默认运行时继续不携带该依赖；后续结合驱动类名、JDK 21 与实体生成策略继续治理独立生成链。
 
 - `org.apache.httpcomponents:httpclient:4.5.14`
   - 当前判断：属于明确的运行时主链依赖，分布在 HTTP 数据源拉取和第三方 OAuth 登录流程中。
