@@ -80,7 +80,7 @@ const GroupLayout: FC<FormGeneratorLayoutProps<ChartStyleConfig>> = memo(
             <>
               <Button
                 className="datart-modal-button"
-                type="ghost"
+                type="default"
                 block={true}
                 title={t(data.label, true)}
                 onClick={handleOpenStateModal}

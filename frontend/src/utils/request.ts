@@ -98,7 +98,7 @@ export const getServerDomain = () => {
 
 function unAuthorizationErrorHandler(error) {
   if (error?.response?.status === 401) {
-    message.error({ key: '401', content: i18next.t('global.401') });
+    message.error({ key: '401', content: String(i18next.t('global.401')) });
     removeToken();
     return true;
   }

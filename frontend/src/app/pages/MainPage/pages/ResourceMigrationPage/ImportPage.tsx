@@ -46,7 +46,7 @@ export const ImportPage: FC<{}> = memo(() => {
       message.success('success');
       form.resetFields(['file']);
     } else {
-      message.warn('warn');
+      message.warning('warn');
     }
   };
   const descStrategy = () => {

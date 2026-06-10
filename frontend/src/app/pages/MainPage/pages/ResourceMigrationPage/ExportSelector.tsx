@@ -56,7 +56,7 @@ export const ExportSelector: FC<{
       setIds([]);
       dispatch(mainActions.setDownloadPolling(true));
     } else {
-      message.warn('warn');
+      message.warning('warn');
     }
   };
   return (

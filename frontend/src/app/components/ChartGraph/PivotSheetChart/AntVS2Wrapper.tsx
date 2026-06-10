@@ -18,7 +18,7 @@
 
 import { setLang } from '@antv/s2';
 import { SheetComponent } from '@antv/s2-react';
-import '@antv/s2-react/dist/style.min.css';
+import '@antv/s2-react/dist/s2-react.min.css';
 import { getLang } from 'locales/i18n';
 import { FC, memo } from 'react';
 import styled from 'styled-components';
@@ -64,11 +64,11 @@ const AntVS2Wrapper: FC<AndvS2Config> = memo(
         dataCfg={dataCfg}
         options={options}
         themeCfg={{ theme, palette }}
-        onCollapseRowsAll={onCollapseRowsAll}
-        onRowCellCollapseTreeRows={onRowCellCollapseTreeRows}
+        onRowCellAllCollapsed={onCollapseRowsAll}
+        onRowCellCollapsed={onRowCellCollapseTreeRows}
         onDataCellHover={onDataCellHover}
         onSelected={onSelected}
-        getSpreadSheet={getSpreadSheet}
+        onMounted={getSpreadSheet}
         onDataCellClick={onDataCellClick}
       />
     );

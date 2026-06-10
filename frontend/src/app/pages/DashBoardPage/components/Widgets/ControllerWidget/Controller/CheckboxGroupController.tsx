@@ -16,10 +16,12 @@
  * limitations under the License.
  */
 import { Checkbox, Form } from 'antd';
-import type { CheckboxValueType } from 'antd/es/checkbox/Group';
+import type { CheckboxGroupProps } from 'antd/es/checkbox';
 import { ControlOption } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
+
+type CheckboxValueType = NonNullable<CheckboxGroupProps<string>['value']>[number];
 
 export interface CheckboxGroupControllerProps {
   options?: ControlOption[];

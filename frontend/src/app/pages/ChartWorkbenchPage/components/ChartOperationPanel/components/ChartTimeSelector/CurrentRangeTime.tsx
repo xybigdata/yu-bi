@@ -17,7 +17,6 @@
  */
 
 import { DatePicker } from 'antd';
-import moment from 'moment';
 import { FC, memo } from 'react';
 const { RangePicker } = DatePicker;
 
@@ -27,7 +26,12 @@ const CurrentRangeTime: FC<{ times?: [string, string]; disabled?: boolean }> =
       <RangePicker
         showTime
         disabled={disabled}
-        value={[moment(times?.[0]), moment(times?.[1])]}
+        value={
+          [
+            times?.[0] ? new Date(times[0]) : null,
+            times?.[1] ? new Date(times[1]) : null,
+          ] as any
+        }
       />
     );
   });

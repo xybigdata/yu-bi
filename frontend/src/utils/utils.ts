@@ -29,7 +29,7 @@ export function errorHandle(error) {
     const { response } = error as AxiosError<APIResponse<any>>;
     switch (response?.status) {
       case 401:
-        message.error({ key: '401', content: i18next.t('global.401') });
+        message.error({ key: '401', content: String(i18next.t('global.401')) });
         removeToken();
         break;
       default:
@@ -54,7 +54,7 @@ export function getErrorMessage(error) {
     switch (response?.status) {
       case 401:
         removeToken();
-        return i18next.t('global.401');
+        return String(i18next.t('global.401'));
       default:
         return response?.data.message || error.message;
     }

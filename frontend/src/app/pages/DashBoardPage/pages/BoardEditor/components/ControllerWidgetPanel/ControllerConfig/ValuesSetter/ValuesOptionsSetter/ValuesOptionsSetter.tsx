@@ -35,6 +35,7 @@ import {
   OPERATOR_TYPE_OPTION,
   ValueOptionType,
 } from 'app/pages/DashBoardPage/constants';
+import { ControllerWidgetContent } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { ViewSimple } from 'app/pages/MainPage/pages/ViewPage/slice/types';
 import { RelationFilterValue } from 'app/types/ChartConfig';
 import ChartDataView from 'app/types/ChartDataView';
@@ -66,7 +67,7 @@ export interface optionProps {
 
 const ValuesOptionsSetter: FC<{
   controllerType: ControllerFacadeTypes;
-  form: FormInstance<{ config: ControllerConfig }> | undefined;
+  form: FormInstance<ControllerWidgetContent> | undefined;
   viewMap: Record<string, ChartDataView>;
 }> = memo(({ form, viewMap, controllerType }) => {
   const tc = useI18NPrefix(`viz.control`);

@@ -1,4 +1,4 @@
-import { EditableProTable, ProColumns } from '@ant-design/pro-table';
+import { EditableProTable, ProColumns } from '@ant-design/pro-components';
 import { useCallback, useMemo, useState } from 'react';
 import { createGlobalStyle } from 'styled-components';
 import { uuidv4 } from 'utils/utils';
@@ -15,7 +15,7 @@ interface ConfigurationProps<T> {
   defaultRecord?: Partial<T>;
   disabled?: boolean;
   value?: T[];
-  onChange?: (config: T[]) => void;
+  onChange?: (config: readonly T[]) => void;
 }
 
 export function Configuration<T extends { id: string }>({
@@ -34,7 +34,10 @@ export function Configuration<T extends { id: string }>({
   );
 
   const setValue = useMemo(
-    () => (onChange !== void 0 ? onChange : setInnerValue),
+    () =>
+      onChange !== void 0
+        ? onChange
+        : (config: readonly T[]) => setInnerValue([...config]),
     [onChange],
   );
 

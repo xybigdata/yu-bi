@@ -4,12 +4,16 @@ import styled from 'styled-components';
 import { FONT_SIZE_BASE } from 'styles/StyleConstants';
 import { mergeClassNames } from 'utils/utils';
 
-export interface ToolbarButtonProps extends ButtonProps {
+interface ToolbarButtonStyleProps {
   fontSize?: number;
   iconSize?: number;
   color?: string;
   disabled?: boolean;
 }
+
+export interface ToolbarButtonProps
+  extends Omit<ButtonProps, 'color'>,
+    ToolbarButtonStyleProps {}
 
 export function ToolbarButton({
   fontSize = FONT_SIZE_BASE,
@@ -20,10 +24,10 @@ export function ToolbarButton({
 }: ToolbarButtonProps) {
   return (
     <Wrapper
-      fontSize={fontSize}
-      iconSize={iconSize}
-      color={color}
-      disabled={disabled}
+      $fontSize={fontSize}
+      $iconSize={iconSize}
+      $color={color}
+      $disabled={disabled}
     >
       <Button
         type="link"
@@ -35,34 +39,39 @@ export function ToolbarButton({
   );
 }
 
-const Wrapper = styled.span<ToolbarButtonProps>`
+const Wrapper = styled.span<{
+  $fontSize?: number;
+  $iconSize?: number;
+  $color?: string;
+  $disabled?: boolean;
+}>`
   .btn {
     color: ${p =>
-      p.disabled
+      p.$disabled
         ? p.theme.textColorDisabled
-        : p.color || p.theme.textColorLight};
+        : p.$color || p.theme.textColorLight};
 
     &:hover,
     &:focus {
       color: ${p =>
-        p.disabled
+        p.$disabled
           ? p.theme.textColorDisabled
-          : p.color || p.theme.textColorLight};
+          : p.$color || p.theme.textColorLight};
       background-color: ${p => p.theme.bodyBackground};
     }
 
     &:active {
       color: ${p =>
-        p.disabled
+        p.$disabled
           ? p.theme.textColorDisabled
-          : p.color
-          ? lighten(0.1, p.color)
+          : p.$color
+          ? lighten(0.1, p.$color)
           : p.theme.textColorSnd};
       background-color: ${p => p.theme.emphasisBackground};
     }
 
     .anticon {
-      font-size: ${p => p.iconSize}px;
+      font-size: ${p => p.$iconSize}px;
     }
   }
 `;

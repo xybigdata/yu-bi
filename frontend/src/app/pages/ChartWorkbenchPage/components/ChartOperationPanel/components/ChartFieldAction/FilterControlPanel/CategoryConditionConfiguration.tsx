@@ -17,6 +17,7 @@
  */
 
 import { Button, Row, Select, Space, Tabs, Transfer, Tree } from 'antd';
+import type { TransferProps } from 'antd';
 import { FilterConditionType } from 'app/constants';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import useMount from 'app/hooks/useMount';
@@ -208,11 +209,13 @@ const CategoryConditionConfiguration: ForwardRefRenderFunction<
     onConditionChange(filter);
   };
 
-  const onSelectChange = (
-    sourceSelectedKeys: string[],
-    targetSelectedKeys: string[],
+  const onSelectChange: TransferProps<RelationFilterValue>['onSelectChange'] = (
+    sourceSelectedKeys,
+    targetSelectedKeys,
   ) => {
-    const newSelectedKeys = [...sourceSelectedKeys, ...targetSelectedKeys];
+    const newSelectedKeys = [...sourceSelectedKeys, ...targetSelectedKeys].map(
+      String,
+    );
     setSelectedKeys(newSelectedKeys);
   };
 

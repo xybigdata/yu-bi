@@ -18,13 +18,14 @@
 import { Button, FormInstance, Space } from 'antd';
 import { DragSortEditTable } from 'app/components/DragSortEditTable';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { ControllerWidgetContent } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { RelationFilterValue } from 'app/types/ChartConfig';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { ControllerConfig } from '../../../types';
 
 export interface CustomOptionsProps {
-  form: FormInstance<{ config: ControllerConfig }> | undefined;
+  form: FormInstance<ControllerWidgetContent> | undefined;
   fieldRowData: RelationFilterValue[];
   getControllerConfig: () => ControllerConfig;
 }

@@ -17,6 +17,7 @@
  */
 
 import { Form, FormInstance, ModalProps, Transfer } from 'antd';
+import type { TransferProps } from 'antd';
 import { LoadingMask, ModalForm } from 'app/components';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { User } from 'app/slice/types';
@@ -61,6 +62,10 @@ export const MemberForm = memo(
       onCancel && onCancel(null as any);
     }, [targetKeys, members, onCancel, onChange]);
 
+    const handleTargetKeysChange: TransferProps<User>['onChange'] = nextTargetKeys => {
+      setTargetKeys(nextTargetKeys.map(String));
+    };
+
     const renderTitle = useCallback(
       ({ name, username, email }) => (
         <ItemTitle>
@@ -93,7 +98,7 @@ export const MemberForm = memo(
               dataSource={dataSource}
               targetKeys={targetKeys}
               render={renderTitle}
-              onChange={setTargetKeys}
+              onChange={handleTargetKeysChange}
               filterOption={filterMemberListOptions}
               showSearch
             />

@@ -44,6 +44,14 @@ type ModalDestroyOnHiddenCompatProps = {
   destroyOnHidden?: boolean;
 };
 
+const normalizeExpiryDate = (value?: string | Date | null) => {
+  if (!value) {
+    return '';
+  }
+
+  return datartDayjs(value).format(TIME_FORMATTER);
+};
+
 const ShareLinkModal: FC<{
   orgId: string;
   vizType: string;
@@ -56,7 +64,7 @@ const ShareLinkModal: FC<{
 
   const t = useI18NPrefix(`viz.action`);
   const dispatch = useAppDispatch();
-  const [expiryDate, setExpiryDate] = useState<string | Date>('');
+  const [expiryDate, setExpiryDate] = useState('');
   const [authenticationMode, setAuthenticationMode] = useState(
     AuthenticationModeType.none,
   );
@@ -130,7 +138,7 @@ const ShareLinkModal: FC<{
   }, []);
 
   const handleDefauleValue = useCallback((shareData: ShareDetail) => {
-    setExpiryDate(shareData.expiryDate);
+    setExpiryDate(normalizeExpiryDate(shareData.expiryDate));
     setAuthenticationMode(shareData.authenticationMode);
     setRowPermissionBy(shareData.rowPermissionBy);
     setSelectUsers(shareData.users);
@@ -175,7 +183,7 @@ const ShareLinkModal: FC<{
       >
         <FormItemEx label={t('share.expireDate')}>
           <DatePicker
-            value={expiryDate ? moment(expiryDate, TIME_FORMATTER) : null}
+            value={expiryDate ? datartDayjs(expiryDate, TIME_FORMATTER) : null}
             showTime
             disabledDate={current => {
               return (
@@ -186,7 +194,7 @@ const ShareLinkModal: FC<{
               );
             }}
             onChange={(_, dateString) => {
-              setExpiryDate(dateString);
+              setExpiryDate(Array.isArray(dateString) ? dateString[0] || '' : dateString);
             }}
           />
         </FormItemEx>

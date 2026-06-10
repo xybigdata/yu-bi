@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { ProColumnType } from '@ant-design/pro-table';
+import { ProColumnType } from '@ant-design/pro-components';
 import { Button } from 'antd';
 import { Configuration } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -63,7 +63,7 @@ export function Properties({
   );
 
   const change = useCallback(
-    (arr: PropertyWithID[]) => {
+    (arr: readonly PropertyWithID[]) => {
       onChange &&
         onChange(
           arr.reduce((obj, { key, value }) => ({ ...obj, [key]: value }), {}),

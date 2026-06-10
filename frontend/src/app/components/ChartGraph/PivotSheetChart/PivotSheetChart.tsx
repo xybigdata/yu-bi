@@ -22,9 +22,9 @@ import {
   DefaultCellTheme,
   Meta,
   S2CellType,
+  S2Style,
   SortParam,
   SpreadSheet,
-  Style,
   TargetCellInfo,
   ViewMeta,
 } from '@antv/s2';
@@ -131,8 +131,8 @@ class PivotSheetChart extends ReactChart {
     selectedItems?: SelectedItem[],
   ): AndvS2Config {
     if (!dataset || !config) {
-      return {
-        options: {},
+        return {
+          options: {},
       };
     }
     if (!selectedItems?.length && this.selectedItems.length && this.chart) {
@@ -235,34 +235,35 @@ class PivotSheetChart extends ReactChart {
     return {
       options: {
         hierarchyType: enableExpandRow ? 'tree' : 'grid',
-        hierarchyCollapse: this.hierarchyCollapse,
         width: context?.width,
         height: context?.height,
         tooltip: {
-          showTooltip: true,
+          enable: true,
         },
         cornerExtraFieldText: context.translator('summary.number'),
         interaction: {
           hoverHighlight: Boolean(enableHoverHighlight),
           selectedCellsSpotlight: Boolean(enableSelectedHighlight),
           autoResetSheetStyle: false,
-          enableCopy: true,
+          copy: {
+            enable: true,
+          },
         },
         totals: {
           row: {
             showGrandTotals: Boolean(enableRowTotal),
-            reverseLayout: Boolean(rowTotalPosition),
+            reverseGrandTotalsLayout: Boolean(rowTotalPosition),
             showSubTotals: Boolean(enableRowSubTotal),
-            reverseSubLayout: Boolean(rowSubTotalPosition),
+            reverseSubTotalsLayout: Boolean(rowSubTotalPosition),
             subTotalsDimensions: [
               rowSectionConfigRows.map(
                 chartDataSet.getFieldKey,
                 chartDataSet,
               )?.[0],
             ],
-            label: context.translator('summary.total'),
-            subLabel: context.translator('summary.subTotal'),
-            calcTotals: {
+            grandTotalsLabel: context.translator('summary.total'),
+            subTotalsLabel: context.translator('summary.subTotal'),
+            calcGrandTotals: {
               aggregation: summaryAggregation,
             },
             calcSubTotals: {
@@ -271,18 +272,18 @@ class PivotSheetChart extends ReactChart {
           },
           col: {
             showGrandTotals: Boolean(enableColTotal),
-            reverseLayout: Boolean(colTotalPosition),
+            reverseGrandTotalsLayout: Boolean(colTotalPosition),
             showSubTotals: Boolean(enableColSubTotal),
-            reverseSubLayout: Boolean(colSubTotalPosition),
+            reverseSubTotalsLayout: Boolean(colSubTotalPosition),
             subTotalsDimensions: [
               columnSectionConfigRows.map(
                 chartDataSet.getFieldKey,
                 chartDataSet,
               )?.[0],
             ],
-            label: context.translator('summary.total'),
-            subLabel: context.translator('summary.subTotal'),
-            calcTotals: {
+            grandTotalsLabel: context.translator('summary.total'),
+            subTotalsLabel: context.translator('summary.subTotal'),
+            calcGrandTotals: {
               aggregation: summaryAggregation,
             },
             calcSubTotals: {
@@ -290,7 +291,6 @@ class PivotSheetChart extends ReactChart {
             },
           },
         },
-        supportCSSTransform: true,
         style: this.getRowAndColStyle(
           styleConfigs,
           metricsSectionConfigRows,
@@ -350,7 +350,11 @@ class PivotSheetChart extends ReactChart {
       },
       palette: {
         basicColors: this.getThemeColorList(styleConfigs),
-        semanticColors: {},
+        semanticColors: {
+          red: '#D84A1B',
+          green: '#0F9960',
+          yellow: '#D99E0B',
+        },
         brandColor: '#3471F9',
         basicColorRelations: [],
       },
@@ -535,7 +539,7 @@ class PivotSheetChart extends ReactChart {
     metricsSectionConfigRows: ChartDataSectionField[],
     columnSectionConfigRows: ChartDataSectionField[],
     chartDataSet: IChartDataSet<string>,
-  ): Partial<Style> {
+  ): Partial<S2Style> {
     const [bodyHeight, bodyWidth] = getStyles(
       style,
       ['tableBodyStyle'],
@@ -552,33 +556,27 @@ class PivotSheetChart extends ReactChart {
       ['style'],
       ['enableExpandRow', 'metricNameShowIn'],
     );
+
+    const dataCellWidth =
+      bodyWidth ||
+      ((!!enableExpandRow || !!metricNameShowIn) &&
+      metricsSectionConfigRows.length > 0
+        ? undefined
+        : undefined);
+
     return {
-      colCfg: {
+      colCell: {
         height: headerHeight || 30,
-        widthByFieldValue:
-          !!enableExpandRow || !!metricNameShowIn
-            ? metricsSectionConfigRows.reduce((allConfig, config) => {
-                return {
-                  ...allConfig,
-                  [chartDataSet.getFieldKey(config)]: bodyWidth,
-                };
-              }, {})
-            : chartDataSet.reduce((dataSetAllConfig, dataSetConfig) => {
-                return {
-                  ...dataSetAllConfig,
-                  [dataSetConfig?.getCell(
-                    columnSectionConfigRows[columnSectionConfigRows.length - 1],
-                  )]: bodyWidth,
-                };
-              }, {}),
       },
-      rowCfg: {
+      rowCell: {
         width: headerWidth,
+        collapseAll: enableExpandRow ? this.hierarchyCollapse : null,
+        collapseFields: enableExpandRow ? this.collapsedRows : null,
       },
-      cellCfg: {
+      dataCell: {
         height: bodyHeight || 30,
+        width: dataCellWidth,
       },
-      collapsedRows: enableExpandRow ? this.collapsedRows : {},
     };
   }
 
