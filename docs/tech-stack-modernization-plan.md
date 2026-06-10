@@ -1669,6 +1669,7 @@
 6. HTTP 客户端双栈
    - 当前状态：生产代码中的实际 HTTP 请求已经统一落在 Apache HttpClient 5，主要使用点集中在 `datart-security` 和 `datart-http-data-provider`。
    - 2026-06-10 本轮推进：已确认 `core/pom.xml` 中遗留的 `okhttp` 没有任何生产代码使用面，并已从主运行时依赖中移除。
+   - 2026-06-10 继续推进：`HttpDataFetcher` 与 `WeChartOauth2Client` 已把 HttpClient 5 的 `executeOpen(...)` 替换为标准 `execute(...)` 关闭语义，避免继续依赖已弃用的“返回开放响应对象”接口。
    - 本轮收益：HTTP 客户端主链继续朝单栈收敛，后续无需再为未使用的第二套客户端维护额外依赖和传递风险。
 
 #### C. 已经收口到现代主线，可从“老旧清单”里降级处理的项
@@ -1722,6 +1723,13 @@
    - 补查 `shouldForwardProp`、iframe / popup target 和测试输出告警。
 5. 故事播放链路复核
    - `reveal.js 6.x` 保持当前版本，但继续确认编辑、预览、分享页行为。
+
+### 2026-06-10 编译层弃用 API 清障补充
+
+- `datart-http-data-provider` 已把 `Class.newInstance()` 与 HttpClient 5 的 `executeOpen(...)` 替换为 `getDeclaredConstructor().newInstance()` 和标准 `execute(...)`。
+- `datart-security` 的 `WeChartOauth2Client` 已同步切到 HttpClient 5 的标准 `execute(...)` 调用。
+- `server` 里的 `APPLICATION_JSON_UTF8_VALUE` 已收口为 `APPLICATION_JSON_VALUE`。
+- `core/src/main/resources/mybatis-generator/generatorConfig.xml` 已把旧驱动类名 `com.mysql.jdbc.Driver` 替换为 `com.mysql.cj.jdbc.Driver`。
 6. 后端长期专项
    - `Shiro -> Spring Security`
    - `Nashorn -> GraalJS`

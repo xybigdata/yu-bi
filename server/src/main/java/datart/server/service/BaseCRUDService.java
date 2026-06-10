@@ -167,7 +167,9 @@ public interface BaseCRUDService<E extends BaseEntity, M extends CRUDMapper> {
 
     default E getEntityInstance() {
         try {
-            return ((Class<E>) getParameterizedType().getActualTypeArguments()[0]).newInstance();
+            return ((Class<E>) getParameterizedType().getActualTypeArguments()[0])
+                    .getDeclaredConstructor()
+                    .newInstance();
         } catch (Exception e) {
             Exceptions.msg("entity instant exception");
         }

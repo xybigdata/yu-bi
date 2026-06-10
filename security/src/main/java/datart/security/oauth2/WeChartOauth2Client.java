@@ -27,8 +27,8 @@ import datart.security.util.AESUtil;
 import datart.security.util.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
@@ -44,7 +44,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @Slf4j
 public class WeChartOauth2Client implements CustomOauth2Client {
 
-    private static final HttpClient httpClient;
+    private static final CloseableHttpClient httpClient;
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -156,7 +156,7 @@ public class WeChartOauth2Client implements CustomOauth2Client {
         uriBuilder.addParameter("secret", clientRegistration.getClientSecret());
         uriBuilder.addParameter("code", code);
         HttpGet httpRequest = new HttpGet(uriBuilder.build());
-        try (ClassicHttpResponse response = (ClassicHttpResponse) httpClient.executeOpen(null, httpRequest, null)) {
+        try (ClassicHttpResponse response = httpClient.execute(httpRequest)) {
             String entity = EntityUtils.toString(response.getEntity());
             JsonNode jsonNode = OBJECT_MAPPER.readTree(entity);
             return jsonNode.path("access_token").asText(null);
@@ -168,7 +168,7 @@ public class WeChartOauth2Client implements CustomOauth2Client {
         uriBuilder.addParameter("access_token", accessToken);
         uriBuilder.addParameter("scope", "snsapi_userinfo");
         HttpGet httpRequest = new HttpGet(uriBuilder.build());
-        try (ClassicHttpResponse response = (ClassicHttpResponse) httpClient.executeOpen(null, httpRequest, null)) {
+        try (ClassicHttpResponse response = httpClient.execute(httpRequest)) {
             String entity = EntityUtils.toString(response.getEntity());
             OBJECT_MAPPER.readTree(entity);
         }

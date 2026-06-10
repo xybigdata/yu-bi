@@ -50,7 +50,7 @@ public class ExternalRegisterController extends BaseController {
 
     @Operation(summary = "External Login")
     @SkipLogin
-    @PostMapping(value = "ldap", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @PostMapping(value = "ldap", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseData<Object> ldapLogin(UserLoginParam loginParam, HttpServletResponse response) throws MessagingException, UnsupportedEncodingException {
         String token = externalRegisterService.ldapRegister(loginParam.getUsername(), loginParam.getPassword());
         if (StringUtils.isNotBlank(token)) {

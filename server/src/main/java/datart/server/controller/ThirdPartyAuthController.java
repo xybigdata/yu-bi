@@ -36,7 +36,7 @@ public class ThirdPartyAuthController extends BaseController {
     private ClientRegistrationRepository clientRegistrationRepository;
 
     @Operation(summary = "Get Oauth2 clents")
-    @GetMapping(value = "getOauth2Clients", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    @GetMapping(value = "getOauth2Clients", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @SkipLogin
     public ResponseData<List<HashMap<String, String>>> getOauth2Clients(HttpServletRequest request) {
         if (clientRegistrationRepository == null) {
