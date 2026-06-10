@@ -26,7 +26,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,7 +40,8 @@ public class CustomOauth2AuthenticationFilter extends AbstractAuthenticationProc
 
     private final ClientRegistrationRepository clientRegistrationRepository;
 
-    private final AntPathRequestMatcher authorizationRequestMatcher = new AntPathRequestMatcher(processUrl);
+    private final PathPatternRequestMatcher authorizationRequestMatcher =
+            PathPatternRequestMatcher.withDefaults().matcher(processUrl);
 
     public CustomOauth2AuthenticationFilter(ClientRegistrationRepository clientRegistrationRepository, AuthenticationSuccessHandler authenticationSuccessHandler) {
         super(processUrl);

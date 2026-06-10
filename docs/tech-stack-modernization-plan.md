@@ -1637,6 +1637,7 @@
 1. `Shiro 2.0.5`
    - 当前状态：已经能跑在 Spring Boot 3 / Jakarta 链上，但和 Spring Security 并行维护两套安全体系。
    - 更现代替代：长期方向仍是收口到 Spring Security 原生体系。
+   - 2026-06-10 本轮前置清障：`datart-security` 中自定义 OAuth2 过滤器已把 Spring Security 即将移除的 `AntPathRequestMatcher` 替换为 `PathPatternRequestMatcher`，先清掉 Boot 3 / Security 6 主线上的一批已弃用 Web matcher 告警。
    - 本仓库判断：Shiro 不是“坏掉了”，但它已经属于架构级历史包袱；适合单列安全专项，而不是在基础库升级时顺手搀带。
 
 2. `Druid 1.2.28`

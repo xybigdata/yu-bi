@@ -21,7 +21,7 @@ package datart.security.oauth2;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import jakarta.servlet.FilterChain;
@@ -35,8 +35,10 @@ public class CustomOAuth2AuthorizationRequestRedirectFilter extends OncePerReque
 
     private final ClientRegistrationRepository clientRegistrationRepository;
 
-    private final AntPathRequestMatcher authorizationRequestMatcher = new AntPathRequestMatcher(
-            OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI + "/{" + CustomOauth2Client.REGISTRATION_ID + "}");
+    private final PathPatternRequestMatcher authorizationRequestMatcher =
+            PathPatternRequestMatcher.withDefaults().matcher(
+                    OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI
+                            + "/{" + CustomOauth2Client.REGISTRATION_ID + "}");
 
     public CustomOAuth2AuthorizationRequestRedirectFilter(ClientRegistrationRepository clientRegistrationRepository) {
         this.clientRegistrationRepository = clientRegistrationRepository;
