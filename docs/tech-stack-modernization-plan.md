@@ -1591,9 +1591,9 @@
 
 2. `react-quill 1.3.5`
    - 当前状态：富文本编辑与展示仍依赖旧版 `react-quill` / Quill 1 生态。
-   - 补充证据：当前不仅有 `react-quill` 本体，还叠加了 `quilljs-markdown`、`quill-image-drop-module`、自定义 `TagBlot` / `CalcFieldBlot`、调色板和邮件/仪表板双编辑链路。
+   - 补充证据：当前不仅有 `react-quill` 本体，还叠加了 `quilljs-markdown`、自定义 `TagBlot` / `CalcFieldBlot`、调色板和邮件/仪表板双编辑链路；原先低活跃度的 `quill-image-drop-module` 已在项目内用本地模块替代并移除依赖。
    - 2026-06-10 最新推进：已新增本地兼容出口 `frontend/src/app/components/ChartGraph/BasicRichText/quillCompat.ts`，并把图表富文本、仪表板富文本、调度邮件富文本、自定义 blot 与 palette 的 `ReactQuill` / `Quill` / `DeltaStatic` 入口统一收口到这一层。
-   - 本轮收益：业务代码已不再直接依赖 `react-quill` / `quill` 包入口，后续无论升级到 `react-quill 2.x`，还是改接 Quill 2 的其它 React 封装，都可以先在 compat 层集中适配。
+   - 本轮收益：业务代码已不再直接依赖 `react-quill` / `quill` 包入口，同时图片拖拽/粘贴模块已切到仓库内维护实现；后续无论升级到 `react-quill 2.x`，还是改接 Quill 2 的其它 React 封装，都可以先在 compat 层和本地模块上集中适配。
    - 更现代替代：优先评估 `react-quill` 2.x 或直接评估仍活跃维护的 Quill 2 React 封装。
    - 本仓库判断：它不一定要先于 AntD 5，但已经属于“仍能跑、后续应替换”的旧编辑器基座，尤其需要关注 React 18 严格模式与自定义 blot 扩展兼容性。
 
@@ -1666,7 +1666,7 @@
        这些文件和相关链路仍需要结合当前 AntD 5 时间组件行为继续回归，而不是只看 import 是否已清零。
 2. 富文本专题
    - `react-quill`、`quilljs-markdown` 继续评估升级或替代。
-   - 下一步先核验 `quilljs-markdown`、`quill-image-drop-module`、自定义 `TagBlot` / `CalcFieldBlot` 对 Quill 2 的兼容性，再决定是升 `react-quill 2.x` 还是直接切到别的 Quill 2 React 封装。
+   - 目前外部 `quill-image-drop-module` 已退出；下一步重点改为核验 `quilljs-markdown`、自定义 `TagBlot` / `CalcFieldBlot` 对 Quill 2 的兼容性，再决定是升 `react-quill 2.x` 还是直接切到别的 Quill 2 React 封装。
    - 每次尝试升级前后，都至少回归 `npm run checkTs`、`npm run build`、`npm run build:task`。
 3. `styled-components 6` 稳定化复核
    - 补查 `shouldForwardProp`、iframe / popup target 和测试输出告警。

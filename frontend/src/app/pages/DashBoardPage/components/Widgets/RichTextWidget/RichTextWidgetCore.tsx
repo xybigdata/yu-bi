@@ -20,12 +20,12 @@ import {
   CustomColor,
   QuillPalette,
 } from 'app/components/ChartGraph/BasicRichText/RichTextPluginLoader/CustomColor';
+import { ImageDropModule } from 'app/components/ChartGraph/BasicRichText/modules/ImageDropModule';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { WidgetInfo } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { editBoardStackActions } from 'app/pages/DashBoardPage/pages/BoardEditor/slice';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
 import produce from 'immer';
-import { ImageDrop } from 'quill-image-drop-module'; // 拖动加载图片组件。
 import QuillMarkdown from 'quilljs-markdown';
 import 'quilljs-markdown/dist/quilljs-markdown-common-style.css';
 import React, {
@@ -49,7 +49,7 @@ import { SPACE_TIMES } from 'styles/StyleConstants';
 import { WidgetActionContext } from '../../ActionProvider/WidgetActionProvider';
 import { Formats, MarkdownOptions } from './config';
 
-Quill.register('modules/imageDrop', ImageDrop);
+Quill.register('modules/imageDrop', ImageDropModule);
 
 const CUSTOM_COLOR_INIT = {
   background: 'transparent',

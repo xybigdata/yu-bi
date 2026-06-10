@@ -2,11 +2,11 @@ import { prefixI18N } from 'app/hooks/useI18NPrefix';
 import ReactQuill, {
   Quill,
 } from 'app/components/ChartGraph/BasicRichText/quillCompat';
-import { ImageDrop } from 'quill-image-drop-module';
+import { ImageDropModule } from 'app/components/ChartGraph/BasicRichText/modules/ImageDropModule';
 import { FC, ReactNode } from 'react';
 import 'react-quill/dist/quill.snow.css';
 import styled from 'styled-components';
-Quill.register('modules/imageDrop', ImageDrop);
+Quill.register('modules/imageDrop', ImageDropModule);
 
 export const Formats = [
   'header',
