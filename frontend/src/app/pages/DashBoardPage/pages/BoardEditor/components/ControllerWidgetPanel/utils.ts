@@ -99,7 +99,7 @@ export const preformatControlConfig = (
 ) => {
   let config = preConfig;
   if (DateControllerTypes.includes(controllerType)) {
-    config = formatControlDateToMoment(JSON.parse(JSON.stringify(config)));
+    config = formatControlDateToDayjs(JSON.parse(JSON.stringify(config)));
   }
   return config;
 };
@@ -131,7 +131,7 @@ export const postControlConfig = (
 
   return config;
 };
-export const formatControlDateToMoment = (config: ControllerConfig) => {
+export const formatControlDateToDayjs = (config: ControllerConfig) => {
   if (config.controllerDate) {
     const filterDate = config.controllerDate;
     if (filterDate.startTime && filterDate.startTime.exactValue) {
@@ -322,14 +322,14 @@ export const filterValueTypeByControl = (
 
 export const formatDateByPickType = (
   pickerType: PickerType,
-  momentTime: DatartDateLike | null | undefined,
+  dateTime: DatartDateLike | null | undefined,
 ) => {
   const formatTemp = TIME_FORMATTER;
-  if (!momentTime) {
+  if (!dateTime) {
     return null;
   }
 
-  const dateValue = datartDayjs(momentTime as any);
+  const dateValue = datartDayjs(dateTime as any);
   switch (pickerType) {
     case 'dateTime':
       return dateValue.format(formatTemp);

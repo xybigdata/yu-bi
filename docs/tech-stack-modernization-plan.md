@@ -241,6 +241,8 @@
 - 仓库已新增统一时间适配入口 `frontend/src/app/utils/date.ts`，开始收口 `dayjs` 插件与 locale 初始化。
 - `frontend/src/locales/i18n.ts` 的时间 locale 初始化已从 `moment.locale(...)` 切到 `dayjs` 适配层。
 - `frontend/src/app/utils/time.ts`、`frontend/src/app/utils/chartHelper.ts` 以及部分只依赖“当前时间格式化”的调用点，已开始从 `moment` 迁到 `dayjs`。
+- `frontend/src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/TimeFilter.tsx` 已不再把 Dayjs 值直接 `toString()` 回写到过滤条件，而是统一按 `TIME_FORMATTER` 序列化，避免不同运行环境下字符串语义漂移。
+- `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/utils.ts` 中仍带 `Moment` 命名的控制器预处理函数已改为 `formatControlDateToDayjs`，并同步收口相关局部命名，避免把历史语义继续扩散到新的时间链路中。
 - 这一步仍然刻意不碰 DatePicker / RangePicker 值类型和表单状态，以便把时间工具层与控件层的风险拆开治理。
 
 迁移边界与批次策略：
@@ -262,6 +264,7 @@
   - 当前剩余问题主要集中在两类：
     1. `rc-picker` 在 lockfile 中仍保留可选 peer 声明；
     2. `task` 独立打包链已完成复核：`rollup-plugin-cleanup` 在 Node 26 下会让 `build:task` 长时间挂起并留下旧产物；移除后 `frontend/public/task/index.js` 已重新生成并切到 `dayjs`。
+    3. 控件值链仍需继续做页面级回归，尤其是分享页、变量页和控制器配置中 DatePicker / RangePicker 的默认值与回显边界。
 - 完成定义
   - 前端生产代码检索 `moment` 结果清零，且项目自身依赖声明退出。
   - `task` 独立打包链重新生成后的产物与当前源码一致，不再携带旧 `moment` bundle。
