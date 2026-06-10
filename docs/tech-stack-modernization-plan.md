@@ -1649,12 +1649,14 @@
 3. `nashorn-core 15.4`
    - 当前状态：脚本执行与表达式能力仍依赖 Nashorn 兼容层。
    - 更现代替代：GraalJS。
+   - 2026-06-10 本轮推进：`JavascriptUtils` 已从 `NashornScriptEngineFactory` 直绑改为 JSR-223 标准脚本引擎发现，默认按 `graal.js -> js -> JavaScript -> javascript -> nashorn` 顺序尝试，也支持通过 `-Ddatart.script.engine=...` 或环境变量 `DATART_SCRIPT_ENGINE` 显式指定引擎名。`nashorn-core` 同步降为运行期依赖，编译期不再直接耦合 Nashorn 专有 API。
+   - 本轮收益：当前仍可继续使用 Nashorn 维持兼容，但后续切换到 GraalJS 时，主改动面可以收敛到依赖与启动参数，而不是继续改业务调用链。
    - 本仓库判断：这是明显老旧但高风险的运行时基座，必须放在单独专项中，且先把脚本执行边界盘清楚。
 
 4. `mybatis-generator-core 1.4.0`
    - 当前状态：主要服务代码生成，不是主运行时链。
    - 更现代替代：升级生成器版本，或把生成链迁出主模块到独立 profile / 工具模块。
-   - 2026-06-10 最新推进：`core/pom.xml` 已移除主依赖里的 `mybatis-generator-core`，并把生成器能力收口到 `mybatis-generator` Maven profile，避免继续污染默认运行时类路径。
+   - 2026-06-10 最新推进：`core/pom.xml` 已把 `mybatis-generator-core` 从默认运行时依赖降为 `provided`，并把生成器执行入口收口到 `mybatis-generator` Maven profile。这样主源码中的 `MybatisGeneratorPlugin` 仍可参与默认编译，但运行时产物不再携带该依赖。
    - 本仓库判断：这类依赖收口的优先级虽然低于前端主栈清障和后端运行时基础设施改造，但它属于低风险、可直接落地的现代化治理项，已经适合先完成。
 
 5. `calcite-core 1.26.0`
