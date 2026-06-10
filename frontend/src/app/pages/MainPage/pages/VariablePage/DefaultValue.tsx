@@ -29,7 +29,6 @@ import {
 import { DateFormat } from 'app/constants';
 import { datartDayjs } from 'app/utils/date';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { TIME_FORMATTER } from 'globalConstants';
 import { memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { SPACE, SPACE_TIMES } from 'styles/StyleConstants';
@@ -59,6 +58,8 @@ export const DefaultValue = memo(
   }: DefaultValueProps) => {
     const [inputValue, setInputValue] = useState<any>(void 0);
     const t = useI18NPrefix('variable');
+    const resolvedDateFormat = dateFormat || DateFormat.DateTime;
+    const showDateTime = resolvedDateFormat === DateFormat.DateTime;
 
     useEffect(() => {
       setInputValue(void 0);
@@ -141,12 +142,12 @@ export const DefaultValue = memo(
       case VariableValueTypes.Date:
         conditionalInputComponent = (
           <DatePicker
-            format={TIME_FORMATTER}
+            format={resolvedDateFormat}
             className="input"
             disabled={!!disabled}
             onChange={datePickerConfirm}
             showNow
-            showTime
+            showTime={showDateTime}
           />
         );
         break;
@@ -182,7 +183,7 @@ export const DefaultValue = memo(
                   const label =
                     type !== VariableValueTypes.Date
                       ? val
-                      : datartDayjs(val).format(dateFormat);
+                      : datartDayjs(val).format(resolvedDateFormat);
                   return (
                     <Tag
                       key={label}

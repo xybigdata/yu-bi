@@ -243,6 +243,7 @@
 - `frontend/src/app/utils/time.ts`、`frontend/src/app/utils/chartHelper.ts` 以及部分只依赖“当前时间格式化”的调用点，已开始从 `moment` 迁到 `dayjs`。
 - `frontend/src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/TimeFilter.tsx` 已不再把 Dayjs 值直接 `toString()` 回写到过滤条件，而是统一按 `TIME_FORMATTER` 序列化，避免不同运行环境下字符串语义漂移。
 - `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/utils.ts` 中仍带 `Moment` 命名的控制器预处理函数已改为 `formatControlDateToDayjs`，并同步收口相关局部命名，避免把历史语义继续扩散到新的时间链路中。
+- `frontend/src/app/pages/MainPage/pages/VariablePage/DefaultValue.tsx` 的日期默认值录入控件已跟随变量自身 `dateFormat` 切换格式与 `showTime` 行为，避免“展示格式是日期、录入控件却强制日期时间”的边界不一致。
 - 这一步仍然刻意不碰 DatePicker / RangePicker 值类型和表单状态，以便把时间工具层与控件层的风险拆开治理。
 
 迁移边界与批次策略：
