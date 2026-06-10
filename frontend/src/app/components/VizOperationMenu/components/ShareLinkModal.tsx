@@ -31,7 +31,6 @@ import {
 } from 'app/pages/MainPage/pages/MemberPage/slice/thunks';
 import { selectIsOrgOwner } from 'app/pages/MainPage/slice/selectors';
 import { TIME_FORMATTER } from 'globalConstants';
-import moment from 'moment';
 import { FC, memo, useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -194,7 +193,9 @@ const ShareLinkModal: FC<{
               );
             }}
             onChange={(_, dateString) => {
-              setExpiryDate(Array.isArray(dateString) ? dateString[0] || '' : dateString);
+              setExpiryDate(
+                Array.isArray(dateString) ? dateString[0] || '' : dateString,
+              );
             }}
           />
         </FormItemEx>

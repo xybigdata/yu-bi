@@ -31,7 +31,6 @@ import { RelationFilterValue } from 'app/types/ChartConfig';
 import { datartDayjs, DatartDateLike } from 'app/utils/date';
 import { FilterSqlOperator, TIME_FORMATTER } from 'globalConstants';
 import i18next from 'i18next';
-import moment from 'moment';
 import {
   DateControllerTypes,
   NumericalControllerTypes,
@@ -138,14 +137,14 @@ export const formatControlDateToMoment = (config: ControllerConfig) => {
     if (filterDate.startTime && filterDate.startTime.exactValue) {
       if (typeof filterDate.startTime.exactValue === 'string') {
         let exactTime = filterDate.startTime.exactValue;
-        let newExactTime = moment(exactTime, TIME_FORMATTER);
+        let newExactTime = datartDayjs(exactTime, TIME_FORMATTER);
         config.controllerDate.startTime.exactValue = newExactTime;
       }
     }
     if (filterDate.endTime && filterDate.endTime.exactValue) {
       if (typeof filterDate.endTime.exactValue === 'string') {
         let exactTime = filterDate.endTime.exactValue;
-        let newExactTime = moment(exactTime, TIME_FORMATTER);
+        let newExactTime = datartDayjs(exactTime, TIME_FORMATTER);
         config.controllerDate.endTime!.exactValue = newExactTime;
       }
     }

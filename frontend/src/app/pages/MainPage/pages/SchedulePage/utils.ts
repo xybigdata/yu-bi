@@ -1,6 +1,5 @@
 import { TIME_FORMATTER } from 'globalConstants';
 import { datartDayjs } from 'app/utils/date';
-import moment from 'moment';
 import { PermissionLevels, ResourceTypes } from '../PermissionPage/constants';
 import { JobTypes, TimeModes, VizTypes } from './constants';
 import { AddScheduleParams, Schedule, VizContentsItem } from './slice/types';
@@ -144,7 +143,9 @@ export const toEchoFormValues = ({
     index,
     jobType: type as JobTypes,
     dateRange:
-      startDate && endDate ? [moment(startDate), moment(endDate)] : undefined,
+      startDate && endDate
+        ? [datartDayjs(startDate), datartDayjs(endDate)]
+        : undefined,
     subject: configObj?.subject,
     textContent: configObj?.textContent || '',
     imageWidth: configObj?.imageWidth,

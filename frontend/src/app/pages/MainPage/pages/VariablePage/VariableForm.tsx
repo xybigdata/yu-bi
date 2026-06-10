@@ -20,10 +20,10 @@ import { Checkbox, Form, FormInstance, Input, Radio } from 'antd';
 import { ModalForm, ModalFormProps } from 'app/components';
 import { DateFormat } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { datartDayjs } from 'app/utils/date';
 import { fetchCheckName } from 'app/utils/fetch';
 import debounce from 'debounce-promise';
 import { DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
-import moment from 'moment';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SPACE_XS } from 'styles/StyleConstants';
 import styled from 'styled-components';
@@ -82,7 +82,7 @@ export const VariableForm = memo(
             ? JSON.parse(editingVariable.defaultValue)
             : [];
           if (valueType === VariableValueTypes.Date && !expression) {
-            defaultValue = defaultValue.map(str => moment(str));
+            defaultValue = defaultValue.map(str => datartDayjs(str));
           }
           setType(type);
           setValueType(valueType);

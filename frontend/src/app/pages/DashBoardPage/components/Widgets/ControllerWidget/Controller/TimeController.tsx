@@ -18,7 +18,7 @@
 import { DatePicker, Form, FormItemProps } from 'antd';
 import { PickerType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import { formatDateByPickType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/utils';
-import moment from 'moment';
+import { datartDayjs } from 'app/utils/date';
 import React, { memo } from 'react';
 import styled from 'styled-components';
 
@@ -69,7 +69,7 @@ export const TimeController: React.FC<SingleTimeSetProps> = memo(
           <DatePicker
             style={{ width: '100%' }}
             allowClear={true}
-            value={value ? moment(value) : null}
+            value={value ? datartDayjs(value) : null}
             showTime
             onChange={_onChange}
             className="control-datePicker"
@@ -79,7 +79,7 @@ export const TimeController: React.FC<SingleTimeSetProps> = memo(
           <DatePicker
             style={{ width: '100%' }}
             allowClear={true}
-            value={value ? moment(value) : null}
+            value={value ? datartDayjs(value) : null}
             onChange={_onChange}
             picker={pickerType as any}
             className="control-datePicker"

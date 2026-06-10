@@ -19,26 +19,26 @@
 import { DatePicker } from 'antd';
 import { FilterConditionType } from 'app/constants';
 import { ConditionBuilder } from 'app/models/ChartFilterCondition';
+import { datartDayjs } from 'app/utils/date';
 import {
   formatTime,
   getTime,
   recommendTimeRangeConverter,
 } from 'app/utils/time';
 import { TIME_FORMATTER } from 'globalConstants';
-import moment from 'moment';
 import { FC, memo, useMemo } from 'react';
 import { PresentControllerFilterProps } from '.';
 const { RangePicker } = DatePicker;
 
-const toMoment = t => {
+const toDayjs = t => {
   if (!t) {
-    return moment();
+    return datartDayjs();
   }
   if (Boolean(t) && typeof t === 'object' && 'unit' in t) {
     const time = getTime(+(t.direction + t.amount), t.unit)(t.unit, t.isStart);
-    return moment(formatTime(time, TIME_FORMATTER));
+    return datartDayjs(formatTime(time, TIME_FORMATTER));
   }
-  return moment(t);
+  return datartDayjs(t);
 };
 
 const RangeTimePickerFilter: FC<PresentControllerFilterProps> = memo(
@@ -52,14 +52,14 @@ const RangeTimePickerFilter: FC<PresentControllerFilterProps> = memo(
 
     const rangeTimes = useMemo(() => {
       if (condition?.type === FilterConditionType.RangeTime) {
-        const startTime = toMoment(condition?.value?.[0]);
-        const endTime = toMoment(condition?.value?.[1]);
+        const startTime = toDayjs(condition?.value?.[0]);
+        const endTime = toDayjs(condition?.value?.[1]);
         return [startTime, endTime];
       }
       if (condition?.type === FilterConditionType.RecommendTime) {
-        return recommendTimeRangeConverter(condition?.value)?.map(toMoment);
+        return recommendTimeRangeConverter(condition?.value)?.map(toDayjs);
       }
-      return [moment(), moment()];
+      return [datartDayjs(), datartDayjs()];
     }, [condition?.type, condition?.value]);
 
     return (

@@ -8,7 +8,7 @@
 - 后端主框架：Spring Boot 3.5.12，Spring Cloud 2025.0.1。
 - 构建工具：Maven，`maven-compiler-plugin` 3.14.1，`maven-assembly-plugin` 3.8.0，`exec-maven-plugin` 3.6.3。
 - 前端运行时：本机 Node 26 可启动，默认开发和生产构建已切换到 Vite 5。
-- 前端主框架：React 18、React Router 6.30.1、Ant Design 4.24、TypeScript 5.9；CRA/CRACO 已退出前端主工作流。
+- 前端主框架：React 18、React Router 6.30.1、Ant Design 5.26、TypeScript 5.9；CRA/CRACO 已退出前端主工作流。
 - 已验证基线：
   - `npm run checkTs` 通过。
   - `npm run build:task` 通过。
@@ -128,7 +128,7 @@
 
 ### 已确定目标线，分批迁移中
 
-- Ant Design：`4.24.x -> 5.x`，6.x 暂不作为本轮硬目标
+- Ant Design：已进入 `5.26.x` 稳定线，6.x 暂不作为本轮硬目标
 - `@ant-design/icons`：随 Ant Design 5 同步进入当前主线
 - Jest：`27.5.x -> 30.x`，若验证成本更低可改为 Vitest，但二选一后必须收敛为单栈
 - `styled-components`：`5.3.x -> 6.x`
@@ -196,6 +196,25 @@
 
 当前状态补充：
 
+- 已完成受控试升并通过回归：
+  - `antd 4.24.x -> 5.26.2`
+  - `@ant-design/icons -> 5.6.1`
+  - `@ant-design/pro-table -> @ant-design/pro-components 2.8.10`
+  - `@antv/s2 -> 2.7.1`
+  - `@antv/s2-react -> 2.3.1`
+  - AntD 样式入口已从 `antd.variable.min.css` 切到 `antd/dist/reset.css`
+  - `npm run checkTs`、`npm run build`、`npm run lint:style` 已再次通过
+- 本轮试升中额外完成的真实兼容专题：
+  - `EditableProTable` 只读数组签名适配
+  - `Button type="ghost"` 等已废弃属性收口
+  - `message.warn -> message.warning`
+  - `Transfer` / `Checkbox.Group` / `Slider` / `DatePicker` 类型收紧适配
+  - `@antv/s2` 2.x tooltip、totals、interaction、palette 与事件 prop 映射
+- 因此本阶段状态应从“升级前清障”切换为“主升级已进入稳定化阶段”，后续重点不再是 AntD 4 旧 API 搜索清零，而是：
+  1. 继续做定向页面回归；
+  2. 清理受控试升期间留下的 compat 壳；
+  3. 推进时间体系和富文本等与 AntD 5 联动的后续专题。
+
 - 已继续收口并通过回归验证的前置清障项包括：
   - `visible -> open`、`onVisibleChange/onDropdownVisibleChange -> onOpenChange`
   - `Collapse.Panel -> items`
@@ -203,21 +222,15 @@
   - `Dropdown dropdownRender -> popupRender`
   - `Dropdown destroyPopupOnHide -> destroyOnHidden`
   - `Select dropdownMatchSelectWidth -> popupMatchSelectWidth`
-- 以上改动当前大多仍通过局部 compat props 壳承接，这是刻意选择：
-  - 目标是先把业务语义收口到 AntD 5 方向；
-  - 同时保持当前 `antd 4.24.16` 类型链可编译；
-  - 等真正切换到 AntD 5 后，再统一删除这些 compat 壳。
-- 当前不宜零散硬改的残留主要集中在 `TreeSelect`：
-  - 本地依赖复核显示，当前安装的 `antd 4.24.16` / `rc-tree-select` 仍明确暴露 `dropdownMatchSelectWidth`、`dropdownStyle` 等旧接口；
-  - 仓库里剩余 `TreeSelect dropdownRender/dropdownStyle` 命中点，现阶段更适合在正式升级 `antd` 后结合真实类型面一起处理，而不是提前用不充分的替代口径强推。
-- 当前进入 AntD 5 主升级前，剩余更像“真实阻塞”的项主要是：
-  - 少量 `TreeSelect` 旧 popup props
-  - `SetFieldType` 里 submenu 级 `popupClassName` 这类菜单细节
-  - `Popup` / `Popover` / `Dropdown` 上仍保留的 `overlayClassName` 样式挂载点，需要在真实升级时再判断是否迁到 `classNames` / `styles`
-- 因此下一阶段最合理的动作不是继续无限清零搜索结果，而是：
-  1. 保持当前已验证清障成果；
-  2. 发起一次受控的 `antd@5` 试升；
-  3. 根据真实编译报错、类型缺口和页面回归结果反推剩余改动面。
+- 以上改动最初通过局部 compat props 壳承接；当前既然 `antd 5.26.2` 已落地，这些壳的角色也从“升级前开路”转成“升级后稳定化缓冲层”。
+- 当前仍值得继续清理的残留主要集中在：
+  - 少量 `TreeSelect` 旧 popup props 与样式挂载点；
+  - `SetFieldType` 里 submenu 级 `popupClassName` 这类菜单细节；
+  - `Popup` / `Popover` / `Dropdown` 上为了过渡保留的 compat props 壳。
+- 因此下一阶段最合理的动作不再是继续为 AntD 5 开路，而是：
+  1. 以当前 `antd 5` 基线为前提，推进 `moment -> dayjs`；
+  2. 对富文本、控制器、分享页和图表时间筛选器做 AntD 5 下的定向回归；
+  3. 按批次删除已经只为过渡存在的 compat props 壳。
 
 ### Phase C：时间体系现代化
 
@@ -234,7 +247,7 @@
 
 - 第一批：优先迁移纯格式化、比较、序列化出口，以及只剩 `moment` 类型 import 的轻残留。这一批允许直接收口到自有 `dayjs` 适配层或项目内显式类型。
 - 第二批：时间筛选器、控制器配置和请求参数构造这类“值会落库或进接口”的链路，先迁字符串出口与内部比较逻辑，再保留 AntD 4 仍需要的 `Moment` 值对象回显能力。
-- 第三批：DatePicker / RangePicker 的值对象链、表单默认值、`Moment` 类型签名和 locale 联动，统一留到 AntD 5 时间组件专题处理，不做零散硬改。
+- 第三批：DatePicker / RangePicker 的值对象链、表单默认值、`Moment` 类型签名和 locale 联动，在当前 AntD 5 基线上统一切到 `dayjs` / 字符串边界。
 - 批次约束：每一批都必须附带专项回归，重点覆盖分享页、变量页、调度页、仪表板控制器、图表时间筛选器与请求参数构造，避免“看似清了 import，实际破坏控件值链”的假收口。
 
 - 目标替代方案
@@ -244,9 +257,10 @@
   - 时间格式化工具、筛选器默认值、日期控件、locale 和相对时间计算统一到自有时间适配层。
   - 清理 `moment` 直连调用，避免把时间计算散落在组件中。
 - 当前证据
-  - 仓库当前 `moment` 使用面约 `70` 处，属于必须成批治理的主链依赖，不能零散替换。
+  - `frontend/src` 生产代码中的直接 `moment` import / `moment(...)` 调用已检索清零。
+  - 当前剩余问题主要是依赖声明、历史构建产物和第三方 peer 约束，而不是业务源码仍在继续扩散 `moment`。
 - 完成定义
-  - 前端生产代码检索 `moment` 结果清零，或只剩极少量被明确标注的第三方过渡层。
+  - 前端生产代码检索 `moment` 结果清零，且依赖声明与历史构建产物完成最终收口，或只剩被明确标注的第三方过渡层。
   - 时间筛选、控制器、分享页、故事板、图表请求参数构造具备专项回归验证。
 
 ### Phase D：富文本与媒体插件链现代化
@@ -293,42 +307,45 @@
 
 | 类别 | 当前栈 | 当前状态 | 现代化替代方案 | 优先级 |
 | --- | --- | --- | --- | --- |
-| 前端 UI 基座 | `antd 4.24.x` | 仍在主运行时，已完成多批 API 清障 | 升级到 `antd 5.x`，同步升级 `@ant-design/icons` | 高 |
-| 时间体系 | `moment` | 仍有较大残留，已建立 `dayjs` 适配层 | 全面迁到 `dayjs`，仅在控件值类型阶段做局部适配 | 高 |
-| 富文本 | `react-quill 1.3.5` + `quilljs-markdown` | 偏旧，且与 Quill 2 生态脱节 | 优先评估 `react-quill 2.x` / Quill 2 原生封装 | 高 |
+| 前端 UI 基座 | `antd 5.26.x` | 已进入当前稳定主线，仍需做页面级回归与 compat 壳清理 | 保持 5.x 稳定线，暂不追 6.x | 已完成主升级，持续稳定化 |
+| 时间体系 | `moment` | 生产代码直连调用已清零，仍有依赖声明与历史产物待收口 | 全面迁到 `dayjs`，仅在控件值类型阶段做局部适配 | 高 |
+| 富文本 | `react-quill 1.3.5` + `quilljs-markdown` | 偏旧，且仓库内使用面约 `110` 处，改动半径大 | 优先评估 `react-quill 2.x` / Quill 2 原生封装 | 高 |
 | 代码编辑器 | `react-monaco-editor 0.59.0` | 已退出；改为仓库自有 Monaco React 适配层 | 直接基于 `monaco-editor` 维护自有适配组件 | 已完成 |
-| 故事播放 | `reveal.js 4.1.0` | 仍可用，但版本较旧 | 先升级到较新稳定线，长期再评估 React 原生故事方案 | 中 |
-| 颜色选择器 | `react-color 2.19.3` | 老牌库，长期维护信号一般 | 原生色彩输入或更轻的现代封装 | 中 |
+| 故事播放 | `reveal.js 6.0.1` | 已在较新稳定线，短期无需继续追大版本 | 保持当前主线，长期再评估 React 原生故事方案 | 低 |
+| 颜色选择器 | 自有轻量实现 | 已退出第三方重包装依赖 | 保持自有实现 | 已完成 |
 | 尺寸监听 | `react-resize-detector` | 已退出 | 原生 `ResizeObserver` + 自有 hook | 已完成 |
 | 视频播放 | `video-react` | 已退出 | 原生 `<video>` | 已完成 |
 | 看板历史记录 | `redux-undo` | 仍在使用，但功能面集中 | 可保留；若继续现代化，可评估 RTK reducer 历史层 | 中低 |
-| 网格布局 | `react-grid-layout` | 使用面集中在看板编辑/播放 | 先保留；若出现 React 18/AntD5 兼容问题再专项治理 | 中低 |
-| 虚拟列表 | `react-window` | 使用面小，运行风险可控 | 若性能与 API 满足需求可保留 | 低 |
-| 后端安全 | `Shiro` | 明显历史架构包袱 | `Spring Security` | 高，但单独专项 |
-| 后端连接池 | `Druid` | 历史包袱，且偏监控导向 | `HikariCP` | 高，但单独专项 |
-| 后端脚本引擎 | `Nashorn` | 已退场技术 | `GraalJS` | 中高，单独专项 |
+| 网格布局 | `react-grid-layout` + `flexlayout-react` | `react-grid-layout` 是核心依赖；`flexlayout-react` 只在图表工作台局部使用 | 暂保留；出现 React 18/AntD5 兼容问题再专项治理 | 中低 |
+| 虚拟列表 | `react-window` | 使用面仅约 `2` 处，运行风险可控 | 若性能与 API 满足需求可保留 | 低 |
+| 后端安全 | `Shiro 2` | 明显历史架构包袱，仓库使用面约 `71` 处 | `Spring Security` | 高，但单独专项 |
+| 后端连接池 | `Druid` | 历史包袱，且偏监控导向，仓库使用面约 `21` 处 | `HikariCP` | 高，但单独专项 |
+| 后端脚本引擎 | `Nashorn` | 已退场技术，当前直接使用面约 `8` 处 | `GraalJS` | 中高，单独专项 |
 | 浏览器自动化 | `PhantomJS` | 已退出主链 | `Selenium 4` / `Playwright` | 已完成主链退出 |
+| SQL 解析内核 | `Apache Calcite 1.26.0` | 使用面极深，仓库命中约 `1000+` 处 | 升级到较新稳定线，但必须单独治理 parser / JDBC provider | 高，但单独专项 |
+| 样式系统 | `styled-components 6.1.19` | 已进入 v6 主线 | 保持当前主线；关注 `shouldForwardProp` / iframe target / SSR 行为 | 已完成主升级，持续稳定化 |
 
 ### Phase E：后端架构专项现代化
 
 目标：把仍能运行、但已经属于历史架构包袱的后端基础设施列为专项退出对象。
 
 - 安全专项：`Shiro -> Spring Security`
-  - 当前证据：仓库内 `shiro` 使用面约 `41` 处。
+  - 当前证据：仓库内 `shiro` 使用面约 `71` 处，真实改动面已从权限检查、Realm、Subject 获取、缓存到服务层权限字符串拼装。
   - 目标方案：统一认证、鉴权、remember-me、OAuth2 登录和过滤器链到 Spring Security 体系。
   - 前提：JWT、OAuth 客户端、分享页认证链已经稳定。
 - 数据源专项：`Druid -> HikariCP`
-  - 当前证据：仓库内 `druid` 使用面约 `23` 处。
+  - 当前证据：仓库内 `druid` 使用面约 `21` 处，但集中在 server 主数据源和 JDBC provider 工厂，属于“使用面不大、耦合度不低”的典型专项。
   - 目标方案：服务端主链统一池化到 HikariCP，仅在确有必要的 provider 子域保留局部适配层。
   - 前提：多数据源配置、监控项、连接参数语义和 JDBC provider 行为全部盘清。
 - 脚本专项：`Nashorn -> GraalJS`
-  - 当前证据：脚本引擎相关使用面约 `9` 处。
+  - 当前证据：脚本引擎相关使用面约 `8` 处，当前核心实现集中在 [JavascriptUtils.java](/Users/chencongyu/WorkHome/VSProjects/open-project/datart/core/src/main/java/datart/core/common/JavascriptUtils.java:1)。
   - 目标方案：先建立自有脚本执行边界，再替换底层引擎实现。
   - 前提：明确脚本执行的输入输出模型、性能约束和安全边界。
 - 代码生成专项：`mybatis-generator-core`
   - 当前证据：生成链相关使用面约 `14` 处。
   - 目标方案：升级到较新生成器版本，或迁出主运行时模块到独立 profile / 工具模块。
 - Calcite 专项
+  - 当前证据：仓库内 `calcite` / `SqlParser` / `SqlNode` 相关命中约 `1008` 处，主要集中在 `data-providers/data-provider-base` 的 parser、自定义 SQL 方言和 JDBC provider。
   - 目标方案：升级到较新稳定线，但必须以 SQL 解析、函数、JDBC provider 兼容回归为前提。
 - 完成定义
   - 上述架构专题至少完成专项设计、目标选型、迁移顺序与验收策略，且不再作为“未知技术债”悬空。
@@ -361,9 +378,43 @@
 ### 里程碑状态
 
 - `M0 已完成`：JDK 21、Spring Boot 3、Spring Cloud 2025、Node 26、Vite 5、React 18、Router 6 依赖切换、RTK 2、React Redux 9、Selenium 4、后端生产代码 `fastjson` 清零。
-- `M1 进行中`：前端 Router 兼容层收口、Ant Design 5 升级前清障、测试工具链去 CRA 化、CI/Docker 与当前基线对齐。
+- `M1 已完成`：前端 Router 兼容层收口、Ant Design 5 主升级、测试工具链去 CRA 化、CI/Docker 与当前基线对齐。
 - `M2 已完成`：JWT 升级、HttpClient 5、POI/Guava/Commons 系列老基础库清理。
-- `M3 进行中`：H2 2.x demo 数据重建已完成，连接池与安全框架长期演进策略待落地。
+- `M3 进行中`：`moment -> dayjs` 收尾、富文本现代化，以及 H2 2.x 之后的连接池、安全框架、脚本引擎与 Calcite 长期演进策略落地。
+
+## 下一批建议执行顺序
+
+结合当前真实基线、依赖使用面和回归成本，下一批升级不建议继续追 Router 7 或 AntD 6，而应按下面顺序推进：
+
+1. `moment -> dayjs`
+   - 原因：当前使用面已经收敛到约 `28` 处，且 AntD 5 已经落地，时间值链专题的前提已经具备。
+   - 收益：可以删除一个维护模式依赖，并统一前端时间适配入口。
+   - 风险：DatePicker / RangePicker、控制器配置、分享页和变量页需要定向回归。
+
+2. 富文本内核现代化
+   - 对象：`react-quill 1.3.5`、`quilljs-markdown`
+   - 原因：使用面约 `110` 处，属于前端剩余最深的旧生态依赖之一。
+   - 策略：先拆自定义 blot / toolbar / 只读渲染适配层，再评估 `react-quill 2.x` 或 Quill 2 原生封装。
+
+3. `styled-components` 稳定化复核
+   - 当前已在 `6.1.19`，不需要再做版本升级。
+   - 但需要检查：
+     - 是否存在自定义 props 透传到 DOM 的告警；
+     - iframe / popup / embed 场景是否需要统一 `StyleSheetManager target`；
+     - 是否需要显式 `shouldForwardProp` 策略。
+
+4. 后端专项预研与分拆
+   - 先不要直接同时动 `Shiro`、`Druid`、`Nashorn`、`Calcite`。
+   - 应拆成四个独立专题，并先补设计和验证计划：
+     - `Shiro -> Spring Security`
+     - `Druid -> HikariCP`
+     - `Nashorn -> GraalJS`
+     - `Calcite 1.26 -> 较新稳定线`
+
+5. Router 7 和 AntD 6 暂缓
+   - `React Router 6.30.x` 当前已经在可接受主线。
+   - `AntD 5.26.x` 刚进入稳定化阶段。
+   - 两者现在继续追大版本的收益都低于时间体系和富文本现代化。
 
 ### 每个 checkpoint 的强制约束
 
@@ -581,12 +632,12 @@
 - Vite production preview 登录页可渲染。
 - 登录、组织/资源列表、图表或仪表板基础流程可操作。
 
-### 阶段 4：UI 与路由现代化
+### 阶段 4：UI 与路由现代化（历史阶段记录，当前已切到稳定化）
 
 目标：升级用户界面和路由主线，同时控制视觉和交互回归。
 
 升级项：
-- Ant Design 4 先评估升级到 5，再评估 6。
+- Ant Design 5 主升级已完成，6 暂不作为当前优先级。
 - `@ant-design/icons`、`@ant-design/pro-table` 同步升级。
 - React Router 5 升级到 6/7。
 - 替换或适配不再维护的 UI 依赖。
@@ -905,37 +956,35 @@
 2. 复杂页面回归：`VizPage`、`ViewPage`、成员页、权限页、故事板。
 3. 兼容层瘦身：评估 `CompatRoute`、`CompatRoutes`、`CompatRedirect` 是否可继续向 Router 6 原生组件收缩。
 
-### B. Ant Design 5 backlog
+### B. Ant Design 5 backlog（当前已转为稳定化 backlog）
 
 当前扫描结论：
 - 主业务弹窗和分享页的 `Modal` / `Drawer` / `Popover` 已基本收口到 `open` / `onOpenChange`，`visible` 的搜索结果里目前有相当一部分只是内部状态字段或 styled-components 私有属性，并非 AntD 4 旧 API。
-- JSX `Menu.Item` / `Menu.SubMenu` / `Menu.Divider` 在业务代码里已基本清零；当前更真实的阻塞点变成：
-  - 若干 `dropdownRender` 自定义菜单入口仍直接拼 `Menu` 结构
-  - 少量封装层仍兼容 `visible ?? open` 双入参
-  - `antd 4.24.16` 仍未真正切到 v5 token / 时间组件主线
-- 自 2026-06-10 这轮持续清障之后，以下语义已基本完成“升级前收口”：
+- JSX `Menu.Item` / `Menu.SubMenu` / `Menu.Divider` 在业务代码里已基本清零；当前更真实的稳定化重点变成：
+  - 若干 `dropdownRender` 自定义菜单入口仍直接拼 `Menu` 结构；
+  - 少量封装层仍兼容 `visible ?? open` 双入参；
+  - token 主题链、时间组件值链和 `TreeSelect` 旧 props 仍需继续收口。
+- 自 2026-06-10 这轮持续清障之后，以下语义已基本完成主升级前的历史阻塞清理：
   - `Dropdown dropdownRender -> popupRender`
   - `Dropdown destroyPopupOnHide -> destroyOnHidden`
   - `Select dropdownMatchSelectWidth -> popupMatchSelectWidth`
   - 成员、变量、分享页等高频弹层的 `open` / `onOpenChange` 语义
 - 当前剩余 backlog 需要分层看待：
-  - 可在 `antd 4.24` 上继续先清的：
-    - 少量 `Popup` / `Popover` / `Dropdown` 的样式挂载点命名
-    - 个别菜单或子菜单配置上的 `popupClassName`
-  - 不宜脱离主升级单独硬改的：
-    - `TreeSelect dropdownRender/dropdownStyle/dropdownMatchSelectWidth`
-    - 依赖当前 `rc-tree-select` 旧 props 的控制器和结构视图场景
-  - 需要等试升后统一处理的：
-    - token / `ConfigProvider` 主题链
-    - DatePicker / RangePicker 与 `moment` 值对象链联动
-    - 第三方依赖与 AntD 5 的类型兼容细节
+  - 可以继续直接清理的：
+    - 少量 `Popup` / `Popover` / `Dropdown` 的样式挂载点命名；
+    - 个别菜单或子菜单配置上的 `popupClassName`；
+    - 仍只为过渡存在的 compat props 壳。
+  - 需要和相关专题联动处理的：
+    - `TreeSelect dropdownRender/dropdownStyle/dropdownMatchSelectWidth`；
+    - token / `ConfigProvider` 主题链；
+    - DatePicker / RangePicker 与 `dayjs` 值对象链联动；
+    - 第三方依赖与 AntD 5 的类型兼容细节。
 
 工作包拆分：
 1. 清理内部组件与样式层把 `visible` 当作私有属性的历史命名，降低对 AntD 旧 API 的搜索噪音。
-2. 收口少量仍能在 `antd 4.24` 上明确替代的 `Popup/Popover/Dropdown` 样式与菜单细节。
-3. 发起 `antd 5` 试升，拿到真实编译错误、类型报错和页面回归清单。
-4. 基于试升结果集中处理 `TreeSelect`、token 主题链和时间组件值链。
-5. AntD 5 真正升级与回归。
+2. 收口少量仍能在当前 `antd 5` 基线上继续清理的 `Popup/Popover/Dropdown` 样式与菜单细节。
+3. 结合 `moment -> dayjs` 专题集中处理 `TreeSelect`、token 主题链和时间组件值链。
+4. 继续做页面级回归并删除过渡 compat 壳。
 
 ### C. 前端测试栈 backlog
 
@@ -983,10 +1032,10 @@
 
 基于当前风险和收益，建议接下来的 5 个 checkpoint 按这个顺序推进：
 
-1. AntD 5 前置清障：优先处理真实的 `dropdownRender` / Popup 兼容壳、主题链和时间组件边界。
-2. `moment -> dayjs`：继续沿“格式化出口 -> 类型残留 -> 值链专题”分批收口。
-3. 富文本与故事播放专题：评估 `react-quill 1.x` 和 `reveal.js 4.1.x` 的现代替代或升级路径。
-4. 测试输出治理：清理 Jest warning、React Router future flag 和历史测试噪音。
+1. `moment -> dayjs`：继续沿“格式化出口 -> 类型残留 -> 值链专题”分批收口。
+2. 富文本与故事播放专题：评估 `react-quill 1.x` 和当前 `reveal.js 6.x` 的后续现代化路径。
+3. `styled-components 6` 稳定化复核：继续检查 `shouldForwardProp`、iframe/popup target 和测试告警。
+4. 测试输出治理：继续清理 Jest warning、`act(...)` 警告和 React Router future flag 噪音。
 5. 后端长期基础库专题：Guava / Commons Text / AspectJ，以及 Druid / Shiro / Nashorn 的专项设计。
 
 ## 最终完成定义
@@ -1072,18 +1121,18 @@
    - 调研结论：这批升级的关键不在 API，而在数据库文件格式。旧 `1.4.200` demo 库不能被 `2.4.240` 直接打开，必须先用旧版导出 SQL，再在新版中重建导入。
    - 风险判断：当前版本迁移已完成；剩余风险主要在于后续若继续维护 demo 数据，必须沿用“脚本化重建”路径，而不能再回到直接提交旧版 H2 文件库。
 
-### 二类：前端仍有明显年代感，但需要结合大版本迁移节奏推进
+### 二类：前端仍有历史包袱，但需要结合当前基线继续推进
 
-1. Ant Design 4.24
-   - 现状：已经在 4.x 最后稳定线，但仍不是当前主线。
-   - 更现代替代：Ant Design 5。
-   - 当前阻塞：复杂 Dropdown/Menu/Modal/Popover 历史 API 和 less 主题链仍需继续清理。
+1. Ant Design 5.26.x
+   - 现状：主升级已完成，当前问题已从“大版本切换”转成页面回归、compat 壳删除和 token/时间值链稳定化。
+   - 更现代替代：当前继续保持 5.x 稳定线，不追 6.x。
+   - 当前阻塞：少量 `TreeSelect` 旧 props、主题链和时间组件值链还需要继续收口。
 
-2. Jest 27 测试链
-   - 现状：运行、构建已完全脱离 CRA；测试转译链也已经脱离 `babel-preset-react-app`，但整体仍停留在 `jest 27.5.1`。ESLint 主链则已脱离 `eslint-config-react-app`，进入项目自有显式依赖模式。
-   - 更现代替代：独立升级到 Jest 29/30，或评估迁到 Vitest。
-   - 调研结论：Jest 官方已在 2025-06-04 发布 Jest 30，说明上游仍积极维护；当前项目属于“已脱离 CRA 但测试栈仍留在 CRA 时代”的典型状态。
-   - 风险判断：建议先做测试配置去 CRA 化，再决定直接上 Jest 30 还是迁 Vitest。
+2. Jest 29 测试链
+   - 现状：运行、构建与测试转译链都已脱离 CRA，当前已经落到 `jest 29.7.0` 稳定线。
+   - 更现代替代：继续评估 Jest 30 或 Vitest，但都不是当前最高优先级。
+   - 调研结论：这一项的“老旧性”已经显著下降，剩余重点是测试 warning、`act(...)` 告警和运行速度治理。
+   - 风险判断：短期继续保持 Jest 29 更稳，等富文本和时间链路稳定后再评估是否迁到 Vitest。
 
 3. `styled-components 5.3.3` + `styled-components/macro` 兼容壳
    - 现状：源码导入已经从 `styled-components/macro` 全量收口到 `styled-components`，并已继续升级到 `styled-components 6.1.19`；社区 `@types/styled-components` 也已移除。
@@ -1092,10 +1141,10 @@
    - 风险判断：这批升级已完成；当前剩余风险主要是测试输出里少量 React warning，与 `styled-components` 版本升级本身无关。
 
 4. `moment`
-   - 现状：时间格式化、时间控件默认值、仪表板控制器等仍广泛依赖 `moment`。
+   - 现状：前端生产代码中的直接 `moment` 调用已清零，但依赖声明、历史构建产物和局部值对象链仍待最终收口。
    - 更现代替代：`dayjs`、`date-fns`，或结合 AntD 5 时间适配策略重构。
    - 调研结论：Moment 官方文档明确标注项目已进入 maintenance mode，属于典型“还能用，但不建议新项目继续扩展”的库。
-   - 风险判断：调用面很广，不适合拆成很小的随机提交；更适合与 AntD 5 升级联动处理。
+   - 风险判断：当前已具备按专题继续收尾的条件，但仍要重点回归 DatePicker / RangePicker、控制器配置、分享页和变量页。
 
 5. `react-app-polyfill`
    - 现状：此前仅剩运行时与测试 3 个入口的 `stable` 引用。
@@ -1521,7 +1570,7 @@
   - `frontend/src/app/pages/MainPage/pages/MemberPage/pages/RoleDetailPage/index.tsx`
   - `frontend/src/app/pages/MainPage/pages/MemberPage/pages/RoleDetailPage/MemberForm.tsx`
   - `frontend/src/app/pages/MainPage/pages/MemberPage/Sidebar/MemberList.tsx`
-- 这一步集中清理 AntD 4 仍被官方标记为 legacy 的标签页与树选择器写法，同时继续缩小成员管理和数据源配置弹层上的历史 `visible` 控制面，为 Ant Design 5 主升级继续清掉一批明确阻塞项。
+- 这一步集中清理 AntD legacy 标签页与树选择器写法，同时继续缩小成员管理和数据源配置弹层上的历史 `visible` 控制面，为 Ant Design 5 稳定化继续清掉一批明确阻塞项。
 
 ### 2026-06-10 全项目老旧技术栈复核结论
 
@@ -1529,31 +1578,26 @@
 
 #### A. 仍建议尽快推进的前端老旧栈
 
-1. `antd 4.24.16`
-   - 当前状态：仍停在 4.x 最后稳定线，功能可用，但已经不是当前主线。
-   - 官方方向：Ant Design 官方文档已经把 v5 作为当前主迁移目标，受影响最明显的是 `visible -> open`、`Menu children -> items`、主题 token / CSS-in-JS 这几类接口与机制。
-   - 本仓库判断：这是前端下一阶段最值得优先推进的现代化主题，因为它会直接影响后面的 `moment` 替换、主题链清理和菜单/弹层兼容层收口。
-
-2. `moment`
-   - 当前状态：仍覆盖本地化、时间格式化、时间筛选器默认值和多个控制器组件。
+1. `moment`
+   - 当前状态：前端生产代码中的直接调用已清零，但依赖声明、历史构建产物和局部值对象链仍待最终收口。
    - 官方状态：Moment 官方已明确将项目定义为 maintenance mode，只保留稳定性与关键安全/时区数据维护，不再建议新项目继续扩展。
    - 更现代替代：`dayjs` 是最自然的低迁移成本替代；若后续要进一步走函数式与按需组合，也可以评估 `date-fns`。
-   - 本仓库判断：不适合零散替换，更适合与 Ant Design 5 时间组件和 locale 策略一起做一批联动迁移。
+   - 本仓库判断：当前已经从“大面积散落依赖”进入“专题收尾阶段”，适合作为下一个 checkpoint 的主主题。
 
-3. `react-quill 1.3.5`
+2. `react-quill 1.3.5`
    - 当前状态：富文本编辑与展示仍依赖旧版 `react-quill` / Quill 1 生态。
    - 更现代替代：优先评估 `react-quill` 2.x 或直接评估仍活跃维护的 Quill 2 React 封装。
    - 本仓库判断：它不一定要先于 AntD 5，但已经属于“仍能跑、后续应替换”的旧编辑器基座，尤其需要关注 React 18 严格模式与自定义 blot 扩展兼容性。
 
-4. `video-react 0.15.0`
-   - 当前状态：视频组件仍建立在较老的 React 封装之上。
-   - 更现代替代：优先评估直接使用原生 `<video>` + 自定义控制层，或迁到维护更积极的播放器方案。
-   - 本仓库判断：当前使用面相对集中，适合作为后续独立小专题，而不是长期拖着不管。
+3. `styled-components 6.1.19` 稳定化
+   - 当前状态：版本本身已经不老，但样式系统仍需要继续复核 `shouldForwardProp`、iframe target 和测试输出里的样式告警。
+   - 更现代替代：当前不需要再换库，重点是把 v6 主线用稳。
+   - 本仓库判断：这不是版本升级专题，而是现代化升级后的稳定化专题。
 
-5. `reveal.js 4.1.x`
-   - 当前状态：故事板编辑、预览和分享播放页都依赖该库。
-   - 更现代替代：如果仍保留“幻灯片式故事播放”模型，可以先升级到较新的 Reveal.js 稳定线；若长期改成交互式故事画布，再评估更贴近 React 的方案。
-   - 本仓库判断：这不是最紧急的老旧项，但属于明确的“历史前端插件型依赖”，后续应至少提升到当前稳定线。
+4. `reveal.js 6.0.1`
+   - 当前状态：已经不再是明显过时版本，但故事板链路仍是历史插件型依赖。
+   - 更现代替代：短期继续保持当前稳定线，长期再评估更贴近 React 的故事方案。
+   - 本仓库判断：优先级低于 `moment` 和 `react-quill`，但仍值得在富文本/故事专题里一起复核。
 
 #### B. 后端中长期专项，当前不宜零散混改
 
@@ -1596,27 +1640,28 @@
 - React Router `6.30.x`
 - Redux Toolkit `2.x`
 - React Redux `9.x`
+- Ant Design `5.26.2`
 - `styled-components 6.1.19`
 - Jest `29.7.0`
 - Vite `5.x`
+- `video-react` 已退出
 
 #### D. 推荐的后续推进顺序
 
-1. Ant Design 5 前置清障
-   - 优先处理真实 AntD 组件上的 `visible`、`tooltipVisible`、旧 `Menu.*` JSX 子节点用法和 Dropdown overlay / menu 边界。
-2. Ant Design 5 主升级
-   - 同步处理 token / 主题链与时间组件兼容。
-3. `moment -> dayjs`
-   - 结合 AntD 5 的时间组件与 locale 策略一起收口。
-   - 当前复核后的更细分层：
-     - 可单独清理的轻残留已经越来越少；
+1. `moment -> dayjs`
+   - 继续收口依赖声明、历史构建产物和局部值对象链。
+   - 当前复核后的重点仍包括：
      - `frontend/src/app/pages/MainPage/pages/SchedulePage/types.ts`、`frontend/src/app/pages/MainPage/pages/SchedulePage/utils.ts`
      - `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types.ts`
      - `frontend/src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/TimeFilter.tsx`
      - `frontend/src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/RangeTimePickerFilter.tsx`
-       这些文件当前都仍与 AntD 4 `DatePicker` / `RangePicker` 的 `Moment` 值对象链直接耦合，应与 AntD 5 时间组件适配一起处理，而不是提前零碎替换。
-4. 富文本与媒体插件链
-   - `react-quill`、`video-react`、`reveal.js` 分别评估升级或替代。
+       这些文件和相关链路仍需要结合当前 AntD 5 时间组件行为继续回归，而不是只看 import 是否已清零。
+2. 富文本专题
+   - `react-quill`、`quilljs-markdown` 继续评估升级或替代。
+3. `styled-components 6` 稳定化复核
+   - 补查 `shouldForwardProp`、iframe / popup target 和测试输出告警。
+4. 故事播放链路复核
+   - `reveal.js 6.x` 保持当前版本，但继续确认编辑、预览、分享页行为。
 5. 后端长期专项
    - `Shiro -> Spring Security`
    - `Druid -> HikariCP`

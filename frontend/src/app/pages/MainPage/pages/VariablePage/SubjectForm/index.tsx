@@ -18,7 +18,7 @@
 
 import { Modal, ModalProps, Tabs } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import moment from 'moment';
+import { datartDayjs } from 'app/utils/date';
 import { Key, memo, useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -106,7 +106,7 @@ export const SubjectForm = memo(
             useDefaultValue: permission ? permission.useDefaultValue : true,
             value: permission?.value
               ? editingVariable.valueType === VariableValueTypes.Date
-                ? permission.value.map(str => moment(str))
+                ? permission.value.map(str => datartDayjs(str))
                 : permission.value
               : void 0,
           });
@@ -138,7 +138,7 @@ export const SubjectForm = memo(
             useDefaultValue: permission ? permission.useDefaultValue : true,
             value: permission?.value
               ? editingVariable.valueType === VariableValueTypes.Date
-                ? permission.value.map(str => moment(str))
+                ? permission.value.map(str => datartDayjs(str))
                 : permission.value
               : void 0,
           });

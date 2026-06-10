@@ -18,7 +18,7 @@
 import { DatePicker, Form, FormItemProps } from 'antd';
 import { PickerType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import { formatDateByPickType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/utils';
-import moment from 'moment';
+import { datartDayjs } from 'app/utils/date';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 const { RangePicker } = DatePicker;
@@ -71,8 +71,8 @@ export const RangeTimeController: React.FC<TimeSetProps> = memo(
         return undefined;
       }
       return [
-        value[0] ? moment(value[0]) : null,
-        value[1] ? moment(value[1]) : null,
+        value[0] ? datartDayjs(value[0]) : null,
+        value[1] ? datartDayjs(value[1]) : null,
       ];
     }, [value]);
     return (

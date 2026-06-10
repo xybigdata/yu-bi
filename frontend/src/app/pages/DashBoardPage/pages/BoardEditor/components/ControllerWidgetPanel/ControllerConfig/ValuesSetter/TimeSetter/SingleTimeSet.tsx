@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { DatePicker, FormItemProps } from 'antd';
-import moment from 'moment';
+import { datartDayjs } from 'app/utils/date';
 import React, { memo } from 'react';
 import { PickerType } from '../../../types';
 import { formatDateByPickType } from '../../../utils';
@@ -34,7 +34,7 @@ export const SingleTimeSet: React.FC<SingleTimeSetProps> = memo(
       }
       const value = formatDateByPickType(pickerType, date);
 
-      onChange?.(moment(value));
+      onChange?.(value ? datartDayjs(value) : null);
     }
     return (
       <>

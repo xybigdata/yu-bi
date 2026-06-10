@@ -19,9 +19,9 @@
 import { DatePicker } from 'antd';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import { TimeFilterConditionValue } from 'app/types/ChartConfig';
+import { datartDayjs } from 'app/utils/date';
 import { formatTime } from 'app/utils/time';
 import { TIME_FORMATTER } from 'globalConstants';
-import moment from 'moment';
 import { FC, memo } from 'react';
 
 const ExactTimeSelector: FC<
@@ -32,16 +32,16 @@ const ExactTimeSelector: FC<
 > = memo(({ time, i18nPrefix, onChange }) => {
   const t = useI18NPrefix(i18nPrefix);
 
-  const handleMomentTimeChange = momentTime => {
-    const timeStr = formatTime(momentTime, TIME_FORMATTER);
+  const handleTimeChange = timeValue => {
+    const timeStr = formatTime(timeValue, TIME_FORMATTER);
     onChange?.(timeStr);
   };
 
   return (
     <DatePicker
       showTime
-      value={moment(time as string)}
-      onChange={handleMomentTimeChange}
+      value={time ? datartDayjs(time as string) : null}
+      onChange={handleTimeChange}
       placeholder={t('select')}
     />
   );
