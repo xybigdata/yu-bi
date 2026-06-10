@@ -1,4 +1,4 @@
-import type { DeltaStatic, Quill, Sources } from 'quill';
+import type { DeltaStatic, Sources } from 'quill';
 import {
   ForwardedRef,
   forwardRef,
@@ -14,8 +14,6 @@ export interface RichTextEditorHandle {
   focus: () => void;
   format: (name: string, value: unknown, source?: Sources) => DeltaStatic;
   getContents: (index?: number, length?: number) => DeltaStatic;
-  getEditor: () => Quill;
-  getModule: (name: string) => any;
   insertCalcFieldItem: (
     item: Record<string, any>,
     programmaticInsert?: boolean,
@@ -64,8 +62,6 @@ function RichTextEditorImpl(
         typeof index === 'number' && typeof length === 'number'
           ? getEditorInstance().getContents(index, length)
           : getEditorInstance().getContents(),
-      getEditor: () => getEditorInstance(),
-      getModule: name => getEditorInstance().getModule(name),
       insertCalcFieldItem: (item, programmaticInsert) =>
         getEditorInstance()
           .getModule('calcfield')
