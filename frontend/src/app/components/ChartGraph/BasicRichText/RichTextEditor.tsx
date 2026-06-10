@@ -1,4 +1,3 @@
-import type { DeltaStatic, Sources } from 'quill';
 import {
   ForwardedRef,
   forwardRef,
@@ -6,7 +5,10 @@ import {
   useRef,
 } from 'react';
 import MarkdownModule from './modules/MarkdownModule';
-import ReactQuill from './quillCompat';
+import ReactQuill, {
+  DeltaStatic,
+  Sources,
+} from './quillCompat';
 
 export interface RichTextEditorHandle {
   blur: () => void;

@@ -1,7 +1,10 @@
-import type { Quill as QuillInstance, RangeStatic } from 'quill';
 import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
 import { ImageDropModule } from '../modules/ImageDropModule';
-import { Quill } from '../quillCompat';
+import {
+  Quill,
+  QuillInstance,
+  RangeStatic,
+} from '../quillCompat';
 import CalcFieldBlot from './CalcFieldBlot';
 import TagBlot from './TagBlot';
 

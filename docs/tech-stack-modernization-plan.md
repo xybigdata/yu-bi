@@ -285,7 +285,8 @@
 
 - 富文本
   - 当前状态：`react-quill 1.3.5`，仓库内 `react-quill` / `Quill` 使用面约 `110` 处。
-  - 目标方案：优先评估 `react-quill 2.x`；若自定义 blot、toolbar、导出链和只读渲染不兼容，再评估 Quill 2 的其它 React 封装。
+  - 路线修正：`react-quill 2.0.0` 官方包本身仍依赖 `quill ^1.3.7`，它只是较新的 React 包装层，并不等于已经切到 Quill 2。
+  - 目标方案：先评估是否以 `react-quill 2.x` 作为中间态，清理旧包装层 API；若目标是进入真正的 Quill 2 主线，则需要继续评估 Quill 2 的 React 封装，或基于官方 React playground 形态维护仓库内自有轻量适配层。
   - 执行策略：先抽出自定义 blot、颜色面板、只读适配层，再升级编辑器内核。
   - 2026-06-10 最新推进：`RichTextEditorHandle` 已继续收口 markdown 模块构造与 calc field 插入能力；仪表板富文本组件中的重复 `selection-change` 监听已移除，统一复用 `QuillPalette` 处理颜色同步，并补上 markdown 模块的销毁生命周期。随后又把 `getEditor()` / `getModule()` 从公开 handle 中回收，确认业务层不再直接依赖底层 Quill 实例细节。
   - 同日继续推进：`RichTextPluginLoader/index.ts` 已从历史编译态的 `//@ts-nocheck + Babel helper` 形式重写回项目可维护的 TypeScript 模块；`CalcFieldBlot` / `TagBlot` 也同步清理了 `innerHTML +=`、空 click 监听和宽松 dataset 写入等历史 DOM 写法。这样后续评估 `react-quill 2.x` / Quill 2 时，富文本扩展层的噪音会更小，兼容问题也更容易定位。
@@ -322,7 +323,7 @@
 | --- | --- | --- | --- | --- |
 | 前端 UI 基座 | `antd 5.26.x` | 已进入当前稳定主线，仍需做页面级回归与 compat 壳清理 | 保持 5.x 稳定线，暂不追 6.x | 已完成主升级，持续稳定化 |
 | 时间体系 | `moment` | 生产代码直连调用已清零，项目直接依赖已退出；任务页产物也已切到 `dayjs`，剩余仅是上游可选 peer 声明与少量值链回归 | 全面迁到 `dayjs`，仅在控件值类型阶段做局部适配 | 高 |
-| 富文本 | `react-quill 1.3.5` + 本地 markdown / image-drop 模块 | `react-quill` 本体仍偏旧，但 markdown 与图片拖拽已从低活跃度外部插件收回到仓库内维护 | 优先评估 `react-quill 2.x` / Quill 2 原生封装 | 高 |
+| 富文本 | `react-quill 1.3.5` + 本地 markdown / image-drop 模块 | `react-quill` 本体仍偏旧，但 markdown 与图片拖拽已从低活跃度外部插件收回到仓库内维护；且 `react-quill 2.x` 仍基于 Quill 1.3.x | 先评估 `react-quill 2.x` 是否值得作为中间态，再决定是否切到真正的 Quill 2 React 封装或自有适配层 | 高 |
 | 代码编辑器 | `react-monaco-editor 0.59.0` | 已退出；改为仓库自有 Monaco React 适配层 | 直接基于 `monaco-editor` 维护自有适配组件 | 已完成 |
 | 故事播放 | `reveal.js 6.0.1` | 已在较新稳定线，短期无需继续追大版本 | 保持当前主线，长期再评估 React 原生故事方案 | 低 |
 | 颜色选择器 | 自有轻量实现 | 已退出第三方重包装依赖 | 保持自有实现 | 已完成 |
@@ -1610,13 +1611,15 @@
 
 2. `react-quill 1.3.5`
    - 当前状态：富文本编辑与展示仍依赖旧版 `react-quill` / Quill 1 生态。
+   - 路线修正：`react-quill 2.0.0` 官方包仍直接依赖 `quill ^1.3.7`，因此“升 `react-quill 2`”只能算 React 包装层升级，不能当作“已经进入 Quill 2 主线”。
    - 补充证据：当前不仅有 `react-quill` 本体，还叠加了自定义 `TagBlot` / `CalcFieldBlot`、调色板和邮件/仪表板双编辑链路；原先低活跃度的 `quill-image-drop-module`、`quilljs-markdown` 已在项目内用本地模块替代并移除依赖。
    - 2026-06-10 最新推进：已新增本地兼容出口 `frontend/src/app/components/ChartGraph/BasicRichText/quillCompat.ts`，并把图表富文本、仪表板富文本、调度邮件富文本、自定义 blot 与 palette 的 `ReactQuill` / `Quill` / `DeltaStatic` 入口统一收口到这一层。
    - 2026-06-10 补充推进：已新增本地包装层 `frontend/src/app/components/ChartGraph/BasicRichText/RichTextEditor.tsx`，图表富文本、仪表板富文本、调度邮件富文本已不再直接依赖 `ReactQuill` 组件实例，而统一走仓库内 editor handle。
    - 2026-06-10 继续推进：`RichTextEditorHandle` 已补齐 `format`、`getContents`、`getModule`、`on`、`off` 等常用能力，图表富文本、仪表板富文本与自定义调色板不再散用 `getEditor()` 做基础操作。
    - 2026-06-10 再次推进：`RichTextEditorHandle` 已继续补齐 `createMarkdownModule` 与 `insertCalcFieldItem`，图表富文本和仪表板富文本已不再直接 `new MarkdownModule(quill.getEditor(), ...)` 或直接操作 `calcfield` module。
+   - 2026-06-10 本轮补充推进：`MarkdownModule`、`ImageDropModule`、`RichTextEditor` 与 `RichTextPluginLoader` 里散落的 `quill` 类型入口已继续收口到 `quillCompat.ts`，后续若替换底层编辑器包，类型和实例出口也能维持单点调整。
    - 本轮收益：业务代码已不再直接依赖 `react-quill` / `quill` 包入口，同时 markdown、图片拖拽/粘贴模块都已切到仓库内维护实现；后续无论升级到 `react-quill 2.x`，还是改接 Quill 2 的其它 React 封装，都可以先在 compat 层、本地模块和 `RichTextEditor` 包装层上集中适配。
-   - 更现代替代：优先评估 `react-quill` 2.x 或直接评估仍活跃维护的 Quill 2 React 封装。
+   - 更现代替代：先判断是否需要用 `react-quill 2.x` 完成旧 React 包装层收口；若目标是进入真正的 Quill 2 主线，则继续评估仍活跃维护的 Quill 2 React 封装，或基于官方 React playground 方案维护仓库内自有适配层。
    - 本仓库判断：它不一定要先于 AntD 5，但已经属于“仍能跑、后续应替换”的旧编辑器基座，尤其需要关注 React 18 严格模式与自定义 blot 扩展兼容性。
 
 3. `styled-components 6.1.19` 稳定化
@@ -1691,10 +1694,10 @@
        这些文件和相关链路仍需要结合当前 AntD 5 时间组件行为继续回归，而不是只看 import 是否已清零。
 2. 富文本专题
    - `react-quill` 继续评估升级或替代。
-   - 目前外部 `quill-image-drop-module`、`quilljs-markdown` 都已退出，业务层也已切到本地 `RichTextEditor` 包装层；下一步重点改为核验本地 `MarkdownModule`、`RichTextEditor`、自定义 `TagBlot` / `CalcFieldBlot` 对 Quill 2 的兼容性，再决定是升 `react-quill 2.x` 还是直接切到别的 Quill 2 React 封装。
+   - 目前外部 `quill-image-drop-module`、`quilljs-markdown` 都已退出，业务层也已切到本地 `RichTextEditor` 包装层；下一步重点改为核验本地 `MarkdownModule`、`RichTextEditor`、自定义 `TagBlot` / `CalcFieldBlot` 对 Quill 2 的兼容性，再决定是先升 `react-quill 2.x` 作为中间态，还是直接切到真正的 Quill 2 React 封装。
    - 在真正切 Quill 2 之前，继续把少量仍需直接透传底层实例的链路压缩到 `RichTextEditorHandle`，避免再次出现业务页散改；当前 `getEditor()` / `getModule()` 已确认从业务层调用面清零。
    - 本地 `calcfield` 扩展模块已经从历史编译产物形态恢复成 TypeScript 源码形态，后续应继续对照 Quill 2 的模块与 blot API 做行为级核验，而不是在 `//@ts-nocheck` 状态下盲升依赖。
-   - 插件注册入口也已收敛到 `RichTextPluginLoader` 单点；后续若切换到 `react-quill 2.x` 或直接切 Quill 2 React 封装，应优先只在 compat 层和这个 bootstrap 点上调整，而不是回到页面组件里散改 `Quill.register(...)`。
+   - 插件注册入口也已收敛到 `RichTextPluginLoader` 单点；类型与实例出口则继续收敛在 `quillCompat.ts`。后续若切换到 `react-quill 2.x` 或直接切 Quill 2 React 封装，应优先只在 compat 层和这个 bootstrap 点上调整，而不是回到页面组件里散改 `Quill.register(...)`。
    - 每次尝试升级前后，都至少回归 `npm run checkTs`、`npm run build`、`npm run build:task`。
 3. 前端工具链老旧主版本治理
    - 当前还偏旧但不应先于业务主链升级的项包括：

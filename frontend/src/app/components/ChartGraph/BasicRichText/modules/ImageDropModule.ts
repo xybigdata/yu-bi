@@ -1,4 +1,4 @@
-import type { Quill as QuillInstance } from 'quill';
+import type { QuillInstance } from '../quillCompat';
 
 /**
  * 本地维护的图片拖拽/粘贴模块，用来替代低活跃度的 quill-image-drop-module。

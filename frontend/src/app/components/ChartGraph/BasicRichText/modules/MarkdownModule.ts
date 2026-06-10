@@ -1,8 +1,8 @@
 import type {
   DeltaStatic,
-  Quill as QuillInstance,
+  QuillInstance,
   RangeStatic,
-} from 'quill';
+} from '../quillCompat';
 
 export interface MarkdownModuleOptions {
   ignoreTags?: string[];
