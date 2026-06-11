@@ -41,8 +41,6 @@ import {
 import { ECharts, init, registerMap } from 'echarts';
 import { CloneValueDeep } from 'utils/object';
 import Config from './config';
-import geoChinaCity from './geo-china-city.map.json';
-import geoChina from './geo-china.map.json';
 import {
   GeoInfo,
   GeoSeries,
@@ -51,9 +49,57 @@ import {
   MetricAndSizeSeriesStyle,
 } from './types';
 
-// NOTE: source from: http://datav.aliyun.com/tools/atlas/index.html#&lat=31.39115752282472&lng=103.7548828125&zoom=4
-registerMap('china', geoChina as any);
-registerMap('china-city', geoChinaCity as any);
+type GeoMapLevel = 'china' | 'china-city';
+type GeoMapData = {
+  features: Array<{
+    properties: {
+      name?: string;
+      cp?: number[];
+      center?: number[];
+    };
+  }>;
+};
+
+const geoMapLoaders: Record<
+  GeoMapLevel,
+  () => Promise<{ default: GeoMapData }>
+> = {
+  china: () => import('./geo-china.map.json'),
+  'china-city': () => import('./geo-china-city.map.json'),
+};
+
+const geoMapDataCache = new Map<GeoMapLevel, GeoMapData>();
+const geoMapPromiseCache = new Map<GeoMapLevel, Promise<GeoMapData>>();
+const registeredGeoMaps = new Set<GeoMapLevel>();
+
+const loadGeoMap = async (level: GeoMapLevel): Promise<GeoMapData> => {
+  const cached = geoMapDataCache.get(level);
+  if (cached) {
+    return cached;
+  }
+
+  const pending = geoMapPromiseCache.get(level);
+  if (pending) {
+    return pending;
+  }
+
+  const promise = geoMapLoaders[level]().then(module => {
+    const data = module.default;
+    geoMapDataCache.set(level, data);
+    geoMapPromiseCache.delete(level);
+
+    // NOTE: source from: http://datav.aliyun.com/tools/atlas/index.html#&lat=31.39115752282472&lng=103.7548828125&zoom=4
+    if (!registeredGeoMaps.has(level)) {
+      registerMap(level, data as any);
+      registeredGeoMaps.add(level);
+    }
+
+    return data;
+  });
+
+  geoMapPromiseCache.set(level, promise);
+  return promise;
+};
 
 class BasicOutlineMapChart extends Chart {
   config = Config;
@@ -61,12 +107,17 @@ class BasicOutlineMapChart extends Chart {
   selectionManager?: ChartSelectionManager;
 
   protected isNormalGeoMap = false;
-  private geoMap;
   private container: HTMLElement | null = null;
   private geoConfig: GeoInfo = {
     center: undefined,
     zoom: 1,
   };
+  private geoMap?: GeoMapData;
+  private latestRenderPayload?: {
+    options: BrokerOption;
+    context: BrokerContext;
+  };
+  private geoMapLoadToken = 0;
 
   constructor(props?) {
     super(
@@ -115,6 +166,18 @@ class BasicOutlineMapChart extends Chart {
       this.chart?.clear();
       return;
     }
+
+    this.latestRenderPayload = {
+      options,
+      context,
+    };
+
+    const geoMapLevel = this.getGeoMapLevel(options.config.styles || []);
+    if (!this.hasLoadedGeoMap(geoMapLevel)) {
+      this.loadGeoMapAndReplay(geoMapLevel);
+      return;
+    }
+
     this.selectionManager?.updateSelectedItems(options?.selectedItems);
     const newOptions = this.getOptions(
       options.dataset,
@@ -132,12 +195,72 @@ class BasicOutlineMapChart extends Chart {
   }
 
   onUnMount(options: BrokerOption, context: BrokerContext) {
+    this.geoMapLoadToken += 1;
+    this.latestRenderPayload = undefined;
     this.container?.removeEventListener('mouseup', () =>
       this.getOptionsConfig(this.geoConfig, this.chart),
     );
     this.selectionManager?.removeWindowListeners(context.window);
     this.selectionManager?.removeZRenderListeners(this.chart);
     this.chart?.dispose();
+  }
+
+  private hasLoadedGeoMap(level: GeoMapLevel) {
+    const geoMap = geoMapDataCache.get(level);
+    if (!geoMap) {
+      return false;
+    }
+
+    this.geoMap = geoMap;
+    return true;
+  }
+
+  private getGeoMapLevel(styleConfigs: ChartStyleConfig[]): GeoMapLevel {
+    const [mapLevelName] = getStyles(styleConfigs, ['map'], ['level']);
+    return mapLevelName === 'china-city' ? 'china-city' : 'china';
+  }
+
+  private loadGeoMapAndReplay(level: GeoMapLevel) {
+    const token = ++this.geoMapLoadToken;
+
+    void loadGeoMap(level)
+      .then(geoMap => {
+        if (token !== this.geoMapLoadToken) {
+          return;
+        }
+
+        this.geoMap = geoMap;
+
+        const latestPayload = this.latestRenderPayload;
+        if (!latestPayload || !this.chart) {
+          return;
+        }
+
+        const currentLevel = this.getGeoMapLevel(
+          latestPayload.options.config?.styles || [],
+        );
+        if (currentLevel !== level) {
+          this.loadGeoMapAndReplay(currentLevel);
+          return;
+        }
+
+        const { options, context } = latestPayload;
+        if (!options.dataset || !options.config) {
+          return;
+        }
+
+        this.selectionManager?.updateSelectedItems(options.selectedItems);
+        const newOptions = this.getOptions(
+          options.dataset,
+          options.config,
+          options.selectedItems,
+          context,
+        );
+        this.chart?.setOption(Object.assign({}, newOptions), true);
+      })
+      .catch(error => {
+        console.error('Load geo map resource failed', error);
+      });
   }
 
   private getOptions(
@@ -160,8 +283,6 @@ class BasicOutlineMapChart extends Chart {
     const infoConfigs = dataConfigs
       .filter(c => c.type === ChartDataSectionType.Info)
       .flatMap(config => config.rows || []);
-
-    this.registerGeoMap(styleConfigs);
 
     const chartDataSet = transformToDataSet(
       dataset.rows,
@@ -267,11 +388,6 @@ class BasicOutlineMapChart extends Chart {
         },
       },
     };
-  }
-
-  private registerGeoMap(styleConfigs: ChartStyleConfig[]) {
-    const [mapLevelName] = getStyles(styleConfigs, ['map'], ['level']);
-    this.geoMap = mapLevelName === 'china' ? geoChina : geoChinaCity;
   }
 
   private getGeoInfo(
@@ -469,12 +585,12 @@ class BasicOutlineMapChart extends Chart {
   protected mappingGeoName(sourceName: string, styleConfigs): string {
     const [mapLevelName] = getStyles(styleConfigs, ['map'], ['level']);
     const isProvinceLevel = mapLevelName === 'china';
-    const targetName = this.geoMap.features.find(f =>
+    const targetName = this.geoMap?.features.find(f =>
       isProvinceLevel
         ? f.properties.name?.includes(sourceName)
         : f.properties.name === sourceName,
     )?.properties.name;
-    return targetName;
+    return targetName || sourceName;
   }
 
   protected mappingGeoCoordination(
@@ -484,13 +600,17 @@ class BasicOutlineMapChart extends Chart {
   ): Array<number[] | number | string> {
     const [mapLevelName] = getStyles(styleConfigs, ['map'], ['level']);
     const isProvinceLevel = mapLevelName === 'china';
-    const properties = this.geoMap.features.find(f =>
+    const properties = this.geoMap?.features.find(f =>
       isProvinceLevel
         ? f.properties.name?.includes(sourceName)
         : f.properties.name === sourceName,
     )?.properties;
+    const coordinates = properties?.cp || properties?.center;
+    if (!coordinates) {
+      return [];
+    }
 
-    return (properties?.cp || properties?.center)?.concat(values) || [];
+    return [...coordinates, ...values];
   }
 
   protected getVisualMap(

@@ -3241,6 +3241,43 @@
     - 将 PivotSheet / Monaco / StoryBoard 等重量级能力继续按功能入口拆成独立业务加载边界
   - 本轮只保留调研结论与验收数据，不保留会新增 `Circular chunk` 告警的实验性构建配置。
 
+### 2026-06-11 本轮继续推进：地图 GeoJSON 资源按需加载
+
+- 本轮目标：
+  - 基于上一轮大 chunk 预研结论，先挑一个边界清晰、业务风险可控的图表实现层资源做真实拆分。
+  - 优先处理 `BasicOutlineMapChart` 内静态引入的中国/地市 GeoJSON，避免这些大体量资源继续跟随主入口首包加载。
+
+- 本轮改造动作：
+  - `frontend/src/app/components/ChartGraph/BasicOutlineMapChart/BasicOutlineMapChart.tsx`
+    - 移除对 `geo-china.map.json` 与 `geo-china-city.map.json` 的静态顶层导入。
+    - 新增内部 `loadGeoMap(...)` 懒加载与缓存逻辑：
+      - 首次按地图等级动态 `import(...)`
+      - 加载完成后再调用 `registerMap(...)`
+      - 对同等级地图结果做内存缓存，避免重复加载
+    - 新增“最近一次渲染参数”保存与重放逻辑：
+      - 地图资源尚未就绪时先跳过本次渲染
+      - 资源完成加载后，自动重放最近一次 `onUpdated(...)`，保证现有调用链不需要感知异步加载
+    - 补齐类型约束，确保 `mappingGeoName` / `mappingGeoCoordination` 在资源延迟加载场景下仍返回稳定值。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+  - 当前构建产物变化：
+    - 主入口 `index.*.js` 从约 `4.23 MB` 降到约 `2.43 MB`
+    - 新增独立地图资源 chunk：
+      - `geo-china.map.*.js` 约 `581 KB`
+      - `geo-china-city.map.*.js` 约 `1.21 MB`
+    - 本轮未引入新的 `Circular chunk` 告警
+
+- 阶段结论：
+  - “将地图 GeoJSON 与地图图表实现从通用图表主链中分离”这条中风险策略已经拿到一段可落地的正向结果。
+  - 当前主入口虽然仍偏大，但这次改造证明：沿图表实现层静态资源边界做按需加载，收益明显且兼容性可控。
+  - 下一阶段可继续沿同一思路处理：
+    - 其他地图/重资源图表实现
+    - PivotSheet / `@antv/s2`
+    - `ChartManager` 的图表簇级延迟注册
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
