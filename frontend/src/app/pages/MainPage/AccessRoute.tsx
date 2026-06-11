@@ -17,7 +17,7 @@
  */
 
 import React from 'react';
-import { CompatRedirect } from 'app/components/CompatRedirect';
+import { Navigate } from 'react-router-dom';
 import { Access, AccessProps } from './Access';
 import { PermissionLevels } from './pages/PermissionPage/constants';
 
@@ -29,7 +29,7 @@ export function AccessRoute(
       {...props}
       type="module"
       level={PermissionLevels.Enable}
-      denied={<CompatRedirect to="/404" />}
+      denied={<Navigate to="/404" replace />}
     />
   );
 }

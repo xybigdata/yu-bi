@@ -19,9 +19,10 @@ package datart.server.job;
 
 import datart.server.base.dto.JobFile;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -31,6 +32,8 @@ import java.util.Map;
 
 @Slf4j
 public class WeChartJob extends ScheduleJob {
+
+    private static final RestClient REST_CLIENT = RestClient.create();
 
     public WeChartJob() {
     }
@@ -43,9 +46,13 @@ public class WeChartJob extends ScheduleJob {
         }
 
         String webHookUrl = jobConfig.getWebHookUrl();
-        RestTemplate restTemplate = new RestTemplate();
         for (JobFile jobFile : attachments) {
-            restTemplate.postForEntity(webHookUrl, createParam(jobFile.getFile()), Object.class);
+            REST_CLIENT.post()
+                    .uri(webHookUrl)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(createParam(jobFile.getFile()))
+                    .retrieve()
+                    .toBodilessEntity();
         }
     }
 

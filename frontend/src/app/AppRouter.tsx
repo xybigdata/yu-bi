@@ -18,16 +18,14 @@
 
 import { ConfigProvider, message } from 'antd';
 import echartsDefaultTheme from 'app/assets/theme/echarts_default_theme.json';
-import { CompatRoute } from 'app/components/CompatRoute';
-import { CompatRoutes } from 'app/components/CompatRoutes';
 import { registerTheme } from 'echarts';
 import { PUBLIC_URL, StorageKeys } from 'globalConstants';
 import { antdLocales } from 'locales/i18n';
 import { useEffect, useLayoutEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { useAppDispatch } from 'app/hooks/useRedux';
-import { BrowserRouter } from 'app/routerCompat';
 import { GlobalStyles } from 'styles/globalStyles';
 import { getToken } from 'utils/auth';
 import useI18NPrefix from './hooks/useI18NPrefix';
@@ -75,21 +73,21 @@ export function AppRouter() {
         >
           <meta name="description" content="Data Art" />
         </Helmet>
-        <CompatRoutes>
-          <CompatRoute path="/setup" element={<LazySetupPage />} />
-          <CompatRoute path="/login" element={<LazyLoginPage />} />
-          <CompatRoute path="/register" element={<LazyRegisterPage />} />
-          <CompatRoute path="/activation" element={<LazyActivationPage />} />
-          <CompatRoute
+        <Routes>
+          <Route path="/setup" element={<LazySetupPage />} />
+          <Route path="/login" element={<LazyLoginPage />} />
+          <Route path="/register" element={<LazyRegisterPage />} />
+          <Route path="/activation" element={<LazyActivationPage />} />
+          <Route
             path="/forgetPassword"
             element={<LazyForgetPasswordPage />}
           />
-          <CompatRoute
+          <Route
             path="/authorization"
             element={<LazyAuthorizationPage />}
           />
-          <CompatRoute path="/" element={<LoginAuthRoute />} />
-        </CompatRoutes>
+          <Route path="*" element={<LoginAuthRoute />} />
+        </Routes>
         <GlobalStyles />
       </BrowserRouter>
     </ConfigProvider>

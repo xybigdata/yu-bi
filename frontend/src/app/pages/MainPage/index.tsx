@@ -17,9 +17,6 @@
  */
 
 import ChartEditor, { ChartEditorBaseProps } from 'app/components/ChartEditor';
-import { CompatRoute } from 'app/components/CompatRoute';
-import { CompatRedirect } from 'app/components/CompatRedirect';
-import { CompatRoutes } from 'app/components/CompatRoutes';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useMount from 'app/hooks/useMount';
 import ChartManager from 'app/models/ChartManager';
@@ -27,6 +24,7 @@ import { useLocation } from 'app/routerCompat';
 import { useAppSlice } from 'app/slice';
 import React, { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { NotFoundPage } from '../NotFoundPage';
@@ -134,31 +132,29 @@ export function MainPage() {
       <Background />
       <Navbar />
       {orgId && (
-        <CompatRoutes>
-          <CompatRoute
+        <Routes>
+          <Route
             path="/"
-            exact
-            element={<CompatRedirect to={`/organizations/${orgId}`} />}
+            element={<Navigate to={`/organizations/${orgId}`} replace />}
           />
-          <CompatRoute path="/confirminvite" element={<ConfirmInvitePage />} />
-          <CompatRoute
+          <Route path="/confirminvite" element={<ConfirmInvitePage />} />
+          <Route
             path="/organizations/:orgId"
-            exact
-            element={<CompatRedirect to={`/organizations/${orgId}/vizs`} />}
+            element={<Navigate to={`/organizations/${orgId}/vizs`} replace />}
           />
-          <CompatRoute
+          <Route
             path="/organizations/:orgId/vizs/chartEditor"
             element={<ChartEditorRoute />}
           />
-          <CompatRoute
+          <Route
             path="/organizations/:orgId/vizs/storyPlayer/:storyId"
             element={<StoryPlayer />}
           />
-          <CompatRoute
+          <Route
             path="/organizations/:orgId/vizs/storyEditor/:storyId"
             element={<StoryEditor />}
           />
-          <CompatRoute
+          <Route
             path="/organizations/:orgId/vizs/:vizId?"
             element={
               <AccessRoute module={ResourceTypes.Viz}>
@@ -166,7 +162,7 @@ export function MainPage() {
               </AccessRoute>
             }
           />
-          <CompatRoute
+          <Route
             path="/organizations/:orgId/views/:viewId?"
             element={
               <AccessRoute module={ResourceTypes.View}>
@@ -174,7 +170,7 @@ export function MainPage() {
               </AccessRoute>
             }
           />
-          <CompatRoute
+          <Route
             path="/organizations/:orgId/sources"
             element={
               <AccessRoute module={ResourceTypes.Source}>
@@ -182,7 +178,7 @@ export function MainPage() {
               </AccessRoute>
             }
           />
-          <CompatRoute
+          <Route
             path="/organizations/:orgId/schedules/:scheduleId?"
             element={
               <AccessRoute module={ResourceTypes.Schedule}>
@@ -190,7 +186,7 @@ export function MainPage() {
               </AccessRoute>
             }
           />
-          <CompatRoute
+          <Route
             path="/organizations/:orgId/members"
             element={
               <AccessRoute module={ResourceTypes.User}>
@@ -198,7 +194,7 @@ export function MainPage() {
               </AccessRoute>
             }
           />
-          <CompatRoute
+          <Route
             path="/organizations/:orgId/roles"
             element={
               <AccessRoute module={ResourceTypes.User}>
@@ -206,16 +202,16 @@ export function MainPage() {
               </AccessRoute>
             }
           />
-          <CompatRoute
+          <Route
             path="/organizations/:orgId/permissions"
-            exact
             element={
-              <CompatRedirect
+              <Navigate
                 to={`/organizations/${orgId}/permissions/subject`}
+                replace
               />
             }
           />
-          <CompatRoute
+          <Route
             path="/organizations/:orgId/permissions/:viewpoint"
             element={
               <AccessRoute module={ResourceTypes.Manager}>
@@ -223,7 +219,7 @@ export function MainPage() {
               </AccessRoute>
             }
           />
-          <CompatRoute
+          <Route
             path="/organizations/:orgId/variables"
             element={
               <AccessRoute module={ResourceTypes.Manager}>
@@ -231,7 +227,7 @@ export function MainPage() {
               </AccessRoute>
             }
           />
-          <CompatRoute
+          <Route
             path="/organizations/:orgId/orgSettings"
             element={
               <AccessRoute module={ResourceTypes.Manager}>
@@ -239,7 +235,7 @@ export function MainPage() {
               </AccessRoute>
             }
           />
-          <CompatRoute
+          <Route
             path="/organizations/:orgId/resourceMigration"
             element={
               <AccessRoute module={ResourceTypes.Manager}>
@@ -247,8 +243,8 @@ export function MainPage() {
               </AccessRoute>
             }
           />
-          <CompatRoute path="*" element={<NotFoundPage />} />
-        </CompatRoutes>
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
       )}
     </AppContainer>
   );
