@@ -26,13 +26,15 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpPut;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apache.hc.core5.util.Timeout;
@@ -43,6 +45,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 import java.util.Map;
 
 @Slf4j
@@ -53,7 +56,14 @@ public class HttpDataFetcher {
     private final HttpRequestParam param;
 
     static {
-        httpClient = HttpClients.createDefault();
+        ConnectionConfig connectionConfig = ConnectionConfig.custom()
+                .setConnectTimeout(30, TimeUnit.SECONDS)
+                .build();
+        httpClient = HttpClients.custom()
+                .setConnectionManager(PoolingHttpClientConnectionManagerBuilder.create()
+                        .setDefaultConnectionConfig(connectionConfig)
+                        .build())
+                .build();
     }
 
     public HttpDataFetcher(HttpRequestParam param) {
@@ -64,16 +74,13 @@ public class HttpDataFetcher {
 
         HttpUriRequestBase httpRequest = createHttpRequest(param);
 
-        HttpResponseParser parser;
+        final HttpResponseParser parser;
         try {
             parser = param.getResponseParser().getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            parser = new ResponseJsonParser();
+            return executeWithParser(httpRequest, new ResponseJsonParser());
         }
-        try (ClassicHttpResponse response = httpClient.execute(httpRequest)) {
-            return parser.parseResponse(param.getTargetPropertyName(), response, param.getColumns());
-        }
-
+        return executeWithParser(httpRequest, parser);
     }
 
     private HttpUriRequestBase createHttpRequest(HttpRequestParam param) throws URISyntaxException {
@@ -94,7 +101,6 @@ public class HttpDataFetcher {
             httpRequest = new HttpGet(uri);
         }
         RequestConfig config = RequestConfig.custom()
-                .setConnectTimeout(Timeout.ofMilliseconds(param.getTimeout()))
                 .setResponseTimeout(Timeout.ofMilliseconds(param.getTimeout()))
                 .build();
 
@@ -135,6 +141,12 @@ public class HttpDataFetcher {
         for (Map.Entry<String, String> entry : param.getHeaders().entrySet()) {
             httpRequest.addHeader(entry.getKey(), entry.getValue());
         }
+    }
+
+    private Dataframe executeWithParser(HttpUriRequestBase httpRequest, HttpResponseParser parser) throws IOException {
+        HttpClientResponseHandler<Dataframe> responseHandler =
+                response -> parser.parseResponse(param.getTargetPropertyName(), response, param.getColumns());
+        return httpClient.execute(httpRequest, responseHandler);
     }
 
 

@@ -3,10 +3,12 @@ package datart.security.util;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.*;
-import com.nimbusds.jose.jwk.source.RemoteJWKSet;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
 import datart.core.base.exception.Exceptions;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -30,6 +32,7 @@ import javax.crypto.Mac;
 import java.io.File;
 import java.io.FileReader;
 import java.math.BigInteger;
+import java.net.URI;
 import java.net.URL;
 import java.security.*;
 import java.security.interfaces.ECPublicKey;
@@ -101,7 +104,7 @@ public class JwkUtils {
     private static Claims parseClaims(Payload payload) {
         try {
             Map<String, Object> claimsMap = payload.toJSONObject();
-            return Jwts.claims(claimsMap);
+            return Jwts.claims().add(claimsMap).build();
         } catch (Exception e) {
             throw new JwtException("Jwt claims parse failed", e);
         }
@@ -286,10 +289,10 @@ public class JwkUtils {
     public static List<Key> getJwKFromUrl(String jwkSetUrl) {
         List<Key> keys = new ArrayList<>();
         try {
-            RemoteJWKSet remoteJWKSet = new RemoteJWKSet(new URL(jwkSetUrl));
+            JWKSource<com.nimbusds.jose.proc.SecurityContext> remoteJWKSet = createRemoteJwkSource(jwkSetUrl);
             JWKMatcher jwkMatcher = (new JWKMatcher.Builder()).keyUses(KeyUse.SIGNATURE, KeyUse.ENCRYPTION, null).keyTypes(KeyType.OCT, KeyType.RSA, KeyType.EC).build();
             JWKSelector jwsKeySelector = new JWKSelector(jwkMatcher);
-            List list = remoteJWKSet.get(jwsKeySelector, null);
+            List<JWK> list = remoteJWKSet.get(jwsKeySelector, null);
             keys = KeyConverter.toJavaKeys(list);
         } catch (Exception e) {
             log.error("Failed to load jwkSet from url: " + jwkSetUrl);
@@ -300,9 +303,7 @@ public class JwkUtils {
     public static Key getJwKFromUrlByKid(String jwkSetUrl, String kid) {
         Key key = null;
         try {
-            RemoteJWKSet set = new RemoteJWKSet(new URL(jwkSetUrl));
-            JWKSet cachedJWKSet = set.getCachedJWKSet();
-            JWK jwk = cachedJWKSet.getKeyByKeyId(kid);
+            JWK jwk = loadRemoteJwkByKid(jwkSetUrl, kid);
             List<Key> keys = KeyConverter.toJavaKeys(Collections.singletonList(jwk));
             if (!CollectionUtils.isEmpty(keys)) {
                 key = keys.get(0);
@@ -356,6 +357,21 @@ public class JwkUtils {
             log.error("The pem file parsed failed: {}", e.getMessage());
         }
         return key;
+    }
+
+    private static JWKSource<com.nimbusds.jose.proc.SecurityContext> createRemoteJwkSource(String jwkSetUrl) throws Exception {
+        return JWKSourceBuilder.<com.nimbusds.jose.proc.SecurityContext>create(URI.create(jwkSetUrl).toURL()).build();
+    }
+
+    private static JWK loadRemoteJwkByKid(String jwkSetUrl, String kid) throws Exception {
+        JWKSource<com.nimbusds.jose.proc.SecurityContext> jwkSource = createRemoteJwkSource(jwkSetUrl);
+        JWKMatcher jwkMatcher = new JWKMatcher.Builder().keyID(kid).build();
+        JWKSelector jwkSelector = new JWKSelector(jwkMatcher);
+        List<JWK> jwks = jwkSource.get(jwkSelector, null);
+        if (CollectionUtils.isEmpty(jwks)) {
+            throw new KeySourceException("No JWK found for kid: " + kid);
+        }
+        return jwks.get(0);
     }
 
     private static PublicKey ecPrivateToPublic(ECPrivateKey ecPrivateKey) {

@@ -30,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
@@ -158,11 +158,12 @@ public class WeChartOauth2Client implements CustomOauth2Client {
         uriBuilder.addParameter("secret", clientRegistration.getClientSecret());
         uriBuilder.addParameter("code", code);
         HttpGet httpRequest = new HttpGet(uriBuilder.build());
-        try (ClassicHttpResponse response = httpClient.execute(httpRequest)) {
+        HttpClientResponseHandler<String> responseHandler = response -> {
             String entity = EntityUtils.toString(response.getEntity());
             JsonNode jsonNode = OBJECT_MAPPER.readTree(entity);
             return jsonNode.path("access_token").asText(null);
-        }
+        };
+        return httpClient.execute(httpRequest, responseHandler);
     }
 
     private OAuth2AuthenticationToken getUserinfo(String accessToken) throws Exception {
@@ -170,10 +171,12 @@ public class WeChartOauth2Client implements CustomOauth2Client {
         uriBuilder.addParameter("access_token", accessToken);
         uriBuilder.addParameter("scope", "snsapi_userinfo");
         HttpGet httpRequest = new HttpGet(uriBuilder.build());
-        try (ClassicHttpResponse response = httpClient.execute(httpRequest)) {
+        HttpClientResponseHandler<Void> responseHandler = response -> {
             String entity = EntityUtils.toString(response.getEntity());
             OBJECT_MAPPER.readTree(entity);
-        }
+            return null;
+        };
+        httpClient.execute(httpRequest, responseHandler);
 
         return null;
 

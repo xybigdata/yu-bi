@@ -40,6 +40,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -146,7 +147,7 @@ public class SqlScriptRender extends ScriptRender {
         } catch (Exception e) {
             SqlParseError sqlParseError = new SqlParseError(e);
             sqlParseError.setSql(selectSql);
-            sqlParseError.setDbType(sqlDialect.getDatabaseProduct().name());
+            sqlParseError.setDbType(sqlDialect.getClass().getSimpleName());
             RequestContext.putWarning(MessageResolver.getMessage("message.provider.sql.parse.failed"), sqlParseError);
             placeholders = RegexVariableResolver.resolve(sqlDialect, selectSql, variableMap);
         }
@@ -158,7 +159,7 @@ public class SqlScriptRender extends ScriptRender {
         if (CollectionUtils.isNotEmpty(placeholders)) {
             for (VariablePlaceholder placeholder : placeholders) {
                 ReplacementPair replacementPair = placeholder.replacementPair();
-                selectSql = StringUtils.replaceIgnoreCase(selectSql, replacementPair.getPattern(), replacementPair.getReplacement());
+                selectSql = replaceIgnoreCase(selectSql, replacementPair.getPattern(), replacementPair.getReplacement());
             }
         }
 
@@ -170,6 +171,19 @@ public class SqlScriptRender extends ScriptRender {
             return false;
         }
         return VARIABLE_PATTERN.matcher(sql).find();
+    }
+
+    private String replaceIgnoreCase(String text, String searchString, String replacement) {
+        if (StringUtils.isAnyEmpty(text, searchString)) {
+            return text;
+        }
+        String lowerText = text.toLowerCase(Locale.ROOT);
+        String lowerSearch = searchString.toLowerCase(Locale.ROOT);
+        int index = lowerText.indexOf(lowerSearch);
+        if (index < 0) {
+            return text;
+        }
+        return text.substring(0, index) + replacement + text.substring(index + searchString.length());
     }
 
 }

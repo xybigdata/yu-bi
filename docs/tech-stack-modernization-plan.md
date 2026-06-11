@@ -1976,7 +1976,7 @@
 | React 主栈 | React 16/17 时期兼容思路 | 已统一到 `React 18.3.x`、`React Router 6.30.x`、`RTK 2.x`、`React Redux 9.x` | 主线已完成 |
 | UI 主栈 | `Ant Design 4` | 已进入 `Ant Design 5.26.x` 稳定线 | 主线已完成，仍需页面回归 |
 | 连接池 | `Druid` | 运行链已切到 `HikariCP` | 主链已完成，后续只剩行为/监控补验 |
-| HTTP 客户端 | `HttpClient 4 + okhttp` 并存 | 生产代码主运行链已统一到 `HttpClient 5`，`okhttp` 已退出主运行时依赖 | 主链已完成，但还要补 5.5 新 API 收口 |
+| HTTP 客户端 | `HttpClient 4 + okhttp` 并存 | 生产代码主运行链已统一到 `HttpClient 5.5`，`okhttp` 已退出主运行时依赖；5.5 的 `responseHandler` / JWK 远程加载兼容入口也已同步收口 | 主链已完成，后续只做 TLS/行为回归 |
 
 ### 仍偏老、需要继续专项升级或替代的栈
 
@@ -2001,28 +2001,22 @@
 - `RandomStringUtils.randomNumeric/randomAscii` -> `RandomStringUtils.secure().nextNumeric/nextAscii`
 - `JsonNode.fields()` -> `JsonNode.properties().iterator()`
 
-本轮离线编译后，剩余 warning 已基本收敛到以下几类：
+本轮离线编译后，剩余 warning 已进一步收敛到以下几类：
 
-1. `HttpClient 5.5` 新 API 适配
-   - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
-   - `security/src/main/java/datart/security/oauth2/WeChartOauth2Client.java`
-   - 现状：仍使用 `CloseableHttpClient.execute(ClassicHttpRequest)` 这类 5.5 已弃用入口
-   - 下一步：统一改成 `responseHandler` 风格，并复核 timeout 新写法
-
-2. `JwkUtils` 的 JWT / JWK 兼容层
-   - `security/src/main/java/datart/security/util/JwkUtils.java`
-   - 现状：`Jwts.claims(Map)`、`RemoteJWKSet`、`new URL(String)` 仍有弃用提示
-   - 下一步：拆成一个独立安全兼容专题处理，不和普通字符串工具替换混做
-
-3. `Calcite` 局部弃用入口
-   - `data-providers/data-provider-base/src/main/java/datart/data/provider/jdbc/SqlScriptRender.java`
-   - 现状：`SqlDialect.getDatabaseProduct()` 与 `StringUtils.replaceIgnoreCase(...)` 仍有 warning
-   - 下一步：只做兼容封装级替换，不直接升级整个 Calcite 大版本
-
-4. `javacc` 生成代码提示
+1. `javacc` 生成代码提示
    - `data-providers/data-provider-base/target/generated-sources/javacc/.../SimpleCharStream.java`
    - 现状：属于生成物 warning
    - 下一步：先不手改生成代码，后续若要清零，优先从生成链版本或模板入手
+
+2. Lombok `equals/hashCode` 提示
+   - `server/src/main/java/datart/server/base/transfer/model/*`
+   - `server/src/main/java/datart/server/base/dto/UserProfile.java`
+   - 现状：属于注解生成策略提示，不是 Boot 3 / JDK 21 主链兼容阻塞
+   - 下一步：单独评估是否批量补 `@EqualsAndHashCode(callSuper = false)`，避免和运行时迁移混做
+
+3. 常规 unchecked 提示
+   - 现状：主要是历史泛型收紧不足
+   - 下一步：按模块风险分批治理，不作为当前现代化主线阻塞项
 
 ### 当前验收口径
 
@@ -2039,3 +2033,28 @@
 - `vite build`
 
 因此这次不是“只改文档”或“只做静态替换”，而是已经在完整联动构建下确认当前修改未破坏主链运行与打包。
+
+### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
+
+- `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
+  - 已从 `CloseableHttpClient.execute(request)` 切到 `execute(request, responseHandler)` 风格
+  - 已把连接超时默认配置收口到 `ConnectionConfig + PoolingHttpClientConnectionManagerBuilder`
+  - 请求级只保留响应超时配置，避免继续使用 5.5 的 `RequestConfig#setConnectTimeout(...)` 弃用入口
+
+- `security/src/main/java/datart/security/oauth2/WeChartOauth2Client.java`
+  - access token 和 userinfo 拉取都已切到 `responseHandler` 风格
+  - 微信 OAuth 的 `HttpClient 5.5` 弃用执行接口 warning 已清零
+
+- `security/src/main/java/datart/security/util/JwkUtils.java`
+  - `Jwts.claims(Map)` 已改为 `Jwts.claims().add(...).build()`
+  - `RemoteJWKSet` 已替换为 `JWKSourceBuilder.create(...).build()` 生成的远端 JWK source
+  - URL 构造已改为 `URI.create(...).toURL()`，避免继续使用 `new URL(String)` 弃用入口
+
+- `data-providers/data-provider-base/src/main/java/datart/data/provider/jdbc/SqlScriptRender.java`
+  - `sqlDialect.getDatabaseProduct()` 已改为更保守的 `sqlDialect.getClass().getSimpleName()`
+  - `StringUtils.replaceIgnoreCase(...)` 已改为本地大小写无关替换实现
+
+- `2026-06-11` 定向验证结果：
+  - `mvn -o -pl data-providers/http-data-provider -am -DskipTests -Dmaven.compiler.showDeprecation=true compile` 通过
+  - `mvn -o -pl security -am -DskipTests -Dmaven.compiler.showDeprecation=true compile` 通过
+  - 当前这两条链中的 `HttpClient 5.5`、`JWK/JWT`、`SqlScriptRender` 相关 deprecated warning 已退出
