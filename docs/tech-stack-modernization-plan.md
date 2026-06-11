@@ -3124,6 +3124,28 @@
   - 后续现代化改造将进入中风险阶段，开始逐条评估并收口 hooks 依赖 warning。
   - 现阶段仍暂不进入高风险内部命名重构和业务逻辑改造。
 
+### 2026-06-11 本轮继续推进：收口前端剩余 hooks 依赖 warning
+
+- 本轮实际落地：
+  - `frontend/src/app/components/FormGenerator/Customize/Interaction/CrossFilteringRuleList.tsx`
+  - `frontend/src/app/components/MonacoEditor/index.tsx`
+
+- 本轮收口内容：
+  - `CrossFilteringRuleList.tsx` 中，`Dropdown` 的稳定配置对象已改为 `useMemo` 固定引用，并补入 `columns` 的依赖数组，收口 `react-hooks/exhaustive-deps` warning，同时保持下拉弹层行为不变。
+  - `MonacoEditor/index.tsx` 中，编辑器首次挂载所需的 `value/defaultValue/language/options/overrideServices/editorWillMount/editorDidMount/editorWillUnmount/uri` 已收口到 `mountConfigRef`，明确表达“仅在首次挂载时采样”的初始化语义，避免为消除 hooks warning 而错误地把 Monaco 初始化 effect 改成重复执行。
+  - 这一步属于中风险现代化收口：不再是纯格式清理，而是对 hooks 依赖与组件生命周期语义做最小修复，但仍避免改变业务流程和编辑器运行模型。
+
+- 本轮验证结果：
+  - 在本机 `Node 26.0.0 / npm 11.15.0` 下：
+    - `npm run lint` 通过，warning 清零。
+    - `npm run checkTs` 通过。
+    - `npm run test:ci -- --silent` 全量通过，`87` 个测试文件通过，`665` 个测试通过，`4` 个跳过。
+  - 至此，前端 `lint` 已达到 `0 errors / 0 warnings`。
+
+- 当前仍未完成项：
+  - 前端低风险与中风险规范链收口已基本完成，后续可转向更高价值的兼容性验证、构建链验证或后端局部现代化议题。
+  - 现阶段仍暂不进入高风险内部命名重构和业务语义大改。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

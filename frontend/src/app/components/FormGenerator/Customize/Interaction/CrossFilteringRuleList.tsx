@@ -55,9 +55,13 @@ const CrossFilteringRuleList: FC<
   translate: t,
 }) => {
   const viewMap = useSelector(selectViewMap);
-  const dropdownDestroyOnHiddenProps = {
-    destroyOnHidden: true,
-  } as DropdownDestroyOnHiddenCompatProps;
+  const dropdownDestroyOnHiddenProps = useMemo(
+    () =>
+      ({
+        destroyOnHidden: true,
+      }) as DropdownDestroyOnHiddenCompatProps,
+    [],
+  );
 
   const currentRules = useMemo(() => {
     return (boardVizs || [])
@@ -163,6 +167,7 @@ const CrossFilteringRuleList: FC<
       rules,
       onRuleChange,
       viewMap,
+      dropdownDestroyOnHiddenProps,
       dataview?.meta,
       dataview?.computedFields,
       dataview?.variables,

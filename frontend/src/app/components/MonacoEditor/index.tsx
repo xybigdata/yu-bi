@@ -92,6 +92,19 @@ function MonacoEditorComponent(
   const subscriptionRef = useRef<monaco.IDisposable | null>(null);
   const syncingValueRef = useRef(false);
   const onChangeRef = useRef(onChange);
+  const mountConfigRef = useRef({
+    value,
+    defaultValue,
+    language,
+    theme,
+    className,
+    options,
+    overrideServices,
+    editorWillMount,
+    editorDidMount,
+    editorWillUnmount,
+    uri,
+  });
 
   onChangeRef.current = onChange;
 
@@ -119,31 +132,50 @@ function MonacoEditorComponent(
       return;
     }
 
-    const initialValue = value !== null ? value : defaultValue;
-    const extraOptions = editorWillMount(monaco) || {};
-    const modelUri = uri?.(monaco);
+    const {
+      value: initialValueProp,
+      defaultValue: initialDefaultValue,
+      language: initialLanguage,
+      theme: initialTheme,
+      className: initialClassName,
+      options: initialOptions,
+      overrideServices: initialOverrideServices,
+      editorWillMount: initialEditorWillMount,
+      editorDidMount: initialEditorDidMount,
+      editorWillUnmount: initialEditorWillUnmount,
+      uri: initialUri,
+    } = mountConfigRef.current;
+
+    const initialValue =
+      initialValueProp !== null ? initialValueProp : initialDefaultValue;
+    const extraOptions = initialEditorWillMount(monaco) || {};
+    const modelUri = initialUri?.(monaco);
     let model = modelUri ? monaco.editor.getModel(modelUri) : undefined;
 
     if (model) {
       model.setValue(initialValue);
-      monaco.editor.setModelLanguage(model, language);
+      monaco.editor.setModelLanguage(model, initialLanguage);
     } else {
-      model = monaco.editor.createModel(initialValue, language, modelUri);
+      model = monaco.editor.createModel(
+        initialValue,
+        initialLanguage,
+        modelUri,
+      );
     }
 
     editorRef.current = monaco.editor.create(
       containerRef.current,
       {
-        ...options,
+        ...initialOptions,
         ...extraOptions,
-        ...(className ? { extraEditorClassName: className } : {}),
-        ...(theme ? { theme } : {}),
+        ...(initialClassName ? { extraEditorClassName: initialClassName } : {}),
+        ...(initialTheme ? { theme: initialTheme } : {}),
         model,
       },
-      overrideServices,
+      initialOverrideServices,
     );
 
-    editorDidMount(editorRef.current, monaco);
+    initialEditorDidMount(editorRef.current, monaco);
     subscriptionRef.current = editorRef.current.onDidChangeModelContent(
       event => {
         if (!syncingValueRef.current && editorRef.current) {
@@ -154,7 +186,7 @@ function MonacoEditorComponent(
 
     return () => {
       if (editorRef.current) {
-        editorWillUnmount(editorRef.current, monaco);
+        initialEditorWillUnmount(editorRef.current, monaco);
         editorRef.current.dispose();
         editorRef.current = null;
       }
