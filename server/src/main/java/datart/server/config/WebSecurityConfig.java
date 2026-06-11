@@ -3,6 +3,7 @@ package datart.server.config;
 import datart.security.oauth2.ClientRegistrationRepositoryImpl;
 import datart.security.oauth2.CustomOAuth2AuthorizationRequestRedirectFilter;
 import datart.security.oauth2.CustomOauth2AuthenticationFilter;
+import datart.server.config.filter.JwtRequestAuthenticationFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
@@ -32,6 +33,8 @@ public class WebSecurityConfig {
 
     private ClientRegistrationRepositoryImpl clientRegistrations;
 
+    private JwtRequestAuthenticationFilter jwtRequestAuthenticationFilter;
+
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> web.ignoring().requestMatchers(getApiPrefix() + "/tpa");
@@ -41,6 +44,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
         http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
+        http.addFilterBefore(jwtRequestAuthenticationFilter, OAuth2AuthorizationRequestRedirectFilter.class);
         if (this.oAuth2ClientProperties != null) {
             http.addFilterBefore(new CustomOAuth2AuthorizationRequestRedirectFilter(clientRegistrations), OAuth2AuthorizationRequestRedirectFilter.class);
             http.addFilterBefore(new CustomOauth2AuthenticationFilter(clientRegistrations, authenticationSuccessHandler), OAuth2LoginAuthenticationFilter.class);
@@ -74,5 +78,10 @@ public class WebSecurityConfig {
     @Autowired
     public void setAuthenticationFailureHandler(Oauth2AuthenticationFailureHandler authenticationFailureHandler) {
         this.authenticationFailureHandler = authenticationFailureHandler;
+    }
+
+    @Autowired
+    public void setJwtRequestAuthenticationFilter(JwtRequestAuthenticationFilter jwtRequestAuthenticationFilter) {
+        this.jwtRequestAuthenticationFilter = jwtRequestAuthenticationFilter;
     }
 }

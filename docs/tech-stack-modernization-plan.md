@@ -606,6 +606,31 @@
   - 当前仓库拖拽链的大部分使用面原本就已经是 hooks 版，真正卡在旧生态上的只剩少量 HOC 入口；因此本轮直接升到 `react-dnd 16` 的收益大于继续停留在 `14`。
   - `dnd-kit` 依然是更现代的长期候选方案，但在当前仓库里它不再是“必须立刻切”的前置条件；现阶段先把 `react-dnd` 收到维护主线，更符合低风险持续推进策略。
 
+### 2026-06-11 Wave 5 第一批运行时接管：JWT 请求恢复链进入 Spring Security 过滤器
+
+- 本轮实际落地：
+  - 新增 `server/src/main/java/datart/server/config/filter/JwtRequestAuthenticationFilter.java`
+  - 当前请求头 `Authorization` 对应的 JWT 登录态恢复，开始通过 Spring `OncePerRequestFilter` 进入 `SecurityFilterChain`
+  - `WebSecurityConfig` 已把该过滤器接入现有 Spring Security 过滤链
+  - `LoginInterceptor` 不再自己负责“读取请求头 token -> 调用 `securityManager.login(token)` -> 回写响应头”这条逻辑，改为只保留：
+    - `@SkipLogin` 匿名放行判断
+    - 已认证状态判断
+    - 请求收尾时的 `logoutCurrent()` 与 `RequestContext.clean()`
+
+- 本轮收益：
+  - “每个请求都通过 MVC 拦截器触发 Shiro 登录恢复”的模式开始松动，请求级登录态恢复首次进入 Spring Security 过滤链。
+  - 这一步不改变现有权限判定语义，也不直接替换 `DatartRealm` / `ShiroSecurityManager`，因此风险显著低于直接硬切主认证体系。
+  - 后续若继续推进 `Spring Security` 主链接管，可以优先沿过滤器、认证上下文和异常处理链继续扩展，而不是继续把更多逻辑堆在 `LoginInterceptor` 上。
+
+- 本轮验证结果：
+  - `mvn -pl security -am -DskipTests compile` 通过。
+  - `mvn -pl server -am -DskipTests compile` 通过。
+
+- 当前仍未完成项：
+  - 权限判定仍然由 `DatartSecurityManager -> ShiroSecurityManager -> SecuritySubjectFacade` 主链承担。
+  - `runAs`、角色检查、细粒度权限缓存、share 代理身份等核心语义，当前仍在 Shiro 运行时边界内。
+  - 这说明本轮属于“请求入口第一批接管”，还不是“安全体系迁移完成”。
+
 ### 风险台账
 
 这一节用于记录当前仍需重点关注的项目级风险，而不是单个 commit 的局部 warning。
