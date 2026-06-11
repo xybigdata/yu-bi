@@ -2,7 +2,7 @@ package datart.data.provider;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import datart.core.base.exception.Exceptions;
 import datart.core.common.FileUtils;
 import datart.core.common.MessageResolver;
@@ -249,13 +249,13 @@ public class JdbcDataProvider extends DataProvider {
                 if (StringUtils.isNotBlank(driverInfo.getAdapterClass())) {
                     try {
                         Class<?> aClass = Class.forName(driverInfo.getAdapterClass());
-                        adapter = (JdbcDataProviderAdapter) aClass.newInstance();
+                        adapter = (JdbcDataProviderAdapter) aClass.getDeclaredConstructor().newInstance();
                     } catch (Exception e) {
                         log.error("Jdbc adapter class (" + driverInfo.getAdapterClass() + ") load error.use default adapter");
                     }
                 }
                 if (adapter == null) {
-                    adapter = (JdbcDataProviderAdapter) Class.forName(DEFAULT_ADAPTER).newInstance();
+                    adapter = (JdbcDataProviderAdapter) Class.forName(DEFAULT_ADAPTER).getDeclaredConstructor().newInstance();
                 }
             } catch (Exception e) {
                 log.error("Jdbc adapter class load error ", e);
@@ -281,7 +281,7 @@ public class JdbcDataProvider extends DataProvider {
         private static List<JdbcDriverInfo> loadDriverInfoFromResource() {
 
             ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.KEBAB_CASE);
+            objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE);
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
             //Build in database types

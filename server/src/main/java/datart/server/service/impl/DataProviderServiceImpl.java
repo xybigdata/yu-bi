@@ -437,7 +437,7 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
             JsonNode root = objectMapper.readTree(model);
             JsonNode columnsNode = root.get("columns");
             if (columnsNode != null && columnsNode.isObject()) {
-                Iterator<Map.Entry<String, JsonNode>> iterator = columnsNode.fields();
+                Iterator<Map.Entry<String, JsonNode>> iterator = columnsNode.properties().iterator();
                 while (iterator.hasNext()) {
                     Map.Entry<String, JsonNode> entry = iterator.next();
                     String key = entry.getKey();
@@ -448,7 +448,7 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
                 }
             } else if (root.has("hierarchy") && root.get("hierarchy").isObject()) {
                 JsonNode hierarchyNode = root.get("hierarchy");
-                Iterator<Map.Entry<String, JsonNode>> iterator = hierarchyNode.fields();
+                Iterator<Map.Entry<String, JsonNode>> iterator = hierarchyNode.properties().iterator();
                 while (iterator.hasNext()) {
                     Map.Entry<String, JsonNode> entry = iterator.next();
                     String key = entry.getKey();
@@ -465,7 +465,7 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
                 }
             } else {
                 // 兼容1.0.0-beta.1以前的版本
-                Iterator<Map.Entry<String, JsonNode>> iterator = root.fields();
+                Iterator<Map.Entry<String, JsonNode>> iterator = root.properties().iterator();
                 while (iterator.hasNext()) {
                     Map.Entry<String, JsonNode> entry = iterator.next();
                     String key = entry.getKey();

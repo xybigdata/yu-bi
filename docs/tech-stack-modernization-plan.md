@@ -1961,3 +1961,81 @@
 - `server/src/main/java/datart/server/service/impl/UserServiceImpl.java` 与 `server/src/main/java/datart/server/service/impl/ExternalRegisterServiceImpl.java` 已不再把 `OAuth2User.getAttributes()` 包成 `fastjson JSONObject`，而是直接对原始属性 `Map` 使用 `JsonPath.read(...)`。
 - 这一步完成后，后端生产代码中的 `fastjson` 使用面已经收口为 0，后续只剩测试代码中的 `org.json` 残留需要按优先级处理。
 - 2026-06-09 验证：`mvn -pl server -am -DskipTests compile` 通过；对 `security/src/main/java`、`server/src/main/java`、`data-providers/*/src/main/java`、`core/src/main/java` 的 `fastjson` 检索结果为空。
+
+## 2026-06-11 项目级技术栈审计结论
+
+这一节补的是“review 整个项目之后，哪些技术栈仍偏老、现代替代方案是什么、当前已经做到哪一步”。它和上面的迁移记录不是重复关系，而是当前阶段的可执行审计结论。
+
+### 已完成主链现代化、但仍需稳定化回归的栈
+
+| 领域 | 旧栈 / 历史问题 | 当前状态 | 现代化结论 |
+| --- | --- | --- | --- |
+| Java 运行时 | JDK 8/11 时代遗留假设 | 已统一到 `JDK 21` | 主线已完成，后续只做兼容性回归 |
+| Spring 主框架 | Boot 2.x / Spring 5 时代接口 | 已统一到 `Spring Boot 3.5.12`、`Spring Cloud 2025.0.1` | 主线已完成 |
+| 前端构建 | `CRA / CRACO` | 已切到 `Vite 5`，CRA/CRACO 退出主工作流 | 主线已完成 |
+| React 主栈 | React 16/17 时期兼容思路 | 已统一到 `React 18.3.x`、`React Router 6.30.x`、`RTK 2.x`、`React Redux 9.x` | 主线已完成 |
+| UI 主栈 | `Ant Design 4` | 已进入 `Ant Design 5.26.x` 稳定线 | 主线已完成，仍需页面回归 |
+| 连接池 | `Druid` | 运行链已切到 `HikariCP` | 主链已完成，后续只剩行为/监控补验 |
+| HTTP 客户端 | `HttpClient 4 + okhttp` 并存 | 生产代码主运行链已统一到 `HttpClient 5`，`okhttp` 已退出主运行时依赖 | 主链已完成，但还要补 5.5 新 API 收口 |
+
+### 仍偏老、需要继续专项升级或替代的栈
+
+| 领域 | 当前栈 | 老旧点判断 | 更现代替代 | 当前建议优先级 |
+| --- | --- | --- | --- | --- |
+| 安全框架 | `Shiro 2.0.5` | 能跑，但与当前 Spring 生态割裂，属于长期架构包袱 | `Spring Security` 原生体系 | 高 |
+| 富文本 | `react-quill 1.3.5` / Quill 1 生态 | 包装层和底层编辑器都偏旧 | 先评估 `react-quill 2.x` 中间态，再评估真正的 Quill 2 React 封装或自有适配层 | 高 |
+| 时间体系尾部 | `dayjs` 已落地主链，但仍有值链回归专题 | 主逻辑已现代化，剩余是控件值对象与页面回归 | `dayjs` 单栈收口 | 高 |
+| 脚本引擎 | `nashorn-core 15.4` 仍保留运行期兜底 | JDK 主线已不再内建 Nashorn | `GraalJS` / 标准 JSR-223 发现链 | 中高 |
+| SQL 解析/方言 | `calcite-core 1.26.0` | 明显偏老，且带入历史依赖与弃用 API | 保守升级到较新稳定线，或继续封装隔离 | 中高 |
+| 代码生成链 | `mybatis-generator-core 1.4.0` | 工具链偏旧，但已退出主运行时 | 独立 profile / 独立生成链治理 | 中 |
+| 浏览器自动化 | 当前主链已是 Selenium 4，但历史思维仍偏导出脚本式 | 依赖层已经不老，产品能力层仍可继续现代化 | `Playwright` 或继续巩固 `Selenium 4 + Chromium` | 中 |
+| 测试主栈 | `Jest 29 + babel-jest` | 可用，但仍带较重历史转译心智 | `Jest 30` 或 `Vitest` 二选一 | 中 |
+
+### 本轮继续收口后的剩余后端重点
+
+截至 `2026-06-11`，本轮又清掉了一批低风险弃用入口，包括：
+
+- `Class.newInstance()` -> `getDeclaredConstructor().newInstance()`
+- `Jackson PropertyNamingStrategy.KEBAB_CASE` -> `PropertyNamingStrategies.KEBAB_CASE`
+- 多处 `commons-lang3` 旧字符串工具入口，改回 JDK 基础字符串处理或本地等价实现
+- `RandomStringUtils.randomNumeric/randomAscii` -> `RandomStringUtils.secure().nextNumeric/nextAscii`
+- `JsonNode.fields()` -> `JsonNode.properties().iterator()`
+
+本轮离线编译后，剩余 warning 已基本收敛到以下几类：
+
+1. `HttpClient 5.5` 新 API 适配
+   - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
+   - `security/src/main/java/datart/security/oauth2/WeChartOauth2Client.java`
+   - 现状：仍使用 `CloseableHttpClient.execute(ClassicHttpRequest)` 这类 5.5 已弃用入口
+   - 下一步：统一改成 `responseHandler` 风格，并复核 timeout 新写法
+
+2. `JwkUtils` 的 JWT / JWK 兼容层
+   - `security/src/main/java/datart/security/util/JwkUtils.java`
+   - 现状：`Jwts.claims(Map)`、`RemoteJWKSet`、`new URL(String)` 仍有弃用提示
+   - 下一步：拆成一个独立安全兼容专题处理，不和普通字符串工具替换混做
+
+3. `Calcite` 局部弃用入口
+   - `data-providers/data-provider-base/src/main/java/datart/data/provider/jdbc/SqlScriptRender.java`
+   - 现状：`SqlDialect.getDatabaseProduct()` 与 `StringUtils.replaceIgnoreCase(...)` 仍有 warning
+   - 下一步：只做兼容封装级替换，不直接升级整个 Calcite 大版本
+
+4. `javacc` 生成代码提示
+   - `data-providers/data-provider-base/target/generated-sources/javacc/.../SimpleCharStream.java`
+   - 现状：属于生成物 warning
+   - 下一步：先不手改生成代码，后续若要清零，优先从生成链版本或模板入手
+
+### 当前验收口径
+
+截至本节更新时，以下链路已再次验证通过：
+
+- `mvn -o -pl data-providers/jdbc-data-provider -am -DskipTests -Dmaven.compiler.showDeprecation=true compile`
+- `mvn -o -pl security -am -DskipTests -Dmaven.compiler.showDeprecation=true compile`
+- `mvn -o -pl server -am -DskipTests -Dmaven.compiler.showDeprecation=true compile`
+
+其中 `server` 链会联动执行：
+
+- `frontend npm install --legacy-peer-deps`
+- `npm run build:task`
+- `vite build`
+
+因此这次不是“只改文档”或“只做静态替换”，而是已经在完整联动构建下确认当前修改未破坏主链运行与打包。

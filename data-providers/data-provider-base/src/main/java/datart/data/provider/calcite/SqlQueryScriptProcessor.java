@@ -74,8 +74,7 @@ public class SqlQueryScriptProcessor implements QueryScriptProcessor {
 
         script = SqlStringUtils.replaceFragmentVariables(script, queryScript.getVariables());
 
-        script = StringUtils.appendIfMissing(script, " ", " ");
-        script = StringUtils.prependIfMissing(script, " ", " ");
+        script = ensurePadding(script);
 
 
         final String selectSql0 = parseSelectSql(script);
@@ -90,8 +89,7 @@ public class SqlQueryScriptProcessor implements QueryScriptProcessor {
         if (StringUtils.isNotBlank(selectSql)) {
             selectSql = SqlStringUtils.removeEndDelimiter(selectSql);
         }
-        selectSql = StringUtils.appendIfMissing(selectSql, " ", " ");
-        selectSql = StringUtils.prependIfMissing(selectSql, " ", " ");
+        selectSql = ensurePadding(selectSql);
 
         SqlBasicCall sqlBasicCall = new SqlBasicCall(SqlStdOperatorTable.AS
                 , new SqlNode[]{new SqlFragment("(" + selectSql + ")"), new SqlIdentifier(T, SqlParserPos.ZERO)}
@@ -132,6 +130,20 @@ public class SqlQueryScriptProcessor implements QueryScriptProcessor {
         }
 
         return selectSql;
+    }
+
+    private String ensurePadding(String sql) {
+        if (sql == null) {
+            return null;
+        }
+        String result = sql;
+        if (!result.startsWith(" ")) {
+            result = " " + result;
+        }
+        if (!result.endsWith(" ")) {
+            result = result + " ";
+        }
+        return result;
     }
 
 

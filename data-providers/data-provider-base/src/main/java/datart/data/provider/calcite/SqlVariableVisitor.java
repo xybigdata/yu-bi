@@ -134,11 +134,18 @@ public class SqlVariableVisitor extends SqlBasicVisitor<Object> {
             if (variable != null) {
                 variables.add(variable);
             }
-            if (!StringUtils.containsIgnoreCase(originalSqlFragment, identifier.toString())) {
+            if (!containsIgnoreCase(originalSqlFragment, identifier.toString())) {
                 variablePlaceholders.add(new SimpleVariablePlaceholder(variable, sqlDialect, identifier.toString()));
             }
         }
         variablePlaceholders.add(new VariablePlaceholder(variables, sqlDialect, logicExpressionCall, originalSqlFragment));
+    }
+
+    private boolean containsIgnoreCase(String source, String target) {
+        if (source == null || target == null) {
+            return false;
+        }
+        return source.toLowerCase(Locale.ROOT).contains(target.toLowerCase(Locale.ROOT));
     }
 
     // 处理calcite某些情况下不把左右括号算进index，导致的index错位问题

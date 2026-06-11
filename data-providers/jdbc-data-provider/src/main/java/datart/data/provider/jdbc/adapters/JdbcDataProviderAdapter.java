@@ -318,7 +318,7 @@ public class JdbcDataProviderAdapter implements Closeable {
                     Constructor<?> constructor = clz.getConstructor(JdbcDriverInfo.class);
                     sqlDialect = (CustomSqlDialect) constructor.newInstance(driverInfo);
                 } else {
-                    sqlDialect = (SqlDialect) clz.newInstance();
+                    sqlDialect = (SqlDialect) clz.getDeclaredConstructor().newInstance();
                 }
             } catch (Exception ignored) {
                 log.warn("Sql dialect " + driverInfo.getSqlDialect() + " not found, use default sql dialect");

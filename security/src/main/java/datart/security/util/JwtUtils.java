@@ -31,8 +31,6 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.security.Keys;
-import org.apache.commons.lang3.StringUtils;
-
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
@@ -99,7 +97,7 @@ public class JwtUtils {
         if (jwtString == null || !jwtString.startsWith(Const.TOKEN_HEADER_PREFIX)) {
             return null;
         }
-        jwtString = StringUtils.removeStart(jwtString, Const.TOKEN_HEADER_PREFIX);
+        jwtString = removePrefix(jwtString, Const.TOKEN_HEADER_PREFIX);
         Claims claims = getClaims(jwtString);
         JwtToken jwtToken = new JwtToken();
         jwtToken.setSubject(claims.getSubject());
@@ -109,7 +107,7 @@ public class JwtUtils {
     }
 
     public static InviteToken toInviteToken(String token) {
-        token = StringUtils.removeStart(token, Const.TOKEN_HEADER_PREFIX);
+        token = removePrefix(token, Const.TOKEN_HEADER_PREFIX);
         Claims claims = getClaims(token);
         InviteToken inviteToken = new InviteToken();
         inviteToken.setInviter(claims.get(TOKEN_KEY_INVITER, String.class));
@@ -181,6 +179,13 @@ public class JwtUtils {
     private static long getSessionTimeout() {
         String timeout = Application.getProperty("datart.security.token.timeout-min", "30");
         return Long.parseLong(timeout) * 60 * 1000;
+    }
+
+    private static String removePrefix(String value, String prefix) {
+        if (value != null && prefix != null && value.startsWith(prefix)) {
+            return value.substring(prefix.length());
+        }
+        return value;
     }
 
 }

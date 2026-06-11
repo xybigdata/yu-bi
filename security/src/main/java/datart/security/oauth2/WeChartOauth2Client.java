@@ -90,7 +90,9 @@ public class WeChartOauth2Client implements CustomOauth2Client {
         if (StringUtils.isBlank(url)) {
             url = Application.getServerPrefix();
         }
-        url = StringUtils.removeEnd(url, "/");
+        if (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
         url = url + redirectUri;
         return url;
     }

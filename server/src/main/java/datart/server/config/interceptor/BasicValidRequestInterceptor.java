@@ -48,8 +48,10 @@ public class BasicValidRequestInterceptor implements HandlerInterceptor {
         String requestURI = request.getRequestURI();
         contextPath = getContextPath();
         if (requestURI.startsWith(contextPath)) {
-            requestURI = StringUtils.removeStart(requestURI, contextPath);
-            requestURI = StringUtils.prependIfMissing(requestURI, "/");
+            requestURI = requestURI.substring(contextPath.length());
+            if (!requestURI.startsWith("/")) {
+                requestURI = "/" + requestURI;
+            }
         }
         return requestURI.startsWith(getApiPrePath())
                 || requestURI.equals("/")

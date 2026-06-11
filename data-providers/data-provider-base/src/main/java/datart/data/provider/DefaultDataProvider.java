@@ -231,7 +231,7 @@ public abstract class DefaultDataProvider extends DataProvider {
                             val = null;
                         } else if (NumberUtils.isDigits(val.toString())) {
                             val = Long.parseLong(val.toString());
-                        } else if (NumberUtils.isNumber(val.toString())) {
+                        } else if (NumberUtils.isCreatable(val.toString())) {
                             val = Double.parseDouble(val.toString());
                         } else {
                             val = null;

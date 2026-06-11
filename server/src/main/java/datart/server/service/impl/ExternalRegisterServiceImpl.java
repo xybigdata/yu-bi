@@ -96,7 +96,7 @@ public class ExternalRegisterServiceImpl implements ExternalRegisterService {
 
         UserRegisterParam registerParam = new UserRegisterParam();
         registerParam.setUsername(filter);
-        registerParam.setPassword(RandomStringUtils.randomAscii(32));
+        registerParam.setPassword(RandomStringUtils.secure().nextAscii(32));
         registerParam.setEmail(email);
 
         if (userService.register(registerParam, false)) {
@@ -125,7 +125,7 @@ public class ExternalRegisterServiceImpl implements ExternalRegisterService {
 
         UserRegisterParam userRegisterParam = new UserRegisterParam();
         userRegisterParam.setUsername(oauthUser.getName());
-        userRegisterParam.setPassword(RandomStringUtils.randomAscii(32));
+        userRegisterParam.setPassword(RandomStringUtils.secure().nextAscii(32));
         if (emailMapping != null) {
             userRegisterParam.setEmail(JsonPath.read(attributeDocument, emailMapping));
         }

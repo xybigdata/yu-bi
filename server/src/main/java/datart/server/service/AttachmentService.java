@@ -9,7 +9,6 @@ import datart.server.base.params.DownloadCreateParam;
 import datart.server.service.impl.AttachmentExcelServiceImpl;
 import datart.server.service.impl.AttachmentImageServiceImpl;
 import datart.server.service.impl.AttachmentPdfServiceImpl;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.io.File;
@@ -24,7 +23,7 @@ public interface AttachmentService {
     default String generateFileName(String path, String fileName, AttachmentType attachmentType) {
         path = FileUtils.withBasePath(path);
         String timeStr = DateFormatUtils.format(Calendar.getInstance(), Const.FILE_SUFFIX_DATE_FORMAT);
-        String randomStr = RandomStringUtils.randomNumeric(3);
+        String randomStr = org.apache.commons.lang3.RandomStringUtils.secure().nextNumeric(3);
         fileName = fileName + "_" + timeStr + "_" + randomStr + attachmentType.getSuffix();
         return FileUtils.concatPath(path, fileName);
     }

@@ -147,7 +147,7 @@ public class CustomPropertiesValidate implements EnvironmentPostProcessor {
 
     private String processDBUrl(ConfigurableEnvironment environment) {
         String jdbcUrl = environment.getProperty(DATABASE_URL);
-        if (!StringUtils.startsWith(jdbcUrl, "jdbc:mysql")) {
+        if (!jdbcUrl.startsWith("jdbc:mysql")) {
             return "";
         }
         Boolean isModify = false;

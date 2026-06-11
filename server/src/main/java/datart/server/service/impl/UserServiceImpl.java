@@ -108,8 +108,12 @@ public class UserServiceImpl extends BaseService implements UserService {
 
     @Override
     public List<UserBaseInfo> listUsersByKeyword(String keyword) {
-        keyword = StringUtils.appendIfMissing(keyword, "%");
-        keyword = StringUtils.prependIfMissing(keyword, "%");
+        if (!keyword.endsWith("%")) {
+            keyword = keyword + "%";
+        }
+        if (!keyword.startsWith("%")) {
+            keyword = "%" + keyword;
+        }
         List<User> users = userMapper.searchUsers(keyword);
         final User self = securityManager.getCurrentUser();
         return users.stream()

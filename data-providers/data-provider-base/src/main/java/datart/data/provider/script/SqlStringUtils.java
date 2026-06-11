@@ -84,7 +84,7 @@ public class SqlStringUtils {
             return sql;
         }
         sql = sql.trim();
-        sql = StringUtils.removeEnd(sql, SqlSplitter.DEFAULT_DELIMITER + "");
+        sql = removeTrailingDelimiter(sql);
         sql = sql.trim();
         if (sql.endsWith(SqlSplitter.DEFAULT_DELIMITER + "")) {
             return removeEndDelimiter(sql);
@@ -126,10 +126,29 @@ public class SqlStringUtils {
         int removeLength = 0;
         for (SqlParserPos pos : posList) {
             String pattern = sql.substring(pos.getColumnNum() - removeLength, pos.getEndColumnNum() - removeLength);
-            sql = StringUtils.replaceOnce(sql, pattern, "");
+            sql = replaceOnce(sql, pattern, "");
             removeLength = removeLength + pattern.length();
         }
         return sql.trim();
+    }
+
+    private static String removeTrailingDelimiter(String sql) {
+        String delimiter = String.valueOf(SqlSplitter.DEFAULT_DELIMITER);
+        if (sql.endsWith(delimiter)) {
+            return sql.substring(0, sql.length() - delimiter.length());
+        }
+        return sql;
+    }
+
+    private static String replaceOnce(String text, String searchString, String replacement) {
+        if (StringUtils.isEmpty(text) || StringUtils.isEmpty(searchString)) {
+            return text;
+        }
+        int index = text.indexOf(searchString);
+        if (index < 0) {
+            return text;
+        }
+        return text.substring(0, index) + replacement + text.substring(index + searchString.length());
     }
 
     /**

@@ -58,7 +58,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
 
     public String getPathPrefix() {
-        return StringUtils.removeEnd(pathPrefix, "/");
+        if (pathPrefix.endsWith("/")) {
+            return pathPrefix.substring(0, pathPrefix.length() - 1);
+        }
+        return pathPrefix;
     }
 
     @Bean

@@ -41,8 +41,9 @@ public class OracleDataProviderAdapter extends JdbcDataProviderAdapter {
     @Override
     protected String readCurrDatabase(Connection conn, boolean isCatalog) throws SQLException {
         String user = jdbcProperties.getUser();
-        if (StringUtils.endsWithIgnoreCase(user, " AS SYSDBA")
-                || StringUtils.endsWithIgnoreCase(user, " AS SYSOPER")) {
+        String normalizedUser = user == null ? null : StringUtils.upperCase(user);
+        if ((normalizedUser != null && normalizedUser.endsWith(" AS SYSDBA"))
+                || (normalizedUser != null && normalizedUser.endsWith(" AS SYSOPER"))) {
             return null;
         }
         return super.readCurrDatabase(conn, isCatalog);
