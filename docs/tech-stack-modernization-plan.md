@@ -533,6 +533,40 @@
   - 还没有完成基于 Quill 2 目标的组件级兼容核验，尤其是 `MarkdownModule`、`TagBlot`、`CalcFieldBlot` 和 `selection-change` 相关行为。
   - 还需要补富文本页面级验收证据，覆盖图表富文本、仪表板富文本和调度邮件富文本三条主要业务链。
 
+### 2026-06-11 Wave 3 预热：页面级懒加载与低风险依赖升级
+
+- 本轮实际落地：
+  - `frontend/src/app/pages/MainPage/index.tsx` 改为继续沿用仓库现有 `defaultLazyLoad` 模式，把 `ChartEditor`、主工作台页、故事播放/编辑页收敛到路由级懒加载。
+  - 新增：
+    - `frontend/src/app/pages/MainPage/PageLoadables.tsx`
+    - `frontend/src/app/pages/DashBoardPage/pages/Board/Loadable.tsx`
+    - `frontend/src/app/pages/SharePage/StoryPlayer/StoryPlayerForShare/Loadable.tsx`
+  - `StoryBoardPage/components/StoryPageItem.tsx` 与分享故事页 `StoryPageItem.tsx` 不再同步直连重型 `Board` 渲染链，改为按需加载。
+  - 升级并验证低风险依赖：
+    - `dayjs 1.11.21`
+    - `@antv/s2 2.7.2`
+    - `echarts-wordcloud 2.1.0`
+  - 新增 `frontend/src/app/components/DndProviderCompat.tsx`，把当前 `react-dnd 14` 与 TypeScript 5.9 / React 18 组合下的 `children` 类型噪音收口到单点兼容层。
+  - `frontend/src/app/utils/time.ts` 改为统一兼容历史 `W / Q` 时间单位写法，避免 `dayjs` 新类型收紧后继续在业务调用点散落适配代码。
+
+- 本轮验证结果：
+  - `npm run checkTs` 通过。
+  - `npm run build` 通过。
+  - 故事页链路已稳定拆出独立小 chunk，例如 `BoardPageItem.*.js`、`StoryPageItem.*.js`。
+  - `ChartEditor` 已从主路由入口中拆出独立 chunk。
+  - 主入口仍然偏大，最新构建下最大 `index.*.js` 约 `4.18 MB`，说明下一步重点仍应放在业务级页面/工作台继续拆分，而不是只做 vendor 手工分包。
+
+- 本轮调研结论：
+  - `react-dnd 14` 仍可运行，但仓库内还保留 `DragLayer` / `DragSource` / `DropTarget` 等旧 HOC 时代 API。直接升到 `react-dnd 16` 会触发构建和类型断裂，因此这条线应单列专题。
+  - 更现代拖拽替代路线可指向 `dnd-kit`。根据其官方文档与 README，当前主线是基于 hooks 的现代 React 拖拽工具包。
+  - `i18next 19` + `react-i18next 11` 当前可运行，但已明显落后于活跃主线；官方 README 也明确现代 React 用法以 hooks 为主。该项适合放入前端工具链现代化专题，而不是和富文本/安全专题并行硬推。
+  - `Spring Security` 仍是当前 Spring 官方安全主线，因此 `Shiro -> Spring Security` 继续保持为高优先级长期目标，但必须单列 Wave 5 安全专题推进。
+
+- 下一步建议：
+  - 继续拆 `MainPage` 内部高耦合页面与编辑链，优先查 `VizPage`、`ViewPage`、`SourcePage` 等是否还有工作台级同步重依赖。
+  - 单列 `react-dnd -> dnd-kit` 迁移设计，先统计 HOC API 使用面，再决定是先迁 `react-dnd 16` hooks 主线，还是直接切到 `dnd-kit`。
+  - 在 Wave 3 中补 `i18next / react-i18next` 升级评估与第一批验证。
+
 ### 风险台账
 
 这一节用于记录当前仍需重点关注的项目级风险，而不是单个 commit 的局部 warning。

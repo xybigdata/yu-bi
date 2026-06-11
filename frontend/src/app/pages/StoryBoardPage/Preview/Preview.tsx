@@ -17,6 +17,7 @@
  */
 import { Layout } from 'antd';
 import { Split } from 'app/components';
+import DndProviderCompat from 'app/components/DndProviderCompat';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { useSplitSizes } from 'app/hooks/useSplitSizes';
 import { usePublishBoard } from 'app/pages/DashBoardPage/hooks/usePublishBoard';
@@ -24,7 +25,6 @@ import { selectPublishLoading } from 'app/pages/MainPage/pages/VizPage/slice/sel
 import { StoryContext } from 'app/pages/StoryBoardPage/contexts/StoryContext';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -144,7 +144,7 @@ export const StoryPagePreview: React.FC<{
   }, [dispatch, currentPageIndex, sortedPages, storyId]);
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndProviderCompat backend={HTML5Backend}>
       <StoryContext.Provider
         value={{
           name: story?.name,
@@ -197,7 +197,7 @@ export const StoryPagePreview: React.FC<{
           </Container>
         </Wrapper>
       </StoryContext.Provider>
-    </DndProvider>
+    </DndProviderCompat>
   );
 });
 

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import Board from 'app/pages/DashBoardPage/pages/Board';
+import { LazyBoard } from 'app/pages/DashBoardPage/pages/Board/Loadable';
 import { VizRenderMode } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
@@ -31,7 +31,7 @@ const StoryPageItem: React.FC<{
   const SlideContent = useMemo(() => {
     if (relType === 'DASHBOARD') {
       return (
-        <Board
+        <LazyBoard
           key={relId}
           id={relId}
           fetchData={false}

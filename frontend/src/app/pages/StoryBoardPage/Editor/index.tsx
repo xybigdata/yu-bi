@@ -17,6 +17,7 @@
  */
 import { Layout, Modal } from 'antd';
 import { Split } from 'app/components';
+import DndProviderCompat from 'app/components/DndProviderCompat';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useSplitSizes } from 'app/hooks/useSplitSizes';
@@ -33,7 +34,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -254,7 +254,7 @@ export const StoryEditor: React.FC<{}> = memo(() => {
   }, [addPages]);
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndProviderCompat backend={HTML5Backend}>
       <StoryContext.Provider
         value={{
           name: story?.name,
@@ -300,7 +300,7 @@ export const StoryEditor: React.FC<{}> = memo(() => {
           </Container>
         </Wrapper>
       </StoryContext.Provider>
-    </DndProvider>
+    </DndProviderCompat>
   );
 });
 

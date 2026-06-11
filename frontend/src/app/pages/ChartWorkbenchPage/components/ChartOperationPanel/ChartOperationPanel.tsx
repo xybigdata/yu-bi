@@ -18,10 +18,10 @@
 
 import { IChart } from 'app/types/Chart';
 import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
+import DndProviderCompat from 'app/components/DndProviderCompat';
 import FlexLayout, { Model } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css';
 import { FC, memo, useContext, useState } from 'react';
-import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import styled from 'styled-components';
 import ChartDatasetContext from '../../contexts/ChartDatasetContext';
@@ -121,4 +121,4 @@ const ChartOperationPanel: FC<{
 
 export default ChartOperationPanel;
 
-const StyledChartOperationPanel = styled(DndProvider)<{ backend }>``;
+const StyledChartOperationPanel = styled(DndProviderCompat)<{ backend }>``;

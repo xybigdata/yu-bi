@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
+import DndProviderCompat from 'app/components/DndProviderCompat';
 import useResizeObserver from 'app/hooks/useResizeObserver';
 import { FC, memo, useEffect, useMemo } from 'react';
-import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -168,7 +168,9 @@ export const Board: FC<BoardProps> = memo(
 
     return (
       <Wrapper ref={ref} className="dashboard-box">
-        <DndProvider backend={HTML5Backend}>{viewBoard}</DndProvider>
+        <DndProviderCompat backend={HTML5Backend}>
+          {viewBoard}
+        </DndProviderCompat>
       </Wrapper>
     );
   },

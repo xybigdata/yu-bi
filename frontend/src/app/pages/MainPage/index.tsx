@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import ChartEditor, { ChartEditorBaseProps } from 'app/components/ChartEditor';
+import type { ChartEditorBaseProps } from 'app/components/ChartEditor';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useMount from 'app/hooks/useMount';
 import ChartManager from 'app/models/ChartManager';
@@ -27,24 +27,26 @@ import { useSelector } from 'react-redux';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
+import { defaultLazyLoad } from 'utils/loadable';
 import { NotFoundPage } from '../NotFoundPage';
-import { StoryEditor } from '../StoryBoardPage/Editor';
-import { StoryPlayer } from '../StoryBoardPage/Player';
+import { EditorPPT, PPTPlayer } from '../StoryBoardPage/Loadable';
 import { AccessRoute } from './AccessRoute';
 import { Background } from './Background';
 import { Navbar } from './Navbar';
-import { ConfirmInvitePage } from './pages/ConfirmInvitePage';
-import { MemberPage } from './pages/MemberPage';
-import { OrgSettingPage } from './pages/OrgSettingPage';
-import { PermissionPage } from './pages/PermissionPage';
+import {
+  LazyConfirmInvitePage,
+  LazyMemberPage,
+  LazyOrgSettingPage,
+  LazyPermissionPage,
+  LazyResourceMigrationPage,
+  LazySchedulePage,
+  LazySourcePage,
+  LazyVariablePage,
+  LazyViewPage,
+  LazyVizPage,
+} from './PageLoadables';
 import { ResourceTypes } from './pages/PermissionPage/constants';
-import { ResourceMigrationPage } from './pages/ResourceMigrationPage';
-import { SchedulePage } from './pages/SchedulePage';
-import { SourcePage } from './pages/SourcePage';
-import { VariablePage } from './pages/VariablePage';
-import { ViewPage } from './pages/ViewPage';
 import { useViewSlice } from './pages/ViewPage/slice';
-import { VizPage } from './pages/VizPage';
 import { useVizSlice } from './pages/VizPage/slice';
 import { initChartPreviewData } from './pages/VizPage/slice/thunks';
 import { useMainSlice } from './slice';
@@ -55,6 +57,11 @@ import {
   getUserSettings,
 } from './slice/thunks';
 import { MainPageRouteParams } from './types';
+
+const LazyChartEditor = defaultLazyLoad(
+  () => import('app/components/ChartEditor'),
+  module => module.ChartEditor,
+);
 
 export function MainPage() {
   useAppSlice();
@@ -114,7 +121,7 @@ export function MainPage() {
 
     return (
       <AccessRoute module={ResourceTypes.Viz}>
-        <ChartEditor
+        <LazyChartEditor
           dataChartId={hisState.dataChartId}
           orgId={orgId}
           chartType={hisState.chartType}
@@ -137,7 +144,7 @@ export function MainPage() {
             path="/"
             element={<Navigate to={`/organizations/${orgId}`} replace />}
           />
-          <Route path="/confirminvite" element={<ConfirmInvitePage />} />
+          <Route path="/confirminvite" element={<LazyConfirmInvitePage />} />
           <Route
             path="/organizations/:orgId"
             element={<Navigate to={`/organizations/${orgId}/vizs`} replace />}
@@ -148,17 +155,17 @@ export function MainPage() {
           />
           <Route
             path="/organizations/:orgId/vizs/storyPlayer/:storyId"
-            element={<StoryPlayer />}
+            element={<PPTPlayer />}
           />
           <Route
             path="/organizations/:orgId/vizs/storyEditor/:storyId"
-            element={<StoryEditor />}
+            element={<EditorPPT />}
           />
           <Route
             path="/organizations/:orgId/vizs/:vizId?"
             element={
               <AccessRoute module={ResourceTypes.Viz}>
-                <VizPage />
+                <LazyVizPage />
               </AccessRoute>
             }
           />
@@ -166,7 +173,7 @@ export function MainPage() {
             path="/organizations/:orgId/views/:viewId?"
             element={
               <AccessRoute module={ResourceTypes.View}>
-                <ViewPage />
+                <LazyViewPage />
               </AccessRoute>
             }
           />
@@ -174,7 +181,7 @@ export function MainPage() {
             path="/organizations/:orgId/sources"
             element={
               <AccessRoute module={ResourceTypes.Source}>
-                <SourcePage />
+                <LazySourcePage />
               </AccessRoute>
             }
           />
@@ -182,7 +189,7 @@ export function MainPage() {
             path="/organizations/:orgId/schedules/:scheduleId?"
             element={
               <AccessRoute module={ResourceTypes.Schedule}>
-                <SchedulePage />
+                <LazySchedulePage />
               </AccessRoute>
             }
           />
@@ -190,7 +197,7 @@ export function MainPage() {
             path="/organizations/:orgId/members"
             element={
               <AccessRoute module={ResourceTypes.User}>
-                <MemberPage />
+                <LazyMemberPage />
               </AccessRoute>
             }
           />
@@ -198,7 +205,7 @@ export function MainPage() {
             path="/organizations/:orgId/roles"
             element={
               <AccessRoute module={ResourceTypes.User}>
-                <MemberPage />
+                <LazyMemberPage />
               </AccessRoute>
             }
           />
@@ -215,7 +222,7 @@ export function MainPage() {
             path="/organizations/:orgId/permissions/:viewpoint"
             element={
               <AccessRoute module={ResourceTypes.Manager}>
-                <PermissionPage />
+                <LazyPermissionPage />
               </AccessRoute>
             }
           />
@@ -223,7 +230,7 @@ export function MainPage() {
             path="/organizations/:orgId/variables"
             element={
               <AccessRoute module={ResourceTypes.Manager}>
-                <VariablePage />
+                <LazyVariablePage />
               </AccessRoute>
             }
           />
@@ -231,7 +238,7 @@ export function MainPage() {
             path="/organizations/:orgId/orgSettings"
             element={
               <AccessRoute module={ResourceTypes.Manager}>
-                <OrgSettingPage />
+                <LazyOrgSettingPage />
               </AccessRoute>
             }
           />
@@ -239,7 +246,7 @@ export function MainPage() {
             path="/organizations/:orgId/resourceMigration"
             element={
               <AccessRoute module={ResourceTypes.Manager}>
-                <ResourceMigrationPage />
+                <LazyResourceMigrationPage />
               </AccessRoute>
             }
           />

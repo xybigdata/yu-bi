@@ -16,15 +16,15 @@
  * limitations under the License.
  */
 
-import { DndProvider } from 'react-dnd';
+import DndProviderCompat from 'app/components/DndProviderCompat';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { DraggableContainer } from './DraggableContainer';
 
 const DraggableList = props => {
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndProviderCompat backend={HTML5Backend}>
       <DraggableContainer {...props} />
-    </DndProvider>
+    </DndProviderCompat>
   );
 };
 

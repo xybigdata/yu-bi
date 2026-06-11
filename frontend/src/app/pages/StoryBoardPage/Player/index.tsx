@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 import { Layout } from 'antd';
+import DndProviderCompat from 'app/components/DndProviderCompat';
 import { useBoardSlice } from 'app/pages/DashBoardPage/pages/Board/slice';
 import { useEditBoardSlice } from 'app/pages/DashBoardPage/pages/BoardEditor/slice';
 import { useParams } from 'app/routerCompat';
@@ -28,7 +29,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -162,7 +162,7 @@ export const StoryPlayer: React.FC<{}> = memo(() => {
   }, [currentPageIndex, dispatch, sortedPages, pageMap]);
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndProviderCompat backend={HTML5Backend}>
       <Wrapper ref={fullRef}>
         <Content>
           <div id={domId} className="reveal">
@@ -179,7 +179,7 @@ export const StoryPlayer: React.FC<{}> = memo(() => {
           </div>
         </Content>
       </Wrapper>
-    </DndProvider>
+    </DndProviderCompat>
   );
 });
 

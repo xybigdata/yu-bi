@@ -18,7 +18,7 @@
 import { StoryPage } from 'app/pages/StoryBoardPage/slice/types';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { BoardPageItem } from './BoardPageItem';
+import { LazyBoardPageItem } from './Loadable';
 
 const StoryPageItem: React.FC<{
   page: StoryPage;
@@ -27,7 +27,7 @@ const StoryPageItem: React.FC<{
 
   const SlideContent = useMemo(() => {
     if (relType === 'DASHBOARD') {
-      return <BoardPageItem boardId={relId}></BoardPageItem>;
+      return <LazyBoardPageItem boardId={relId} />;
     } else {
       return null;
     }

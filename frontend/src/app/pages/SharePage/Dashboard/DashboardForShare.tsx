@@ -17,8 +17,8 @@
  */
 
 import { ChartDataRequest } from 'app/types/ChartDataRequest';
+import DndProviderCompat from 'app/components/DndProviderCompat';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -155,14 +155,14 @@ export const DashboardForShare: React.FC<ShareBoardProps> = memo(
     ]);
 
     return (
-      <DndProvider backend={HTML5Backend}>
+      <DndProviderCompat backend={HTML5Backend}>
         {viewBoard}
         <HeadlessBrowserIdentifier
           renderSign={allItemFetched}
           width={Number(taskW)}
           height={Number(taskH) + TitleHeight}
         />
-      </DndProvider>
+      </DndProviderCompat>
     );
   },
 );

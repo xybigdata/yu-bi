@@ -19,9 +19,10 @@
 import { Form, Input, Table, TableProps } from 'antd';
 import type { FormInstance } from 'antd';
 import type { InputRef } from 'antd';
+import DndProviderCompat from 'app/components/DndProviderCompat';
 import { RelationFilterValue } from 'app/types/ChartConfig';
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 const type = 'DraggableBodyRow';
@@ -53,13 +54,13 @@ export const DragSortEditTable: React.FC<DragEditTableProps> = ({
   };
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndProviderCompat backend={HTML5Backend}>
       <Table
         rowClassName={() => 'editable-row'}
         components={DragEditComponents}
         {...restProps}
       />
-    </DndProvider>
+    </DndProviderCompat>
   );
 };
 export const EditableRow: React.FC<EditableRowProps> = ({

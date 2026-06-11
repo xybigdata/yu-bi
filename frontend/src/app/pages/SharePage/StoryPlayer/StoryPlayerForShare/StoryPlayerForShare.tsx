@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 import { Layout } from 'antd';
+import DndProviderCompat from 'app/components/DndProviderCompat';
 import React, {
   memo,
   RefObject,
@@ -25,7 +26,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -172,7 +172,7 @@ export const StoryPlayerForShare: React.FC<{
   ]);
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndProviderCompat backend={HTML5Backend}>
       <Wrapper ref={fullRef}>
         <Content>
           <div id={domId} className="reveal">
@@ -184,7 +184,7 @@ export const StoryPlayerForShare: React.FC<{
           </div>
         </Content>
       </Wrapper>
-    </DndProvider>
+    </DndProviderCompat>
   );
 });
 

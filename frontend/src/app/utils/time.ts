@@ -24,19 +24,103 @@ import {
   RECOMMEND_TIME,
   TIME_FORMATTER,
 } from 'globalConstants';
-import { ManipulateType, OpUnitType } from 'dayjs';
+import { ManipulateType, OpUnitType, QUnitType } from 'dayjs';
+
+type LegacyManipulateUnit =
+  | ManipulateType
+  | QUnitType
+  | 'W'
+  | 'Q'
+  | 'M'
+  | 'y'
+  | 'd'
+  | 'h'
+  | 'm'
+  | 's';
+
+type LegacyOpUnit = OpUnitType | QUnitType | 'W' | 'Q';
+
+const normalizeManipulateUnit = (
+  unit?: LegacyManipulateUnit,
+): ManipulateType | QUnitType | undefined => {
+  switch (unit) {
+    case 'W':
+      return 'week';
+    case 'M':
+      return 'month';
+    case 'Q':
+      return 'quarter';
+    case 'y':
+      return 'year';
+    case 'd':
+      return 'day';
+    case 'h':
+      return 'hour';
+    case 'm':
+      return 'minute';
+    case 's':
+      return 'second';
+    default:
+      return unit as ManipulateType | QUnitType | undefined;
+  }
+};
+
+const normalizeOpUnit = (
+  unitTime?: LegacyOpUnit,
+): OpUnitType | QUnitType => {
+  switch (unitTime) {
+    case 'W':
+      return 'week';
+    case 'M':
+      return 'month';
+    case 'Q':
+      return 'quarter';
+    case 'y':
+      return 'year';
+    case 'd':
+      return 'day';
+    case 'h':
+      return 'hour';
+    case 'm':
+      return 'minute';
+    case 's':
+      return 'second';
+    default:
+      return (unitTime || 'day') as OpUnitType;
+  }
+};
+
+const addByUnit = (
+  dayValue: DatartDayjs,
+  amount: number,
+  unit?: ManipulateType | QUnitType,
+) => {
+  return unit ? dayValue.add(amount, unit as any) : dayValue.add(amount);
+};
+
+const startOfUnit = (dayValue: DatartDayjs, unit: OpUnitType | QUnitType) => {
+  return dayValue.startOf(unit as any);
+};
+
+const endOfUnit = (dayValue: DatartDayjs, unit: OpUnitType | QUnitType) => {
+  return dayValue.endOf(unit as any);
+};
 
 export function getTimeRange(
   amount?: [number, number],
-  unit?,
-): (unitTime, dateFormat?) => [string, string] {
+  unit?: LegacyManipulateUnit,
+): (unitTime: LegacyOpUnit, dateFormat?) => [string, string] {
   return (timeUnit, dateFormat?) => {
-    const startTime = datartDayjs()
-      .add(amount?.[0] || 0, unit)
-      .startOf(timeUnit as OpUnitType);
-    const endTime = datartDayjs()
-      .add(amount?.[1] || 0, unit)
-      .endOf(timeUnit as OpUnitType);
+    const normalizedUnit = normalizeManipulateUnit(unit);
+    const normalizedTimeUnit = normalizeOpUnit(timeUnit);
+    const startTime = startOfUnit(
+      addByUnit(datartDayjs(), amount?.[0] || 0, normalizedUnit),
+      normalizedTimeUnit,
+    );
+    const endTime = endOfUnit(
+      addByUnit(datartDayjs(), amount?.[1] || 0, normalizedUnit),
+      normalizedTimeUnit,
+    );
     return [
       startTime.format(dateFormat || TIME_FORMATTER),
       endTime.format(dateFormat || TIME_FORMATTER),
@@ -46,17 +130,26 @@ export function getTimeRange(
 
 export function getTime(
   amount?: number | string,
-  unit?: ManipulateType,
-): (unitTime, isStart?: boolean) => DatartDayjs {
-  return (timeUnit: OpUnitType, isStart?: boolean) => {
+  unit?: LegacyManipulateUnit,
+): (unitTime: LegacyOpUnit, isStart?: boolean) => DatartDayjs {
+  return (timeUnit, isStart?: boolean) => {
     const amountValue = Number(amount ?? 0);
+    const normalizedUnit = normalizeManipulateUnit(unit);
+    const normalizedTimeUnit = normalizeOpUnit(timeUnit);
     if (!!isStart) {
-      return datartDayjs().add(amountValue, unit).startOf(timeUnit);
+      return startOfUnit(
+        addByUnit(datartDayjs(), amountValue, normalizedUnit),
+        normalizedTimeUnit,
+      );
     }
-    return datartDayjs()
-      .add(amountValue, unit)
-      .add(1, unit)
-      .startOf(timeUnit);
+    return startOfUnit(
+      addByUnit(
+        addByUnit(datartDayjs(), amountValue, normalizedUnit),
+        1,
+        normalizedUnit,
+      ),
+      normalizedTimeUnit,
+    );
   };
 }
 

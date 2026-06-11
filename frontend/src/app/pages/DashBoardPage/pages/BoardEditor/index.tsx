@@ -16,10 +16,10 @@
  * limitations under the License.
  */
 import ChartEditor from 'app/components/ChartEditor';
+import DndProviderCompat from 'app/components/DndProviderCompat';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { BOARD_SELF_CHART_PREFIX } from 'globalConstants';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
-import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -165,10 +165,10 @@ export const BoardEditor: React.FC<{
 
   return (
     <StyledBoardEditor>
-      <DndProvider backend={HTML5Backend}>
+      <DndProviderCompat backend={HTML5Backend}>
         {boardEditor}
         {boardLoading && <BoardLoading />}
-      </DndProvider>
+      </DndProviderCompat>
     </StyledBoardEditor>
   );
 });
