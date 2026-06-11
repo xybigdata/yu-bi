@@ -15,7 +15,7 @@
         <java.version>21</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <lombok.version>1.18.46</lombok.version>
-        <nashorn.version>15.4</nashorn.version>
+        <graalvm.version>25.0.1</graalvm.version>
         <spring.cloud.version>2025.0.1</spring.cloud.version>
         <mybatis.spring.boot.version>3.0.4</mybatis.spring.boot.version>
         <shiro.version>2.0.5</shiro.version>
@@ -73,9 +73,14 @@
                 <version>2.22.0</version>
             </dependency>
             <dependency>
-                <groupId>org.openjdk.nashorn</groupId>
-                <artifactId>nashorn-core</artifactId>
-                <version>${nashorn.version}</version>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js-scriptengine</artifactId>
+                <version>${graalvm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js</artifactId>
+                <version>${graalvm.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
