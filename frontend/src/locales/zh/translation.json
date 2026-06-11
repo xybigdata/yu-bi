@@ -76,7 +76,7 @@
     }
   },
   "setup": {
-    "welcome": "欢迎使用 datart",
+    "welcome": "欢迎使用 yu-bi",
     "welcomeDesc": "在首次使用之前，请设置一位初始用户",
     "success": "设置成功",
     "successDesc": "已成功设置初始用户，点击这里",

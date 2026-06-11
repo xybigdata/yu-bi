@@ -87,7 +87,7 @@ export const EmailSettingForm: FC<EmailSettingFormProps> = ({
         </Form.Item>
       ) : null}
       <Form.Item label={t('contentOfEmail')} validateFirst name="textContent">
-        <CommonRichText placeholder="This email comes from cron job on the datart." />
+        <CommonRichText placeholder="This email comes from a scheduled job on yu-bi." />
       </Form.Item>
     </>
   );

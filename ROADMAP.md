@@ -19,4 +19,4 @@
 
 - sustain a release line that is fully independent of the abandoned upstream cadence
 - publish clearer release notes and compatibility matrix
-- decide whether to keep `datart` naming for the current project or introduce a distinct project brand
+- continue aligning repository, release, and product-facing materials under the `yu-bi` brand

@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for datart
+about: Suggest an idea for yu-bi
 title: ''
 labels: ''
 assignees: ''

@@ -76,8 +76,8 @@
     }
   },
   "setup": {
-    "welcome": "Welcome to datart",
-    "welcomeDesc": "Before using datart for the first time, set up an initial user",
+    "welcome": "Welcome to yu-bi",
+    "welcomeDesc": "Before using yu-bi for the first time, set up an initial user",
     "success": "Success",
     "successDesc": "Initial user set up successfully. Click here to",
     "goLogin": "Log In",

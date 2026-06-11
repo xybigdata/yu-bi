@@ -26,7 +26,7 @@ const HelmetPageTitle: FC<{ lang: string }> = memo(({ lang }) => {
 
   return (
     <>
-      <Helmet titleTemplate="Datart Share | %s" htmlAttributes={{ lang }}>
+      <Helmet titleTemplate="yu-bi Share | %s" htmlAttributes={{ lang }}>
         <meta name="description" content="Data Art" />
       </Helmet>
       <Helmet>

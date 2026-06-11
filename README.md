@@ -1,4 +1,4 @@
-# datart Independent Open Source Project
+# yu-bi Independent Open Source Project
 
 > An independently maintained open source analytics project, focused on keeping the codebase runnable, modernized, and openly maintained.
 
@@ -13,7 +13,7 @@ Current maintenance goals:
 - continue security, dependency, and runtime maintenance
 - keep all ongoing maintenance work open and reviewable
 
-This project is independently maintained. It originated from the original `datart` codebase, but it is not presented as the original official project and it does not follow the original upstream as a maintenance source.
+This project is independently maintained under the `yu-bi` brand. It originated from the original `datart` codebase, but it is not presented as the original official project and it does not follow the original upstream as a maintenance source.
 
 ## Project Origin
 
