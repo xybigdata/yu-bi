@@ -32,10 +32,7 @@ export function LoginAuthRoute() {
 
   if (systemInfo) {
     return (
-      <Navigate
-        to={systemInfo.initialized ? '/login' : '/setup'}
-        replace
-      />
+      <Navigate to={systemInfo.initialized ? '/login' : '/setup'} replace />
     );
   } else {
     // TODO: add system info load fail page

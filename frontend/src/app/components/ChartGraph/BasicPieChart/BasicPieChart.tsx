@@ -367,8 +367,8 @@ class BasicPieChart extends Chart {
         showPercent && showValue
           ? '(' + seriesParams?.percent + '%)'
           : showPercent
-          ? seriesParams?.percent + '%'
-          : ''
+            ? seriesParams?.percent + '%'
+            : ''
       }`;
     };
   }

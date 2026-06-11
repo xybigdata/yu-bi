@@ -28,9 +28,7 @@ interface ReactLifecycleAdapterProps {
   init: (componentWrapper) => void;
 }
 
-export default class ReactLifecycleAdapter
-  implements ReactLifecycleAdapterProps
-{
+export default class ReactLifecycleAdapter implements ReactLifecycleAdapterProps {
   private domContainer;
   private reactComponent;
   private externalLibs;

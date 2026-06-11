@@ -31,15 +31,8 @@ import {
 type SaveFormProps = Omit<ModalFormProps, 'type' | 'open' | 'onSave'>;
 
 export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
-  const {
-    vizType,
-    type,
-    open,
-    initialValues,
-    onSave,
-    onCancel,
-    onAfterClose,
-  } = useContext(SaveFormContext);
+  const { vizType, type, open, initialValues, onSave, onCancel, onAfterClose } =
+    useContext(SaveFormContext);
   const selectVizFolderTree = useMemo(makeSelectVizFolderTree, []);
   const selectStoryboradFolderTree = useMemo(
     makeSelectStoryboradFolderTree,

@@ -25,9 +25,9 @@ import { IDomainEvent, Task } from './types';
  * @class MigrationTaskEvent
  * @template TDomainModel
  */
-class MigrationEvent<TDomainModel extends { version?: string }>
-  implements IDomainEvent<TDomainModel>
-{
+class MigrationEvent<
+  TDomainModel extends { version?: string },
+> implements IDomainEvent<TDomainModel> {
   version: string = APP_VERSION_INIT;
   semver?: SemVer;
   task?: Task<TDomainModel>;

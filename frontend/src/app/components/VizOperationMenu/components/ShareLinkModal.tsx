@@ -188,7 +188,9 @@ const ShareLinkModal: FC<{
             disabledDate={current => {
               return (
                 current &&
-                datartDayjs(current.toDate()).isBefore(datartDayjs().endOf('day'))
+                datartDayjs(current.toDate()).isBefore(
+                  datartDayjs().endOf('day'),
+                )
               );
             }}
             onChange={(_, dateString) => {

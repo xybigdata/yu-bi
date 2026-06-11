@@ -262,10 +262,10 @@ export const Toolbar = memo(
                 error
                   ? 'error'
                   : stage >= ViewViewModelStages.Running
-                  ? stage === ViewViewModelStages.Running
-                    ? 'processing'
-                    : 'success'
-                  : 'default'
+                    ? stage === ViewViewModelStages.Running
+                      ? 'processing'
+                      : 'success'
+                    : 'default'
               }
             />
           </Space>

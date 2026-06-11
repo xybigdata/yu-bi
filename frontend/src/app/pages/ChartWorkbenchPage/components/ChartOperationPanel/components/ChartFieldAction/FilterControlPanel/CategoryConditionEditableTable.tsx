@@ -216,7 +216,7 @@ const CategoryConditionEditableTable: FC<
             ({
               index,
               moveRow,
-            } as any)
+            }) as any
           }
         />
       </div>

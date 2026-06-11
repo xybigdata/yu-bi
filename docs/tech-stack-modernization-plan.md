@@ -3080,6 +3080,50 @@
   - 代码规范链剩余 warning 已大幅压缩，后续可继续处理 `LoginAuthRoute.tsx`、`BasicPieChart.tsx`、`ViewPage/utils.tsx`、`ViewPage/slice/types.ts` 等纯格式小文件。
   - 现阶段仍暂不进入 hooks 依赖修复、业务逻辑调整和高风险内部命名重构。
 
+### 2026-06-11 本轮继续推进：前端 Prettier 历史 warning 全量清零
+
+- 本轮实际落地：
+  - `frontend/src/app/LoginAuthRoute.tsx`
+  - `frontend/src/app/components/ChartGraph/BasicPieChart/BasicPieChart.tsx`
+  - `frontend/src/app/components/VizOperationMenu/VizOperationMenu.tsx`
+  - `frontend/src/app/components/VizOperationMenu/components/ShareLinkModal.tsx`
+  - `frontend/src/app/migration/BoardConfig/types.ts`
+  - `frontend/src/app/migration/MigrationEvent.ts`
+  - `frontend/src/app/models/ChartDrillOption.ts`
+  - `frontend/src/app/models/ReactLifecycleAdapter.ts`
+  - `frontend/src/app/models/__tests__/ReactChart.test.ts`
+  - `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartConfigPanel/ChartStyleConfigPanel.tsx`
+  - `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartDataViewPanel/ChartDataViewPanel.tsx`
+  - `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartDataViewPanel/components/ChartComputedFieldEditor/ChartComputedFieldEditor.tsx`
+  - `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartDraggable/ChartDraggableTargetContainer.tsx`
+  - `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterControlPanel/CategoryConditionEditableTable.tsx`
+  - `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterControlPanel/FilterControlPanel.tsx`
+  - `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/SortAction/DraggableList/DraggableItem.tsx`
+  - `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartGraphIcon.tsx`
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/Main/Editor/Toolbar.tsx`
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/slice/types.ts`
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/utils.tsx`
+  - `frontend/src/app/pages/MainPage/pages/VizPage/SaveForm.tsx`
+  - `frontend/src/app/utils/time.ts`
+  - `frontend/src/styles/__tests__/media.test.ts`
+
+- 本轮收口内容：
+  - 只处理当前剩余全部 `prettier/prettier` 历史格式差异，不改登录跳转语义、不改图表和图表工作台逻辑、不改迁移类型语义、不改 ViewPage / VizPage 运行行为。
+  - 本轮属于前端代码规范链“清尾”动作，统一使用前端本地已安装的 `prettier` 做机械格式化，确保无网络依赖、无手工逻辑调整。
+  - 至此，前端 `lint` 中的 `prettier/prettier` warning 已全部清零，warning 类型从低风险格式问题彻底收敛到少量需要语义判断的 hooks 依赖问题。
+
+- 本轮验证结果：
+  - 在本机 `Node 26.0.0 / npm 11.15.0` 下：
+    - `npm run lint` 通过。
+  - `lint` 总 warning 从 `62` 降到 `2`，且当前仅剩：
+    - `frontend/src/app/components/FormGenerator/Customize/Interaction/CrossFilteringRuleList.tsx`
+    - `frontend/src/app/components/MonacoEditor/index.tsx`
+  - 当前剩余 `2` 条 warning 均为 `react-hooks/exhaustive-deps`，前端历史 `prettier` warning 已全部退出。
+
+- 当前仍未完成项：
+  - 后续现代化改造将进入中风险阶段，开始逐条评估并收口 hooks 依赖 warning。
+  - 现阶段仍暂不进入高风险内部命名重构和业务逻辑改造。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

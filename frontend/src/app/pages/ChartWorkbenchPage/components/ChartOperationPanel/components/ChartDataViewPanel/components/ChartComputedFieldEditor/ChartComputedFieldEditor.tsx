@@ -17,9 +17,7 @@
  */
 
 import { Divider, Row } from 'antd';
-import MonacoEditor, {
-  MonacoEditorHandle,
-} from 'app/components/MonacoEditor';
+import MonacoEditor, { MonacoEditorHandle } from 'app/components/MonacoEditor';
 import {
   ChartComputedFieldHandle,
   FunctionDescription,

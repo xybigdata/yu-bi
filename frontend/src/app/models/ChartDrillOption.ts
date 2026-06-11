@@ -98,8 +98,8 @@ export class ChartDrillOption implements IChartDrillOption {
     return this.cursor === -1
       ? undefined
       : this.mode === DrillMode.Drill
-      ? [this.drillFields?.[this.cursor + 1]]
-      : this.drillFields.slice(0, this.cursor + 2);
+        ? [this.drillFields?.[this.cursor + 1]]
+        : this.drillFields.slice(0, this.cursor + 2);
   }
 
   public getCurrentDrillLevel(): number {

@@ -65,9 +65,7 @@ const normalizeManipulateUnit = (
   }
 };
 
-const normalizeOpUnit = (
-  unitTime?: LegacyOpUnit,
-): OpUnitType | QUnitType => {
+const normalizeOpUnit = (unitTime?: LegacyOpUnit): OpUnitType | QUnitType => {
   switch (unitTime) {
     case 'W':
       return 'week';

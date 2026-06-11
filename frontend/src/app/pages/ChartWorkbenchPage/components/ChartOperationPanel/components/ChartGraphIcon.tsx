@@ -82,12 +82,12 @@ const ChartGraphIcon: FC<{
                     num: getMaxValueStr(limit),
                   })
                 : Array.isArray(limit) && limit.length === 2
-                ? t('allowRange', undefined, {
-                    type: t(type),
-                    start: limit?.[0],
-                    end: getMaxValueStr(limit?.[1]),
-                  })
-                : null}
+                  ? t('allowRange', undefined, {
+                      type: t(type),
+                      start: limit?.[0],
+                      end: getMaxValueStr(limit?.[1]),
+                    })
+                  : null}
             </li>
           );
         },

@@ -443,8 +443,8 @@ export function addPathToHierarchyStructureAndChangeName(
           acc[name].children![i]['path'] = Array.isArray(children.name)
             ? children.name
             : viewType === 'STRUCT'
-            ? children.name && JSON.parse(children.name)
-            : [children.name];
+              ? children.name && JSON.parse(children.name)
+              : [children.name];
 
           acc[name].children![i]['name'] =
             viewType === 'STRUCT'
@@ -456,8 +456,8 @@ export function addPathToHierarchyStructureAndChangeName(
       acc[name]['path'] = Array.isArray(acc[name]['name'])
         ? acc[name]['name']
         : viewType === 'STRUCT'
-        ? acc[name]['name'] && JSON.parse(acc[name]['name'])
-        : [name];
+          ? acc[name]['name'] && JSON.parse(acc[name]['name'])
+          : [name];
 
       acc[name]['name'] = name;
     }

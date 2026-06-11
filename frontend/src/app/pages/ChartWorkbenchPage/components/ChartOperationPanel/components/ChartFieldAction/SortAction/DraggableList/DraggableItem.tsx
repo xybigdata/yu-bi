@@ -115,11 +115,7 @@ export const DraggableItem: FC<DraggableItemProps> = ({
     },
   });
 
-  const [{ isDragging }, drag] = useDrag<
-    Item,
-    void,
-    { isDragging: boolean }
-  >({
+  const [{ isDragging }, drag] = useDrag<Item, void, { isDragging: boolean }>({
     type: 'ItemTypes.Item',
     item: () => {
       return { id, index };

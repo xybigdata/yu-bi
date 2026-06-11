@@ -194,19 +194,15 @@ export const useVizOperationMenuItems = ({
   ]);
 };
 
-const VizOperationMenu: FC<VizOperationMenuProps> = memo(
-  ({
-    ...props
-  }) => {
-    const menuItems = useVizOperationMenuItems(props);
+const VizOperationMenu: FC<VizOperationMenuProps> = memo(({ ...props }) => {
+  const menuItems = useVizOperationMenuItems(props);
 
-    return (
-      <StyleVizOperationMenu>
-        <Menu items={menuItems} />
-      </StyleVizOperationMenu>
-    );
-  },
-);
+  return (
+    <StyleVizOperationMenu>
+      <Menu items={menuItems} />
+    </StyleVizOperationMenu>
+  );
+});
 
 export default VizOperationMenu;
 
