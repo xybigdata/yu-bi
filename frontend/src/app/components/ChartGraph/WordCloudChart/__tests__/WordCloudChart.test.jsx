@@ -16,6 +16,10 @@
  * limitations under the License.
  */
 
+import { vi } from 'vitest';
+
+vi.mock('echarts-wordcloud', () => ({}));
+
 import WordCloudChart from '../WordCloudChart';
 
 describe('<WordCloudChart />', () => {
