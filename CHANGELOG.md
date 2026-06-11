@@ -4,8 +4,8 @@
 
 ### Project governance
 
-- republished the repository as a community-maintained open source fork
-- added maintainer, roadmap, and security documentation for the maintained fork
+- republished the repository as an independently maintained open source project
+- added maintainer, roadmap, security, and attribution documentation for the independent project
 
 ### Runtime and platform modernization
 

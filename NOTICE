@@ -1,0 +1,18 @@
+datart
+
+This repository is an independently maintained open source project derived
+from the original "datart" codebase published by running-elephant/datart.
+
+Original upstream project:
+- Repository: running-elephant/datart
+- Original license: Apache License 2.0
+
+This repository continues to distribute upstream-derived code and ongoing
+modifications under the Apache License 2.0. Original copyright and license
+notices that apply to upstream-derived files are retained in the source tree.
+
+Independent maintenance for this repository is currently coordinated by:
+- chencongyu / xybigdata
+
+This NOTICE file is provided for attribution and project-origin clarity. It
+does not modify the terms of the Apache License 2.0.

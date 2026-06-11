@@ -2,9 +2,9 @@
 
 ## Repository Role
 
-This repository is a community-maintained fork of the original `datart` project.
+This repository is an independently maintained open source project.
 
-It is currently maintained as an open source continuation focused on buildability, security, dependency health, and controlled modernization.
+It originated from the original `datart` codebase and is currently maintained as an independent project focused on buildability, security, dependency health, and controlled modernization.
 
 ## Current Maintainer
 

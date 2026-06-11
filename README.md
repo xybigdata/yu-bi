@@ -1,27 +1,27 @@
-# datart Community Maintained Fork
+# datart Independent Open Source Project
 
-> A community-maintained fork of `datart`, focused on keeping the project runnable, modernized, and open.
+> An independently maintained open source analytics project, focused on keeping the codebase runnable, modernized, and openly maintained.
 
 ## Project Status
 
-This repository is no longer treated as an upstream mirror. It is a maintained open source fork based on the original `datart` project.
+This repository is maintained as an independent open source project.
 
 Current maintenance goals:
 
 - keep the project buildable on modern toolchains
-- preserve core datart capabilities and compatibility where practical
+- preserve core product capabilities and compatibility where practical
 - continue security, dependency, and runtime maintenance
 - keep all ongoing maintenance work open and reviewable
 
-This fork is maintained independently. It is derived from the original `datart` codebase, but it is not presented as the original official project.
+This project is independently maintained. It originated from the original `datart` codebase, but it is not presented as the original official project and it does not follow the original upstream as a maintenance source.
 
-## Upstream Origin
+## Project Origin
 
 - Original project: `running-elephant/datart`
 - License: `Apache-2.0`
-- This repository retains the original license and attribution notices required by Apache License 2.0.
+- This repository retains the original license and attribution notices required by Apache License 2.0 and continues development as an independent project.
 
-## What This Fork Maintains
+## What This Project Maintains
 
 The current maintenance line is focused on:
 
@@ -105,4 +105,4 @@ Please use the process documented in [SECURITY.md](./SECURITY.md).
 
 This repository continues to be distributed under the [Apache License 2.0](./LICENSE).
 
-Original project attribution remains in place. New maintenance work in this fork is also released under Apache 2.0 unless explicitly stated otherwise in a specific file.
+Original project attribution remains in place. Ongoing development in this repository is released under Apache 2.0 unless explicitly stated otherwise in a specific file. See [NOTICE](./NOTICE) for project origin and attribution context.

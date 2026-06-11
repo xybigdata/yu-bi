@@ -13,10 +13,10 @@
 - complete a single clear frontend test-stack direction
 - upgrade lint and formatting toolchain to newer stable major lines
 - continue Calcite and code-generation risk assessment
-- improve release documentation and operational guidance for this maintained fork
+- improve release documentation and operational guidance for this independent project
 
 ## Long Term
 
-- reach a sustainable maintained release line independent of the abandoned upstream cadence
+- sustain a release line that is fully independent of the abandoned upstream cadence
 - publish clearer release notes and compatibility matrix
-- decide whether to keep `datart` naming for the maintained fork or introduce a distinct project brand
+- decide whether to keep `datart` naming for the current project or introduce a distinct project brand

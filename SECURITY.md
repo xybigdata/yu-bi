@@ -26,7 +26,7 @@ If no private reporting channel has been published yet, open a minimal public is
 
 ## Response Expectations
 
-Best-effort targets for this maintenance fork:
+Best-effort targets for this independently maintained project:
 
 - initial acknowledgement: within 7 days
 - triage outcome: as soon as the issue is reproducible
