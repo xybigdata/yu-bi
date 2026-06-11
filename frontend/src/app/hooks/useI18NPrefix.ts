@@ -54,10 +54,8 @@ function usePrefixI18N(prefix?: string) {
         c.lang.includes(i18n.language),
       )?.translation;
       const contextTranslation = get(langTrans, translationKey);
-      return (
-        contextTranslation ||
-        (t.call(Object.create(null), translationKey, options) as string)
-      );
+      const fallbackTranslation = t(translationKey, options);
+      return contextTranslation || String(fallbackTranslation);
     },
     [i18n.language, prefix, t, vizI18NConfigs],
   );

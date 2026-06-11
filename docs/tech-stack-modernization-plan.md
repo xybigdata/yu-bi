@@ -567,6 +567,25 @@
   - 单列 `react-dnd -> dnd-kit` 迁移设计，先统计 HOC API 使用面，再决定是先迁 `react-dnd 16` hooks 主线，还是直接切到 `dnd-kit`。
   - 在 Wave 3 中补 `i18next / react-i18next` 升级评估与第一批验证。
 
+### 2026-06-11 Wave 3 继续推进：国际化链路升级到较新稳定主线
+
+- 本轮实际落地：
+  - 升级：
+    - `i18next 26.0.2`
+    - `react-i18next 17.0.8`
+    - `i18next-browser-languagedetector 8.2.1`
+  - `frontend/src/app/hooks/useI18NPrefix.ts` 去掉了对旧版 `t.call(...)` 绑定方式的依赖，改为直接使用现代 `t(...)` 返回值并显式收口到字符串。
+
+- 本轮验证结果：
+  - `npm run checkTs` 通过。
+  - `npm run build` 通过。
+  - `npm run test:ci -- src/__tests__/task.test.ts src/styles/theme/__tests__/ThemeProvider.test.tsx` 通过。
+
+- 本轮调研结论：
+  - `react-i18next` 当前主线仍以 `useTranslation` hooks 形态作为现代 React 用法主路径。
+  - 当前仓库国际化使用面总体健康，主要是 hooks `useTranslation`、少量 `i18next.t(...)` 直接调用，以及少量旧测试习惯；因此这条升级链路的风险显著低于 `react-dnd` 或 `Shiro` 这类跨架构专题。
+  - 当前仍可继续关注的不是“是否还能升级”，而是是否要在后续专题中补类型化 key / namespace 收口，以及减少业务层直接调用全局 `i18next.t(...)` 的散点出口。
+
 ### 风险台账
 
 这一节用于记录当前仍需重点关注的项目级风险，而不是单个 commit 的局部 warning。
