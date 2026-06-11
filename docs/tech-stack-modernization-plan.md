@@ -3034,6 +3034,28 @@
   - 代码规范链后续可继续处理 `FolderTree.tsx`、`chartHelper.ts` 等剩余纯格式大文件。
   - 现阶段仍暂不进入 hooks 依赖修复、业务逻辑调整和高风险内部命名重构。
 
+### 2026-06-11 本轮继续推进：收口 MainPage 通用访问控制与视图目录历史格式差异
+
+- 本轮实际落地：
+  - `frontend/src/app/pages/MainPage/Access.tsx`
+  - `frontend/src/app/pages/MainPage/Navbar/ModifyPassword.tsx`
+  - `frontend/src/app/pages/MainPage/pages/VizPage/Sidebar/Folders/FolderTree.tsx`
+  - `frontend/src/app/utils/chartHelper.ts`
+
+- 本轮收口内容：
+  - 只处理这 4 个文件中的 `prettier/prettier` 历史格式差异，不改权限判断语义、不改修改密码交互、不改视图目录菜单行为、不改图表 mark line / mark area 计算逻辑。
+  - 本轮仍然优先选择单文件扫描中只有 `prettier/prettier` 的目标文件；`ViewPage/Sidebar/FolderTree.tsx` 虽然也是纯格式问题，但 warning 规模更大，继续留在下一轮单独处理。
+  - 处理方式仍然是使用前端本地已安装的 `prettier` 做机械格式化，保持无网络依赖，也不引入手工业务调整。
+
+- 本轮验证结果：
+  - 在本机 `Node 26.0.0 / npm 11.15.0` 下：
+    - `npm run lint` 通过。
+  - `lint` 总 warning 从 `196` 降到 `164`，且本轮目标文件相关的 `32` 条 `prettier` warning 已退出。
+
+- 当前仍未完成项：
+  - 代码规范链后续优先继续处理 `frontend/src/app/pages/MainPage/pages/ViewPage/Sidebar/FolderTree.tsx` 这类剩余纯格式大文件。
+  - 现阶段仍暂不进入 hooks 依赖修复、业务逻辑调整和高风险内部命名重构。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

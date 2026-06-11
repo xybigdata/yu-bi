@@ -163,10 +163,10 @@ export function calcAc(
   return isOwner
     ? true
     : type === 'module'
-    ? permissionMap[module]['*'] >= level
-    : id
-    ? permissionMap[module][id] !== void 0
-      ? (permissionMap[module][id] & level) === level
-      : void 0
-    : false;
+      ? permissionMap[module]['*'] >= level
+      : id
+        ? permissionMap[module][id] !== void 0
+          ? (permissionMap[module][id] & level) === level
+          : void 0
+        : false;
 }

@@ -634,10 +634,13 @@ function getMarkLine2(
   isHorizonDisplay: boolean,
 ): MarkLine {
   const markLineData = refTabs
-    ?.reduce((acc, cur) => {
-      const markLineConfigs = cur?.rows?.filter(r => r.key === 'markLine');
-      return acc.concat(markLineConfigs);
-    }, [] as Array<ChartStyleSectionGroup | undefined>)
+    ?.reduce(
+      (acc, cur) => {
+        const markLineConfigs = cur?.rows?.filter(r => r.key === 'markLine');
+        return acc.concat(markLineConfigs);
+      },
+      [] as Array<ChartStyleSectionGroup | undefined>,
+    )
     .map(ml => {
       return getMarkLineData2(
         ml,
@@ -926,10 +929,13 @@ function getMarkArea2(
   dataConfig: ChartDataSectionField,
   isHorizonDisplay: boolean,
 ): MarkArea {
-  const refAreas = refTabs?.reduce((acc, cur) => {
-    const markLineConfigs = cur?.rows?.filter(r => r.key === 'markArea');
-    return acc.concat(markLineConfigs);
-  }, [] as Array<ChartStyleSectionGroup | undefined>);
+  const refAreas = refTabs?.reduce(
+    (acc, cur) => {
+      const markLineConfigs = cur?.rows?.filter(r => r.key === 'markArea');
+      return acc.concat(markLineConfigs);
+    },
+    [] as Array<ChartStyleSectionGroup | undefined>,
+  );
 
   return {
     data: refAreas
