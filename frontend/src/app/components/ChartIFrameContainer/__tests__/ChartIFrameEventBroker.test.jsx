@@ -17,6 +17,7 @@
  */
 
 import ChartIFrameEventBroker from '../ChartIFrameEventBroker';
+import { vi } from 'vitest';
 
 describe('ChartIFrameEventBroker Tests', () => {
   let broker = null;
@@ -39,10 +40,10 @@ describe('ChartIFrameEventBroker Tests', () => {
 
   test('should register chart lifecycle event correctly', () => {
     const chart = {
-      onMount: jest.fn().mockImplementation(),
-      onUpdated: jest.fn().mockImplementation(),
-      onResize: jest.fn().mockImplementation(),
-      onUnMount: jest.fn().mockImplementation(),
+      onMount: vi.fn().mockImplementation(() => {}),
+      onUpdated: vi.fn().mockImplementation(() => {}),
+      onResize: vi.fn().mockImplementation(() => {}),
+      onUnMount: vi.fn().mockImplementation(() => {}),
     };
     broker.register(chart);
     expect(broker._chart).toEqual(chart);
@@ -53,14 +54,14 @@ describe('ChartIFrameEventBroker Tests', () => {
   });
 
   test('should subscribe chart lifecycle event standalone', () => {
-    const mountFn = jest.fn().mockImplementation();
+    const mountFn = vi.fn().mockImplementation(() => {});
     broker.subscribe('mounted', mountFn);
     expect(broker._listeners.get('mounted')).toEqual(mountFn);
   });
 
   test('should call chart onMount lifecycle when mounted', () => {
     const chart = {
-      onMount: jest.fn().mockImplementation(),
+      onMount: vi.fn().mockImplementation(() => {}),
     };
     broker.register(chart);
     broker.publish('mounted', mockOptions, mockContext);
@@ -71,7 +72,7 @@ describe('ChartIFrameEventBroker Tests', () => {
   test('should call chart onUpdated lifecycle after mounted', async () => {
     const chart = {
       state: 'ready',
-      onUpdated: jest.fn().mockImplementation(),
+      onUpdated: vi.fn().mockImplementation(() => {}),
     };
     broker.register(chart);
     broker.publish('updated', mockOptions, mockContext);
@@ -85,7 +86,7 @@ describe('ChartIFrameEventBroker Tests', () => {
   test('should invoke once onUpdated lifecycle with many update events', async () => {
     const chart = {
       state: 'ready',
-      onUpdated: jest.fn().mockImplementation(),
+      onUpdated: vi.fn().mockImplementation(() => {}),
     };
     broker.register(chart);
     broker.publish('updated', mockOptions, mockContext);
@@ -100,7 +101,7 @@ describe('ChartIFrameEventBroker Tests', () => {
 
   test('should not call chart onUpdated lifecycle before mounted', () => {
     const chart = {
-      onUpdated: jest.fn().mockImplementation(),
+      onUpdated: vi.fn().mockImplementation(() => {}),
     };
     broker.register(chart);
     broker.publish('updated', mockOptions, mockContext);
@@ -110,7 +111,7 @@ describe('ChartIFrameEventBroker Tests', () => {
   test('should call chart onResize lifecycle after mounted', async () => {
     const chart = {
       state: 'ready',
-      onResize: jest.fn().mockImplementation(),
+      onResize: vi.fn().mockImplementation(() => {}),
     };
     broker.register(chart);
     broker.publish('resize', mockOptions, mockContext);
@@ -124,7 +125,7 @@ describe('ChartIFrameEventBroker Tests', () => {
   test('should invoke once onResize lifecycle with many resize events', async () => {
     const chart = {
       state: 'ready',
-      onResize: jest.fn().mockImplementation(),
+      onResize: vi.fn().mockImplementation(() => {}),
     };
     broker.register(chart);
     broker.publish('resize', mockOptions, mockContext);
@@ -139,7 +140,7 @@ describe('ChartIFrameEventBroker Tests', () => {
 
   test('should not call chart onResize lifecycle before mounted', () => {
     const chart = {
-      onResize: jest.fn().mockImplementation(),
+      onResize: vi.fn().mockImplementation(() => {}),
     };
     broker.register(chart);
     broker.publish('resize', mockOptions, mockContext);
@@ -149,7 +150,7 @@ describe('ChartIFrameEventBroker Tests', () => {
   test('should call chart onUnMount lifecycle after mounted', () => {
     const chart = {
       state: 'ready',
-      onUnMount: jest.fn().mockImplementation(),
+      onUnMount: vi.fn().mockImplementation(() => {}),
     };
     broker.register(chart);
     broker.publish('unmount', mockOptions, mockContext);
@@ -159,7 +160,7 @@ describe('ChartIFrameEventBroker Tests', () => {
 
   test('should not call chart onUnMount lifecycle before mounted', () => {
     const chart = {
-      onUnMount: jest.fn().mockImplementation(),
+      onUnMount: vi.fn().mockImplementation(() => {}),
     };
     broker.register(chart);
     broker.publish('unmount', mockOptions, mockContext);
@@ -169,7 +170,7 @@ describe('ChartIFrameEventBroker Tests', () => {
   test('should not call event when event name is not correct', () => {
     const chart = {
       state: 'mounting',
-      onUnMount: jest.fn().mockImplementation(),
+      onUnMount: vi.fn().mockImplementation(() => {}),
     };
     broker.register(chart);
     broker.publish('unknown', mockOptions, mockContext);
@@ -179,7 +180,7 @@ describe('ChartIFrameEventBroker Tests', () => {
   test('should not call event after disposed', () => {
     const chart = {
       state: 'mounting',
-      onUnMount: jest.fn().mockImplementation(),
+      onUnMount: vi.fn().mockImplementation(() => {}),
     };
     broker.register(chart);
     broker.dispose();
@@ -190,7 +191,7 @@ describe('ChartIFrameEventBroker Tests', () => {
   test('should set state to ready after mounted', () => {
     const chart = {
       state: '',
-      onMount: jest.fn().mockImplementation(),
+      onMount: vi.fn().mockImplementation(() => {}),
     };
     broker.register(chart);
     broker.publish('mounted', mockOptions, mockContext);
@@ -201,7 +202,7 @@ describe('ChartIFrameEventBroker Tests', () => {
   test('should set state to ready after updated', async () => {
     const chart = {
       state: 'ready',
-      onUpdated: jest.fn().mockImplementation(),
+      onUpdated: vi.fn().mockImplementation(() => {}),
     };
     broker.register(chart);
     broker.publish('updated', mockOptions, mockContext);

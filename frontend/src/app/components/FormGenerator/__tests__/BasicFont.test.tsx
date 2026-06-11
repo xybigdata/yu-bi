@@ -19,6 +19,7 @@
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { vi } from 'vitest';
 import BasicFont from '../Basic/BasicFont';
 
 describe('<BasicFont />', () => {
@@ -137,7 +138,7 @@ describe('<BasicFont />', () => {
   });
 
   test.skip('should call onChange event', async () => {
-    const handleOnChangeEvent = jest.fn();
+    const handleOnChangeEvent = vi.fn();
     const { debug } = render(
       <BasicFont
         ancestors={[]}

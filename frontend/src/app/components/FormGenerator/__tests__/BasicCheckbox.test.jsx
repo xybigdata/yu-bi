@@ -18,6 +18,7 @@
 
 import '@testing-library/jest-dom';
 import { fireEvent, render } from '@testing-library/react';
+import { vi } from 'vitest';
 import BasicCheckbox from '../Basic/BasicCheckbox';
 
 describe('<BasicCheckbox />', () => {
@@ -39,7 +40,7 @@ describe('<BasicCheckbox />', () => {
   });
 
   test('should fire onChange event', async () => {
-    const handleOnChangeEvent = jest.fn();
+    const handleOnChangeEvent = vi.fn();
     const ancestors = [];
     const needRefresh = true;
 
