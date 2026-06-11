@@ -17,6 +17,7 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import BasicCheckbox from '../Basic/BasicCheckbox';
 

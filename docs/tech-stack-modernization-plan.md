@@ -7,7 +7,7 @@
 - Java 运行时：JDK 21。
 - 后端主框架：Spring Boot 3.5.12，Spring Cloud 2025.0.1。
 - 构建工具：Maven，`maven-compiler-plugin` 3.14.1，`maven-assembly-plugin` 3.8.0，`exec-maven-plugin` 3.6.3。
-- 前端运行时：默认工程化基线收口到 Node 24 LTS，并保留 Node 26 当前线兼容验证；开发和生产构建已切换到 Vite 5。
+- 前端运行时：默认工程化基线收口到 Node 24 LTS，并保留 Node 26 当前线兼容验证；开发和生产构建已切换到 Vite 6 稳定线。
 - 前端主框架：React 18、React Router 6.30.1、Ant Design 5.26、TypeScript 5.9；CRA/CRACO 已退出前端主工作流。
 - 已验证基线：
   - `npm run checkTs` 通过。
@@ -118,7 +118,7 @@
 - MySQL JDBC 坐标：`com.mysql:mysql-connector-j`
 - Selenium：`4.31.0`
 - Node：`24.x LTS` 默认基线，`26.x` 兼容验证
-- Vite：`5.x`
+- Vite：`6.4.x`
 - React：`18.3.x`
 - React Router：`6.30.x`
 - Redux Toolkit：`2.x`
@@ -188,7 +188,7 @@
 | 栈 | 当前值 | 终态目标 | 当前状态 | 当前证据 | 下一动作 |
 | --- | --- | --- | --- | --- | --- |
 | Node | `24.x LTS` 默认基线，`26.x` 兼容验证 | `24.x LTS` 默认基线，按需保留 Node 当前线兼容验证 | 已完成本轮基线收口 | `package.json engines`、CI 双版本矩阵、`.nvmrc` | 持续回归 |
-| Vite | `5.x` | 作为唯一主构建链 | 已完成 | `package.json`、`vite.config.mts`、build 通过 | 持续优化分包 |
+| Vite | `6.4.x` | 作为唯一主构建链 | 已完成本轮稳定线对齐 | `package.json`、`vite.config.mts`、`build` / `build:task` / `test:ci` 通过 | 持续优化分包 |
 | task 打包链 | `Vite library mode` | 与 Vite 主链统一 | 已完成 | `vite.task.config.mts`、`build:task` 通过 | 清理残留历史依赖声明 |
 | React | `18.3.1` | `18+`，后续再评估 `19` | 已完成 | `package.json`、build 通过 | 持续回归 |
 | React Router | `6.30.x` | `6/7` | 当前主链已在 6 | 兼容层与主依赖 | 继续做路由回归，不急追 7 |
@@ -299,7 +299,7 @@
 
 | 波次 | 主题 | 目标 | 进入条件 | 退出条件 |
 | --- | --- | --- | --- | --- |
-| Wave 0 | 基线锁定 | 固化当前 JDK 21 / Boot 3 / Node 24 LTS 默认基线、Node 26 兼容验证、Vite 5 / React 18 基线 | 已完成 | 基线文档、CI、构建链一致 |
+| Wave 0 | 基线锁定 | 固化当前 JDK 21 / Boot 3 / Node 24 LTS 默认基线、Node 26 兼容验证、Vite 6 稳定线 / React 18 基线 | 已完成 | 基线文档、CI、构建链一致 |
 | Wave 1 | 前端时间体系收尾 | 把 `moment` 专题从“主链已迁”推进到“专题完成” | AntD 5 主升级已稳定 | 生产代码、task 产物、时间控件值链和分享页回归全部闭环 |
 | Wave 2 | 富文本与页面稳定化 | 收口 `react-quill 1.x` 旧生态，完成 Quill 升级路线决策 | 时间体系主链稳定 | `RichTextEditor` 包装层稳定，升级路线定稿并完成至少一批落地 |
 | Wave 3 | 前端工具链现代化 | 收敛 Vitest 单栈，清理 lint/format 历史壳 | 富文本与时间链路不再频繁波动 | 测试链、lint 链、task 打包链全部收口到明确单栈 |
@@ -927,7 +927,7 @@
 只有同时满足下面条件，才能宣称“整个技术栈清单已经现代化替代完成”：
 
 1. 当前基线项
-   - JDK 21、Spring Boot 3、Spring Cloud 2025、Node 24 LTS 默认基线与 Node 26 兼容验证、Vite 5、React 18、Router 6、RTK 2、React Redux 9 均保持通过构建和运行验证。
+   - JDK 21、Spring Boot 3、Spring Cloud 2025、Node 24 LTS 默认基线与 Node 26 兼容验证、Vite 6 稳定线、React 18、Router 6、RTK 2、React Redux 9 均保持通过构建和运行验证。
 2. 前端主栈项
    - Ant Design 5 完成主升级并稳定运行。
    - `moment` 退出主生产代码。
@@ -949,7 +949,7 @@
 
 ### 里程碑状态
 
-- `M0 已完成`：JDK 21、Spring Boot 3、Spring Cloud 2025、Node 默认基线收口到 24 LTS 并补 26 兼容验证、Vite 5、React 18、Router 6 依赖切换、RTK 2、React Redux 9、Selenium 4、后端生产代码 `fastjson` 清零。
+- `M0 已完成`：JDK 21、Spring Boot 3、Spring Cloud 2025、Node 默认基线收口到 24 LTS 并补 26 兼容验证、Vite 6 稳定线、React 18、Router 6 依赖切换、RTK 2、React Redux 9、Selenium 4、后端生产代码 `fastjson` 清零。
 - `M1 已完成`：前端 Router 兼容层收口、Ant Design 5 主升级、测试工具链去 CRA 化、CI/Docker 与当前基线对齐。
 - `M2 已完成`：JWT 升级、HttpClient 5、POI/Guava/Commons 系列老基础库清理。
 - `M3 进行中`：`moment -> dayjs` 收尾、富文本现代化，以及 H2 2.x 之后的连接池、安全框架、脚本引擎与 Calcite 长期演进策略落地。
@@ -2702,7 +2702,6 @@
 
 - 当前仍未完成项：
 - 代码规范链已推进到 `ESLint 8 / stylelint 17 / Prettier 3`，其中 ESLint 9 flat config 仍待单列专题，Prettier 3 历史格式差异按触达文件渐进收口。
-  - `@vitest/mocker 4` 对 `Vite 6+` 的 peer 期望仍提示当前主构建链未来要补一次专题对齐，这不是本轮低风险升级应强行解决的问题。
 
 ### 2026-06-11 本轮继续推进：收口 Vitest setup 历史兼容壳
 
@@ -2731,7 +2730,35 @@
 
 - 当前仍未完成项：
   - 本轮测试输出中的 React warning 主要来自旧组件自身实现和历史测试写法，不是这次 Vitest setup 收口新引入的问题，后续应按组件专题继续治理。
-  - `Vitest 4` 与 `Vite 5` 的 peer 提示仍然存在，后续在 Vite 升级专题中一并处理。
+
+### 2026-06-11 本轮继续推进：Vite 6 稳定线对齐，消除 Vitest 主链 peer 错位
+
+- 本轮实际落地：
+  - `frontend/package.json`
+  - `frontend/package-lock.json`
+  - `frontend/src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx`
+  - `frontend/src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx`
+  - `frontend/src/app/components/ChartIFrameContainer/__tests__/ChartIFrameContainer.test.jsx`
+
+- 本轮收口内容：
+  - 前端主构建链已从 `Vite 5.4.21` 收口到 `Vite 6.4.3` 稳定线。
+  - 这次升级不追逐更高主版本，只解决当前 `Vitest 4.1.8` 与 `Vite 5` 之间的主链 peer 错位。
+  - 为兼容 `Vite 6` 下测试文件不再依赖隐式 React 注入的行为，补了 3 个历史 `.jsx` 测试文件的显式 `React` 导入；未修改对应生产代码逻辑。
+
+- 本轮收益：
+  - `Vitest 4` 与主构建链的版本关系恢复一致，不再维持“测试栈要求 `Vite 6+`、仓库却停在 `Vite 5`”的错位状态。
+  - `Node 26` 下的 `checkTs`、测试和构建链均继续通过，说明这次升级符合“较新的稳定版”而非盲目追新。
+  - 这一步继续保持 Vite 单栈方向，不引入新的构建工具或新的测试主链。
+
+- 本轮验证结果：
+  - 在本机 `Node 26.0.0 / npm 11.15.0` 下：
+    - `npm run checkTs` 通过。
+    - `npm run build:task` 通过。
+    - `npm run build` 通过。
+    - `npm run test:ci` 通过，结果为 `87 passed`, `665 passed | 4 skipped`。
+
+- 当前仍未完成项：
+  - 全量测试输出中仍存在一批历史 React warning 与上游 sourcemap warning，这些不是本轮 `Vite 6` 升级新引入的问题，后续应在组件和依赖治理专题中继续消化。
 
 ### 2026-06-11 本轮继续推进：Jest 运行链退出，Vitest 单栈完成主链收口
 
