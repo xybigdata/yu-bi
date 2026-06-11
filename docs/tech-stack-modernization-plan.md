@@ -3206,6 +3206,41 @@
   - 前端 task 打包链“清理残留历史依赖声明”已向前推进一项，`rollup 2` 历史直依赖已退出显式声明。
   - 本轮属于低风险工程化收口，不涉及业务逻辑、内部命名或发布语义调整。
 
+### 2026-06-11 本轮继续推进：构建链大 chunk 告警压缩预研
+
+- 本轮目标：
+  - 不直接做高风险业务拆分，先基于 `Vite 6.4.x` 构建产物定位当前大 chunk 的真实来源，判断下一阶段应优先动构建参数还是业务导入边界。
+
+- 本轮现状确认：
+  - 基线构建下，前端主构建仍存在 4 个显著大块：
+    - `index.*.js` 约 `4.23 MB`
+    - `migrationViewDetailConfig.*.js` 约 `2.30 MB`
+    - `antdDesign.*.js` 约 `1.93 MB`
+    - `echarts.*.js` 约 `1.02 MB`
+  - 其中 `migrationViewDetailConfig.*.js` 名称虽然显眼，但实际打包内容远不止视图迁移逻辑；该 chunk 内同时混入了大量图表实现、地图数据、PivotSheet 等业务模块。
+
+- 本轮调研结论：
+  - 仅靠继续给第三方依赖补 `manualChunks`，对 `index.*.js` 主块缩减效果有限。
+  - 真正的大头来自业务图表实现层：
+    - `ChartManager` 当前静态引入整套 `app/components/ChartGraph`
+    - `ChartGraph` 目录内同时承载：
+      - ECharts 图表实现
+      - 中国/地市 GeoJSON 地图资源
+      - PivotSheet / `@antv/s2` 相关实现
+      - 富文本、表格、地图等多类重量级图表组件
+  - 本轮试过把 `ChartGraph + ChartManager` 通过 `manualChunks` 强制切为独立业务 chunk，结果显示：
+    - 主入口 chunk 可从约 `4.23 MB` 降到约 `2.53 MB`
+    - 图表实现层可独立成约 `2.08 MB` 的 `chartGraphs.*.js`
+    - 但会引入多条新的 `Circular chunk` 告警，说明当前静态导入拓扑下，单靠 Vite 构建参数硬切块不可直接落地。
+
+- 阶段结论：
+  - “大 chunk”问题已经从现象定位到结构性来源：核心瓶颈不在第三方 vendor 命名分包，而在图表实现层和主入口之间的静态耦合。
+  - 下一阶段应优先评估以下中风险方案，而不是继续堆构建参数：
+    - 将 `ChartManager` 从“静态注册全部图表”改为“按图表类型或图表簇延迟加载”
+    - 将地图 GeoJSON 与地图图表实现从通用图表主链中分离
+    - 将 PivotSheet / Monaco / StoryBoard 等重量级能力继续按功能入口拆成独立业务加载边界
+  - 本轮只保留调研结论与验收数据，不保留会新增 `Circular chunk` 告警的实验性构建配置。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
