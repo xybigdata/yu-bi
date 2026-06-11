@@ -196,13 +196,13 @@
 | React Redux | `9.3.0` | `9.x` | 已完成 | `package.json`、typed hooks 收口 | 持续回归 |
 | Ant Design | `5.26.2` | `5.x` 稳定线，后续再评估 6 | 已完成主升级 | `package.json`、页面构建与回归记录 | 清理 compat 壳与页面回归 |
 | 时间体系 | `dayjs` 主链，局部值链待收尾 | `dayjs` 单栈 | 进行中 | 生产代码 `moment` 清零、task 产物已切换 | 收尾控件值链和页面回归 |
-| 富文本 | `react-quill 1.3.5` + 本地适配层 | Quill 2 路线或更现代 React 封装 | 进行中 | `quillCompat`、`RichTextEditor`、本地插件模块 | 路线定稿并做第一批升级 |
+| 富文本 | `react-quill 2.0.0` + 本地适配层 | Quill 2 路线或更现代 React 封装 | 进行中 | `quillCompat`、`RichTextEditor`、本地插件模块 | 继续压缩对旧 `@types/quill` 内嵌类型路径的耦合 |
 | 视频播放 | 原生 `<video>` | 原生能力 | 已完成 | VideoWidget 改造 | 持续回归 |
 | 故事播放 | `reveal.js 6.0.1` | 暂保留当前主线 | 已完成主线升级 | `package.json` | 结合富文本专题复核 |
 | 样式系统 | `styled-components 6.1.19` | `6.x` | 已完成主升级 | `package.json`、TS/build 通过 | 做稳定化复核 |
 | 测试栈 | `Vitest 4` 主链 + `Jest 29` 存量 | `Vitest` 单栈 | 进行中 | `package.json`、`vitest.config.mts`、已迁移用例持续通过 | 继续迁移存量 `jest.fn/mock` 测试 |
-| 代码规范链 | `ESLint 8` + `stylelint 14` + `Prettier 2` | 当前稳定主线 | 第一批低风险升级已完成，仍待大版本专题 | 配置与执行主链已显式化，Babel/Jest 辅助依赖已开始收口 | 等 Vitest 迁移面稳定后升级到新主线 |
-| 国际化 | `i18next 19` + `react-i18next 11` | 当前稳定主线 | 待评估 | `package.json` | 结合 React 18 再评估 |
+| 代码规范链 | `ESLint 8` + `stylelint 14` + `Prettier 2` | 当前稳定主线 | 进行中 | `package.json`、`lint-staged 17`、`husky 9`、`commitlint 21`、hooks 校验通过 | 下一步再做 ESLint 9 / stylelint 16 / Prettier 3 专题 |
+| 国际化 | `i18next 26.0.2` + `react-i18next 17.0.8` | 当前稳定主线 | 已完成主链升级 | `package.json`、hooks 用法与专项测试通过 | 后续评估 key / namespace 类型化 |
 | IE11 残留 | 主运行时已退出 polyfill 主链 | 不再为 IE11 保留历史兼容壳 | 已完成主链退出 | `react-app-polyfill` 已移除 | 持续清理残留命名与文档 |
 
 ### 工程化总表
@@ -211,6 +211,7 @@
 | --- | --- | --- | --- | --- | --- |
 | Maven | `3.9+` 受 Enforcer 约束 | 显式最低版本 | 已完成 | 根 POM Enforcer | 持续回归 |
 | npm | `11+` | 显式最低版本 | 已完成 | `package.json engines` | 持续回归 |
+| Git hooks / 提交流程 | `husky 9` + `lint-staged 17` + `commitlint 21` | 进入当前维护主线并与 Node 26 兼容 | 已完成本轮主升级 | `frontend/package.json`、`.husky`、`commitlint.config.mjs`、本轮 lint/test 校验 | 后续再评估是否把 root/子项目脚本继续收敛 |
 | CI | Node 26 / JDK 21 / package + health check | 与本地一致 | 已完成主链对齐 | GitHub workflow | 持续补专项验证 |
 | Docker | 直接消费安装包 | 与 package 链一致 | 已完成静态收口，镜像级实测不足 | Dockerfile、安装包结构 | 后续补 docker build/run 实测 |
 | 发布包 | `mvn package` 统一产出 | 本地/CI/Docker 同产物 | 已完成主链收口 | server package、health check | 持续回归 |
@@ -618,6 +619,31 @@
     - 请求收尾时的 `logoutCurrent()` 与 `RequestContext.clean()`
 
 - 本轮收益：
+
+### 2026-06-11 Wave 3 继续推进：提交流程工具链升级到当前稳定主线
+
+- 本轮实际落地：
+  - 升级：
+    - `@commitlint/cli 21.0.2`
+    - `@commitlint/config-conventional 21.0.2`
+    - `husky 9.1.7`
+    - `lint-staged 17.0.7`
+  - `frontend/commitlint.config.js` 切换为 `frontend/commitlint.config.mjs`，与当前 `commitlint` ESM 主线保持一致。
+  - 补齐 `frontend/.husky/commit-msg`，把提交信息校验正式接回本地提交流程。
+  - `frontend/.husky/pre-commit` 改为通过 `lint-staged` 执行增量检查，不再全量跑样式命令。
+  - `frontend/.husky/pre-push` 去掉旧 Husky 启动壳，避免继续依赖将在 Husky 10 失效的历史写法。
+
+- 本轮验证结果：
+  - `printf 'chore: 校验 commitlint' | npx --prefix frontend commitlint --config frontend/commitlint.config.mjs` 通过。
+  - `cd frontend && npx lint-staged --debug` 通过，已确认能正确识别当前 monorepo 路径与 `package.json` 配置。
+  - `cd frontend && npm run lint:css` 通过。
+  - `cd frontend && npm run lint:style` 通过。
+  - `cd frontend && npm run test:ci` 通过，结果为 `87 passed`, `665 passed | 4 skipped`。
+
+- 本轮调研结论：
+  - `husky 9` 已明确标记旧 `husky.sh` 启动壳为废弃写法，继续保留会在 `v10` 直接失效，因此本轮先完成 hook 文件格式收口是必要动作。
+  - 当前仓库的 `core.hooksPath` 已稳定指向 `frontend/.husky`，因此受管环境下 `npm run prepare` 虽然因为 `.git/config` 写锁限制未能重写配置，但不影响现有 hooks 生效，也不影响本轮升级结果。
+  - `lint-staged 17` 在当前仓库结构下可正常从 `frontend` 解析到上层 Git 根目录，因此继续保留配置在 `frontend/package.json` 是可行的。
   - “每个请求都通过 MVC 拦截器触发 Shiro 登录恢复”的模式开始松动，请求级登录态恢复首次进入 Spring Security 过滤链。
   - 这一步不改变现有权限判定语义，也不直接替换 `DatartRealm` / `ShiroSecurityManager`，因此风险显著低于直接硬切主认证体系。
   - 后续若继续推进 `Spring Security` 主链接管，可以优先沿过滤器、认证上下文和异常处理链继续扩展，而不是继续把更多逻辑堆在 `LoginInterceptor` 上。
