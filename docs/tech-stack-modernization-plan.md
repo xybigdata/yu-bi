@@ -3056,6 +3056,30 @@
   - 代码规范链后续优先继续处理 `frontend/src/app/pages/MainPage/pages/ViewPage/Sidebar/FolderTree.tsx` 这类剩余纯格式大文件。
   - 现阶段仍暂不进入 hooks 依赖修复、业务逻辑调整和高风险内部命名重构。
 
+### 2026-06-11 本轮继续推进：收口 MainPage 视图目录树与成员/变量类型历史格式差异
+
+- 本轮实际落地：
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/Sidebar/FolderTree.tsx`
+  - `frontend/src/app/pages/MainPage/pages/SourcePage/slice/types.ts`
+  - `frontend/src/app/pages/MainPage/pages/VariablePage/types.ts`
+  - `frontend/src/app/pages/MainPage/pages/MemberPage/index.tsx`
+  - `frontend/src/app/pages/MainPage/pages/MemberPage/pages/MemberDetailPage.tsx`
+  - `frontend/src/app/pages/MainPage/pages/MemberPage/pages/RoleDetailPage/MemberForm.tsx`
+
+- 本轮收口内容：
+  - 只处理这 6 个文件中的 `prettier/prettier` 历史格式差异，不改目录树菜单语义、不改成员页路由参数语义、不改成员编辑逻辑、不改变量和数据源表单类型定义。
+  - 本轮把上一轮刻意留待单独处理的 `ViewPage/Sidebar/FolderTree.tsx` 一并收口；该文件虽然体量较大，但单文件扫描结果仍然只有纯格式 warning，因此继续沿用机械格式化策略。
+  - 处理方式仍然是使用前端本地已安装的 `prettier` 做机械格式化，保持无网络依赖，也不引入手工业务改动。
+
+- 本轮验证结果：
+  - 在本机 `Node 26.0.0 / npm 11.15.0` 下：
+    - `npm run lint` 通过。
+  - `lint` 总 warning 从 `164` 降到 `62`，且本轮目标文件相关的 `102` 条 `prettier` warning 已退出。
+
+- 当前仍未完成项：
+  - 代码规范链剩余 warning 已大幅压缩，后续可继续处理 `LoginAuthRoute.tsx`、`BasicPieChart.tsx`、`ViewPage/utils.tsx`、`ViewPage/slice/types.ts` 等纯格式小文件。
+  - 现阶段仍暂不进入 hooks 依赖修复、业务逻辑调整和高风险内部命名重构。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

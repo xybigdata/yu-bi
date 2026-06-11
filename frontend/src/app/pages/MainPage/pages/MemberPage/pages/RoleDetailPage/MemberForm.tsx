@@ -62,9 +62,10 @@ export const MemberForm = memo(
       onCancel && onCancel(null as any);
     }, [targetKeys, members, onCancel, onChange]);
 
-    const handleTargetKeysChange: TransferProps<User>['onChange'] = nextTargetKeys => {
-      setTargetKeys(nextTargetKeys.map(String));
-    };
+    const handleTargetKeysChange: TransferProps<User>['onChange'] =
+      nextTargetKeys => {
+        setTargetKeys(nextTargetKeys.map(String));
+      };
 
     const renderTitle = useCallback(
       ({ name, username, email }) => (

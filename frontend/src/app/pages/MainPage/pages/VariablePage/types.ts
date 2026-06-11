@@ -18,7 +18,9 @@
 
 import { Variable, VariableDefaultValueItem } from './slice/types';
 
-export interface VariableFormModel
-  extends Omit<Variable, 'id' | 'defaultValue'> {
+export interface VariableFormModel extends Omit<
+  Variable,
+  'id' | 'defaultValue'
+> {
   defaultValue: VariableDefaultValueItem[];
 }

@@ -82,11 +82,10 @@ export interface SourceSimpleViewModel extends SourceSimple {
   deleteLoading: boolean;
 }
 
-export interface SourceFormModel
-  extends Pick<
-    SourceSimple,
-    'isFolder' | 'name' | 'type' | 'parentId' | 'orgId' | 'index'
-  > {
+export interface SourceFormModel extends Pick<
+  SourceSimple,
+  'isFolder' | 'name' | 'type' | 'parentId' | 'orgId' | 'index'
+> {
   config: object;
 }
 
