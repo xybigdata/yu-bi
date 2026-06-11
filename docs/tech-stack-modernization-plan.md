@@ -2011,8 +2011,8 @@
 2. Lombok `equals/hashCode` 提示
    - `server/src/main/java/datart/server/base/transfer/model/*`
    - `server/src/main/java/datart/server/base/dto/UserProfile.java`
-   - 现状：属于注解生成策略提示，不是 Boot 3 / JDK 21 主链兼容阻塞
-   - 下一步：单独评估是否批量补 `@EqualsAndHashCode(callSuper = false)`，避免和运行时迁移混做
+   - 2026-06-11 最新状态：已批量补 `@EqualsAndHashCode(callSuper = false)`，server 编译阶段这批 Lombok 提示已退出
+   - 结论：不是主链阻塞项，已完成本轮低风险收口
 
 3. 常规 unchecked 提示
    - 现状：主要是历史泛型收紧不足

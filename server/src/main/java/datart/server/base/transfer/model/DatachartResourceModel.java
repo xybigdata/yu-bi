@@ -21,6 +21,7 @@ package datart.server.base.transfer.model;
 import datart.core.entity.Datachart;
 import datart.core.entity.Folder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class DatachartResourceModel extends TransferModel {
 
     private List<MainModel> mainModels;

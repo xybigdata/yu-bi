@@ -19,8 +19,10 @@
 package datart.server.base.transfer.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class ResourceModel extends TransferModel {
 
     private DashboardResourceModel dashboardResourceModel;

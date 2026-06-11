@@ -21,12 +21,14 @@ package datart.server.base.transfer.model;
 import datart.core.entity.Variable;
 import datart.core.entity.View;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class ViewResourceModel extends TransferModel {
 
     private List<MainModel> mainModels;

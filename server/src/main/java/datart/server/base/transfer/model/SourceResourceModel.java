@@ -20,12 +20,14 @@ package datart.server.base.transfer.model;
 
 import datart.core.entity.Source;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class SourceResourceModel extends TransferModel {
 
     private List<MainModel> mainModels;

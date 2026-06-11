@@ -22,6 +22,7 @@ import datart.core.entity.Dashboard;
 import datart.core.entity.Folder;
 import datart.server.base.dto.WidgetDetail;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class DashboardResourceModel extends TransferModel {
 
     private List<MainModel> mainModels;
