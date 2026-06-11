@@ -2947,6 +2947,30 @@
 - 当前仍未完成项：
   - 代码规范链后续继续按文件簇推进 Prettier 存量清理，优先保留“纯机械、易回归、低行为风险”的节奏。
 
+### 2026-06-11 本轮继续推进：收口 DashBoardPage 类型与小组件历史格式差异
+
+- 本轮实际落地：
+  - `frontend/src/app/pages/DashBoardPage/components/WidgetComponents/DropHolder.tsx`
+  - `frontend/src/app/pages/DashBoardPage/components/Widgets/ControllerWidget/Controller/CheckboxGroupController.tsx`
+  - `frontend/src/app/pages/DashBoardPage/constants.ts`
+  - `frontend/src/app/pages/DashBoardPage/pages/Board/slice/asyncActions.ts`
+  - `frontend/src/app/pages/DashBoardPage/pages/Board/slice/types.ts`
+  - `frontend/src/app/pages/DashBoardPage/types/widgetTypes.ts`
+
+- 本轮收口内容：
+  - 只处理 `DashBoardPage` 小组件、常量和类型文件中的 `prettier/prettier` 历史格式差异，不改仪表板交互逻辑、不改数据结构语义、不碰运行时行为。
+  - 处理方式仍然是使用前端本地已安装的 `prettier` 对目标文件做机械格式化，避免网络依赖，也避免掺入手工逻辑改动。
+  - 本轮改动全部停留在前端代码规范链，不涉及 Java 服务端实现，因此不会引入额外的 `JDK 21` 兼容面变化。
+
+- 本轮验证结果：
+  - 在本机 `Node 26.0.0 / npm 11.15.0` 下：
+    - `npm run lint` 通过。
+  - `lint` 总 warning 从 `326` 降到 `308`，且本轮目标文件相关的 `prettier` warning 已退出。
+
+- 当前仍未完成项：
+  - 代码规范链后续继续优先处理同类“小文件、小范围、纯机械”的 Prettier 存量。
+  - 现阶段仍暂不进入高风险内部命名、数据迁移常量和后端稳定标识调整。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

@@ -83,8 +83,8 @@ const DropWrap = styled.div<{
     props.canDrop
       ? rgba(props.theme.success, 0.25)
       : props.isOver
-      ? rgba(props.theme.error, 0.25)
-      : props.theme.emphasisBackground};
+        ? rgba(props.theme.error, 0.25)
+        : props.theme.emphasisBackground};
 
   .center {
     text-align: center;

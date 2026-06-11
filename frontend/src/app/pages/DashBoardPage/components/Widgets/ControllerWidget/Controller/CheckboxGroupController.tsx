@@ -21,7 +21,9 @@ import { ControlOption } from 'app/pages/DashBoardPage/pages/BoardEditor/compone
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 
-type CheckboxValueType = NonNullable<CheckboxGroupProps<string>['value']>[number];
+type CheckboxValueType = NonNullable<
+  CheckboxGroupProps<string>['value']
+>[number];
 
 export interface CheckboxGroupControllerProps {
   options?: ControlOption[];

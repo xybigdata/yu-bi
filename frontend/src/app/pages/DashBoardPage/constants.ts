@@ -142,7 +142,7 @@ export const CONTAINER_TAB = 'containerTab';
 // setting
 
 export const TEXT_ALIGNS = ['left', 'center', 'right'] as const;
-export type TextAlignType = typeof TEXT_ALIGNS[number];
+export type TextAlignType = (typeof TEXT_ALIGNS)[number];
 
 export const BORDER_STYLES = [
   'none',
@@ -156,7 +156,7 @@ export const BORDER_STYLES = [
   'inset',
   'outset',
 ] as const;
-export type BorderStyleType = typeof BORDER_STYLES[number];
+export type BorderStyleType = (typeof BORDER_STYLES)[number];
 
 export const SCALE_MODES = [
   'scaleWidth',
@@ -165,7 +165,7 @@ export const SCALE_MODES = [
   'noScale',
 ] as const;
 
-export type ScaleModeType = typeof SCALE_MODES[number];
+export type ScaleModeType = (typeof SCALE_MODES)[number];
 
 export const enum ValueOptionTypes {
   Common = 'common',

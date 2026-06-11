@@ -145,10 +145,13 @@ export const getWidgetChartDatasAction =
         };
         return item;
       })
-      .reduce((acc, cur) => {
-        acc[cur.id] = cur;
-        return acc;
-      }, {} as Record<string, WidgetData | undefined>);
+      .reduce(
+        (acc, cur) => {
+          acc[cur.id] = cur;
+          return acc;
+        },
+        {} as Record<string, WidgetData | undefined>,
+      );
 
     return dataMap;
   };

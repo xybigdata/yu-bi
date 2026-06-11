@@ -109,10 +109,10 @@ export interface DashboardConfigBeta3 {
   scaleMode: ScaleModeType;
 }
 
-export type ColsKeyType = typeof LAYOUT_COLS_KEYS[number];
+export type ColsKeyType = (typeof LAYOUT_COLS_KEYS)[number];
 export const BoardTypes = ['auto', 'free'] as const;
 BoardTypes.includes('auto');
-export type BoardType = typeof BoardTypes[number];
+export type BoardType = (typeof BoardTypes)[number];
 
 export interface WidgetOfCopy extends Widget {
   selectedCopy?: boolean;
@@ -196,7 +196,7 @@ export const RenderTypes = [
   'select',
   'flush',
 ] as const;
-export type RenderType = typeof RenderTypes[number];
+export type RenderType = (typeof RenderTypes)[number];
 
 export interface Relation {
   targetId: string;
@@ -312,7 +312,7 @@ export const WidgetTypes = [
   'button',
   'group',
 ] as const;
-export type WidgetType = typeof WidgetTypes[number];
+export type WidgetType = (typeof WidgetTypes)[number];
 
 export declare const ContainerWidgetTypes: ['tab', 'carousel'];
 
@@ -321,14 +321,14 @@ export type LightWidgetType =
   | MediaWidgetType
   | ControllerFacadeTypes;
 
-export type ContainerWidgetType = typeof ContainerWidgetTypes[number];
+export type ContainerWidgetType = (typeof ContainerWidgetTypes)[number];
 
 /**
  * widgetChart 属于board 内部 配置存在widget 表内,
  * 没有真实的datachartId
  */
 export const ChartWidgetTypes = ['dataChart', 'widgetChart'] as const;
-export type WidgetContentChartType = typeof ChartWidgetTypes[number];
+export type WidgetContentChartType = (typeof ChartWidgetTypes)[number];
 export declare const MediaWidgetTypes: [
   'richText',
   'timer',
@@ -337,7 +337,7 @@ export declare const MediaWidgetTypes: [
   'iframe',
 ];
 
-export type MediaWidgetType = typeof MediaWidgetTypes[number];
+export type MediaWidgetType = (typeof MediaWidgetTypes)[number];
 
 export interface RectConfig {
   x: number;
