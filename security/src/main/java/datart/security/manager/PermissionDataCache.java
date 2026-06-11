@@ -19,8 +19,6 @@
 package datart.security.manager;
 
 import datart.security.base.Permission;
-import org.apache.shiro.authc.SimpleAuthenticationInfo;
-import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -37,11 +35,11 @@ public class PermissionDataCache {
     }
 
 
-    public SimpleAuthorizationInfo getAuthorizationInfo() {
+    public AuthorizationCache getAuthorizationCache() {
         try {
-            return requestScope.getAuthorizationInfo();
+            return requestScope.getAuthorizationCache();
         } catch (Exception e) {
-            return threadScope.getAuthorizationInfo();
+            return threadScope.getAuthorizationCache();
         }
     }
 
@@ -78,27 +76,27 @@ public class PermissionDataCache {
     }
 
 
-    public void setAuthorizationInfo(SimpleAuthorizationInfo authorizationInfo) {
+    public void setAuthorizationCache(AuthorizationCache authorizationCache) {
         try {
-            requestScope.setAuthorizationInfo(authorizationInfo);
+            requestScope.setAuthorizationCache(authorizationCache);
         } catch (Exception e) {
-            threadScope.setAuthorizationInfo(authorizationInfo);
+            threadScope.setAuthorizationCache(authorizationCache);
         }
     }
 
-    public SimpleAuthenticationInfo getAuthenticationInfo() {
+    public AuthenticationCache getAuthenticationCache() {
         try {
-            return requestScope.getAuthenticationInfo();
+            return requestScope.getAuthenticationCache();
         } catch (Exception e) {
-            return threadScope.getAuthenticationInfo();
+            return threadScope.getAuthenticationCache();
         }
     }
 
-    public void setAuthenticationInfo(SimpleAuthenticationInfo authenticationInfo) {
+    public void setAuthenticationCache(AuthenticationCache authenticationCache) {
         try {
-            requestScope.setAuthenticationInfo(authenticationInfo);
+            requestScope.setAuthenticationCache(authenticationCache);
         } catch (Exception e) {
-            threadScope.setAuthenticationInfo(authenticationInfo);
+            threadScope.setAuthenticationCache(authenticationCache);
         }
     }
 

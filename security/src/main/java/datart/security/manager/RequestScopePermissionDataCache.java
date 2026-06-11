@@ -20,8 +20,6 @@ package datart.security.manager;
 
 import datart.security.base.Permission;
 import lombok.Data;
-import org.apache.shiro.authc.SimpleAuthenticationInfo;
-import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
 
@@ -37,9 +35,9 @@ public class RequestScopePermissionDataCache {
 
     private final Map<Permission, Boolean> permissionCache = new ConcurrentHashMap<>();
 
-    private SimpleAuthorizationInfo authorizationInfo = null;
+    private AuthorizationCache authorizationCache = null;
 
-    private SimpleAuthenticationInfo authenticationInfo = null;
+    private AuthenticationCache authenticationCache = null;
 
     public Boolean getCachedPermission(Permission permission) {
         return permissionCache.get(permission);
@@ -50,8 +48,8 @@ public class RequestScopePermissionDataCache {
     }
 
     public void clear() {
-        authorizationInfo = null;
-        authenticationInfo = null;
+        authorizationCache = null;
+        authenticationCache = null;
         currentOrg = null;
         permissionCache.clear();
     }

@@ -25,6 +25,8 @@ import datart.core.mappers.ext.RelRoleResourceMapperExt;
 import datart.core.mappers.ext.RoleMapperExt;
 import datart.core.mappers.ext.UserMapperExt;
 import datart.security.base.RoleType;
+import datart.security.manager.AuthenticationCache;
+import datart.security.manager.AuthorizationCache;
 import datart.security.manager.PermissionDataCache;
 import datart.security.manager.PermissionStringCodec;
 import datart.security.util.JwtUtils;
@@ -70,50 +72,50 @@ public class DatartRealm extends AuthorizingRealm {
 
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
-        SimpleAuthorizationInfo authorizationInfo = permissionDataCache.getAuthorizationInfo();
+        AuthorizationCache authorizationCache = permissionDataCache.getAuthorizationCache();
 
-        if (authorizationInfo != null) {
-            return authorizationInfo;
+        if (authorizationCache != null) {
+            return toAuthorizationInfo(authorizationCache);
         }
 
         String userId = ((User) principals.getPrimaryPrincipal()).getId();
 
-        authorizationInfo = new SimpleAuthorizationInfo();
+        authorizationCache = new AuthorizationCache();
         List<Role> userRoles = roleMapper.selectByOrgAndUser(permissionDataCache.getCurrentOrg(), userId);
         for (Role role : userRoles) {
             if (role.getType().equals(RoleType.ORG_OWNER.name())) {
-                addOrgOwnerRoleAndPermission(authorizationInfo, role);
+                addOrgOwnerRoleAndPermission(authorizationCache, role);
             }
         }
         List<RelRoleResource> relRoleResources = rrrMapper.listByOrgAndUser(permissionDataCache.getCurrentOrg(), userId);
         for (RelRoleResource rrr : relRoleResources) {
-            authorizationInfo.addStringPermissions(PermissionStringCodec.toPermissionStrings(
+            authorizationCache.addPermissions(PermissionStringCodec.toPermissionStrings(
                     rrr.getOrgId(),
                     rrr.getRoleId(),
                     rrr.getResourceType(),
                     rrr.getResourceId(),
                     rrr.getPermission()));
         }
-        permissionDataCache.setAuthorizationInfo(authorizationInfo);
+        permissionDataCache.setAuthorizationCache(authorizationCache);
 
-        return authorizationInfo;
+        return toAuthorizationInfo(authorizationCache);
     }
 
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
-        SimpleAuthenticationInfo authenticationInfo = permissionDataCache.getAuthenticationInfo();
+        AuthenticationCache authenticationCache = permissionDataCache.getAuthenticationCache();
 
-        if (authenticationInfo != null) {
-            return authenticationInfo;
+        if (authenticationCache != null) {
+            return toAuthenticationInfo(authenticationCache);
         }
 
         String username = getUsername(token);
         User user = userMapper.selectByNameOrEmail(username);
         if (user == null)
             return null;
-        authenticationInfo = new SimpleAuthenticationInfo(user, user.getPassword(), getName());
-        permissionDataCache.setAuthenticationInfo(authenticationInfo);
-        return authenticationInfo;
+        authenticationCache = new AuthenticationCache(user, user.getPassword(), getName());
+        permissionDataCache.setAuthenticationCache(authenticationCache);
+        return toAuthenticationInfo(authenticationCache);
     }
 
     @Override
@@ -124,12 +126,26 @@ public class DatartRealm extends AuthorizingRealm {
     /**
      * 为用户添加隐式权限
      */
-    private void addOrgOwnerRoleAndPermission(SimpleAuthorizationInfo simpleAuthorizationInfo, Role role) {
+    private void addOrgOwnerRoleAndPermission(AuthorizationCache authorizationCache, Role role) {
         //添加组织拥有者角色
-        simpleAuthorizationInfo.addRole(PermissionStringCodec.toRoleString(role.getType(), role.getOrgId()));
+        authorizationCache.addRole(PermissionStringCodec.toRoleString(role.getType(), role.getOrgId()));
         //添加组织拥有者权限
         String allPermission = PermissionStringCodec.toPermissionString(role.getOrgId(), "*", "*", "*");
-        simpleAuthorizationInfo.addStringPermission(allPermission);
+        authorizationCache.addPermission(allPermission);
+    }
+
+    private SimpleAuthorizationInfo toAuthorizationInfo(AuthorizationCache authorizationCache) {
+        SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
+        authorizationInfo.addRoles(authorizationCache.getRoles());
+        authorizationInfo.addStringPermissions(authorizationCache.getStringPermissions());
+        return authorizationInfo;
+    }
+
+    private SimpleAuthenticationInfo toAuthenticationInfo(AuthenticationCache authenticationCache) {
+        return new SimpleAuthenticationInfo(
+                authenticationCache.getPrincipal(),
+                authenticationCache.getCredentials(),
+                authenticationCache.getRealmName());
     }
 
     private String getUsername(AuthenticationToken token) {

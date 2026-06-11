@@ -19,8 +19,6 @@
 package datart.security.manager;
 
 import datart.security.base.Permission;
-import org.apache.shiro.authc.SimpleAuthenticationInfo;
-import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
@@ -71,20 +69,20 @@ public class ThreadScopePermissionDataCache {
         map.put(permission, permitted);
     }
 
-    public SimpleAuthorizationInfo getAuthorizationInfo() {
-        return (SimpleAuthorizationInfo) permissionData.get().get(AUTHORIZATION);
+    public AuthorizationCache getAuthorizationCache() {
+        return (AuthorizationCache) permissionData.get().get(AUTHORIZATION);
     }
 
-    public void setAuthorizationInfo(SimpleAuthorizationInfo authorizationInfo) {
-        permissionData.get().put(AUTHORIZATION, authorizationInfo);
+    public void setAuthorizationCache(AuthorizationCache authorizationCache) {
+        permissionData.get().put(AUTHORIZATION, authorizationCache);
     }
 
-    public SimpleAuthenticationInfo getAuthenticationInfo() {
-        return (SimpleAuthenticationInfo) permissionData.get().get(AUTHENTICATION);
+    public AuthenticationCache getAuthenticationCache() {
+        return (AuthenticationCache) permissionData.get().get(AUTHENTICATION);
     }
 
-    public void setAuthenticationInfo(SimpleAuthenticationInfo authenticationInfo) {
-        permissionData.get().put(AUTHENTICATION, authenticationInfo);
+    public void setAuthenticationCache(AuthenticationCache authenticationCache) {
+        permissionData.get().put(AUTHENTICATION, authenticationCache);
     }
 
     public void clear() {
