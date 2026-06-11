@@ -1,11 +1,11 @@
-jest.mock('../../../WidgetProvider/WidgetProvider', () => {
-  const React = require('react');
-  return {
-    WidgetContext: React.createContext({}),
-  };
-});
-
 import { render } from '@testing-library/react';
+import React from 'react';
+import { vi } from 'vitest';
+
+vi.mock('../../../WidgetProvider/WidgetProvider', () => ({
+  WidgetContext: React.createContext({}),
+}));
+
 import { WidgetContext } from '../../../WidgetProvider/WidgetProvider';
 import { VideoWidgetCore } from '../VideoWidgetCore';
 
