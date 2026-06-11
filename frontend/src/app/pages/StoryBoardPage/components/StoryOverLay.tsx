@@ -96,9 +96,7 @@ export const useStoryOverlayItems = ({
   }, [allowManage, allowShare, onOpenShareLink, onPublish, recycleViz, t, tg]);
 };
 
-export const StoryOverLay: React.FC<BoardOverLayProps> = memo(
-  props => {
-    const actionItems = useStoryOverlayItems(props);
-    return <Menu items={actionItems} />;
-  },
-);
+export const StoryOverLay: React.FC<BoardOverLayProps> = memo(props => {
+  const actionItems = useStoryOverlayItems(props);
+  return <Menu items={actionItems} />;
+});

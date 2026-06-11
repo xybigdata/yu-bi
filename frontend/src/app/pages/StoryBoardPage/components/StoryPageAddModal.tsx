@@ -30,12 +30,7 @@ export interface IProps {
 }
 
 const StoryPageAddModal: React.FC<IProps> = props => {
-  const {
-    open,
-    onSelectedPages,
-    onCancel,
-    pageContents: dataCharts,
-  } = props;
+  const { open, onSelectedPages, onCancel, pageContents: dataCharts } = props;
   const [selectedDataChartIds, setSelectedDataChartIds] = useState<string[]>(
     [],
   );
