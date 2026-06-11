@@ -39,7 +39,7 @@ import java.util.List;
 
 
 @Tag(name = "DownloadController")
-
+@RestController
 @RequestMapping(value = "/download")
 public class DownloadController extends BaseController {
 

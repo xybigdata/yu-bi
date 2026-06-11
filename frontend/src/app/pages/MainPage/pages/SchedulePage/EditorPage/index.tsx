@@ -10,7 +10,6 @@ import {
 } from 'antd';
 import { DetailPageHeader } from 'app/components/DetailPageHeader';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { useParams } from 'app/routerCompat';
 import { getFolders } from 'app/pages/MainPage/pages/VizPage/slice/thunks';
 import { CommonFormTypes } from 'globalConstants';
 import {
@@ -59,6 +58,7 @@ import { EmailSettingForm } from './EmailSettingForm';
 import { ScheduleErrorLog } from './ScheduleErrorLog';
 import { SendContentForm } from './SendContentForm';
 import { WeChatSettingForm } from './WeChatSettingForm';
+import { useScheduleRouteParams } from '../hooks';
 
 export const EditorPage: FC = () => {
   const [form] = Form.useForm();
@@ -70,10 +70,7 @@ export const EditorPage: FC = () => {
   );
   const [periodUnit, setPeriodUnit] = useState<TimeModes>(TimeModes.Minute);
   const [periodInput, setPeriodInput] = useState(false);
-  const { scheduleId, orgId } = useParams<{
-    scheduleId: string;
-    orgId: string;
-  }>();
+  const { scheduleId, orgId } = useScheduleRouteParams();
   const editingSchedule = useSelector(selectEditingSchedule);
   const loading = useSelector(selectScheduleDetailLoading);
   const saveLoading = useSelector(selectSaveLoading);

@@ -14,7 +14,6 @@ import { ListNav, ListPane, ListTitle } from 'app/components';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
-import { useParams } from 'app/routerCompat';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import { CommonFormTypes } from 'globalConstants';
 import { memo, useCallback, useContext, useMemo } from 'react';
@@ -36,6 +35,7 @@ import { addSchedule } from '../slice/thunks';
 import { ScheduleSimpleViewModel } from '../slice/types';
 import { Recycle } from './Recycle';
 import { ScheduleList } from './ScheduleList';
+import { useScheduleRouteParams } from '../hooks';
 
 interface SidebarProps extends I18NComponentProps {
   isDragging: boolean;
@@ -47,9 +47,7 @@ interface SidebarProps extends I18NComponentProps {
 export const Sidebar = memo(
   ({ width, isDragging, sliderVisible, handleSliderVisible }: SidebarProps) => {
     const dispatch = useAppDispatch();
-    const { scheduleId } = useParams<{
-      scheduleId: string;
-    }>();
+    const { scheduleId } = useScheduleRouteParams();
     const orgId = useSelector(selectOrgId);
     const archived = useSelector(selectArchived);
     const scheduleData = useSelector(selectSchedules);

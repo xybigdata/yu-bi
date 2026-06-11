@@ -419,7 +419,7 @@
 | Wave | 主题 | 状态 | 负责人动作 | 阻塞项 | 进入下一 Wave 的条件 |
 | --- | --- | --- | --- | --- | --- |
 | Wave 0 | 基线锁定 | 已完成 | 持续验证基线不回退 | 无 | 基线仍稳定 |
-| Wave 1 | 时间体系收尾 | 进行中 | 继续收口值对象链、补页面回归与 share/schedule smoke | 仍缺分享页与调度页的运行态回归证据 | 时间专题具备完整验收证据 |
+| Wave 1 | 时间体系收尾 | 进行中 | 继续收口值对象链、补页面回归与 share smoke | 仍缺 share 入口的运行态回归证据 | 时间专题具备完整验收证据 |
 | Wave 2 | 富文本路线定稿与落地 | 待执行 | 定稿 Quill 路线，做第一批升级 | 需要先稳定时间链路 | 富文本适配层稳定、路线已定 |
 | Wave 3 | 前端工具链现代化 | 待执行 | 定 Jest/Vitest、升级规范链 | 依赖 Wave 2 稳定 | 测试链与规范链路线明确 |
 | Wave 4 | GraalJS / Calcite / 生成链 | 待执行 | 先做 GraalJS，再做 Calcite 预研 | 属于高风险运行时专题 | 脚本与 SQL 专题均有专项验证 |
@@ -453,6 +453,50 @@
    - 对应登录、可视化、富文本、导出、数据执行等真实工作流
 
 如果某专题只通过了 L1/L2，没有 L3 证据，就不能宣称“功能和之前一致”。
+
+### 2026-06-11 运行态补证据
+
+- 本轮新增的真实阻塞修复：
+  - `server/src/main/java/datart/server/config/CustomPropertiesValidate.java`
+    - 调整 demo profile 与 `datartConfig` 属性源顺序，避免 `application-demo.yml` 压过命令行 `--server.port` 和系统环境变量。
+    - 实际结果：安装包 demo 已可稳定监听 `8081`。
+  - `server/src/main/java/datart/server/controller/CustomPluginController.java`
+  - `server/src/main/java/datart/server/controller/DataProviderController.java`
+  - `server/src/main/java/datart/server/controller/DownloadController.java`
+  - `server/src/main/java/datart/server/controller/FileController.java`
+  - `server/src/main/java/datart/server/controller/OrgController.java`
+    - 补齐 `@RestController`，恢复 `/api/v1/orgs`、`/api/v1/data-provider/providers`、`/api/v1/download/tasks`、`/api/v1/plugins/custom/charts` 等主应用初始化接口注册。
+  - `core/src/main/java/datart/core/mappers/ext/DownloadMapperExt.java`
+  - `server/src/main/java/datart/server/service/impl/DownloadServiceImpl.java`
+    - 把下载任务最近 7 天筛选从 H2 2.x 不兼容的 `NOW() - INTERVAL 7 DAY` 改成 Java 侧计算 `createdAfter` 参数，消除 demo 登录后的 H2 SQL 语法错误。
+  - `frontend/src/app/pages/MainPage/index.tsx`
+  - `frontend/src/app/pages/MainPage/pages/SchedulePage/hooks.ts`
+  - `frontend/src/app/pages/MainPage/pages/SchedulePage/index.tsx`
+  - `frontend/src/app/pages/MainPage/pages/SchedulePage/Sidebar/index.tsx`
+  - `frontend/src/app/pages/MainPage/pages/SchedulePage/EditorPage/index.tsx`
+    - 修复调度页兼容路由参数链，让 `/schedules/add` 与 `/schedules/:scheduleId` 可以在当前 Router 6 兼容层下正确解析 `scheduleId`，恢复编辑页和时间范围控件渲染。
+
+- 本轮新增运行态证据：
+  - 构建链：
+    - `npm run checkTs`
+    - `npm run build`
+    - `mvn -o -pl server -am -DskipTests compile`
+    - `mvn -o -pl server -am -DskipTests package`
+  - 安装包 demo：
+    - `java --add-opens=java.base/java.lang=ALL-UNNAMED -Dfile.encoding=UTF-8 -cp "lib/*" datart.DatartServerApplication --spring.profiles.active=demo --server.port=8081 --datart.server.address=http://127.0.0.1:8081`
+    - 启动日志确认 `http-nio-0.0.0.0-8081`
+  - 页面回归：
+    - `http://127.0.0.1:8081/login`
+    - `http://127.0.0.1:8081/organizations/f8435e0a3323459aaef679ab63fbd01a/vizs`
+    - `http://127.0.0.1:8081/organizations/f8435e0a3323459aaef679ab63fbd01a/variables`
+    - `http://127.0.0.1:8081/organizations/f8435e0a3323459aaef679ab63fbd01a/schedules/add`
+  - 实际观察结果：
+    - 主应用初始化完成后，本次刷新窗口下不再产生新的 `download/tasks`、`custom charts` 或 H2 `INTERVAL 7 DAY` 错误。
+    - 变量页“新建公共变量”弹窗切到“日期”值类型后，日期输入框和日期格式下拉真实渲染。
+    - 调度页“新建定时任务”编辑页真实渲染，`有效时间范围` 的开始/结束日期输入框可见。
+
+- 当前未完成项：
+  - share 入口仍缺至少一个真实 L2/L3 回归证据，因此 Wave 1 仍保持“进行中”。
 
 ### 风险台账
 
@@ -577,6 +621,12 @@
 - `frontend/src/app/pages/MainPage/pages/VariablePage` 相关类型已开始把默认值与权限值从宽泛 `any[]` 收紧到显式的 `VariableDefaultValueItem` 联合类型，降低后续时间值链回归时再次混入历史 `Moment` 语义的概率。
 - 2026-06-11 最新推进：`CurrentRangeTime`、`ExactTimeSelector`、`RangeTimePickerFilter`、`TimeFilter` 与分享链接过期时间选择器已统一按 Dayjs 值对象回填，并显式对齐 `TIME_FORMATTER` / `showTime`；`ManualRangeTimeSelector` 与图表预览 `RangeTimeFilter` 同时修正了 range 状态原地修改，避免控件回显与条件回写不同步。
 - 同日补证据：本轮已通过 `npm run checkTs`、`npm run build`、`npm test -- --runTestsByPath src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx --runInBand --silent`，说明时间值链收口没有打断前端类型检查、生产构建和控制器相关定向测试。
+- 2026-06-11 运行态补证据继续推进后，已确认：
+  - 安装包 demo 以 `http://127.0.0.1:8081` 启动并可登录 `demo / 123456`。
+  - 主应用初始化链路可稳定进入 `/organizations/f8435e0a3323459aaef679ab63fbd01a/vizs`，不再出现此前的 `download/tasks`、`custom charts` 静态资源兜底错误。
+  - 变量页新增弹窗已能把“值类型”切到“日期”，并真实渲染“请选择日期”和日期格式选择控件。
+  - 调度页 `/schedules/add` 已恢复编辑页渲染，`有效时间范围` 的开始/结束日期输入框与 `showTime` 范围控件已能真实显示。
+- 同日还顺手收口了一处被运行态回归带出的前端兼容路由残留：`SchedulePage` 现在通过局部 `useScheduleRouteParams` 从当前 URL 提取 `orgId/scheduleId`，避免 `/schedules/add` 只切 URL 不渲染编辑表单。
 - 这一步仍然刻意不碰 DatePicker / RangePicker 值类型和表单状态，以便把时间工具层与控件层的风险拆开治理。
 
 迁移边界与批次策略：
@@ -604,7 +654,7 @@
   - `task` 独立打包链重新生成后的产物与当前源码一致，不再携带旧 `moment` bundle。
   - lockfile 中若仍存在第三方可选 peer 声明，需要在文档中明确标注为上游约束，而不是项目自身直连依赖。
   - 时间筛选、控制器、分享页、故事板、图表请求参数构造具备专项回归验证。
-  - 当前仍缺的主要证据是：分享页入口、调度页日期范围和变量页默认值在真实页面交互下的 L2/L3 运行态回归。
+  - 当前仍缺的主要证据收敛为：至少一个 share 入口的真实 L2/L3 运行态回归。
 
 ### Phase D：富文本与媒体插件链现代化
 

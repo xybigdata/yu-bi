@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Set;
 
 @Tag(name = "DataProviderController")
-
+@RestController
 @RequestMapping(value = "/data-provider")
 public class DataProviderController extends BaseController {
 

@@ -183,7 +183,7 @@ export function MainPage() {
             }
           />
           <CompatRoute
-            path="/organizations/:orgId/schedules"
+            path="/organizations/:orgId/schedules/:scheduleId?"
             element={
               <AccessRoute module={ResourceTypes.Schedule}>
                 <SchedulePage />

@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Set;
 
 @Tag(name = "OrgController")
-
+@RestController
 @RequestMapping(value = "/orgs")
 public class OrgController extends BaseController {
 

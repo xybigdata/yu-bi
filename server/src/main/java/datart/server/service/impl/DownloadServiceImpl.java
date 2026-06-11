@@ -38,6 +38,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
@@ -109,12 +111,18 @@ public class DownloadServiceImpl extends BaseService implements DownloadService 
 
     @Override
     public List<Download> listDownloadTasks() {
-        return downloadMapper.selectByCreator(getCurrentUser().getId());
+        return downloadMapper.selectByCreator(
+                getCurrentUser().getId(),
+                Date.from(Instant.now().minus(7, ChronoUnit.DAYS))
+        );
     }
 
     @Override
     public List<Download> listDownloadTasks(String clientId) {
-        return downloadMapper.selectByCreator(clientId);
+        return downloadMapper.selectByCreator(
+                clientId,
+                Date.from(Instant.now().minus(7, ChronoUnit.DAYS))
+        );
     }
 
     @Override

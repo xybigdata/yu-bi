@@ -31,7 +31,7 @@ import java.net.MalformedURLException;
 import java.util.Set;
 
 @Tag(name = "CustomPluginController")
-
+@RestController
 @RequestMapping(value = "/plugins")
 public class CustomPluginController extends BaseController {
 

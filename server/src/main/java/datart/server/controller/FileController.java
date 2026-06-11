@@ -29,7 +29,7 @@ import java.io.IOException;
 
 
 @Tag(name = "FileController")
-
+@RestController
 @RequestMapping(value = "/files")
 public class FileController extends BaseController {
 

@@ -12,6 +12,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertiesPropertySource;
 import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 
@@ -39,12 +40,12 @@ public class CustomPropertiesValidate implements EnvironmentPostProcessor {
         MutablePropertySources propertySources = environment.getPropertySources();
         Properties properties = loadCustomProperties();
         //this.validateConfig(properties);
-        propertySources.addFirst(new PropertiesPropertySource("datartConfig", properties));
+        addDatartConfigPropertySource(propertySources, new PropertiesPropertySource("datartConfig", properties));
         switchProfile(environment);
         String jdbcUrl = processDBUrl(environment);
         if (StringUtils.isNotBlank(jdbcUrl)) {
             properties.setProperty(DATABASE_URL, jdbcUrl);
-            propertySources.addFirst(new PropertiesPropertySource("datartConfig", properties));
+            addDatartConfigPropertySource(propertySources, new PropertiesPropertySource("datartConfig", properties));
         }
     }
 
@@ -135,7 +136,7 @@ public class CustomPropertiesValidate implements EnvironmentPostProcessor {
                 List<PropertySource<?>> propertySources = new YamlPropertySourceLoader().load("demo", new ClassPathResource("application-demo.yml"));
                 if (propertySources != null && propertySources.size() > 0) {
                     for (PropertySource<?> propertySource : propertySources) {
-                        environment.getPropertySources().addFirst(propertySource);
+                        addDemoPropertySource(environment.getPropertySources(), propertySource);
                     }
                 }
                 System.err.println("【********* Invalid database configuration. Datart is running in demo mode *********】");
@@ -143,6 +144,34 @@ public class CustomPropertiesValidate implements EnvironmentPostProcessor {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void addDatartConfigPropertySource(MutablePropertySources propertySources, PropertySource<?> propertySource) {
+        if (propertySources.contains(propertySource.getName())) {
+            propertySources.replace(propertySource.getName(), propertySource);
+            return;
+        }
+        if (propertySources.contains(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
+            propertySources.addAfter(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, propertySource);
+            return;
+        }
+        propertySources.addFirst(propertySource);
+    }
+
+    private void addDemoPropertySource(MutablePropertySources propertySources, PropertySource<?> propertySource) {
+        if (propertySources.contains(propertySource.getName())) {
+            propertySources.replace(propertySource.getName(), propertySource);
+            return;
+        }
+        if (propertySources.contains("datartConfig")) {
+            propertySources.addAfter("datartConfig", propertySource);
+            return;
+        }
+        if (propertySources.contains(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
+            propertySources.addAfter(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, propertySource);
+            return;
+        }
+        propertySources.addFirst(propertySource);
     }
 
     private String processDBUrl(ConfigurableEnvironment environment) {

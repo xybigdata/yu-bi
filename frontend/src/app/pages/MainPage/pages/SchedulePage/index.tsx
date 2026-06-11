@@ -1,11 +1,11 @@
 import { Split } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useSplitSizes } from 'app/hooks/useSplitSizes';
-import { useParams } from 'app/routerCompat';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { useVizSlice } from '../VizPage/slice';
+import { useScheduleRouteParams } from './hooks';
 import { EditorPage } from './EditorPage';
 import { SaveForm } from './SaveForm';
 import { SaveFormContext, useSaveFormContext } from './SaveFormContext';
@@ -17,7 +17,7 @@ export function SchedulePage() {
   const saveFormContextValue = useSaveFormContext();
   useScheduleSlice();
   useVizSlice();
-  const { scheduleId } = useParams<{ scheduleId?: string }>();
+  const { scheduleId } = useScheduleRouteParams();
 
   const [sliderVisible, setSliderVisible] = useState<boolean>(false);
 
