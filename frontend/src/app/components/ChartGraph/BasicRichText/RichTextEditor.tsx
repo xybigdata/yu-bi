@@ -4,6 +4,7 @@ import {
   useImperativeHandle,
   useRef,
 } from 'react';
+import './RichTextBootstrap';
 import MarkdownModule from './modules/MarkdownModule';
 import ReactQuill, {
   DeltaStatic,

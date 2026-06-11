@@ -29,11 +29,8 @@ import {
   useRef,
   useState,
 } from 'react';
-import 'react-quill/dist/quill.bubble.css';
-import 'react-quill/dist/quill.core.css';
 import styled from 'styled-components';
 import { BLUE } from 'styles/StyleConstants';
-import './RichTextPluginLoader';
 import RichTextEditor, { RichTextEditorHandle } from './RichTextEditor';
 import { DeltaStatic } from './quillCompat';
 import { CustomColor, QuillPalette } from './RichTextPluginLoader/CustomColor';

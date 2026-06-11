@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 import { Modal } from 'antd';
-import 'app/components/ChartGraph/BasicRichText/RichTextPluginLoader';
 import {
   CustomColor,
   QuillPalette,
@@ -38,8 +37,6 @@ import React, {
   useRef,
   useState,
 } from 'react';
-// DeltaStatic
-import 'react-quill/dist/quill.snow.css';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import { DeltaStatic } from 'app/components/ChartGraph/BasicRichText/quillCompat';
 import styled from 'styled-components';

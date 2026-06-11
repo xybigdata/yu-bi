@@ -420,7 +420,7 @@
 | --- | --- | --- | --- | --- | --- |
 | Wave 0 | 基线锁定 | 已完成 | 持续验证基线不回退 | 无 | 基线仍稳定 |
 | Wave 1 | 时间体系收尾 | 已完成 | 转入后续专题，保留当前回归基线 | 无 | 时间专题证据已闭环 |
-| Wave 2 | 富文本路线定稿与落地 | 待执行 | 定稿 Quill 路线，做第一批升级 | 需要先稳定时间链路 | 富文本适配层稳定、路线已定 |
+| Wave 2 | 富文本路线定稿与落地 | 进行中 | 继续压缩 `react-quill` 直接耦合面，定稿 Quill 路线并做第一批升级 | 仍需补富文本页面级验收与路线决策 checkpoint | 富文本适配层稳定、路线已定 |
 | Wave 3 | 前端工具链现代化 | 待执行 | 定 Jest/Vitest、升级规范链 | 依赖 Wave 2 稳定 | 测试链与规范链路线明确 |
 | Wave 4 | GraalJS / Calcite / 生成链 | 待执行 | 先做 GraalJS，再做 Calcite 预研 | 属于高风险运行时专题 | 脚本与 SQL 专题均有专项验证 |
 | Wave 5 | Spring Security 专题 | 待执行 | 启动 Shiro 接管迁移 | 依赖 JWT/OAuth/脚本链稳定 | Spring Security 主链接管完成 |
@@ -506,9 +506,34 @@
     - share API `POST /api/v1/shares/b5a9fafba0294a2788168a7b87648d01/viz` 在当前 demo 数据下返回 200，并可拿到 dashboard 明细与 `authorizedToken`。
     - share dashboard 冷启动页可真实渲染空看板态，不再是白屏；应用内浏览器 DOM 片段包含 `DashboardForShare` 容器、`more` 菜单按钮，以及 Ant Design Empty 的“暂无数据”内容。
 
-- 当前结论：
+  - 当前结论：
   - Wave 1 已完成。时间体系相关的主应用页与 share 入口均已补齐真实 L2 运行态证据。
   - 当前 share 验收样例使用的是空 dashboard，因此页面呈现“暂无数据”是符合预期的业务状态，不代表渲染失败。
+
+### 2026-06-11 Wave 2 继续推进：富文本入口继续收口
+
+- 新增结论：
+  - `react-quill` 官方 2025 README 已明确提示“在 React 中使用 Quill 时，你大概率不需要这个库”。
+  - `react-quill 2.0.0` 的 `package.json` 仍依赖 `quill ^1.3.7`，因此“升级到 `react-quill 2`”只能算 React 包装层升级，不能当作“已经进入 Quill 2 主线”。
+  - 基于这一事实，Wave 2 的短期目标应继续放在“压缩仓库对 `react-quill` / Quill 1 的直接耦合面”，而不是草率把 `react-quill 2` 误报成终态替代方案。
+
+- 本轮继续收口的代码边界：
+  - `frontend/src/app/components/ChartGraph/BasicRichText/RichTextBootstrap.ts`
+  - `frontend/src/app/components/ChartGraph/BasicRichText/RichTextEditor.tsx`
+  - `frontend/src/app/components/ChartGraph/BasicRichText/ChartRichTextAdapter.tsx`
+  - `frontend/src/app/pages/MainPage/pages/SchedulePage/EditorPage/EmailSettingForm/CommonRichText.tsx`
+  - `frontend/src/app/pages/DashBoardPage/components/Widgets/RichTextWidget/RichTextWidgetCore.tsx`
+  - 调整内容：
+    - 把 `react-quill` 的样式加载和 `RichTextPluginLoader` 注册入口收敛到 `RichTextEditor` 单点 bootstrap。
+    - 业务页和业务组件不再各自重复引入 Quill 样式或手动触发插件注册。
+
+- 本轮收益：
+  - 富文本相关页面进一步从“到处显式依赖 Quill 运行时副作用”收敛到“统一依赖仓库内 editor 包装层”。
+  - 后续无论选择 `react-quill 2.x` 作为中间态，还是直接切到真正的 Quill 2 React 封装，都可以优先只调整 `quillCompat.ts`、`RichTextEditor.tsx` 与 `RichTextBootstrap.ts` 这一小块边界。
+
+- 当前仍未完成项：
+  - 还没有完成基于 Quill 2 目标的组件级兼容核验，尤其是 `MarkdownModule`、`TagBlot`、`CalcFieldBlot` 和 `selection-change` 相关行为。
+  - 还需要补富文本页面级验收证据，覆盖图表富文本、仪表板富文本和调度邮件富文本三条主要业务链。
 
 ### 风险台账
 

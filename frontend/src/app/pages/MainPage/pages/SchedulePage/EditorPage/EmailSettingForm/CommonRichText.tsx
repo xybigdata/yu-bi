@@ -1,8 +1,6 @@
 import { prefixI18N } from 'app/hooks/useI18NPrefix';
-import 'app/components/ChartGraph/BasicRichText/RichTextPluginLoader';
 import RichTextEditor from 'app/components/ChartGraph/BasicRichText/RichTextEditor';
 import { FC, ReactNode } from 'react';
-import 'react-quill/dist/quill.snow.css';
 import styled from 'styled-components';
 
 export const Formats = [
