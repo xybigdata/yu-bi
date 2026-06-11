@@ -16,12 +16,21 @@
  * limitations under the License.
  */
 
+const mockFn =
+  typeof globalThis !== 'undefined' &&
+  'vi' in globalThis &&
+  typeof globalThis.vi?.fn === 'function'
+    ? globalThis.vi.fn
+    : typeof jest !== 'undefined'
+      ? jest.fn
+      : () => () => {};
+
 global.matchMedia =
   global.matchMedia ||
   function () {
     return {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
+      addListener: mockFn(),
+      removeListener: mockFn(),
     };
   };
 

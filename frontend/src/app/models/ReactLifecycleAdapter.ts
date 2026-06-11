@@ -17,13 +17,15 @@
  */
 
 import React from 'react';
-import ReactDom from 'react-dom';
+import type { Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 
 interface ReactLifecycleAdapterProps {
   mounted: (container, options?, context?) => any;
   updated: (options: any, context?) => any;
   unmount: () => void;
   resize: (opt: any) => void;
+  init: (componentWrapper) => void;
 }
 
 export default class ReactLifecycleAdapter
@@ -32,8 +34,13 @@ export default class ReactLifecycleAdapter
   private domContainer;
   private reactComponent;
   private externalLibs;
+  private root: Root | null = null;
 
   constructor(componentWrapper) {
+    this.reactComponent = componentWrapper;
+  }
+
+  public init(componentWrapper) {
     this.reactComponent = componentWrapper;
   }
 
@@ -43,35 +50,43 @@ export default class ReactLifecycleAdapter
 
   public mounted(container, options?, context?) {
     this.domContainer = container;
-    return ReactDom.render(
-      React.createElement(this.getComponent(), options, context),
-      this.domContainer,
-    );
+    return this.render(options, context);
   }
 
   public updated(options, context?) {
-    return ReactDom.render(
-      React.createElement(this.getComponent(), options, context),
-      this.domContainer,
-    );
+    return this.render(options, context);
   }
 
   public unmount() {
-    ReactDom.unmountComponentAtNode(this.domContainer);
+    this.root?.unmount();
+    this.root = null;
+    this.domContainer = null;
   }
 
   public resize(options, context?) {
-    return ReactDom.render(
+    return this.render(options, context);
+  }
+
+  private render(options?, context?) {
+    if (!this.domContainer) {
+      return null;
+    }
+
+    if (!this.root) {
+      this.root = createRoot(this.domContainer);
+    }
+
+    this.root.render(
       React.createElement(this.getComponent(), options, context),
-      this.domContainer,
     );
+    return this.root;
   }
 
   private getComponent() {
     if (typeof this.reactComponent === 'function') {
       return this.reactComponent({
         React,
-        ReactDom,
+        createRoot,
         ...this.externalLibs,
       });
     }

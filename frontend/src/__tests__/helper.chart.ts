@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { expect } from '@jest/globals';
+import { expect } from 'vitest';
 import { IChart } from 'app/types/Chart';
 import { isFunc } from 'utils/object';
 

@@ -16,26 +16,28 @@
  * limitations under the License.
  */
 
+import { vi } from 'vitest';
+
+const getElementById = vi.fn(() => document.createElement('div'));
+
+vi.mock('react-dom/client', () => ({
+  createRoot: vi.fn(() => ({
+    render: vi.fn(),
+    unmount: vi.fn(),
+  })),
+}));
+
 import Chart from '../Chart';
 import ReactChart from '../ReactChart';
 
-jest.mock('react-dom', () => ({
-  render: jest.fn(),
-  unmountComponentAtNode: jest.fn(),
-}));
-
-jest.mock('react', () => ({
-  createElement: (...args) => args,
-}));
-
 describe('ReactChart Tests', () => {
   test('should get correct model', () => {
-    const mockWrapper = jest.fn();
+    const mockWrapper = vi.fn(() => () => null);
     const chartMetaInfo = { id: 'react', name: 'react-chart', icon: 'chart' };
     const reactChart = new ReactChart(mockWrapper, chartMetaInfo);
     reactChart.onMount(
       { containerId: 1 },
-      { document: { getElementById: jest.fn() } },
+      { document: { getElementById } },
     );
     reactChart.onUnMount(null, null);
     expect(reactChart).not.toBeNull();
@@ -44,7 +46,7 @@ describe('ReactChart Tests', () => {
   });
 
   test('should get default values', () => {
-    const mockWrapper = jest.fn();
+    const mockWrapper = vi.fn(() => () => null);
     const chartMetaInfo = {};
     const reactChart = new ReactChart(mockWrapper, chartMetaInfo);
     expect(reactChart.meta.id).toEqual('react-table');
@@ -53,7 +55,7 @@ describe('ReactChart Tests', () => {
   });
 
   test('should get internal adapter', () => {
-    const mockWrapper = jest.fn();
+    const mockWrapper = vi.fn(() => () => null);
     const chartMetaInfo = { id: 'react', name: 'react-chart', icon: 'chart' };
     const reactChart = new ReactChart(mockWrapper, chartMetaInfo);
     expect(reactChart.adapter).not.toBeNull();

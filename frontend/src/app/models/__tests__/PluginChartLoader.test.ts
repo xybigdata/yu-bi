@@ -16,11 +16,10 @@
  * limitations under the License.
  */
 
-import Chart from '../Chart';
-import PluginChartLoader from '../PluginChartLoader';
+import { vi } from 'vitest';
 
-jest.mock('app/utils/fetch', () => ({
-  fetchPluginChart: path => {
+vi.mock('app/utils/fetch', () => ({
+  fetchPluginChart: (path: string) => {
     if (path === 'not-exist-chart') {
       return null;
     }
@@ -64,6 +63,9 @@ jest.mock('app/utils/fetch', () => ({
             }`;
   },
 }));
+
+import Chart from '../Chart';
+import PluginChartLoader from '../PluginChartLoader';
 
 describe('PluginChartLoader Tests', () => {
   test('should get correct loader', async () => {

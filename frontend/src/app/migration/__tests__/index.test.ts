@@ -16,9 +16,14 @@
  * limitations under the License.
  */
 
+import { vi } from 'vitest';
+
+vi.mock('../alpha3', () => ({
+  alpha3: vi.fn(config => config),
+}));
+
 import { migrateChartConfig } from '..';
 import { alpha3 } from '../alpha3';
-jest.mock('../alpha3');
 
 describe('migrateChartConfig Test', () => {
   test('should not begin migration if config is empty', () => {

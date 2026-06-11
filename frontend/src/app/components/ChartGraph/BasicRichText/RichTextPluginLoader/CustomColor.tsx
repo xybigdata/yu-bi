@@ -75,7 +75,10 @@ export class QuillPalette {
       const delta = this.quillJS.getContents(index, length);
 
       if (delta.ops?.length === 1 && delta.ops[0]?.attributes) {
-        const { background, color } = delta.ops[0].attributes;
+        const {
+          background,
+          color,
+        } = delta.ops[0].attributes as Record<string, string | undefined>;
 
         const colorNode = document.querySelector(
           `#${toolbarId} .ql-color .ql-color-label`,

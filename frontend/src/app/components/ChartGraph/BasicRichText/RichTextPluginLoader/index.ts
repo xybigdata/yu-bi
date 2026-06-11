@@ -267,7 +267,7 @@ class CalcField {
     this.numberFieldCharPos = numberFieldCharPos;
 
     const textAfter = textBeforeCursor.substring(
-      numberFieldCharIndex + numberFieldChar.length,
+      numberFieldCharIndex + (numberFieldChar?.length || 0),
     );
 
     if (

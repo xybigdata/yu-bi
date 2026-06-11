@@ -16,20 +16,23 @@
  * limitations under the License.
  */
 
+import { vi } from 'vitest';
+
+const rootRender = vi.fn();
+const rootUnmount = vi.fn();
+
+vi.mock('react-dom/client', () => ({
+  createRoot: vi.fn(() => ({
+    render: rootRender,
+    unmount: rootUnmount,
+  })),
+}));
+
 import ReactLifecycleAdapter from '../ReactLifecycleAdapter';
-
-jest.mock('react-dom', () => ({
-  render: jest.fn(),
-  unmountComponentAtNode: jest.fn(),
-}));
-
-jest.mock('react', () => ({
-  createElement: (...args) => args,
-}));
 
 describe('ReactLifecycleAdapter Tests', () => {
   test('should get correct adapter', () => {
-    const mockRealComponent = jest.fn();
+    const mockRealComponent = vi.fn(() => () => null);
     const dependencies = ['echarts'];
     const adapter = new ReactLifecycleAdapter(mockRealComponent);
     adapter.registerImportDependencies(dependencies);
@@ -41,23 +44,28 @@ describe('ReactLifecycleAdapter Tests', () => {
   });
 
   test('should invoke events', () => {
-    const mockRealComponent = jest.fn();
+    const container = document.createElement('div');
+    const mockRealComponent = vi.fn(() => () => null);
     const dependencies = ['echarts'];
     const adapter = new ReactLifecycleAdapter(mockRealComponent);
     adapter.registerImportDependencies(dependencies);
-    adapter.mounted(null, null, null);
+    adapter.mounted(container, null, null);
     adapter.updated(null, null);
     adapter.resize(null, null);
     adapter.unmount();
     expect(adapter).not.toBeNull();
+    expect(rootRender).toHaveBeenCalledTimes(3);
+    expect(rootUnmount).toHaveBeenCalledTimes(1);
   });
 
   test('should render real component when it is not a function', () => {
+    const container = document.createElement('div');
     const mockRealComponent = '<div>Real</div>';
     const dependencies = ['echarts'];
     const adapter = new ReactLifecycleAdapter(mockRealComponent);
     adapter.registerImportDependencies(dependencies);
-    adapter.mounted(null, null, null);
+    adapter.mounted(container, null, null);
     expect(adapter).not.toBeNull();
+    expect(rootRender).toHaveBeenCalled();
   });
 });

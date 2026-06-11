@@ -131,12 +131,13 @@ const ChartRichTextAdapter: FC<{
 
     useEffect(() => {
       if (typeof quillValue !== 'string') {
-        const quill = Object.assign({}, quillValue);
+        const quill = Object.assign({}, quillValue) as DeltaStatic;
         const ops = quill.ops?.concat().map(item => {
           let insert = item.insert;
-          if (typeof insert !== 'string') {
-            if (insert.hasOwnProperty('calcfield')) {
-              const name = insert.calcfield?.name;
+          if (insert && typeof insert !== 'string') {
+            const calcfield = (insert as Record<string, any>).calcfield;
+            if (calcfield) {
+              const name = calcfield?.name;
               const config = name
                 ? dataList.find(items => items.name === name)
                 : null;
@@ -145,7 +146,7 @@ const ChartRichTextAdapter: FC<{
           }
           return { ...item, insert };
         });
-        setTranslate(ops?.length ? { ...quill, ops } : '');
+        setTranslate(ops?.length ? ({ ...quill, ops } as DeltaStatic) : '');
       } else {
         setTranslate(quillValue);
       }

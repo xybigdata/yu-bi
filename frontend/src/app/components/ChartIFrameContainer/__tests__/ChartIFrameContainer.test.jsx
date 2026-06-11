@@ -18,9 +18,10 @@
 
 import '@testing-library/jest-dom';
 import { render } from '@testing-library/react';
+import { vi } from 'vitest';
 import { ChartIFrameContainer } from '../index';
 
-jest.mock('uuid');
+vi.mock('uuid');
 
 describe('ChartIFrameContainer Test', () => {
   test('should render within iframe when enable use iframe', async () => {
