@@ -189,13 +189,14 @@ export const VizPermissionForm = memo(
                 id === record.id
                   ? newPermissionArray
                   : path.includes(record.id)
-                  ? getChangedPermission(
-                      parentPermissionArray[index] === PermissionLevels.Disable,
-                      permissionArray,
-                      index,
-                      base,
-                    )
-                  : permissionArray,
+                    ? getChangedPermission(
+                        parentPermissionArray[index] ===
+                          PermissionLevels.Disable,
+                        permissionArray,
+                        index,
+                        base,
+                      )
+                    : permissionArray,
               getDefaultPermissionArray(),
             );
             // 根据改变后的树重新计算出权限列表

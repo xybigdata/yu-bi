@@ -325,22 +325,22 @@ export const ScheduleList: FC<{
               ];
 
               return (
-            <Popup
-              trigger={['click']}
-              placement="bottom"
-              content={
-                <Menu
-                  prefixCls="ant-dropdown-menu"
-                  selectable={false}
-                  onClick={moreMenuClick(node)}
-                  items={items}
-                />
-              }
-            >
-              <span className="action" onClick={stopPPG}>
-                <MoreOutlined />
-              </span>
-            </Popup>
+                <Popup
+                  trigger={['click']}
+                  placement="bottom"
+                  content={
+                    <Menu
+                      prefixCls="ant-dropdown-menu"
+                      selectable={false}
+                      onClick={moreMenuClick(node)}
+                      items={items}
+                    />
+                  }
+                >
+                  <span className="action" onClick={stopPPG}>
+                    <MoreOutlined />
+                  </span>
+                </Popup>
               );
             })()}
           </CascadeAccess>

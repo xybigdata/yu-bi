@@ -222,19 +222,24 @@ export const VariableForm = memo(
             ))}
           </Radio.Group>
         </Form.Item>
-        {scope === VariableScopes.Public && type === VariableTypes.Permission && (
-          <Form.Item
-            name="permission"
-            label={t('permission.label')}
-            initialValue={0}
-          >
-            <Radio.Group>
-              <Radio.Button value={0}>{t('permission.hidden')}</Radio.Button>
-              <Radio.Button value={1}>{t('permission.readonly')}</Radio.Button>
-              <Radio.Button value={2}>{t('permission.editable')}</Radio.Button>
-            </Radio.Group>
-          </Form.Item>
-        )}
+        {scope === VariableScopes.Public &&
+          type === VariableTypes.Permission && (
+            <Form.Item
+              name="permission"
+              label={t('permission.label')}
+              initialValue={0}
+            >
+              <Radio.Group>
+                <Radio.Button value={0}>{t('permission.hidden')}</Radio.Button>
+                <Radio.Button value={1}>
+                  {t('permission.readonly')}
+                </Radio.Button>
+                <Radio.Button value={2}>
+                  {t('permission.editable')}
+                </Radio.Button>
+              </Radio.Group>
+            </Form.Item>
+          )}
         <CompactFormItem name="defaultValue" label={t('defaultValue')}>
           <DefaultValue
             type={valueType}
