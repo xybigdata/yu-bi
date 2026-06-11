@@ -334,7 +334,7 @@
 | 网格布局 | `react-grid-layout` + `flexlayout-react` | `react-grid-layout` 是核心依赖；`flexlayout-react` 只在图表工作台局部使用 | 暂保留；出现 React 18/AntD5 兼容问题再专项治理 | 中低 |
 | 虚拟列表 | `react-window` | 使用面仅约 `2` 处，运行风险可控 | 若性能与 API 满足需求可保留 | 低 |
 | 测试栈 | `Jest 29 + babel-jest` | 当前稳定可用，但仍带 CRA 时代的转译心智，且与 Vite 主链分离 | 短期保持 Jest 29；后续二选一评估 Jest 30 或 Vitest | 中 |
-| task 独立打包链 | `Rollup 2` | 只服务 `build:task`，Node 26 下的挂起点已清除，但链路本身仍偏旧 | 中期评估迁到 Vite library mode 或较新 Rollup 主线 | 中 |
+| task 独立打包链 | `Vite 5 library mode` | 已退出独立 `Rollup 2` 主工作流；`build:task` 直接产出 UMD `build/task/index.js`，并同步回写 `public/task/index.js` 供前端静态资源与后端 parser 重命名链复用 | 保持 Vite 单栈；后续只清理残留 Rollup 依赖声明 | 已完成主链切换，持续清理 |
 | 代码规范链 | `ESLint 8` + `stylelint 14` + `Prettier 2` | 当前与 Node 26 兼容，但主版本都偏旧，且仍有存量 warning | 等富文本/时间体系稳定后，分批迁到 ESLint 9、stylelint 16、Prettier 3 | 中 |
 | 国际化 | `i18next 19` + `react-i18next 11` | 可运行，但版本偏旧 | 评估进入当前稳定主线，并结合 React 18 Suspense/类型签名复核 | 中低 |
 | 后端安全 | `Shiro 2` | 明显历史架构包袱，仓库使用面约 `71` 处 | `Spring Security` | 高，但单独专项 |
@@ -623,7 +623,7 @@
 验收门槛：
 - `npm start` 成功，默认启动 Vite dev server。
 - `npm run build` 生成可被后端托管的 `frontend/build`。
-- `npm run build:task` 生成 `frontend/build/task/index.js`。
+- `npm run build:task` 生成 `frontend/build/task/index.js`，并同步 `frontend/public/task/index.js`。
 - 端到端访问后端托管静态资源成功。
 
 当前并行验收：
