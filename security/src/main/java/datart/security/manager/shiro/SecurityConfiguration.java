@@ -21,7 +21,9 @@ package datart.security.manager.shiro;
 import datart.core.mappers.ext.RelRoleResourceMapperExt;
 import datart.core.mappers.ext.RoleMapperExt;
 import datart.core.mappers.ext.UserMapperExt;
+import datart.security.manager.AuthenticationTokenAdapter;
 import datart.security.manager.PermissionDataCache;
+import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.realm.Realm;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,8 +36,9 @@ public class SecurityConfiguration {
                        RoleMapperExt roleMapper,
                        RelRoleResourceMapperExt rrrMapper,
                        PermissionDataCache permissionDataCache,
-                       PasswordCredentialsMatcher passwordCredentialsMatcher) {
-        return new DatartRealm(userMapper, roleMapper, rrrMapper, permissionDataCache, passwordCredentialsMatcher);
+                       PasswordCredentialsMatcher passwordCredentialsMatcher,
+                       AuthenticationTokenAdapter<AuthenticationToken> authenticationTokenAdapter) {
+        return new DatartRealm(userMapper, roleMapper, rrrMapper, permissionDataCache, passwordCredentialsMatcher, authenticationTokenAdapter);
     }
 
 

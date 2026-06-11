@@ -26,10 +26,10 @@ import datart.core.mappers.ext.RoleMapperExt;
 import datart.core.mappers.ext.UserMapperExt;
 import datart.security.base.RoleType;
 import datart.security.manager.AuthenticationCache;
+import datart.security.manager.AuthenticationTokenAdapter;
 import datart.security.manager.AuthorizationCache;
 import datart.security.manager.PermissionDataCache;
 import datart.security.manager.PermissionStringCodec;
-import datart.security.util.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
@@ -53,16 +53,20 @@ public class DatartRealm extends AuthorizingRealm {
 
     private final PasswordCredentialsMatcher passwordCredentialsMatcher;
 
+    private final AuthenticationTokenAdapter<AuthenticationToken> authenticationTokenAdapter;
 
     public DatartRealm(UserMapperExt userMapper,
                        RoleMapperExt roleMapper,
                        RelRoleResourceMapperExt rrrMapper,
-                       PermissionDataCache permissionDataCache, PasswordCredentialsMatcher passwordCredentialsMatcher) {
+                       PermissionDataCache permissionDataCache,
+                       PasswordCredentialsMatcher passwordCredentialsMatcher,
+                       AuthenticationTokenAdapter<AuthenticationToken> authenticationTokenAdapter) {
         this.userMapper = userMapper;
         this.roleMapper = roleMapper;
         this.rrrMapper = rrrMapper;
         this.permissionDataCache = permissionDataCache;
         this.passwordCredentialsMatcher = passwordCredentialsMatcher;
+        this.authenticationTokenAdapter = authenticationTokenAdapter;
     }
 
     @Override
@@ -109,7 +113,7 @@ public class DatartRealm extends AuthorizingRealm {
             return toAuthenticationInfo(authenticationCache);
         }
 
-        String username = getUsername(token);
+        String username = authenticationTokenAdapter.resolveUsername(token);
         User user = userMapper.selectByNameOrEmail(username);
         if (user == null)
             return null;
@@ -146,14 +150,6 @@ public class DatartRealm extends AuthorizingRealm {
                 authenticationCache.getPrincipal(),
                 authenticationCache.getCredentials(),
                 authenticationCache.getRealmName());
-    }
-
-    private String getUsername(AuthenticationToken token) {
-        if (token instanceof BearerToken) {
-            return JwtUtils.toJwtToken((String) token.getPrincipal()).getSubject();
-        } else {
-            return (String) token.getPrincipal();
-        }
     }
 
 }
