@@ -51,7 +51,11 @@ export const DraggableItem: FC<DraggableItemProps> = ({
   onDrop,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const [{ handlerId }, drop] = useDrop({
+  const [{ handlerId }, drop] = useDrop<
+    Item,
+    void,
+    { handlerId: ReturnType<DropTargetMonitor['getHandlerId']> }
+  >({
     accept: 'ItemTypes.Item',
     collect(monitor) {
       return {
@@ -111,12 +115,16 @@ export const DraggableItem: FC<DraggableItemProps> = ({
     },
   });
 
-  const [{ isDragging }, drag] = useDrag({
+  const [{ isDragging }, drag] = useDrag<
+    Item,
+    void,
+    { isDragging: boolean }
+  >({
     type: 'ItemTypes.Item',
     item: () => {
       return { id, index };
     },
-    collect: (monitor: any) => ({
+    collect: monitor => ({
       isDragging: monitor.isDragging(),
     }),
   });

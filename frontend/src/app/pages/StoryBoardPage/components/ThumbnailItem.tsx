@@ -80,7 +80,11 @@ const ThumbnailItem: React.FC<IProps> = ({
     }
     // storyActions.updateStoryPageNameAndThumbnail
   }, [dashboard, dispatch, page.id, page.storyId]);
-  const [{ handlerId }, drop] = useDrop({
+  const [{ handlerId }, drop] = useDrop<
+    DragItem,
+    void,
+    { handlerId: ReturnType<DropTargetMonitor['getHandlerId']> }
+  >({
     accept: 'storyBoardListDnd',
     collect(monitor) {
       return {
@@ -139,7 +143,11 @@ const ThumbnailItem: React.FC<IProps> = ({
     },
   });
 
-  const [{ isDragging }, drag] = useDrag({
+  const [{ isDragging }, drag] = useDrag<
+    DragItem,
+    void,
+    { isDragging: boolean }
+  >({
     type: 'storyBoardListDnd',
     item: () => {
       return {
@@ -151,7 +159,7 @@ const ThumbnailItem: React.FC<IProps> = ({
     canDrag: () => {
       return canDrag;
     },
-    collect: (monitor: any) => ({
+    collect: monitor => ({
       isDragging: monitor.isDragging(),
     }),
     end() {

@@ -16,21 +16,13 @@
  * limitations under the License.
  */
 
-import { DragLayer } from 'react-dnd';
+import { useDragLayer } from 'react-dnd';
+import type { XYCoord } from 'dnd-core';
 import styled from 'styled-components';
 import { LEVEL_100 } from 'styles/StyleConstants';
 import ChartDragPreview from './ChartDragPreview';
 
-const collect = monitor => {
-  return {
-    item: monitor.getItem(),
-    itemType: monitor.getItemType(),
-    currentOffset: monitor.getSourceClientOffset(),
-    isDragging: monitor.isDragging(),
-  };
-};
-
-const getItemStyles = currentOffset => {
+const getItemStyles = (currentOffset: XYCoord | null) => {
   if (!currentOffset) {
     return {
       display: 'none',
@@ -42,8 +34,15 @@ const getItemStyles = currentOffset => {
   };
 };
 
-function CardDragLayer(props) {
-  const { item, itemType, currentOffset, isDragging } = props;
+function CardDragLayer() {
+  const { item, itemType, currentOffset, isDragging } = useDragLayer(
+    monitor => ({
+      item: monitor.getItem(),
+      itemType: monitor.getItemType(),
+      currentOffset: monitor.getSourceClientOffset(),
+      isDragging: monitor.isDragging(),
+    }),
+  );
 
   /**
    * zh: 如果不是正在拖动或者拖动的数据项不是一个数组则不执行
@@ -68,7 +67,7 @@ function CardDragLayer(props) {
 
   return <LayerStyles>{renderItem(itemType, item)}</LayerStyles>;
 }
-export default DragLayer(collect)(CardDragLayer);
+export default CardDragLayer;
 
 const LayerStyles = styled.div`
   position: fixed;

@@ -586,6 +586,26 @@
   - 当前仓库国际化使用面总体健康，主要是 hooks `useTranslation`、少量 `i18next.t(...)` 直接调用，以及少量旧测试习惯；因此这条升级链路的风险显著低于 `react-dnd` 或 `Shiro` 这类跨架构专题。
   - 当前仍可继续关注的不是“是否还能升级”，而是是否要在后续专题中补类型化 key / namespace 收口，以及减少业务层直接调用全局 `i18next.t(...)` 的散点出口。
 
+### 2026-06-11 Wave 3 继续推进：拖拽链升级到 react-dnd 16 主线
+
+- 本轮实际落地：
+  - 升级：
+    - `react-dnd 16.0.1`
+    - `react-dnd-html5-backend 16.0.1`
+  - 把历史 HOC 时代的两个关键入口改成 hooks 主线：
+    - `ChartDraggableElement.tsx`：`DragSource / DropTarget` -> `useDrag / useDrop`
+    - `ChartDragLayer.tsx`：`DragLayer(...)` -> `useDragLayer(...)`
+  - `DraggableItem.tsx` 与 `ThumbnailItem.tsx` 补齐了新的泛型类型参数，适配 `react-dnd 16` 的更严格 hooks 类型签名。
+
+- 本轮验证结果：
+  - `npm run checkTs` 通过。
+  - `npm run build` 通过。
+  - `npm run test:ci -- src/__tests__/task.test.ts src/styles/theme/__tests__/ThemeProvider.test.tsx src/app/models/__tests__/ChartSelectionManager.test.ts` 通过。
+
+- 本轮调研结论：
+  - 当前仓库拖拽链的大部分使用面原本就已经是 hooks 版，真正卡在旧生态上的只剩少量 HOC 入口；因此本轮直接升到 `react-dnd 16` 的收益大于继续停留在 `14`。
+  - `dnd-kit` 依然是更现代的长期候选方案，但在当前仓库里它不再是“必须立刻切”的前置条件；现阶段先把 `react-dnd` 收到维护主线，更符合低风险持续推进策略。
+
 ### 风险台账
 
 这一节用于记录当前仍需重点关注的项目级风险，而不是单个 commit 的局部 warning。
