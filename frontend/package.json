@@ -5,11 +5,11 @@
   "description": "",
   "repository": {
     "type": "git",
-    "url": "git@github.com:xybigdata/datart.git"
+    "url": "git@github.com:xybigdata/yu-bi.git"
   },
   "engines": {
     "npm": ">=11.0.0",
-    "node": ">=26.0.0"
+    "node": ">=24.0.0"
   },
   "author": "chencongyu <congyu_email@163.com>",
   "license": "Apache-2.0",
@@ -110,18 +110,8 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.15.8",
-    "@babel/preset-env": "^7.29.7",
-    "@babel/preset-react": "^7.29.7",
-    "@babel/preset-typescript": "^7.29.7",
     "@commitlint/cli": "^21.0.2",
     "@commitlint/config-conventional": "^21.0.2",
-    "@rollup/plugin-babel": "^5.3.0",
-    "@rollup/plugin-commonjs": "^21.0.1",
-    "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^13.0.6",
-    "@rollup/plugin-replace": "^2.4.2",
-    "@rollup/plugin-typescript": "^8.3.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "14.3.1",
     "@testing-library/user-event": "14.6.1",
@@ -155,9 +145,6 @@
     "prettier": "^3.8.4",
     "prettier-plugin-organize-imports": "^4.3.0",
     "rollup": "^2.62.0",
-    "rollup-plugin-cleanup": "^3.2.1",
-    "serve": "13.0.2",
-    "source-map-explorer": "^2.5.3",
     "styled-components": "6.1.19",
     "stylelint": "^17.13.0",
     "stylelint-config-recess-order": "^7.7.0",
@@ -167,11 +154,6 @@
     "vite": "^5.4.21",
     "vite-plugin-svgr": "^4.5.0",
     "vitest": "^4.1.8"
-  },
-  "resolutions": {
-    "react-error-overlay": "6.0.9",
-    "@types/react": "17.0.38",
-    "@types/react-dom": "18.0.11"
   },
   "config": {
     "commitizen": {

@@ -1,13 +1,13 @@
 # 技术栈现代化升级计划
 
-本文档记录 Datart 技术栈现代化迁移的目标终态、阶段顺序、验收门槛和风险控制。它是后续升级工作的执行基线，避免把多个高风险迁移混在同一个提交里。
+本文档记录 yu-bi 技术栈现代化迁移的目标终态、阶段顺序、验收门槛和风险控制。它是后续升级工作的执行基线，避免把多个高风险迁移混在同一个提交里。
 
 ## 当前基线
 
 - Java 运行时：JDK 21。
 - 后端主框架：Spring Boot 3.5.12，Spring Cloud 2025.0.1。
 - 构建工具：Maven，`maven-compiler-plugin` 3.14.1，`maven-assembly-plugin` 3.8.0，`exec-maven-plugin` 3.6.3。
-- 前端运行时：本机 Node 26 可启动，默认开发和生产构建已切换到 Vite 5。
+- 前端运行时：默认工程化基线收口到 Node 24 LTS，并保留 Node 26 当前线兼容验证；开发和生产构建已切换到 Vite 5。
 - 前端主框架：React 18、React Router 6.30.1、Ant Design 5.26、TypeScript 5.9；CRA/CRACO 已退出前端主工作流。
 - 已验证基线：
   - `npm run checkTs` 通过。
@@ -38,7 +38,7 @@
 ### 终态判定原则
 
 - “现代化完成”不是把所有依赖都追到最新，而是满足四个条件：
-  1. 进入仍活跃维护、与 JDK 21 / React 18 / Node 26 兼容的主线。
+  1. 进入仍活跃维护、与 JDK 21 / React 18 / Node 24 LTS 兼容，并经过 Node 当前线兼容验证的主线。
   2. 项目主运行时不再依赖已进入维护模式、已退场或高度历史化的基础栈。
   3. 本地、CI、Docker、发布包使用同一套可复现构建链。
   4. 关键业务路径有明确的自动或半自动验收证据，而不是只看能否编译。
@@ -77,7 +77,7 @@
 ### 前端目标清单
 
 - 构建与运行
-  - Node 26 可稳定开发、构建、测试
+  - Node 24 LTS 作为默认开发、构建、测试基线，并补 Node 当前线兼容验证
   - Vite 作为唯一主构建链
   - CRA / CRACO 完全退出主工作流
 - 核心框架
@@ -94,7 +94,7 @@
 - 测试与工具链
   - Testing Library 作为主测试方案
   - Enzyme 完全退出
-  - Lint / Format / Type Check 与 Node 26 兼容
+  - Lint / Format / Type Check 与 Node 24 LTS 兼容，并补 Node 当前线兼容验证
 - 兼容与运行策略
   - 明确是否放弃 IE 11；若放弃，则移除 `react-app-polyfill` 和相关历史兼容代码
 
@@ -117,7 +117,7 @@
 - MyBatis Spring Boot Starter：`3.0.x`
 - MySQL JDBC 坐标：`com.mysql:mysql-connector-j`
 - Selenium：`4.31.0`
-- Node：`26.x`
+- Node：`24.x LTS` 默认基线，`26.x` 兼容验证
 - Vite：`5.x`
 - React：`18.3.x`
 - React Router：`6.30.x`
@@ -187,7 +187,7 @@
 
 | 栈 | 当前值 | 终态目标 | 当前状态 | 当前证据 | 下一动作 |
 | --- | --- | --- | --- | --- | --- |
-| Node | `26.x` | `26.x` | 已完成 | `package.json engines`、CI、`.nvmrc` | 持续回归 |
+| Node | `24.x LTS` 默认基线，`26.x` 兼容验证 | `24.x LTS` 默认基线，按需保留 Node 当前线兼容验证 | 已完成本轮基线收口 | `package.json engines`、CI 双版本矩阵、`.nvmrc` | 持续回归 |
 | Vite | `5.x` | 作为唯一主构建链 | 已完成 | `package.json`、`vite.config.mts`、build 通过 | 持续优化分包 |
 | task 打包链 | `Vite library mode` | 与 Vite 主链统一 | 已完成 | `vite.task.config.mts`、`build:task` 通过 | 清理残留历史依赖声明 |
 | React | `18.3.1` | `18+`，后续再评估 `19` | 已完成 | `package.json`、build 通过 | 持续回归 |
@@ -211,8 +211,8 @@
 | --- | --- | --- | --- | --- | --- |
 | Maven | `3.9+` 受 Enforcer 约束 | 显式最低版本 | 已完成 | 根 POM Enforcer | 持续回归 |
 | npm | `11+` | 显式最低版本 | 已完成 | `package.json engines` | 持续回归 |
-| Git hooks / 提交流程 | `husky 9` + `lint-staged 17` + `commitlint 21` | 进入当前维护主线并与 Node 26 兼容 | 已完成本轮主升级 | `frontend/package.json`、`.husky`、`commitlint.config.mjs`、本轮 lint/test 校验 | 后续再评估是否把 root/子项目脚本继续收敛 |
-| CI | Node 26 / JDK 21 / package + health check | 与本地一致 | 已完成主链对齐 | GitHub workflow | 持续补专项验证 |
+| Git hooks / 提交流程 | `husky 9` + `lint-staged 17` + `commitlint 21` | 进入当前维护主线并与 Node 24 LTS 兼容，同时补当前线验证 | 已完成本轮主升级 | `frontend/package.json`、`.husky`、`commitlint.config.mjs`、本轮 lint/test 校验 | 后续再评估是否把 root/子项目脚本继续收敛 |
+| CI | Node 24 LTS + 26 / JDK 21 / package + health check | 与本地一致，并补 Node 当前线兼容矩阵 | 已完成主链对齐 | GitHub workflow | 持续补专项验证 |
 | Docker | 直接消费安装包 | 与 package 链一致 | 已完成静态收口，镜像级实测不足 | Dockerfile、安装包结构 | 后续补 docker build/run 实测 |
 | 发布包 | `mvn package` 统一产出 | 本地/CI/Docker 同产物 | 已完成主链收口 | server package、health check | 持续回归 |
 | 健康检查 | `/api/v1/sys/info` | 最小稳定运行验收 | 已完成 | `scripts/check-demo-health.sh` | 后续可补 share 入口 smoke |
@@ -233,7 +233,7 @@
 | `Shiro 2` | 当前生产鉴权链仍依赖它，且改动面跨登录、权限、分享页、OAuth2 | Spring Security 完整接管认证、鉴权、remember-me、OAuth2、分享认证 | JWT/OAuth/脚本链稳定后启动 Wave 5 | 登录、分享页、权限校验、remember-me、OAuth2 全链路通过 |
 | `Calcite 1.26.0` | SQL 解析与 JDBC provider 强耦合，不能直接升版本 | 完成专项预研并通过 parser / function / JDBC provider 回归 | GraalJS 专题后或独立窗口 | JDBC provider 测试、SQL 渲染、函数校验通过 |
 | `react-quill 2.0.0` / Quill 旧类型耦合 | 富文本功能面深，且自定义 blot/插件较多 | 完成 Quill 2 路线或明确的现代封装替换 | 时间体系收尾后启动富文本专题 | 编辑、只读、邮件、仪表板富文本回归通过 |
-| `ESLint 8` | 当前 ESLint 仍停留在旧配置模型，直接切 9 需要 flat config 专题 | 完成 `eslint.config.*` 迁移并清理关键规则噪音 | stylelint / Prettier 主版本落稳后 | lint/type check 链稳定，Node 26 下配置与 hooks 一致 |
+| `ESLint 8` | 当前 ESLint 仍停留在旧配置模型，直接切 9 需要 flat config 专题 | 完成 `eslint.config.*` 迁移并清理关键规则噪音 | stylelint / Prettier 主版本落稳后 | lint/type check 链稳定，Node 24 LTS 下配置与 hooks 一致，并补 Node 当前线验证 |
 
 ### 遗留栈关闭规则
 
@@ -299,7 +299,7 @@
 
 | 波次 | 主题 | 目标 | 进入条件 | 退出条件 |
 | --- | --- | --- | --- | --- |
-| Wave 0 | 基线锁定 | 固化当前 JDK 21 / Boot 3 / Node 26 / Vite 5 / React 18 基线 | 已完成 | 基线文档、CI、构建链一致 |
+| Wave 0 | 基线锁定 | 固化当前 JDK 21 / Boot 3 / Node 24 LTS 默认基线、Node 26 兼容验证、Vite 5 / React 18 基线 | 已完成 | 基线文档、CI、构建链一致 |
 | Wave 1 | 前端时间体系收尾 | 把 `moment` 专题从“主链已迁”推进到“专题完成” | AntD 5 主升级已稳定 | 生产代码、task 产物、时间控件值链和分享页回归全部闭环 |
 | Wave 2 | 富文本与页面稳定化 | 收口 `react-quill 1.x` 旧生态，完成 Quill 升级路线决策 | 时间体系主链稳定 | `RichTextEditor` 包装层稳定，升级路线定稿并完成至少一批落地 |
 | Wave 3 | 前端工具链现代化 | 收敛 Vitest 单栈，清理 lint/format 历史壳 | 富文本与时间链路不再频繁波动 | 测试链、lint 链、task 打包链全部收口到明确单栈 |
@@ -875,7 +875,7 @@
 | 虚拟列表 | `react-window` | 使用面仅约 `2` 处，运行风险可控 | 若性能与 API 满足需求可保留 | 低 |
 | 测试栈 | `Vitest 4 + jsdom 29` | 已完成单栈主链收口；当前问题主要是历史组件 warning 与 Vite peer 提示，不再是 Jest 运行模型 | 保持 `Vitest` 单栈，后续只做 warning 治理与 `Vite 6+` 对齐评估 | 已完成主链收口 |
 | task 独立打包链 | `Vite 5 library mode` | 已退出独立 `Rollup 2` 主工作流；`build:task` 直接产出 UMD `build/task/index.js`，并同步回写 `public/task/index.js` 供前端静态资源与后端 parser 重命名链复用 | 保持 Vite 单栈；后续只清理残留 Rollup 依赖声明 | 已完成主链切换，持续清理 |
-| 代码规范链 | `ESLint 8` + `stylelint 17` + `Prettier 3` | 已进入 Node 26 可运行的较新稳定主线，但 ESLint 仍停留在旧配置模型，仓库还存在 Prettier 3 历史格式差异 | 已完成 stylelint 17、Prettier 3、提交流程工具链与 Vitest 单栈收口；下一步单列 ESLint 9 flat config 专题，并按触达文件渐进消化格式差异 | 中 |
+| 代码规范链 | `ESLint 8` + `stylelint 17` + `Prettier 3` | 已进入 Node 24 LTS 可运行的较新稳定主线，并补 Node 当前线兼容验证；但 ESLint 仍停留在旧配置模型，仓库还存在 Prettier 3 历史格式差异 | 已完成 stylelint 17、Prettier 3、提交流程工具链与 Vitest 单栈收口；下一步单列 ESLint 9 flat config 专题，并按触达文件渐进消化格式差异 | 中 |
 | 国际化 | `i18next 19` + `react-i18next 11` | 可运行，但版本偏旧 | 评估进入当前稳定主线，并结合 React 18 Suspense/类型签名复核 | 中低 |
 | 后端安全 | `Shiro 2` | 明显历史架构包袱，仓库使用面约 `71` 处 | `Spring Security` | 高，但单独专项 |
 | 后端连接池 | `Druid` | 历史包袱，且偏监控导向，仓库使用面约 `21` 处 | `HikariCP` | 高，但单独专项 |
@@ -927,7 +927,7 @@
 只有同时满足下面条件，才能宣称“整个技术栈清单已经现代化替代完成”：
 
 1. 当前基线项
-   - JDK 21、Spring Boot 3、Spring Cloud 2025、Node 26、Vite 5、React 18、Router 6、RTK 2、React Redux 9 均保持通过构建和运行验证。
+   - JDK 21、Spring Boot 3、Spring Cloud 2025、Node 24 LTS 默认基线与 Node 26 兼容验证、Vite 5、React 18、Router 6、RTK 2、React Redux 9 均保持通过构建和运行验证。
 2. 前端主栈项
    - Ant Design 5 完成主升级并稳定运行。
    - `moment` 退出主生产代码。
@@ -949,7 +949,7 @@
 
 ### 里程碑状态
 
-- `M0 已完成`：JDK 21、Spring Boot 3、Spring Cloud 2025、Node 26、Vite 5、React 18、Router 6 依赖切换、RTK 2、React Redux 9、Selenium 4、后端生产代码 `fastjson` 清零。
+- `M0 已完成`：JDK 21、Spring Boot 3、Spring Cloud 2025、Node 默认基线收口到 24 LTS 并补 26 兼容验证、Vite 5、React 18、Router 6 依赖切换、RTK 2、React Redux 9、Selenium 4、后端生产代码 `fastjson` 清零。
 - `M1 已完成`：前端 Router 兼容层收口、Ant Design 5 主升级、测试工具链去 CRA 化、CI/Docker 与当前基线对齐。
 - `M2 已完成`：JWT 升级、HttpClient 5、POI/Guava/Commons 系列老基础库清理。
 - `M3 进行中`：`moment -> dayjs` 收尾、富文本现代化，以及 H2 2.x 之后的连接池、安全框架、脚本引擎与 Calcite 长期演进策略落地。
@@ -1504,7 +1504,7 @@
 | 时间体系 | `moment` 收尾中 | `dayjs` 单栈 | 已进入收尾阶段 | AntD 5 主升级稳定 | 生产代码、task 产物、控件值链和页面回归全部闭环 |
 | 富文本 | `react-quill 2.0.0` / Quill 旧类型耦合 | 先定真正的 Quill 2 React 路线或继续压缩兼容层 | 兼容层已收口，待路线定稿 | 时间体系波动降低 | 编辑、只读、邮件、仪表板富文本统一落在现代路线 |
 | 测试栈 | `Vitest 4 + jsdom 29` | `Vitest` 单栈 | 主链已完成，进入稳定化阶段 | 已完成主要 Jest 退出与全量回归 | 测试入口、环境、mock、CI 全部维持单栈稳定 |
-| 工具链规范 | `ESLint 8` + `stylelint 17` + `Prettier 3` | 进入当前稳定主线 | stylelint / Prettier 已完成，ESLint 9 待专题 | 测试栈路线明确 | lint/format/type check 与 Node 26 一致，ESLint flat config 完成且历史格式差异进入可控存量 |
+| 工具链规范 | `ESLint 8` + `stylelint 17` + `Prettier 3` | 进入当前稳定主线 | stylelint / Prettier 已完成，ESLint 9 待专题 | 测试栈路线明确 | lint/format/type check 与 Node 24 LTS 一致，并补 Node 当前线验证；ESLint flat config 完成且历史格式差异进入可控存量 |
 | 脚本引擎 | `nashorn-core 15.4` | `GraalJS` | 已做 JSR-223 收口 | 前端主栈稳定，脚本边界明确 | 运行时不再依赖 Nashorn 兜底 |
 | SQL 解析内核 | `Calcite 1.26.0` | 较新稳定线 | 待专项预研 | 脚本专题独立 | parser、函数、JDBC provider 回归通过 |
 | 安全体系 | `Shiro 2.0.5` | `Spring Security` | 已做前置拆障 | JWT/OAuth/脚本链稳定 | 登录、分享页、权限、remember-me、OAuth2 全链路接管 |
@@ -1544,7 +1544,7 @@
 
 只有满足下面全部条件，某项技术才允许暂时保留：
 
-- 当前仍能在 JDK 21 / Node 26 / React 18 / Boot 3 基线上稳定运行
+- 当前仍能在 JDK 21 / Node 24 LTS 默认基线、Node 26 兼容验证 / React 18 / Boot 3 基线上稳定运行
 - 替换它会显著放大当前回归面
 - 当前已经有边界收口或适配层
 - 文档里明确写了退出条件
@@ -1956,12 +1956,12 @@
 - 本批不改变业务逻辑，也不处理 `visible`、`Menu.*` 或 Dropdown/Modal 的历史 API 语义，只收口 import 边界。
 - 2026-06-10 验证：`npm run checkTs`、`npm test -- --runInBand --watchAll=false`、`npm run build` 均通过。
 
-### 并行治理：收口 Node 26 工程化基线
+### 并行治理：收口 Node LTS 工程化基线
 
-- `frontend/.nvmrc` 已从历史的 `lts/dubnium` 更新到 `v26.0.0`，与当前本机真实运行基线保持一致。
-- `frontend/package.json` 的 `engines.node` 已从 `>=22.0.0` 收紧到 `>=26.0.0`，避免继续让旧 Node 主版本处于“看似支持、实则未验证”的模糊状态。
-- `.github/workflows/dev-ut-stage.js.yml` 已将前端 CI 的 Node 版本矩阵从 `14.x/16.x` 切到 `26.x`，并补上 `npm run checkTs` 与 `npm run build:task`，让 CI 至少覆盖当前前端真实主链。
-- 这一步不引入新的构建工具，也不改变前端运行语义，目标只是把“本机已跑通的 Node 26 基线”真正下沉到仓库级工程化约束里。
+- `frontend/.nvmrc` 当前已收口到 `v24.0.0`，作为默认 Node LTS 开发基线。
+- `frontend/package.json` 的 `engines.node` 当前已收口到 `>=24.0.0`，避免继续把未验证的旧 Node 主版本标成受支持范围。
+- `.github/workflows/dev-ut-stage.js.yml` 当前使用 `24.x` 与 `26.x` 双版本矩阵，既覆盖默认 LTS 基线，也保留对 Node 当前线的兼容验证。
+- 这一步不引入新的构建工具，也不改变前端运行语义，目标是把“默认用 LTS、同时验证当前线”的 Node 基线真正下沉到仓库级工程化约束里。
 
 ### 并行治理：收口图表工作台里的 Ant Design 旧菜单 API
 
