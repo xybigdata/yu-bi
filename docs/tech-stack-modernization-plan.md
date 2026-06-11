@@ -2828,6 +2828,38 @@
 - 当前仍未完成项：
   - 代码规范链已完成主版本和配置模型收口，后续重点转为按触达文件渐进清理历史 warning，而不是继续做大范围规则扩张。
 
+### 2026-06-11 本轮继续推进：清理无效 eslint-disable 历史抑制
+
+- 本轮实际落地：
+  - `frontend/src/utils/persistence.ts`
+  - `frontend/src/utils/object.ts`
+  - `frontend/src/app/components/FormGenerator/Customize/PivotSheetTheme/theme.ts`
+  - `frontend/src/app/components/ReactFrameComponent/Frame.jsx`
+  - `frontend/src/app/components/Split.tsx`
+  - `frontend/src/app/components/SplitPane/index.tsx`
+  - `frontend/src/app/models/PluginChartLoader.ts`
+  - `frontend/src/app/pages/DashBoardPage/components/WidgetComponents/WidgetDndHandleMask.tsx`
+  - `frontend/src/app/pages/MainPage/slice/utils.ts`
+  - `frontend/src/utils/@reduxjs/injectReducer/reducerInjectors.ts`
+  - `frontend/src/utils/utils.ts`
+
+- 本轮收口内容：
+  - 只处理 `ESLint 9` 主链下已经失效的 `eslint-disable` / `eslint-disable-next-line` 注释，不扩展到业务逻辑调整。
+  - 删除的都是 `lint` 已明确判定为 `Unused eslint-disable directive` 的历史抑制，包括：
+    - 匿名默认导出、`eqeqeq`、`no-param-reassign`、`no-new-func`
+    - `no-underscore-dangle`、`react/destructuring-assignment`
+    - `react/no-unused-prop-types`、`no-bitwise`、`no-empty`
+    - 若干无目标规则名的块级 `eslint-disable`
+  - 这一步不改变运行时行为，只是让代码规范链和当前真实规则集保持一致。
+
+- 本轮验证结果：
+  - 在本机 `Node 26.0.0 / npm 11.15.0` 下：
+    - `npm run lint` 通过。
+  - `lint` 总 warning 从 `422` 降到 `407`，且没有新增 error。
+
+- 当前仍未完成项：
+  - 代码规范链后续仍以低风险 warning 渐进治理为主，优先顺序保持为：无效抑制清理 -> Prettier 历史差异 -> Hooks 依赖提示。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

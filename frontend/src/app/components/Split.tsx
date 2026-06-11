@@ -40,7 +40,6 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
         gutterElement.className = `gutter gutter-${direction}`;
       }
 
-      // eslint-disable-next-line no-underscore-dangle
       gutterElement.__isSplitGutter = true;
       return gutterElement;
     };
@@ -74,7 +73,6 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
     ];
 
     let needsRecreate = otherProps
-      // eslint-disable-next-line react/destructuring-assignment
       .map(prop => this.props[prop] !== prevProps[prop])
       .reduce((accum, same) => accum || same, false);
 
@@ -99,7 +97,6 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
       options.gutter = (index, direction, pairB) => pairB.previousSibling;
       this.split = Split(
         Array.from(this.parent!.children).filter(
-          // eslint-disable-next-line no-underscore-dangle
           element => !(element as any).__isSplitGutter,
         ),
         { ...options, minSize, sizes: sizes || this.split?.getSizes() },
@@ -113,7 +110,6 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
       });
 
       if (sizeChanged) {
-        // eslint-disable-next-line react/destructuring-assignment
         this.split?.setSizes(this.props.sizes!);
       }
     }

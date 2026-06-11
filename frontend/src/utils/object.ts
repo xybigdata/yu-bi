@@ -77,7 +77,6 @@ export function isNumerical(n?: number | string) {
 }
 
 export function isNumericEqual(a?: number | string, b?: number | string) {
-  // eslint-disable-next-line eqeqeq
   return a == b;
 }
 

@@ -236,14 +236,12 @@ export const getInsertedNodeIndex = (
   viewData: any,
 ) => {
   let index: number = 0;
-  /* eslint-disable */
   if (viewData?.length) {
     let IndexArr = viewData
       .filter((v: any) => v.parentId == AddData.parentId)
       .map(val => Number(val.index) || 0);
     index = IndexArr?.length ? Math.max(...IndexArr) + 1 : 0;
   }
-  /* eslint-disable */
   return index;
 };
 
