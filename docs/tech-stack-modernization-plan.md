@@ -2992,6 +2992,25 @@
   - 代码规范链后续继续优先处理 `DashBoardPage` 和相邻页面中同类“小文件、小范围、纯机械”的 Prettier 存量。
   - 现阶段仍暂不进入 hooks 依赖修复、业务逻辑调整和高风险内部命名重构。
 
+### 2026-06-11 本轮继续推进：收口 DashBoardPage widget 工具链大文件历史格式差异
+
+- 本轮实际落地：
+  - `frontend/src/app/pages/DashBoardPage/utils/widget.ts`
+
+- 本轮收口内容：
+  - 只处理 `DashBoardPage` 的 `widget.ts` 中 `prettier/prettier` 历史格式差异，不改 widget 映射逻辑、不改 computed field 合并语义、不改容器复制和序列化行为。
+  - 虽然目标文件体量较大，但本轮问题全部是 `reduce`、长条件表达式和长对象字面量的机械换行与缩进，不涉及类型重构或运行时逻辑修复。
+  - 处理方式仍然是使用前端本地已安装的 `prettier` 进行单文件机械格式化，保持无网络依赖，也不引入手工逻辑调整。
+
+- 本轮验证结果：
+  - 在本机 `Node 26.0.0 / npm 11.15.0` 下：
+    - `npm run lint` 通过。
+  - `lint` 总 warning 从 `302` 降到 `255`，且 `frontend/src/app/pages/DashBoardPage/utils/widget.ts` 中原有的 `47` 条 `prettier` warning 已全部退出。
+
+- 当前仍未完成项：
+  - 代码规范链后续可继续按“单文件 warning 高但仍为纯格式问题”的方式收口剩余大文件。
+  - 现阶段仍暂不进入 hooks 依赖修复、业务逻辑调整和高风险内部命名重构。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
