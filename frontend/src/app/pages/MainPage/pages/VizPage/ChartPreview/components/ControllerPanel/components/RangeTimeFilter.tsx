@@ -36,11 +36,12 @@ const RangeTimeFilter: FC<PresentControllerFilterProps> = memo(
     });
 
     const handleTimeChange = index => time => {
-      rangeTimes[index] = time;
-      setRangeTimes(rangeTimes);
+      const nextRangeTimes = [...rangeTimes];
+      nextRangeTimes[index] = time;
+      setRangeTimes(nextRangeTimes);
 
       const filterRow = new ConditionBuilder(condition)
-        .setValue(rangeTimes || [])
+        .setValue(nextRangeTimes || [])
         .asRangeTime();
       onConditionChange?.(filterRow);
     };

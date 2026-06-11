@@ -27,3 +27,14 @@ export const datartDayjs = dayjs;
 export function setDatartDayjsLocale(locale: string) {
   dayjs.locale(locale);
 }
+
+export function toDatartDayjs(value?: DatartDateLike | null) {
+  if (!value) {
+    return null;
+  }
+
+  const dateInput =
+    typeof value === 'object' && 'format' in value ? value.toString() : value;
+  const dayValue = dayjs(dateInput);
+  return dayValue.isValid() ? dayValue : null;
+}

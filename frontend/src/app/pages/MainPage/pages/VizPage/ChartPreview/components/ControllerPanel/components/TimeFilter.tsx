@@ -18,8 +18,7 @@
 
 import { DatePicker } from 'antd';
 import { updateBy } from 'app/utils/mutation';
-import { DatartDateLike } from 'app/utils/date';
-import { datartDayjs } from 'app/utils/date';
+import { DatartDateLike, datartDayjs, toDatartDayjs } from 'app/utils/date';
 import { formatTime } from 'app/utils/time';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo, useState } from 'react';
@@ -50,7 +49,9 @@ const TimeFilter: FC<PresentControllerFilterProps> = memo(
     }
     return (
       <DatePicker
-        value={stringTime ? datartDayjs(stringTime) : null}
+        showTime
+        format={TIME_FORMATTER}
+        value={toDatartDayjs(stringTime)}
         onChange={onChange}
       />
     );

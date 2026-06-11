@@ -19,7 +19,7 @@
 import { DatePicker } from 'antd';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import { TimeFilterConditionValue } from 'app/types/ChartConfig';
-import { datartDayjs } from 'app/utils/date';
+import { toDatartDayjs } from 'app/utils/date';
 import { formatTime } from 'app/utils/time';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo } from 'react';
@@ -40,7 +40,8 @@ const ExactTimeSelector: FC<
   return (
     <DatePicker
       showTime
-      value={time ? datartDayjs(time as string) : null}
+      format={TIME_FORMATTER}
+      value={typeof time === 'string' ? toDatartDayjs(time) : null}
       onChange={handleTimeChange}
       placeholder={t('select')}
     />

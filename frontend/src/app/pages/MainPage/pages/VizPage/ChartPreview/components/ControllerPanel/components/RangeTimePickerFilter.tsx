@@ -19,7 +19,7 @@
 import { DatePicker } from 'antd';
 import { FilterConditionType } from 'app/constants';
 import { ConditionBuilder } from 'app/models/ChartFilterCondition';
-import { datartDayjs } from 'app/utils/date';
+import { datartDayjs, toDatartDayjs } from 'app/utils/date';
 import {
   formatTime,
   getTime,
@@ -65,7 +65,8 @@ const RangeTimePickerFilter: FC<PresentControllerFilterProps> = memo(
     return (
       <RangePicker
         showTime
-        value={rangeTimes as any}
+        format={TIME_FORMATTER}
+        value={rangeTimes.map(time => toDatartDayjs(time)) as any}
         onChange={handleTimeChange}
       />
     );

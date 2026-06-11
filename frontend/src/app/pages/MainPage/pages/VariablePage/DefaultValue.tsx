@@ -27,7 +27,7 @@ import {
   Tag,
 } from 'antd';
 import { DateFormat } from 'app/constants';
-import { datartDayjs } from 'app/utils/date';
+import { datartDayjs, toDatartDayjs } from 'app/utils/date';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -146,6 +146,7 @@ export const DefaultValue = memo(
             format={resolvedDateFormat}
             className="input"
             disabled={!!disabled}
+            value={toDatartDayjs(inputValue)}
             onChange={datePickerConfirm}
             showNow
             showTime={showDateTime}

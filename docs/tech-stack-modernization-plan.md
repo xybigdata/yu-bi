@@ -419,7 +419,7 @@
 | Wave | 主题 | 状态 | 负责人动作 | 阻塞项 | 进入下一 Wave 的条件 |
 | --- | --- | --- | --- | --- | --- |
 | Wave 0 | 基线锁定 | 已完成 | 持续验证基线不回退 | 无 | 基线仍稳定 |
-| Wave 1 | 时间体系收尾 | 待执行 | 收尾值对象链、补页面回归 | DatePicker / RangePicker 值链仍需验证 | 时间专题具备完整验收证据 |
+| Wave 1 | 时间体系收尾 | 进行中 | 继续收口值对象链、补页面回归与 share/schedule smoke | 仍缺分享页与调度页的运行态回归证据 | 时间专题具备完整验收证据 |
 | Wave 2 | 富文本路线定稿与落地 | 待执行 | 定稿 Quill 路线，做第一批升级 | 需要先稳定时间链路 | 富文本适配层稳定、路线已定 |
 | Wave 3 | 前端工具链现代化 | 待执行 | 定 Jest/Vitest、升级规范链 | 依赖 Wave 2 稳定 | 测试链与规范链路线明确 |
 | Wave 4 | GraalJS / Calcite / 生成链 | 待执行 | 先做 GraalJS，再做 Calcite 预研 | 属于高风险运行时专题 | 脚本与 SQL 专题均有专项验证 |
@@ -575,6 +575,8 @@
 - `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/utils.ts` 中仍带 `Moment` 命名的控制器预处理函数已改为 `formatControlDateToDayjs`，并同步收口相关局部命名，避免把历史语义继续扩散到新的时间链路中。
 - `frontend/src/app/pages/MainPage/pages/VariablePage/DefaultValue.tsx` 的日期默认值录入控件已跟随变量自身 `dateFormat` 切换格式与 `showTime` 行为，避免“展示格式是日期、录入控件却强制日期时间”的边界不一致。
 - `frontend/src/app/pages/MainPage/pages/VariablePage` 相关类型已开始把默认值与权限值从宽泛 `any[]` 收紧到显式的 `VariableDefaultValueItem` 联合类型，降低后续时间值链回归时再次混入历史 `Moment` 语义的概率。
+- 2026-06-11 最新推进：`CurrentRangeTime`、`ExactTimeSelector`、`RangeTimePickerFilter`、`TimeFilter` 与分享链接过期时间选择器已统一按 Dayjs 值对象回填，并显式对齐 `TIME_FORMATTER` / `showTime`；`ManualRangeTimeSelector` 与图表预览 `RangeTimeFilter` 同时修正了 range 状态原地修改，避免控件回显与条件回写不同步。
+- 同日补证据：本轮已通过 `npm run checkTs`、`npm run build`、`npm test -- --runTestsByPath src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx --runInBand --silent`，说明时间值链收口没有打断前端类型检查、生产构建和控制器相关定向测试。
 - 这一步仍然刻意不碰 DatePicker / RangePicker 值类型和表单状态，以便把时间工具层与控件层的风险拆开治理。
 
 迁移边界与批次策略：
@@ -602,6 +604,7 @@
   - `task` 独立打包链重新生成后的产物与当前源码一致，不再携带旧 `moment` bundle。
   - lockfile 中若仍存在第三方可选 peer 声明，需要在文档中明确标注为上游约束，而不是项目自身直连依赖。
   - 时间筛选、控制器、分享页、故事板、图表请求参数构造具备专项回归验证。
+  - 当前仍缺的主要证据是：分享页入口、调度页日期范围和变量页默认值在真实页面交互下的 L2/L3 运行态回归。
 
 ### Phase D：富文本与媒体插件链现代化
 
