@@ -693,8 +693,8 @@ class BasicTableChart extends ReactChart {
             const backgroundColor = conditionalCellStyle?.backgroundColor
               ? conditionalCellStyle.backgroundColor
               : rest.rowIndex % 2 === 0
-              ? oddBgColor
-              : evenBgColor;
+                ? oddBgColor
+                : evenBgColor;
             highlightStyle = {
               backgroundColor:
                 getLuminance(backgroundColor) > 0.5
@@ -1131,19 +1131,19 @@ class BasicTableChart extends ReactChart {
         x: !enableFixedHeader
           ? '100%'
           : this.exceedMaxContent
-          ? this.totalWidth
-          : '100%',
+            ? this.totalWidth
+            : '100%',
         y: !enableFixedHeader
           ? '100%'
           : context?.height
-          ? context?.height -
-            (this.showSummaryRow
-              ? SUMMRAY_ROW_HEIGHT[tableSize || 'default'] +
-                (summaryFont?.fontSize || 0) * TABLE_LINE_HEIGHT
-              : 0) -
-            headerHeight -
-            (enablePaging ? PAGINATION_HEIGHT[tableSize || 'default'] : 0)
-          : 0,
+            ? context?.height -
+              (this.showSummaryRow
+                ? SUMMRAY_ROW_HEIGHT[tableSize || 'default'] +
+                  (summaryFont?.fontSize || 0) * TABLE_LINE_HEIGHT
+                : 0) -
+              headerHeight -
+              (enablePaging ? PAGINATION_HEIGHT[tableSize || 'default'] : 0)
+            : 0,
       }),
       bordered: !!showTableBorder,
       size: tableSize || 'default',

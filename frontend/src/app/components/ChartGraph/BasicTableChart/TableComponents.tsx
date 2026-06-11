@@ -93,12 +93,12 @@ const Td = styled.td<any>`
           },
         })
       : p.isJumpCell
-      ? css({
-          ':hover': {
-            color: BLUE,
-            textDecoration: 'underline',
-            cursor: 'pointer',
-          },
-        })
-      : null}
+        ? css({
+            ':hover': {
+              color: BLUE,
+              textDecoration: 'underline',
+              cursor: 'pointer',
+            },
+          })
+        : null}
 `;

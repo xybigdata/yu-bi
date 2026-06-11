@@ -2883,6 +2883,26 @@
 - 当前仍未完成项：
   - 代码规范链后续继续按文件簇处理 Prettier 历史格式差异，优先选择同模块、纯机械、可单独回归的小批次。
 
+### 2026-06-11 本轮继续推进：收口 BasicTableChart / PivotSheetChart 历史格式差异
+
+- 本轮实际落地：
+  - `frontend/src/app/components/ChartGraph/BasicTableChart/BasicTableChart.tsx`
+  - `frontend/src/app/components/ChartGraph/BasicTableChart/TableComponents.tsx`
+  - `frontend/src/app/components/ChartGraph/PivotSheetChart/PivotSheetChart.tsx`
+
+- 本轮收口内容：
+  - 只处理 `BasicTableChart / PivotSheetChart` 文件簇内的 `prettier/prettier` 历史格式差异，不改表格渲染逻辑、不改透视表配置行为、不碰交互逻辑。
+  - 处理方式仍然是使用前端本地已安装的 `prettier` 对目标文件做机械格式化，保证这一步没有网络依赖，也没有手工改动噪音。
+  - 这一步属于代码规范链的低风险收口，不改变运行时行为。
+
+- 本轮验证结果：
+  - 在本机 `Node 26.0.0 / npm 11.15.0` 下：
+    - `npm run lint` 通过。
+  - `lint` 总 warning 从 `374` 降到 `350`，且本轮目标文件相关的 `prettier` warning 已退出。
+
+- 当前仍未完成项：
+  - 代码规范链后续继续按文件簇收口 Prettier 历史格式差异，优先处理同模块、小范围、可单独回归的纯机械改动。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

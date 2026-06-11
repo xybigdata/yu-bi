@@ -131,8 +131,8 @@ class PivotSheetChart extends ReactChart {
     selectedItems?: SelectedItem[],
   ): AndvS2Config {
     if (!dataset || !config) {
-        return {
-          options: {},
+      return {
+        options: {},
       };
     }
     if (!selectedItems?.length && this.selectedItems.length && this.chart) {
@@ -517,8 +517,8 @@ class PivotSheetChart extends ReactChart {
           this.collapsedRows[path] = !isUndefined(initState)
             ? Boolean(initState)
             : isUndefined(this.collapsedRows?.[path])
-            ? this.hierarchyCollapse
-            : this.collapsedRows[path];
+              ? this.hierarchyCollapse
+              : this.collapsedRows[path];
         }
       });
     });
