@@ -149,6 +149,116 @@
 - 脚本引擎：`Nashorn -> GraalJS`，属于单独专项
 - 代码生成链：`mybatis-generator-core` 独立治理，避免继续污染主运行时依赖面
 
+## 项目级技术栈总表
+
+这一节是后续执行时最常用的总览表。目标是让任何人都能快速回答 5 个问题：
+
+1. 当前到底在用什么
+2. 终态准备收敛到什么
+3. 现在处于什么状态
+4. 结论的证据是什么
+5. 下一步应该做什么
+
+### 后端总表
+
+| 栈 | 当前值 | 终态目标 | 当前状态 | 当前证据 | 下一动作 |
+| --- | --- | --- | --- | --- | --- |
+| JDK | `21` | `21 LTS` | 已完成 | 根 POM、Enforcer、编译链通过 | 持续回归 |
+| Spring Boot | `3.5.12` | `3.5.x` 稳定线 | 已完成 | 根 POM、server package 通过 | 持续回归 |
+| Spring Cloud | `2025.0.1` | `2025.0.x` 稳定线 | 已完成 | 根 POM | 持续回归 |
+| MyBatis Spring Boot | `3.0.4` | `3.0.x` | 已完成 | `core/pom.xml` | 持续回归 |
+| MySQL JDBC | `com.mysql:mysql-connector-j` | 当前官方坐标 | 已完成 | `core/pom.xml` | 持续回归 |
+| JSON 栈 | `Jackson` 单栈 | `Jackson` 单栈 | 已完成 | 生产代码 `fastjson` 检索清零 | 持续回归 |
+| JWT | `jjwt 0.12.7` | 单一现代 JWT 栈 | 已完成主链升级 | `core/pom.xml`、`JwtUtils`、security/server compile 通过 | 后续评估是否继续收口到 Security JOSE |
+| HTTP 客户端 | `HttpClient 5.5` | 单一现代 HTTP 客户端 | 已完成主链收口 | `core/pom.xml`、http/security 模块 compile 通过 | 补 TLS/行为回归 |
+| 浏览器自动化 | `Selenium 4.31.0` | `Selenium 4` 或 `Playwright` | 已完成主链退出 PhantomJS | `core/pom.xml`、`server/pom.xml`、`WebUtils` 使用面 | 评估是否继续走 Playwright |
+| 连接池 | `HikariCP` 主链 | `HikariCP` | 已完成主链切换 | server package、demo 健康检查 | 做多数据源/监控专项回归 |
+| H2/demo | `2.4.240` | `2.x` 稳定线或更长期容器化测试库 | 已完成当前升级 | 依赖树、demo DB 重建、相关测试通过 | 固化 demo 数据维护策略 |
+| POI | `5.5.1` | 较新 5.x 稳定线 | 已完成 | `core/pom.xml`、POIUtilsTest | 持续回归导出链 |
+| Commons CSV | `1.14.1` | 当前稳定线 | 已完成 | `core/pom.xml` | 持续回归 |
+| Guava | 项目自有生产代码已退出 | 不依赖自有 Guava API | 已完成 | 检索与依赖树 | 仅关注上游传递依赖 |
+| Commons Lang 2 / IO 1.x | 主代码已退出 | 不再使用旧版本 | 已完成 | 检索与依赖树 | 持续回归 |
+| 安全框架 | `Shiro 2.0.5` | `Spring Security` | 前置拆障进行中 | security 模块前置收口提交链 | 进入迁移设计与运行时接管 |
+| 脚本引擎 | `nashorn-core 15.4` 运行期兜底 | `GraalJS` | 已做边界收口，未完成替代 | `JavascriptUtils`、JSR-223 发现链 | 做 GraalJS 方案与第一批落地 |
+| SQL 解析内核 | `Calcite 1.26.0` | 较新稳定线 | 待专项预研 | data-provider-base 使用面与 warning | 做 parser/JDBC provider 专项设计 |
+| 代码生成链 | `mybatis-generator-core 1.4.0` | 独立工具链/独立 profile | 已退出主运行时 | `core/pom.xml` profile 化 | 决定是否继续升级生成器 |
+
+### 前端总表
+
+| 栈 | 当前值 | 终态目标 | 当前状态 | 当前证据 | 下一动作 |
+| --- | --- | --- | --- | --- | --- |
+| Node | `26.x` | `26.x` | 已完成 | `package.json engines`、CI、`.nvmrc` | 持续回归 |
+| Vite | `5.x` | 作为唯一主构建链 | 已完成 | `package.json`、`vite.config.mts`、build 通过 | 持续优化分包 |
+| task 打包链 | `Vite library mode` | 与 Vite 主链统一 | 已完成 | `vite.task.config.mts`、`build:task` 通过 | 清理残留历史依赖声明 |
+| React | `18.3.1` | `18+`，后续再评估 `19` | 已完成 | `package.json`、build 通过 | 持续回归 |
+| React Router | `6.30.x` | `6/7` | 当前主链已在 6 | 兼容层与主依赖 | 继续做路由回归，不急追 7 |
+| Redux Toolkit | `2.12.0` | `2.x` | 已完成 | `package.json`、TS/build 通过 | 持续回归 |
+| React Redux | `9.3.0` | `9.x` | 已完成 | `package.json`、typed hooks 收口 | 持续回归 |
+| Ant Design | `5.26.2` | `5.x` 稳定线，后续再评估 6 | 已完成主升级 | `package.json`、页面构建与回归记录 | 清理 compat 壳与页面回归 |
+| 时间体系 | `dayjs` 主链，局部值链待收尾 | `dayjs` 单栈 | 进行中 | 生产代码 `moment` 清零、task 产物已切换 | 收尾控件值链和页面回归 |
+| 富文本 | `react-quill 1.3.5` + 本地适配层 | Quill 2 路线或更现代 React 封装 | 进行中 | `quillCompat`、`RichTextEditor`、本地插件模块 | 路线定稿并做第一批升级 |
+| 视频播放 | 原生 `<video>` | 原生能力 | 已完成 | VideoWidget 改造 | 持续回归 |
+| 故事播放 | `reveal.js 6.0.1` | 暂保留当前主线 | 已完成主线升级 | `package.json` | 结合富文本专题复核 |
+| 样式系统 | `styled-components 6.1.19` | `6.x` | 已完成主升级 | `package.json`、TS/build 通过 | 做稳定化复核 |
+| 测试栈 | `Jest 29 + babel-jest` | `Jest 30` 或 `Vitest` 单栈 | 待路线定稿 | `package.json`、当前测试命令通过 | 决策并分批迁移 |
+| 代码规范链 | `ESLint 8` + `stylelint 14` + `Prettier 2` | 当前稳定主线 | 待升级 | 配置与执行主链已显式化 | 等测试栈方向明确后升级 |
+| 国际化 | `i18next 19` + `react-i18next 11` | 当前稳定主线 | 待评估 | `package.json` | 结合 React 18 再评估 |
+| IE11 残留 | 主运行时已退出 polyfill 主链 | 不再为 IE11 保留历史兼容壳 | 已完成主链退出 | `react-app-polyfill` 已移除 | 持续清理残留命名与文档 |
+
+### 工程化总表
+
+| 栈/链路 | 当前值 | 终态目标 | 当前状态 | 当前证据 | 下一动作 |
+| --- | --- | --- | --- | --- | --- |
+| Maven | `3.9+` 受 Enforcer 约束 | 显式最低版本 | 已完成 | 根 POM Enforcer | 持续回归 |
+| npm | `11+` | 显式最低版本 | 已完成 | `package.json engines` | 持续回归 |
+| CI | Node 26 / JDK 21 / package + health check | 与本地一致 | 已完成主链对齐 | GitHub workflow | 持续补专项验证 |
+| Docker | 直接消费安装包 | 与 package 链一致 | 已完成静态收口，镜像级实测不足 | Dockerfile、安装包结构 | 后续补 docker build/run 实测 |
+| 发布包 | `mvn package` 统一产出 | 本地/CI/Docker 同产物 | 已完成主链收口 | server package、health check | 持续回归 |
+| 健康检查 | `/api/v1/sys/info` | 最小稳定运行验收 | 已完成 | `scripts/check-demo-health.sh` | 后续可补 share 入口 smoke |
+
+### 使用这张总表的规则
+
+- `当前状态 = 已完成`：表示主链已经达到终态目标，后续只做稳定化回归
+- `当前状态 = 进行中`：表示方向已定、主链已部分落地，但还不能宣称专题完成
+- `当前状态 = 待评估`：表示当前仍在主链，但需要单独决定迁移路线
+- `当前状态 = 待专项预研`：表示不能直接升级，必须先做设计和验证策略
+
+## 遗留栈退出清单
+
+这一节只管“哪些栈还没有完全退出终态视角”。它比审计表更严格，因为这里列出来的项都不能在项目收官时继续模糊带过。
+
+| 栈 | 当前保留原因 | 退出条件 | 退出触发点 | 退出后的验收要求 |
+| --- | --- | --- | --- | --- |
+| `Shiro 2` | 当前生产鉴权链仍依赖它，且改动面跨登录、权限、分享页、OAuth2 | Spring Security 完整接管认证、鉴权、remember-me、OAuth2、分享认证 | JWT/OAuth/脚本链稳定后启动 Wave 5 | 登录、分享页、权限校验、remember-me、OAuth2 全链路通过 |
+| `nashorn-core` | 当前脚本链仍需要运行期兜底，虽然已做 JSR-223 收口 | GraalJS 可稳定执行现有 parser / 脚本能力，且不再依赖 Nashorn 兜底 | GraalJS 方案与第一批落地完成后 | 脚本解析、表达式、task/parser 相关链路通过 |
+| `Calcite 1.26.0` | SQL 解析与 JDBC provider 强耦合，不能直接升版本 | 完成专项预研并通过 parser / function / JDBC provider 回归 | GraalJS 专题后或独立窗口 | JDBC provider 测试、SQL 渲染、函数校验通过 |
+| `react-quill 1.3.5` | 富文本功能面深，且自定义 blot/插件较多 | 完成 Quill 2 路线或明确的现代封装替换 | 时间体系收尾后启动富文本专题 | 编辑、只读、邮件、仪表板富文本回归通过 |
+| `Jest 29` | 当前可用，但与 Vite 主链心智仍分离 | 决定 Jest 30 或 Vitest 单栈，并完成迁移 | 富文本路线定稿后 | 当前测试、CI、transform、mock 全部稳定 |
+| `ESLint 8 / stylelint 14 / Prettier 2` | 当前可用，但主版本偏旧，且升级更适合放在测试链后 | 升到当前稳定主线并清理关键 warning | 测试栈路线明确后 | lint/format/type check 链稳定、规则噪音可控 |
+
+### 遗留栈关闭规则
+
+只有同时满足以下条件，某项遗留栈才可以从这张清单移除：
+
+1. 仓库中的主依赖声明已切到目标方案
+2. 生产代码不再直接依赖旧栈
+3. 文档中的审计表与总表已同步更新
+4. 相关专项验收已经补证据
+
+如果只满足其中 1-2 项，而验收和文档没跟上，只能算“已进入迁移中”，不能从遗留栈清单删除。
+
+### 项目收官前必须清空或给出保留结论的项
+
+在项目最终收官前，下列项必须逐一处理，不能悬空：
+
+- `Shiro 2`
+- `nashorn-core`
+- `Calcite 1.26.0`
+- `react-quill 1.3.5`
+- `Jest 29`
+
+其中前 3 项属于后端架构级保留项；如果最终没有彻底替换，也必须写出“为何保留、保留边界、退出前提、未来触发条件”的正式结论。
+
 ## 项目总控蓝图
 
 这一节不是历史记录，而是后续整个大型迁移项目的执行主表。目标是把“看起来要做很多事”的升级工程，收敛成可以持续推进、持续验收、持续回退的项目计划。
