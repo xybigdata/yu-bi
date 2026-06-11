@@ -31,6 +31,7 @@ import datart.security.base.RoleType;
 import datart.security.exception.AuthException;
 import datart.security.exception.PermissionDeniedException;
 import datart.security.manager.DatartSecurityManager;
+import datart.security.manager.PermissionStringCodec;
 import datart.security.manager.PermissionDataCache;
 import datart.security.util.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +46,9 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Set;
 
 
 @Slf4j
@@ -154,7 +157,7 @@ public class ShiroSecurityManager implements DatartSecurityManager {
                     return;
                 }
             }
-            Set<String> permissionString = toShiroPermissionString(permission.getOrgId()
+            Set<String> permissionString = PermissionStringCodec.toPermissionStrings(permission.getOrgId()
                     , permission.getRoleId()
                     , permission.getResourceType()
                     , permission.getResourceId()
@@ -187,7 +190,7 @@ public class ShiroSecurityManager implements DatartSecurityManager {
                     return true;
                 }
             }
-            Set<String> permissionString = toShiroPermissionString(permission.getOrgId()
+            Set<String> permissionString = PermissionStringCodec.toPermissionStrings(permission.getOrgId()
                     , permission.getRoleId()
                     , permission.getResourceType()
                     , permission.getResourceId()
@@ -214,7 +217,7 @@ public class ShiroSecurityManager implements DatartSecurityManager {
     public void requireOrgOwner(String orgId) throws PermissionDeniedException {
         try {
             permissionDataCache.setCurrentOrg(orgId);
-            SecurityUtils.getSubject().checkRole(toShiroRoleString(RoleType.ORG_OWNER.name(), orgId));
+            SecurityUtils.getSubject().checkRole(PermissionStringCodec.toRoleString(RoleType.ORG_OWNER.name(), orgId));
         } catch (AuthorizationException e) {
             log.warn("User permission denied. User-{} Role-{}"
                     , getCurrentUser() != null ? getCurrentUser().getUsername() : "none"
@@ -226,7 +229,7 @@ public class ShiroSecurityManager implements DatartSecurityManager {
     @Override
     public boolean isOrgOwner(String orgId) {
         permissionDataCache.setCurrentOrg(orgId);
-        return SecurityUtils.getSubject().hasRole(toShiroRoleString(RoleType.ORG_OWNER.name(), orgId));
+        return SecurityUtils.getSubject().hasRole(PermissionStringCodec.toRoleString(RoleType.ORG_OWNER.name(), orgId));
     }
 
     @Override
@@ -239,7 +242,7 @@ public class ShiroSecurityManager implements DatartSecurityManager {
                 return permitted;
             }
 
-            Set<String> strings = toShiroPermissionString(permission.getOrgId()
+            Set<String> strings = PermissionStringCodec.toPermissionStrings(permission.getOrgId()
                     , permission.getRoleId()
                     , permission.getResourceType()
                     , permission.getResourceId()
@@ -276,64 +279,6 @@ public class ShiroSecurityManager implements DatartSecurityManager {
     public void releaseRunAs() {
         logoutCurrent();
     }
-
-
-    public static String toShiroRoleString(String roleType, String orgId) {
-        return roleType + "." + orgId;
-    }
-
-    public static Set<String> toShiroPermissionString(String orgId, String roleId, String resourceType, String resourceId, int permission) {
-        Set<String> shiroPermissionStrings = new HashSet<>();
-        Set<String> permissions = expand2StringPermissions(permission);
-        for (String p : permissions) {
-            StringJoiner stringJoiner = new StringJoiner(":");
-            stringJoiner.add(orgId)
-                    .add(roleId != null ? roleId : "*")
-                    .add(resourceType)
-                    .add(p)
-                    .add(resourceId);
-            shiroPermissionStrings.add(stringJoiner.toString());
-        }
-        return shiroPermissionStrings;
-
-    }
-
-    public static String toShiroPermissionString(String orgId, String resourceType, String resourceId, String permission) {
-        StringJoiner stringJoiner = new StringJoiner(":");
-        stringJoiner.add(orgId)
-                .add(resourceType)
-                .add(permission)
-                .add(resourceId);
-        return stringJoiner.toString();
-    }
-
-    public static Set<String> expand2StringPermissions(int permission) {
-        Set<String> permissions = new HashSet<>();
-        if (permission == Const.DISABLE) {
-            permissions.add("DISABLE");
-            return permissions;
-        }
-        if ((Const.ENABLE & permission) == Const.ENABLE) {
-            permissions.add("ENABLE");
-        }
-        if ((Const.READ & permission) == Const.READ) {
-            permissions.add("READ");
-        }
-        if ((Const.MANAGE & permission) == Const.MANAGE) {
-            permissions.add("MANAGE");
-        }
-        if ((Const.GRANT & permission) == Const.GRANT) {
-            permissions.add("GRANT");
-        }
-        if ((Const.DOWNLOAD & permission) == Const.DOWNLOAD) {
-            permissions.add("DOWNLOAD");
-        }
-        if ((Const.SHARE & permission) == Const.SHARE) {
-            permissions.add("SHARE");
-        }
-        return permissions;
-    }
-
 
     @PostConstruct
     public void initSecurityManager() {

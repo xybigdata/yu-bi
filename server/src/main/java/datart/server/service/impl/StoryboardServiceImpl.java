@@ -27,7 +27,7 @@ import datart.security.base.PermissionInfo;
 import datart.security.base.ResourceType;
 import datart.security.base.SubjectType;
 import datart.security.exception.PermissionDeniedException;
-import datart.security.manager.shiro.ShiroSecurityManager;
+import datart.security.manager.PermissionStringCodec;
 import datart.security.util.PermissionHelper;
 import datart.server.base.dto.StoryboardDetail;
 import datart.server.base.params.BaseCreateParam;
@@ -162,7 +162,7 @@ public class StoryboardServiceImpl extends BaseService implements StoryboardServ
         boolean hasPermission = roles.stream().anyMatch(role -> hasPermission(role, storyboard, permission));
         if (!hasPermission) {
             Exceptions.tr(PermissionDeniedException.class, "message.security.permission-denied",
-                    ResourceType.STORYBOARD + ":" + storyboard.getName() + ":" + ShiroSecurityManager.expand2StringPermissions(permission));
+                    ResourceType.STORYBOARD + ":" + storyboard.getName() + ":" + PermissionStringCodec.expandPermissions(permission));
         }
     }
 

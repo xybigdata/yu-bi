@@ -29,7 +29,7 @@ import datart.core.entity.*;
 import datart.core.mappers.ext.*;
 import datart.security.base.ResourceType;
 import datart.security.exception.PermissionDeniedException;
-import datart.security.manager.shiro.ShiroSecurityManager;
+import datart.security.manager.PermissionStringCodec;
 import datart.security.util.PermissionHelper;
 import datart.server.base.dto.ViewDetailDTO;
 import datart.server.base.params.*;
@@ -380,7 +380,7 @@ public class ViewServiceImpl extends BaseService implements ViewService {
         boolean hasPermission = roles.stream().anyMatch(role -> hasPermission(role, view, permission));
         if (!hasPermission) {
             Exceptions.tr(PermissionDeniedException.class, "message.security.permission-denied",
-                    ResourceType.VIEW + ":" + view.getName() + ":" + ShiroSecurityManager.expand2StringPermissions(permission));
+                    ResourceType.VIEW + ":" + view.getName() + ":" + PermissionStringCodec.expandPermissions(permission));
         }
     }
 

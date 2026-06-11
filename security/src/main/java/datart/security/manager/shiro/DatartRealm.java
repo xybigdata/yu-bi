@@ -26,6 +26,7 @@ import datart.core.mappers.ext.RoleMapperExt;
 import datart.core.mappers.ext.UserMapperExt;
 import datart.security.base.RoleType;
 import datart.security.manager.PermissionDataCache;
+import datart.security.manager.PermissionStringCodec;
 import datart.security.util.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.*;
@@ -86,8 +87,12 @@ public class DatartRealm extends AuthorizingRealm {
         }
         List<RelRoleResource> relRoleResources = rrrMapper.listByOrgAndUser(permissionDataCache.getCurrentOrg(), userId);
         for (RelRoleResource rrr : relRoleResources) {
-            authorizationInfo.addStringPermissions(ShiroSecurityManager
-                    .toShiroPermissionString(rrr.getOrgId(), rrr.getRoleId(), rrr.getResourceType(), rrr.getResourceId(), rrr.getPermission()));
+            authorizationInfo.addStringPermissions(PermissionStringCodec.toPermissionStrings(
+                    rrr.getOrgId(),
+                    rrr.getRoleId(),
+                    rrr.getResourceType(),
+                    rrr.getResourceId(),
+                    rrr.getPermission()));
         }
         permissionDataCache.setAuthorizationInfo(authorizationInfo);
 
@@ -121,9 +126,9 @@ public class DatartRealm extends AuthorizingRealm {
      */
     private void addOrgOwnerRoleAndPermission(SimpleAuthorizationInfo simpleAuthorizationInfo, Role role) {
         //添加组织拥有者角色
-        simpleAuthorizationInfo.addRole(ShiroSecurityManager.toShiroRoleString(role.getType(), role.getOrgId()));
+        simpleAuthorizationInfo.addRole(PermissionStringCodec.toRoleString(role.getType(), role.getOrgId()));
         //添加组织拥有者权限
-        String allPermission = ShiroSecurityManager.toShiroPermissionString(role.getOrgId(), "*", "*", "*");
+        String allPermission = PermissionStringCodec.toPermissionString(role.getOrgId(), "*", "*", "*");
         simpleAuthorizationInfo.addStringPermission(allPermission);
     }
 

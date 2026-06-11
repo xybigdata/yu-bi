@@ -30,7 +30,7 @@ import datart.security.base.PermissionInfo;
 import datart.security.base.ResourceType;
 import datart.security.base.SubjectType;
 import datart.security.exception.PermissionDeniedException;
-import datart.security.manager.shiro.ShiroSecurityManager;
+import datart.security.manager.PermissionStringCodec;
 import datart.security.util.PermissionHelper;
 import datart.server.base.params.BaseCreateParam;
 import datart.server.base.params.BaseUpdateParam;
@@ -85,7 +85,7 @@ public class FolderServiceImpl extends BaseService implements FolderService {
         boolean hasPermission = roles.stream().anyMatch(role -> hasPermission(role, folder, permission));
         if (!hasPermission) {
             Exceptions.tr(PermissionDeniedException.class, "message.security.permission-denied",
-                    folder.getRelType() + ":" + folder.getName() + ":" + ShiroSecurityManager.expand2StringPermissions(permission));
+                    folder.getRelType() + ":" + folder.getName() + ":" + PermissionStringCodec.expandPermissions(permission));
         }
     }
 

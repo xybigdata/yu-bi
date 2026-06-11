@@ -351,6 +351,8 @@
 - 安全专项：`Shiro -> Spring Security`
   - 当前证据：仓库内 `shiro` 使用面约 `71` 处，真实改动面已从权限检查、Realm、Subject 获取、缓存到服务层权限字符串拼装。
   - 目标方案：统一认证、鉴权、remember-me、OAuth2 登录和过滤器链到 Spring Security 体系。
+  - 2026-06-11 最新推进：新增中立权限字符串编解码层 `datart.security.manager.PermissionStringCodec`，把角色字符串、权限位展开和权限字符串拼装从 `ShiroSecurityManager` 静态工具方法中抽离；`server` 服务层不再直接依赖 `security.manager.shiro.*`，`DatartRealm` 也已改为复用中立编解码层。
+  - 本轮收益：后续即使继续保留 Shiro 运行时，也可以把 `server -> shiro implementation` 这条静态依赖先拆掉，缩小未来迁移到 Spring Security 时需要一起改动的横切面。
   - 前提：JWT、OAuth 客户端、分享页认证链已经稳定。
 - 数据源专项：`Druid -> HikariCP`
   - 当前证据：原始使用面主要集中在 server 主数据源和 JDBC provider 工厂，属于“使用面不大、耦合度不低”的典型专项。
@@ -1639,6 +1641,8 @@
    - 当前状态：已经能跑在 Spring Boot 3 / Jakarta 链上，但和 Spring Security 并行维护两套安全体系。
    - 更现代替代：长期方向仍是收口到 Spring Security 原生体系。
    - 2026-06-10 本轮前置清障：`datart-security` 中自定义 OAuth2 过滤器已把 Spring Security 即将移除的 `AntPathRequestMatcher` 替换为 `PathPatternRequestMatcher`，先清掉 Boot 3 / Security 6 主线上的一批已弃用 Web matcher 告警。
+   - 2026-06-11 本轮前置清障：权限字符串相关的角色编码、权限位展开和 permission string 拼装已抽到 `PermissionStringCodec`，`server` 多个服务实现不再直接静态引用 `ShiroSecurityManager`；这一批改动不改变运行时鉴权语义，但把未来 `Shiro -> Spring Security` 的第一层服务端耦合面收窄了。
+   - 验收证据：`mvn -o -pl security -am -DskipTests -Dmaven.compiler.showDeprecation=true compile` 与 `mvn -o -pl server -am -DskipTests -Dmaven.compiler.showDeprecation=true compile` 已通过。
    - 本仓库判断：Shiro 不是“坏掉了”，但它已经属于架构级历史包袱；适合单列安全专项，而不是在基础库升级时顺手搀带。
 
 2. `Druid 1.2.28`

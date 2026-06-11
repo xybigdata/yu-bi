@@ -31,7 +31,7 @@ import datart.security.base.PermissionInfo;
 import datart.security.base.ResourceType;
 import datart.security.base.SubjectType;
 import datart.security.exception.PermissionDeniedException;
-import datart.security.manager.shiro.ShiroSecurityManager;
+import datart.security.manager.PermissionStringCodec;
 import datart.security.util.PermissionHelper;
 import datart.server.base.dto.ScheduleBaseInfo;
 import datart.server.base.params.*;
@@ -85,7 +85,7 @@ public class ScheduleServiceImpl extends BaseService implements ScheduleService 
         boolean hasPermission = roles.stream().anyMatch(role -> hasPermission(role, schedule, permission));
         if (!hasPermission) {
             Exceptions.tr(PermissionDeniedException.class, "message.security.permission-denied",
-                    ResourceType.SCHEDULE + ":" + schedule.getName() + ":" + ShiroSecurityManager.expand2StringPermissions(permission));
+                    ResourceType.SCHEDULE + ":" + schedule.getName() + ":" + PermissionStringCodec.expandPermissions(permission));
         }
     }
 

@@ -42,7 +42,7 @@ import datart.security.base.PermissionInfo;
 import datart.security.base.ResourceType;
 import datart.security.base.SubjectType;
 import datart.security.exception.PermissionDeniedException;
-import datart.security.manager.shiro.ShiroSecurityManager;
+import datart.security.manager.PermissionStringCodec;
 import datart.security.util.AESUtil;
 import datart.security.util.PermissionHelper;
 import datart.server.base.params.*;
@@ -274,7 +274,7 @@ public class SourceServiceImpl extends BaseService implements SourceService {
         boolean hasPermission = roles.stream().anyMatch(role -> hasPermission(role, source, permission));
         if (!hasPermission) {
             Exceptions.tr(PermissionDeniedException.class, "message.security.permission-denied",
-                    ResourceType.SOURCE + ":" + source.getName() + ":" + ShiroSecurityManager.expand2StringPermissions(permission));
+                    ResourceType.SOURCE + ":" + source.getName() + ":" + PermissionStringCodec.expandPermissions(permission));
         }
     }
 
