@@ -246,9 +246,7 @@ const ChartRichTextAdapter: FC<{
           ];
     }, [dataList, t]);
 
-    const handleFieldMenuClick = useCallback<
-      NonNullable<MenuProps['onClick']>
-    >(
+    const handleFieldMenuClick = useCallback<NonNullable<MenuProps['onClick']>>(
       ({ key, domEvent }) => {
         domEvent.preventDefault();
         const field = dataList?.find(item => item.name === key);

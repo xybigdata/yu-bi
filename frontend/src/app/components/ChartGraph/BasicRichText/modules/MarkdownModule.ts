@@ -1,12 +1,11 @@
-import type {
-  DeltaStatic,
-  QuillInstance,
-  RangeStatic,
-} from '../quillCompat';
+import type { DeltaStatic, QuillInstance, RangeStatic } from '../quillCompat';
 
 export interface MarkdownModuleOptions {
   ignoreTags?: string[];
-  tags?: Record<string, { pattern?: RegExp | ((value: string) => RegExp | string | null) }>;
+  tags?: Record<
+    string,
+    { pattern?: RegExp | ((value: string) => RegExp | string | null) }
+  >;
 }
 
 type InlineAction = {
@@ -110,7 +109,9 @@ export class MarkdownModule {
   ) {
     if (source !== 'user') return;
 
-    const insertOp = delta.ops?.find(op => Object.prototype.hasOwnProperty.call(op, 'insert'));
+    const insertOp = delta.ops?.find(op =>
+      Object.prototype.hasOwnProperty.call(op, 'insert'),
+    );
     const insertText =
       typeof insertOp?.insert === 'string' ? insertOp.insert : undefined;
 
@@ -123,13 +124,18 @@ export class MarkdownModule {
       return;
     }
 
-    if (insertText && [' ', '\n', ')', '*', '`', '~', '_'].includes(insertText)) {
+    if (
+      insertText &&
+      [' ', '\n', ')', '*', '`', '~', '_'].includes(insertText)
+    ) {
       setTimeout(() => {
         this.processCurrentLine();
       }, 0);
     }
 
-    const deleteOp = delta.ops?.find(op => Object.prototype.hasOwnProperty.call(op, 'delete'));
+    const deleteOp = delta.ops?.find(op =>
+      Object.prototype.hasOwnProperty.call(op, 'delete'),
+    );
     if (deleteOp && (deleteOp as any).delete === 1) {
       setTimeout(() => {
         this.releaseEmptyBlockFormats();
@@ -150,14 +156,16 @@ export class MarkdownModule {
     const normalizedText = `${lineText} `;
     const range = selection || ({ index, length: 0 } as RangeStatic);
 
-    if (this.tryLineActions({
-      line,
-      lineIndex,
-      lineOffset,
-      quill: this.quill,
-      selection: range,
-      text: normalizedText,
-    })) {
+    if (
+      this.tryLineActions({
+        line,
+        lineIndex,
+        lineOffset,
+        quill: this.quill,
+        selection: range,
+        text: normalizedText,
+      })
+    ) {
       return;
     }
 
@@ -180,7 +188,8 @@ export class MarkdownModule {
         name: 'bold',
         match: text => execPattern(this.getPattern('bold'), text),
         run: ({ annotatedText, lineStart, match, quill }) => {
-          if (isOnlyFormattingText(base.lineText, /^([*_ \n]+)$/g)) return false;
+          if (isOnlyFormattingText(base.lineText, /^([*_ \n]+)$/g))
+            return false;
           const startIndex = lineStart + (match.index || 0);
           const matchedText = match[2];
           quill.deleteText(startIndex, annotatedText.length);
@@ -196,7 +205,8 @@ export class MarkdownModule {
           const matchedToken = match[1] || match[3];
           const matchedText = match[2] || match[4];
           const firstToken = quill.getText()[lineStart + (match.index || 0)];
-          const secondToken = quill.getText()[lineStart + (match.index || 0) + 1];
+          const secondToken =
+            quill.getText()[lineStart + (match.index || 0) + 1];
           if (matchedToken === firstToken && firstToken === secondToken) {
             return false;
           }
@@ -216,7 +226,8 @@ export class MarkdownModule {
         name: 'strikethrough',
         match: text => execPattern(this.getPattern('strikethrough'), text),
         run: ({ annotatedText, lineStart, match, quill }) => {
-          if (isOnlyFormattingText(base.lineText, /^([~_ \n]+)$/g)) return false;
+          if (isOnlyFormattingText(base.lineText, /^([~_ \n]+)$/g))
+            return false;
           const startIndex = lineStart + (match.index || 0);
           const matchedText = match[1];
           quill.deleteText(startIndex, annotatedText.length);
@@ -302,12 +313,18 @@ export class MarkdownModule {
         run: ({ lineIndex, quill, text }) => {
           const match = execPattern(this.getPattern('bulletList'), text);
           if (!match) return false;
-          const normalized = /^\s{0,9}\*/.test(text) ? text.replace('*', '-') : text;
+          const normalized = /^\s{0,9}\*/.test(text)
+            ? text.replace('*', '-')
+            : text;
           const depth = normalized
             .split('- ')[0]
             .split('')
             .filter(ch => /\s/.test(ch)).length;
-          const replaceText = normalized.split('- ').slice(1).join('- ').trimEnd();
+          const replaceText = normalized
+            .split('- ')
+            .slice(1)
+            .join('- ')
+            .trimEnd();
           quill.deleteText(lineIndex, text.length - 1);
           quill.insertText(lineIndex, replaceText);
           quill.formatLine(lineIndex, 0, { list: 'bullet', indent: depth });
@@ -319,7 +336,11 @@ export class MarkdownModule {
         run: ({ lineIndex, quill, text }) => {
           const match = execPattern(this.getPattern('checkboxChecked'), text);
           if (!match) return false;
-          const replaceText = text.split('[x] ').slice(1).join('[x] ').trimEnd();
+          const replaceText = text
+            .split('[x] ')
+            .slice(1)
+            .join('[x] ')
+            .trimEnd();
           quill.deleteText(lineIndex, text.length - 1);
           quill.insertText(lineIndex, replaceText);
           quill.formatLine(lineIndex, 0, 'list', 'checked');

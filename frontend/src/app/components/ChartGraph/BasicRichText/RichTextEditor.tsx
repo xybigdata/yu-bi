@@ -1,15 +1,7 @@
-import {
-  ForwardedRef,
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-} from 'react';
+import { ForwardedRef, forwardRef, useImperativeHandle, useRef } from 'react';
 import './RichTextBootstrap';
 import MarkdownModule from './modules/MarkdownModule';
-import ReactQuill, {
-  DeltaStatic,
-  Sources,
-} from './quillCompat';
+import ReactQuill, { DeltaStatic, Sources } from './quillCompat';
 
 export interface RichTextEditorHandle {
   blur: () => void;

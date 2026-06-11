@@ -40,7 +40,10 @@ export class QuillPalette {
     color: '#000',
   };
 
-  constructor(quillJS: RichTextEditorHandle, options = {} as QuillPaletteOptions) {
+  constructor(
+    quillJS: RichTextEditorHandle,
+    options = {} as QuillPaletteOptions,
+  ) {
     this.quillJS = quillJS;
     this.options = options;
     this.styleNode = null;
@@ -75,10 +78,10 @@ export class QuillPalette {
       const delta = this.quillJS.getContents(index, length);
 
       if (delta.ops?.length === 1 && delta.ops[0]?.attributes) {
-        const {
-          background,
-          color,
-        } = delta.ops[0].attributes as Record<string, string | undefined>;
+        const { background, color } = delta.ops[0].attributes as Record<
+          string,
+          string | undefined
+        >;
 
         const colorNode = document.querySelector(
           `#${toolbarId} .ql-color .ql-color-label`,

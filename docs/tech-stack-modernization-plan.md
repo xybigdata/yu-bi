@@ -2860,6 +2860,29 @@
 - 当前仍未完成项：
   - 代码规范链后续仍以低风险 warning 渐进治理为主，优先顺序保持为：无效抑制清理 -> Prettier 历史差异 -> Hooks 依赖提示。
 
+### 2026-06-11 本轮继续推进：收口 BasicRichText 目录 Prettier 历史格式差异
+
+- 本轮实际落地：
+  - `frontend/src/app/components/ChartGraph/BasicRichText/ChartRichTextAdapter.tsx`
+  - `frontend/src/app/components/ChartGraph/BasicRichText/RichTextEditor.tsx`
+  - `frontend/src/app/components/ChartGraph/BasicRichText/RichTextPluginLoader/CustomColor.tsx`
+  - `frontend/src/app/components/ChartGraph/BasicRichText/RichTextPluginLoader/index.ts`
+  - `frontend/src/app/components/ChartGraph/BasicRichText/modules/ImageDropModule.ts`
+  - `frontend/src/app/components/ChartGraph/BasicRichText/modules/MarkdownModule.ts`
+
+- 本轮收口内容：
+  - 只处理 `BasicRichText` 文件簇内的 `prettier/prettier` 历史格式差异，不改业务逻辑、不改富文本 API、不调整 Quill 兼容策略。
+  - 处理方式为使用前端本地已安装的 `prettier` 对目标文件做机械格式化，避免依赖网络拉包，也避免手工改出额外噪音。
+  - 这一步属于代码规范链的低风险收口，不改变运行时行为。
+
+- 本轮验证结果：
+  - 在本机 `Node 26.0.0 / npm 11.15.0` 下：
+    - `npm run lint` 通过。
+  - `lint` 总 warning 从 `403` 降到 `374`，且 `BasicRichText` 目录相关的本轮目标 `prettier` warning 已退出。
+
+- 当前仍未完成项：
+  - 代码规范链后续继续按文件簇处理 Prettier 历史格式差异，优先选择同模块、纯机械、可单独回归的小批次。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

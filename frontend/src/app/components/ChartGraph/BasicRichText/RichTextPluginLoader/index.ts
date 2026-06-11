@@ -1,10 +1,6 @@
 import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
 import { ImageDropModule } from '../modules/ImageDropModule';
-import {
-  Quill,
-  QuillInstance,
-  RangeStatic,
-} from '../quillCompat';
+import { Quill, QuillInstance, RangeStatic } from '../quillCompat';
 import CalcFieldBlot from './CalcFieldBlot';
 import TagBlot from './TagBlot';
 
@@ -60,9 +56,7 @@ type SourceExecutionToken = {
   abandoned: boolean;
 };
 
-type AllowedCharsResolver =
-  | RegExp
-  | ((denotationChar: string) => RegExp);
+type AllowedCharsResolver = RegExp | ((denotationChar: string) => RegExp);
 
 type CalcFieldSource = (
   searchTerm: string,
@@ -90,10 +84,7 @@ type CalcFieldOptions = {
   selectKeys: number[];
 };
 
-function getFieldCharIndex(
-  text: string,
-  numberFieldDenotationChars: string[],
-) {
+function getFieldCharIndex(text: string, numberFieldDenotationChars: string[]) {
   return numberFieldDenotationChars.reduce(
     (prev, numberFieldChar) => {
       const numberFieldCharIndex = text.lastIndexOf(numberFieldChar);
@@ -211,12 +202,7 @@ class CalcField {
       insertAtPos = this.cursorPos;
     }
 
-    this.quill.insertEmbed(
-      insertAtPos,
-      this.options.blotName,
-      render,
-      'user',
-    );
+    this.quill.insertEmbed(insertAtPos, this.options.blotName, render, 'user');
 
     if (this.options.spaceAfterInsert) {
       this.quill.insertText(insertAtPos + 1, ' ', 'user');
