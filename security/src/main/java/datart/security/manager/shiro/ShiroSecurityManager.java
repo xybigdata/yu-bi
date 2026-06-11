@@ -33,19 +33,14 @@ import datart.security.exception.PermissionDeniedException;
 import datart.security.manager.DatartSecurityManager;
 import datart.security.manager.PermissionStringCodec;
 import datart.security.manager.PermissionDataCache;
+import datart.security.manager.SecurityAuthorizationException;
+import datart.security.manager.SecuritySubjectFacade;
 import datart.security.util.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.BearerToken;
-import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.authz.AuthorizationException;
-import org.apache.shiro.mgt.SecurityManager;
-import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
@@ -61,16 +56,16 @@ public class ShiroSecurityManager implements DatartSecurityManager {
 
     private final PermissionDataCache permissionDataCache;
 
-    private final SecurityManager securityManager;
+    private final SecuritySubjectFacade securitySubjectFacade;
 
     public ShiroSecurityManager(MessageResolver messageResolver,
                                 UserMapperExt userMapper,
                                 PermissionDataCache permissionDataCache,
-                                SecurityManager securityManager) {
+                                SecuritySubjectFacade securitySubjectFacade) {
         this.messageResolver = messageResolver;
         this.userMapper = userMapper;
         this.permissionDataCache = permissionDataCache;
-        this.securityManager = securityManager;
+        this.securitySubjectFacade = securitySubjectFacade;
     }
 
     @Override
@@ -83,10 +78,8 @@ public class ShiroSecurityManager implements DatartSecurityManager {
         if (!user.getActive()) {
             Exceptions.tr(BaseException.class, "message.user.not.active");
         }
-        Subject subject = SecurityUtils.getSubject();
-        UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(token.getSubject(), token.getPassword());
         try {
-            subject.login(usernamePasswordToken);
+            securitySubjectFacade.loginWithPassword(token.getSubject(), token.getPassword());
         } catch (Exception e) {
             log.error("Login error ({})", token.getSubject());
             Exceptions.msg("login.fail");
@@ -121,10 +114,8 @@ public class ShiroSecurityManager implements DatartSecurityManager {
             Exceptions.tr(AuthException.class, "login.fail.pwd.hash");
         }
 
-        BearerToken bearerToken = new BearerToken(tokenString);
         try {
-            Subject subject = SecurityUtils.getSubject();
-            subject.login(bearerToken);
+            securitySubjectFacade.loginWithBearer(tokenString);
         } catch (Exception e) {
             log.error("Login error ({})", user.getUsername());
             Exceptions.msg("login.fail");
@@ -135,15 +126,12 @@ public class ShiroSecurityManager implements DatartSecurityManager {
     @Override
     public void logoutCurrent() {
         permissionDataCache.clear();
-        Subject subject = SecurityUtils.getSubject();
-        if (subject != null) {
-            subject.logout();
-        }
+        securitySubjectFacade.logoutCurrent();
     }
 
     @Override
     public boolean isAuthenticated() {
-        return SecurityUtils.getSubject().isAuthenticated();
+        return securitySubjectFacade.isAuthenticated();
     }
 
     @Override
@@ -152,7 +140,7 @@ public class ShiroSecurityManager implements DatartSecurityManager {
             Boolean permitted = permissionDataCache.getCachedPermission(permission);
             if (permitted != null) {
                 if (!permitted) {
-                    Exceptions.e(new AuthorizationException());
+                    Exceptions.e(new SecurityAuthorizationException(null));
                 } else {
                     return;
                 }
@@ -164,9 +152,9 @@ public class ShiroSecurityManager implements DatartSecurityManager {
                     , permission.getPermission());
             try {
                 permissionDataCache.setCurrentOrg(permission.getOrgId());
-                SecurityUtils.getSubject().checkPermissions(permissionString.toArray(new String[0]));
+                securitySubjectFacade.checkPermissions(permissionString.toArray(new String[0]));
                 permissionDataCache.setPermissionCache(permission, true);
-            } catch (AuthorizationException e) {
+            } catch (SecurityAuthorizationException e) {
                 log.warn("User permission denied. User-{} Permission-{}"
                         , getCurrentUser() != null ? getCurrentUser().getUsername() : "none"
                         , permission);
@@ -185,7 +173,7 @@ public class ShiroSecurityManager implements DatartSecurityManager {
             Boolean permitted = permissionDataCache.getCachedPermission(permission);
             if (permitted != null) {
                 if (!permitted) {
-                    Exceptions.e(new AuthorizationException());
+                    Exceptions.e(new SecurityAuthorizationException(null));
                 } else {
                     return true;
                 }
@@ -197,10 +185,10 @@ public class ShiroSecurityManager implements DatartSecurityManager {
                     , permission.getPermission());
             try {
                 permissionDataCache.setCurrentOrg(permission.getOrgId());
-                SecurityUtils.getSubject().checkPermissions(permissionString.toArray(new String[0]));
+                securitySubjectFacade.checkPermissions(permissionString.toArray(new String[0]));
                 permissionDataCache.setPermissionCache(permission, true);
                 return true;
-            } catch (AuthorizationException e) {
+            } catch (SecurityAuthorizationException e) {
                 log.warn("User permission denied. User-{} Permission-{}"
                         , getCurrentUser() != null ? getCurrentUser().getUsername() : "none"
                         , permission);
@@ -217,8 +205,8 @@ public class ShiroSecurityManager implements DatartSecurityManager {
     public void requireOrgOwner(String orgId) throws PermissionDeniedException {
         try {
             permissionDataCache.setCurrentOrg(orgId);
-            SecurityUtils.getSubject().checkRole(PermissionStringCodec.toRoleString(RoleType.ORG_OWNER.name(), orgId));
-        } catch (AuthorizationException e) {
+            securitySubjectFacade.checkRole(PermissionStringCodec.toRoleString(RoleType.ORG_OWNER.name(), orgId));
+        } catch (SecurityAuthorizationException e) {
             log.warn("User permission denied. User-{} Role-{}"
                     , getCurrentUser() != null ? getCurrentUser().getUsername() : "none"
                     , RoleType.ORG_OWNER.name());
@@ -229,7 +217,7 @@ public class ShiroSecurityManager implements DatartSecurityManager {
     @Override
     public boolean isOrgOwner(String orgId) {
         permissionDataCache.setCurrentOrg(orgId);
-        return SecurityUtils.getSubject().hasRole(PermissionStringCodec.toRoleString(RoleType.ORG_OWNER.name(), orgId));
+        return securitySubjectFacade.hasRole(PermissionStringCodec.toRoleString(RoleType.ORG_OWNER.name(), orgId));
     }
 
     @Override
@@ -249,9 +237,9 @@ public class ShiroSecurityManager implements DatartSecurityManager {
                     , permission.getPermission());
             try {
                 permissionDataCache.setCurrentOrg(permission.getOrgId());
-                SecurityUtils.getSubject().checkPermissions(strings.toArray(new String[0]));
+                securitySubjectFacade.checkPermissions(strings.toArray(new String[0]));
                 permissionDataCache.setPermissionCache(permission, true);
-            } catch (AuthorizationException e) {
+            } catch (SecurityAuthorizationException e) {
                 log.debug("User permission denied. User-{} Permission-{}"
                         , getCurrentUser() != null ? getCurrentUser().getUsername() : "none"
                         , permission);
@@ -264,13 +252,12 @@ public class ShiroSecurityManager implements DatartSecurityManager {
 
     @Override
     public User getCurrentUser() {
-        Subject subject = SecurityUtils.getSubject();
-        return (User) subject.getPrincipal();
+        return securitySubjectFacade.getPrincipal();
     }
 
     @Override
     public void runAs(String userNameOrEmail) {
-        ThreadContext.unbindSubject();
+        securitySubjectFacade.clearRunAs();
         User user = userMapper.selectByNameOrEmail(userNameOrEmail);
         login(JwtUtils.toJwtString(JwtUtils.createJwtToken(user)));
     }
@@ -278,11 +265,6 @@ public class ShiroSecurityManager implements DatartSecurityManager {
     @Override
     public void releaseRunAs() {
         logoutCurrent();
-    }
-
-    @PostConstruct
-    public void initSecurityManager() {
-        SecurityUtils.setSecurityManager(securityManager);
     }
 
 }
