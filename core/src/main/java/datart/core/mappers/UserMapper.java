@@ -14,13 +14,13 @@ import org.apache.ibatis.type.JdbcType;
 
 public interface UserMapper extends CRUDMapper {
     @Delete({
-        "delete from user",
+        "delete from `user`",
         "where id = #{id,jdbcType=VARCHAR}"
     })
     int deleteByPrimaryKey(String id);
 
     @Insert({
-        "insert into user (id, email, ",
+        "insert into `user` (id, email, ",
         "username, `password`, ",
         "active, `name`, description, ",
         "avatar, create_time, ",
@@ -42,7 +42,7 @@ public interface UserMapper extends CRUDMapper {
         "select",
         "id, email, username, `password`, active, `name`, description, avatar, create_time, ",
         "create_by, update_time, update_by",
-        "from user",
+        "from `user`",
         "where id = #{id,jdbcType=VARCHAR}"
     })
     @Results({
@@ -65,7 +65,7 @@ public interface UserMapper extends CRUDMapper {
     int updateByPrimaryKeySelective(User record);
 
     @Update({
-        "update user",
+        "update `user`",
         "set email = #{email,jdbcType=VARCHAR},",
           "username = #{username,jdbcType=VARCHAR},",
           "`password` = #{password,jdbcType=VARCHAR},",

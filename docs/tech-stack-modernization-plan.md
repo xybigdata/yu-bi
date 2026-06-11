@@ -419,7 +419,7 @@
 | Wave | 主题 | 状态 | 负责人动作 | 阻塞项 | 进入下一 Wave 的条件 |
 | --- | --- | --- | --- | --- | --- |
 | Wave 0 | 基线锁定 | 已完成 | 持续验证基线不回退 | 无 | 基线仍稳定 |
-| Wave 1 | 时间体系收尾 | 进行中 | 继续收口值对象链、补页面回归与 share smoke | 仍缺 share 入口的运行态回归证据 | 时间专题具备完整验收证据 |
+| Wave 1 | 时间体系收尾 | 已完成 | 转入后续专题，保留当前回归基线 | 无 | 时间专题证据已闭环 |
 | Wave 2 | 富文本路线定稿与落地 | 待执行 | 定稿 Quill 路线，做第一批升级 | 需要先稳定时间链路 | 富文本适配层稳定、路线已定 |
 | Wave 3 | 前端工具链现代化 | 待执行 | 定 Jest/Vitest、升级规范链 | 依赖 Wave 2 稳定 | 测试链与规范链路线明确 |
 | Wave 4 | GraalJS / Calcite / 生成链 | 待执行 | 先做 GraalJS，再做 Calcite 预研 | 属于高风险运行时专题 | 脚本与 SQL 专题均有专项验证 |
@@ -469,12 +469,20 @@
   - `core/src/main/java/datart/core/mappers/ext/DownloadMapperExt.java`
   - `server/src/main/java/datart/server/service/impl/DownloadServiceImpl.java`
     - 把下载任务最近 7 天筛选从 H2 2.x 不兼容的 `NOW() - INTERVAL 7 DAY` 改成 Java 侧计算 `createdAfter` 参数，消除 demo 登录后的 H2 SQL 语法错误。
+  - `core/src/main/java/datart/core/mappers/UserMapper.java`
+  - `core/src/main/java/datart/core/mappers/UserSqlProvider.java`
+    - 将 H2 2.x 下保留字表名 `user` 改为反引号引用 `` `user` ``，恢复 share 链路在 `UserMapper` 上的查询与更新。
   - `frontend/src/app/pages/MainPage/index.tsx`
   - `frontend/src/app/pages/MainPage/pages/SchedulePage/hooks.ts`
   - `frontend/src/app/pages/MainPage/pages/SchedulePage/index.tsx`
   - `frontend/src/app/pages/MainPage/pages/SchedulePage/Sidebar/index.tsx`
   - `frontend/src/app/pages/MainPage/pages/SchedulePage/EditorPage/index.tsx`
     - 修复调度页兼容路由参数链，让 `/schedules/add` 与 `/schedules/:scheduleId` 可以在当前 Router 6 兼容层下正确解析 `scheduleId`，恢复编辑页和时间范围控件渲染。
+  - `frontend/src/app/pages/SharePage/hooks/useShareRouteParams.ts`
+  - `frontend/src/app/pages/SharePage/Dashboard/ShareDashboardPage.tsx`
+  - `frontend/src/app/pages/SharePage/Chart/ShareChartPage.tsx`
+  - `frontend/src/app/pages/SharePage/StoryPlayer/ShareStoryPlayerPage.tsx`
+    - share 独立入口不再依赖当前兼容层下拿不到参数的 `useParams()`，改为显式 `matchPath` 提取 `shareToken`，恢复 `/shareDashboard/:token`、`/shareChart/:token`、`/shareStoryPlayer/:token` 的真实参数解析。
 
 - 本轮新增运行态证据：
   - 构建链：
@@ -490,13 +498,17 @@
     - `http://127.0.0.1:8081/organizations/f8435e0a3323459aaef679ab63fbd01a/vizs`
     - `http://127.0.0.1:8081/organizations/f8435e0a3323459aaef679ab63fbd01a/variables`
     - `http://127.0.0.1:8081/organizations/f8435e0a3323459aaef679ab63fbd01a/schedules/add`
+    - `http://127.0.0.1:8081/shareDashboard/b5a9fafba0294a2788168a7b87648d01?type=NONE`
   - 实际观察结果：
     - 主应用初始化完成后，本次刷新窗口下不再产生新的 `download/tasks`、`custom charts` 或 H2 `INTERVAL 7 DAY` 错误。
     - 变量页“新建公共变量”弹窗切到“日期”值类型后，日期输入框和日期格式下拉真实渲染。
     - 调度页“新建定时任务”编辑页真实渲染，`有效时间范围` 的开始/结束日期输入框可见。
+    - share API `POST /api/v1/shares/b5a9fafba0294a2788168a7b87648d01/viz` 在当前 demo 数据下返回 200，并可拿到 dashboard 明细与 `authorizedToken`。
+    - share dashboard 冷启动页可真实渲染空看板态，不再是白屏；应用内浏览器 DOM 片段包含 `DashboardForShare` 容器、`more` 菜单按钮，以及 Ant Design Empty 的“暂无数据”内容。
 
-- 当前未完成项：
-  - share 入口仍缺至少一个真实 L2/L3 回归证据，因此 Wave 1 仍保持“进行中”。
+- 当前结论：
+  - Wave 1 已完成。时间体系相关的主应用页与 share 入口均已补齐真实 L2 运行态证据。
+  - 当前 share 验收样例使用的是空 dashboard，因此页面呈现“暂无数据”是符合预期的业务状态，不代表渲染失败。
 
 ### 风险台账
 

@@ -19,7 +19,7 @@
 import useMount from 'app/hooks/useMount';
 import useRouteQuery from 'app/hooks/useRouteQuery';
 import ChartManager from 'app/models/ChartManager';
-import { useLocation, useParams } from 'app/routerCompat';
+import { useLocation } from 'app/routerCompat';
 import { login } from 'app/slice/thunks';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -45,6 +45,7 @@ import {
   fetchAvailableSourceFunctionsForShare,
   fetchShareVizInfo,
 } from '../slice/thunks';
+import { useShareRouteParams } from '../hooks/useShareRouteParams';
 import ChartPreviewBoardForShare from './ChartPreviewBoardForShare';
 
 export function ShareChartPage() {
@@ -52,8 +53,7 @@ export function ShareChartPage() {
 
   const dispatch = useAppDispatch();
   const location = useLocation();
-
-  const { token: shareToken } = useParams<{ token: string }>();
+  const { token: shareToken } = useShareRouteParams('chart');
   const search = location.search;
   const logged = !!getToken();
 

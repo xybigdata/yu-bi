@@ -19,7 +19,7 @@
 import useMount from 'app/hooks/useMount';
 import useRouteQuery from 'app/hooks/useRouteQuery';
 import ChartManager from 'app/models/ChartManager';
-import { useLocation, useParams } from 'app/routerCompat';
+import { useLocation } from 'app/routerCompat';
 import { login } from 'app/slice/thunks';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -35,6 +35,7 @@ import { useEditBoardSlice } from '../../DashBoardPage/pages/BoardEditor/slice';
 import { FilterSearchParams } from '../../MainPage/pages/VizPage/slice/types';
 import { useStoryBoardSlice } from '../../StoryBoardPage/slice';
 import { selectShareStoryBoard } from '../../StoryBoardPage/slice/selectors';
+import { useShareRouteParams } from '../hooks/useShareRouteParams';
 import PasswordModal from '../components/PasswordModal';
 import ShareLoginModal from '../components/ShareLoginModal';
 import { shareActions, useShareSlice } from '../slice';
@@ -50,7 +51,7 @@ function ShareStoryPlayerPage() {
 
   const dispatch = useAppDispatch();
   const location = useLocation();
-  const { token: shareToken } = useParams<{ token: string }>();
+  const { token: shareToken } = useShareRouteParams('storyPlayer');
   const search = location.search;
   const logged = !!getToken();
 
@@ -161,7 +162,7 @@ function ShareStoryPlayerPage() {
         </div>
       )}
 
-      {!Boolean(needVerify) && shareStory && (
+      {!Boolean(needVerify) && shareStory && shareToken && (
         <StoryPlayerForShare storyBoard={shareStory} shareToken={shareToken} />
       )}
     </StyledWrapper>

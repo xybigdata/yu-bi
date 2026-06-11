@@ -6,7 +6,7 @@ import org.apache.ibatis.jdbc.SQL;
 public class UserSqlProvider {
     public String insertSelective(User record) {
         SQL sql = new SQL();
-        sql.INSERT_INTO("user");
+        sql.INSERT_INTO("`user`");
         
         if (record.getId() != null) {
             sql.VALUES("id", "#{id,jdbcType=VARCHAR}");
@@ -61,7 +61,7 @@ public class UserSqlProvider {
 
     public String updateByPrimaryKeySelective(User record) {
         SQL sql = new SQL();
-        sql.UPDATE("user");
+        sql.UPDATE("`user`");
         
         if (record.getEmail() != null) {
             sql.SET("email = #{email,jdbcType=VARCHAR}");

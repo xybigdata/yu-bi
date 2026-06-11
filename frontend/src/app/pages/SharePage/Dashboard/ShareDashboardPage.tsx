@@ -19,7 +19,7 @@
 import useMount from 'app/hooks/useMount';
 import useRouteQuery from 'app/hooks/useRouteQuery';
 import ChartManager from 'app/models/ChartManager';
-import { useLocation, useParams } from 'app/routerCompat';
+import { useLocation } from 'app/routerCompat';
 import { login } from 'app/slice/thunks';
 import { ChartDataRequest } from 'app/types/ChartDataRequest';
 import {
@@ -52,6 +52,7 @@ import {
   selectShareVizType,
 } from '../slice/selectors';
 import { fetchShareVizInfo } from '../slice/thunks';
+import { useShareRouteParams } from '../hooks/useShareRouteParams';
 import DashboardForShare from './DashboardForShare';
 
 function ShareDashboardPage() {
@@ -61,7 +62,7 @@ function ShareDashboardPage() {
 
   const dispatch = useAppDispatch();
   const location = useLocation();
-  const { token: shareToken } = useParams<{ token: string }>();
+  const { token: shareToken } = useShareRouteParams('dashboard');
   const search = location.search;
 
   const [shareClientId, setShareClientId] = useState('');
@@ -155,7 +156,7 @@ function ShareDashboardPage() {
 
   const onMakeShareDownloadDataTask = useCallback(
     (downloadParams: ChartDataRequest[], fileName: string) => {
-      if (shareClientId && executeTokenMap) {
+      if (shareClientId && executeTokenMap && shareToken) {
         dispatch(
           makeShareDownloadDataTask({
             clientId: shareClientId,
@@ -232,7 +233,7 @@ function ShareDashboardPage() {
         </div>
       )}
 
-      {!Boolean(needVerify) && shareBoard && (
+      {!Boolean(needVerify) && shareToken && shareBoard && (
         <DashboardForShare
           dashboard={shareBoard}
           allowDownload={false}
