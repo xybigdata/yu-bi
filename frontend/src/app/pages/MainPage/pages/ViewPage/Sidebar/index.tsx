@@ -261,8 +261,8 @@ const ListNavWrapper = styled(ListNav)`
   position: relative;
   z-index: ${LEVEL_10};
   display: flex;
-  flex-direction: column;
   flex-shrink: 0;
+  flex-direction: column;
   height: 100%;
   padding: ${SPACE_XS} 0;
   background-color: ${p => p.theme.componentBackground};

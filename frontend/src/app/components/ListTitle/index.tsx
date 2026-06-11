@@ -145,8 +145,8 @@ export function ListTitle({
 
 const Wrapper = styled.div`
   display: flex;
-  flex-direction: column;
   flex-shrink: 0;
+  flex-direction: column;
 
   &.hidden {
     display: none;
@@ -164,9 +164,9 @@ const Title = styled.div`
     flex: 1;
     padding: ${SPACE_MD} 0;
     overflow: hidden;
+    text-overflow: ellipsis;
     font-size: ${FONT_SIZE_TITLE};
     font-weight: ${FONT_WEIGHT_MEDIUM};
-    text-overflow: ellipsis;
     white-space: nowrap;
   }
 
@@ -174,10 +174,10 @@ const Title = styled.div`
     flex: 1;
     padding: ${SPACE_XS} 0;
     overflow: hidden;
+    text-overflow: ellipsis;
     font-size: ${FONT_SIZE_SUBTITLE};
     font-weight: ${FONT_WEIGHT_MEDIUM};
     color: ${p => p.theme.textColorLight};
-    text-overflow: ellipsis;
     white-space: nowrap;
   }
 

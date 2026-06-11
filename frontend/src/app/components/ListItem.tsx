@@ -43,9 +43,9 @@ const StyledItem = styled(Item)`
   .ant-list-item-meta-title {
     margin: 0;
     overflow: hidden;
+    text-overflow: ellipsis;
     font-weight: ${FONT_WEIGHT_MEDIUM};
     color: ${p => p.theme.textColorSnd};
-    text-overflow: ellipsis;
     white-space: nowrap;
   }
 
@@ -89,8 +89,8 @@ const StyledItem = styled(Item)`
 
   .ant-list-item-meta-description {
     overflow: hidden;
-    color: ${p => p.theme.textColorLight};
     text-overflow: ellipsis;
+    color: ${p => p.theme.textColorLight};
   }
 
   .ant-list-item-action {

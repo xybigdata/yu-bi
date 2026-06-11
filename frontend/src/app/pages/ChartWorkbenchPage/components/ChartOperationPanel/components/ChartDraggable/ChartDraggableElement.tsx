@@ -167,8 +167,8 @@ const Content = styled.div`
   }
 
   .action {
-    flex-shrink: 0;
     visibility: hidden;
+    flex-shrink: 0;
   }
 
   &:hover {

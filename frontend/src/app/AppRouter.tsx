@@ -78,14 +78,8 @@ export function AppRouter() {
           <Route path="/login" element={<LazyLoginPage />} />
           <Route path="/register" element={<LazyRegisterPage />} />
           <Route path="/activation" element={<LazyActivationPage />} />
-          <Route
-            path="/forgetPassword"
-            element={<LazyForgetPasswordPage />}
-          />
-          <Route
-            path="/authorization"
-            element={<LazyAuthorizationPage />}
-          />
+          <Route path="/forgetPassword" element={<LazyForgetPasswordPage />} />
+          <Route path="/authorization" element={<LazyAuthorizationPage />} />
           <Route path="*" element={<LoginAuthRoute />} />
         </Routes>
         <GlobalStyles />

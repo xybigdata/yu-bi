@@ -120,8 +120,8 @@ export const Sidebar = memo(
 
 const Wrapper = styled.div`
   display: flex;
-  flex-direction: column;
   flex-shrink: 0;
+  flex-direction: column;
   padding: ${SPACE_XS} 0;
   background-color: ${p => p.theme.componentBackground};
   border-right: 1px solid ${p => p.theme.borderColorSplit};

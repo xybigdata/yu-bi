@@ -75,8 +75,8 @@ export const Sidebar = memo(() => {
 
 const Wrapper = styled.div`
   display: flex;
-  flex-direction: column;
   flex-shrink: 0;
+  flex-direction: column;
   width: 320px;
   padding: ${SPACE_XS} 0;
   background-color: ${p => p.theme.componentBackground};

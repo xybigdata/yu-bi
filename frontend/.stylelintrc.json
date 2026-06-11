@@ -1,15 +1,13 @@
 {
-  "extends": [
-    "stylelint-config-recommended",
-    "stylelint-config-recess-order"
-  ],
+  "extends": ["stylelint-config-recommended", "stylelint-config-recess-order"],
   "rules": {
     "property-no-vendor-prefix": true,
     "value-no-vendor-prefix": true,
     "no-empty-source": null,
-    "no-missing-end-of-source-newline": null,
     "function-no-unknown": null,
-    "font-family-no-missing-generic-family-keyword": null
+    "font-family-no-missing-generic-family-keyword": null,
+    "declaration-property-value-no-unknown": null,
+    "media-query-no-invalid": null
   },
   "overrides": [
     {

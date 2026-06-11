@@ -38,8 +38,8 @@ export function DetailPageHeader({
 
 const Wrapper = styled.div`
   display: flex;
-  flex-direction: column;
   flex-shrink: 0;
+  flex-direction: column;
   padding: ${SPACE_SM} ${SPACE_LG};
   background-color: ${p => p.theme.componentBackground};
   box-shadow: ${p => p.theme.shadowSider};

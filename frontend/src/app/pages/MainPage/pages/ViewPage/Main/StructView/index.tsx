@@ -616,8 +616,8 @@ const JoinConditionLine = styled.div`
   }
 
   .action {
-    margin-left: ${SPACE_XS};
     visibility: hidden;
+    margin-left: ${SPACE_XS};
   }
 
   &:hover {

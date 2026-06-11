@@ -408,7 +408,10 @@ export function Navbar() {
           </Popup>
         </Toolbar>
         <Profile open={profileOpen} onCancel={hideProfile} />
-        <ModifyPassword open={modifyPasswordOpen} onCancel={hideModifyPassword} />
+        <ModifyPassword
+          open={modifyPasswordOpen}
+          onCancel={hideModifyPassword}
+        />
       </MainNav>
       {showSubNav && (
         <SubNav>
@@ -434,8 +437,8 @@ export function Navbar() {
 const MainNav = styled.div`
   z-index: ${LEVEL_10};
   display: flex;
-  flex-direction: column;
   flex-shrink: 0;
+  flex-direction: column;
   width: ${SPACE_TIMES(20)};
   background-color: ${p => p.theme.componentBackground};
   border-right: 1px solid ${p => p.theme.borderColorSplit};
@@ -514,8 +517,8 @@ const Toolbar = styled.ul`
 
 const SubNav = styled.div`
   display: flex;
-  flex-direction: column;
   flex-shrink: 0;
+  flex-direction: column;
   width: ${SPACE_TIMES(64)};
   padding: ${SPACE_MD} 0;
   background-color: ${p => p.theme.componentBackground};

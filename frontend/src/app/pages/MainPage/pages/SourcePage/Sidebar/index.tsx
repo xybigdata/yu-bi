@@ -235,8 +235,8 @@ const Wrapper = styled.div<{
 }>`
   z-index: ${LEVEL_5};
   display: flex;
-  flex-direction: column;
   flex-shrink: 0;
+  flex-direction: column;
   min-height: 0;
   background-color: ${p => p.theme.componentBackground};
   box-shadow: ${p => p.theme.shadowSider};

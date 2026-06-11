@@ -54,8 +54,8 @@ const StyledWrapper = styled.div`
     display: inline-block;
     width: 100px;
     overflow: hidden;
-    line-height: 32px;
     text-overflow: ellipsis;
+    line-height: 32px;
     white-space: nowrap;
   }
 `;

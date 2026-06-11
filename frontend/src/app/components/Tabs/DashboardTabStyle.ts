@@ -29,8 +29,8 @@ export const DashboardTabStyle = createGlobalStyle`
     }
 
     .ant-tabs-tab-remove {
-      margin-right: -${SPACE_SM};
       visibility: hidden;
+      margin-right: -${SPACE_SM};
     }
 
     &.ant-tabs-card {

@@ -201,7 +201,7 @@
 | 故事播放 | `reveal.js 6.0.1` | 暂保留当前主线 | 已完成主线升级 | `package.json` | 结合富文本专题复核 |
 | 样式系统 | `styled-components 6.1.19` | `6.x` | 已完成主升级 | `package.json`、TS/build 通过 | 做稳定化复核 |
 | 测试栈 | `Vitest 4` + `jsdom 29` | `Vitest` 单栈 | 已完成主链收口 | `package.json`、`vitest.config.mts`、`vitest.setup.ts`、全量 `test:ci` 通过 | 后续只做 warning 治理与覆盖率专题 |
-| 代码规范链 | `ESLint 8` + `stylelint 14` + `Prettier 2` | 当前稳定主线 | 进行中 | `package.json`、`lint-staged 17`、`husky 9`、`commitlint 21`、hooks 校验通过 | 下一步再做 ESLint 9 / stylelint 16 / Prettier 3 专题 |
+| 代码规范链 | `ESLint 8` + `stylelint 17` + `Prettier 3` | 当前稳定主线 | 进行中 | `package.json`、`lint-staged 17`、`husky 9`、`commitlint 21`、`lint:css` / `lint:style` / `test:ci` 通过 | 下一步单列 ESLint 9 flat config 专题，并按触达文件渐进收口 Prettier 3 历史格式差异 |
 | 国际化 | `i18next 26.0.2` + `react-i18next 17.0.8` | 当前稳定主线 | 已完成主链升级 | `package.json`、hooks 用法与专项测试通过 | 后续评估 key / namespace 类型化 |
 | IE11 残留 | 主运行时已退出 polyfill 主链 | 不再为 IE11 保留历史兼容壳 | 已完成主链退出 | `react-app-polyfill` 已移除 | 持续清理残留命名与文档 |
 
@@ -233,7 +233,7 @@
 | `Shiro 2` | 当前生产鉴权链仍依赖它，且改动面跨登录、权限、分享页、OAuth2 | Spring Security 完整接管认证、鉴权、remember-me、OAuth2、分享认证 | JWT/OAuth/脚本链稳定后启动 Wave 5 | 登录、分享页、权限校验、remember-me、OAuth2 全链路通过 |
 | `Calcite 1.26.0` | SQL 解析与 JDBC provider 强耦合，不能直接升版本 | 完成专项预研并通过 parser / function / JDBC provider 回归 | GraalJS 专题后或独立窗口 | JDBC provider 测试、SQL 渲染、函数校验通过 |
 | `react-quill 2.0.0` / Quill 旧类型耦合 | 富文本功能面深，且自定义 blot/插件较多 | 完成 Quill 2 路线或明确的现代封装替换 | 时间体系收尾后启动富文本专题 | 编辑、只读、邮件、仪表板富文本回归通过 |
-| `ESLint 8 / stylelint 14 / Prettier 2` | 当前可用，但主版本偏旧，且升级更适合放在测试链后 | 先完成低风险依赖收口，再升到当前稳定主线并清理关键 warning | Vitest 迁移基本收口后 | lint/format/type check 链稳定、规则噪音可控 |
+| `ESLint 8` | 当前 ESLint 仍停留在旧配置模型，直接切 9 需要 flat config 专题 | 完成 `eslint.config.*` 迁移并清理关键规则噪音 | stylelint / Prettier 主版本落稳后 | lint/type check 链稳定，Node 26 下配置与 hooks 一致 |
 
 ### 遗留栈关闭规则
 
@@ -875,7 +875,7 @@
 | 虚拟列表 | `react-window` | 使用面仅约 `2` 处，运行风险可控 | 若性能与 API 满足需求可保留 | 低 |
 | 测试栈 | `Vitest 4 + jsdom 29` | 已完成单栈主链收口；当前问题主要是历史组件 warning 与 Vite peer 提示，不再是 Jest 运行模型 | 保持 `Vitest` 单栈，后续只做 warning 治理与 `Vite 6+` 对齐评估 | 已完成主链收口 |
 | task 独立打包链 | `Vite 5 library mode` | 已退出独立 `Rollup 2` 主工作流；`build:task` 直接产出 UMD `build/task/index.js`，并同步回写 `public/task/index.js` 供前端静态资源与后端 parser 重命名链复用 | 保持 Vite 单栈；后续只清理残留 Rollup 依赖声明 | 已完成主链切换，持续清理 |
-| 代码规范链 | `ESLint 8` + `stylelint 14` + `Prettier 2` | 当前与 Node 26 兼容，但主版本都偏旧，且仍有存量 warning | 已完成 Babel/Jest 辅助依赖与 `jest-dom` 第一批收口；等富文本/时间体系稳定后，分批迁到 ESLint 9、stylelint 16、Prettier 3 | 中 |
+| 代码规范链 | `ESLint 8` + `stylelint 17` + `Prettier 3` | 已进入 Node 26 可运行的较新稳定主线，但 ESLint 仍停留在旧配置模型，仓库还存在 Prettier 3 历史格式差异 | 已完成 stylelint 17、Prettier 3、提交流程工具链与 Vitest 单栈收口；下一步单列 ESLint 9 flat config 专题，并按触达文件渐进消化格式差异 | 中 |
 | 国际化 | `i18next 19` + `react-i18next 11` | 可运行，但版本偏旧 | 评估进入当前稳定主线，并结合 React 18 Suspense/类型签名复核 | 中低 |
 | 后端安全 | `Shiro 2` | 明显历史架构包袱，仓库使用面约 `71` 处 | `Spring Security` | 高，但单独专项 |
 | 后端连接池 | `Druid` | 历史包袱，且偏监控导向，仓库使用面约 `21` 处 | `HikariCP` | 高，但单独专项 |
@@ -1504,7 +1504,7 @@
 | 时间体系 | `moment` 收尾中 | `dayjs` 单栈 | 已进入收尾阶段 | AntD 5 主升级稳定 | 生产代码、task 产物、控件值链和页面回归全部闭环 |
 | 富文本 | `react-quill 2.0.0` / Quill 旧类型耦合 | 先定真正的 Quill 2 React 路线或继续压缩兼容层 | 兼容层已收口，待路线定稿 | 时间体系波动降低 | 编辑、只读、邮件、仪表板富文本统一落在现代路线 |
 | 测试栈 | `Vitest 4 + jsdom 29` | `Vitest` 单栈 | 主链已完成，进入稳定化阶段 | 已完成主要 Jest 退出与全量回归 | 测试入口、环境、mock、CI 全部维持单栈稳定 |
-| 工具链规范 | `ESLint 8` + `stylelint 14` + `Prettier 2` | 进入当前稳定主线 | 待后续清理 | 测试栈路线明确 | lint/format/type check 与 Node 26 一致且 warning 可控 |
+| 工具链规范 | `ESLint 8` + `stylelint 17` + `Prettier 3` | 进入当前稳定主线 | stylelint / Prettier 已完成，ESLint 9 待专题 | 测试栈路线明确 | lint/format/type check 与 Node 26 一致，ESLint flat config 完成且历史格式差异进入可控存量 |
 | 脚本引擎 | `nashorn-core 15.4` | `GraalJS` | 已做 JSR-223 收口 | 前端主栈稳定，脚本边界明确 | 运行时不再依赖 Nashorn 兜底 |
 | SQL 解析内核 | `Calcite 1.26.0` | 较新稳定线 | 待专项预研 | 脚本专题独立 | parser、函数、JDBC provider 回归通过 |
 | 安全体系 | `Shiro 2.0.5` | `Spring Security` | 已做前置拆障 | JWT/OAuth/脚本链稳定 | 登录、分享页、权限、remember-me、OAuth2 全链路接管 |
@@ -2346,8 +2346,8 @@
      - `Jest 29 + babel-jest`
      - `Rollup 2`
      - `ESLint 8`
-     - `stylelint 14`
-     - `Prettier 2`
+     - `stylelint 17`
+     - `Prettier 3`
      - `i18next 19` / `react-i18next 11`
    - 这些栈都有更现代的替代或更高主线，但它们对业务功能的直接收益低于时间体系和富文本专题；更合理的顺序是先保持当前稳定，再分批做“工具链升级 + 存量 warning 清理 + 配置收口”。
 4. `styled-components 6` 稳定化复核
@@ -2701,7 +2701,7 @@
   - `npm run test:ci -- src/__tests__/task.test.ts src/styles/theme/__tests__/ThemeProvider.test.tsx src/app/models/__tests__/ChartSelectionManager.test.ts` 通过。
 
 - 当前仍未完成项：
-  - 代码规范链的主版本仍停留在 `ESLint 8 / stylelint 14 / Prettier 2`。
+- 代码规范链已推进到 `ESLint 8 / stylelint 17 / Prettier 3`，其中 ESLint 9 flat config 仍待单列专题，Prettier 3 历史格式差异按触达文件渐进收口。
   - `@vitest/mocker 4` 对 `Vite 6+` 的 peer 期望仍提示当前主构建链未来要补一次专题对齐，这不是本轮低风险升级应强行解决的问题。
 
 ### 2026-06-11 本轮继续推进：收口 Vitest setup 历史兼容壳

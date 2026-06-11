@@ -144,10 +144,10 @@ const DownloadFileItemWrapper = styled.div`
   .download-file-name {
     flex: 1;
     overflow: hidden;
-    color: ${p => p.theme.textColorDisabled};
     text-overflow: ellipsis;
-    white-space: nowrap;
     vertical-align: middle;
+    color: ${p => p.theme.textColorDisabled};
+    white-space: nowrap;
 
     &.finished {
       font-weight: ${FONT_WEIGHT_BOLD};
