@@ -89,6 +89,46 @@ const craSvgReactComponentCompat = (): Plugin => ({
   },
 });
 
+const vendorManualChunks = (id: string) => {
+  if (!id.includes('node_modules')) {
+    return undefined;
+  }
+
+  if (id.includes('/node_modules/antd/') || id.includes('/node_modules/@ant-design/')) {
+    return 'antdDesign';
+  }
+
+  if (id.includes('/node_modules/echarts/') || id.includes('/node_modules/zrender/')) {
+    return 'echarts';
+  }
+
+  if (id.includes('/node_modules/quill/')) {
+    return 'quill';
+  }
+
+  if (
+    id.includes('/node_modules/react/') ||
+    id.includes('/node_modules/react-dom/') ||
+    id.includes('/node_modules/scheduler/')
+  ) {
+    return 'react';
+  }
+
+  if (id.includes('/node_modules/react-grid-layout/')) {
+    return 'reactGridLayout';
+  }
+
+  if (id.includes('/node_modules/reveal.js/')) {
+    return 'reveal';
+  }
+
+  if (id.includes('/node_modules/flexlayout-react/')) {
+    return 'flexlayout';
+  }
+
+  return undefined;
+};
+
 export default defineConfig(({ mode }) => ({
   publicDir: 'public',
   plugins: [
@@ -203,13 +243,7 @@ export default defineConfig(({ mode }) => ({
             ? 'static/css/[name].[hash][extname]'
             : 'static/media/[name].[hash][extname]';
         },
-        manualChunks: {
-          antdDesign: ['@ant-design/icons', 'antd'],
-          echarts: ['echarts', 'zrender'],
-          quill: ['quill'],
-          react: ['react', 'react-dom'],
-          reactGridLayout: ['react-grid-layout'],
-        },
+        manualChunks: vendorManualChunks,
       },
     },
   },
