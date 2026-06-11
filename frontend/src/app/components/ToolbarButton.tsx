@@ -12,8 +12,7 @@ interface ToolbarButtonStyleProps {
 }
 
 export interface ToolbarButtonProps
-  extends Omit<ButtonProps, 'color'>,
-    ToolbarButtonStyleProps {}
+  extends Omit<ButtonProps, 'color'>, ToolbarButtonStyleProps {}
 
 export function ToolbarButton({
   fontSize = FONT_SIZE_BASE,
@@ -65,8 +64,8 @@ const Wrapper = styled.span<{
         p.$disabled
           ? p.theme.textColorDisabled
           : p.$color
-          ? lighten(0.1, p.$color)
-          : p.theme.textColorSnd};
+            ? lighten(0.1, p.$color)
+            : p.theme.textColorSnd};
       background-color: ${p => p.theme.emphasisBackground};
     }
 

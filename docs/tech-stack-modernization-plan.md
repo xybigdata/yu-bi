@@ -2903,6 +2903,29 @@
 - 当前仍未完成项：
   - 代码规范链后续继续按文件簇收口 Prettier 历史格式差异，优先处理同模块、小范围、可单独回归的纯机械改动。
 
+### 2026-06-11 本轮继续推进：收口一组通用前端小文件历史格式差异
+
+- 本轮实际落地：
+  - `frontend/src/app/components/ColorPicker/utils.ts`
+  - `frontend/src/app/components/Configuration.tsx`
+  - `frontend/src/app/components/Confirm.tsx`
+  - `frontend/src/app/components/Popup/MenuWrapper.tsx`
+  - `frontend/src/app/components/ToolbarButton.tsx`
+  - `frontend/src/app/hooks/useResizeObserver.ts`
+
+- 本轮收口内容：
+  - 只处理一组体量较小、边界清晰的通用前端文件中的 `prettier/prettier` 历史格式差异，不改业务逻辑、不调整组件 API、不改 hooks 行为。
+  - 处理方式仍然是使用前端本地已安装的 `prettier` 对目标文件做机械格式化，确保不依赖网络，也不引入手工修改噪音。
+  - 这一步依然属于代码规范链的低风险收口，不改变运行时行为。
+
+- 本轮验证结果：
+  - 在本机 `Node 26.0.0 / npm 11.15.0` 下：
+    - `npm run lint` 通过。
+  - `lint` 总 warning 从 `350` 降到 `342`，且本轮目标文件相关的 `prettier` warning 已退出。
+
+- 当前仍未完成项：
+  - 代码规范链后续继续优先处理同类“小文件、小范围、纯机械”的 Prettier 存量，再视情况回到中等体量文件簇。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

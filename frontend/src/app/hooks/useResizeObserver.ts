@@ -42,9 +42,9 @@ interface ResizeObserverResult<T extends HTMLElement> {
   height?: number;
 }
 
-export default function useResizeObserver<T extends HTMLElement = HTMLDivElement>(
-  options: ResizeObserverOptions<T> = {},
-): ResizeObserverResult<T> {
+export default function useResizeObserver<
+  T extends HTMLElement = HTMLDivElement,
+>(options: ResizeObserverOptions<T> = {}): ResizeObserverResult<T> {
   const {
     refreshMode = 'throttle',
     refreshRate = 1000,

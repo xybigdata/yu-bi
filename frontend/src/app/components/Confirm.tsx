@@ -15,7 +15,13 @@ export interface ConfirmProps extends Omit<ModalProps, 'visible'> {
   footer?: ReactNode;
 }
 
-export function Confirm({ title, content, icon, open, ...modalProps }: ConfirmProps) {
+export function Confirm({
+  title,
+  content,
+  icon,
+  open,
+  ...modalProps
+}: ConfirmProps) {
   return (
     <Modal width={400} closable={false} open={open} {...modalProps}>
       <ConfirmBody>
