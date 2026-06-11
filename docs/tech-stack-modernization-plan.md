@@ -200,7 +200,7 @@
 | 视频播放 | 原生 `<video>` | 原生能力 | 已完成 | VideoWidget 改造 | 持续回归 |
 | 故事播放 | `reveal.js 6.0.1` | 暂保留当前主线 | 已完成主线升级 | `package.json` | 结合富文本专题复核 |
 | 样式系统 | `styled-components 6.1.19` | `6.x` | 已完成主升级 | `package.json`、TS/build 通过 | 做稳定化复核 |
-| 测试栈 | `Vitest 4` 主链 + `Jest 29` 存量 | `Vitest` 单栈 | 进行中 | `package.json`、`vitest.config.mts`、已迁移用例持续通过 | 继续迁移存量 `jest.fn/mock` 测试 |
+| 测试栈 | `Vitest 4` + `jsdom 29` | `Vitest` 单栈 | 已完成主链收口 | `package.json`、`vitest.config.mts`、`vitest.setup.ts`、全量 `test:ci` 通过 | 后续只做 warning 治理与覆盖率专题 |
 | 代码规范链 | `ESLint 8` + `stylelint 14` + `Prettier 2` | 当前稳定主线 | 进行中 | `package.json`、`lint-staged 17`、`husky 9`、`commitlint 21`、hooks 校验通过 | 下一步再做 ESLint 9 / stylelint 16 / Prettier 3 专题 |
 | 国际化 | `i18next 26.0.2` + `react-i18next 17.0.8` | 当前稳定主线 | 已完成主链升级 | `package.json`、hooks 用法与专项测试通过 | 后续评估 key / namespace 类型化 |
 | IE11 残留 | 主运行时已退出 polyfill 主链 | 不再为 IE11 保留历史兼容壳 | 已完成主链退出 | `react-app-polyfill` 已移除 | 持续清理残留命名与文档 |
@@ -232,8 +232,7 @@
 | --- | --- | --- | --- | --- |
 | `Shiro 2` | 当前生产鉴权链仍依赖它，且改动面跨登录、权限、分享页、OAuth2 | Spring Security 完整接管认证、鉴权、remember-me、OAuth2、分享认证 | JWT/OAuth/脚本链稳定后启动 Wave 5 | 登录、分享页、权限校验、remember-me、OAuth2 全链路通过 |
 | `Calcite 1.26.0` | SQL 解析与 JDBC provider 强耦合，不能直接升版本 | 完成专项预研并通过 parser / function / JDBC provider 回归 | GraalJS 专题后或独立窗口 | JDBC provider 测试、SQL 渲染、函数校验通过 |
-| `react-quill 1.3.5` | 富文本功能面深，且自定义 blot/插件较多 | 完成 Quill 2 路线或明确的现代封装替换 | 时间体系收尾后启动富文本专题 | 编辑、只读、邮件、仪表板富文本回归通过 |
-| `Jest 29` | 当前仍有存量测试使用 `jest.fn/mock` 与旧 transform 心智 | 完成 Vitest 单栈迁移并移除主命令对 Jest 的依赖 | 当前已进入迁移执行期 | 当前测试、CI、transform、mock 全部稳定 |
+| `react-quill 2.0.0` / Quill 旧类型耦合 | 富文本功能面深，且自定义 blot/插件较多 | 完成 Quill 2 路线或明确的现代封装替换 | 时间体系收尾后启动富文本专题 | 编辑、只读、邮件、仪表板富文本回归通过 |
 | `ESLint 8 / stylelint 14 / Prettier 2` | 当前可用，但主版本偏旧，且升级更适合放在测试链后 | 先完成低风险依赖收口，再升到当前稳定主线并清理关键 warning | Vitest 迁移基本收口后 | lint/format/type check 链稳定、规则噪音可控 |
 
 ### 遗留栈关闭规则
@@ -874,7 +873,7 @@
 | 看板历史记录 | `redux-undo` | 仍在使用，但功能面集中 | 可保留；若继续现代化，可评估 RTK reducer 历史层 | 中低 |
 | 网格布局 | `react-grid-layout` + `flexlayout-react` | `react-grid-layout` 是核心依赖；`flexlayout-react` 只在图表工作台局部使用 | 暂保留；出现 React 18/AntD5 兼容问题再专项治理 | 中低 |
 | 虚拟列表 | `react-window` | 使用面仅约 `2` 处，运行风险可控 | 若性能与 API 满足需求可保留 | 低 |
-| 测试栈 | `Jest 29 + babel-jest` | 当前稳定可用，但仍带 CRA 时代的转译心智，且与 Vite 主链分离 | 短期保持 Jest 29；后续二选一评估 Jest 30 或 Vitest | 中 |
+| 测试栈 | `Vitest 4 + jsdom 29` | 已完成单栈主链收口；当前问题主要是历史组件 warning 与 Vite peer 提示，不再是 Jest 运行模型 | 保持 `Vitest` 单栈，后续只做 warning 治理与 `Vite 6+` 对齐评估 | 已完成主链收口 |
 | task 独立打包链 | `Vite 5 library mode` | 已退出独立 `Rollup 2` 主工作流；`build:task` 直接产出 UMD `build/task/index.js`，并同步回写 `public/task/index.js` 供前端静态资源与后端 parser 重命名链复用 | 保持 Vite 单栈；后续只清理残留 Rollup 依赖声明 | 已完成主链切换，持续清理 |
 | 代码规范链 | `ESLint 8` + `stylelint 14` + `Prettier 2` | 当前与 Node 26 兼容，但主版本都偏旧，且仍有存量 warning | 已完成 Babel/Jest 辅助依赖与 `jest-dom` 第一批收口；等富文本/时间体系稳定后，分批迁到 ESLint 9、stylelint 16、Prettier 3 | 中 |
 | 国际化 | `i18next 19` + `react-i18next 11` | 可运行，但版本偏旧 | 评估进入当前稳定主线，并结合 React 18 Suspense/类型签名复核 | 中低 |
@@ -1503,8 +1502,8 @@
 | 专题 | 当前栈 | 目标替代方案 | 当前阶段 | 进入条件 | 完成定义 |
 | --- | --- | --- | --- | --- | --- |
 | 时间体系 | `moment` 收尾中 | `dayjs` 单栈 | 已进入收尾阶段 | AntD 5 主升级稳定 | 生产代码、task 产物、控件值链和页面回归全部闭环 |
-| 富文本 | `react-quill 1.3.5` / Quill 1 | 先定 `react-quill 2.x` 中间态或真正 Quill 2 路线 | 兼容层已收口，待路线定稿 | 时间体系波动降低 | 编辑、只读、邮件、仪表板富文本统一落在现代路线 |
-| 测试栈 | `Jest 29 + babel-jest` | `Jest 30` 或 `Vitest` 二选一 | 稳定运行，待路线定稿 | 富文本与时间链路稳定 | 测试入口、transform、mock、CI 全部落在单栈 |
+| 富文本 | `react-quill 2.0.0` / Quill 旧类型耦合 | 先定真正的 Quill 2 React 路线或继续压缩兼容层 | 兼容层已收口，待路线定稿 | 时间体系波动降低 | 编辑、只读、邮件、仪表板富文本统一落在现代路线 |
+| 测试栈 | `Vitest 4 + jsdom 29` | `Vitest` 单栈 | 主链已完成，进入稳定化阶段 | 已完成主要 Jest 退出与全量回归 | 测试入口、环境、mock、CI 全部维持单栈稳定 |
 | 工具链规范 | `ESLint 8` + `stylelint 14` + `Prettier 2` | 进入当前稳定主线 | 待后续清理 | 测试栈路线明确 | lint/format/type check 与 Node 26 一致且 warning 可控 |
 | 脚本引擎 | `nashorn-core 15.4` | `GraalJS` | 已做 JSR-223 收口 | 前端主栈稳定，脚本边界明确 | 运行时不再依赖 Nashorn 兜底 |
 | SQL 解析内核 | `Calcite 1.26.0` | 较新稳定线 | 待专项预研 | 脚本专题独立 | parser、函数、JDBC provider 回归通过 |
@@ -2615,13 +2614,13 @@
 | 领域 | 当前栈 | 老旧点判断 | 更现代替代 | 当前建议优先级 |
 | --- | --- | --- | --- | --- |
 | 安全框架 | `Shiro 2.0.5` | 能跑，但与当前 Spring 生态割裂，属于长期架构包袱 | `Spring Security` 原生体系 | 高 |
-| 富文本 | `react-quill 1.3.5` / Quill 1 生态 | 包装层和底层编辑器都偏旧 | 先评估 `react-quill 2.x` 中间态，再评估真正的 Quill 2 React 封装或自有适配层 | 高 |
+| 富文本 | `react-quill 2.0.0` / Quill 旧类型耦合 | React 包装层已升，但仍保留旧类型路径和深度定制插件负担 | 继续评估真正的 Quill 2 React 封装或自有适配层 | 高 |
 | 时间体系尾部 | `dayjs` 已落地主链，但仍有值链回归专题 | 主逻辑已现代化，剩余是控件值对象与页面回归 | `dayjs` 单栈收口 | 高 |
 | 脚本引擎 | `nashorn-core 15.4` 仍保留运行期兜底 | JDK 主线已不再内建 Nashorn | `GraalJS` / 标准 JSR-223 发现链 | 中高 |
 | SQL 解析/方言 | `calcite-core 1.26.0` | 明显偏老，且带入历史依赖与弃用 API | 保守升级到较新稳定线，或继续封装隔离 | 中高 |
 | 代码生成链 | `mybatis-generator-core 1.4.0` | 工具链偏旧，但已退出主运行时 | 独立 profile / 独立生成链治理 | 中 |
 | 浏览器自动化 | 当前主链已是 Selenium 4，但历史思维仍偏导出脚本式 | 依赖层已经不老，产品能力层仍可继续现代化 | `Playwright` 或继续巩固 `Selenium 4 + Chromium` | 中 |
-| 测试主栈 | `Jest 29 + babel-jest` | 可用，但仍带较重历史转译心智 | `Jest 30` 或 `Vitest` 二选一 | 中 |
+| 测试主栈 | `Vitest 4 + jsdom 29` | 主链已统一，Jest 运行时与 transform 已退出 | 保持 `Vitest` 单栈，并继续治理 warning / peer 提示 | 已完成主链收口 |
 
 ### 本轮继续收口后的剩余后端重点
 
@@ -2702,7 +2701,6 @@
   - `npm run test:ci -- src/__tests__/task.test.ts src/styles/theme/__tests__/ThemeProvider.test.tsx src/app/models/__tests__/ChartSelectionManager.test.ts` 通过。
 
 - 当前仍未完成项：
-  - `Jest 29 + babel-jest` 主链仍在，尚未完成和 `Vitest` 的单栈路线定稿。
   - 代码规范链的主版本仍停留在 `ESLint 8 / stylelint 14 / Prettier 2`。
   - `@vitest/mocker 4` 对 `Vite 6+` 的 peer 期望仍提示当前主构建链未来要补一次专题对齐，这不是本轮低风险升级应强行解决的问题。
 
@@ -2732,9 +2730,45 @@
   - `npm run test:ci -- src/__tests__/task.test.ts src/styles/theme/__tests__/ThemeProvider.test.tsx src/app/models/__tests__/ChartSelectionManager.test.ts src/app/components/ChartIFrameContainer/__tests__/ChartIFrameContainer.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx` 通过。
 
 - 当前仍未完成项：
-  - `package.json` 仍保留 `test:jest` 与 `jest.config.js`，说明 Jest 存量链路还未退出。
-  - `babel-jest`、`jest-environment-jsdom`、`jest-watch-typeahead` 仍然是实际依赖，测试主栈还没有完成单栈收口。
   - 本轮测试输出中的 React warning 主要来自旧组件自身实现和历史测试写法，不是这次 Vitest setup 收口新引入的问题，后续应按组件专题继续治理。
+  - `Vitest 4` 与 `Vite 5` 的 peer 提示仍然存在，后续在 Vite 升级专题中一并处理。
+
+### 2026-06-11 本轮继续推进：Jest 运行链退出，Vitest 单栈完成主链收口
+
+- 本轮实际落地：
+  - 删除：
+    - `frontend/jest.config.js`
+    - `frontend/jest/babelTransform.js`
+    - `frontend/jest/cssTransform.js`
+    - `frontend/jest/fileTransform.js`
+  - `frontend/package.json` 已移除：
+    - `test:jest`
+    - `jest`
+    - `babel-jest`
+    - `@types/jest`
+    - `jest-environment-jsdom`
+    - `jest-styled-components`
+    - `jest-watch-typeahead`
+    - `jest-canvas-mock`
+    - `identity-obj-proxy`
+  - 为保证 `Vitest` 的 `jsdom` 环境继续稳定运行，新增直接依赖：
+    - `jsdom 29.1.1`
+
+- 本轮收益：
+  - 前端测试主链不再维持“Vitest 运行、Jest 配置和依赖还在”的双栈假象。
+  - 测试入口、环境与锁文件都已收口到 `Vitest + jsdom`，Node 26 下的运行模型更直接，也更符合当前 Vite 主构建链。
+  - `npm install` 后锁文件中已移除整批 Jest 运行时依赖，仓库测试工具链负担明显收缩。
+
+- 本轮验证结果：
+  - `npm run checkTs` 通过。
+  - `npm run lint:css` 通过。
+  - `npm run lint:style` 通过。
+  - `npm run test:ci` 通过，结果为 `87 passed`, `665 passed | 4 skipped`。
+  - 额外检索确认：源码与配置层已不存在 `test:jest`、`jest.config.js`、`frontend/jest/`、`babel-jest`、`@types/jest` 等主链入口。
+
+- 本轮结论：
+  - “测试栈”这一项可以从“`Vitest 4` 主链 + `Jest 29` 存量，进行中”更新为“`Vitest 4 + jsdom 29`，主链已完成收口”。
+  - 后续测试专题的重点已从“是否退出 Jest”切换为“如何治理历史 warning、是否升级到与未来 `Vite 6+` 更一致的版本组合”。
 
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
