@@ -183,7 +183,7 @@ export const CustomOptions: React.FC<CustomOptionsProps> = memo(
               ({
                 index,
                 moveRow,
-              } as any)
+              }) as any
             }
           />
         </div>

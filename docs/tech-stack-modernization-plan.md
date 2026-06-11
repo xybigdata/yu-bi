@@ -2971,6 +2971,27 @@
   - 代码规范链后续继续优先处理同类“小文件、小范围、纯机械”的 Prettier 存量。
   - 现阶段仍暂不进入高风险内部命名、数据迁移常量和后端稳定标识调整。
 
+### 2026-06-11 本轮继续推进：收口 DashBoardPage 下拉菜单与配置面板历史格式差异
+
+- 本轮实际落地：
+  - `frontend/src/app/pages/DashBoardPage/components/BoardDropdownList/BoardDropdownList.tsx`
+  - `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/ControllerConfig/ValuesSetter/ValuesOptionsSetter/CustomOptions.tsx`
+  - `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/SlideSetting/WidgetConfigPanel.tsx`
+
+- 本轮收口内容：
+  - 只处理 `DashBoardPage` 下拉菜单与配置面板文件中的 `prettier/prettier` 历史格式差异，不改菜单项逻辑、不改控制器配置语义、不改面板运行行为。
+  - 处理方式仍然是使用前端本地已安装的 `prettier` 对目标文件做机械格式化，避免网络依赖，也避免引入与业务无关的手工变更。
+  - 本轮改动仍然只落在前端代码规范链，不涉及后端实现和内部稳定标识，因此不会扩大 `JDK 21` 兼容面风险。
+
+- 本轮验证结果：
+  - 在本机 `Node 26.0.0 / npm 11.15.0` 下：
+    - `npm run lint` 通过。
+  - `lint` 总 warning 从 `308` 降到 `302`，且本轮目标文件相关的 `prettier` warning 已退出。
+
+- 当前仍未完成项：
+  - 代码规范链后续继续优先处理 `DashBoardPage` 和相邻页面中同类“小文件、小范围、纯机械”的 Prettier 存量。
+  - 现阶段仍暂不进入 hooks 依赖修复、业务逻辑调整和高风险内部命名重构。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
