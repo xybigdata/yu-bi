@@ -5,13 +5,13 @@
   "description": "",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "git@github.com:xybigdata/datart.git"
   },
   "engines": {
     "npm": ">=11.0.0",
     "node": ">=26.0.0"
   },
-  "author": "",
+  "author": "chencongyu <congyu_email@163.com>",
   "license": "Apache-2.0",
   "scripts": {
     "bootstrap": "npm install --legacy-peer-deps",

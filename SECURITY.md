@@ -1,21 +1,33 @@
 # Security Policy
 
-## Supported Versions
+## Supported Maintenance Line
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+This repository currently maintains one active line:
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| Branch / Line | Status |
+| --- | --- |
+| `codex/stack-modernization` and follow-up maintenance work | supported |
+
+Older states of the repository may contain known issues and are not guaranteed to receive security backports.
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+If you discover a security issue:
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+1. Do not publish exploit details in a public issue first.
+2. Contact the current maintainer before broad disclosure.
+3. Include:
+   - affected version or commit
+   - reproduction steps
+   - impact assessment
+   - suggested mitigation if available
+
+If no private reporting channel has been published yet, open a minimal public issue that only states a security report is needed, without disclosing the exploit details.
+
+## Response Expectations
+
+Best-effort targets for this maintenance fork:
+
+- initial acknowledgement: within 7 days
+- triage outcome: as soon as the issue is reproducible
+- public fix disclosure: after a patch or mitigation is ready
