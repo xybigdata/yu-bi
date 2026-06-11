@@ -18,10 +18,9 @@
 
 package datart.security.manager.shiro;
 
-import datart.core.mappers.ext.RelRoleResourceMapperExt;
-import datart.core.mappers.ext.RoleMapperExt;
-import datart.core.mappers.ext.UserMapperExt;
+import datart.security.manager.AuthenticationAssembler;
 import datart.security.manager.AuthenticationTokenAdapter;
+import datart.security.manager.AuthorizationAssembler;
 import datart.security.manager.PermissionDataCache;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.realm.Realm;
@@ -32,13 +31,16 @@ import org.springframework.context.annotation.Configuration;
 public class SecurityConfiguration {
 
     @Bean
-    public Realm realm(UserMapperExt userMapper,
-                       RoleMapperExt roleMapper,
-                       RelRoleResourceMapperExt rrrMapper,
-                       PermissionDataCache permissionDataCache,
+    public Realm realm(PermissionDataCache permissionDataCache,
                        PasswordCredentialsMatcher passwordCredentialsMatcher,
-                       AuthenticationTokenAdapter<AuthenticationToken> authenticationTokenAdapter) {
-        return new DatartRealm(userMapper, roleMapper, rrrMapper, permissionDataCache, passwordCredentialsMatcher, authenticationTokenAdapter);
+                       AuthenticationTokenAdapter<AuthenticationToken> authenticationTokenAdapter,
+                       AuthenticationAssembler authenticationAssembler,
+                       AuthorizationAssembler authorizationAssembler) {
+        return new DatartRealm(permissionDataCache,
+                passwordCredentialsMatcher,
+                authenticationTokenAdapter,
+                authenticationAssembler,
+                authorizationAssembler);
     }
 
 

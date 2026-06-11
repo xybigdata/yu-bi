@@ -18,18 +18,13 @@
 
 package datart.security.manager.shiro;
 
-import datart.core.entity.RelRoleResource;
-import datart.core.entity.Role;
 import datart.core.entity.User;
-import datart.core.mappers.ext.RelRoleResourceMapperExt;
-import datart.core.mappers.ext.RoleMapperExt;
-import datart.core.mappers.ext.UserMapperExt;
-import datart.security.base.RoleType;
 import datart.security.manager.AuthenticationCache;
+import datart.security.manager.AuthenticationAssembler;
 import datart.security.manager.AuthenticationTokenAdapter;
+import datart.security.manager.AuthorizationAssembler;
 import datart.security.manager.AuthorizationCache;
 import datart.security.manager.PermissionDataCache;
-import datart.security.manager.PermissionStringCodec;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authc.credential.CredentialsMatcher;
@@ -37,17 +32,8 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
-
-import java.util.List;
-
 @Slf4j
 public class DatartRealm extends AuthorizingRealm {
-
-    private final UserMapperExt userMapper;
-
-    private final RoleMapperExt roleMapper;
-
-    private final RelRoleResourceMapperExt rrrMapper;
 
     private final PermissionDataCache permissionDataCache;
 
@@ -55,18 +41,21 @@ public class DatartRealm extends AuthorizingRealm {
 
     private final AuthenticationTokenAdapter<AuthenticationToken> authenticationTokenAdapter;
 
-    public DatartRealm(UserMapperExt userMapper,
-                       RoleMapperExt roleMapper,
-                       RelRoleResourceMapperExt rrrMapper,
+    private final AuthenticationAssembler authenticationAssembler;
+
+    private final AuthorizationAssembler authorizationAssembler;
+
+    public DatartRealm(
                        PermissionDataCache permissionDataCache,
                        PasswordCredentialsMatcher passwordCredentialsMatcher,
-                       AuthenticationTokenAdapter<AuthenticationToken> authenticationTokenAdapter) {
-        this.userMapper = userMapper;
-        this.roleMapper = roleMapper;
-        this.rrrMapper = rrrMapper;
+                       AuthenticationTokenAdapter<AuthenticationToken> authenticationTokenAdapter,
+                       AuthenticationAssembler authenticationAssembler,
+                       AuthorizationAssembler authorizationAssembler) {
         this.permissionDataCache = permissionDataCache;
         this.passwordCredentialsMatcher = passwordCredentialsMatcher;
         this.authenticationTokenAdapter = authenticationTokenAdapter;
+        this.authenticationAssembler = authenticationAssembler;
+        this.authorizationAssembler = authorizationAssembler;
     }
 
     @Override
@@ -84,22 +73,7 @@ public class DatartRealm extends AuthorizingRealm {
 
         String userId = ((User) principals.getPrimaryPrincipal()).getId();
 
-        authorizationCache = new AuthorizationCache();
-        List<Role> userRoles = roleMapper.selectByOrgAndUser(permissionDataCache.getCurrentOrg(), userId);
-        for (Role role : userRoles) {
-            if (role.getType().equals(RoleType.ORG_OWNER.name())) {
-                addOrgOwnerRoleAndPermission(authorizationCache, role);
-            }
-        }
-        List<RelRoleResource> relRoleResources = rrrMapper.listByOrgAndUser(permissionDataCache.getCurrentOrg(), userId);
-        for (RelRoleResource rrr : relRoleResources) {
-            authorizationCache.addPermissions(PermissionStringCodec.toPermissionStrings(
-                    rrr.getOrgId(),
-                    rrr.getRoleId(),
-                    rrr.getResourceType(),
-                    rrr.getResourceId(),
-                    rrr.getPermission()));
-        }
+        authorizationCache = authorizationAssembler.assemble(permissionDataCache.getCurrentOrg(), userId);
         permissionDataCache.setAuthorizationCache(authorizationCache);
 
         return toAuthorizationInfo(authorizationCache);
@@ -114,10 +88,10 @@ public class DatartRealm extends AuthorizingRealm {
         }
 
         String username = authenticationTokenAdapter.resolveUsername(token);
-        User user = userMapper.selectByNameOrEmail(username);
-        if (user == null)
+        authenticationCache = authenticationAssembler.assemble(username, getName());
+        if (authenticationCache == null) {
             return null;
-        authenticationCache = new AuthenticationCache(user, user.getPassword(), getName());
+        }
         permissionDataCache.setAuthenticationCache(authenticationCache);
         return toAuthenticationInfo(authenticationCache);
     }
@@ -125,17 +99,6 @@ public class DatartRealm extends AuthorizingRealm {
     @Override
     public CredentialsMatcher getCredentialsMatcher() {
         return passwordCredentialsMatcher;
-    }
-
-    /**
-     * 为用户添加隐式权限
-     */
-    private void addOrgOwnerRoleAndPermission(AuthorizationCache authorizationCache, Role role) {
-        //添加组织拥有者角色
-        authorizationCache.addRole(PermissionStringCodec.toRoleString(role.getType(), role.getOrgId()));
-        //添加组织拥有者权限
-        String allPermission = PermissionStringCodec.toPermissionString(role.getOrgId(), "*", "*", "*");
-        authorizationCache.addPermission(allPermission);
     }
 
     private SimpleAuthorizationInfo toAuthorizationInfo(AuthorizationCache authorizationCache) {

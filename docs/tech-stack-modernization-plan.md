@@ -355,6 +355,7 @@
   - 2026-06-11 第二轮推进：`PermissionDataCache`、`RequestScopePermissionDataCache`、`ThreadScopePermissionDataCache` 不再以 `SimpleAuthorizationInfo` / `SimpleAuthenticationInfo` 作为通用缓存接口，而是改为中立的 `AuthorizationCache` / `AuthenticationCache`；Shiro 认证对象现在只在 `DatartRealm` 内部做适配转换。
   - 2026-06-11 第三轮推进：新增 `SecuritySubjectFacade` 抽象和 `ShiroSubjectFacade` 适配实现，把 `SecurityUtils.getSubject()`、`ThreadContext.unbindSubject()`、登录 token 构造、权限校验和当前主体获取等 Shiro 运行时 API 从 `ShiroSecurityManager` 主流程里收口出去。
   - 2026-06-11 第四轮推进：新增 `AuthenticationTokenAdapter` 抽象和 `ShiroAuthenticationTokenAdapter` 实现，把“从认证 token 解析用户名”和“密码/JWT 有效性校验”从 `DatartRealm` 与 `PasswordCredentialsMatcher` 中抽离；realm 和 matcher 现在只承担 Shiro 桥接职责。
+  - 2026-06-11 第五轮推进：新增 `AuthenticationAssembler` / `AuthorizationAssembler` 及其 Shiro 适配实现，把用户查询、组织 owner 隐式权限和资源权限装配从 `DatartRealm` 中抽离；realm 现在只保留 principal 提取、缓存协同与 Shiro 对象转换。
   - 本轮收益：后续即使继续保留 Shiro 运行时，也可以把 `server -> shiro implementation` 这条静态依赖先拆掉，缩小未来迁移到 Spring Security 时需要一起改动的横切面。
   - 前提：JWT、OAuth 客户端、分享页认证链已经稳定。
 - 数据源专项：`Druid -> HikariCP`
@@ -1648,6 +1649,7 @@
    - 2026-06-11 本轮继续推进：权限缓存层已从 Shiro 认证/授权对象改为中立缓存模型，`SimpleAuthorizationInfo` / `SimpleAuthenticationInfo` 只保留在 `DatartRealm` 内部适配，不再向 `security.manager` 通用层外溢。
    - 2026-06-11 本轮继续推进：`ShiroSecurityManager` 已不再直接持有 `SecurityUtils/Subject` 作为主流程实现细节，而是改通过 `SecuritySubjectFacade` 访问当前主体、登录、登出、角色检查和权限检查；Shiro API 现已进一步收缩到 `shiro` 子包适配层。
    - 2026-06-11 本轮继续推进：认证 token 语义已从 `DatartRealm` / `PasswordCredentialsMatcher` 中抽到 `AuthenticationTokenAdapter`，用户名解析和凭证匹配统一经由 `ShiroAuthenticationTokenAdapter` 完成，继续压缩了 realm 与 matcher 对 Datart 业务 token 语义的理解范围。
+   - 2026-06-11 本轮继续推进：认证/授权数据装配已进一步抽到 `AuthenticationAssembler` / `AuthorizationAssembler`，`DatartRealm` 不再自己理解用户查找、组织 owner 隐式权限和资源权限拼装细节，Shiro realm 本身继续收缩为更薄的适配壳。
    - 验收证据：`mvn -o -pl security -am -DskipTests -Dmaven.compiler.showDeprecation=true compile` 与 `mvn -o -pl server -am -DskipTests -Dmaven.compiler.showDeprecation=true compile` 已通过。
    - 本仓库判断：Shiro 不是“坏掉了”，但它已经属于架构级历史包袱；适合单列安全专项，而不是在基础库升级时顺手搀带。
 
