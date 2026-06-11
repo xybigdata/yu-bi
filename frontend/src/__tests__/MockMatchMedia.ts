@@ -16,14 +16,12 @@
  * limitations under the License.
  */
 
+import { vi } from 'vitest';
+
 const mockFn =
-  typeof globalThis !== 'undefined' &&
-  'vi' in globalThis &&
-  typeof globalThis.vi?.fn === 'function'
-    ? globalThis.vi.fn
-    : typeof jest !== 'undefined'
-      ? jest.fn
-      : () => () => {};
+  typeof globalThis !== 'undefined' && typeof vi.fn === 'function'
+    ? vi.fn
+    : () => () => {};
 
 global.matchMedia =
   global.matchMedia ||

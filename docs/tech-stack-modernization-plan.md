@@ -2680,6 +2680,36 @@
   - 代码规范链的主版本仍停留在 `ESLint 8 / stylelint 14 / Prettier 2`。
   - `@vitest/mocker 4` 对 `Vite 6+` 的 peer 期望仍提示当前主构建链未来要补一次专题对齐，这不是本轮低风险升级应强行解决的问题。
 
+### 2026-06-11 本轮继续推进：收口 Vitest setup 历史兼容壳
+
+- 本轮实际落地：
+  - `frontend/vitest.setup.ts`
+  - `frontend/src/setupTests.ts`
+  - `frontend/src/__tests__/MockMatchMedia.ts`
+  - 若干已迁到 Vitest 的测试文件
+  - `frontend/tsconfig.json`
+
+- 本轮收口内容：
+  - `vitest.setup.ts` 不再人为注入 `globalThis.jest = vi` 这一层兼容壳。
+  - `jest-dom` 的 Vitest 入口已切到官方推荐的 `@testing-library/jest-dom/vitest`。
+  - `MockMatchMedia` 不再兜底读取 `jest.fn`，统一直接使用 `vi.fn`。
+  - 已迁到 Vitest 的测试文件不再重复局部 `import '@testing-library/jest-dom'`，由统一 setup 负责注入。
+  - `tsconfig.json` 已显式补入 `vitest/globals` 与 `@testing-library/jest-dom` 类型，保证 `checkTs` 与 Vitest 运行时对齐。
+
+- 本轮收益：
+  - 仓库对“Vitest 运行时里伪装一个 Jest 全局对象”的依赖继续缩小，后续迁移剩余 Jest 存量测试时边界会更清晰。
+  - `jest-dom` 的 matcher 注册入口从“Jest 默认入口 + 本地兼容理解”收口到官方 Vitest 入口，减少 setup 歧义。
+  - 这一步不改变生产代码行为，只收测试链运行时和类型边界。
+
+- 本轮验证结果：
+  - `npm run checkTs` 通过。
+  - `npm run test:ci -- src/__tests__/task.test.ts src/styles/theme/__tests__/ThemeProvider.test.tsx src/app/models/__tests__/ChartSelectionManager.test.ts src/app/components/ChartIFrameContainer/__tests__/ChartIFrameContainer.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx` 通过。
+
+- 当前仍未完成项：
+  - `package.json` 仍保留 `test:jest` 与 `jest.config.js`，说明 Jest 存量链路还未退出。
+  - `babel-jest`、`jest-environment-jsdom`、`jest-watch-typeahead` 仍然是实际依赖，测试主栈还没有完成单栈收口。
+  - 本轮测试输出中的 React warning 主要来自旧组件自身实现和历史测试写法，不是这次 Vitest setup 收口新引入的问题，后续应按组件专题继续治理。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

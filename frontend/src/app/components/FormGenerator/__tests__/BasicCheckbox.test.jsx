@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-import '@testing-library/jest-dom';
 import { fireEvent, render } from '@testing-library/react';
 import { vi } from 'vitest';
 import BasicCheckbox from '../Basic/BasicCheckbox';

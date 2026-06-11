@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import '@testing-library/jest-dom/vitest';
 import './src/setupTests';
 
 const storage = new Map<string, string>();
@@ -21,11 +21,6 @@ Object.defineProperty(globalThis, 'localStorage', {
 Object.defineProperty(window, 'localStorage', {
   configurable: true,
   value: localStorageMock,
-});
-
-Object.defineProperty(globalThis, 'jest', {
-  configurable: true,
-  value: vi,
 });
 
 await import('./src/locales/i18n');

@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom';
 import './__tests__/helper.chart';
 import './__tests__/MockMatchMedia';
 
