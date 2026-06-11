@@ -179,7 +179,7 @@
 | Guava | 项目自有生产代码已退出 | 不依赖自有 Guava API | 已完成 | 检索与依赖树 | 仅关注上游传递依赖 |
 | Commons Lang 2 / IO 1.x | 主代码已退出 | 不再使用旧版本 | 已完成 | 检索与依赖树 | 持续回归 |
 | 安全框架 | `Shiro 2.0.5` | `Spring Security` | 前置拆障进行中 | security 模块前置收口提交链 | 进入迁移设计与运行时接管 |
-| 脚本引擎 | `nashorn-core 15.4` 运行期兜底 | `GraalJS` | 已做边界收口，未完成替代 | `JavascriptUtils`、JSR-223 发现链 | 做 GraalJS 方案与第一批落地 |
+| 脚本引擎 | `GraalJS 25.0.1` + JSR-223 发现链 | `GraalJS` | 已完成主链替代 | 根 POM、`core/pom.xml`、`JavascriptUtilsTest`、整仓 `mvn -DskipTests package` | 补 JVMCI/性能专项评估 |
 | SQL 解析内核 | `Calcite 1.26.0` | 较新稳定线 | 待专项预研 | data-provider-base 使用面与 warning | 做 parser/JDBC provider 专项设计 |
 | 代码生成链 | `mybatis-generator-core 1.4.0` | 独立工具链/独立 profile | 已退出主运行时 | `core/pom.xml` profile 化 | 决定是否继续升级生成器 |
 
@@ -200,8 +200,8 @@
 | 视频播放 | 原生 `<video>` | 原生能力 | 已完成 | VideoWidget 改造 | 持续回归 |
 | 故事播放 | `reveal.js 6.0.1` | 暂保留当前主线 | 已完成主线升级 | `package.json` | 结合富文本专题复核 |
 | 样式系统 | `styled-components 6.1.19` | `6.x` | 已完成主升级 | `package.json`、TS/build 通过 | 做稳定化复核 |
-| 测试栈 | `Jest 29 + babel-jest` | `Jest 30` 或 `Vitest` 单栈 | 待路线定稿 | `package.json`、当前测试命令通过 | 决策并分批迁移 |
-| 代码规范链 | `ESLint 8` + `stylelint 14` + `Prettier 2` | 当前稳定主线 | 待升级 | 配置与执行主链已显式化 | 等测试栈方向明确后升级 |
+| 测试栈 | `Vitest 4` 主链 + `Jest 29` 存量 | `Vitest` 单栈 | 进行中 | `package.json`、`vitest.config.mts`、已迁移用例持续通过 | 继续迁移存量 `jest.fn/mock` 测试 |
+| 代码规范链 | `ESLint 8` + `stylelint 14` + `Prettier 2` | 当前稳定主线 | 待升级 | 配置与执行主链已显式化 | 等 Vitest 迁移面稳定后升级 |
 | 国际化 | `i18next 19` + `react-i18next 11` | 当前稳定主线 | 待评估 | `package.json` | 结合 React 18 再评估 |
 | IE11 残留 | 主运行时已退出 polyfill 主链 | 不再为 IE11 保留历史兼容壳 | 已完成主链退出 | `react-app-polyfill` 已移除 | 持续清理残留命名与文档 |
 
@@ -230,11 +230,10 @@
 | 栈 | 当前保留原因 | 退出条件 | 退出触发点 | 退出后的验收要求 |
 | --- | --- | --- | --- | --- |
 | `Shiro 2` | 当前生产鉴权链仍依赖它，且改动面跨登录、权限、分享页、OAuth2 | Spring Security 完整接管认证、鉴权、remember-me、OAuth2、分享认证 | JWT/OAuth/脚本链稳定后启动 Wave 5 | 登录、分享页、权限校验、remember-me、OAuth2 全链路通过 |
-| `nashorn-core` | 当前脚本链仍需要运行期兜底，虽然已做 JSR-223 收口 | GraalJS 可稳定执行现有 parser / 脚本能力，且不再依赖 Nashorn 兜底 | GraalJS 方案与第一批落地完成后 | 脚本解析、表达式、task/parser 相关链路通过 |
 | `Calcite 1.26.0` | SQL 解析与 JDBC provider 强耦合，不能直接升版本 | 完成专项预研并通过 parser / function / JDBC provider 回归 | GraalJS 专题后或独立窗口 | JDBC provider 测试、SQL 渲染、函数校验通过 |
 | `react-quill 1.3.5` | 富文本功能面深，且自定义 blot/插件较多 | 完成 Quill 2 路线或明确的现代封装替换 | 时间体系收尾后启动富文本专题 | 编辑、只读、邮件、仪表板富文本回归通过 |
-| `Jest 29` | 当前可用，但与 Vite 主链心智仍分离 | 决定 Jest 30 或 Vitest 单栈，并完成迁移 | 富文本路线定稿后 | 当前测试、CI、transform、mock 全部稳定 |
-| `ESLint 8 / stylelint 14 / Prettier 2` | 当前可用，但主版本偏旧，且升级更适合放在测试链后 | 升到当前稳定主线并清理关键 warning | 测试栈路线明确后 | lint/format/type check 链稳定、规则噪音可控 |
+| `Jest 29` | 当前仍有存量测试使用 `jest.fn/mock` 与旧 transform 心智 | 完成 Vitest 单栈迁移并移除主命令对 Jest 的依赖 | 当前已进入迁移执行期 | 当前测试、CI、transform、mock 全部稳定 |
+| `ESLint 8 / stylelint 14 / Prettier 2` | 当前可用，但主版本偏旧，且升级更适合放在测试链后 | 升到当前稳定主线并清理关键 warning | Vitest 迁移基本收口后 | lint/format/type check 链稳定、规则噪音可控 |
 
 ### 遗留栈关闭规则
 
@@ -252,7 +251,6 @@
 在项目最终收官前，下列项必须逐一处理，不能悬空：
 
 - `Shiro 2`
-- `nashorn-core`
 - `Calcite 1.26.0`
 - `react-quill 1.3.5`
 - `Jest 29`
@@ -304,8 +302,8 @@
 | Wave 0 | 基线锁定 | 固化当前 JDK 21 / Boot 3 / Node 26 / Vite 5 / React 18 基线 | 已完成 | 基线文档、CI、构建链一致 |
 | Wave 1 | 前端时间体系收尾 | 把 `moment` 专题从“主链已迁”推进到“专题完成” | AntD 5 主升级已稳定 | 生产代码、task 产物、时间控件值链和分享页回归全部闭环 |
 | Wave 2 | 富文本与页面稳定化 | 收口 `react-quill 1.x` 旧生态，完成 Quill 升级路线决策 | 时间体系主链稳定 | `RichTextEditor` 包装层稳定，升级路线定稿并完成至少一批落地 |
-| Wave 3 | 前端工具链现代化 | 决定 Jest 30 或 Vitest，清理 lint/format 历史壳 | 富文本与时间链路不再频繁波动 | 测试链、lint 链、task 打包链全部收口到明确单栈 |
-| Wave 4 | 脚本与运行时专题 | 先做 `Nashorn -> GraalJS`，再做 Calcite / 代码生成链 | 前端主栈波动降低 | 脚本引擎切换方案和 SQL 解析专题有完整专项验证 |
+| Wave 3 | 前端工具链现代化 | 收敛 Vitest 单栈，清理 lint/format 历史壳 | 富文本与时间链路不再频繁波动 | 测试链、lint 链、task 打包链全部收口到明确单栈 |
+| Wave 4 | 脚本与运行时专题 | 已完成 `Nashorn -> GraalJS`，继续 Calcite / 代码生成链 | 前端主栈波动降低 | SQL 解析专题有完整专项验证 |
 | Wave 5 | 安全体系专题 | `Shiro -> Spring Security` | JWT/OAuth/脚本链稳定，前置拆障完成 | 登录、分享页、权限校验、remember-me、OAuth2 全链路迁移完成 |
 | Wave 6 | 总体验收与残项清零 | 收口剩余 compat 壳、长期保留结论和发布验收 | 前 5 个波次均有阶段证据 | 全部终态项有证据，剩余保留项有明确结论 |
 
@@ -317,13 +315,13 @@
 2. 时间筛选器 / 变量页 / 分享页时间回归
 3. 富文本 compat 层继续收口
 4. `react-quill` 升级路线实验与定稿
-5. Jest 29 保持 or Vitest 迁移决策
+5. 继续迁移 Jest 存量测试到 Vitest 兼容写法
 6. ESLint 9 / stylelint 16 / Prettier 3 升级准备
-7. GraalJS 依赖与执行边界设计
-8. `Nashorn -> GraalJS` 第一批实现
-9. Calcite / parser / JDBC provider 升级预研
-10. Spring Security 迁移设计稿与映射表
-11. `Shiro -> Spring Security` 第一批运行时接管
+7. Calcite / parser / JDBC provider 升级预研
+8. Spring Security 迁移设计稿与映射表
+9. `Shiro -> Spring Security` 第一批运行时接管
+10. 前端 chunk 拆分与重依赖隔离
+11. Docker / 发布包 / smoke 验证增强
 12. 最终集成验收与保留项结论固化
 
 ### 不允许并行推进的高风险组合

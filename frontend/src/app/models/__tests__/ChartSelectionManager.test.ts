@@ -18,6 +18,7 @@
 
 import { ChartInteractionEvent } from 'app/constants';
 import { KEYBOARD_EVENT_NAME } from 'globalConstants';
+import { vi } from 'vitest';
 import { ChartSelectionManager } from '../ChartSelectionManager';
 
 describe('ChartSelectionManager Test', () => {
@@ -43,7 +44,7 @@ describe('ChartSelectionManager Test', () => {
   test('should attach window listener', () => {
     const manager = new ChartSelectionManager([]);
     const mockWindow = {
-      addEventListener: jest.fn(),
+      addEventListener: vi.fn(),
     } as any;
     manager.attachWindowListeners(mockWindow);
     expect(mockWindow.addEventListener.mock.calls.length).toBe(2);
@@ -54,7 +55,7 @@ describe('ChartSelectionManager Test', () => {
   test('should remove window listener', () => {
     const manager = new ChartSelectionManager([]);
     const mockWindow = {
-      removeEventListener: jest.fn(),
+      removeEventListener: vi.fn(),
     } as any;
     manager.removeWindowListeners(mockWindow);
     expect(mockWindow.removeEventListener.mock.calls.length).toBe(2);
@@ -64,7 +65,7 @@ describe('ChartSelectionManager Test', () => {
 
   test('should attach ZRender listener', () => {
     const manager = new ChartSelectionManager([]);
-    const mockOnFunction = jest.fn();
+    const mockOnFunction = vi.fn();
     const mockChart = {
       getZr: () => ({
         on: mockOnFunction,
@@ -77,7 +78,7 @@ describe('ChartSelectionManager Test', () => {
 
   test('should remove ZRender listener', () => {
     const manager = new ChartSelectionManager([]);
-    const mockOnFunction = jest.fn();
+    const mockOnFunction = vi.fn();
     const mockChart = {
       getZr: () => ({
         off: mockOnFunction,
@@ -90,7 +91,7 @@ describe('ChartSelectionManager Test', () => {
 
   test('should attach ECharts listener', () => {
     const manager = new ChartSelectionManager([]);
-    const mockOnFunction = jest.fn();
+    const mockOnFunction = vi.fn();
     const mockChart = {
       on: mockOnFunction,
     } as any;
@@ -103,7 +104,7 @@ describe('ChartSelectionManager Test', () => {
     const mockMouseEvents = [
       {
         name: 'click' as any,
-        callback: jest.fn(),
+        callback: vi.fn(),
       },
     ];
     let zRenderHandler;
@@ -135,7 +136,7 @@ describe('ChartSelectionManager Test', () => {
     const mockMouseEvents = [
       {
         name: 'click' as any,
-        callback: jest.fn(),
+        callback: vi.fn(),
       },
     ];
     let zRenderHandler;
@@ -163,7 +164,7 @@ describe('ChartSelectionManager Test', () => {
     const mockMouseEvents = [
       {
         name: 'click' as any,
-        callback: jest.fn(),
+        callback: vi.fn(),
       },
     ];
     let zRenderHandler;
@@ -379,7 +380,7 @@ describe('ChartSelectionManager Test', () => {
     const mockMouseEvents = [
       {
         name: 'click' as any,
-        callback: jest.fn(),
+        callback: vi.fn(),
       },
     ];
     const manager = new ChartSelectionManager(mockMouseEvents);
@@ -404,7 +405,7 @@ describe('ChartSelectionManager Test', () => {
     const mockMouseEvents = [
       {
         name: 'click' as any,
-        callback: jest.fn(),
+        callback: vi.fn(),
       },
     ];
     const manager = new ChartSelectionManager(mockMouseEvents);

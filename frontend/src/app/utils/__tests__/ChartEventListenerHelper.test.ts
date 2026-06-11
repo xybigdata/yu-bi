@@ -19,6 +19,7 @@
 import { ChartInteractionEvent } from 'app/constants';
 import { ChartDrillOption } from 'app/models/ChartDrillOption';
 import { ChartConfigReducerActionType } from 'app/pages/ChartWorkbenchPage/slice/constant';
+import { vi } from 'vitest';
 import {
   chartSelectionEventListener,
   drillDownEventListener,
@@ -29,7 +30,7 @@ import {
 
 describe('ChartEventListenerHelper Tests', () => {
   test('should invoke tablePagingAndSortEventListener callback', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const param = {
       chartType: 'table',
       interactionType: ChartInteractionEvent.PagingOrSort,
@@ -55,7 +56,7 @@ describe('ChartEventListenerHelper Tests', () => {
   });
 
   test('should not invoke tablePagingAndSortEventListener callback when chartType is not table', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const param = {
       chartType: 'chart',
       interactionType: ChartInteractionEvent.PagingOrSort,
@@ -71,7 +72,7 @@ describe('ChartEventListenerHelper Tests', () => {
   });
 
   test('should invoke drillDownEventListener callback', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const drillOption = new ChartDrillOption([]);
     drillOption.toggleSelectedDrill(true);
     const param = {
@@ -84,7 +85,7 @@ describe('ChartEventListenerHelper Tests', () => {
   });
 
   test('should not invoke drillDownEventListener callback when not enable selected drill', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const drillOption = new ChartDrillOption([]);
     drillOption.toggleSelectedDrill(false);
     const param = {
@@ -97,7 +98,7 @@ describe('ChartEventListenerHelper Tests', () => {
   });
 
   test('should invoke pivotTableDrillEventListener callback', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const param = {
       chartType: 'pivotSheet',
       interactionType: ChartInteractionEvent.Drilled,
@@ -109,7 +110,7 @@ describe('ChartEventListenerHelper Tests', () => {
   });
 
   test('should not invoke pivotTableDrillEventListener callback when not pivot table', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const param = {
       chartType: 'chart',
       interactionType: ChartInteractionEvent.Drilled,
@@ -120,7 +121,7 @@ describe('ChartEventListenerHelper Tests', () => {
   });
 
   test('should not invoke pivotTableDrillEventListener callback when not drill event', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const param = {
       chartType: 'pivotSheet',
       interactionType: ChartInteractionEvent.Select,
@@ -131,7 +132,7 @@ describe('ChartEventListenerHelper Tests', () => {
   });
 
   test('should invoke richTextContextEventListener callback', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const row = { id: 1 };
     const param = {
       chartType: 'rich-text',
@@ -155,7 +156,7 @@ describe('ChartEventListenerHelper Tests', () => {
   });
 
   test('should not invoke richTextContextEventListener callback when not rich text', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const row = { id: 1 };
     const param = {
       chartType: 'chart',
@@ -167,7 +168,7 @@ describe('ChartEventListenerHelper Tests', () => {
   });
 
   test('should not invoke richTextContextEventListener callback when change context event', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const row = { id: 1 };
     const param = {
       chartType: 'rich-text',
@@ -179,7 +180,7 @@ describe('ChartEventListenerHelper Tests', () => {
   });
 
   test('should invoke chartSelectionEventListener callback when select event', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const param = {
       interactionType: ChartInteractionEvent.Select,
       selectedItems: [1],
@@ -190,7 +191,7 @@ describe('ChartEventListenerHelper Tests', () => {
   });
 
   test('should invoke chartSelectionEventListener callback when un-select event', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const param = {
       interactionType: ChartInteractionEvent.UnSelect,
       selectedItems: [1],
@@ -201,7 +202,7 @@ describe('ChartEventListenerHelper Tests', () => {
   });
 
   test('should not invoke chartSelectionEventListener callback when drill event', () => {
-    const mockCallback = jest.fn();
+    const mockCallback = vi.fn();
     const param = {
       interactionType: ChartInteractionEvent.Drilled,
       selectedItems: [1],

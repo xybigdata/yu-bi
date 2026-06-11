@@ -22,10 +22,11 @@ import {
   widgetMove,
   widgetMoveEnd,
 } from '../events';
+import { vi } from 'vitest';
 
 describe('board editor event bus', () => {
   test('widgetMove can emit and unsubscribe listeners', () => {
-    const listener = jest.fn();
+    const listener = vi.fn();
 
     widgetMove.on(listener);
     widgetMove.emit('widget-1', 10, 20);
@@ -37,7 +38,7 @@ describe('board editor event bus', () => {
   });
 
   test('widgetMoveEnd notifies listeners once removed', () => {
-    const listener = jest.fn();
+    const listener = vi.fn();
 
     widgetMoveEnd.on(listener);
     widgetMoveEnd.emit();
@@ -48,8 +49,8 @@ describe('board editor event bus', () => {
   });
 
   test('boardScroll listeners are isolated by board id', () => {
-    const boardAListener = jest.fn();
-    const boardBListener = jest.fn();
+    const boardAListener = vi.fn();
+    const boardBListener = vi.fn();
 
     boardScroll.on('board-a', boardAListener);
     boardScroll.on('board-b', boardBListener);

@@ -4,6 +4,7 @@
 
 import { combineReducers, compose, createStore } from '@reduxjs/toolkit';
 import identity from 'lodash/identity';
+import { vi } from 'vitest';
 import injectReducerEnhancer from '../enhancer';
 import getInjectors, { injectReducerFactory } from '../reducerInjectors';
 
@@ -91,7 +92,7 @@ describe('reducer injectors', () => {
     });
 
     it('should not assign reducer if already existing', () => {
-      store.replaceReducer = jest.fn();
+      store.replaceReducer = vi.fn();
       injectReducer('test', reducer);
       injectReducer('test', reducer);
 
@@ -99,7 +100,7 @@ describe('reducer injectors', () => {
     });
 
     it('should assign reducer if different implementation for hot reloading', () => {
-      store.replaceReducer = jest.fn();
+      store.replaceReducer = vi.fn();
       injectReducer('test', reducer);
       injectReducer('test', identity);
 
