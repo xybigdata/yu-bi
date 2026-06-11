@@ -144,7 +144,6 @@
     "postcss-styled-syntax": "^0.7.1",
     "prettier": "^3.8.4",
     "prettier-plugin-organize-imports": "^4.3.0",
-    "rollup": "^2.62.0",
     "styled-components": "6.1.19",
     "stylelint": "^17.13.0",
     "stylelint-config-recess-order": "^7.7.0",

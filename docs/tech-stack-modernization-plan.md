@@ -3146,6 +3146,66 @@
   - 前端低风险与中风险规范链收口已基本完成，后续可转向更高价值的兼容性验证、构建链验证或后端局部现代化议题。
   - 现阶段仍暂不进入高风险内部命名重构和业务语义大改。
 
+### 2026-06-11 本轮继续推进：补齐 Node 26 / JDK 21 阶段性兼容验证证据
+
+- 本轮环境确认：
+  - Node: `v26.0.0`
+  - npm: `11.15.0`
+  - Java: `OpenJDK 21.0.11 LTS`
+  - Maven: `3.9.16`
+
+- 本轮前端验证结果：
+  - `frontend` 下：
+    - `npm run lint` 通过，当前为 `0 errors / 0 warnings`
+    - `npm run checkTs` 通过
+    - `npm run test:ci -- --silent` 全量通过：`87` 个测试文件通过，`665` 个测试通过，`4` 个跳过
+    - `npm run build:all` 通过，主构建与 `vite.task.config.mts` 任务构建均成功
+  - 当前前端仍存在的非阻断现象：
+    - Vite 生产构建存在 chunk size 警告，但不影响构建成功
+    - Vitest 运行时存在部分三方依赖 sourcemap 缺失提示，但不影响测试通过
+
+- 本轮后端验证结果：
+  - 仓库根目录下：
+    - `mvn -o -pl security -am -DskipTests -Dmaven.compiler.release=21 compile` 通过
+    - `mvn -o -pl server -am -DskipTests -Dmaven.compiler.release=21 compile` 通过
+  - `server -am` 过程中会触发前端 `bootstrap / build:all`，其中 `prepare` 阶段尝试写 `.git/config` 时出现 `Operation not permitted`，但 npm 流程继续成功，最终 Maven 构建为 `BUILD SUCCESS`
+  - 当前后端仍存在的非阻断现象：
+    - 若干 Lombok `equals/hashCode` 提示
+    - 若干 `unchecked or unsafe operations` 提示
+    - `javacc` 生成源码中的局部 deprecated/annotation 提示
+    - 以上均未阻断 `JDK 21` 编译成功
+
+- 阶段结论：
+  - 当前主线已经具备较强证据表明前端可在 `Node 26` 下完成 lint、类型检查、测试与生产构建。
+  - 当前主线已经具备较强证据表明后端核心服务链可在 `JDK 21` 下完成定向编译。
+  - 现代化改造下一阶段可从“规范链清理”转入“兼容性告警压缩、构建链优化、后端局部现代化议题”。
+
+### 2026-06-11 本轮继续推进：清理前端 Rollup 2 历史直依赖残留
+
+- 本轮问题识别：
+  - `frontend/package.json` 中仍显式声明了 `rollup ^2.62.0`，但前端主构建链已经统一到 `Vite 6.4.x`。
+  - `npm ls rollup` 显示当前工作区同时存在：
+    - `vite@6.4.3 -> rollup@4.61.1`
+    - 历史直依赖残留的 `rollup@2.70.1 extraneous`
+  - 这说明 `rollup 2` 已不再作为当前主构建链的显式依赖，只是旧时代遗留声明。
+
+- 本轮收口动作：
+  - 从 `frontend/package.json` 中移除显式的 `rollup` 开发依赖声明。
+  - 使用 `npm install --package-lock-only --ignore-scripts --legacy-peer-deps` 同步 lockfile，保留 `npm 11` 下的锁文件元数据收口结果。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run build:all` 通过
+    - 主构建 `vite build` 通过
+    - `vite build --config vite.task.config.mts` 通过
+  - 当前保留现象：
+    - `Vite 6` 仍通过自身依赖链使用 `rollup 4.x`，这是当前主构建链的正常状态
+    - 生产构建仍有 chunk size warning，但本轮未扩大到分包策略调整
+
+- 阶段结论：
+  - 前端 task 打包链“清理残留历史依赖声明”已向前推进一项，`rollup 2` 历史直依赖已退出显式声明。
+  - 本轮属于低风险工程化收口，不涉及业务逻辑、内部命名或发布语义调整。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
