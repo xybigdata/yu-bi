@@ -31,7 +31,7 @@ import {
 } from 'app/utils/internalChartHelper';
 import { BASE_RESOURCE_URL } from 'globalConstants';
 import i18next from 'i18next';
-import qs from 'qs';
+import { stringifyQuery } from 'utils/queryString';
 import { request2, requestWithHeader } from 'utils/request';
 import { convertToChartDto } from './ChartDtoHelper';
 import { getAllColumnInMeta } from './chartHelper';
@@ -172,7 +172,7 @@ export async function checkComputedFieldAsync(sourceId, expression) {
       snippet: expression,
     },
     paramsSerializer: function (params) {
-      return qs.stringify(params, { arrayFormat: 'brackets' });
+      return stringifyQuery(params, { arrayFormat: 'brackets' });
     },
   });
   return !!response;

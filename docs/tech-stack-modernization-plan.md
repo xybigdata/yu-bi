@@ -4630,6 +4630,41 @@
   - 当前语言初始化早已由仓库内 `getInitialLocale()` 显式控制，第三方 detector 并未承担独立职责。
   - 这一步只是把依赖声明与实际行为对齐，不改变国际化主链，也不涉及语言切换交互与文案资源结构调整。
 
+### 2026-06-12 本轮继续推进：移除前端 qs 直接依赖
+
+- 本轮目标：
+  - 继续清理前端里使用面有限、协议边界明确的基础工具依赖。
+  - 在不改变现有跳转 URL 协议和接口查询串格式的前提下，把 `qs` 的少量编解码职责收回仓库内实现。
+
+- 本轮改造动作：
+  - `frontend/src/utils/queryString.ts`
+    - 新增仓库内 query-string helper，覆盖当前实际用到的 bracket 语法数组、索引数组和有限层级对象编解码。
+  - `frontend/src/app/utils/fetch.ts`
+    - `checkComputedFieldAsync()` 的 `paramsSerializer` 改为使用本地 `stringifyQuery(..., { arrayFormat: 'brackets' })`。
+  - `frontend/src/app/hooks/useChartInteractions.ts`
+    - 图表跳转参数里的 `filters` / `variables` 编码改为使用本地 `stringifyQuery()`。
+  - `frontend/src/app/pages/MainPage/pages/VizPage/hooks/useQSLibUrlHelper.ts`
+    - `parse` / `stringify` 改为透出本地 `parseQuery()` / `stringifyQuery()`。
+  - `frontend/src/utils/__tests__/queryString.test.ts`
+    - 新增单测，锁住：
+      - 请求参数 `ids[]=x&ids[]=y` 的 bracket 数组格式
+      - 图表跳转 `filters[0][...]` / `variables[region][0]` 的嵌套编解码格式
+  - `frontend/package.json`
+  - `frontend/package-lock.json`
+    - 移除 `qs` 顶层直接依赖，并用 `npm uninstall qs --package-lock-only` 同步锁文件。
+
+- 本轮验证结果：
+  - 检索确认：仓库生产代码中 `qs` 的直接使用面原本仅有 3 处，本轮已全部替换。
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- src/utils/__tests__/queryString.test.ts --silent` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 当前项目对 `qs` 的依赖并不是通用深层对象协议，而是非常有限的查询串子集；把这部分收回仓库内实现，风险可控且更利于后续 Node 版本切换时减少外部小型工具包噪音。
+  - 这一步保持了现有跳转 URL 与接口参数编码格式，不涉及分享页协议重构或更大范围的路由查询策略调整。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
