@@ -43,9 +43,9 @@ import {
   WordCloudChart,
 } from 'app/components/ChartGraph';
 import { IChart } from 'app/types/Chart';
-import { getChartPluginPaths } from 'app/utils/fetch';
 import { Debugger } from 'utils/debugger';
 import { CloneValueDeep } from 'utils/object';
+import { preloadChartPlugins } from 'app/services/chartPluginService';
 import PluginChartLoader from './PluginChartLoader';
 
 class ChartManager {
@@ -65,9 +65,9 @@ class ChartManager {
     if (this._isLoaded) {
       return;
     }
-    const pluginsPaths = await getChartPluginPaths();
+    const pluginsPaths = await preloadChartPlugins();
     return Debugger.instance.measure('Plugin Charts | ', async () => {
-      await this._loadCustomizeCharts(pluginsPaths);
+      await this._loadCustomizeCharts(pluginsPaths || []);
     });
   }
 

@@ -3358,6 +3358,44 @@
     - 评估 `ChartManager` 图表簇级延迟注册
     - 评估 StoryBoard 播放/编辑链路中的重依赖边界
 
+### 2026-06-12 本轮继续推进：收口 ChartManager 初始化阶段的插件预加载链
+
+- 本轮目标：
+  - 在不直接改动 `ChartManager` 同步图表注册协议的前提下，先把“自定义图表插件预加载”从主页面和分享页对 `ChartManager` 的初始化级依赖里拆出来。
+  - 目标是进一步缩小 `MainPage` / 分享页入口与整套图表实现链的静态耦合面，为后续图表簇级延迟注册做前置拆障。
+
+- 本轮改造动作：
+  - `frontend/src/app/services/chartPluginService.ts`
+    - 新增统一的插件预加载服务 `preloadChartPlugins()`。
+    - 将插件路径探测与单次 promise 缓存集中到独立服务，避免多个页面入口各自绑定 `ChartManager` 初始化职责。
+  - `frontend/src/app/models/ChartManager.ts`
+    - 将插件路径获取从直接调用 `getChartPluginPaths()` 改为走 `preloadChartPlugins()`。
+    - 保持 `load()`、`getAllCharts()`、`getById()`、`getDefaultChart()` 和基础图表同步注册协议不变。
+  - `frontend/src/app/pages/MainPage/index.tsx`
+  - `frontend/src/app/pages/SharePage/Chart/ShareChartPage.tsx`
+  - `frontend/src/app/pages/SharePage/Dashboard/ShareDashboardPage.tsx`
+  - `frontend/src/app/pages/SharePage/StoryPlayer/ShareStoryPlayerPage.tsx`
+    - 页面入口不再通过 `ChartManager.instance().load()` 触发插件预加载。
+    - 改为先执行 `preloadChartPlugins()`，保留原有“插件路径准备完成后再继续页面数据加载”的时序语义。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`87` 个测试文件通过，`665` 个测试通过，`4` 个跳过
+  - 当前构建产物变化：
+    - `migrationViewDetailConfig.*.js` 进一步压缩到约 `2.51 KB`
+    - 主入口相关 chunk 维持在上一轮收口后的量级，没有引入新的大块回流
+  - 本轮未引入新的 `Circular chunk` 告警
+
+- 阶段结论：
+  - 这一步还不是 `ChartManager` 图表簇级延迟注册本身，但已经把“页面入口初始化”和“图表管理器实例化”之间的一层职责耦合拆开了。
+  - 现代化改造在图表链上的推进顺序已经比较明确：
+    1. 重资源运行时按需加载
+    2. 编辑器运行时按需加载
+    3. 页面入口与图表管理器初始化职责拆分
+    4. 再评估更高收益但结构性更强的图表簇级延迟注册
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
