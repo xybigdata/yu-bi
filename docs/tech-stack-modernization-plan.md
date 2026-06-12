@@ -4130,6 +4130,35 @@
   - 当前仍然没有进入异步实例获取，也没有改变页面调用契约；只是减少了“整批列表”和“按 id 获取”之间的分叉实现。
   - 后续如果继续推进更高风险的惰性注册，真正需要评估的重点会更集中在“何时暴露 id / seed / async factory”，而不是继续维护多套同步实例化壳。
 
+### 2026-06-12 本轮继续推进：移除 PluginChartLoader 旧整批实例包装层
+
+- 本轮目标：
+  - 继续沿“definition / seed / instance”三段式职责边界收口插件图表链。
+  - 清理 `PluginChartLoader` 中已经没有生产调用的旧整批包装层，避免继续保留“definition 加载后顺手整批转实例”的历史接口。
+  - 保持 `ChartManager` 当前基于 definition / seed / 按需实例转换的运行路径不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/models/PluginChartLoader.ts`
+    - 删除 `loadPlugins()` 旧包装方法。
+    - 保留并继续收口为三类原子能力：
+      - `loadPluginDefinitions()`
+      - `getPluginPaletteSeed()`
+      - `convertToDatartChartModel()`
+  - `frontend/src/app/models/__tests__/PluginChartLoader.test.ts`
+    - 测试改为显式验证“先加载 definition，再按需转换 chart model”，不再依赖已移除的整批包装层。
+    - 缺失脚本场景改为直接校验 `loadPluginDefinitions()` 返回 `null` definition。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 到这一步，插件图表 loader 的职责边界更接近当前真实运行态：加载 definition、派生 seed、按需转实例。
+  - 这不是功能重写，也没有改插件协议；只是把已经退出生产路径的旧整批包装层从维护面里删掉。
+  - 后续如果继续沿插件链推进，更合理的重点会是 definition 校验、错误边界和更细粒度的延迟注册，而不是保留历史整批实例 API。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

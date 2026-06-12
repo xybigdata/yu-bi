@@ -73,18 +73,20 @@ describe('PluginChartLoader Tests', () => {
     expect(loader).not.toBeNull();
   });
 
-  test('should load pure js plugin charts', async () => {
+  test('should convert pure js plugin definition to chart model', async () => {
     const loader = new PluginChartLoader();
-    const charts = await loader.loadPlugins(['b-chart.js']);
-    expect((charts[0] as Chart).meta).toEqual({
+    const plugins = await loader.loadPluginDefinitions(['b-chart.js']);
+    const chart = loader.convertToDatartChartModel(plugins[0]!);
+
+    expect((chart as Chart).meta).toEqual({
       id: 1,
       icon: 'chart',
       name: 'b-chart.js',
       requirements: [],
     });
-    expect((charts[0] as Chart).config).toEqual([]);
-    expect((charts[0] as Chart).dependency).toEqual(['echarts.min.js']);
-    expect((charts[0] as Chart).isISOContainer).toEqual(
+    expect((chart as Chart).config).toEqual([]);
+    expect((chart as Chart).dependency).toEqual(['echarts.min.js']);
+    expect((chart as Chart).isISOContainer).toEqual(
       'pure-chart-container-id',
     );
   });
@@ -104,23 +106,25 @@ describe('PluginChartLoader Tests', () => {
     expect(plugin.dependency).toEqual(['echarts.min.js']);
   });
 
-  test('should load iife js plugin charts', async () => {
+  test('should convert iife js plugin definition to chart model', async () => {
     const loader = new PluginChartLoader();
-    const charts = await loader.loadPlugins(['a-chart.iife.js']);
-    expect((charts[0] as Chart).meta).toEqual({
+    const plugins = await loader.loadPluginDefinitions(['a-chart.iife.js']);
+    const chart = loader.convertToDatartChartModel(plugins[0]!);
+
+    expect((chart as Chart).meta).toEqual({
       id: 1,
       icon: 'chart',
       name: 'a-chart.iife.js',
       requirements: [],
     });
-    expect((charts[0] as Chart).config).toEqual({
+    expect((chart as Chart).config).toEqual({
       datas: [],
       i18ns: [],
       settings: [],
       styles: [],
     });
-    expect((charts[0] as Chart).dependency).toEqual(['d3.min.js']);
-    expect((charts[0] as Chart).isISOContainer).toEqual(
+    expect((chart as Chart).dependency).toEqual(['d3.min.js']);
+    expect((chart as Chart).isISOContainer).toEqual(
       'iife-chart-container-id',
     );
   });
@@ -140,9 +144,9 @@ describe('PluginChartLoader Tests', () => {
     expect(seed.i18ns).toEqual([]);
   });
 
-  test('should get reject promise when did not get charts', async () => {
+  test('should return null definition when plugin script is missing', async () => {
     const loader = new PluginChartLoader();
-    const charts = await loader.loadPlugins(['not-exist-chart']);
-    expect(charts[0] as Chart).toEqual(null);
+    const plugins = await loader.loadPluginDefinitions(['not-exist-chart']);
+    expect(plugins[0]).toEqual(null);
   });
 });

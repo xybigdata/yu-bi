@@ -78,16 +78,6 @@ class PluginChartLoader {
     return Promise.all(loadPluginTasks);
   }
 
-  async loadPlugins(paths: string[]) {
-    const pluginDefinitions = await this.loadPluginDefinitions(paths);
-    return pluginDefinitions.map(pluginDefinition => {
-      if (!pluginDefinition) {
-        return null;
-      }
-      return this.convertToDatartChartModel(pluginDefinition);
-    });
-  }
-
   getPluginPaletteSeed(
     customPlugin: PluginChartDefinition,
   ): PluginChartPaletteSeed {
