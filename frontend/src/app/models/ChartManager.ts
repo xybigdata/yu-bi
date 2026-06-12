@@ -26,7 +26,11 @@ import PluginChartLoader, {
   PluginChartDefinition,
   PluginChartPaletteSeed,
 } from './PluginChartLoader';
-import { basicChartPaletteSeeds, basicChartRegistry } from './chartRegistry';
+import {
+  ChartPaletteSeed,
+  basicChartPaletteSeeds,
+  basicChartRegistry,
+} from './chartRegistry';
 import { isChartMatchRequirement } from './chartRequirement';
 
 export type ChartPaletteItem = {
@@ -69,24 +73,8 @@ class ChartManager {
   }
 
   public getAllChartPalette(): ChartPaletteItem[] {
-    const basicPalettes: ChartPaletteItem[] = basicChartPaletteSeeds.map(
-      item => ({
-        meta: CloneValueDeep(item.meta),
-        datas: CloneValueDeep(item.datas || []),
-        i18ns: CloneValueDeep(item.i18ns || []),
-        isMatchRequirement: targetConfig =>
-          isChartMatchRequirement({ datas: item.datas }, targetConfig),
-      }),
-    );
-
-    return basicPalettes.concat(
-      this._customChartPaletteSeeds.map(item => ({
-        meta: CloneValueDeep(item.meta),
-        datas: CloneValueDeep(item.datas || []),
-        i18ns: CloneValueDeep(item.i18ns || []),
-        isMatchRequirement: targetConfig =>
-          isChartMatchRequirement({ datas: item.datas }, targetConfig),
-      })),
+    return this._createPaletteItems(basicChartPaletteSeeds).concat(
+      this._createPaletteItems(this._customChartPaletteSeeds),
     );
   }
 
@@ -171,6 +159,18 @@ class ChartManager {
     const chart = this._loader.convertToDatartChartModel(pluginDefinition);
     this._customChartInstanceMap.set(chartId, chart);
     return CloneValueDeep(chart);
+  }
+
+  private _createPaletteItems(
+    seeds: Array<ChartPaletteSeed | PluginChartPaletteSeed>,
+  ): ChartPaletteItem[] {
+    return seeds.map(item => ({
+      meta: CloneValueDeep(item.meta),
+      datas: CloneValueDeep(item.datas || []),
+      i18ns: CloneValueDeep(item.i18ns || []),
+      isMatchRequirement: targetConfig =>
+        isChartMatchRequirement({ datas: item.datas }, targetConfig),
+    }));
   }
 }
 

@@ -4015,6 +4015,40 @@
     - 明确哪些使用面必须继续保持同步，哪些已经具备异步化前提
     - 在证据充分后，再决定是否进入 `ChartManager` 更高风险的结构性异步化设计
 
+### 2026-06-12 本轮继续推进：统一 ChartManager 的 palette seed 构建路径
+
+- 本轮目标：
+  - 在基础图表 seed 和插件图表 seed 都已经成型的前提下，继续收口 `ChartManager` 内部的 palette 组装逻辑。
+  - 把基础 / 插件两条 palette 视图构建路径统一到同一个 helper，减少后续继续做统一惰性注册时的重复边界。
+  - 保持所有外部同步接口、图标来源、图表面板逻辑和实例获取行为不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/models/ChartManager.ts`
+    - 新增统一的 `_createPaletteItems()`，把 `ChartPaletteSeed` / `PluginChartPaletteSeed` 都收口到一条 palette item 构建路径。
+    - `getAllChartPalette()` 不再分别维护两套几乎相同的映射实现，改为复用统一 helper。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`88` 个测试文件通过，`676` 个测试通过，`4` 个跳过
+  - 当前构建产物观察：
+    - 主入口相关大 chunk 保持在约 `553.22 KB`
+    - `ChartEditor.*.js` 保持在约 `64.09 KB`
+    - 本轮未新增新的重量级桥接 chunk，也未引入新的 `Circular chunk` 告警
+
+- 阶段结论：
+  - 这一步虽然是内部收口，但它把 `ChartManager` 的“palette 展示链”和“实例获取链”边界进一步压实了。
+  - 到目前为止，基础图表和插件图表两条线已经在：
+    - seed 来源
+    - palette 构建
+    - 实例按需获取
+    上都具备了比较一致的结构。
+  - 下一步更合理的顺序是：
+    - 继续识别是否还存在必须依赖 `getAllCharts()` 的同步调用面
+    - 评估这些调用面是否可以逐步切到“按 id 取实例 + 按 seed 取展示信息”的统一模式
+    - 在同步调用面的收口证据足够充分后，再进入更高风险的统一惰性注册评估
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
