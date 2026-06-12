@@ -3856,6 +3856,42 @@
     - 单独评估哪些调用面还必须依赖完整 `IChart`，哪些可以进一步切到轻量视图
     - 在证据充分后，再评估图表簇级延迟注册是否值得进入实现阶段
 
+### 2026-06-12 本轮继续推进：收口 ChartManager 基础图表按需实例化
+
+- 本轮目标：
+  - 在前一轮 palette 轻量视图拆分的基础上，继续降低 `ChartManager` 初始化阶段对整套基础图表实例的同步依赖。
+  - 保持 `getById()`、`getDefaultChart()`、`getAllCharts()` 仍为同步接口，不引入异步管理器，不改编辑器、预览页、分享页和看板的现有调用协议。
+  - 把“基础图表整套实例缓存”收口为“基础图表工厂按需同步创建 + 插件图表继续单独缓存”的更清晰边界。
+
+- 本轮改造动作：
+  - `frontend/src/app/models/ChartManager.ts`
+    - 删除管理器构造时对整套基础图表实例数组的持有，不再在 `ChartManager` 初始化时同步缓存所有基础图表实例。
+    - 新增 `_customCharts`，只缓存插件图表加载结果。
+    - `getAllCharts()` 改为“基础图表按需同步创建 + 插件图表克隆快照”的组合返回。
+    - `getAllChartPalette()` 改为基于按需创建的基础图表和插件图表快照统一生成 palette。
+    - `getById()` 对基础图表继续通过工厂同步创建新实例；对插件图表保持从缓存中克隆返回。
+    - `getDefaultChart()` 改为直接使用基础图表注册表的首项 id，避免依赖预先构造好的 `_charts[0]`。
+  - `frontend/src/app/models/__tests__/ChartManager.test.ts`
+    - 新增断言，覆盖基础图表 `getById()` 每次返回新实例，以及 `getAllCharts()` 每次返回新的列表快照。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`88` 个测试文件通过，`668` 个测试通过，`4` 个跳过
+  - 当前构建产物观察：
+    - 主入口相关大 chunk 保持在约 `552 KB` 量级
+    - `ChartEditor.*.js` 保持在约 `64 KB` 量级
+    - 本轮未新增新的重量级桥接 chunk，也未引入新的 `Circular chunk` 告警
+
+- 阶段结论：
+  - 这一步继续把 `ChartManager` 从“初始化时同步持有整套基础图表实例”收口到“只持有基础图表工厂和插件图表缓存”，职责边界更清晰。
+  - 当前同步主链仍然成立，因此对现有页面调用面的回归风险依旧显著低于直接推进异步图表管理。
+  - 下一步更合理的顺序是：
+    - 继续拆分基础图表 `metadata`、`palette` 与实例工厂的注册来源
+    - 评估插件图表 metadata 是否也可以在不加载完整实例的前提下提供轻量视图
+    - 在基础 / 插件两条链的职责边界都足够清晰后，再判断是否值得进入图表簇级延迟注册
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

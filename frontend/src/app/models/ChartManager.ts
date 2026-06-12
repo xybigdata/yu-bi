@@ -39,7 +39,7 @@ class ChartManager {
   private _basicChartFactoryMap = new Map(
     basicChartRegistry.map(item => [item.id, item.create]),
   );
-  private _charts: IChart[] = this._basicCharts();
+  private _customCharts: IChart[] = [];
   private static _manager: ChartManager | null = null;
 
   public static instance() {
@@ -60,17 +60,13 @@ class ChartManager {
   }
 
   public getAllCharts(): IChart[] {
-    return this._charts || [];
+    return this._basicCharts().concat(this._cloneCustomCharts());
   }
 
   public getAllChartPalette(): ChartPaletteItem[] {
-    return this._charts.map(chart => ({
-      meta: CloneValueDeep(chart.meta),
-      datas: CloneValueDeep(chart.config?.datas || []),
-      i18ns: CloneValueDeep(chart.config?.i18ns || []),
-      isMatchRequirement: targetConfig =>
-        isChartMatchRequirement(chart.config, targetConfig),
-    }));
+    return this._basicCharts()
+      .concat(this._cloneCustomCharts())
+      .map(chart => this._createPaletteItem(chart));
   }
 
   public getAllChartIcons() {
@@ -88,37 +84,50 @@ class ChartManager {
     if (basicChartFactory) {
       return basicChartFactory();
     }
-    return CloneValueDeep(this._charts.find(c => c.meta?.id === id));
+    return CloneValueDeep(this._customCharts.find(c => c.meta?.id === id));
   }
 
   public getDefaultChart(): IChart {
-    const defaultChart = this._charts[0];
-    if (!defaultChart?.meta?.id) {
-      if (!defaultChart) {
+    const defaultChartId = basicChartRegistry[0]?.id;
+    if (!defaultChartId) {
+      const firstCustomChart = this._customCharts[0];
+      if (!firstCustomChart) {
         throw new Error('ChartManager has no registered charts');
       }
-      return CloneValueDeep(defaultChart);
+      return CloneValueDeep(firstCustomChart);
     }
-    return this.getById(defaultChart.meta.id)!;
+    return this.getById(defaultChartId)!;
   }
 
   private async _loadCustomizeCharts(paths: string[]) {
     if (this._isLoaded) {
-      return this._charts;
+      return this._customCharts;
     }
 
     const customCharts = await this._loader.loadPlugins(paths);
-    this._charts = this._charts.concat(
-      customCharts?.filter(Boolean) as IChart[],
-    );
+    this._customCharts = customCharts?.filter(Boolean) as IChart[];
     this._isLoaded = true;
-    return this._charts;
+    return this._customCharts;
   }
 
   private _basicCharts(): IChart[] {
     return basicChartRegistry
       .map(item => this._basicChartFactoryMap.get(item.id)?.())
       .filter(Boolean) as IChart[];
+  }
+
+  private _cloneCustomCharts(): IChart[] {
+    return CloneValueDeep(this._customCharts || []);
+  }
+
+  private _createPaletteItem(chart: IChart): ChartPaletteItem {
+    return {
+      meta: CloneValueDeep(chart.meta),
+      datas: CloneValueDeep(chart.config?.datas || []),
+      i18ns: CloneValueDeep(chart.config?.i18ns || []),
+      isMatchRequirement: targetConfig =>
+        isChartMatchRequirement(chart.config, targetConfig),
+    };
   }
 }
 

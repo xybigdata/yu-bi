@@ -25,4 +25,27 @@ describe('ChartManager Tests', () => {
     const secondPalette = manager.getAllChartPalette();
     expect(secondPalette[0].meta.id).not.toBe('changed');
   });
+
+  test('should create a new basic chart instance for each getById call', () => {
+    const manager = ChartManager.instance();
+    const first = manager.getById('mingxi-table');
+    const second = manager.getById('mingxi-table');
+
+    expect(first).toBeDefined();
+    expect(second).toBeDefined();
+    expect(first).not.toBe(second);
+    expect(first?.meta.id).toBe('mingxi-table');
+    expect(second?.meta.id).toBe('mingxi-table');
+  });
+
+  test('should create a new basic chart list snapshot for each getAllCharts call', () => {
+    const manager = ChartManager.instance();
+    const firstCharts = manager.getAllCharts();
+    const secondCharts = manager.getAllCharts();
+
+    expect(firstCharts.length).toBeGreaterThan(0);
+    expect(secondCharts.length).toBe(firstCharts.length);
+    expect(firstCharts[0]).not.toBe(secondCharts[0]);
+    expect(firstCharts[0].meta.id).toBe(secondCharts[0].meta.id);
+  });
 });
