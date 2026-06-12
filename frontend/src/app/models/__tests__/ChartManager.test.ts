@@ -54,6 +54,17 @@ describe('ChartManager Tests', () => {
     expect(firstCharts[0].meta.id).toBe(secondCharts[0].meta.id);
   });
 
+  test('should materialize chart list through getById compatibility path', () => {
+    const manager = ChartManager.instance();
+    const getByIdSpy = vi.spyOn(manager, 'getById');
+
+    const charts = manager.getAllCharts();
+
+    expect(charts.length).toBeGreaterThan(0);
+    expect(getByIdSpy).toHaveBeenCalledTimes(charts.length);
+    expect(getByIdSpy).toHaveBeenCalledWith(chartRegistry.basicChartRegistry[0].id);
+  });
+
   test('should read basic chart palette from registry seeds without creating chart instances', () => {
     const manager = ChartManager.instance();
     const createSpy = vi.spyOn(chartRegistry.basicChartRegistry[0], 'create');

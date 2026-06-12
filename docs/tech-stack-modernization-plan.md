@@ -4104,6 +4104,32 @@
   - 这一步没有推进异步取实例，也没有扩大页面改造面，只是把剩余兼容层的并发行为收口到可预测状态。
   - 后续继续推进时，更值得关注的仍然是同步实例获取链是否还有进一步收口空间，而不是再扩张 `load()` 的职责。
 
+### 2026-06-12 本轮继续推进：收口 ChartManager 整批实例列表的兼容路径
+
+- 本轮目标：
+  - 既然生产代码里已经没有外部调用 `getAllCharts()`，就继续压缩它作为兼容壳的内部职责。
+  - 让整批实例列表获取不再维护一套独立的“基础图表整批创建 + 插件图表逐个转换”路径，而是显式复用 `getById()`。
+  - 保持 `getAllCharts()`、`getDefaultChart()`、`getById()` 的同步接口形态不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/models/ChartManager.ts`
+    - `getAllCharts()` 改为先聚合基础图表 id 与插件图表 id，再统一通过 `getById()` 逐个物化实例。
+    - `getDefaultChart()` 在没有基础图表时，改为通过首个插件图表 id 继续走 `getById()`，避免再维护独立的插件整批实例读取路径。
+    - 删除仅服务旧整批实例化路径的 `_basicCharts()` / `_getCustomCharts()`，改为更窄的 id 聚合 helper。
+  - `frontend/src/app/models/__tests__/ChartManager.test.ts`
+    - 新增断言，验证 `getAllCharts()` 的实例物化已经明确复用 `getById()` 兼容路径。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步继续把 `ChartManager` 的实例获取链压缩成一条主路径：按 id 取实例。
+  - 当前仍然没有进入异步实例获取，也没有改变页面调用契约；只是减少了“整批列表”和“按 id 获取”之间的分叉实现。
+  - 后续如果继续推进更高风险的惰性注册，真正需要评估的重点会更集中在“何时暴露 id / seed / async factory”，而不是继续维护多套同步实例化壳。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

@@ -81,7 +81,9 @@ class ChartManager {
   }
 
   public getAllCharts(): IChart[] {
-    return this._basicCharts().concat(this._getCustomCharts());
+    return this._getAllChartIds()
+      .map(id => this.getById(id))
+      .filter(Boolean) as IChart[];
   }
 
   public getAllChartPalette(): ChartPaletteItem[] {
@@ -109,11 +111,11 @@ class ChartManager {
   public getDefaultChart(): IChart {
     const defaultChartId = basicChartRegistry[0]?.id;
     if (!defaultChartId) {
-      const firstCustomChart = this._getCustomCharts()[0];
-      if (!firstCustomChart) {
+      const firstCustomChartId = this._getCustomChartIds()[0];
+      if (!firstCustomChartId) {
         throw new Error('ChartManager has no registered charts');
       }
-      return CloneValueDeep(firstCustomChart);
+      return this.getById(firstCustomChartId)!;
     }
     return this.getById(defaultChartId)!;
   }
@@ -142,16 +144,14 @@ class ChartManager {
     return this._customChartPaletteSeeds;
   }
 
-  private _basicCharts(): IChart[] {
+  private _getAllChartIds(): string[] {
     return basicChartRegistry
-      .map(item => this._basicChartFactoryMap.get(item.id)?.())
-      .filter(Boolean) as IChart[];
+      .map(item => item.id)
+      .concat(this._getCustomChartIds());
   }
 
-  private _getCustomCharts(): IChart[] {
-    return Array.from(this._customChartDefinitionMap.keys())
-      .map(id => this._getCustomChartById(id))
-      .filter(Boolean) as IChart[];
+  private _getCustomChartIds(): string[] {
+    return Array.from(this._customChartDefinitionMap.keys());
   }
 
   private _getCustomChartById(id: string): IChart | undefined {
