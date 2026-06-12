@@ -4488,6 +4488,33 @@
   - 与直接替换 `split.js`、`react-window` 这类交互型运行时库相比，这种按需加载收口的回归面明显更小，更适合作为低风险现代化推进项。
   - 后续如果继续做同类优化，应优先找这种“功能按按钮或特定场景触发、静态导入成本高、运行时边界清晰”的工具型依赖。
 
+### 2026-06-12 本轮继续推进：将 Split 组件内的 split.js 收口为按需加载
+
+- 本轮目标：
+  - 继续收口已有包装层内的同步运行时依赖，而不贸然替换交互库本身。
+  - 将 `Split` 组件内部对 `split.js` 的同步静态导入改为运行时按需加载。
+  - 保持 `app/components/Split` 的外部 API 和各页面调用方式不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/components/splitRuntime.ts`
+    - 新增 `loadSplit()`，以单例 Promise 形式动态加载 `split.js`。
+  - `frontend/src/app/components/Split.tsx`
+    - 删除对 `split.js` 的同步顶层导入。
+    - 在 `componentDidMount` 和需要重建实例的 `componentDidUpdate` 分支里按需调用 `loadSplit()`。
+    - 补充 `mounted` 标记，避免组件卸载后异步加载返回再继续操作 DOM。
+    - 保持现有 `Split` 包装层的 props、gutter 行为、recreate 逻辑和 collapse 逻辑不变。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步并没有替换 `split.js`，只是把它从主静态链路移到了真正渲染 `Split` 组件时再加载。
+  - 由于仓库本身已经通过 `app/components/Split` 统一封装了外部交互边界，这类“先收口、后评估是否替换”的路径明显比直接重写分栏交互更稳。
+  - 后续如果继续处理 `react-window` 等交互型运行时依赖，也应优先复用这种“先沿包装层做运行时边界收口”的策略。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

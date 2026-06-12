@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import Split from 'split.js';
+import { loadSplit } from './splitRuntime';
 
 interface SplitWrapperProps {
   sizes?: number[];
@@ -24,10 +24,17 @@ interface SplitWrapperProps {
 }
 
 class SplitWrapper extends React.Component<SplitWrapperProps> {
-  private split?: Split.Instance;
+  private split?: {
+    destroy: (preserveStyles?: boolean, preserveGutter?: boolean) => void;
+    setSizes: (sizes: number[]) => void;
+    getSizes: () => number[];
+    collapse: (index: number) => void;
+  };
   private parent: { children: HTMLElement[] } | null = null;
+  private mounted = false;
 
-  componentDidMount() {
+  async componentDidMount() {
+    this.mounted = true;
     const { children, gutter, ...options } = this.props;
 
     const updatedGutter = (index, direction) => {
@@ -44,13 +51,19 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
       return gutterElement;
     };
 
-    this.split = Split(this.parent!.children, {
+    const Split = await loadSplit();
+
+    if (!this.mounted || !this.parent) {
+      return;
+    }
+
+    this.split = Split(this.parent.children, {
       ...options,
       gutter: updatedGutter,
     });
   }
 
-  componentDidUpdate(prevProps) {
+  async componentDidUpdate(prevProps) {
     const { children, minSize, sizes, collapsed, ...options } = this.props;
     const {
       minSize: prevMinSize,
@@ -95,8 +108,14 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
     if (needsRecreate) {
       this.split?.destroy(true, true);
       options.gutter = (index, direction, pairB) => pairB.previousSibling;
+      const Split = await loadSplit();
+
+      if (!this.mounted || !this.parent) {
+        return;
+      }
+
       this.split = Split(
-        Array.from(this.parent!.children).filter(
+        Array.from(this.parent.children).filter(
           element => !(element as any).__isSplitGutter,
         ),
         { ...options, minSize, sizes: sizes || this.split?.getSizes() },
@@ -124,6 +143,7 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
   }
 
   componentWillUnmount() {
+    this.mounted = false;
     if (this.split) {
       this.split.destroy();
       delete this.split;
