@@ -17,14 +17,24 @@
  */
 
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
-import { init } from 'echarts';
 import Chart from '../../../models/Chart';
+import { loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 
 class BasicAreaChart extends Chart {
   dependency = [];
   config = Config;
   chart: any = null;
+  protected container: HTMLElement | null = null;
+  private latestMountPayload?: {
+    options: BrokerOption;
+    context: BrokerContext;
+  };
+  private latestRenderPayload?: {
+    options: BrokerOption;
+    context: BrokerContext;
+  };
+  private runtimeLoadToken = 0;
   option = {
     xAxis: {
       type: 'category',
@@ -51,22 +61,69 @@ class BasicAreaChart extends Chart {
       return;
     }
 
-    this.chart = init(
-      context.document.getElementById(options.containerId)!,
-      'default',
-    );
+    this.container = context.document.getElementById(options.containerId);
+    this.latestMountPayload = {
+      options,
+      context,
+    };
+    this.loadRuntimeAndReplay();
   }
 
   onUpdated(options: BrokerOption, context: BrokerContext) {
+    this.latestRenderPayload = {
+      options,
+      context,
+    };
+    if (!this.chart) {
+      this.loadRuntimeAndReplay();
+      return;
+    }
     this.chart?.setOption(Object.assign({}, options?.config), true);
   }
 
   onUnMount(options: BrokerOption, context: BrokerContext) {
+    this.runtimeLoadToken += 1;
+    this.latestMountPayload = undefined;
+    this.latestRenderPayload = undefined;
+    this.container = null;
     this.chart?.dispose();
+    this.chart = null;
   }
 
   onResize(options: BrokerOption, context: BrokerContext) {
     this.chart?.resize(context);
+  }
+
+  private loadRuntimeAndReplay() {
+    const token = ++this.runtimeLoadToken;
+
+    void loadEChartsRuntime()
+      .then(({ init }) => {
+        if (token !== this.runtimeLoadToken) {
+          return;
+        }
+
+        if (!this.latestMountPayload || !this.container) {
+          return;
+        }
+
+        if (!this.chart) {
+          this.chart = init(this.container, 'default');
+        }
+
+        const latestRenderPayload = this.latestRenderPayload;
+        if (!latestRenderPayload) {
+          return;
+        }
+
+        this.chart?.setOption(
+          Object.assign({}, latestRenderPayload.options?.config),
+          true,
+        );
+      })
+      .catch(error => {
+        console.error('Load echarts runtime failed in BasicAreaChart', error);
+      });
   }
 }
 

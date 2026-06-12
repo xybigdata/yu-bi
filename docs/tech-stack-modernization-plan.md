@@ -3693,6 +3693,45 @@
     - 先完成剩余非地图同步入口收口
     - 再单独评估地图链与 `ChartManager` 的更高风险结构性拆分
 
+### 2026-06-12 本轮继续推进：收口剩余非地图 ECharts 同步入口
+
+- 本轮目标：
+  - 把上一轮之后仍然顶层同步 `import { init } from 'echarts'` 的非地图图表入口全部清掉。
+  - 优先处理 `BasicAreaChart`、`BasicRadarChart`、`WaterfallChart`，把前端图表层的剩余同步运行时依赖面收缩到地图链一处。
+  - 保持图表元数据、`default` 主题、事件注册与当前渲染配置协议不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/components/ChartGraph/BasicAreaChart/BasicAreaChart.tsx`
+    - 移除顶层同步 `init` 导入。
+    - 改为在 `onMount` / `onUpdated` 阶段按需触发共享 `loadEChartsRuntime()`，并缓存最近一次挂载参数与渲染参数。
+  - `frontend/src/app/components/ChartGraph/BasicRadarChart/BasicRadarChart.tsx`
+    - 移除顶层同步 `init` 导入。
+    - 保留原有 `mouseEvents` 注册方式不变，改为在运行时加载完成后再完成实例初始化与事件绑定。
+  - `frontend/src/app/components/ChartGraph/WaterfallChart/WaterfallChart.tsx`
+    - 移除顶层同步 `init` 导入。
+    - 保留瀑布图 click 事件分发和 `rowDataList` 逻辑不变，改为在运行时加载完成后再注册图表实例与 click handler。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`87` 个测试文件通过，`665` 个测试通过，`4` 个跳过
+  - 当前构建产物观察：
+    - `echarts.*.js` 继续作为独立运行时存在，约 `1.03 MB`
+    - 主入口相关大 chunk 本轮约 `550.34 KB`
+    - 本轮未新增新的重量级桥接 chunk，也未引入新的 `Circular chunk` 告警
+  - 当前 `frontend/src/app/components/ChartGraph` 下仍保留同步 `echarts` 运行时导入的图表入口只剩：
+    - `BasicOutlineMapChart`
+
+- 阶段结论：
+  - 至此，前端图表层除地图链外，其余 ECharts 图表实现已经全部从“模块顶层同步依赖 ECharts 运行时”收口到“挂载时按需加载”。
+  - 这说明后续前端图表运行时现代化的主要剩余难点已经从“分散的普通图表类”收缩为两类：
+    - 地图图表与 GeoJSON / `registerMap` 注册链
+    - `ChartManager` 同步注册模型本身
+  - 因此下一步更合理的顺序已经很清晰：
+    - 单独评估 `BasicOutlineMapChart` 的运行时与地图资源注册链
+    - 再决定是否进入 `ChartManager` 图表簇级延迟注册这类更高风险结构改造
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
