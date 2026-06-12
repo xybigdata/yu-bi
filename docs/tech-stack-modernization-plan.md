@@ -4665,6 +4665,46 @@
   - 当前项目对 `qs` 的依赖并不是通用深层对象协议，而是非常有限的查询串子集；把这部分收回仓库内实现，风险可控且更利于后续 Node 版本切换时减少外部小型工具包噪音。
   - 这一步保持了现有跳转 URL 与接口参数编码格式，不涉及分享页协议重构或更大范围的路由查询策略调整。
 
+### 2026-06-12 本轮继续推进：移除前端 debounce-promise 直接依赖
+
+- 本轮目标：
+  - 继续清理前端里仅承担单一交互子集职责的小型基础工具依赖。
+  - 保持名称唯一性异步校验的防抖体验和 Promise 校验链行为不变。
+
+- 本轮改造动作：
+  - `frontend/src/utils/debouncePromise.ts`
+    - 新增仓库内 promise debounce helper，覆盖当前实际用到的默认 trailing 防抖 + 共享 Promise 结果语义。
+  - 以下 9 处名称校验表单统一改为使用本地 `debouncePromise()`：
+    - `frontend/src/app/pages/MainPage/OrganizationForm.tsx`
+    - `frontend/src/app/pages/MainPage/pages/ViewPage/SaveForm.tsx`
+    - `frontend/src/app/pages/MainPage/pages/SourcePage/SaveForm.tsx`
+    - `frontend/src/app/pages/MainPage/pages/SourcePage/SourceDetailPage/index.tsx`
+    - `frontend/src/app/pages/MainPage/pages/VizPage/SaveForm.tsx`
+    - `frontend/src/app/pages/MainPage/pages/SchedulePage/SaveForm.tsx`
+    - `frontend/src/app/pages/MainPage/pages/VariablePage/VariableForm.tsx`
+    - `frontend/src/app/pages/MainPage/pages/MemberPage/pages/RoleDetailPage/index.tsx`
+    - `frontend/src/app/pages/MainPage/pages/OrgSettingPage/index.tsx`
+  - `frontend/src/utils/__tests__/debouncePromise.test.ts`
+    - 新增专项测试，锁住：
+      - 同一防抖窗口内只执行最后一次调用
+      - 多次调用共享同一个 Promise 结果
+      - 异常能沿 Promise 链正确向外抛出
+  - `frontend/package.json`
+  - `frontend/package-lock.json`
+    - 移除 `debounce-promise` 顶层直接依赖，并用 `npm uninstall debounce-promise --package-lock-only` 同步锁文件。
+
+- 本轮验证结果：
+  - 检索确认：仓库中 `debounce-promise` 的直接使用面原本仅有 9 处，且全部集中在名称唯一性异步校验表单，本轮已清零。
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- src/utils/__tests__/debouncePromise.test.ts --silent` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 当前项目对 `debounce-promise` 的实际依赖并不是完整选项语义，而是非常稳定的“默认 trailing 异步校验”子集；把这部分收回仓库内实现，风险明显低于在更大范围统一替换所有 debounce 方案。
+  - 这一步只触及名称校验表单链路，不改动 lodash debounce 承担的编辑器、拖拽、resize 和 iframe 事件等高频交互逻辑。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

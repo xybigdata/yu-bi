@@ -32,7 +32,7 @@ import { ModalForm, ModalFormProps } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { APP_CURRENT_VERSION } from 'app/migration/constants';
 import { fetchCheckName } from 'app/utils/fetch';
-import debounce from 'debounce-promise';
+import { debouncePromise } from 'utils/debouncePromise';
 import { DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
 import {
   useCallback,
@@ -159,7 +159,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
             message: `${t('name')}${tg('validation.required')}`,
           },
           {
-            validator: debounce((_, value) => {
+            validator: debouncePromise((_, value) => {
               if (!value || initialValues?.name === value) {
                 return Promise.resolve();
               }

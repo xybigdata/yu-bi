@@ -30,7 +30,7 @@ import {
   ResourceTypes,
 } from 'app/pages/MainPage/pages/PermissionPage/constants';
 import { fetchCheckName } from 'app/utils/fetch';
-import debounce from 'debounce-promise';
+import { debouncePromise } from 'utils/debouncePromise';
 import {
   CommonFormTypes,
   DEFAULT_DEBOUNCE_WAIT,
@@ -503,7 +503,7 @@ export function SourceDetailPage() {
                     message: `${t('form.name')}${tg('validation.required')}`,
                   },
                   {
-                    validator: debounce((_, value) => {
+                    validator: debouncePromise((_, value) => {
                       if (value === editingSource?.name) {
                         return Promise.resolve();
                       }

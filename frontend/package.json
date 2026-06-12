@@ -68,7 +68,6 @@
     "axios": "1.17.0",
     "classnames": "^2.3.1",
     "dayjs": "^1.11.21",
-    "debounce-promise": "3.1.2",
     "echarts": "5.3.1",
     "echarts-wordcloud": "^2.1.0",
     "flexlayout-react": "^0.5.12",

@@ -22,7 +22,7 @@ import { DateFormat } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { datartDayjs } from 'app/utils/date';
 import { fetchCheckName } from 'app/utils/fetch';
-import debounce from 'debounce-promise';
+import { debouncePromise } from 'utils/debouncePromise';
 import { DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SPACE_XS } from 'styles/StyleConstants';
@@ -144,7 +144,7 @@ export const VariableForm = memo(
                 return Promise.resolve();
               }
             }
-          : debounce((_, value) => {
+          : debouncePromise((_, value: string) => {
               if (!value || value === editingVariable?.name) {
                 return Promise.resolve();
               }
