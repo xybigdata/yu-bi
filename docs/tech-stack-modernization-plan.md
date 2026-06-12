@@ -4731,6 +4731,32 @@
   - 这一步属于纯类型依赖清理，不触及运行时代码路径，也不改变业务行为。
   - 前端类型依赖清单进一步向“仅保留真实编译所需包”收敛，减少了后续 Node / npm 版本切换时的维护噪音。
 
+### 2026-06-12 本轮继续推进：移除前端未使用的 ajv / ajv-keywords 直接声明
+
+- 本轮目标：
+  - 继续清理前端开发依赖清单中“只剩直接声明、实际由上游工具链传递提供”的包。
+  - 保持 commitlint、stylelint、eslint、Vite 与测试链行为不变。
+
+- 本轮改造动作：
+  - `frontend/package.json`
+  - `frontend/package-lock.json`
+    - 移除未被仓库配置和源码直接引用的 `ajv`
+    - 移除未被仓库配置和源码直接引用的 `ajv-keywords`
+    - 使用 `npm uninstall ajv ajv-keywords --package-lock-only` 同步锁文件。
+
+- 本轮验证结果：
+  - 检索确认：
+    - 仓库中不存在对 `ajv` / `ajv-keywords` 的直接 import、require 或配置引用
+    - `npm ls` 显示二者仍会经 `@commitlint/cli`、`stylelint` 等上游工具链作为传递依赖存在
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步属于纯开发依赖元数据治理，不触及运行时代码路径。
+  - 前端依赖清单继续向“只声明仓库自己明确消费的工具包”收敛，同时保留上游工具链真实需要的传递依赖。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
