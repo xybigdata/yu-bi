@@ -22,7 +22,10 @@ import ChartMetadata from 'app/types/ChartMetadata';
 import { Debugger } from 'utils/debugger';
 import { CloneValueDeep } from 'utils/object';
 import { preloadChartPlugins } from 'app/services/chartPluginService';
-import PluginChartLoader from './PluginChartLoader';
+import PluginChartLoader, {
+  PluginChartDefinition,
+  PluginChartPaletteSeed,
+} from './PluginChartLoader';
 import { basicChartPaletteSeeds, basicChartRegistry } from './chartRegistry';
 import { isChartMatchRequirement } from './chartRequirement';
 
@@ -40,6 +43,7 @@ class ChartManager {
     basicChartRegistry.map(item => [item.id, item.create]),
   );
   private _customCharts: IChart[] = [];
+  private _customChartPaletteSeeds: PluginChartPaletteSeed[] = [];
   private static _manager: ChartManager | null = null;
 
   public static instance() {
@@ -75,7 +79,13 @@ class ChartManager {
     );
 
     return basicPalettes.concat(
-      this._cloneCustomCharts().map(chart => this._createPaletteItem(chart)),
+      this._customChartPaletteSeeds.map(item => ({
+        meta: CloneValueDeep(item.meta),
+        datas: CloneValueDeep(item.datas || []),
+        i18ns: CloneValueDeep(item.i18ns || []),
+        isMatchRequirement: targetConfig =>
+          isChartMatchRequirement({ datas: item.datas }, targetConfig),
+      })),
     );
   }
 
@@ -114,8 +124,17 @@ class ChartManager {
       return this._customCharts;
     }
 
-    const customCharts = await this._loader.loadPlugins(paths);
-    this._customCharts = customCharts?.filter(Boolean) as IChart[];
+    const pluginDefinitions = await this._loader.loadPluginDefinitions(paths);
+    const validPluginDefinitions = (pluginDefinitions?.filter(
+      Boolean,
+    ) || []) as PluginChartDefinition[];
+
+    this._customChartPaletteSeeds = validPluginDefinitions.map(pluginDefinition =>
+      this._loader.getPluginPaletteSeed(pluginDefinition),
+    );
+    this._customCharts = validPluginDefinitions.map(pluginDefinition =>
+      this._loader.convertToDatartChartModel(pluginDefinition),
+    ) as IChart[];
     this._isLoaded = true;
     return this._customCharts;
   }
@@ -128,16 +147,6 @@ class ChartManager {
 
   private _cloneCustomCharts(): IChart[] {
     return CloneValueDeep(this._customCharts || []);
-  }
-
-  private _createPaletteItem(chart: IChart): ChartPaletteItem {
-    return {
-      meta: CloneValueDeep(chart.meta),
-      datas: CloneValueDeep(chart.config?.datas || []),
-      i18ns: CloneValueDeep(chart.config?.i18ns || []),
-      isMatchRequirement: targetConfig =>
-        isChartMatchRequirement(chart.config, targetConfig),
-    };
   }
 }
 

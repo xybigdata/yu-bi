@@ -1,6 +1,7 @@
 import { vi } from 'vitest';
 import ChartManager from '../ChartManager';
 import * as chartRegistry from '../chartRegistry';
+import PluginChartLoader from '../PluginChartLoader';
 
 describe('ChartManager Tests', () => {
   beforeEach(() => {
@@ -60,5 +61,38 @@ describe('ChartManager Tests', () => {
     expect(palette.length).toBeGreaterThan(0);
     expect(createSpy).not.toHaveBeenCalled();
     expect(palette[0].meta.id).toBe(chartRegistry.basicChartRegistry[0].id);
+  });
+
+  test('should read plugin palette from plugin seeds without creating plugin charts again', async () => {
+    const manager = ChartManager.instance();
+    const definitionSpy = vi.spyOn(PluginChartLoader.prototype, 'loadPluginDefinitions');
+    const convertSpy = vi.spyOn(
+      PluginChartLoader.prototype,
+      'convertToDatartChartModel',
+    );
+
+    definitionSpy.mockResolvedValueOnce([
+      {
+        meta: {
+          id: 'plugin-chart',
+          name: 'plugin-chart',
+          icon: 'chart',
+          requirements: [],
+        },
+        config: {
+          datas: [],
+          i18ns: [],
+        },
+        dependency: [],
+      } as any,
+    ]);
+
+    await (manager as any)._loadCustomizeCharts(['mock-plugin.js']);
+    convertSpy.mockClear();
+
+    const palette = manager.getAllChartPalette();
+
+    expect(palette.find(item => item.meta.id === 'plugin-chart')).toBeTruthy();
+    expect(convertSpy).not.toHaveBeenCalled();
   });
 });

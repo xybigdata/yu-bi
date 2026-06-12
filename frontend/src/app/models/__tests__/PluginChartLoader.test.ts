@@ -89,6 +89,21 @@ describe('PluginChartLoader Tests', () => {
     );
   });
 
+  test('should load pure js plugin definitions', async () => {
+    const loader = new PluginChartLoader();
+    const plugins = await loader.loadPluginDefinitions(['b-chart.js']);
+    const plugin = plugins[0]!;
+
+    expect(plugin.meta).toEqual({
+      id: 1,
+      icon: 'chart',
+      name: 'b-chart.js',
+      requirements: [],
+    });
+    expect(plugin.config).toEqual([]);
+    expect(plugin.dependency).toEqual(['echarts.min.js']);
+  });
+
   test('should load iife js plugin charts', async () => {
     const loader = new PluginChartLoader();
     const charts = await loader.loadPlugins(['a-chart.iife.js']);
@@ -108,6 +123,21 @@ describe('PluginChartLoader Tests', () => {
     expect((charts[0] as Chart).isISOContainer).toEqual(
       'iife-chart-container-id',
     );
+  });
+
+  test('should create plugin palette seed from definition', async () => {
+    const loader = new PluginChartLoader();
+    const plugins = await loader.loadPluginDefinitions(['a-chart.iife.js']);
+    const seed = loader.getPluginPaletteSeed(plugins[0]!);
+
+    expect(seed.meta).toEqual({
+      id: 1,
+      icon: 'chart',
+      name: 'a-chart.iife.js',
+      requirements: [],
+    });
+    expect(seed.datas).toEqual([]);
+    expect(seed.i18ns).toEqual([]);
   });
 
   test('should get reject promise when did not get charts', async () => {

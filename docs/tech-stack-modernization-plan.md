@@ -3931,6 +3931,49 @@
     - 再决定插件图表 palette 是否也能从实例视图切到 seed 视图
     - 在基础 / 插件两条链都具备轻量 metadata 来源后，再进入更高风险的簇级延迟注册评估
 
+### 2026-06-12 本轮继续推进：拆分插件图表 definition、palette seed 与实例转换
+
+- 本轮目标：
+  - 延续基础图表 registry 双层化的思路，把插件图表加载链也拆成“definition 解析”“palette seed 提取”“完整实例转换”三步。
+  - 让 `ChartManager` 的插件 palette 来源不再依赖插件 `Chart` 实例，而是直接复用插件 definition 派生出的 seed。
+  - 保持插件图表的现有加载协议、渲染协议和同步 `getById()` 行为不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/models/PluginChartLoader.ts`
+    - 新增 `PluginChartDefinition` 与 `PluginChartPaletteSeed` 类型。
+    - 新增 `loadPluginDefinitions()`，先只负责拉取并解析插件定义对象。
+    - 新增 `getPluginPaletteSeed()`，从插件定义提取 `meta`、`datas`、`i18ns` 的轻量 seed。
+    - 保留 `convertToDatartChartModel()`，专门负责把插件定义转换为完整 `Chart` 实例。
+    - `loadPlugins()` 改为复用 `loadPluginDefinitions()`，避免定义解析逻辑重复。
+  - `frontend/src/app/models/ChartManager.ts`
+    - 新增 `_customChartPaletteSeeds`，缓存插件图表的轻量 palette seed。
+    - `_loadCustomizeCharts()` 改为在一次插件定义加载后，同时生成：
+      - 插件 palette seed 缓存
+      - 插件完整图表实例缓存
+    - `getAllChartPalette()` 对插件图表改为直接消费 `_customChartPaletteSeeds`，不再从插件实例回填 palette。
+  - `frontend/src/app/models/__tests__/PluginChartLoader.test.ts`
+    - 补充插件 definition 加载和 plugin palette seed 生成测试。
+  - `frontend/src/app/models/__tests__/ChartManager.test.ts`
+    - 补充断言，验证插件 palette 读取阶段不会再次触发插件实例转换。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`88` 个测试文件通过，`674` 个测试通过，`4` 个跳过
+  - 当前构建产物观察：
+    - 主入口相关大 chunk 保持在约 `552.86 KB`
+    - `ChartEditor.*.js` 保持在约 `64.09 KB`
+    - 本轮未新增新的重量级桥接 chunk，也未引入新的 `Circular chunk` 告警
+
+- 阶段结论：
+  - 到这一步，基础图表和插件图表两条链都已经具备了轻量 palette seed 来源，`ChartManager` 的 palette 视图已经不再依赖任何图表实例回填。
+  - 这意味着后续如果要评估图表簇级延迟注册，至少“图表面板 / 图标 / 默认 metadata 展示链”已经具备了独立演进的基础。
+  - 下一步更合理的顺序是：
+    - 评估插件图表 `getById()` 是否也能在不提前转换整批实例的前提下按 id 延迟转换
+    - 再决定是否进入基础 / 插件统一的簇级或 id 级惰性注册评估
+    - 在证据充分后，再碰更高风险的 `ChartManager` 结构性异步化议题
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

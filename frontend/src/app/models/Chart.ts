@@ -25,7 +25,7 @@ import {
 import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
 import ChartDataSetDTO from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
-import ChartMetadata from 'app/types/ChartMetadata';
+import ChartMetadata, { ChartRequirement } from 'app/types/ChartMetadata';
 import { isChartDataConfigMatchRequirement } from './chartRequirement';
 
 class Chart implements IChart, IChartLifecycle {
@@ -49,7 +49,12 @@ class Chart implements IChart, IChartLifecycle {
     return this._state;
   }
 
-  constructor(id: string, name: string, icon?: string, requirements?: []) {
+  constructor(
+    id: string,
+    name: string,
+    icon?: string,
+    requirements?: ChartRequirement[],
+  ) {
     this.meta = {
       id,
       name,
