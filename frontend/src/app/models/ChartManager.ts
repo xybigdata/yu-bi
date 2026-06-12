@@ -23,7 +23,7 @@ import { Debugger } from 'utils/debugger';
 import { CloneValueDeep } from 'utils/object';
 import { preloadChartPlugins } from 'app/services/chartPluginService';
 import PluginChartLoader from './PluginChartLoader';
-import { basicChartRegistry } from './chartRegistry';
+import { basicChartPaletteSeeds, basicChartRegistry } from './chartRegistry';
 import { isChartMatchRequirement } from './chartRequirement';
 
 export type ChartPaletteItem = {
@@ -64,9 +64,19 @@ class ChartManager {
   }
 
   public getAllChartPalette(): ChartPaletteItem[] {
-    return this._basicCharts()
-      .concat(this._cloneCustomCharts())
-      .map(chart => this._createPaletteItem(chart));
+    const basicPalettes: ChartPaletteItem[] = basicChartPaletteSeeds.map(
+      item => ({
+        meta: CloneValueDeep(item.meta),
+        datas: CloneValueDeep(item.datas || []),
+        i18ns: CloneValueDeep(item.i18ns || []),
+        isMatchRequirement: targetConfig =>
+          isChartMatchRequirement({ datas: item.datas }, targetConfig),
+      }),
+    );
+
+    return basicPalettes.concat(
+      this._cloneCustomCharts().map(chart => this._createPaletteItem(chart)),
+    );
   }
 
   public getAllChartIcons() {

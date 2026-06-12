@@ -1,4 +1,6 @@
+import { vi } from 'vitest';
 import ChartManager from '../ChartManager';
+import * as chartRegistry from '../chartRegistry';
 
 describe('ChartManager Tests', () => {
   beforeEach(() => {
@@ -47,5 +49,16 @@ describe('ChartManager Tests', () => {
     expect(secondCharts.length).toBe(firstCharts.length);
     expect(firstCharts[0]).not.toBe(secondCharts[0]);
     expect(firstCharts[0].meta.id).toBe(secondCharts[0].meta.id);
+  });
+
+  test('should read basic chart palette from registry seeds without creating chart instances', () => {
+    const manager = ChartManager.instance();
+    const createSpy = vi.spyOn(chartRegistry.basicChartRegistry[0], 'create');
+
+    const palette = manager.getAllChartPalette();
+
+    expect(palette.length).toBeGreaterThan(0);
+    expect(createSpy).not.toHaveBeenCalled();
+    expect(palette[0].meta.id).toBe(chartRegistry.basicChartRegistry[0].id);
   });
 });

@@ -3892,6 +3892,45 @@
     - 评估插件图表 metadata 是否也可以在不加载完整实例的前提下提供轻量视图
     - 在基础 / 插件两条链的职责边界都足够清晰后，再判断是否值得进入图表簇级延迟注册
 
+### 2026-06-12 本轮继续推进：拆分基础图表 registry 的 palette seed 与实例工厂
+
+- 本轮目标：
+  - 继续沿 `ChartManager` 低风险收口路线，把基础图表 registry 从“只有实例工厂”推进到“静态 palette seed + 实例工厂”双层结构。
+  - 让基础图表的 palette / icons / 默认元数据来源直接走 registry 静态快照，而不是每次通过实例创建回填。
+  - 继续保持 `getById()`、`getDefaultChart()`、`getAllCharts()` 的同步调用协议不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/models/chartRegistry.ts`
+    - 为每个基础图表注册项补充 `meta`、`datas`、`i18ns` 静态快照，形成统一的 registry item。
+    - 新增 `basicChartPaletteSeeds`，作为基础图表 palette 视图的静态注册来源。
+    - 保留 `create` 工厂不变，基础图表实例仍由同步工厂负责创建。
+  - `frontend/src/app/models/ChartManager.ts`
+    - `getAllChartPalette()` 对基础图表改为直接消费 `basicChartPaletteSeeds`，不再为生成 palette 临时创建基础图表实例。
+    - 插件图表 palette 仍保持从加载后的图表快照生成，保持当前兼容路径不变。
+  - `frontend/src/app/models/__tests__/ChartManager.test.ts`
+    - 新增断言，验证读取基础图表 palette 时不会触发基础图表实例工厂。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`88` 个测试文件通过，`671` 个测试通过，`4` 个跳过
+  - 当前构建产物观察：
+    - 主入口相关大 chunk 保持在约 `552.57 KB`
+    - `ChartEditor.*.js` 保持在约 `64.09 KB`
+    - 本轮未新增新的重量级桥接 chunk，也未引入新的 `Circular chunk` 告警
+
+- 阶段结论：
+  - 到这一步，基础图表已经明确分成三层来源：
+    - registry 静态 palette seed
+    - registry 同步实例工厂
+    - `ChartManager` 对插件图表的运行时缓存
+  - 这让后续继续评估“插件图表 metadata 轻量化”和“图表簇级延迟注册”时，基础图表链的边界已经足够清晰。
+  - 下一步更合理的顺序是：
+    - 评估 `PluginChartLoader` 是否可以在不构造完整 `Chart` 实例的前提下先产出轻量 metadata
+    - 再决定插件图表 palette 是否也能从实例视图切到 seed 视图
+    - 在基础 / 插件两条链都具备轻量 metadata 来源后，再进入更高风险的簇级延迟注册评估
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
