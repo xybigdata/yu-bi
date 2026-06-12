@@ -96,6 +96,47 @@ describe('ChartManager Tests', () => {
     expect(convertSpy).not.toHaveBeenCalled();
   });
 
+  test('should read chart icons from seeds without creating chart instances', async () => {
+    const manager = ChartManager.instance();
+    const createSpy = vi.spyOn(chartRegistry.basicChartRegistry[0], 'create');
+    const definitionSpy = vi.spyOn(
+      PluginChartLoader.prototype,
+      'loadPluginDefinitions',
+    );
+    const convertSpy = vi.spyOn(
+      PluginChartLoader.prototype,
+      'convertToDatartChartModel',
+    );
+
+    definitionSpy.mockResolvedValueOnce([
+      {
+        meta: {
+          id: 'plugin-chart-icon',
+          name: 'plugin-chart-icon',
+          icon: 'plugin-icon',
+          requirements: [],
+        },
+        config: {
+          datas: [],
+          i18ns: [],
+        },
+        dependency: [],
+      } as any,
+    ]);
+
+    await (manager as any)._loadCustomizeCharts(['mock-plugin-icon.js']);
+    convertSpy.mockClear();
+
+    const icons = manager.getAllChartIcons();
+
+    expect(createSpy).not.toHaveBeenCalled();
+    expect(convertSpy).not.toHaveBeenCalled();
+    expect(icons[chartRegistry.basicChartRegistry[0].id]).toBe(
+      chartRegistry.basicChartRegistry[0].meta.icon,
+    );
+    expect(icons['plugin-chart-icon']).toBe('plugin-icon');
+  });
+
   test('should not convert plugin chart instances during plugin definition preload', async () => {
     const manager = ChartManager.instance();
     const definitionSpy = vi.spyOn(

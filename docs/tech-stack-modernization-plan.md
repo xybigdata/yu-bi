@@ -4049,6 +4049,35 @@
     - 评估这些调用面是否可以逐步切到“按 id 取实例 + 按 seed 取展示信息”的统一模式
     - 在同步调用面的收口证据足够充分后，再进入更高风险的统一惰性注册评估
 
+### 2026-06-12 本轮继续推进：收口 ChartManager 图标索引的 seed 只读路径
+
+- 本轮目标：
+  - 在 palette 展示链已经完全切到 seed 来源之后，继续收口 `ChartManager` 内部剩余的展示侧派生逻辑。
+  - 让图标索引也直接基于基础图表 seed 和插件图表 seed 构建，不再先构造一轮 palette item。
+  - 保持 `getAllChartIcons()`、`getAllChartPalette()`、`getById()` 与现有同步使用方式不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/models/ChartManager.ts`
+    - 新增统一的 `_getAllPaletteSeeds()`，把基础图表 seed 与插件图表 seed 的聚合入口收口到一处。
+    - `getAllChartPalette()` 改为直接复用 `_getAllPaletteSeeds()`，不再各自拼接两段来源。
+    - `getAllChartIcons()` 改为直接基于 seed 构建图标索引，不再借道 palette item 构造链，避免为纯图标读取额外创建 `isMatchRequirement()` 闭包。
+  - `frontend/src/app/models/__tests__/ChartManager.test.ts`
+    - 新增断言，验证读取图标索引时不会触发基础图表实例工厂，也不会触发插件图表实例转换。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步仍然属于低风险内部收口，不改变任何外部同步契约。
+  - 到当前阶段，`ChartManager` 的展示侧只读链已经基本统一为：
+    - seed 聚合
+    - palette 派生
+    - icons 派生
+  - 后续如果继续推进统一惰性注册，剩余更值得评估的重点会更集中在实例获取链，而不是展示侧派生链。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

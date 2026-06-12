@@ -33,6 +33,8 @@ import {
 } from './chartRegistry';
 import { isChartMatchRequirement } from './chartRequirement';
 
+type ChartPaletteSeedLike = ChartPaletteSeed | PluginChartPaletteSeed;
+
 export type ChartPaletteItem = {
   meta: ChartMetadata;
   datas?: ChartConfig['datas'];
@@ -73,13 +75,11 @@ class ChartManager {
   }
 
   public getAllChartPalette(): ChartPaletteItem[] {
-    return this._createPaletteItems(basicChartPaletteSeeds).concat(
-      this._createPaletteItems(this._customChartPaletteSeeds),
-    );
+    return this._createPaletteItems(this._getAllPaletteSeeds());
   }
 
   public getAllChartIcons() {
-    return this.getAllChartPalette().reduce((acc, cur) => {
+    return this._getAllPaletteSeeds().reduce((acc, cur) => {
       acc[cur.meta.id] = cur.meta.icon;
       return acc;
     }, {} as Record<string, string | undefined>);
@@ -161,8 +161,12 @@ class ChartManager {
     return CloneValueDeep(chart);
   }
 
+  private _getAllPaletteSeeds(): ChartPaletteSeedLike[] {
+    return [...basicChartPaletteSeeds, ...this._customChartPaletteSeeds];
+  }
+
   private _createPaletteItems(
-    seeds: Array<ChartPaletteSeed | PluginChartPaletteSeed>,
+    seeds: ChartPaletteSeedLike[],
   ): ChartPaletteItem[] {
     return seeds.map(item => ({
       meta: CloneValueDeep(item.meta),
