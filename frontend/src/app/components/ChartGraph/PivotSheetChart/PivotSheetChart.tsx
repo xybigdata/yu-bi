@@ -17,18 +17,6 @@
  */
 
 import {
-  Data,
-  DataCell,
-  DefaultCellTheme,
-  Meta,
-  S2CellType,
-  S2Style,
-  SortParam,
-  SpreadSheet,
-  TargetCellInfo,
-  ViewMeta,
-} from '@antv/s2';
-import {
   ChartDataSectionType,
   ChartInteractionEvent,
   SortActionType,
@@ -53,9 +41,21 @@ import {
 } from 'app/utils/chartHelper';
 import { isUndefined } from 'utils/object';
 import { PIVOT_THEME_LIST } from '../../FormGenerator/Customize/PivotSheetTheme/theme';
-import AntVS2Wrapper from './AntVS2Wrapper';
+import LazyAntVS2Wrapper from './LazyAntVS2Wrapper';
 import Config from './config';
-import { AndvS2Config } from './types';
+import type {
+  Data,
+  DataCell,
+  DefaultCellTheme,
+  Meta,
+  S2CellType,
+  S2Style,
+  SortParam,
+  SpreadSheet,
+  TargetCellInfo,
+  ViewMeta,
+} from '@antv/s2';
+import type { AndvS2Config } from './types';
 
 enum BolderFontWeight {
   lighter = 'normal',
@@ -79,7 +79,7 @@ class PivotSheetChart extends ReactChart {
   private selectedItems: SelectedItem[] = [];
 
   constructor() {
-    super(AntVS2Wrapper, {
+    super(LazyAntVS2Wrapper, {
       id: 'piovt-sheet', // TODO(Stephen): should fix typo pivot
       name: 'viz.palette.graph.names.pivotSheet',
       icon: PivotSheetChart.icon,

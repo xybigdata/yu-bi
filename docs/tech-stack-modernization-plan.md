@@ -3278,6 +3278,42 @@
     - PivotSheet / `@antv/s2`
     - `ChartManager` 的图表簇级延迟注册
 
+### 2026-06-12 本轮继续推进：PivotSheet / `@antv/s2` 运行时按需加载
+
+- 本轮目标：
+  - 延续“沿图表实现层静态边界拆重模块”的策略，在不改 `ChartManager` 同步注册模型的前提下，把 `PivotSheetChart` 的 `@antv/s2-react` 运行时渲染链从主入口静态导入中拆出去。
+  - 保持透视表图表元数据、配置协议、交互回调和现有图表调用接口不变，先拿到一段低中风险、可验证的主包减载结果。
+
+- 本轮改造动作：
+  - `frontend/src/app/components/ChartGraph/PivotSheetChart/LazyAntVS2Wrapper.tsx`
+    - 新增懒加载包装层，使用 `React.lazy + Suspense` 动态加载 `AntVS2Wrapper`。
+    - 在真实 S2 运行时代码尚未加载完成时，先渲染一个轻量 `Spin` 占位，避免透视表挂载期出现空白闪断。
+  - `frontend/src/app/components/ChartGraph/PivotSheetChart/PivotSheetChart.tsx`
+    - 将 `super(...)` 传入的渲染组件从同步 `AntVS2Wrapper` 改为 `LazyAntVS2Wrapper`。
+    - 把 `@antv/s2` 的导入全部改为 `import type`，避免仅用于类型标注的 S2 运行时代码继续参与主入口静态打包。
+    - 不调整透视表配置生成、选中联动、钻取、折叠、tooltip、theme、palette 等业务逻辑。
+  - `frontend/src/app/components/ChartGraph/PivotSheetChart/types.ts`
+    - 将 `@antv/s2` 与 `@antv/s2-react` 的类型声明切为纯类型导入，继续压缩静态运行时依赖面。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+  - 当前构建产物变化：
+    - 新增独立透视表运行时 chunk：`AntVS2Wrapper.*.js` 约 `1.85 MB`
+    - 新增独立透视表样式 chunk：`AntVS2Wrapper.*.css` 约 `14.36 KB`
+    - 本轮未引入新的 `Circular chunk` 告警
+  - 当前保留现象：
+    - 由于 `ChartManager` 仍同步注册所有基础图表，`PivotSheetChart` 元数据和配置实现仍会留在主链，只是最重的 S2 React 渲染运行时已被拆出。
+    - 生产构建仍保留原有大 chunk 告警，说明这一步是“继续拆重模块”的阶段性推进，而不是最终收口。
+
+- 阶段结论：
+  - `PivotSheet / @antv/s2` 已证明可以在不修改图表注册协议的前提下，先把最重的运行时渲染层切出主入口静态链路。
+  - 这条路径与地图 GeoJSON 按需加载一样，属于“兼容优先、边界渐进拆分”的现代化改造策略，风险明显低于直接改 `ChartManager` 全量异步注册。
+  - 下一阶段可继续沿真实重模块边界推进：
+    - 评估 `MonacoEditor` 的运行时加载链路，避免编辑器能力继续跟随主入口首包
+    - 再评估 `ChartManager` 图表簇级延迟注册，作为收益更高但结构性更强的下一层改造
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

@@ -1,4 +1,4 @@
-import {
+import type {
   Node,
   Palette,
   RowCellCollapsedParams,
@@ -7,7 +7,7 @@ import {
   SpreadSheet,
   TargetCellInfo,
 } from '@antv/s2';
-import { SheetComponentOptions } from '@antv/s2-react';
+import type { SheetComponentOptions } from '@antv/s2-react';
 export interface AndvS2Config {
   dataCfg?: S2DataConfig;
   options: SheetComponentOptions;
