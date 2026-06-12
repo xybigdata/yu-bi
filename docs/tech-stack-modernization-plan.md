@@ -4515,6 +4515,33 @@
   - 由于仓库本身已经通过 `app/components/Split` 统一封装了外部交互边界，这类“先收口、后评估是否替换”的路径明显比直接重写分栏交互更稳。
   - 后续如果继续处理 `react-window` 等交互型运行时依赖，也应优先复用这种“先沿包装层做运行时边界收口”的策略。
 
+### 2026-06-12 本轮继续推进：将 VirtualTable 内的 react-window 收口为按需加载
+
+- 本轮目标：
+  - 沿已有包装层继续压缩交互型运行时库的同步静态链路。
+  - 将 `VirtualTable` 内部对 `react-window` 的同步静态依赖改为运行时按需加载。
+  - 保持 `VirtualTable` 与 `SchemaTable` 的外部调用方式不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/components/virtualTableRuntime.ts`
+    - 新增 `loadVirtualTableRuntime()`，以单例 Promise 动态加载 `react-window`，并导出 `VariableSizeGrid`。
+  - `frontend/src/app/components/VirtualTable.tsx`
+    - 删除对 `react-window` 的同步顶层导入。
+    - 新增运行时 `Grid` 状态，在组件挂载后异步加载 `VariableSizeGrid`。
+    - 在虚拟表格运行时尚未加载完成时，先返回一个轻量占位容器，避免直接触发未定义组件渲染。
+    - 保持原有列宽计算、滚动桥接、空态和 `VariableSizeGrid` 参数配置不变。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步没有替换 `react-window`，只是把它从虚拟表格包装层的同步依赖改成了运行时加载。
+  - 与直接更换虚拟滚动实现相比，这种改法对业务表格交互面的影响更窄，符合当前“先收口边界、再决定是否替换”的现代化推进策略。
+  - 后续如果继续评估虚拟滚动方案，应基于真实表格性能、列宽同步和滚动联动行为做专项验证，而不是因为依赖名字较旧就贸然迁移。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

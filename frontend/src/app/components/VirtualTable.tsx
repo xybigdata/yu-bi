@@ -27,9 +27,9 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { VariableSizeGrid as Grid } from 'react-window';
 import styled from 'styled-components';
 import { SPACE_TIMES } from 'styles/StyleConstants';
+import { loadVirtualTableRuntime } from './virtualTableRuntime';
 
 interface VirtualTableProps extends TableProps<object> {
   width: number;
@@ -71,7 +71,24 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
     });
     return obj;
   });
+  const [Grid, setGrid] = useState<Awaited<
+    ReturnType<typeof loadVirtualTableRuntime>
+  >['VariableSizeGrid'] | null>(null);
   isFull.current = boxWidth > scroll.x;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    loadVirtualTableRuntime().then(module => {
+      if (!cancelled) {
+        setGrid(() => module.VariableSizeGrid);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (isFull.current === true) {
     widthColumns.forEach((v, i) => {
@@ -110,6 +127,10 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
       if (!dataSource?.length) {
         //If the data is empty
         return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
+      }
+
+      if (!Grid) {
+        return <VirtualTablePlaceholder style={{ height: scroll.y }} />;
       }
 
       return (
@@ -172,4 +193,8 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
 
 const TableCell = styled.div`
   border-bottom: 1px solid ${p => p.theme.borderColorSplit};
+`;
+
+const VirtualTablePlaceholder = styled.div`
+  width: 100%;
 `;
