@@ -17,15 +17,28 @@
  */
 
 import { CalculationType } from 'globalConstants';
-import { precisionCalculation } from '../number';
+import { precisionCalculation, toSafeNumber } from '../number';
 
 describe('number Test', () => {
   describe.each([
     [CalculationType.ADD, [null, 1, '1', undefined], 2],
     [CalculationType.SUBTRACT, [null, 1, '1', undefined], 0],
+    [CalculationType.ADD, [0.1, 0.2], 0.3],
+    [CalculationType.SUBTRACT, [0.3, 0.1], 0.2],
   ])('precisionCalculation Test - ', (type, numberList, expected) => {
     test(`The precision calculation method test, type ${type} number list ${numberList} expected ${expected}`, () => {
       expect(precisionCalculation(type, numberList as any)).toEqual(expected);
+    });
+  });
+
+  describe.each([
+    ['12.34', 12.34],
+    ['invalid', 0],
+    [undefined, 0],
+    [null, 0],
+  ])('toSafeNumber Test - ', (value, expected) => {
+    test(`The safe number method test, value ${value} expected ${expected}`, () => {
+      expect(toSafeNumber(value as any)).toEqual(expected);
     });
   });
 });

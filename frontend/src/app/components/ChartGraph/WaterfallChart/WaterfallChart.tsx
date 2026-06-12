@@ -43,8 +43,7 @@ import {
   toFormattedValue,
   transformToDataSet,
 } from 'app/utils/chartHelper';
-import { precisionCalculation } from 'app/utils/number';
-import currency from 'currency.js';
+import { precisionCalculation, toSafeNumber } from 'app/utils/number';
 import { CalculationType } from 'globalConstants';
 import { UniqArray } from 'utils/object';
 import { loadEChartsRuntime } from '../echartsRuntime';
@@ -409,12 +408,8 @@ class WaterfallChart extends Chart {
     const ascendOrder: OrderConfig[] = [];
     const descendOrder: OrderConfig[] = [];
     dataList.forEach((data, index) => {
-      const newData: number = isNaN(currency(data).value)
-        ? 0
-        : currency(data).value;
-      const lastData: number = isNaN(currency(dataList[index - 1]).value)
-        ? 0
-        : currency(dataList[index - 1]).value;
+      const newData = toSafeNumber(data);
+      const lastData = toSafeNumber(dataList[index - 1]);
       if (index > 0) {
         if (isIncrement) {
           const result: number =

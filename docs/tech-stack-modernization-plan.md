@@ -4571,6 +4571,40 @@
   - 现有 `checkStore` / `injectReducerFactory` 测试已经覆盖抛错行为，因此这类小型断言库替换的风险很低。
   - 后续如果继续筛低频工具依赖，仍应优先选择这种“调用面少、语义简单、现有测试已覆盖”的候选项。
 
+### 2026-06-12 本轮继续推进：移除前端 currency.js 直接依赖
+
+- 本轮目标：
+  - 继续清理只承担局部数值工具职责的前端直接依赖。
+  - 将小数精度加减和安全 number 归一逻辑收回仓库内实现，移除 `currency.js` 顶层直接依赖。
+  - 保持瀑布图计算结果和现有数值工具行为稳定。
+
+- 本轮改造动作：
+  - `frontend/src/app/utils/number.ts`
+    - 删除 `currency.js` 直接导入。
+    - 新增 `toSafeNumber()`，统一把输入归一为有限 number。
+    - 新增基于缩放整数的 `calculateWithPrecision()`，用于支持 `ADD` / `SUBTRACT` 的小数精度计算。
+    - `precisionCalculation()` 改为复用仓库内数值工具，不再依赖 `currency.js`。
+  - `frontend/src/app/components/ChartGraph/WaterfallChart/WaterfallChart.tsx`
+    - 瀑布图里的 `newData` / `lastData` 数值归一改为使用 `toSafeNumber()`。
+  - `frontend/src/app/utils/__tests__/number.test.ts`
+    - 新增 `0.1 + 0.2 = 0.3`、`0.3 - 0.1 = 0.2` 等小数精度用例。
+    - 新增 `toSafeNumber()` 对非法值、空值和字符串数字的归一测试。
+  - `frontend/package.json`
+  - `frontend/package-lock.json`
+    - 移除 `currency.js` 顶层直接依赖，并用 `npm uninstall currency.js --package-lock-only` 同步锁文件。
+
+- 本轮验证结果：
+  - 检索确认：仓库生产代码中 `currency.js` 的直接导入原本只存在于 `frontend/src/app/utils/number.ts` 和 `WaterfallChart.tsx`，本轮已全部替换。
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步把精度加减和数值归一能力收口到仓库内，减少了一个单用途数值库依赖。
+  - 改动边界集中在数值工具层和瀑布图内部数据归一逻辑，不涉及通用格式化展示策略。
+  - 后续如果继续推进数字相关现代化，更值得关注的是更大范围的格式化语义和图表口径一致性，而不是继续引入额外的小型数值工具库。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
