@@ -10,17 +10,50 @@ import {
   FONT_WEIGHT_REGULAR,
 } from 'styles/StyleConstants';
 import { APIResponse } from 'types';
-import { v4 as uuidv4 } from 'uuid';
 import { SaveFormModel } from '../app/pages/MainPage/pages/VizPage/SaveFormContext';
 import { removeToken } from './auth';
 
-export { uuidv4 };
+function getRandomByte(): number {
+  return Math.floor(Math.random() * 256);
+}
+
+function createUuidFromRandomBytes(randomBytes: number[]) {
+  const bytes = randomBytes.slice(0, 16);
+
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+  const hex = bytes.map(byte => byte.toString(16).padStart(2, '0')).join('');
+
+  return [
+    hex.slice(0, 8),
+    hex.slice(8, 12),
+    hex.slice(12, 16),
+    hex.slice(16, 20),
+    hex.slice(20, 32),
+  ].join('-');
+}
+
+export function uuidv4() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  if (
+    typeof crypto !== 'undefined' &&
+    typeof crypto.getRandomValues === 'function'
+  ) {
+    return createUuidFromRandomBytes(Array.from(crypto.getRandomValues(new Uint8Array(16))));
+  }
+
+  return createUuidFromRandomBytes(
+    Array.from({ length: 16 }, () => getRandomByte()),
+  );
+}
 
 // For environments that do not support crypto.getRandomValues, such as nashorn.
 export function universalUUID() {
-  return typeof crypto === 'undefined'
-    ? `_${Math.random().toString(36).substring(2)}`
-    : uuidv4();
+  return uuidv4();
 }
 
 export function errorHandle(error) {

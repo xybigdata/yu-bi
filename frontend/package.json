@@ -101,8 +101,7 @@
     "redux-undo": "^1.0.1",
     "reveal.js": "^6.0.1",
     "split.js": "^1.6.4",
-    "sql-formatter": "9.2.0",
-    "uuid": "^8.3.2"
+    "sql-formatter": "9.2.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.0.2",

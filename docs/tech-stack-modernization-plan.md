@@ -4341,6 +4341,36 @@
   - 当前富文本链仍处于 `react-quill 2.0.0` 包装层加本地 compat 层状态，且 `react-quill` 自身依赖的仍是 `quill 1.3.7`；因此不能把这次清理表述成 Quill 2 主线迁移完成。
   - 后续如果继续推进富文本现代化，应聚焦 `quillCompat.ts`、`RichTextEditor`、自定义 blot 和 markdown/image-drop 模块对真正 Quill 2 React 路线的兼容成本，而不是重新引入未使用的顶层 `quill` 声明。
 
+### 2026-06-12 本轮继续推进：移除前端 uuid 直接依赖
+
+- 本轮目标：
+  - 继续清理前端里“仓库自己的业务代码可以不再直接依赖第三方包”的低风险基础工具项。
+  - 将全仓 UUID 生成入口收口到 `utils.ts` 仓库内实现，避免继续为单一用途保留 `uuid` 顶层直接依赖。
+  - 保持现有调用点、ID 格式和无 `crypto` 环境下的行为边界稳定。
+
+- 本轮改造动作：
+  - `frontend/src/utils/utils.ts`
+    - 删除对 `uuid` 包的直接导入。
+    - 新增仓库内 `uuidv4()` 实现：优先使用 `crypto.randomUUID()`，其次回退到 `crypto.getRandomValues()`，最后再回退到 `Math.random()` 生成的 v4 格式 UUID。
+    - `universalUUID()` 改为复用统一的 `uuidv4()` 出口，不再分裂出另一套下划线前缀格式。
+  - `frontend/src/utils/__tests__/utils.test.ts`
+    - 补充 `crypto.randomUUID`、`crypto.getRandomValues` 和无 `crypto` 三条路径的单元测试。
+  - `frontend/package.json`
+  - `frontend/package-lock.json`
+    - 移除 `uuid` 顶层直接依赖，并用 `npm uninstall uuid --package-lock-only` 同步锁文件。
+
+- 本轮验证结果：
+  - 检索确认：仓库生产代码中的 UUID 调用仍统一走 `utils.ts` 导出的 `uuidv4()` / `universalUUID()`，没有新增分散实现。
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步把 UUID 生成逻辑继续收口到仓库内单点出口，降低了前端基础工具依赖清单的维护噪音。
+  - 当前仓库仍会因 `flexlayout-react` 的传递依赖带有 `uuid`，但 `yu-bi` 自身业务代码已不再直接声明或直接导入该包。
+  - 后续如果还要继续做类似治理，应优先选择这种“调用面已集中、替换边界清晰、可用小测试兜底”的基础工具项，而不是贸然进入高耦合运行时专题。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
