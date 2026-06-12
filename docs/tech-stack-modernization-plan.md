@@ -3583,6 +3583,61 @@
     - `echarts` 主运行时进一步按图表簇拆分
   - 但这两项仍明显高于本轮风险等级，因此这一轮继续保持“先收口入口同步链，再评估结构性拆分”的现代化策略。
 
+### 2026-06-12 本轮继续推进：基础 ECharts 图表基类运行时按需加载
+
+- 本轮目标：
+  - 延续词云与主题注册链的渐进拆分策略，优先处理 `ChartManager` 同步注册阶段覆盖面最大的三条基础图表继承链。
+  - 将柱状系、折线系、饼图系图表从顶层同步 `import { init } from 'echarts'` 改为挂载时按需加载。
+  - 保持 `ChartManager` 同步实例化协议、图表元数据、交互选择链、`default` 主题和业务配置协议不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/components/ChartGraph/echartsRuntime.ts`
+    - 新增统一的 ECharts 主运行时加载入口 `loadEChartsRuntime()`。
+    - 将 `import('echarts')` 收口为单次 promise 缓存，作为多个基础图表基类共享的运行时入口。
+  - `frontend/src/app/components/ChartGraph/BasicBarChart/BasicBarChart.tsx`
+    - 移除顶层同步 `init` 导入。
+    - 改为在 `onMount` / `onUpdated` 阶段按需触发运行时加载，并缓存最近一次挂载参数与渲染参数。
+    - 在运行时尚未就绪时保存最近一次更新请求；待运行时加载完成后自动补做 `init(...)`、事件监听注册和 `setOption(...)` 重放。
+    - 这一轮直接覆盖 `ClusterColumnChart`、`ClusterBarChart`、`StackColumnChart`、`StackBarChart`、`PercentageStackColumnChart`、`PercentageStackBarChart` 六类柱状系图表。
+  - `frontend/src/app/components/ChartGraph/BasicLineChart/BasicLineChart.tsx`
+    - 移除顶层同步 `init` 导入。
+    - 将折线系图表改为复用同一套运行时加载与重放逻辑。
+    - 这一轮直接覆盖 `LineChart`、`AreaChart`、`StackAreaChart` 三类折线/面积图。
+  - `frontend/src/app/components/ChartGraph/BasicPieChart/BasicPieChart.tsx`
+    - 移除顶层同步 `init` 导入。
+    - 将饼图系图表改为复用同一套运行时加载与重放逻辑。
+    - 这一轮直接覆盖 `PieChart`、`DoughnutChart`、`RoseChart` 三类饼图。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`87` 个测试文件通过，`665` 个测试通过，`4` 个跳过
+  - 当前构建产物观察：
+    - `echarts.*.js` 继续作为独立运行时存在，约 `1.03 MB`
+    - 主入口相关大 chunk 本轮约 `545.01 KB`
+    - 本轮未新增新的重量级桥接 chunk，也未引入新的 `Circular chunk` 告警
+  - 当前剩余同步 `echarts` 图表入口主要还有：
+    - `BasicFunnelChart`
+    - `BasicScatterChart`
+    - `BasicGaugeChart`
+    - `BasicRadarChart`
+    - `BasicOutlineMapChart`
+    - `WaterfallChart`
+    - `BasicDoubleYChart`
+    - `BasicAreaChart`
+
+- 阶段结论：
+  - 这一步的核心收益不是立刻继续压小主入口 chunk，而是把 `ChartManager` 同步注册阶段里覆盖面最大的三条基础继承链，从“类定义即同步依赖 ECharts 运行时”收口到“真正挂载时再加载”。
+  - 本轮直接覆盖了：
+    - 6 类柱状系图表
+    - 3 类折线/面积图
+    - 3 类饼图
+  - 当前主图表链仍未彻底脱离 `echarts` 主运行时同步依赖，因为地图、漏斗、散点、仪表盘、瀑布图等基类还在同步链路中。
+  - 因此下一步更合理的顺序仍然是：
+    - 继续按基类收口剩余同步 `echarts` 图表实现
+    - 再评估 `ChartManager` 图表簇级延迟注册与更高风险的结构性拆分
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
