@@ -3638,6 +3638,61 @@
     - 继续按基类收口剩余同步 `echarts` 图表实现
     - 再评估 `ChartManager` 图表簇级延迟注册与更高风险的结构性拆分
 
+### 2026-06-12 本轮继续推进：第二批独立 ECharts 图表运行时按需加载
+
+- 本轮目标：
+  - 延续上一轮基础图表基类拆分策略，继续收口仍然顶层同步 `import { init } from 'echarts'` 的独立图表实现。
+  - 优先处理业务覆盖面较高、但不涉及地图注册和更高风险结构改造的四类图表：漏斗图、散点图、仪表盘、双 Y 轴图。
+  - 保持 `ChartManager` 同步实例化协议、图表元数据、`default` 主题、事件注册和图表配置协议不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/components/ChartGraph/BasicFunnelChart/BasicFunnelChart.tsx`
+    - 移除顶层同步 `init` 导入。
+    - 改为在 `onMount` / `onUpdated` 阶段按需触发 ECharts 运行时加载，并缓存最近一次挂载参数与渲染参数。
+    - 在运行时尚未就绪时，延后执行 `clear()`、`setOption(...)` 和选择态同步，待运行时可用后自动重放。
+  - `frontend/src/app/components/ChartGraph/BasicScatterChart/BasicScatterChart.tsx`
+    - 移除顶层同步 `init` 导入。
+    - 改为复用共享 `loadEChartsRuntime()` 入口，保留散点图的选中态、tooltip、颜色/大小映射逻辑不变。
+  - `frontend/src/app/components/ChartGraph/BasicGaugeChart/BasicGaugeChart.tsx`
+    - 移除顶层同步 `init` 导入。
+    - 将仪表盘图表切到挂载时按需初始化，保留原有 `ChartSelectionManager` 的 zrender/echarts 事件注册方式不变。
+  - `frontend/src/app/components/ChartGraph/BasicDoubleYChart/BasicDoubleYChart.tsx`
+    - 移除顶层同步 `init` 导入。
+    - 改为在运行时加载完成后再初始化图表实例，并保留双 Y 轴图的 axis overflow 重算与更新重放逻辑。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`87` 个测试文件通过，`665` 个测试通过，`4` 个跳过
+  - 当前构建产物观察：
+    - `echarts.*.js` 继续作为独立运行时存在，约 `1.03 MB`
+    - 主入口相关大 chunk 本轮约 `549.21 KB`
+    - 本轮未新增新的重量级桥接 chunk，也未引入新的 `Circular chunk` 告警
+  - 当前剩余同步 `echarts` 图表入口主要还有：
+    - `BasicRadarChart`
+    - `WaterfallChart`
+    - `BasicAreaChart`
+    - `BasicOutlineMapChart`
+
+- 阶段结论：
+  - 这一步继续缩小了 `ChartManager` 同步注册阶段对 ECharts 主运行时的直接耦合面，把漏斗图、散点图、仪表盘和双 Y 轴图都从“类定义时同步依赖运行时”收口到“实际挂载时再加载”。
+  - 截至当前，两轮前端图表运行时收口已覆盖：
+    - 6 类柱状系图表
+    - 3 类折线/面积图
+    - 3 类饼图
+    - 1 类漏斗图
+    - 1 类散点图
+    - 1 类仪表盘
+    - 1 类双 Y 轴图
+  - 当前还没有继续压小主入口相关大 chunk，说明决定性剩余成本仍主要在：
+    - 地图图表与地图资源注册链
+    - `BasicRadarChart` / `WaterfallChart` / `BasicAreaChart` 的剩余同步入口
+    - `ChartManager` 同步注册模型本身
+  - 因此下一步更合理的顺序仍然是：
+    - 先完成剩余非地图同步入口收口
+    - 再单独评估地图链与 `ChartManager` 的更高风险结构性拆分
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

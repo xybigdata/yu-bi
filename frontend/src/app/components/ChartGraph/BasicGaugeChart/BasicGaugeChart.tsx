@@ -31,9 +31,9 @@ import {
   toFormattedValue,
   transformToDataSet,
 } from 'app/utils/chartHelper';
-import { init } from 'echarts';
 import Chart from '../../../models/Chart';
 import { ChartSelectionManager } from '../../../models/ChartSelectionManager';
+import { loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 import {
   DataConfig,
@@ -51,6 +51,16 @@ class BasicGaugeChart extends Chart {
   config = Config;
   chart: any = null;
   selectionManager?: ChartSelectionManager;
+  protected container: HTMLElement | null = null;
+  private latestMountPayload?: {
+    options: BrokerOption;
+    context: BrokerContext;
+  };
+  private latestRenderPayload?: {
+    options: BrokerOption;
+    context: BrokerContext;
+  };
+  private runtimeLoadToken = 0;
 
   protected isArea = false;
   protected isStack = false;
@@ -74,17 +84,24 @@ class BasicGaugeChart extends Chart {
       return;
     }
 
-    this.chart = init(
-      context.document.getElementById(options.containerId)!,
-      'default',
-    );
-    this.selectionManager = new ChartSelectionManager(this.mouseEvents);
-    this.selectionManager.attachZRenderListeners(this.chart);
-    this.selectionManager.attachEChartsListeners(this.chart);
+    this.container = context.document.getElementById(options.containerId);
+    this.latestMountPayload = {
+      options,
+      context,
+    };
+    this.loadRuntimeAndReplay();
   }
 
   onUpdated(options: BrokerOption, context: BrokerContext) {
     if (!options.dataset || !options.dataset.columns || !options.config) {
+      return;
+    }
+    this.latestRenderPayload = {
+      options,
+      context,
+    };
+    if (!this.chart) {
+      this.loadRuntimeAndReplay();
       return;
     }
     if (!this.isMatchRequirement(options.config)) {
@@ -96,12 +113,61 @@ class BasicGaugeChart extends Chart {
   }
 
   onUnMount(options: BrokerOption, context: BrokerContext): void {
+    this.runtimeLoadToken += 1;
+    this.latestMountPayload = undefined;
+    this.latestRenderPayload = undefined;
+    this.container = null;
     this.selectionManager?.removeZRenderListeners(this.chart);
     this.chart?.dispose();
+    this.chart = null;
+    this.selectionManager = undefined;
   }
 
   onResize(options: BrokerOption, context: BrokerContext): void {
     this.chart?.resize(context);
+  }
+
+  private loadRuntimeAndReplay() {
+    const token = ++this.runtimeLoadToken;
+
+    void loadEChartsRuntime()
+      .then(({ init }) => {
+        if (token !== this.runtimeLoadToken) {
+          return;
+        }
+
+        const latestMountPayload = this.latestMountPayload;
+        if (!latestMountPayload || !this.container) {
+          return;
+        }
+
+        if (!this.chart) {
+          this.chart = init(this.container, 'default');
+          this.selectionManager = new ChartSelectionManager(this.mouseEvents);
+          this.selectionManager.attachZRenderListeners(this.chart);
+          this.selectionManager.attachEChartsListeners(this.chart);
+        }
+
+        const latestRenderPayload = this.latestRenderPayload;
+        if (!latestRenderPayload) {
+          return;
+        }
+
+        const { options } = latestRenderPayload;
+        if (!options.dataset || !options.config) {
+          return;
+        }
+
+        if (!this.isMatchRequirement(options.config)) {
+          this.chart?.clear();
+          return;
+        }
+        const newOptions = this.getOptions(options.dataset, options.config);
+        this.chart?.setOption(Object.assign({}, newOptions), true);
+      })
+      .catch(error => {
+        console.error('Load echarts runtime failed in BasicGaugeChart', error);
+      });
   }
 
   getOptions(dataset: ChartDataSetDTO, config: ChartConfig) {
