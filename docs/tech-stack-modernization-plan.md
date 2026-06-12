@@ -4210,6 +4210,31 @@
   - 它本身不会立刻带来新的懒加载边界，但能减少后续代码阅读和分包分析时的“类型导入看起来像运行时依赖”噪音。
   - 后续如果继续推进图表链现代化，更值得关注的会是剩余真正需要运行时值导入的位置，而不是这些纯类型位文件。
 
+### 2026-06-12 本轮继续推进：移除前端未使用的 history 直接依赖
+
+- 本轮目标：
+  - 继续做低风险工程化治理，移除已经退出生产代码的前端直接依赖。
+  - 降低 `package.json` / lockfile 的维护噪音，避免让现代化后的依赖清单继续保留无意义残留。
+  - 不改变任何路由运行逻辑或现有 Router 兼容层行为。
+
+- 本轮改造动作：
+  - `frontend/package.json`
+    - 移除未再被生产代码引用的 `history` 直接依赖声明。
+  - `frontend/package-lock.json`
+    - 使用 `npm uninstall history --package-lock-only` 同步锁文件，确保依赖树与声明一致。
+
+- 本轮验证结果：
+  - 检索确认：`frontend/src` 生产代码中已无 `history` 直接导入。
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步是纯依赖治理，不改业务代码路径。
+  - `history` 已从“仓库遗留直接依赖”收口为“无直接声明、无生产使用面”的状态，减少了后续版本维护的干扰项。
+  - 后续可以继续用同样方式筛掉其它已退出生产路径、但仍滞留在依赖声明里的低风险包。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
