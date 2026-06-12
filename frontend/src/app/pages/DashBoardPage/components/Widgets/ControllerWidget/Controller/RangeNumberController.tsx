@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { Form, InputNumber } from 'antd';
-import type { valueType } from 'antd/es/statistic/utils';
+import type { StatisticProps } from 'antd/es/statistic';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { rangeNumberValidator } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/utils';
 import React, { memo, useEffect, useState } from 'react';
@@ -50,8 +50,8 @@ export interface RangeNumberSetProps {
 }
 export const RangeNumberController: React.FC<RangeNumberSetProps> = memo(
   ({ onChange, value }) => {
-    const [startVal, setStartVal] = useState<valueType | undefined>();
-    const [endVal, setEndVal] = useState<valueType | undefined>();
+    const [startVal, setStartVal] = useState<StatisticProps['value']>();
+    const [endVal, setEndVal] = useState<StatisticProps['value']>();
 
     const _onStartValEnter = e => {
       onChange?.([e.target.value, endVal]);

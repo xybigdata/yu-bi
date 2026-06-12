@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { Form, FormItemProps, InputNumber } from 'antd';
-import type { valueType } from 'antd/es/statistic/utils';
+import type { StatisticProps } from 'antd/es/statistic';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import React, { memo, useEffect, useState } from 'react';
 import { ControllerValuesName } from '../..';
@@ -54,8 +54,8 @@ export interface RangeNumberSetProps {
 }
 export const RangeNumberSet: React.FC<RangeNumberSetProps> = memo(
   ({ onChange, value }) => {
-    const [startVal, setStartVal] = useState<valueType | undefined>();
-    const [endVal, setEndVal] = useState<valueType | undefined>();
+    const [startVal, setStartVal] = useState<StatisticProps['value']>();
+    const [endVal, setEndVal] = useState<StatisticProps['value']>();
     const onStartChange = start => {
       onChange?.([start, endVal]);
     };
