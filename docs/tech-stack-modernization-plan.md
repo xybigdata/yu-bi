@@ -4401,6 +4401,37 @@
   - 改动边界只在前端下载触发实现，不涉及后端下载接口、响应头协议或任务链路。
   - 后续如果继续筛同类依赖，仍应优先找这种“生产调用面单点集中、浏览器已有稳定原生能力、可用小测试兜底”的候选项。
 
+### 2026-06-12 本轮继续推进：移除前端 js-cookie 直接依赖
+
+- 本轮目标：
+  - 继续收口前端里只被仓库内单点封装直接使用的基础工具依赖。
+  - 将认证 token 的 cookie 读写逻辑收回仓库内 `auth.ts` 实现，移除 `js-cookie` 顶层直接依赖。
+  - 保持现有 token 读取、写入、删除和 `path=/` 作用域行为不变。
+
+- 本轮改造动作：
+  - `frontend/src/utils/auth.ts`
+    - 删除 `js-cookie` 直接导入。
+    - 新增仓库内 `getCookie` / `setCookie` / `removeCookie` 小工具。
+    - `setToken()` 保持按到期时间写入 cookie，并显式保留 `path=/`。
+    - `removeToken()` 改为写入过期时间为 `1970-01-01` 的根路径 cookie，保持删除语义。
+  - `frontend/src/utils/__tests__/auth.test.ts`
+    - 补充 token cookie 读写、删除和 `path=/` / `expires=` 关键行为单测。
+  - `frontend/package.json`
+  - `frontend/package-lock.json`
+    - 移除 `js-cookie` 顶层直接依赖，并用 `npm uninstall js-cookie --package-lock-only` 同步锁文件。
+
+- 本轮验证结果：
+  - 检索确认：仓库生产代码中对 `js-cookie` 的直接导入原本只存在于 `frontend/src/utils/auth.ts`，本轮已全部替换。
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步把认证 token 的 cookie 行为继续收口到仓库内单点实现，减少了前端依赖清单中的单用途工具包。
+  - 当前依赖树仍会因 `@antv/s2-react -> ahooks` 的传递依赖携带 `js-cookie`，但 `yu-bi` 自身业务代码已不再直接声明或直接导入该包。
+  - 改动边界只在前端 token cookie 工具层，不涉及登录接口、鉴权协议或后端 session / JWT 语义。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
