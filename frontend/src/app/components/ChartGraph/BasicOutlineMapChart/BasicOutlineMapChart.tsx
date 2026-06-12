@@ -38,8 +38,8 @@ import {
   toFormattedValue,
   transformToDataSet,
 } from 'app/utils/chartHelper';
-import { ECharts, init, registerMap } from 'echarts';
 import { CloneValueDeep } from 'utils/object';
+import { loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 import {
   GeoInfo,
@@ -88,12 +88,6 @@ const loadGeoMap = async (level: GeoMapLevel): Promise<GeoMapData> => {
     geoMapDataCache.set(level, data);
     geoMapPromiseCache.delete(level);
 
-    // NOTE: source from: http://datav.aliyun.com/tools/atlas/index.html#&lat=31.39115752282472&lng=103.7548828125&zoom=4
-    if (!registeredGeoMaps.has(level)) {
-      registerMap(level, data as any);
-      registeredGeoMaps.add(level);
-    }
-
     return data;
   });
 
@@ -117,7 +111,12 @@ class BasicOutlineMapChart extends Chart {
     options: BrokerOption;
     context: BrokerContext;
   };
-  private geoMapLoadToken = 0;
+  private latestMountPayload?: {
+    options: BrokerOption;
+    context: BrokerContext;
+  };
+  private runtimeLoadToken = 0;
+  private runtimeReady = false;
 
   constructor(props?) {
     super(
@@ -133,7 +132,7 @@ class BasicOutlineMapChart extends Chart {
     ];
   }
 
-  getOptionsConfig(geoConfig: GeoInfo, chart?: ECharts) {
+  getOptionsConfig(geoConfig: GeoInfo, chart?: any) {
     const newOption: any = CloneValueDeep(chart?.getOption());
     geoConfig.center = newOption?.geo?.[0].center;
     geoConfig.zoom = newOption?.geo?.[0].zoom;
@@ -148,14 +147,11 @@ class BasicOutlineMapChart extends Chart {
       return;
     }
     this.container = context.document.getElementById(options.containerId);
-    this.chart = init(this.container!, 'default');
-    this.selectionManager = new ChartSelectionManager(this.mouseEvents);
-    this.selectionManager.attachWindowListeners(context.window);
-    this.selectionManager.attachZRenderListeners(this.chart);
-    this.selectionManager.attachEChartsListeners(this.chart);
-    this.container?.addEventListener('mouseup', () =>
-      this.getOptionsConfig(this.geoConfig, this.chart),
-    );
+    this.latestMountPayload = {
+      options,
+      context,
+    };
+    this.loadRuntimeAndReplay();
   }
 
   onUpdated(options: BrokerOption, context: BrokerContext) {
@@ -171,6 +167,11 @@ class BasicOutlineMapChart extends Chart {
       options,
       context,
     };
+
+    if (!this.runtimeReady || !this.chart) {
+      this.loadRuntimeAndReplay();
+      return;
+    }
 
     const geoMapLevel = this.getGeoMapLevel(options.config.styles || []);
     if (!this.hasLoadedGeoMap(geoMapLevel)) {
@@ -195,14 +196,16 @@ class BasicOutlineMapChart extends Chart {
   }
 
   onUnMount(options: BrokerOption, context: BrokerContext) {
-    this.geoMapLoadToken += 1;
+    this.runtimeLoadToken += 1;
     this.latestRenderPayload = undefined;
-    this.container?.removeEventListener('mouseup', () =>
-      this.getOptionsConfig(this.geoConfig, this.chart),
-    );
+    this.latestMountPayload = undefined;
     this.selectionManager?.removeWindowListeners(context.window);
     this.selectionManager?.removeZRenderListeners(this.chart);
     this.chart?.dispose();
+    this.chart = null;
+    this.selectionManager = undefined;
+    this.container = null;
+    this.runtimeReady = false;
   }
 
   private hasLoadedGeoMap(level: GeoMapLevel) {
@@ -221,12 +224,18 @@ class BasicOutlineMapChart extends Chart {
   }
 
   private loadGeoMapAndReplay(level: GeoMapLevel) {
-    const token = ++this.geoMapLoadToken;
+    const token = this.runtimeLoadToken;
 
-    void loadGeoMap(level)
-      .then(geoMap => {
-        if (token !== this.geoMapLoadToken) {
+    void Promise.all([loadEChartsRuntime(), loadGeoMap(level)])
+      .then(([{ registerMap }, geoMap]) => {
+        if (token !== this.runtimeLoadToken) {
           return;
+        }
+
+        // NOTE: source from: http://datav.aliyun.com/tools/atlas/index.html#&lat=31.39115752282472&lng=103.7548828125&zoom=4
+        if (!registeredGeoMaps.has(level)) {
+          registerMap(level, geoMap as any);
+          registeredGeoMaps.add(level);
         }
 
         this.geoMap = geoMap;
@@ -260,6 +269,70 @@ class BasicOutlineMapChart extends Chart {
       })
       .catch(error => {
         console.error('Load geo map resource failed', error);
+      });
+  }
+
+  private loadRuntimeAndReplay() {
+    const token = ++this.runtimeLoadToken;
+
+    void loadEChartsRuntime()
+      .then(({ init }) => {
+        if (token !== this.runtimeLoadToken) {
+          return;
+        }
+
+        const latestMountPayload = this.latestMountPayload;
+        if (!latestMountPayload || !this.container) {
+          return;
+        }
+
+        if (!this.chart) {
+          this.chart = init(this.container, 'default');
+          this.selectionManager = new ChartSelectionManager(this.mouseEvents);
+          this.selectionManager.attachWindowListeners(
+            latestMountPayload.context.window,
+          );
+          this.selectionManager.attachZRenderListeners(this.chart);
+          this.selectionManager.attachEChartsListeners(this.chart);
+          this.container?.addEventListener('mouseup', () =>
+            this.getOptionsConfig(this.geoConfig, this.chart),
+          );
+        }
+
+        this.runtimeReady = true;
+
+        const latestPayload = this.latestRenderPayload;
+        if (!latestPayload || !latestPayload.options.config) {
+          return;
+        }
+
+        const geoMapLevel = this.getGeoMapLevel(
+          latestPayload.options.config.styles || [],
+        );
+        if (!this.hasLoadedGeoMap(geoMapLevel)) {
+          this.loadGeoMapAndReplay(geoMapLevel);
+          return;
+        }
+
+        const { options, context } = latestPayload;
+        if (!options.dataset || !options.config) {
+          return;
+        }
+
+        this.selectionManager?.updateSelectedItems(options.selectedItems);
+        const newOptions = this.getOptions(
+          options.dataset,
+          options.config,
+          options.selectedItems,
+          context,
+        );
+        this.chart?.setOption(Object.assign({}, newOptions), true);
+      })
+      .catch(error => {
+        console.error(
+          'Load echarts runtime failed in BasicOutlineMapChart',
+          error,
+        );
       });
   }
 

@@ -3732,6 +3732,45 @@
     - 单独评估 `BasicOutlineMapChart` 的运行时与地图资源注册链
     - 再决定是否进入 `ChartManager` 图表簇级延迟注册这类更高风险结构改造
 
+### 2026-06-12 本轮继续推进：地图图表运行时与 registerMap 注册链按需加载
+
+- 本轮目标：
+  - 处理前端图表层最后一个同步 `echarts` 入口：`BasicOutlineMapChart`。
+  - 保持 GeoJSON 资源仍按需加载、地图等级切换逻辑不变，同时把 `init` 与 `registerMap` 都移动到运行时加载路径里。
+  - 在不修改 `ChartManager` 同步实例化协议的前提下，把图表目录里的同步 `echarts` 运行时导入清零。
+
+- 本轮改造动作：
+  - `frontend/src/app/components/ChartGraph/BasicOutlineMapChart/BasicOutlineMapChart.tsx`
+    - 移除顶层同步 `import { ECharts, init, registerMap } from 'echarts'`。
+    - 改为复用共享 `loadEChartsRuntime()`，在 `onMount` / `onUpdated` 阶段按需初始化地图图表运行时。
+    - 增加 `latestMountPayload`、`runtimeLoadToken`、`runtimeReady` 等状态，确保地图图表在运行时和 GeoJSON 尚未就绪时能够安全重放最近一次渲染请求。
+    - 保留 `geoMapLoaders`、`geoMapDataCache`、`geoMapPromiseCache` 这些 GeoJSON 资源按需缓存机制不变。
+    - 将 `registerMap(level, geoMap)` 从 GeoJSON 模块加载回调移动到“ECharts 运行时 + GeoJSON 资源”都到位之后执行，避免在模块顶层同步依赖 ECharts。
+    - 保留 `ChartSelectionManager`、`mouseup` 后 geo center/zoom 回写、地图等级切换和 `visualMap` / `scatter` 叠加逻辑不变。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`87` 个测试文件通过，`665` 个测试通过，`4` 个跳过
+  - 当前构建产物观察：
+    - `echarts.*.js` 继续作为独立运行时存在，约 `1.03 MB`
+    - `geo-china.map.*.js` 约 `581.73 KB`
+    - `geo-china-city.map.*.js` 约 `1.22 MB`
+    - 主入口相关大 chunk 本轮约 `551.25 KB`
+    - 本轮未新增新的重量级桥接 chunk，也未引入新的 `Circular chunk` 告警
+  - 代码层检索证据：
+    - `frontend/src/app/components/ChartGraph` 下对 `import { init } from 'echarts'` / `import { ECharts, init, registerMap } from 'echarts'` 的检索结果已清零
+
+- 阶段结论：
+  - 至此，前端图表目录中的同步 `echarts` 运行时导入已经全部退出，地图链也已经进入与其它图表一致的“挂载时按需加载”路径。
+  - 这说明前端图表运行时现代化已经从“清同步依赖面”阶段进入下一个更高风险阶段，真正剩余的结构性问题主要只剩：
+    - `ChartManager` 仍在同步实例化整套基础图表
+    - `echarts` 主运行时本体仍是独立大块，但尚未按图表簇进一步拆分
+  - 因此下一步更合理的顺序已经进一步收敛为：
+    - 单独评估 `ChartManager` 图表簇级延迟注册的收益、边界和回归成本
+    - 在确认风险可控后，再决定是否进入这类结构性改造
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
