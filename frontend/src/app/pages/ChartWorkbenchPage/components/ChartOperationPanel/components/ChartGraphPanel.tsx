@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import ChartManager from 'app/models/ChartManager';
+import ChartManager, { ChartPaletteItem } from 'app/models/ChartManager';
 import ChartI18NContext from 'app/pages/ChartWorkbenchPage/contexts/Chart18NContext';
 import { IChart } from 'app/types/Chart';
 import { ChartConfig } from 'app/types/ChartConfig';
@@ -33,17 +33,19 @@ const ChartGraphPanel: FC<{
   onChartChange: (chart: IChart) => void;
 }> = memo(({ chart, chartConfig, onChartChange }) => {
   const chartManager = ChartManager.instance();
-  const [allCharts] = useState<IChart[]>(chartManager.getAllCharts());
+  const [allCharts] = useState<ChartPaletteItem[]>(
+    chartManager.getAllChartPalette(),
+  );
   const [requirementsStates, setRequirementStates] = useState<object>({});
 
   useLayoutEffect(() => {
     if (allCharts) {
       const dict = allCharts?.reduce((acc, cur) => {
         const transferedChartConfig = transferChartDataConfig(
-          { datas: CloneValueDeep(cur?.config?.datas || []) },
+          { datas: CloneValueDeep(cur?.datas || []) },
           { datas: chartConfig?.datas },
         );
-        acc[cur.meta.id] = cur?.isMatchRequirement(transferedChartConfig);
+        acc[cur.meta.id] = cur.isMatchRequirement(transferedChartConfig);
         return acc;
       }, {});
       setRequirementStates(dict);
@@ -56,7 +58,7 @@ const ChartGraphPanel: FC<{
         return (
           <ChartI18NContext.Provider
             key={c?.meta?.id}
-            value={{ i18NConfigs: c?.config?.i18ns }}
+            value={{ i18NConfigs: c?.i18ns }}
           >
             <ChartGraphIcon
               chart={c}

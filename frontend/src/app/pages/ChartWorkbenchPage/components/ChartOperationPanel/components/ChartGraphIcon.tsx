@@ -20,7 +20,7 @@ import { Tooltip } from 'antd';
 import { IW } from 'app/components';
 import { ChartDataSectionType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import ChartManager from 'app/models/ChartManager';
+import ChartManager, { ChartPaletteItem } from 'app/models/ChartManager';
 import { IChart } from 'app/types/Chart';
 import classnames from 'classnames';
 import { FC, memo, useCallback } from 'react';
@@ -32,7 +32,7 @@ import {
 } from 'styles/StyleConstants';
 
 const ChartGraphIcon: FC<{
-  chart?: IChart;
+  chart?: Pick<ChartPaletteItem, 'meta'>;
   isActive?: boolean;
   isMatchRequirement?: boolean;
   onChartChange: (chart: IChart) => void;

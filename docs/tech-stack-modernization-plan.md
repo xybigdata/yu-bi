@@ -3813,6 +3813,49 @@
     - 图表编辑器和分享页初始化协议改为异步取图表实例
     - 内部稳定标识、命名空间和迁移常量重构
 
+### 2026-06-12 本轮继续推进：拆分 ChartManager 的 palette 轻量视图
+
+- 本轮目标：
+  - 延续 `ChartManager` 注册表前置收口后的低风险路线，继续把“图表面板 / 图标显示”与“完整图表生命周期实例”解耦。
+  - 保持 `ChartEditor`、预览页、分享页、看板渲染链仍然通过 `getById()` / `getDefaultChart()` 同步拿图表实例，不直接进入异步管理器改造。
+  - 为后续拆分 `metadata list`、`icon map`、`instance factory` 三层职责继续打前站。
+
+- 本轮改造动作：
+  - `frontend/src/app/models/chartRequirement.ts`
+    - 新增图表需求匹配纯函数，把基础的 `datas` 必填区段匹配逻辑从 `Chart` 实例内部抽出。
+    - 保持原有 group / aggregate / drillable 匹配语义不变，为后续非实例化视图复用这套逻辑提供统一入口。
+  - `frontend/src/app/models/Chart.ts`
+    - `isMatchRequirement()` 改为委托给共享纯函数，删除类内部重复的需求匹配实现。
+  - `frontend/src/app/models/ChartManager.ts`
+    - 新增 `getAllChartPalette()`，对外提供仅包含 `meta`、`datas`、`i18ns` 和 `isMatchRequirement()` 的轻量 palette 视图。
+    - `getAllChartIcons()` 改为基于 palette 视图生成图标映射，不再直接依赖完整图表实例数组。
+    - 保持 `getAllCharts()`、`getById()`、`getDefaultChart()` 和插件图表加载链不变。
+  - `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartGraphPanel.tsx`
+    - 图表面板改为消费 `getAllChartPalette()`，仅基于 palette 数据计算图表需求匹配状态和国际化上下文。
+  - `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartGraphIcon.tsx`
+    - 图标组件输入从完整 `IChart` 缩窄到只依赖 `meta` 的轻量视图。
+  - `frontend/src/app/hooks/useGetVizIcon.tsx`
+    - 补齐图标映射的 `undefined` 边界处理，保留缺省图标回退逻辑不变。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`88` 个测试文件通过，`668` 个测试通过，`4` 个跳过
+  - 当前构建产物观察：
+    - 主入口相关大 chunk 本轮约 `552.66 KB`
+    - `ChartEditor.*.js` 约 `64.09 KB`
+    - `echarts.*.js` 继续作为独立运行时存在，约 `1.03 MB`
+    - 本轮未新增新的重量级桥接 chunk，也未引入新的 `Circular chunk` 告警
+
+- 阶段结论：
+  - 这一步的核心收益，是把图表 palette 展示链从“必须拿完整 `IChart` 实例”收口到“只吃轻量元数据与配置视图”，为 `ChartManager` 继续职责拆分提供了更清晰的边界。
+  - 当前同步渲染主链依然保持不变，因此编辑器、预览、分享页和看板部件的回归风险仍受控。
+  - 下一步更合理的顺序是：
+    - 继续把 `metadata list`、`icon map`、`instance factory` 的数据来源独立出来
+    - 单独评估哪些调用面还必须依赖完整 `IChart`，哪些可以进一步切到轻量视图
+    - 在证据充分后，再评估图表簇级延迟注册是否值得进入实现阶段
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

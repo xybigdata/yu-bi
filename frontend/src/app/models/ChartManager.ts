@@ -17,11 +17,21 @@
  */
 
 import { IChart } from 'app/types/Chart';
+import { ChartConfig, ChartI18NSectionConfig } from 'app/types/ChartConfig';
+import ChartMetadata from 'app/types/ChartMetadata';
 import { Debugger } from 'utils/debugger';
 import { CloneValueDeep } from 'utils/object';
 import { preloadChartPlugins } from 'app/services/chartPluginService';
 import PluginChartLoader from './PluginChartLoader';
 import { basicChartRegistry } from './chartRegistry';
+import { isChartMatchRequirement } from './chartRequirement';
+
+export type ChartPaletteItem = {
+  meta: ChartMetadata;
+  datas?: ChartConfig['datas'];
+  i18ns?: ChartI18NSectionConfig[];
+  isMatchRequirement: (targetConfig?: ChartConfig) => boolean;
+};
 
 class ChartManager {
   private _loader = new PluginChartLoader();
@@ -53,11 +63,21 @@ class ChartManager {
     return this._charts || [];
   }
 
+  public getAllChartPalette(): ChartPaletteItem[] {
+    return this._charts.map(chart => ({
+      meta: CloneValueDeep(chart.meta),
+      datas: CloneValueDeep(chart.config?.datas || []),
+      i18ns: CloneValueDeep(chart.config?.i18ns || []),
+      isMatchRequirement: targetConfig =>
+        isChartMatchRequirement(chart.config, targetConfig),
+    }));
+  }
+
   public getAllChartIcons() {
-    return this._charts.reduce((acc, cur) => {
+    return this.getAllChartPalette().reduce((acc, cur) => {
       acc[cur.meta.id] = cur.meta.icon;
       return acc;
-    }, {});
+    }, {} as Record<string, string | undefined>);
   }
 
   public getById(id?: string) {
