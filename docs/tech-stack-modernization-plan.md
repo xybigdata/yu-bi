@@ -3314,6 +3314,50 @@
     - 评估 `MonacoEditor` 的运行时加载链路，避免编辑器能力继续跟随主入口首包
     - 再评估 `ChartManager` 图表簇级延迟注册，作为收益更高但结构性更强的下一层改造
 
+### 2026-06-12 本轮继续推进：MonacoEditor 运行时按需加载
+
+- 本轮目标：
+  - 延续 `PivotSheet` 的渐进拆分策略，把 `MonacoEditor` 的 `monaco-editor` 运行时从主入口同步导入中拆出去。
+  - 保持 SQL 编辑器、Mock Data 编辑器、变量/资源补全、快捷键、主题切换和现有编辑器调用方式不变，不直接改页面结构或业务交互协议。
+
+- 本轮改造动作：
+  - `frontend/src/app/components/MonacoEditor/runtime.ts`
+    - 新增 Monaco 运行时加载入口 `loadMonaco()`。
+    - 新增 SQL 与 JavaScript 语言贡献的按需初始化方法，避免语言定义继续随主包同步进入。
+  - `frontend/src/app/components/MonacoEditor/index.tsx`
+    - 将 `monaco-editor/esm/vs/editor/editor.api` 从顶层静态导入改为挂载期动态加载。
+    - 编辑器首次挂载改为异步初始化，并在运行时代码尚未就绪时显示轻量 `Spin` 占位。
+    - 保持 `value/defaultValue/language/theme/options/overrideServices/editorWillMount/editorDidMount/editorWillUnmount/uri` 的现有对外协议不变。
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/Main/Editor/SQLEditor.tsx`
+    - SQL 语言注册改为通过 `ensureMonacoSqlLanguage(...)` 懒初始化。
+    - `Ctrl/Cmd + Enter`、`Ctrl/Cmd + S` 命令绑定改为在运行时 Monaco 加载完成后再注册。
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/Main/Properties/Resource.tsx`
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/Main/Properties/Variables.tsx`
+    - SQL 自动补全 provider 改为等待 `loadMonaco()` 后再注册，移除对同步 `monaco` 运行时值的直接依赖。
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/EditorContext.ts`
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/slice/thunks.ts`
+  - `frontend/src/app/pages/DashBoardPage/components/MockDataPanel/MockDataEditor.tsx`
+    - 将 Monaco 相关使用面收口为纯类型导入或运行时按需加载，避免这些模块继续把编辑器运行时拖回主链。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`87` 个测试文件通过，`665` 个测试通过，`4` 个跳过
+  - 当前构建产物变化：
+    - 新增独立 Monaco 主运行时 chunk：`editor.api.*.js` 约 `2.30 MB`
+    - 新增独立 SQL 语言 chunk：`sql.*.js` 约 `10.19 KB`
+    - 新增独立 JavaScript 语言贡献 chunk：`javascript.contribution.*.js` 约 `2.36 KB`
+    - 主入口相关 chunk 从 `index.DjMeMnAM.js` 约 `429.73 KB` 读取侧看，编辑器运行时已不再直接并入主入口同步代码
+  - 本轮未引入新的 `Circular chunk` 告警
+
+- 阶段结论：
+  - `MonacoEditor` 已完成一轮低中风险的运行时拆分，证明“将重量级编辑器运行时从主入口静态链路剥离”是可落地的。
+  - 当前仍有若干编辑器相关页面会在真正进入编辑态时拉起这些 chunk，这属于符合预期的延迟加载行为。
+  - 下一阶段可继续沿真实重模块边界推进：
+    - 评估 `ChartManager` 图表簇级延迟注册
+    - 评估 StoryBoard 播放/编辑链路中的重依赖边界
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

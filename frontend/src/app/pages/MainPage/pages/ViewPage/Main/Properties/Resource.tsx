@@ -25,7 +25,7 @@ import {
   TableOutlined,
 } from '@ant-design/icons';
 import { Button, Col, Dropdown, Input, Row, Space, TreeDataNode } from 'antd';
-import { monaco } from 'app/components/MonacoEditor';
+import { loadMonaco } from 'app/components/MonacoEditor/runtime';
 import { Tree } from 'app/components';
 import { DataViewFieldType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -115,20 +115,32 @@ export const Resource = memo(() => {
     );
 
   useEffect(() => {
+    let cancelled = false;
     if (databaseTreeModel && editorCompletionItemProviderRef) {
       editorCompletionItemProviderRef.current?.dispose();
-      dispatch(
-        getEditorProvideCompletionItems({
-          sourceId,
-          resolve: getItem => {
-            editorCompletionItemProviderRef.current =
-              monaco.languages.registerCompletionItemProvider('sql', {
-                provideCompletionItems: getItem,
-              });
-          },
-        }),
-      );
+      void loadMonaco().then(monaco => {
+        if (cancelled) {
+          return;
+        }
+        dispatch(
+          getEditorProvideCompletionItems({
+            sourceId,
+            resolve: getItem => {
+              if (cancelled) {
+                return;
+              }
+              editorCompletionItemProviderRef.current =
+                monaco.languages.registerCompletionItemProvider('sql', {
+                  provideCompletionItems: getItem,
+                });
+            },
+          }),
+        );
+      });
     }
+    return () => {
+      cancelled = true;
+    };
   }, [dispatch, sourceId, databaseTreeModel, editorCompletionItemProviderRef]);
 
   const renderIcon = useCallback(node => {

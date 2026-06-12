@@ -25,7 +25,7 @@ import {
   TeamOutlined,
 } from '@ant-design/icons';
 import { Button, List, Popconfirm } from 'antd';
-import { monaco } from 'app/components/MonacoEditor';
+import { loadMonaco } from 'app/components/MonacoEditor/runtime';
 import { ListItem } from 'app/components';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -96,20 +96,32 @@ export const Variables = memo(() => {
   const tg = useI18NPrefix('global');
 
   useEffect(() => {
+    let cancelled = false;
     if (editorCompletionItemProviderRef) {
       editorCompletionItemProviderRef.current?.dispose();
-      dispatch(
-        getEditorProvideCompletionItems({
-          sourceId,
-          resolve: getItem => {
-            editorCompletionItemProviderRef.current =
-              monaco.languages.registerCompletionItemProvider('sql', {
-                provideCompletionItems: getItem,
-              });
-          },
-        }),
-      );
+      void loadMonaco().then(monaco => {
+        if (cancelled) {
+          return;
+        }
+        dispatch(
+          getEditorProvideCompletionItems({
+            sourceId,
+            resolve: getItem => {
+              if (cancelled) {
+                return;
+              }
+              editorCompletionItemProviderRef.current =
+                monaco.languages.registerCompletionItemProvider('sql', {
+                  provideCompletionItems: getItem,
+                });
+            },
+          }),
+        );
+      });
     }
+    return () => {
+      cancelled = true;
+    };
   }, [
     dispatch,
     sourceId,

@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-import { monaco } from 'app/components/MonacoEditor';
 import {
   createContext,
   MutableRefObject,
@@ -25,13 +24,14 @@ import {
   useRef,
   useState,
 } from 'react';
+import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
 interface EditorContextValue {
-  editorInstance: monaco.editor.IStandaloneCodeEditor | undefined;
+  editorInstance: Monaco.editor.IStandaloneCodeEditor | undefined;
   editorCompletionItemProviderRef:
-    | MutableRefObject<monaco.IDisposable | undefined>
+    | MutableRefObject<Monaco.IDisposable | undefined>
     | undefined;
-  setEditor: (editor: monaco.editor.IStandaloneCodeEditor | undefined) => void;
+  setEditor: (editor: Monaco.editor.IStandaloneCodeEditor | undefined) => void;
   onRun: () => void;
   onSave: () => void;
   initActions: ({
@@ -56,10 +56,10 @@ export const EditorContext = createContext(editorContextValue);
 
 export const useEditorContext = (): EditorContextValue => {
   const [editorInstance, setEditor] =
-    useState<monaco.editor.IStandaloneCodeEditor>();
-  const [onRun, setOnRun] = useState(() => () => {});
-  const [onSave, setOnSave] = useState(() => () => {});
-  const editorCompletionItemProviderRef = useRef<monaco.IDisposable>();
+    useState<Monaco.editor.IStandaloneCodeEditor>();
+  const [onRun, setOnRun] = useState<() => void>(() => () => {});
+  const [onSave, setOnSave] = useState<() => void>(() => () => {});
+  const editorCompletionItemProviderRef = useRef<Monaco.IDisposable>();
 
   const initActions = useCallback(({ onRun, onSave }) => {
     setOnRun(() => onRun);
