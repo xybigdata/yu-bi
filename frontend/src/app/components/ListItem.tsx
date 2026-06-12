@@ -1,5 +1,5 @@
 import { List } from 'antd';
-import type { ListItemProps } from 'antd/es/list/Item';
+import type { ListItemProps } from 'antd/es/list';
 import classnames from 'classnames';
 import { memo, ReactNode } from 'react';
 import styled from 'styled-components';
