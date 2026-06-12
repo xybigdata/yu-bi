@@ -4315,6 +4315,32 @@
   - `@types/react` 现在与 `@types/react-dom`、`@types/node` 等类型包保持同类归属，前端运行时依赖清单更干净。
   - 后续可以继续按同样规则检查是否还有其它误放在 `dependencies` 中的类型包或纯开发工具。
 
+### 2026-06-12 本轮继续推进：移除前端未使用的 quill 直接依赖
+
+- 本轮目标：
+  - 继续按“生产代码零直接引用即可优先清理”的规则收口前端依赖声明。
+  - 移除已经不再被仓库源码直接 `import` 的 `quill` 顶层直接依赖，减少依赖清单噪音。
+  - 明确这一步只是依赖治理，不误报为“富文本已经完成 Quill 2 路线切换”。
+
+- 本轮改造动作：
+  - `frontend/package.json`
+    - 删除未被生产代码直接引用的 `quill` 顶层直接依赖声明。
+  - `frontend/package-lock.json`
+    - 使用 `npm install --package-lock-only` 同步锁文件，确保依赖声明与锁文件一致。
+
+- 本轮验证结果：
+  - 检索确认：`frontend/src` 生产代码中已无 `import 'quill'` 或 `import ... from 'quill'` 直接入口。
+  - `react-quill 2.0.0` 仍会经其自身依赖链携带 `quill 1.3.7`，当前富文本运行时能力保持不变。
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步只是把“仓库声明的直接依赖”和“实际直接使用面”对齐，不触及富文本业务代码路径。
+  - 当前富文本链仍处于 `react-quill 2.0.0` 包装层加本地 compat 层状态，且 `react-quill` 自身依赖的仍是 `quill 1.3.7`；因此不能把这次清理表述成 Quill 2 主线迁移完成。
+  - 后续如果继续推进富文本现代化，应聚焦 `quillCompat.ts`、`RichTextEditor`、自定义 blot 和 markdown/image-drop 模块对真正 Quill 2 React 路线的兼容成本，而不是重新引入未使用的顶层 `quill` 声明。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
