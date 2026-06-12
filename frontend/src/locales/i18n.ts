@@ -2,7 +2,6 @@ import enUS from 'antd/lib/locale/en_US';
 import zhCN from 'antd/lib/locale/zh_CN';
 import { StorageKeys } from 'globalConstants';
 import i18next from 'i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 import { setDatartDayjsLocale } from 'app/utils/date';
 import { instance as requestInstance } from 'utils/request';
@@ -40,9 +39,6 @@ setDatartDayjsLocale(initialLocale === 'zh' ? 'zh-cn' : 'en'); // FIXME locale
 export const i18n = i18next
   // pass the i18n instance to react-i18next.
   .use(initReactI18next)
-  // detect user language
-  // learn more: https://github.com/i18next/i18next-browser-languageDetector
-  .use(LanguageDetector)
   // init i18next
   // for all options read: https://www.i18next.com/overview/configuration-options
   .init({

@@ -4605,6 +4605,31 @@
   - 改动边界集中在数值工具层和瀑布图内部数据归一逻辑，不涉及通用格式化展示策略。
   - 后续如果继续推进数字相关现代化，更值得关注的是更大范围的格式化语义和图表口径一致性，而不是继续引入额外的小型数值工具库。
 
+### 2026-06-12 本轮继续推进：移除前端 i18next-browser-languagedetector 直接依赖
+
+- 本轮目标：
+  - 继续清理前端中已被仓库内显式实现覆盖的单点工具依赖。
+  - 保持国际化初始化、语言持久化和请求头语言设置行为不变。
+
+- 本轮改造动作：
+  - `frontend/src/locales/i18n.ts`
+    - 删除 `i18next-browser-languagedetector` 直接导入与 `.use(LanguageDetector)` 挂载。
+    - 保持 `getInitialLocale()` 作为唯一语言决策入口，继续统一读取 `localStorage` 并回退浏览器语言。
+  - `frontend/package.json`
+  - `frontend/package-lock.json`
+    - 移除 `i18next-browser-languagedetector` 顶层直接依赖，并用 `npm uninstall i18next-browser-languagedetector --package-lock-only` 同步锁文件。
+
+- 本轮验证结果：
+  - 检索确认：仓库中 `i18next-browser-languagedetector` 的直接使用面仅存在于 `frontend/src/locales/i18n.ts` 一处，本轮已清零。
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 当前语言初始化早已由仓库内 `getInitialLocale()` 显式控制，第三方 detector 并未承担独立职责。
+  - 这一步只是把依赖声明与实际行为对齐，不改变国际化主链，也不涉及语言切换交互与文案资源结构调整。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
