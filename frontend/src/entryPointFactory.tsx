@@ -18,7 +18,6 @@
 
 import 'antd/dist/reset.css';
 import 'app/assets/fonts/iconfont.css';
-import 'core-js/features/string/replace-all';
 import React, { Fragment } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';

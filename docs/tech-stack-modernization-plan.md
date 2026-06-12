@@ -4261,6 +4261,36 @@
   - 对生产构建而言，`react-dev-inspector` 现在更接近真正的“仅开发态存在”。
   - 后续可以继续沿“开发工具包只在开发态按需加载、并移到 devDependencies”这条规则筛其它低风险候选项。
 
+### 2026-06-12 本轮继续推进：移除 replaceAll polyfill 与 core-js 直接依赖
+
+- 本轮目标：
+  - 清理前端里只为 `String.prototype.replaceAll` 保留的历史 polyfill 残留。
+  - 在不降低当前现代浏览器基线兼容性的前提下，先把源码改成不依赖 `replaceAll`，再移除 `core-js` 直接依赖。
+  - 保持下载文件名清理、边距宽度解析和 task 构建链行为不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/utils/fetch.ts`
+    - 文件名里的双引号清理从 `replaceAll` 改为 `split().join()`。
+  - `frontend/src/app/components/FormGenerator/Basic/BasicMarginWidth.tsx`
+    - 宽度模式字符串剥离从 `replaceAll` 改为 `split().join()`。
+  - `frontend/src/entryPointFactory.tsx`
+  - `frontend/src/task.ts`
+    - 删除 `core-js/features/string/replace-all` 显式 polyfill 导入。
+  - `frontend/package.json`
+  - `frontend/package-lock.json`
+    - 移除 `core-js` 直接依赖，并用 `npm uninstall core-js --package-lock-only` 同步锁文件。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步把前端主入口与 task 入口上最后一段显式 `replaceAll` polyfill 残留清掉了。
+  - 当前清理方式不依赖“浏览器一定支持 `replaceAll`”这个前提，因此比直接删 polyfill 更保守。
+  - `core-js` 已从前端直接依赖中退出；后续如果还要继续做兼容治理，更应关注是否仍存在必须靠手动 polyfill 支撑的真实运行时代码。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

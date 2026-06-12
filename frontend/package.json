@@ -69,7 +69,6 @@
     "antd": "^5.26.2",
     "axios": "1.17.0",
     "classnames": "^2.3.1",
-    "core-js": "^3.49.0",
     "currency.js": "^2.0.4",
     "dayjs": "^1.11.21",
     "debounce-promise": "3.1.2",

@@ -237,7 +237,7 @@ export const dealFileSave = (data, headers) => {
   );
   const encodeFileName = decodeURIComponent(fileNames?.[1] || '');
   const blob = new Blob([data], { type: '**application/octet-stream**' });
-  saveAs(blob, String(encodeFileName?.replaceAll('"', '')) || 'unknown.xlsx');
+  saveAs(blob, String(encodeFileName?.split('"').join('')) || 'unknown.xlsx');
 };
 
 export async function downloadFile(id) {
