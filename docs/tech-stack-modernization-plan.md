@@ -4371,6 +4371,36 @@
   - 当前仓库仍会因 `flexlayout-react` 的传递依赖带有 `uuid`，但 `yu-bi` 自身业务代码已不再直接声明或直接导入该包。
   - 后续如果还要继续做类似治理，应优先选择这种“调用面已集中、替换边界清晰、可用小测试兜底”的基础工具项，而不是贸然进入高耦合运行时专题。
 
+### 2026-06-12 本轮继续推进：移除前端 file-saver 直接依赖
+
+- 本轮目标：
+  - 继续收口前端中调用面极小、但仍依赖第三方包的浏览器工具类能力。
+  - 将文件下载逻辑改为浏览器原生 `Blob + a[download] + URL.createObjectURL` 实现，移除 `file-saver` 顶层直接依赖。
+  - 保持当前下载接口协议、文件名解析和下载触发行为不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/utils/fetch.ts`
+    - 删除 `file-saver` 的 `saveAs` 导入。
+    - `dealFileSave()` 改为使用浏览器原生下载链：创建 `Blob`、生成 object URL、挂载隐藏 `<a>`、触发点击、释放 object URL。
+    - 保留原有 `content-disposition` 文件名解析和默认文件名 `unknown.xlsx` 逻辑。
+  - `frontend/src/app/utils/__tests__/fetch.test.ts`
+    - 补充下载逻辑单测，覆盖文件名 decode、`createObjectURL`、点击触发和 `revokeObjectURL` 清理。
+  - `frontend/package.json`
+  - `frontend/package-lock.json`
+    - 移除 `file-saver` 顶层直接依赖，并用 `npm uninstall file-saver --package-lock-only` 同步锁文件。
+
+- 本轮验证结果：
+  - 检索确认：仓库生产代码中 `file-saver` 仅在 `dealFileSave()` 一处承担下载职责，本轮已全部替换。
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步把浏览器文件下载逻辑继续收口回仓库内基础工具函数，减少了前端依赖清单里的单点工具包。
+  - 改动边界只在前端下载触发实现，不涉及后端下载接口、响应头协议或任务链路。
+  - 后续如果继续筛同类依赖，仍应优先找这种“生产调用面单点集中、浏览器已有稳定原生能力、可用小测试兜底”的候选项。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
