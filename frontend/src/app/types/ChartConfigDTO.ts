@@ -18,7 +18,7 @@
 
 import { ChartDataConfig } from 'app/types/ChartConfig';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
-import { ECharts } from 'echarts';
+import type { ECharts } from 'echarts';
 
 export type ChartStyleConfigDTO = {
   key: string;

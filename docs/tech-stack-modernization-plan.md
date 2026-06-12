@@ -4185,6 +4185,31 @@
   - 这一步没有改变插件容错策略，也没有改变实例转换时机；只是去掉了无意义的 `null` 数组协议。
   - 后续如果继续沿插件链推进，更合理的方向会是 definition 校验与诊断信息收口，而不是继续把失败态以结构化空值传递到更高层。
 
+### 2026-06-12 本轮继续推进：收口非运行时模块里的 ECharts 类型导入
+
+- 本轮目标：
+  - 在图表运行时已经基本按需加载之后，继续清理仍然留在非运行时模块中的 `echarts` 静态值导入。
+  - 把只用于类型标注的 `ECharts` / `EChartsType` / `ECBasicOption` 统一收口为 `import type`，避免这类文件继续对 `echarts` 主包形成不必要的值依赖。
+  - 不改变任何图表渲染逻辑、事件绑定逻辑或配置协议。
+
+- 本轮改造动作：
+  - `frontend/src/app/types/ChartSelection.ts`
+  - `frontend/src/app/types/ChartConfigDTO.ts`
+  - `frontend/src/app/models/ChartSelectionManager.ts`
+  - `frontend/src/app/utils/chartHelper.ts`
+    - 将 `ECharts`、`EChartsType`、`ECBasicOption` 的导入统一改为 `import type`。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步继续缩小了非运行时模块和 `echarts` 主运行时之间的静态耦合面。
+  - 它本身不会立刻带来新的懒加载边界，但能减少后续代码阅读和分包分析时的“类型导入看起来像运行时依赖”噪音。
+  - 后续如果继续推进图表链现代化，更值得关注的会是剩余真正需要运行时值导入的位置，而不是这些纯类型位文件。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

@@ -60,8 +60,8 @@ import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import ChartMetadata from 'app/types/ChartMetadata';
 import { updateBy } from 'app/utils/mutation';
-import { ECharts } from 'echarts';
-import { ECBasicOption } from 'echarts/types/dist/shared';
+import type { ECharts } from 'echarts';
+import type { ECBasicOption } from 'echarts/types/dist/shared';
 import {
   DATE_LEVEL_DELIMITER,
   NumberUnitKey,
