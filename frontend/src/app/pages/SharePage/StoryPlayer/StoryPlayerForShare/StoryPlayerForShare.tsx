@@ -17,6 +17,7 @@
  */
 import { Layout } from 'antd';
 import DndProviderCompat from 'app/components/DndProviderCompat';
+import { loadRevealRuntime } from 'app/pages/StoryBoardPage/revealRuntime';
 import React, {
   memo,
   RefObject,
@@ -29,10 +30,7 @@ import React, {
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
-import Reveal from 'reveal.js';
 import type { RevealApi } from 'reveal.js';
-import 'reveal.js/reveal.css';
-import RevealZoom from 'reveal.js/plugin/zoom';
 import styled from 'styled-components';
 import { LEVEL_20, WHITE } from 'styles/StyleConstants';
 import { uuidv4 } from 'utils/utils';
@@ -106,37 +104,44 @@ export const StoryPlayerForShare: React.FC<{
     return false;
   }, [storyBoard?.config?.autoPlay?.auto, storyBoard?.config?.autoPlay?.delay]);
   useEffect(() => {
+    let cancelled = false;
     if (sortedPages.length > 0) {
-      revealRef.current = new Reveal(document.getElementById(domId)!, {
-        hash: false,
-        history: false,
-        controls: true,
-        controlsLayout: 'bottom-right',
-        slideNumber: 'c/t',
-        controlsTutorial: false,
-        progress: false,
-        loop: true,
-        width: '100%',
-        height: '100%',
-        margin: 0,
-        minScale: 1,
-        maxScale: 1,
-        autoSlide: autoSlide,
-        transition: 'convex',
-        // backgroundTransition: 'fade',
-        transitionSpeed: 'slow',
-        viewDistance: 100,
-        plugins: [RevealZoom],
-        keyboard: {
-          27: () => {
-            // disabled esc
-          }, // do something custom when ESC is pressed
-        },
+      void loadRevealRuntime().then(({ Reveal, RevealZoom }) => {
+        if (cancelled) {
+          return;
+        }
+        revealRef.current = new Reveal(document.getElementById(domId)!, {
+          hash: false,
+          history: false,
+          controls: true,
+          controlsLayout: 'bottom-right',
+          slideNumber: 'c/t',
+          controlsTutorial: false,
+          progress: false,
+          loop: true,
+          width: '100%',
+          height: '100%',
+          margin: 0,
+          minScale: 1,
+          maxScale: 1,
+          autoSlide: autoSlide,
+          transition: 'convex',
+          // backgroundTransition: 'fade',
+          transitionSpeed: 'slow',
+          viewDistance: 100,
+          plugins: [RevealZoom],
+          keyboard: {
+            27: () => {
+              // disabled esc
+            }, // do something custom when ESC is pressed
+          },
+        });
+        revealRef.current?.initialize();
+        revealRef.current?.addEventListener('slidechanged', changePage);
       });
-      revealRef.current?.initialize();
-      revealRef.current?.addEventListener('slidechanged', changePage);
 
       return () => {
+        cancelled = true;
         revealRef.current?.removeEventListener('slidechanged', changePage);
         revealRef.current?.destroy();
         revealRef.current = null;

@@ -25,6 +25,7 @@ import { useBoardSlice } from 'app/pages/DashBoardPage/pages/Board/slice';
 import { useEditBoardSlice } from 'app/pages/DashBoardPage/pages/BoardEditor/slice';
 import { useParams } from 'app/routerCompat';
 import { StoryContext } from 'app/pages/StoryBoardPage/contexts/StoryContext';
+import { loadRevealRuntime } from 'app/pages/StoryBoardPage/revealRuntime';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import React, {
   memo,
@@ -37,10 +38,7 @@ import React, {
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
-import Reveal from 'reveal.js';
 import type { RevealApi } from 'reveal.js';
-import 'reveal.js/reveal.css';
-import RevealZoom from 'reveal.js/plugin/zoom';
 import styled from 'styled-components';
 import { LEVEL_20, SPACE_MD } from 'styles/StyleConstants';
 import { uuidv4 } from 'utils/utils';
@@ -174,35 +172,42 @@ export const StoryEditor: React.FC<{}> = memo(() => {
     navigate.push(`/organizations/${orgId}/vizs/${storyId}`);
   }, [navigate, orgId, storyId]);
   useEffect(() => {
+    let cancelled = false;
     if (sortedPages.length > 0) {
-      revealRef.current = new Reveal(document.getElementById(domId)!, {
-        hash: false,
-        history: false,
-        controls: false,
-        controlsLayout: 'bottom-right',
-        slideNumber: 'c/t',
-        controlsTutorial: false,
-        progress: false,
-        loop: true,
-        width: '100%',
-        height: '100%',
-        margin: 0,
-        minScale: 1,
-        maxScale: 1,
-        autoSlide: false,
-        transition: 'convex',
-        // backgroundTransition: 'fade',
-        transitionSpeed: 'slow',
-        viewDistance: 100,
-        plugins: [RevealZoom],
-        keyboard: {
-          70: () => {},
-        },
+      void loadRevealRuntime().then(({ Reveal, RevealZoom }) => {
+        if (cancelled) {
+          return;
+        }
+        revealRef.current = new Reveal(document.getElementById(domId)!, {
+          hash: false,
+          history: false,
+          controls: false,
+          controlsLayout: 'bottom-right',
+          slideNumber: 'c/t',
+          controlsTutorial: false,
+          progress: false,
+          loop: true,
+          width: '100%',
+          height: '100%',
+          margin: 0,
+          minScale: 1,
+          maxScale: 1,
+          autoSlide: false,
+          transition: 'convex',
+          // backgroundTransition: 'fade',
+          transitionSpeed: 'slow',
+          viewDistance: 100,
+          plugins: [RevealZoom],
+          keyboard: {
+            70: () => {},
+          },
+        });
+        revealRef.current?.initialize();
+        revealRef.current?.addEventListener('slidechanged', changePage);
       });
-      revealRef.current?.initialize();
-      revealRef.current?.addEventListener('slidechanged', changePage);
 
       return () => {
+        cancelled = true;
         revealRef.current?.removeEventListener('slidechanged', changePage);
         revealRef.current?.destroy();
         revealRef.current = null;

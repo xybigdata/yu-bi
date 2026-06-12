@@ -3396,6 +3396,41 @@
     3. 页面入口与图表管理器初始化职责拆分
     4. 再评估更高收益但结构性更强的图表簇级延迟注册
 
+### 2026-06-12 本轮继续推进：StoryBoard / reveal.js 运行时按需加载
+
+- 本轮目标：
+  - 将 `StoryBoard` 编辑页、播放页、分享播放页对 `reveal.js` 的同步运行时导入改为挂载时按需加载。
+  - 保持故事板数据结构、分页切换、自动播放、缩放插件、分享态播放和现有页面路由协议不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/pages/StoryBoardPage/revealRuntime.ts`
+    - 新增统一的 `reveal.js` 运行时加载器 `loadRevealRuntime()`。
+    - 将 `Reveal` 主运行时和 `plugin/zoom` 收口为单次 promise 缓存，避免 3 条入口链各自同步导入。
+  - `frontend/src/app/pages/StoryBoardPage/Editor/index.tsx`
+  - `frontend/src/app/pages/StoryBoardPage/Player/index.tsx`
+  - `frontend/src/app/pages/SharePage/StoryPlayer/StoryPlayerForShare/StoryPlayerForShare.tsx`
+    - 移除对 `Reveal`、`RevealZoom` 的顶层同步运行时导入。
+    - 改为在 `sortedPages.length > 0` 时通过 `loadRevealRuntime()` 动态初始化。
+    - 保留原有 `slidechanged` 事件绑定、自动播放、键盘配置、销毁清理和页面切换行为。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`87` 个测试文件通过，`665` 个测试通过，`4` 个跳过
+  - 当前构建产物变化：
+    - 新增轻量运行时桥接 chunk：`revealRuntime.*.js` 约 `0.50 KB`
+    - `reveal.js` 运行时继续单独落为 `reveal.*.js`，约 `120.03 KB`
+    - 故事播放入口 `shareStoryPlayer.js` 约 `1.75 KB`，维持较小入口体积，`reveal.js` 不再同步并入入口文件
+  - 本轮未引入新的 `Circular chunk` 告警
+
+- 阶段结论：
+  - `StoryBoard / reveal.js` 已完成一轮低中风险的运行时拆分，和前面的地图、透视表、Monaco 一样，继续沿“重量级运行时从入口同步链路剥离”的方向推进。
+  - 当前故事板链仍可能在进入编辑或播放场景后拉起 `reveal.*.js`，这属于符合预期的按需加载行为。
+  - 下一阶段可回到收益更高但结构性更强的项：
+    - 评估 `ChartManager` 图表簇级延迟注册
+    - 评估富文本与故事播放的更长期收口策略
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
