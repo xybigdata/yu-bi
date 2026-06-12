@@ -1,5 +1,5 @@
-import enUS from 'antd/lib/locale/en_US';
-import zhCN from 'antd/lib/locale/zh_CN';
+import enUS from 'antd/locale/en_US';
+import zhCN from 'antd/locale/zh_CN';
 import { StorageKeys } from 'globalConstants';
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';

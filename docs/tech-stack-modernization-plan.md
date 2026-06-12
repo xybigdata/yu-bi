@@ -260,6 +260,10 @@
 - 评估并缩减 AntD 历史 Less 变量链
 - 检查 `styled-components/cssprop`、`react-app-env.d.ts` 等历史壳是否还能进一步收口
 
+当前进展：
+
+- 已完成一小批 Ant Design 深路径类型与 locale 导入收口，优先改为 `antd` 公共导出和 `antd/locale/*` 入口
+
 ### Wave C：做中风险稳定化专题
 
 按顺序建议：
