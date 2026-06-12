@@ -59,7 +59,6 @@
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
     "@ant-design/pro-components": "^2.8.10",
-    "@antv/g2": "^5.4.8",
     "@antv/s2": "^2.7.2",
     "@antv/s2-react": "^2.3.1",
     "@hello-pangea/dnd": "18.0.1",
