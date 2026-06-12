@@ -1,10 +1,12 @@
 import { vi } from 'vitest';
+import * as chartPluginService from 'app/services/chartPluginService';
 import ChartManager from '../ChartManager';
 import * as chartRegistry from '../chartRegistry';
 import PluginChartLoader from '../PluginChartLoader';
 
 describe('ChartManager Tests', () => {
   beforeEach(() => {
+    vi.restoreAllMocks();
     (ChartManager as any)._manager = null;
   });
 
@@ -203,5 +205,41 @@ describe('ChartManager Tests', () => {
 
     expect(charts.find(chart => chart.meta.id === 'plugin-chart-lazy')).toBeTruthy();
     expect(convertSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('should preload plugin definitions only once for concurrent load calls', async () => {
+    const manager = ChartManager.instance();
+    const preloadSpy = vi
+      .spyOn(chartPluginService, 'preloadChartPlugins')
+      .mockResolvedValue(['mock-plugin-load.js']);
+    const definitionSpy = vi.spyOn(
+      PluginChartLoader.prototype,
+      'loadPluginDefinitions',
+    );
+
+    definitionSpy.mockResolvedValue([
+      {
+        meta: {
+          id: 'plugin-chart-load',
+          name: 'plugin-chart-load',
+          icon: 'chart',
+          requirements: [],
+        },
+        config: {
+          datas: [],
+          i18ns: [],
+        },
+        dependency: [],
+      } as any,
+    ]);
+
+    await Promise.all([manager.load(), manager.load()]);
+    await manager.load();
+
+    expect(preloadSpy).toHaveBeenCalledTimes(1);
+    expect(definitionSpy).toHaveBeenCalledTimes(1);
+    expect(
+      manager.getAllChartPalette().find(item => item.meta.id === 'plugin-chart-load'),
+    ).toBeTruthy();
   });
 });

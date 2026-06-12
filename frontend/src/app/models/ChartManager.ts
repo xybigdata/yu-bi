@@ -45,6 +45,7 @@ export type ChartPaletteItem = {
 class ChartManager {
   private _loader = new PluginChartLoader();
   private _isLoaded = false;
+  private _loadPromise: Promise<PluginChartPaletteSeed[] | void> | null = null;
   private _basicChartFactoryMap = new Map(
     basicChartRegistry.map(item => [item.id, item.create]),
   );
@@ -62,12 +63,21 @@ class ChartManager {
 
   public async load() {
     if (this._isLoaded) {
-      return;
+      return this._customChartPaletteSeeds;
     }
-    const pluginsPaths = await preloadChartPlugins();
-    return Debugger.instance.measure('Plugin Charts | ', async () => {
-      await this._loadCustomizeCharts(pluginsPaths || []);
-    });
+    if (!this._loadPromise) {
+      this._loadPromise = (async () => {
+        const pluginsPaths = await preloadChartPlugins();
+        return Debugger.instance.measure('Plugin Charts | ', async () => {
+          return this._loadCustomizeCharts(pluginsPaths || []);
+        });
+      })().finally(() => {
+        if (!this._isLoaded) {
+          this._loadPromise = null;
+        }
+      });
+    }
+    return this._loadPromise;
   }
 
   public getAllCharts(): IChart[] {

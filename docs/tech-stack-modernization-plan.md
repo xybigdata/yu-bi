@@ -4078,6 +4078,32 @@
     - icons 派生
   - 后续如果继续推进统一惰性注册，剩余更值得评估的重点会更集中在实例获取链，而不是展示侧派生链。
 
+### 2026-06-12 本轮继续推进：收口 ChartManager.load 的单次预热兼容层
+
+- 本轮目标：
+  - 既然生产代码里已经不再直接依赖 `ChartManager.instance().load()`，就把这层兼容壳继续收紧到更明确的职责边界。
+  - 避免遗留调用或未来兼容调用在并发进入时重复触发插件 definition 预热。
+  - 保持 `getById()`、`getAllChartPalette()`、`getAllChartIcons()` 与现有同步使用方式不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/models/ChartManager.ts`
+    - 新增 `_loadPromise`，把 `load()` 收口为单次 promise 预热。
+    - 在已加载完成后直接返回当前插件 palette seed 缓存；在尚未完成且发生失败时清空 `_loadPromise`，避免僵死缓存失败态。
+    - 保持 `load()` 的职责仍然只是插件 definition / seed 预热，不提前实例化插件图表。
+  - `frontend/src/app/models/__tests__/ChartManager.test.ts`
+    - 新增并发断言，验证多次并发调用 `load()` 只会触发一次插件路径预加载和一次插件 definition 加载。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - `ChartManager.load()` 现在更明确地退化成“兼容单次预热壳”，而不是带副作用的重复初始化入口。
+  - 这一步没有推进异步取实例，也没有扩大页面改造面，只是把剩余兼容层的并发行为收口到可预测状态。
+  - 后续继续推进时，更值得关注的仍然是同步实例获取链是否还有进一步收口空间，而不是再扩张 `load()` 的职责。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
