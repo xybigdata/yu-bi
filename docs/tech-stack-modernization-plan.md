@@ -3506,6 +3506,40 @@
     - `react-quill` 包本身仍停留在旧包装层语义
     - 自定义 `TagBlot` / `CalcFieldBlot` / markdown / palette 等扩展对未来底层编辑器路线的兼容成本仍需专项评估
 
+### 2026-06-12 本轮继续推进：WordCloud 图表运行时按需加载
+
+- 本轮目标：
+  - 延续地图、PivotSheet、Monaco、StoryBoard、富文本的渐进拆分策略，把 `WordCloudChart` 对 `echarts-wordcloud` 扩展运行时的同步依赖从主入口静态链路里拆出去。
+  - 保持词云图表元数据、配置协议、交互选择链、只读渲染和现有 `ChartManager` 同步注册方式不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/components/ChartGraph/WordCloudChart/runtime.ts`
+    - 新增统一的词云运行时加载入口 `loadWordCloudRuntime()`。
+    - 将 `echarts` 主运行时与 `echarts-wordcloud` 扩展收口为单次 promise 缓存，避免词云扩展继续通过顶层副作用同步并入主链。
+  - `frontend/src/app/components/ChartGraph/WordCloudChart/WordCloudChart.tsx`
+    - 移除对 `echarts` `init` 和 `echarts-wordcloud` 的顶层同步导入。
+    - 改为在 `onMount` / `onUpdated` 阶段按需触发 runtime loader，并缓存挂载参数与最近一次渲染参数。
+    - 在扩展运行时尚未加载完成时，先保存最近一次更新请求；待运行时就绪后自动重放最近一次 `setOption(...)`，保证现有生命周期调用链不需要感知异步化。
+    - 保留 `ChartSelectionManager`、配置解析、tooltip、字号/颜色/阴影等业务逻辑不变。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`87` 个测试文件通过，`665` 个测试通过，`4` 个跳过
+  - 当前构建产物变化：
+    - 新增词云运行时桥接 chunk：`index.*.js` 约 `16.01 KB`
+    - 主入口相关大 chunk 从上一轮约 `557.08 KB` 继续下降到约 `541.80 KB`
+    - `echarts.*.js` 继续作为独立运行时存在，约 `1.03 MB`；`echarts-wordcloud` 扩展不再通过 `WordCloudChart` 顶层副作用同步并入主入口
+  - 本轮未引入新的 `Circular chunk` 告警
+
+- 阶段结论：
+  - `WordCloudChart` 证明了在不修改 `ChartManager` 同步注册协议的前提下，还可以继续沿“局部重扩展运行时按需加载”的思路拿到实际收益。
+  - 当前主图表链真正更大的结构性收益仍然在：
+    - `ChartManager` 图表簇级延迟注册
+    - `echarts` 主运行时进一步按图表簇拆分
+  - 但这两项都明显高于本轮风险等级，因此这一轮继续保持“兼容优先、边界渐进拆分”的现代化策略。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
