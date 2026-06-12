@@ -126,15 +126,11 @@ class ChartManager {
     }
 
     const pluginDefinitions = await this._loader.loadPluginDefinitions(paths);
-    const validPluginDefinitions = (pluginDefinitions?.filter(
-      Boolean,
-    ) || []) as PluginChartDefinition[];
-
-    this._customChartPaletteSeeds = validPluginDefinitions.map(pluginDefinition =>
+    this._customChartPaletteSeeds = pluginDefinitions.map(pluginDefinition =>
       this._loader.getPluginPaletteSeed(pluginDefinition),
     );
     this._customChartDefinitionMap = new Map(
-      validPluginDefinitions.map(pluginDefinition => [
+      pluginDefinitions.map(pluginDefinition => [
         String(pluginDefinition.meta.id),
         pluginDefinition,
       ]),

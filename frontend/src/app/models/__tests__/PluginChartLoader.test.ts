@@ -147,6 +147,6 @@ describe('PluginChartLoader Tests', () => {
   test('should return null definition when plugin script is missing', async () => {
     const loader = new PluginChartLoader();
     const plugins = await loader.loadPluginDefinitions(['not-exist-chart']);
-    expect(plugins[0]).toEqual(null);
+    expect(plugins).toEqual([]);
   });
 });

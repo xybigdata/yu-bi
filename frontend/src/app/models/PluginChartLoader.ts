@@ -75,7 +75,10 @@ class PluginChartLoader {
           return null;
         }
       });
-    return Promise.all(loadPluginTasks);
+    const pluginDefinitions = await Promise.all(loadPluginTasks);
+    return pluginDefinitions.filter(
+      Boolean,
+    ) as PluginChartDefinition[];
   }
 
   getPluginPaletteSeed(

@@ -4159,6 +4159,32 @@
   - 这不是功能重写，也没有改插件协议；只是把已经退出生产路径的旧整批包装层从维护面里删掉。
   - 后续如果继续沿插件链推进，更合理的重点会是 definition 校验、错误边界和更细粒度的延迟注册，而不是保留历史整批实例 API。
 
+### 2026-06-12 本轮继续推进：收口插件 definition 的空值过滤边界
+
+- 本轮目标：
+  - 继续压缩插件图表 definition 链上的冗余边界，让 loader 输出更贴近生产消费方的真实需要。
+  - 不再把“加载失败的 `null` definition”外溢给 `ChartManager` 和测试层再做二次过滤。
+  - 保持插件脚本加载失败时“忽略该插件并继续运行”的容错行为不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/models/PluginChartLoader.ts`
+    - `loadPluginDefinitions()` 改为在 loader 内部完成 `null` 过滤，对外只返回有效 definition 列表。
+  - `frontend/src/app/models/ChartManager.ts`
+    - 删除 `_loadCustomizeCharts()` 中对 plugin definition 的重复空值过滤，直接消费 loader 收口后的有效列表。
+  - `frontend/src/app/models/__tests__/PluginChartLoader.test.ts`
+    - 缺失脚本场景改为断言返回空 definition 列表，而不是暴露 `[null]`。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 插件 definition 链现在更接近“失败在 loader 内部吞掉、上层只消费有效 definition”的单一职责边界。
+  - 这一步没有改变插件容错策略，也没有改变实例转换时机；只是去掉了无意义的 `null` 数组协议。
+  - 后续如果继续沿插件链推进，更合理的方向会是 definition 校验与诊断信息收口，而不是继续把失败态以结构化空值传递到更高层。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
