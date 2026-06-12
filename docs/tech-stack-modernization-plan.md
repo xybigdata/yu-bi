@@ -4461,6 +4461,33 @@
   - 对当前项目而言，外部币种包带来的收益很有限，而仓库内静态常量更直接、更可控。
   - 后续如果继续做数字格式化现代化，应把重点放在数值渲染策略、单位体系和国际化格式语义，而不是回到这种单纯的币种枚举来源。
 
+### 2026-06-12 本轮继续推进：将 sql-formatter 收口为按需加载
+
+- 本轮目标：
+  - 继续压缩前端 SQL 编辑器主链上的同步静态依赖。
+  - 将只在“beautify”按钮点击时才需要的 `sql-formatter` 改为运行时按需加载。
+  - 保持现有 SQL 格式化参数和编辑器行为不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/Main/Editor/sqlFormatterRuntime.ts`
+    - 新增 `loadSqlFormatter()`，以单例 Promise 形式动态加载 `sql-formatter`。
+  - `frontend/src/app/pages/MainPage/pages/ViewPage/Main/Editor/Toolbar.tsx`
+    - 删除对 `sql-formatter` 的同步顶层导入。
+    - `formatSQL` 改为点击时异步加载 formatter，再按原参数执行格式化：
+      - `denseOperators: true`
+      - `logicalOperatorNewline: 'before'`
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步没有改变 SQL 美化语义，只是把 formatter 从编辑器初始静态链路移到了用户真正触发美化动作时再加载。
+  - 与直接替换 `split.js`、`react-window` 这类交互型运行时库相比，这种按需加载收口的回归面明显更小，更适合作为低风险现代化推进项。
+  - 后续如果继续做同类优化，应优先找这种“功能按按钮或特定场景触发、静态导入成本高、运行时边界清晰”的工具型依赖。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

@@ -34,7 +34,6 @@ import { CommonFormTypes } from 'globalConstants';
 import React, { memo, useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
-import { format } from 'sql-formatter';
 import styled from 'styled-components';
 import {
   INFO,
@@ -63,6 +62,7 @@ import {
 } from '../../slice/selectors';
 import { saveView } from '../../slice/thunks';
 import { isNewView } from '../../utils';
+import { loadSqlFormatter } from './sqlFormatterRuntime';
 interface ToolbarProps {
   allowManage: boolean;
   allowEnableViz: boolean | undefined;
@@ -120,7 +120,9 @@ export const Toolbar = memo(
     ) as number;
     const isArchived = status === ViewStatus.Archived;
 
-    const formatSQL = useCallback(() => {
+    const formatSQL = useCallback(async () => {
+      const { format } = await loadSqlFormatter();
+
       dispatch(
         actions.changeCurrentEditingView({
           script: format(script, {
