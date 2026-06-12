@@ -16,41 +16,19 @@
  * limitations under the License.
  */
 
-import {
-  AreaChart,
-  BasicDoubleYChart,
-  BasicFunnelChart,
-  BasicGaugeChart,
-  BasicRichText,
-  BasicScatterChart,
-  ClusterBarChart,
-  ClusterColumnChart,
-  DoughnutChart,
-  LineChart,
-  MingXiTableChart,
-  NormalOutlineMapChart,
-  PercentageStackBarChart,
-  PercentageStackColumnChart,
-  PieChart,
-  PivotSheetChart,
-  RoseChart,
-  ScatterOutlineMapChart,
-  Scorecard,
-  StackAreaChart,
-  StackBarChart,
-  StackColumnChart,
-  WaterfallChart,
-  WordCloudChart,
-} from 'app/components/ChartGraph';
 import { IChart } from 'app/types/Chart';
 import { Debugger } from 'utils/debugger';
 import { CloneValueDeep } from 'utils/object';
 import { preloadChartPlugins } from 'app/services/chartPluginService';
 import PluginChartLoader from './PluginChartLoader';
+import { basicChartRegistry } from './chartRegistry';
 
 class ChartManager {
   private _loader = new PluginChartLoader();
   private _isLoaded = false;
+  private _basicChartFactoryMap = new Map(
+    basicChartRegistry.map(item => [item.id, item.create]),
+  );
   private _charts: IChart[] = this._basicCharts();
   private static _manager: ChartManager | null = null;
 
@@ -86,11 +64,22 @@ class ChartManager {
     if (id === null || id === undefined) {
       return;
     }
+    const basicChartFactory = this._basicChartFactoryMap.get(id);
+    if (basicChartFactory) {
+      return basicChartFactory();
+    }
     return CloneValueDeep(this._charts.find(c => c.meta?.id === id));
   }
 
-  public getDefaultChart() {
-    return CloneValueDeep(this._charts[0]);
+  public getDefaultChart(): IChart {
+    const defaultChart = this._charts[0];
+    if (!defaultChart?.meta?.id) {
+      if (!defaultChart) {
+        throw new Error('ChartManager has no registered charts');
+      }
+      return CloneValueDeep(defaultChart);
+    }
+    return this.getById(defaultChart.meta.id)!;
   }
 
   private async _loadCustomizeCharts(paths: string[]) {
@@ -107,32 +96,9 @@ class ChartManager {
   }
 
   private _basicCharts(): IChart[] {
-    return [
-      new MingXiTableChart(),
-      new PivotSheetChart(),
-      new Scorecard(),
-      new ClusterColumnChart(),
-      new ClusterBarChart(),
-      new StackColumnChart(),
-      new StackBarChart(),
-      new PercentageStackColumnChart(),
-      new PercentageStackBarChart(),
-      new WaterfallChart(),
-      new LineChart(),
-      new AreaChart(),
-      new StackAreaChart(),
-      new BasicScatterChart(),
-      new PieChart(),
-      new DoughnutChart(),
-      new RoseChart(),
-      new BasicFunnelChart(),
-      new BasicDoubleYChart(),
-      new WordCloudChart(),
-      new NormalOutlineMapChart(),
-      new ScatterOutlineMapChart(),
-      new BasicGaugeChart(),
-      new BasicRichText(),
-    ];
+    return basicChartRegistry
+      .map(item => this._basicChartFactoryMap.get(item.id)?.())
+      .filter(Boolean) as IChart[];
   }
 }
 

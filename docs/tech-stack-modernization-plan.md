@@ -3771,6 +3771,48 @@
     - 单独评估 `ChartManager` 图表簇级延迟注册的收益、边界和回归成本
     - 在确认风险可控后，再决定是否进入这类结构性改造
 
+### 2026-06-12 本轮继续推进：收口 ChartManager 基础图表注册表
+
+- 本轮目标：
+  - 在不直接改动 `ChartManager` 同步使用协议的前提下，先把“基础图表注册定义”从管理器实现内部抽离出来。
+  - 保持 `getAllCharts()`、`getById()`、`getDefaultChart()`、自定义图表加载链和现有图表元数据协议不变。
+  - 为下一阶段的“图表元数据列表 / 图标索引 / 实例工厂”职责拆分，以及更高风险的图表簇级延迟注册，先做低风险前置收口。
+
+- 本轮改造动作：
+  - `frontend/src/app/models/chartRegistry.ts`
+    - 新增基础图表注册表，显式维护 `{ id, create }` 形式的基础图表工厂列表。
+    - 保持当前 `ChartManager` 基础图表覆盖范围不变，仍覆盖明细表、透视表、记分卡、柱状/条形/折线/饼图、词云、地图、富文本等现有基础图表。
+    - 暂不引入异步 `import()`、暂不引入图表簇级延迟注册，只做同步工厂收口。
+  - `frontend/src/app/models/ChartManager.ts`
+    - 移除管理器内部对整套基础图表类的大段顶层静态导入。
+    - 新增基础图表工厂映射表，改为通过注册表统一生成基础图表实例。
+    - `getById()` 对基础图表优先走显式工厂创建；对插件图表仍保留现有克隆返回逻辑。
+    - `getDefaultChart()` 改为经 `getById()` 返回默认图表实例，避免继续直接暴露内部缓存对象。
+    - `_basicCharts()` 改为从注册表统一生成基础图表列表，保持同步初始化行为不变。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`87` 个测试文件通过，`665` 个测试通过，`4` 个跳过
+  - 当前构建产物观察：
+    - `echarts.*.js` 继续作为独立运行时存在，约 `1.03 MB`
+    - 主入口相关大 chunk 本轮约 `552.43 KB`
+    - `ChartEditor.*.js` 约 `64.16 KB`
+    - 本轮未新增新的重量级桥接 chunk，也未引入新的 `Circular chunk` 告警
+
+- 阶段结论：
+  - 这一步还不是 `ChartManager` 异步化，也不是图表簇级延迟注册本身；它的价值在于把“基础图表注册定义”和“管理器实例分发逻辑”先分开。
+  - 当前 `ChartManager` 的同步调用契约仍然成立，因此对编辑器、分享页、看板渲染链和图标面板的回归风险明显低于直接改成异步管理器。
+  - 下一步更合理的顺序是：
+    - 继续拆分 `metadata list`、`icon map`、`instance factory` 三层职责
+    - 再评估哪些图表簇具备延迟注册收益，哪些调用面必须保持同步
+    - 在证据充分后，再决定是否进入 `ChartManager` 图表簇级延迟注册
+  - 当前暂不进入的高风险项：
+    - `ChartManager` 全量异步化
+    - 图表编辑器和分享页初始化协议改为异步取图表实例
+    - 内部稳定标识、命名空间和迁移常量重构
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
