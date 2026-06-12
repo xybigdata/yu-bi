@@ -4542,6 +4542,35 @@
   - 与直接更换虚拟滚动实现相比，这种改法对业务表格交互面的影响更窄，符合当前“先收口边界、再决定是否替换”的现代化推进策略。
   - 后续如果继续评估虚拟滚动方案，应基于真实表格性能、列宽同步和滚动联动行为做专项验证，而不是因为依赖名字较旧就贸然迁移。
 
+### 2026-06-12 本轮继续推进：移除前端 invariant 直接依赖
+
+- 本轮目标：
+  - 继续清理只被仓库内部工具层少量使用的基础依赖。
+  - 将 reducer 注入辅助工具中的断言逻辑收回仓库内实现，移除 `invariant` 顶层直接依赖。
+  - 保持当前异常抛出语义和测试行为不变。
+
+- 本轮改造动作：
+  - `frontend/src/utils/assertInvariant.ts`
+    - 新增仓库内断言工具 `assertInvariant()`，条件不满足时抛出 `Error(message)`。
+  - `frontend/src/utils/@reduxjs/injectReducer/checkStore.ts`
+  - `frontend/src/utils/@reduxjs/injectReducer/reducerInjectors.ts`
+    - 删除 `invariant` 直接导入，改用仓库内 `assertInvariant()`。
+  - `frontend/package.json`
+  - `frontend/package-lock.json`
+    - 移除 `invariant` 顶层直接依赖，并用 `npm uninstall invariant --package-lock-only` 同步锁文件。
+
+- 本轮验证结果：
+  - 检索确认：仓库生产代码中 `invariant` 的直接导入原本只存在于 reducer 注入 helper 两处，本轮已全部替换。
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步只是把内部工具层的断言能力继续收口到仓库内，不触及业务页面、状态逻辑本身或 reducer 注入策略。
+  - 现有 `checkStore` / `injectReducerFactory` 测试已经覆盖抛错行为，因此这类小型断言库替换的风险很低。
+  - 后续如果继续筛低频工具依赖，仍应优先选择这种“调用面少、语义简单、现有测试已覆盖”的候选项。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

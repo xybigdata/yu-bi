@@ -1,8 +1,8 @@
-import invariant from 'invariant';
 import isEmpty from 'lodash/isEmpty';
 import isFunction from 'lodash/isFunction';
 import isString from 'lodash/isString';
 import { Reducer } from '@reduxjs/toolkit';
+import assertInvariant from 'utils/assertInvariant';
 import { InjectedReducersType } from 'utils/types/injector-typings';
 import checkStore from './checkStore';
 
@@ -19,7 +19,7 @@ export function injectReducerFactory(
   return function injectReducer(key, reducer) {
     if (!isValid) checkStore(store);
 
-    invariant(
+    assertInvariant(
       isString(key) && !isEmpty(key) && isFunction(reducer),
       '(redux-injectors...) injectReducer: Expected `reducer` to be a reducer function',
     );
