@@ -4291,6 +4291,30 @@
   - 当前清理方式不依赖“浏览器一定支持 `replaceAll`”这个前提，因此比直接删 polyfill 更保守。
   - `core-js` 已从前端直接依赖中退出；后续如果还要继续做兼容治理，更应关注是否仍存在必须靠手动 polyfill 支撑的真实运行时代码。
 
+### 2026-06-12 本轮继续推进：修正 @types/react 的依赖归属
+
+- 本轮目标：
+  - 继续清理前端依赖清单中的“编译期依赖落在运行时 dependencies”问题。
+  - 让类型包的归属更贴近实际用途，减少生产依赖清单噪音。
+  - 不改变任何运行时代码、类型行为或构建输出。
+
+- 本轮改造动作：
+  - `frontend/package.json`
+    - 将 `@types/react` 从 `dependencies` 移到 `devDependencies`。
+  - `frontend/package-lock.json`
+    - 使用 `npm install --package-lock-only` 同步锁文件，保持依赖归属一致。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步是纯依赖元数据治理，不触及运行时代码路径。
+  - `@types/react` 现在与 `@types/react-dom`、`@types/node` 等类型包保持同类归属，前端运行时依赖清单更干净。
+  - 后续可以继续按同样规则检查是否还有其它误放在 `dependencies` 中的类型包或纯开发工具。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
