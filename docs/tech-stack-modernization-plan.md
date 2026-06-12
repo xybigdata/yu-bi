@@ -196,7 +196,7 @@
 | React Redux | `9.3.0` | `9.x` | 已完成 | `package.json`、typed hooks 收口 | 持续回归 |
 | Ant Design | `5.26.2` | `5.x` 稳定线，后续再评估 6 | 已完成主升级 | `package.json`、页面构建与回归记录 | 清理 compat 壳与页面回归 |
 | 时间体系 | `dayjs` 主链，局部值链待收尾 | `dayjs` 单栈 | 进行中 | 生产代码 `moment` 清零、task 产物已切换 | 收尾控件值链和页面回归 |
-| 富文本 | `react-quill 2.0.0` + 本地适配层 | Quill 2 路线或更现代 React 封装 | 进行中 | `quillCompat`、`RichTextEditor`、本地插件模块 | 继续压缩对旧 `@types/quill` 内嵌类型路径的耦合 |
+| 富文本 | `react-quill 2.0.0` + 本地适配层 | Quill 2 路线或更现代 React 封装 | 进行中 | `quillCompat`、`RichTextEditor`、本地插件模块 | 继续评估真正的 Quill 2 React 封装与自定义 blot 兼容成本 |
 | 视频播放 | 原生 `<video>` | 原生能力 | 已完成 | VideoWidget 改造 | 持续回归 |
 | 故事播放 | `reveal.js 6.0.1` | 暂保留当前主线 | 已完成主线升级 | `package.json` | 结合富文本专题复核 |
 | 样式系统 | `styled-components 6.1.19` | `6.x` | 已完成主升级 | `package.json`、TS/build 通过 | 做稳定化复核 |
@@ -2614,7 +2614,7 @@
 | 领域 | 当前栈 | 老旧点判断 | 更现代替代 | 当前建议优先级 |
 | --- | --- | --- | --- | --- |
 | 安全框架 | `Shiro 2.0.5` | 能跑，但与当前 Spring 生态割裂，属于长期架构包袱 | `Spring Security` 原生体系 | 高 |
-| 富文本 | `react-quill 2.0.0` / Quill 旧类型耦合 | React 包装层已升，但仍保留旧类型路径和深度定制插件负担 | 继续评估真正的 Quill 2 React 封装或自有适配层 | 高 |
+| 富文本 | `react-quill 2.0.0` / Quill 深度定制插件负担 | React 包装层已升，类型出口已收口到仓库内 compat 层，但仍保留自定义 blot / markdown / palette 兼容负担 | 继续评估真正的 Quill 2 React 封装或自有适配层 | 高 |
 | 时间体系尾部 | `dayjs` 已落地主链，但仍有值链回归专题 | 主逻辑已现代化，剩余是控件值对象与页面回归 | `dayjs` 单栈收口 | 高 |
 | 脚本引擎 | `nashorn-core 15.4` 仍保留运行期兜底 | JDK 主线已不再内建 Nashorn | `GraalJS` / 标准 JSR-223 发现链 | 中高 |
 | SQL 解析/方言 | `calcite-core 1.26.0` | 明显偏老，且带入历史依赖与弃用 API | 保守升级到较新稳定线，或继续封装隔离 | 中高 |
@@ -3474,6 +3474,37 @@
   - 下一阶段建议：
     - 继续评估 `ChartManager` 图表簇级延迟注册
     - 继续评估富文本最终路线，尤其是 `quillCompat.ts` 里的旧类型路径和自定义 blot 对 Quill 2 的兼容成本
+
+### 2026-06-12 本轮继续推进：收口富文本 compat 层的深路径类型依赖
+
+- 本轮目标：
+  - 继续推进富文本链的现代化收口，移除 `quillCompat.ts` 对 `react-quill/node_modules/@types/quill` 这类脆弱包内深路径的直接类型依赖。
+  - 保持图表富文本、仪表板富文本、调度邮件富文本和本地插件模块现有类型名与业务调用方式不变，不在这一轮草率切到 Quill 2 原生类型体系。
+
+- 本轮改造动作：
+  - `frontend/src/app/components/ChartGraph/BasicRichText/quillCompat.ts`
+    - 不再从 `react-quill/node_modules/@types/quill` 深路径取 `DeltaStatic`、`RangeStatic`、`Sources`、编辑器实例类型。
+    - 改为基于 `react-quill` 公开组件签名，在仓库内 compat 层单点推导：
+      - `DeltaStatic = Parameters<onChange>[1]`
+      - `RangeStatic = Parameters<onChangeSelection>[0]`
+      - `Sources = Parameters<onChange>[2]`
+      - `QuillInstance = ReturnType<getEditor>`
+    - 保留 `DeltaStatic`、`RangeStatic`、`Sources`、`QuillInstance` 这些历史类型别名，避免业务侧和本地富文本模块大面积改名。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`87` 个测试文件通过，`665` 个测试通过，`4` 个跳过
+  - 构建观察：
+    - 本轮主要是类型兼容层收口，不以新增分包收益为目标
+    - 生产构建产物量级与上一轮保持一致，没有引入新的 chunk 回流或额外 warning
+
+- 阶段结论：
+  - 富文本 compat 层已经不再依赖包管理器目录结构下的 `@types/quill` 深路径，这对 Node 版本切换、依赖树变化和后续真正评估 Quill 2 路线都更稳。
+  - 当前仍未解决的重点，不再是“类型入口散落”，而是：
+    - `react-quill` 包本身仍停留在旧包装层语义
+    - 自定义 `TagBlot` / `CalcFieldBlot` / markdown / palette 等扩展对未来底层编辑器路线的兼容成本仍需专项评估
 
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 

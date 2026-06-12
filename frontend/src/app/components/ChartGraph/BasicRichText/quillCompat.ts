@@ -1,14 +1,18 @@
+import type { ComponentProps } from 'react';
 import ReactQuill, { Quill } from 'react-quill';
-import type QuillType from 'react-quill/node_modules/@types/quill';
-import type {
-  DeltaStatic as QuillDeltaStatic,
-  RangeStatic as QuillRangeStatic,
-  Sources as QuillSources,
-} from 'react-quill/node_modules/@types/quill';
+
+type ReactQuillProps = ComponentProps<typeof ReactQuill>;
+type ReactQuillInstance = InstanceType<typeof ReactQuill>;
+type ReactQuillOnChange = NonNullable<ReactQuillProps['onChange']>;
+type ReactQuillOnChangeSelection = NonNullable<
+  ReactQuillProps['onChangeSelection']
+>;
 
 export { Quill };
-export type DeltaStatic = QuillDeltaStatic;
-export type QuillInstance = QuillType;
-export type RangeStatic = QuillRangeStatic;
-export type Sources = QuillSources;
+export type DeltaStatic = Parameters<ReactQuillOnChange>[1];
+export type QuillInstance = ReturnType<ReactQuillInstance['getEditor']>;
+export type RangeStatic = NonNullable<
+  Parameters<ReactQuillOnChangeSelection>[0]
+>;
+export type Sources = Parameters<ReactQuillOnChange>[2];
 export default ReactQuill;
