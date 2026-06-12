@@ -1,7 +1,16 @@
-import { ForwardedRef, forwardRef, useImperativeHandle, useRef } from 'react';
-import './RichTextBootstrap';
-import MarkdownModule from './modules/MarkdownModule';
-import ReactQuill, { DeltaStatic, Sources } from './quillCompat';
+import { Spin } from 'antd';
+import {
+  ForwardedRef,
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
+import styled from 'styled-components';
+import type MarkdownModule from './modules/MarkdownModule';
+import type { DeltaStatic, Sources } from './quillCompat';
+import { loadRichTextEditorRuntime } from './runtime';
 
 export interface RichTextEditorHandle {
   blur: () => void;
@@ -40,38 +49,63 @@ function RichTextEditorImpl(
   props: RichTextEditorProps,
   ref: ForwardedRef<RichTextEditorHandle>,
 ) {
-  const editorRef = useRef<ReactQuill>(null);
+  const editorRef = useRef<RichTextEditorHandle>(null);
+  const [RuntimeEditor, setRuntimeEditor] = useState<
+    Awaited<ReturnType<typeof loadRichTextEditorRuntime>>['default'] | null
+  >(null);
 
-  const getEditorInstance = () => editorRef.current!.getEditor();
+  useEffect(() => {
+    let cancelled = false;
+
+    loadRichTextEditorRuntime().then(module => {
+      if (!cancelled) {
+        setRuntimeEditor(() => module.default);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useImperativeHandle(
     ref,
     () => ({
       blur: () => editorRef.current?.blur(),
       createMarkdownModule: options =>
-        new MarkdownModule(getEditorInstance(), options),
+        editorRef.current!.createMarkdownModule(options),
       focus: () => editorRef.current?.focus(),
       format: (name, value, source) =>
-        getEditorInstance().format(name, value, source),
+        editorRef.current!.format(name, value, source),
       getContents: (index, length) =>
-        typeof index === 'number' && typeof length === 'number'
-          ? getEditorInstance().getContents(index, length)
-          : getEditorInstance().getContents(),
+        editorRef.current!.getContents(index, length),
       insertCalcFieldItem: (item, programmaticInsert) =>
-        getEditorInstance()
-          .getModule('calcfield')
-          .insertItem(item, programmaticInsert),
-      off: (eventName, handler) =>
-        (getEditorInstance() as any).off(eventName, handler),
-      on: (eventName, handler) =>
-        (getEditorInstance() as any).on(eventName, handler),
+        editorRef.current!.insertCalcFieldItem(item, programmaticInsert),
+      off: (eventName, handler) => editorRef.current!.off(eventName, handler),
+      on: (eventName, handler) => editorRef.current!.on(eventName, handler),
     }),
     [],
   );
 
-  return <ReactQuill ref={editorRef} {...props} />;
+  if (!RuntimeEditor) {
+    return (
+      <LoadingWrap className={props.className}>
+        <Spin size="small" />
+      </LoadingWrap>
+    );
+  }
+
+  return <RuntimeEditor ref={editorRef} {...props} />;
 }
 
 const RichTextEditor = forwardRef(RichTextEditorImpl);
 
 export default RichTextEditor;
+
+const LoadingWrap = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 120px;
+`;

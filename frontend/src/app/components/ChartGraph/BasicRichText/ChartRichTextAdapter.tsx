@@ -32,7 +32,7 @@ import {
 import styled from 'styled-components';
 import { BLUE } from 'styles/StyleConstants';
 import RichTextEditor, { RichTextEditorHandle } from './RichTextEditor';
-import { DeltaStatic } from './quillCompat';
+import type { DeltaStatic } from './quillCompat';
 import { CustomColor, QuillPalette } from './RichTextPluginLoader/CustomColor';
 import {
   Formats,

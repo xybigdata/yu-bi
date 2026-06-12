@@ -3431,6 +3431,50 @@
     - 评估 `ChartManager` 图表簇级延迟注册
     - 评估富文本与故事播放的更长期收口策略
 
+### 2026-06-12 本轮继续推进：富文本 `react-quill / quill` 运行时按需加载
+
+- 本轮目标：
+  - 将图表富文本、仪表板富文本、调度邮件富文本对 `react-quill / quill` 的同步运行时依赖，从主入口静态链路里拆出去。
+  - 保持 `RichTextEditor` 对外组件协议、`RichTextEditorHandle` 能力、markdown 模块、calc field 插入、只读渲染和现有业务页面调用方式不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/components/ChartGraph/BasicRichText/runtime.ts`
+    - 新增统一的富文本运行时加载入口 `loadRichTextEditorRuntime()`。
+    - 将 `RichTextEditorRuntime` 组件的动态导入收口为单次 promise 缓存，避免多个富文本入口重复各自触发运行时装载。
+  - `frontend/src/app/components/ChartGraph/BasicRichText/RichTextEditorRuntime.tsx`
+    - 新增真实运行时组件，集中承载 `react-quill`、Quill CSS bootstrap、本地插件注册和 `RichTextEditorHandle` 到底层编辑器实例的桥接逻辑。
+    - 保留 `createMarkdownModule`、`insertCalcFieldItem`、`format`、`getContents`、`on/off` 等既有 handle 能力，不改业务协议。
+  - `frontend/src/app/components/ChartGraph/BasicRichText/RichTextEditor.tsx`
+    - 从同步直接渲染 `ReactQuill` 改为挂载期动态加载 `RichTextEditorRuntime`。
+    - 在富文本运行时代码尚未就绪时，先渲染轻量 `Spin` 占位，避免编辑区出现空白闪断。
+  - `frontend/src/app/components/ChartGraph/BasicRichText/ChartRichTextAdapter.tsx`
+  - `frontend/src/app/pages/DashBoardPage/components/Widgets/RichTextWidget/RichTextWidgetCore.tsx`
+    - 将 `DeltaStatic` 改为纯类型导入，继续压缩调用侧把 Quill 运行时带回主链的机会。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`87` 个测试文件通过，`665` 个测试通过，`4` 个跳过
+  - 当前构建产物变化：
+    - 新增富文本运行时桥接 chunk：`RichTextEditorRuntime.*.js` 约 `20.37 KB`
+    - 新增富文本样式 chunk：`RichTextEditorRuntime.*.css` 约 `36.70 KB`
+    - `quill.*.js` 继续独立落为约 `216.92 KB` 的运行时 chunk，不再通过 `RichTextEditor` 同步并入主入口静态链路
+  - 当前保留现象：
+    - 富文本相关页面在真正进入编辑或只读渲染场景后，仍会按需拉起 `RichTextEditorRuntime.*` 与 `quill.*`，这属于符合预期的延迟加载行为。
+    - `quillCompat.ts` 仍保留对旧类型路径的兼容出口，说明本轮完成的是“运行时拆分”和“边界继续收口”，不是最终的 Quill 2 路线定稿。
+
+- 阶段结论：
+  - 富文本链已经完成一轮低中风险的运行时拆分，和地图、PivotSheet、Monaco、StoryBoard 一样，继续沿“重量级运行时从入口同步链路剥离”的方向推进。
+  - 这一步进一步压缩了业务页面与底层编辑器包的直接耦合面，后续无论是继续评估 `react-quill` 中间态，还是转向真正的 Quill 2 React 封装，都应优先只调整：
+    - `quillCompat.ts`
+    - `RichTextEditor.tsx`
+    - `RichTextEditorRuntime.tsx`
+    - `RichTextBootstrap.ts`
+  - 下一阶段建议：
+    - 继续评估 `ChartManager` 图表簇级延迟注册
+    - 继续评估富文本最终路线，尤其是 `quillCompat.ts` 里的旧类型路径和自定义 blot 对 Quill 2 的兼容成本
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
