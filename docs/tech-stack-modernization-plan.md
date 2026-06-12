@@ -4235,6 +4235,32 @@
   - `history` 已从“仓库遗留直接依赖”收口为“无直接声明、无生产使用面”的状态，减少了后续版本维护的干扰项。
   - 后续可以继续用同样方式筛掉其它已退出生产路径、但仍滞留在依赖声明里的低风险包。
 
+### 2026-06-12 本轮继续推进：收口 react-dev-inspector 到开发态按需加载
+
+- 本轮目标：
+  - 把只在开发调试场景使用的 `react-dev-inspector` 从生产主入口静态依赖里移开。
+  - 让主应用和三个 share 入口在生产构建下不再因为顶层导入而绑定这个开发工具包。
+  - 保持当前开发态调试能力和现有入口调用方式不变。
+
+- 本轮改造动作：
+  - `frontend/src/entryPointFactory.tsx`
+    - `generateEntryPoint` 改为异步初始化。
+    - 新增 `resolveInspectorWrapper()`，仅在开发态通过动态 `import('react-dev-inspector')` 加载 `Inspector`；生产态直接返回 `Fragment`。
+  - `frontend/package.json`
+  - `frontend/package-lock.json`
+    - 将 `react-dev-inspector` 从 `dependencies` 挪到 `devDependencies`，与其真实使用场景对齐。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步把一个纯开发工具从生产主入口静态链路里切开了，同时不改变开发入口和分享入口的调用方式。
+  - 对生产构建而言，`react-dev-inspector` 现在更接近真正的“仅开发态存在”。
+  - 后续可以继续沿“开发工具包只在开发态按需加载、并移到 devDependencies”这条规则筛其它低风险候选项。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
