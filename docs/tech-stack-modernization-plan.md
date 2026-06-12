@@ -4705,6 +4705,32 @@
   - 当前项目对 `debounce-promise` 的实际依赖并不是完整选项语义，而是非常稳定的“默认 trailing 异步校验”子集；把这部分收回仓库内实现，风险明显低于在更大范围统一替换所有 debounce 方案。
   - 这一步只触及名称校验表单链路，不改动 lodash debounce 承担的编辑器、拖拽、resize 和 iframe 事件等高频交互逻辑。
 
+### 2026-06-12 本轮继续推进：移除前端未使用的类型包声明
+
+- 本轮目标：
+  - 继续清理前端依赖清单中的遗留类型包噪音。
+  - 保持 TypeScript 编译链、Vite 构建链和测试链行为不变。
+
+- 本轮改造动作：
+  - `frontend/package.json`
+  - `frontend/package-lock.json`
+    - 移除未被仓库源码引用的 `@types/js-cookie`
+    - 移除未被仓库源码引用的 `@types/babel__traverse`
+    - 使用 `npm uninstall @types/js-cookie @types/babel__traverse --package-lock-only` 同步锁文件。
+
+- 本轮验证结果：
+  - 检索确认：
+    - `@types/js-cookie` 仅剩依赖声明，无源码使用面
+    - `@types/babel__traverse` 仅剩依赖声明，无源码使用面
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步属于纯类型依赖清理，不触及运行时代码路径，也不改变业务行为。
+  - 前端类型依赖清单进一步向“仅保留真实编译所需包”收敛，减少了后续 Node / npm 版本切换时的维护噪音。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

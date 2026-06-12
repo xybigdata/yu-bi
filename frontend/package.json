@@ -101,8 +101,6 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "14.3.1",
     "@testing-library/user-event": "14.6.1",
-    "@types/babel__traverse": "^7.18.5",
-    "@types/js-cookie": "3.0.6",
     "@types/lodash": "^4.17.24",
     "@types/node": "22.19.20",
     "@types/react": "18.3.12",
