@@ -263,6 +263,7 @@
 当前进展：
 
 - 已完成一小批 Ant Design 深路径类型与 locale 导入收口，优先改为 `antd` 公共导出和 `antd/locale/*` 入口
+- 已删除未接入当前构建链的 Ant Design 历史 Less 变量残留文件
 
 ### Wave C：做中风险稳定化专题
 
