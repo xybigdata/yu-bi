@@ -3974,6 +3974,47 @@
     - 再决定是否进入基础 / 插件统一的簇级或 id 级惰性注册评估
     - 在证据充分后，再碰更高风险的 `ChartManager` 结构性异步化议题
 
+### 2026-06-12 本轮继续推进：收口插件图表实例按需转换
+
+- 本轮目标：
+  - 在插件图表已经具备 definition 和 palette seed 的前提下，进一步把插件实例转换从“预加载时整批转换”收口到“真正需要实例时再按需转换”。
+  - 保持 `getById()`、`getAllCharts()` 等现有同步调用协议不变，不引入异步实例获取链。
+  - 让 `ChartManager.load()` 阶段只完成插件 definition / palette seed 预热，不顺手物化整批插件实例。
+
+- 本轮改造动作：
+  - `frontend/src/app/models/ChartManager.ts`
+    - 新增 `_customChartDefinitionMap` 与 `_customChartInstanceMap`，分别缓存插件 definition 和按需转换后的实例。
+    - `_loadCustomizeCharts()` 改为只缓存：
+      - 插件 definition map
+      - 插件 palette seed
+      - 空实例缓存
+    - `getById()` 对插件图表改为通过 `_getCustomChartById()` 按 id 延迟转换并缓存实例。
+    - `getAllCharts()` 对插件图表改为遍历 definition map，在真正物化图表列表时才触发按需转换。
+    - `_loadCustomizeCharts()` 的返回值从“插件实例列表”收口为“插件 palette seed 列表”，避免在预加载阶段产生实例转换副作用。
+  - `frontend/src/app/models/__tests__/ChartManager.test.ts`
+    - 补充断言，验证：
+      - 插件 definition 预加载阶段不会提前物化整批插件实例
+      - 读取 plugin palette 不会触发实例转换
+      - 真正物化图表列表时才触发插件实例转换
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`88` 个测试文件通过，`676` 个测试通过，`4` 个跳过
+  - 当前构建产物观察：
+    - 主入口相关大 chunk 保持在约 `553.25 KB`
+    - `ChartEditor.*.js` 保持在约 `64.09 KB`
+    - 本轮未新增新的重量级桥接 chunk，也未引入新的 `Circular chunk` 告警
+
+- 阶段结论：
+  - 到这一步，插件图表已经从“预加载即整批实例化”推进到“预加载只拿 definition / seed，实例按需转换”。
+  - 这意味着基础图表和插件图表都已经完成了“展示链不依赖实例、实例链按需触发”的前置拆障。
+  - 下一步更合理的顺序是：
+    - 评估基础 / 插件图表是否还能进一步统一成按簇或按 id 的惰性注册接口
+    - 明确哪些使用面必须继续保持同步，哪些已经具备异步化前提
+    - 在证据充分后，再决定是否进入 `ChartManager` 更高风险的结构性异步化设计
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`

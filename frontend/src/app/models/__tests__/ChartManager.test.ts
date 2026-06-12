@@ -95,4 +95,72 @@ describe('ChartManager Tests', () => {
     expect(palette.find(item => item.meta.id === 'plugin-chart')).toBeTruthy();
     expect(convertSpy).not.toHaveBeenCalled();
   });
+
+  test('should not convert plugin chart instances during plugin definition preload', async () => {
+    const manager = ChartManager.instance();
+    const definitionSpy = vi.spyOn(
+      PluginChartLoader.prototype,
+      'loadPluginDefinitions',
+    );
+    const convertSpy = vi.spyOn(
+      PluginChartLoader.prototype,
+      'convertToDatartChartModel',
+    );
+
+    definitionSpy.mockResolvedValueOnce([
+      {
+        meta: {
+          id: 'plugin-chart-lazy',
+          name: 'plugin-chart-lazy',
+          icon: 'chart',
+          requirements: [],
+        },
+        config: {
+          datas: [],
+          i18ns: [],
+        },
+        dependency: [],
+      } as any,
+    ]);
+
+    await (manager as any)._loadCustomizeCharts(['mock-plugin-lazy.js']);
+
+    expect(convertSpy).not.toHaveBeenCalled();
+  });
+
+  test('should convert plugin chart when materializing chart list', async () => {
+    const manager = ChartManager.instance();
+    const definitionSpy = vi.spyOn(
+      PluginChartLoader.prototype,
+      'loadPluginDefinitions',
+    );
+    const convertSpy = vi.spyOn(
+      PluginChartLoader.prototype,
+      'convertToDatartChartModel',
+    );
+
+    definitionSpy.mockResolvedValueOnce([
+      {
+        meta: {
+          id: 'plugin-chart-lazy',
+          name: 'plugin-chart-lazy',
+          icon: 'chart',
+          requirements: [],
+        },
+        config: {
+          datas: [],
+          i18ns: [],
+        },
+        dependency: [],
+      } as any,
+    ]);
+
+    await (manager as any)._loadCustomizeCharts(['mock-plugin-lazy.js']);
+    convertSpy.mockClear();
+
+    const charts = manager.getAllCharts();
+
+    expect(charts.find(chart => chart.meta.id === 'plugin-chart-lazy')).toBeTruthy();
+    expect(convertSpy).toHaveBeenCalledTimes(1);
+  });
 });

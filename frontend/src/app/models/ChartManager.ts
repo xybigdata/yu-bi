@@ -42,7 +42,8 @@ class ChartManager {
   private _basicChartFactoryMap = new Map(
     basicChartRegistry.map(item => [item.id, item.create]),
   );
-  private _customCharts: IChart[] = [];
+  private _customChartDefinitionMap = new Map<string, PluginChartDefinition>();
+  private _customChartInstanceMap = new Map<string, IChart>();
   private _customChartPaletteSeeds: PluginChartPaletteSeed[] = [];
   private static _manager: ChartManager | null = null;
 
@@ -64,7 +65,7 @@ class ChartManager {
   }
 
   public getAllCharts(): IChart[] {
-    return this._basicCharts().concat(this._cloneCustomCharts());
+    return this._basicCharts().concat(this._getCustomCharts());
   }
 
   public getAllChartPalette(): ChartPaletteItem[] {
@@ -104,13 +105,13 @@ class ChartManager {
     if (basicChartFactory) {
       return basicChartFactory();
     }
-    return CloneValueDeep(this._customCharts.find(c => c.meta?.id === id));
+    return this._getCustomChartById(id);
   }
 
   public getDefaultChart(): IChart {
     const defaultChartId = basicChartRegistry[0]?.id;
     if (!defaultChartId) {
-      const firstCustomChart = this._customCharts[0];
+      const firstCustomChart = this._getCustomCharts()[0];
       if (!firstCustomChart) {
         throw new Error('ChartManager has no registered charts');
       }
@@ -121,7 +122,7 @@ class ChartManager {
 
   private async _loadCustomizeCharts(paths: string[]) {
     if (this._isLoaded) {
-      return this._customCharts;
+      return this._customChartPaletteSeeds;
     }
 
     const pluginDefinitions = await this._loader.loadPluginDefinitions(paths);
@@ -132,11 +133,15 @@ class ChartManager {
     this._customChartPaletteSeeds = validPluginDefinitions.map(pluginDefinition =>
       this._loader.getPluginPaletteSeed(pluginDefinition),
     );
-    this._customCharts = validPluginDefinitions.map(pluginDefinition =>
-      this._loader.convertToDatartChartModel(pluginDefinition),
-    ) as IChart[];
+    this._customChartDefinitionMap = new Map(
+      validPluginDefinitions.map(pluginDefinition => [
+        String(pluginDefinition.meta.id),
+        pluginDefinition,
+      ]),
+    );
+    this._customChartInstanceMap = new Map();
     this._isLoaded = true;
-    return this._customCharts;
+    return this._customChartPaletteSeeds;
   }
 
   private _basicCharts(): IChart[] {
@@ -145,8 +150,27 @@ class ChartManager {
       .filter(Boolean) as IChart[];
   }
 
-  private _cloneCustomCharts(): IChart[] {
-    return CloneValueDeep(this._customCharts || []);
+  private _getCustomCharts(): IChart[] {
+    return Array.from(this._customChartDefinitionMap.keys())
+      .map(id => this._getCustomChartById(id))
+      .filter(Boolean) as IChart[];
+  }
+
+  private _getCustomChartById(id: string): IChart | undefined {
+    const chartId = String(id);
+    const cachedChart = this._customChartInstanceMap.get(chartId);
+    if (cachedChart) {
+      return CloneValueDeep(cachedChart);
+    }
+
+    const pluginDefinition = this._customChartDefinitionMap.get(chartId);
+    if (!pluginDefinition) {
+      return;
+    }
+
+    const chart = this._loader.convertToDatartChartModel(pluginDefinition);
+    this._customChartInstanceMap.set(chartId, chart);
+    return CloneValueDeep(chart);
   }
 }
 
