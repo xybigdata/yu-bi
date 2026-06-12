@@ -4432,6 +4432,35 @@
   - 当前依赖树仍会因 `@antv/s2-react -> ahooks` 的传递依赖携带 `js-cookie`，但 `yu-bi` 自身业务代码已不再直接声明或直接导入该包。
   - 改动边界只在前端 token cookie 工具层，不涉及登录接口、鉴权协议或后端 session / JWT 语义。
 
+### 2026-06-12 本轮继续推进：移除前端 @dinero.js/currencies 直接依赖
+
+- 本轮目标：
+  - 继续收口只承担少量静态元数据的前端直接依赖。
+  - 将数字格式化面板使用的有限币种列表本地化到仓库内实现，移除 `@dinero.js/currencies` 顶层直接依赖。
+  - 保持币种下拉框的代码集合与关键 exponent 元数据不变。
+
+- 本轮改造动作：
+  - `frontend/src/app/utils/currency.ts`
+    - 删除对 `@dinero.js/currencies` 的直接导入。
+    - 新增仓库内 `CurrencyDefinition` 类型和静态 `CURRENCIES` 常量，保留当前实际使用到的 7 个币种：`CNY`、`USD`、`GBP`、`AUD`、`EUR`、`JPY`、`CAD`。
+  - `frontend/src/app/utils/__tests__/currency.test.ts`
+    - 补充币种代码顺序和 `JPY.exponent = 0` 等关键元数据单测。
+  - `frontend/package.json`
+  - `frontend/package-lock.json`
+    - 移除 `@dinero.js/currencies` 顶层直接依赖，并用 `npm uninstall @dinero.js/currencies --package-lock-only` 同步锁文件。
+
+- 本轮验证结果：
+  - 检索确认：仓库生产代码中 `@dinero.js/currencies` 的直接导入原本只存在于 `frontend/src/app/utils/currency.ts`，本轮已全部替换。
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过
+
+- 阶段结论：
+  - 这一步只是把币种静态元数据继续收口到仓库内，不涉及 `currency.js` 的金额计算逻辑，也不涉及更大范围的本地化货币格式化策略。
+  - 对当前项目而言，外部币种包带来的收益很有限，而仓库内静态常量更直接、更可控。
+  - 后续如果继续做数字格式化现代化，应把重点放在数值渲染策略、单位体系和国际化格式语义，而不是回到这种单纯的币种枚举来源。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
