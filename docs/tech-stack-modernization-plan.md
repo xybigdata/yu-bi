@@ -3540,6 +3540,49 @@
     - `echarts` 主运行时进一步按图表簇拆分
   - 但这两项都明显高于本轮风险等级，因此这一轮继续保持“兼容优先、边界渐进拆分”的现代化策略。
 
+### 2026-06-12 本轮继续推进：ECharts 默认主题注册链按需加载
+
+- 本轮目标：
+  - 延续地图、PivotSheet、Monaco、StoryBoard、富文本、词云的渐进拆分策略，把主站入口与三个 share 入口对 `echarts registerTheme(...)` 的同步运行时依赖从顶层 Router 链路中移走。
+  - 保持现有图表初始化仍使用 `default` 主题、不改 `ChartManager` 同步注册协议、不改图表元数据与渲染配置。
+
+- 本轮改造动作：
+  - `frontend/src/app/utils/echartsThemeRuntime.ts`
+    - 新增统一的主题运行时加载入口 `ensureEChartsDefaultTheme()`。
+    - 将 `echarts` 动态导入与 `registerTheme('default', echartsDefaultTheme)` 收口为单次 promise 缓存，避免多个入口重复触发主题注册。
+  - `frontend/src/app/pages/MainPage/Loadable.tsx`
+    - `LazyMainPage` 在真正进入主站业务页懒加载前，先等待 `ensureEChartsDefaultTheme()` 完成。
+    - 避免登录、注册、初始化等无图表页面继续被顶层 `echarts` 导入拖入首包。
+  - `frontend/src/app/pages/SharePage/Chart/Loadable.tsx`
+  - `frontend/src/app/pages/SharePage/Dashboard/Loadable.tsx`
+  - `frontend/src/app/pages/SharePage/StoryPlayer/Loadable.tsx`
+    - 三个 share 业务入口在懒加载真实页面前，统一先完成默认主题注册，保证图表初始化时序不回退。
+  - `frontend/src/app/AppRouter.tsx`
+  - `frontend/src/app/pages/SharePage/Chart/Router.tsx`
+  - `frontend/src/app/pages/SharePage/Dashboard/Router.tsx`
+  - `frontend/src/app/pages/SharePage/StoryPlayer/Router.tsx`
+    - 移除顶层同步 `import { registerTheme } from 'echarts'` 和 `registerTheme('default', ...)` 调用，让四个 Router 重新回到轻入口职责。
+
+- 本轮验证结果：
+  - `frontend` 下：
+    - `npm run checkTs` 通过
+    - `npm run build:all` 通过
+    - `npm run test:ci -- --silent` 通过：`87` 个测试文件通过，`665` 个测试通过，`4` 个跳过
+  - 当前构建产物观察：
+    - `shareChart.js` 约 `2.24 KB`
+    - `shareDashboard.js` 约 `2.28 KB`
+    - `shareStoryPlayer.js` 约 `1.65 KB`
+    - `echarts.*.js` 继续作为独立运行时存在，约 `1.03 MB`
+    - 本轮未新增新的重量级桥接 chunk，也未引入新的 `Circular chunk` 告警
+
+- 阶段结论：
+  - `echarts` 默认主题注册已经不再由 `AppRouter` 和三个 share Router 顶层同步拉起，通用入口与图表运行时的耦合面进一步缩小。
+  - 这一步的收益重点不是继续压小 `echarts.*.js` 本体，而是避免无图表入口为默认主题注册提前承担 `echarts` 主运行时成本。
+  - 当前主图表链真正更大的结构性收益仍然在：
+    - `ChartManager` 图表簇级延迟注册
+    - `echarts` 主运行时进一步按图表簇拆分
+  - 但这两项仍明显高于本轮风险等级，因此这一轮继续保持“先收口入口同步链，再评估结构性拆分”的现代化策略。
+
 ### 2026-06-11 本轮继续推进：收口 HttpClient 5.5 / JWT-JWK / Calcite 局部弃用入口
 
 - `data-providers/http-data-provider/src/main/java/datart/data/provider/HttpDataFetcher.java`
