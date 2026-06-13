@@ -34,7 +34,7 @@ import {
   Tooltip,
 } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { datartDayjs } from 'app/utils/date';
+import { formatDatartDate } from 'app/utils/date';
 import { CommonFormTypes, TIME_FORMATTER } from 'globalConstants';
 import { Key, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -190,7 +190,7 @@ export function VariablePage() {
         values.defaultValue;
       if (values.valueType === VariableValueTypes.Date && !values.expression) {
         defaultValue = values.defaultValue.map(d =>
-          datartDayjs(d).format(values.dateFormat),
+          formatDatartDate(d, values.dateFormat),
         );
       }
 
@@ -238,7 +238,7 @@ export function VariablePage() {
           value:
             cr.value &&
             (editingVariable?.valueType === VariableValueTypes.Date
-              ? cr.value.map(m => datartDayjs(m).format(dateFormat))
+              ? cr.value.map(m => formatDatartDate(m, dateFormat))
               : cr.value),
         };
       });
