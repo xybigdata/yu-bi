@@ -1148,6 +1148,11 @@ describe('adjustRangeDataEndValue', () => {
   it('should timeValue is null', () => {
     expect(adjustRangeDataEndValue('date', '')).toEqual('');
   });
+  it('should keep invalid time value formatting result', () => {
+    expect(adjustRangeDataEndValue('date', 'invalid-time')).toEqual(
+      'Invalid date',
+    );
+  });
   it('should pickerType=dateTime', () => {
     expect(adjustRangeDataEndValue('dateTime', '2022-03-01 01:01:23')).toEqual(
       '2022-03-01 01:01:23',

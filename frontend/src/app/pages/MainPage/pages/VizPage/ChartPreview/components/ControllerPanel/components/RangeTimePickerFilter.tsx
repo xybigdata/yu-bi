@@ -26,14 +26,14 @@ import { FC, memo, useMemo } from 'react';
 import { PresentControllerFilterProps } from '.';
 const { RangePicker } = DatePicker;
 
-const toDayjs = (t): DatartDayjs => {
+const toRangeTimeValue = (t): DatartDayjs => {
   if (!t) {
     return datartDayjs();
   }
   if (Boolean(t) && typeof t === 'object' && 'unit' in t) {
     return getTime(+(t.direction + t.amount), t.unit)(t.unit, t.isStart);
   }
-  return datartDayjs(t);
+  return toDatartDayjs(t) || datartDayjs();
 };
 
 const RangeTimePickerFilter: FC<PresentControllerFilterProps> = memo(
@@ -47,12 +47,14 @@ const RangeTimePickerFilter: FC<PresentControllerFilterProps> = memo(
 
     const rangeTimes = useMemo(() => {
       if (condition?.type === FilterConditionType.RangeTime) {
-        const startTime = toDayjs(condition?.value?.[0]);
-        const endTime = toDayjs(condition?.value?.[1]);
+        const startTime = toRangeTimeValue(condition?.value?.[0]);
+        const endTime = toRangeTimeValue(condition?.value?.[1]);
         return [startTime, endTime];
       }
       if (condition?.type === FilterConditionType.RecommendTime) {
-        return recommendTimeRangeConverter(condition?.value)?.map(toDayjs);
+        return recommendTimeRangeConverter(condition?.value)?.map(
+          toRangeTimeValue,
+        );
       }
       return [datartDayjs(), datartDayjs()];
     }, [condition?.type, condition?.value]);
