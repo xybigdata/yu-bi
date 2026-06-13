@@ -28,7 +28,7 @@ import {
 } from 'app/pages/DashBoardPage/constants';
 import { VariableValueTypes } from 'app/pages/MainPage/pages/VariablePage/constants';
 import { RelationFilterValue } from 'app/types/ChartConfig';
-import { datartDayjs, DatartDateLike } from 'app/utils/date';
+import { datartDayjs, DatartDateLike, toDatartDayjs } from 'app/utils/date';
 import { FilterSqlOperator, TIME_FORMATTER } from 'globalConstants';
 import i18next from 'i18next';
 import {
@@ -45,7 +45,7 @@ type FormattableDateValue = Exclude<DatartDateLike, string | Date> & {
 const isFormattableDateValue = (
   value: DatartDateLike | null | undefined,
 ): value is FormattableDateValue => {
-  return !!value && typeof value !== 'string' && 'format' in value;
+  return !!value && typeof value === 'object' && 'format' in value;
 };
 
 export const getStringFacadeOptions = (type: ValueOptionType) => {
@@ -329,7 +329,10 @@ export const formatDateByPickType = (
     return null;
   }
 
-  const dateValue = datartDayjs(dateTime as any);
+  const dateValue = toDatartDayjs(dateTime);
+  if (!dateValue) {
+    return null;
+  }
   switch (pickerType) {
     case 'dateTime':
       return dateValue.format(formatTemp);

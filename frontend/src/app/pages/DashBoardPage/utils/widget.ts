@@ -32,8 +32,8 @@ import {
   filterCurrentUsedComputedFields,
   mergeChartAndViewComputedField,
 } from 'app/utils/chartHelper';
+import { formatDatartDate } from 'app/utils/date';
 import { updateBy } from 'app/utils/mutation';
-import { formatTime } from 'app/utils/time';
 import {
   BOARD_COPY_CHART_SUFFIX,
   FilterSqlOperator,
@@ -618,7 +618,7 @@ export const getWidgetMap = (
                 ...(content.config.controllerDate as any),
                 startTime: {
                   relativeOrExact: TimeFilterValueCategory.Exact,
-                  exactValue: formatTime(_value as any, TIME_FORMATTER),
+                  exactValue: formatDatartDate(_value?.[0], TIME_FORMATTER),
                 },
               };
               break;

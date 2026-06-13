@@ -1,5 +1,5 @@
 import { TIME_FORMATTER } from 'globalConstants';
-import { datartDayjs } from 'app/utils/date';
+import { datartDayjs, formatDatartDate, toDatartDayjs } from 'app/utils/date';
 import { PermissionLevels, ResourceTypes } from '../PermissionPage/constants';
 import { JobTypes, TimeModes, VizTypes } from './constants';
 import { AddScheduleParams, Schedule, VizContentsItem } from './slice/types';
@@ -108,10 +108,10 @@ export const toScheduleSubmitParams = (
       : getCronExpressionByPartition(values),
     type: jobType as JobTypes,
     startDate: dateRange[0]
-      ? datartDayjs(dateRange[0] as any).format(TIME_FORMATTER)
+      ? formatDatartDate(dateRange[0], TIME_FORMATTER)
       : undefined,
     endDate: dateRange[1]
-      ? datartDayjs(dateRange[1] as any).format(TIME_FORMATTER)
+      ? formatDatartDate(dateRange[1], TIME_FORMATTER)
       : undefined,
     orgId,
     parentId,
@@ -144,7 +144,11 @@ export const toEchoFormValues = ({
     jobType: type as JobTypes,
     dateRange:
       startDate && endDate
-        ? [datartDayjs(startDate), datartDayjs(endDate)]
+        ? (() => {
+            const start = toDatartDayjs(startDate);
+            const end = toDatartDayjs(endDate);
+            return start && end ? [start, end] : undefined;
+          })()
         : undefined,
     subject: configObj?.subject,
     textContent: configObj?.textContent || '',

@@ -166,6 +166,7 @@
 - `00861e059 chore: 继续收口 Ant Design 类型推导入口`
 - `1a21e7893 chore: 收口一批 Ant Design 历史类型入口`
 - `492193acc chore: 收口 SelectController 的类型入口`
+- `5f538da70 chore: 移除前端安装脚本的 legacy-peer-deps`
 
 ## 5. 当前遗留项分层
 
@@ -178,6 +179,7 @@
 | 前端剩余深路径类型导入 | 仅剩 `SliderFilter` 中一处 `antd/es/slider` | 保留精确 range 类型，避免退化为联合类型 |
 | 前端直接依赖收口 | 仍需持续确认是否存在“声明但未直接消费”的依赖 | 逐项检索、删除、构建验证 |
 | 本地安装脚本 | `bootstrap` 已验证可去掉 `--legacy-peer-deps` | 收口为普通 `npm install`，继续观察安装稳定性 |
+| 时间值标准化 | 仍有少量 `as any` / `toDate()` / 分散格式化入口 | 继续收口到统一日期工具层 |
 | 文档状态同步 | 当前文档已收口，但需要保持与仓库进度同步 | 每轮只更新状态和下一步 |
 
 当前已知剩余 Ant Design 历史类型入口：
@@ -207,17 +209,20 @@
 
 当前批次主题：
 
-- 收口前端安装脚本中的 `--legacy-peer-deps`
+- 收口一批时间值标准化入口
 
 当前已改未提：
 
-1. `frontend/package.json`
-   - `bootstrap` 已从 `npm install --legacy-peer-deps` 收口为 `npm install`
-2. `README.md` / `README_zh.md`
-   - 安装说明同步移除 `--legacy-peer-deps`
-3. 安装路径验证证据
-   - 全新临时目录下 `npm ci --ignore-scripts` 通过
-   - 全新临时目录下 `npm install --ignore-scripts` 通过
+1. `frontend/src/app/utils/date.ts`
+   - 新增 `formatDatartDate`，统一日期值格式化入口
+2. 日期调用点收口
+   - `Variables.tsx`
+   - `SchedulePage/utils.ts`
+   - `ControllerWidgetPanel/utils.ts`
+   - `DashBoardPage/utils/widget.ts`
+   - `ShareLinkModal.tsx`
+3. 收口目标
+   - 减少 `datartDayjs(x as any)`、`current.toDate()` 和分散格式化逻辑
 
 当前批次门禁：
 
@@ -239,8 +244,8 @@
 
 目标：
 
-- 完成 `bootstrap` 脚本去除 `--legacy-peer-deps`
-- 提交安装说明与执行板同步改动
+- 提交时间值标准化的这一小批低风险收口
+- 保持时间体系回归在小步、可验证范围内
 
 ### Wave B：继续收口前端历史入口
 

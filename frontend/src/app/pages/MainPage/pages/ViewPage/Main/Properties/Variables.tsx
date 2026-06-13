@@ -29,7 +29,7 @@ import { loadMonaco } from 'app/components/MonacoEditor/runtime';
 import { ListItem } from 'app/components';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { datartDayjs } from 'app/utils/date';
+import { formatDatartDate } from 'app/utils/date';
 import { getRoles } from 'app/pages/MainPage/pages/MemberPage/slice/thunks';
 import {
   VariableScopes,
@@ -195,7 +195,7 @@ export const Variables = memo(() => {
       let defaultValue: any = values.defaultValue;
       if (values.valueType === VariableValueTypes.Date && !values.expression) {
         defaultValue = values.defaultValue.map(d =>
-          datartDayjs(d as any).format(values.dateFormat),
+          formatDatartDate(d, values.dateFormat),
         );
       }
 
@@ -258,7 +258,7 @@ export const Variables = memo(() => {
             value: JSON.stringify(
               cr.value &&
                 (editingVariable?.valueType === VariableValueTypes.Date
-                  ? cr.value.map(d => datartDayjs(d as any).format(dateFormat))
+                  ? cr.value.map(d => formatDatartDate(d, dateFormat))
                   : cr.value),
             ),
           };

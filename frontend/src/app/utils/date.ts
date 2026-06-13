@@ -16,6 +16,7 @@ export type DatartDayjs = Dayjs;
 export type DatartDateLike =
   | Dayjs
   | Date
+  | number
   | string
   | {
       format: (template?: string) => string;
@@ -37,4 +38,12 @@ export function toDatartDayjs(value?: DatartDateLike | null) {
     typeof value === 'object' && 'format' in value ? value.toString() : value;
   const dayValue = dayjs(dateInput);
   return dayValue.isValid() ? dayValue : null;
+}
+
+export function formatDatartDate(
+  value?: DatartDateLike | null,
+  template?: string,
+) {
+  const dayValue = toDatartDayjs(value);
+  return dayValue ? dayValue.format(template) : 'Invalid date';
 }
