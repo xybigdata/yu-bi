@@ -18,15 +18,15 @@
 
 import { DatePicker } from 'antd';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
-import { TimeFilterConditionValue } from 'app/types/ChartConfig';
 import { formatDatartDate, toDatartDayjs } from 'app/utils/date';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo } from 'react';
+import type { ManualTimeValue } from './ManualSingleTimeSelector';
 
 const ExactTimeSelector: FC<
   {
-    time?: TimeFilterConditionValue;
-    onChange: (time) => void;
+    time?: ManualTimeValue;
+    onChange: (time: string) => void;
   } & I18NComponentProps
 > = memo(({ time, i18nPrefix, onChange }) => {
   const t = useI18NPrefix(i18nPrefix);

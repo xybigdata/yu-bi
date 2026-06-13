@@ -18,7 +18,7 @@
 import { DatePicker, Form, FormItemProps } from 'antd';
 import { PickerType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import { formatDateByPickType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/utils';
-import { datartDayjs } from 'app/utils/date';
+import { DatartDayjs, toDatartDayjs } from 'app/utils/date';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 const { RangePicker } = DatePicker;
@@ -53,9 +53,16 @@ export interface TimeSetProps extends FormItemProps<any> {
   value?: any;
   onChange?: any;
 }
+
+const isDateTimePickerType = (
+  pickerType: PickerType,
+): pickerType is 'dateTime' => {
+  return pickerType === 'dateTime';
+};
+
 export const RangeTimeController: React.FC<TimeSetProps> = memo(
   ({ pickerType, value, onChange }) => {
-    const _onChange = times => {
+    const handleRangeChange = (times: [DatartDayjs | null, DatartDayjs | null] | null) => {
       if (!times) {
         onChange?.(null);
         return;
@@ -66,34 +73,34 @@ export const RangeTimeController: React.FC<TimeSetProps> = memo(
       ];
       onChange?.(newValues);
     };
-    const _values = useMemo(() => {
+    const rangeValues = useMemo<[DatartDayjs | null, DatartDayjs | null] | null>(() => {
       if (!value || !Array.isArray(value)) {
-        return undefined;
+        return null;
       }
       return [
-        value[0] ? datartDayjs(value[0]) : null,
-        value[1] ? datartDayjs(value[1]) : null,
+        toDatartDayjs(value[0]),
+        toDatartDayjs(value[1]),
       ];
     }, [value]);
     return (
       <StyledWrap>
-        {pickerType === 'dateTime' ? (
+        {isDateTimePickerType(pickerType) ? (
           <RangePicker
             showTime
             style={{ width: '100%' }}
             allowClear={true}
-            value={_values as any}
-            onChange={_onChange}
+            value={rangeValues}
+            onChange={handleRangeChange}
             className="control-datePicker"
             bordered={false}
           />
         ) : (
           <RangePicker
-            onChange={_onChange}
+            onChange={handleRangeChange}
             allowClear={true}
             style={{ width: '100%' }}
-            value={_values as any}
-            picker={pickerType as any}
+            value={rangeValues}
+            picker={pickerType}
             className="control-datePicker"
             bordered={false}
           />

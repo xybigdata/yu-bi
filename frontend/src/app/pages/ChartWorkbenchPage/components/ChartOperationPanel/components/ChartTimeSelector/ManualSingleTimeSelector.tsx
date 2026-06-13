@@ -19,19 +19,28 @@
 import { Select, Space } from 'antd';
 import { TimeFilterValueCategory } from 'app/constants';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
-import { TimeFilterConditionValue } from 'app/types/ChartConfig';
 import { formatDatartDate } from 'app/utils/date';
+import { RelativeTimeUnit } from 'globalConstants';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
 import ExactTimeSelector from './ExactTimeSelector';
 import RelativeTimeSelector from './RelativeTimeSelector';
 
+export type ManualTimeValue =
+  | string
+  | {
+      unit: RelativeTimeUnit;
+      amount: number;
+      direction?: string;
+      isStart?: boolean;
+    };
+
 const ManualSingleTimeSelector: FC<
   {
-    time?: TimeFilterConditionValue;
+    time?: ManualTimeValue;
     isStart: boolean;
-    onTimeChange: (time) => void;
+    onTimeChange: (time: ManualTimeValue | null) => void;
   } & I18NComponentProps
 > = memo(({ time, isStart, i18nPrefix, onTimeChange }) => {
   const t = useI18NPrefix(i18nPrefix);

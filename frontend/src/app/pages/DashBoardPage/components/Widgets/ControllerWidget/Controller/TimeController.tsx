@@ -18,7 +18,7 @@
 import { DatePicker, Form, FormItemProps } from 'antd';
 import { PickerType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import { formatDateByPickType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/utils';
-import { datartDayjs } from 'app/utils/date';
+import { toDatartDayjs } from 'app/utils/date';
 import React, { memo } from 'react';
 import styled from 'styled-components';
 
@@ -52,9 +52,16 @@ export interface SingleTimeSetProps extends FormItemProps<any> {
   value?: any;
   onChange?: any;
 }
+
+const isDateTimePickerType = (
+  pickerType: PickerType,
+): pickerType is 'dateTime' => {
+  return pickerType === 'dateTime';
+};
+
 export const TimeController: React.FC<SingleTimeSetProps> = memo(
   ({ pickerType, value, onChange }) => {
-    const _onChange = (time, strTime) => {
+    const handleTimeChange = time => {
       if (!time) {
         return onChange(null);
       }
@@ -63,15 +70,17 @@ export const TimeController: React.FC<SingleTimeSetProps> = memo(
       onChange(newValues);
     };
 
+    const pickerValue = toDatartDayjs(value);
+
     return (
       <StyledWrap>
-        {pickerType === 'dateTime' ? (
+        {isDateTimePickerType(pickerType) ? (
           <DatePicker
             style={{ width: '100%' }}
             allowClear={true}
-            value={value ? datartDayjs(value) : null}
+            value={pickerValue}
             showTime
-            onChange={_onChange}
+            onChange={handleTimeChange}
             className="control-datePicker"
             bordered={false}
           />
@@ -79,9 +88,9 @@ export const TimeController: React.FC<SingleTimeSetProps> = memo(
           <DatePicker
             style={{ width: '100%' }}
             allowClear={true}
-            value={value ? datartDayjs(value) : null}
-            onChange={_onChange}
-            picker={pickerType as any}
+            value={pickerValue}
+            onChange={handleTimeChange}
+            picker={pickerType}
             className="control-datePicker"
             bordered={false}
           />

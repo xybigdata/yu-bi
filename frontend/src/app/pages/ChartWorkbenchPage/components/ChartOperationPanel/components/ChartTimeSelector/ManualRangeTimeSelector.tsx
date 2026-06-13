@@ -22,13 +22,17 @@ import { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import ChartFilterCondition, {
   ConditionBuilder,
 } from 'app/models/ChartFilterCondition';
-import { FilterCondition } from 'app/types/ChartConfig';
+import { FilterCondition, TimeFilterConditionValue } from 'app/types/ChartConfig';
 import { formatDatartDate } from 'app/utils/date';
 import { getTime } from 'app/utils/time';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo, useState } from 'react';
 import CurrentRangeTime from './CurrentRangeTime';
-import ManualSingleTimeSelector from './ManualSingleTimeSelector';
+import ManualSingleTimeSelector, {
+  ManualTimeValue,
+} from './ManualSingleTimeSelector';
+
+type RangeTimeValue = [ManualTimeValue | undefined, ManualTimeValue | undefined];
 
 const ManualRangeTimeSelector: FC<
   {
@@ -36,18 +40,18 @@ const ManualRangeTimeSelector: FC<
     onConditionChange: (filter: ChartFilterCondition) => void;
   } & I18NComponentProps
 > = memo(({ i18nPrefix, condition, onConditionChange }) => {
-  const [rangeTimes, setRangeTimes] = useState(() => {
+  const [rangeTimes, setRangeTimes] = useState<RangeTimeValue>(() => {
     if (condition?.type === FilterConditionType.RangeTime) {
       const startTime = condition?.value?.[0];
       const endTime = condition?.value?.[1];
-      return [startTime, endTime];
+      return [startTime as ManualTimeValue | undefined, endTime as ManualTimeValue | undefined];
     }
-    return [];
+    return [undefined, undefined];
   });
 
-  const handleTimeChange = index => time => {
-    const nextRangeTimes = [...rangeTimes];
-    nextRangeTimes[index] = time;
+  const handleTimeChange = (index: number) => (time: ManualTimeValue | null) => {
+    const nextRangeTimes: RangeTimeValue = [...rangeTimes];
+    nextRangeTimes[index] = time || undefined;
     setRangeTimes(nextRangeTimes);
 
     const filterRow = new ConditionBuilder(condition)
@@ -57,32 +61,32 @@ const ManualRangeTimeSelector: FC<
   };
 
   const getRangeStringTimes = () => {
-    return (rangeTimes || []).map(t => {
+    return rangeTimes.map(t => {
       if (Boolean(t) && typeof t === 'object' && 'unit' in t) {
-        const time = getTime(+(t.direction + t.amount), t.unit)(
+        const time = getTime(+((t.direction || '-') + t.amount), t.unit)(
           t.unit,
           t.isStart,
         );
         return formatDatartDate(time, TIME_FORMATTER);
       }
-      return t;
-    });
+      return t || '';
+    }) as [string, string];
   };
 
   return (
     <div>
       <Space direction="vertical" size={12}>
         <Row>
-          <CurrentRangeTime times={getRangeStringTimes() as any} />
+          <CurrentRangeTime times={getRangeStringTimes()} />
         </Row>
         <ManualSingleTimeSelector
-          time={rangeTimes?.[0] as any}
+          time={rangeTimes[0]}
           isStart={true}
           i18nPrefix={i18nPrefix}
           onTimeChange={handleTimeChange(0)}
         />
         <ManualSingleTimeSelector
-          time={rangeTimes?.[1] as any}
+          time={rangeTimes[1]}
           isStart={false}
           i18nPrefix={i18nPrefix}
           onTimeChange={handleTimeChange(1)}
