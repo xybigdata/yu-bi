@@ -163,6 +163,9 @@
 - `9de952f11 chore: 继续收口 Ant Design 深路径类型导入`
 - `3c395c940 chore: 删除未使用的 Ant Design Less 变量残留`
 - `2477307d6 chore: 收口 RangeNumber 的 Ant Design 内部类型依赖`
+- `00861e059 chore: 继续收口 Ant Design 类型推导入口`
+- `1a21e7893 chore: 收口一批 Ant Design 历史类型入口`
+- `492193acc chore: 收口 SelectController 的类型入口`
 
 ## 5. 当前遗留项分层
 
@@ -172,26 +175,14 @@
 
 | 项目 | 当前情况 | 建议动作 |
 | --- | --- | --- |
-| 前端剩余深路径类型导入 | 仍有少量 `antd/es/*` 历史类型入口 | 优先改为 `antd` 公共导出或更稳定的 props 推导 |
+| 前端剩余深路径类型导入 | 仅剩 `SliderFilter` 中一处 `antd/es/slider` | 保留精确 range 类型，避免退化为联合类型 |
 | 前端直接依赖收口 | 仍需持续确认是否存在“声明但未直接消费”的依赖 | 逐项检索、删除、构建验证 |
-| 本地安装脚本 | `bootstrap` 仍保留 `npm install --legacy-peer-deps` | 评估是否可移除，避免掩盖 peer 依赖问题 |
+| 本地安装脚本 | `bootstrap` 已验证可去掉 `--legacy-peer-deps` | 收口为普通 `npm install`，继续观察安装稳定性 |
 | 文档状态同步 | 当前文档已收口，但需要保持与仓库进度同步 | 每轮只更新状态和下一步 |
 
 当前已知剩余 Ant Design 历史类型入口：
 
-- `antd/es/radio`
-- `antd/es/statistic`
-- `antd/es/cascader`
-- `antd/es/list`
-- `antd/es/button`
-- `antd/es/checkbox`
 - `antd/es/slider`
-- `antd/es/select`
-
-其中当前批次已经在处理：
-
-- `StoryPageAddModal.tsx` 中的 `antd/es/table/interface` 已改为 `TableProps` 推导
-- `BoardToolBarContext.ts` 中的 `ButtonType` 已改为 `ButtonProps['type']`
 
 ### 5.2 中风险，需要专项验证
 
@@ -216,14 +207,17 @@
 
 当前批次主题：
 
-- 继续收口前端 Ant Design 历史类型导入
+- 收口前端安装脚本中的 `--legacy-peer-deps`
 
 当前已改未提：
 
-1. `frontend/src/app/pages/StoryBoardPage/components/StoryPageAddModal.tsx`
-   - `RowSelectionType` 深路径类型已替换为 `TableProps<Folder>['rowSelection']['type']` 推导
-2. `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/BoardToolBar/context/BoardToolBarContext.ts`
-   - `ButtonType` 已替换为 `ButtonProps['type']`
+1. `frontend/package.json`
+   - `bootstrap` 已从 `npm install --legacy-peer-deps` 收口为 `npm install`
+2. `README.md` / `README_zh.md`
+   - 安装说明同步移除 `--legacy-peer-deps`
+3. 安装路径验证证据
+   - 全新临时目录下 `npm ci --ignore-scripts` 通过
+   - 全新临时目录下 `npm install --ignore-scripts` 通过
 
 当前批次门禁：
 
@@ -245,21 +239,20 @@
 
 目标：
 
-- 完成当前两处 Ant Design 类型收口验证
-- 提交当前未收尾的低风险改动
+- 完成 `bootstrap` 脚本去除 `--legacy-peer-deps`
+- 提交安装说明与执行板同步改动
 
 ### Wave B：继续收口前端历史入口
 
 目标：
 
-- 继续审计 `antd/es/*`、`antd/lib/*` 剩余入口
-- 优先处理可通过 props 类型推导替代的项
+- 保留 `SliderFilter` 里唯一剩余的 `antd/es/slider` 精确 range 类型
+- 转向前端直接依赖与安装健康度的持续收口
 
 候选项：
 
-- `SelectValue`
-- `SliderRangeProps`
-- 其他仍可安全替换的历史类型入口
+- 清理安装目录中的历史残留包
+- 持续确认是否还有“声明但未直接消费”的直接依赖
 
 ### Wave C：中风险稳定化专题
 
@@ -320,7 +313,7 @@
 - `calcite-core`
 - `react-quill` 兼容层
 - Ant Design 历史深路径导入与历史接入方式
-- `bootstrap` 脚本中的 `--legacy-peer-deps`
+- `bootstrap` 脚本的安装稳定性
 
 当前已在较新稳定线、暂不追更高版本：
 
