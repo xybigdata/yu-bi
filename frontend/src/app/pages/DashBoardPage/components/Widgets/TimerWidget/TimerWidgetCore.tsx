@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { formatDatartDate } from 'app/utils/date';
+import { formatCurrentDatartDate } from 'app/utils/date';
 import { TIME_FORMATTER } from 'globalConstants';
 import { memo, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -31,12 +31,12 @@ export const TimerWidgetCore: React.FC = memo(() => {
   );
   const timeFormat = time?.format || TIME_FORMATTER;
   const [currentTime, setCurrentTime] = useState(
-    formatDatartDate(Date.now(), timeFormat),
+    formatCurrentDatartDate(timeFormat),
   );
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(formatDatartDate(Date.now(), timeFormat));
+      setCurrentTime(formatCurrentDatartDate(timeFormat));
     }, time?.duration);
     return () => {
       clearInterval(timer);

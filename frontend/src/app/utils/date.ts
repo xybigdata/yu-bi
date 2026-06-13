@@ -29,6 +29,14 @@ export function setDatartDayjsLocale(locale: string) {
   dayjs.locale(locale);
 }
 
+export function getDatartNow() {
+  return datartDayjs();
+}
+
+export function getDatartNowMillis() {
+  return getDatartNow().valueOf();
+}
+
 export function toDatartDayjs(value?: DatartDateLike | null) {
   if (!value) {
     return null;
@@ -71,6 +79,10 @@ export function formatDatartDate(
 ) {
   const dayValue = toDatartDayjs(value);
   return dayValue ? dayValue.format(template) : 'Invalid date';
+}
+
+export function formatCurrentDatartDate(template?: string) {
+  return formatDatartDate(getDatartNow(), template);
 }
 
 export function formatDatartDateIfValid(

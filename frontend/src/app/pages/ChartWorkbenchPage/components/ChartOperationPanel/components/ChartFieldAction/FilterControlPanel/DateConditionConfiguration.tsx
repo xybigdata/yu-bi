@@ -22,7 +22,7 @@ import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import ChartFilterCondition, {
   ConditionBuilder,
 } from 'app/models/ChartFilterCondition';
-import { formatDatartDate } from 'app/utils/date';
+import { formatCurrentDatartDate } from 'app/utils/date';
 import {
   FilterSqlOperator,
   RECOMMEND_TIME,
@@ -78,11 +78,9 @@ const DateConditionConfiguration: ForwardRefRenderFunction<
         .asRecommendTime();
       onConditionChange?.(filter);
     } else if (conditionType === FilterConditionType.RangeTime) {
+      const currentTime = formatCurrentDatartDate(TIME_FORMATTER);
       const filterRow = new ConditionBuilder(condition)
-        .setValue([
-          formatDatartDate(Date.now(), TIME_FORMATTER),
-          formatDatartDate(Date.now(), TIME_FORMATTER),
-        ])
+        .setValue([currentTime, currentTime])
         .asRangeTime();
       onConditionChange?.(filterRow);
     }

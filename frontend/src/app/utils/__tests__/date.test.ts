@@ -17,7 +17,10 @@
  */
 
 import {
+  formatCurrentDatartDate,
   formatDatartDateIfValid,
+  getDatartNow,
+  getDatartNowMillis,
   toDatartDayjsList,
   toDatartDayjsRange,
 } from '../date';
@@ -84,5 +87,22 @@ describe('formatDatartDateIfValid', () => {
       formatDatartDateIfValid('invalid-date', 'YYYY-MM-DD HH:mm:ss'),
     ).toBeUndefined();
     expect(formatDatartDateIfValid()).toBeUndefined();
+  });
+});
+
+describe('current datart time helpers', () => {
+  test('should return current dayjs and milliseconds consistently', () => {
+    const now = getDatartNow();
+    const nowMillis = getDatartNowMillis();
+
+    expect(typeof nowMillis).toBe('number');
+    expect(now.isValid()).toBe(true);
+    expect(Math.abs(now.valueOf() - nowMillis)).toBeLessThan(1000);
+  });
+
+  test('should format current time with template', () => {
+    expect(formatCurrentDatartDate('YYYY-MM-DD HH:mm:ss')).toMatch(
+      /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
+    );
   });
 });
