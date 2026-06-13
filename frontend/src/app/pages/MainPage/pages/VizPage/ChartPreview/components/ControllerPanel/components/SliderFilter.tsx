@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import { Slider } from 'antd';
 import type { SliderRangeProps } from 'antd/es/slider';
 import { updateBy } from 'app/utils/mutation';
@@ -30,7 +29,7 @@ const SliderFilter: FC<PresentControllerFilterProps> = memo(
       }
     });
 
-    const handleValueChange: SliderRangeProps['onChange'] = values => {
+    const handleValueChange: NonNullable<SliderRangeProps['onChange']> = values => {
       if (!Array.isArray(values) || values.length !== 2) {
         return;
       }

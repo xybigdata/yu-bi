@@ -42,7 +42,7 @@ export function Configuration<T extends { id: string }>({
   );
 
   const getDefaultRecord = useCallback(
-    () => ({ id: uuidv4(), ...defaultRecord } as T),
+    () => ({ id: uuidv4(), ...defaultRecord }) as T,
     [defaultRecord],
   );
 

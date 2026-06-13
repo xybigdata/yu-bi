@@ -60,14 +60,14 @@ import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import ChartMetadata from 'app/types/ChartMetadata';
 import { updateBy } from 'app/utils/mutation';
-import { ECharts } from 'echarts';
-import { ECBasicOption } from 'echarts/types/dist/shared';
+import type { ECharts } from 'echarts';
+import type { ECBasicOption } from 'echarts/types/dist/shared';
 import {
   DATE_LEVEL_DELIMITER,
   NumberUnitKey,
   NumericUnitDescriptions,
 } from 'globalConstants';
-import { datartDayjs } from './date';
+import { formatDatartDate } from './date';
 import { Debugger } from 'utils/debugger';
 import {
   CloneValueDeep,
@@ -309,7 +309,7 @@ function dateFormater(value, config?: FormatFieldAction[FieldFormatType.Date]) {
     return value;
   }
 
-  return datartDayjs(value).format(config?.format);
+  return formatDatartDate(value, config?.format);
 }
 
 /**
@@ -634,10 +634,13 @@ function getMarkLine2(
   isHorizonDisplay: boolean,
 ): MarkLine {
   const markLineData = refTabs
-    ?.reduce((acc, cur) => {
-      const markLineConfigs = cur?.rows?.filter(r => r.key === 'markLine');
-      return acc.concat(markLineConfigs);
-    }, [] as Array<ChartStyleSectionGroup | undefined>)
+    ?.reduce(
+      (acc, cur) => {
+        const markLineConfigs = cur?.rows?.filter(r => r.key === 'markLine');
+        return acc.concat(markLineConfigs);
+      },
+      [] as Array<ChartStyleSectionGroup | undefined>,
+    )
     .map(ml => {
       return getMarkLineData2(
         ml,
@@ -926,10 +929,13 @@ function getMarkArea2(
   dataConfig: ChartDataSectionField,
   isHorizonDisplay: boolean,
 ): MarkArea {
-  const refAreas = refTabs?.reduce((acc, cur) => {
-    const markLineConfigs = cur?.rows?.filter(r => r.key === 'markArea');
-    return acc.concat(markLineConfigs);
-  }, [] as Array<ChartStyleSectionGroup | undefined>);
+  const refAreas = refTabs?.reduce(
+    (acc, cur) => {
+      const markLineConfigs = cur?.rows?.filter(r => r.key === 'markArea');
+      return acc.concat(markLineConfigs);
+    },
+    [] as Array<ChartStyleSectionGroup | undefined>,
+  );
 
   return {
     data: refAreas

@@ -29,7 +29,6 @@ export interface DropItem {
 }
 export const WidgetDndHandleMask: React.FC<WidgetDndHandleMaskProps> = memo(
   ({ widgetId, canWrapped }) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_, dragRef, dragPreview] = useDrag(() => ({
       type: CONTAINER_TAB,
       item: { canWrapped: canWrapped, childId: widgetId } as DropItem,

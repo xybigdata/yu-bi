@@ -477,15 +477,11 @@ const ChartDataViewPanel: FC<{
     () => [
       {
         key: 'searchField',
-        label: (
-          <MenuItemContent>{t('searchField')}</MenuItemContent>
-        ),
+        label: <MenuItemContent>{t('searchField')}</MenuItemContent>,
       },
       {
         key: 'createComputedFields',
-        label: (
-          <MenuItemContent>{t('createComputedFields')}</MenuItemContent>
-        ),
+        label: <MenuItemContent>{t('createComputedFields')}</MenuItemContent>,
       },
       {
         key: 'group',

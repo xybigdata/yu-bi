@@ -17,8 +17,6 @@
  */
 
 import { ConfigProvider, message } from 'antd';
-import echartsDefaultTheme from 'app/assets/theme/echarts_default_theme.json';
-import { registerTheme } from 'echarts';
 import { PUBLIC_URL, StorageKeys } from 'globalConstants';
 import { antdLocales } from 'locales/i18n';
 import { useEffect, useLayoutEffect } from 'react';
@@ -38,8 +36,6 @@ import { LazyRegisterPage } from './pages/RegisterPage/Loadable';
 import { LazySetupPage } from './pages/SetupPage/Loadable';
 import { useAppSlice } from './slice';
 import { getSystemInfo, logout, setLoggedInUser } from './slice/thunks';
-
-registerTheme('default', echartsDefaultTheme);
 
 export function AppRouter() {
   const dispatch = useAppDispatch();

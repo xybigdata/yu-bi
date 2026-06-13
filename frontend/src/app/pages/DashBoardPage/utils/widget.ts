@@ -32,8 +32,8 @@ import {
   filterCurrentUsedComputedFields,
   mergeChartAndViewComputedField,
 } from 'app/utils/chartHelper';
+import { formatDatartDate } from 'app/utils/date';
 import { updateBy } from 'app/utils/mutation';
-import { formatTime } from 'app/utils/time';
 import {
   BOARD_COPY_CHART_SUFFIX,
   FilterSqlOperator,
@@ -302,17 +302,23 @@ export const convertWidgetRelationsToSave = (
 };
 
 export const convertToWidgetMap = (widgets: Widget[]) => {
-  return widgets.reduce((acc, cur) => {
-    acc[cur.id] = cur;
-    return acc;
-  }, {} as Record<string, Widget>);
+  return widgets.reduce(
+    (acc, cur) => {
+      acc[cur.id] = cur;
+      return acc;
+    },
+    {} as Record<string, Widget>,
+  );
 };
 
 export const createWidgetInfoMap = (widgets: Widget[]) => {
-  return widgets.reduce((acc, cur) => {
-    acc[cur.id] = createWidgetInfo(cur.id);
-    return acc;
-  }, {} as Record<string, WidgetInfo>);
+  return widgets.reduce(
+    (acc, cur) => {
+      acc[cur.id] = createWidgetInfo(cur.id);
+      return acc;
+    },
+    {} as Record<string, WidgetInfo>,
+  );
 };
 
 export const convertWrapChartWidget = (params: {
@@ -343,10 +349,13 @@ export const convertWrapChartWidget = (params: {
 export const getAllControlWidget = (widgetMap: Record<string, Widget>) => {
   const controlWidgetMap = Object.values(widgetMap)
     .filter(widget => widget.config.type === 'controller')
-    .reduce((acc, cur) => {
-      acc[cur.id] = cur;
-      return acc;
-    }, {} as Record<string, Widget>);
+    .reduce(
+      (acc, cur) => {
+        acc[cur.id] = cur;
+        return acc;
+      },
+      {} as Record<string, Widget>,
+    );
   return controlWidgetMap;
 };
 export const getOtherStringControlWidgets = (
@@ -539,31 +548,40 @@ export const getWidgetMap = (
 ) => {
   const filterSearchParams = filterSearchParamsMap?.params,
     isMatchByName = filterSearchParamsMap?.isMatchByName;
-  const dashboardDataChartMap = dataCharts.reduce((acc, cur) => {
-    acc[cur.id] = cur;
-    return acc;
-  }, {} as Record<string, DataChart>);
-  const widgetMap = widgets.reduce((acc, cur) => {
-    // issues #601
-    const chartViewId = dashboardDataChartMap[cur.datachartId]?.viewId;
-    const viewIds = chartViewId ? [chartViewId] : cur.viewIds;
-    const viewComputerFields =
-      JSON.parse(serverViews.find(v => v.id === viewIds[0])?.model || '{}')
-        ?.computedFields || [];
-    if (cur.config.type === 'chart' && cur.config?.content?.dataChart?.config) {
-      cur.config.content.dataChart.config.computedFields =
-        mergeChartAndViewComputedField(
-          viewComputerFields,
-          cur.config?.content?.dataChart?.config?.computedFields,
-        );
-    }
+  const dashboardDataChartMap = dataCharts.reduce(
+    (acc, cur) => {
+      acc[cur.id] = cur;
+      return acc;
+    },
+    {} as Record<string, DataChart>,
+  );
+  const widgetMap = widgets.reduce(
+    (acc, cur) => {
+      // issues #601
+      const chartViewId = dashboardDataChartMap[cur.datachartId]?.viewId;
+      const viewIds = chartViewId ? [chartViewId] : cur.viewIds;
+      const viewComputerFields =
+        JSON.parse(serverViews.find(v => v.id === viewIds[0])?.model || '{}')
+          ?.computedFields || [];
+      if (
+        cur.config.type === 'chart' &&
+        cur.config?.content?.dataChart?.config
+      ) {
+        cur.config.content.dataChart.config.computedFields =
+          mergeChartAndViewComputedField(
+            viewComputerFields,
+            cur.config?.content?.dataChart?.config?.computedFields,
+          );
+      }
 
-    acc[cur.id] = {
-      ...cur,
-      viewIds,
-    };
-    return acc;
-  }, {} as Record<string, Widget>);
+      acc[cur.id] = {
+        ...cur,
+        viewIds,
+      };
+      return acc;
+    },
+    {} as Record<string, Widget>,
+  );
 
   const wrappedDataCharts: DataChart[] = [];
   const controllerWidgets: Widget[] = []; // use for reset button
@@ -600,7 +618,7 @@ export const getWidgetMap = (
                 ...(content.config.controllerDate as any),
                 startTime: {
                   relativeOrExact: TimeFilterValueCategory.Exact,
-                  exactValue: formatTime(_value as any, TIME_FORMATTER),
+                  exactValue: formatDatartDate(_value?.[0], TIME_FORMATTER),
                 },
               };
               break;
@@ -745,17 +763,20 @@ export function cloneWidgets(args: {
     if (newWidget.config.type === 'container') {
       const content = newWidget.config.content as TabWidgetContent;
       const itemList = Object.values(content.itemMap);
-      const newItemMap = itemList.reduce((acc, cur) => {
-        const newTabId =
-          newWidgetMapping[cur.childWidgetId]?.newClientId || initClientId();
-        acc[newTabId] = {
-          index: cur.index,
-          name: cur.name,
-          tabId: newTabId,
-          childWidgetId: newWidgetMapping[cur.childWidgetId]?.newId || '',
-        };
-        return acc;
-      }, {} as Record<string, ContainerItem>);
+      const newItemMap = itemList.reduce(
+        (acc, cur) => {
+          const newTabId =
+            newWidgetMapping[cur.childWidgetId]?.newClientId || initClientId();
+          acc[newTabId] = {
+            index: cur.index,
+            name: cur.name,
+            tabId: newTabId,
+            childWidgetId: newWidgetMapping[cur.childWidgetId]?.newId || '',
+          };
+          return acc;
+        },
+        {} as Record<string, ContainerItem>,
+      );
       content.itemMap = newItemMap;
     }
     //chart

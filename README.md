@@ -58,7 +58,7 @@ mvn -pl server -am -DskipTests package
 
 ```bash
 cd frontend
-npm install --legacy-peer-deps
+npm install
 npm run checkTs
 npm run build
 npm run test:ci

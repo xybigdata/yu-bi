@@ -19,13 +19,13 @@
 import {
   Form,
   FormInstance,
+  GetProp,
   Radio,
   Select,
   Space,
   Tree,
   TreeSelect,
 } from 'antd';
-import type { DefaultOptionType } from 'antd/es/cascader';
 import { ControllerFacadeTypes } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import migrationViewConfig from 'app/migration/ViewConfig/migrationViewConfig';
@@ -65,6 +65,8 @@ export interface optionProps {
   value: string;
 }
 
+type SelectOption = GetProp<typeof Select, 'options'>[number];
+
 const ValuesOptionsSetter: FC<{
   controllerType: ControllerFacadeTypes;
   form: FormInstance<ControllerWidgetContent> | undefined;
@@ -74,9 +76,9 @@ const ValuesOptionsSetter: FC<{
   const { orgId } = useContext(BoardContext);
   const [optionValues, setOptionValues] = useState<RelationFilterValue[]>([]);
   const [targetKeys, setTargetKeys] = useState<string[]>([]);
-  const [labelOptions, setLabelOptions] = useState<
-    DefaultOptionType[] | undefined
-  >([]);
+  const [labelOptions, setLabelOptions] = useState<SelectOption[] | undefined>(
+    [],
+  );
   const [labelKey, setLabelKey] = useState<string | undefined>();
   const [viewList, setViewList] = useState<optionProps[]>([]);
 
@@ -145,7 +147,7 @@ const ValuesOptionsSetter: FC<{
       ) || [];
 
     if (!meta) return { option: [], dataView: undefined };
-    const option: DefaultOptionType[] = meta
+    const option: SelectOption[] = meta
       .concat(viewComputedField)
       .map(item => {
         return {

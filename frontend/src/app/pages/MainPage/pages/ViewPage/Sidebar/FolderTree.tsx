@@ -190,100 +190,98 @@ export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
       return (
         <TreeTitle>
           <h4>{`${title}`}</h4>
-          {isAuthorized || allowEnableViz ? (
-            (() => {
-              const items: MenuProps['items'] = [
-                ...(isAuthorized
-                  ? [
-                      {
-                        key: 'info',
-                        label: (
-                          <MenuItemContent
-                            prefix={<EditOutlined className="icon" />}
-                          >
-                            {tg('button.info')}
-                          </MenuItemContent>
-                        ),
-                      },
-                    ]
-                  : []),
-                ...(isAuthorized && !isFolder
-                  ? [
-                      {
-                        key: 'saveAs',
-                        label: (
-                          <MenuItemContent
-                            prefix={<CopyFilled className="icon" />}
-                          >
-                            {tg('button.saveAs')}
-                          </MenuItemContent>
-                        ),
-                      },
-                    ]
-                  : []),
-                ...(allowEnableViz && !isFolder
-                  ? [
-                      {
-                        key: 'startAnalysis',
-                        label: (
-                          <MenuItemContent
-                            prefix={<MonitorOutlined className="icon" />}
-                          >
-                            {t('editor.startAnalysis')}
-                          </MenuItemContent>
-                        ),
-                      },
-                    ]
-                  : []),
-                ...(isAuthorized
-                  ? [
-                      {
-                        key: 'delete',
-                        label: (
-                          <MenuItemContent
-                            prefix={<DeleteOutlined className="icon" />}
-                          >
-                            <Popconfirm
-                              title={
-                                isFolder
-                                  ? tg('operation.deleteConfirm')
-                                  : tg('operation.archiveConfirm')
-                              }
-                              onConfirm={archive(id, isFolder)}
+          {isAuthorized || allowEnableViz
+            ? (() => {
+                const items: MenuProps['items'] = [
+                  ...(isAuthorized
+                    ? [
+                        {
+                          key: 'info',
+                          label: (
+                            <MenuItemContent
+                              prefix={<EditOutlined className="icon" />}
                             >
-                              {isFolder
-                                ? tg('button.delete')
-                                : tg('button.archive')}
-                            </Popconfirm>
-                          </MenuItemContent>
-                        ),
-                      },
-                    ]
-                  : []),
-              ];
+                              {tg('button.info')}
+                            </MenuItemContent>
+                          ),
+                        },
+                      ]
+                    : []),
+                  ...(isAuthorized && !isFolder
+                    ? [
+                        {
+                          key: 'saveAs',
+                          label: (
+                            <MenuItemContent
+                              prefix={<CopyFilled className="icon" />}
+                            >
+                              {tg('button.saveAs')}
+                            </MenuItemContent>
+                          ),
+                        },
+                      ]
+                    : []),
+                  ...(allowEnableViz && !isFolder
+                    ? [
+                        {
+                          key: 'startAnalysis',
+                          label: (
+                            <MenuItemContent
+                              prefix={<MonitorOutlined className="icon" />}
+                            >
+                              {t('editor.startAnalysis')}
+                            </MenuItemContent>
+                          ),
+                        },
+                      ]
+                    : []),
+                  ...(isAuthorized
+                    ? [
+                        {
+                          key: 'delete',
+                          label: (
+                            <MenuItemContent
+                              prefix={<DeleteOutlined className="icon" />}
+                            >
+                              <Popconfirm
+                                title={
+                                  isFolder
+                                    ? tg('operation.deleteConfirm')
+                                    : tg('operation.archiveConfirm')
+                                }
+                                onConfirm={archive(id, isFolder)}
+                              >
+                                {isFolder
+                                  ? tg('button.delete')
+                                  : tg('button.archive')}
+                              </Popconfirm>
+                            </MenuItemContent>
+                          ),
+                        },
+                      ]
+                    : []),
+                ];
 
-              return (
-            <Popup
-              trigger={['click']}
-              placement="bottom"
-              content={
-                <Menu
-                  prefixCls="ant-dropdown-menu"
-                  selectable={false}
-                  onClick={moreMenuClick(node)}
-                  items={items}
-                />
-              }
-            >
-              <span className="action" onClick={stopPPG}>
-                <MoreOutlined />
-              </span>
-            </Popup>
-              );
-            })()
-          ) : (
-            ''
-          )}
+                return (
+                  <Popup
+                    trigger={['click']}
+                    placement="bottom"
+                    content={
+                      <Menu
+                        prefixCls="ant-dropdown-menu"
+                        selectable={false}
+                        onClick={moreMenuClick(node)}
+                        items={items}
+                      />
+                    }
+                  >
+                    <span className="action" onClick={stopPPG}>
+                      <MoreOutlined />
+                    </span>
+                  </Popup>
+                );
+              })()
+            : ''}
         </TreeTitle>
       );
     },

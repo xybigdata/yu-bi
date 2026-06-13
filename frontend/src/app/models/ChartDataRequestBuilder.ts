@@ -45,9 +45,9 @@ import {
   getRuntimeDateLevelFields,
   getValue,
 } from 'app/utils/chartHelper';
+import { formatDatartDate } from 'app/utils/date';
 import { transformToViewConfig } from 'app/utils/internalChartHelper';
 import {
-  formatTime,
   getTime,
   recommendTimeRangeConverter,
   splitRangerDateFilters,
@@ -294,9 +294,9 @@ export class ChartDataRequestBuilder {
           value.unit,
           value.isStart,
         );
-        return formatTime(time, dateFormat);
+        return formatDatartDate(time, dateFormat);
       }
-      return formatTime(value, dateFormat);
+      return formatDatartDate(value, dateFormat);
     };
 
     const _transformFieldValues = (field: ChartDataSectionField) => {

@@ -20,9 +20,9 @@ import { Checkbox, Form, FormInstance, Input, Radio } from 'antd';
 import { ModalForm, ModalFormProps } from 'app/components';
 import { DateFormat } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { datartDayjs } from 'app/utils/date';
+import { toDatartDayjsList } from 'app/utils/date';
 import { fetchCheckName } from 'app/utils/fetch';
-import debounce from 'debounce-promise';
+import { debouncePromise } from 'utils/debouncePromise';
 import { DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SPACE_XS } from 'styles/StyleConstants';
@@ -82,7 +82,7 @@ export const VariableForm = memo(
             ? JSON.parse(editingVariable.defaultValue)
             : [];
           if (valueType === VariableValueTypes.Date && !expression) {
-            defaultValue = defaultValue.map(str => datartDayjs(str));
+            defaultValue = toDatartDayjsList(defaultValue);
           }
           setType(type);
           setValueType(valueType);
@@ -144,7 +144,7 @@ export const VariableForm = memo(
                 return Promise.resolve();
               }
             }
-          : debounce((_, value) => {
+          : debouncePromise((_, value: string) => {
               if (!value || value === editingVariable?.name) {
                 return Promise.resolve();
               }
@@ -222,19 +222,24 @@ export const VariableForm = memo(
             ))}
           </Radio.Group>
         </Form.Item>
-        {scope === VariableScopes.Public && type === VariableTypes.Permission && (
-          <Form.Item
-            name="permission"
-            label={t('permission.label')}
-            initialValue={0}
-          >
-            <Radio.Group>
-              <Radio.Button value={0}>{t('permission.hidden')}</Radio.Button>
-              <Radio.Button value={1}>{t('permission.readonly')}</Radio.Button>
-              <Radio.Button value={2}>{t('permission.editable')}</Radio.Button>
-            </Radio.Group>
-          </Form.Item>
-        )}
+        {scope === VariableScopes.Public &&
+          type === VariableTypes.Permission && (
+            <Form.Item
+              name="permission"
+              label={t('permission.label')}
+              initialValue={0}
+            >
+              <Radio.Group>
+                <Radio.Button value={0}>{t('permission.hidden')}</Radio.Button>
+                <Radio.Button value={1}>
+                  {t('permission.readonly')}
+                </Radio.Button>
+                <Radio.Button value={2}>
+                  {t('permission.editable')}
+                </Radio.Button>
+              </Radio.Group>
+            </Form.Item>
+          )}
         <CompactFormItem name="defaultValue" label={t('defaultValue')}>
           <DefaultValue
             type={valueType}

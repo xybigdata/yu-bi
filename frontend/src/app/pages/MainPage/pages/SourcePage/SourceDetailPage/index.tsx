@@ -24,13 +24,13 @@ import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useParams } from 'app/routerCompat';
 import { useAccess, useCascadeAccess } from 'app/pages/MainPage/Access';
-import { datartDayjs } from 'app/utils/date';
+import { formatDatartDate } from 'app/utils/date';
 import {
   PermissionLevels,
   ResourceTypes,
 } from 'app/pages/MainPage/pages/PermissionPage/constants';
 import { fetchCheckName } from 'app/utils/fetch';
-import debounce from 'debounce-promise';
+import { debouncePromise } from 'utils/debouncePromise';
 import {
   CommonFormTypes,
   DEFAULT_DEBOUNCE_WAIT,
@@ -406,7 +406,7 @@ export function SourceDetailPage() {
       return;
     }
     await dispatch(syncSourceSchema({ sourceId: editingSource.id }));
-    setLastUpdateTime(datartDayjs().format(TIME_FORMATTER));
+    setLastUpdateTime(formatDatartDate(Date.now(), TIME_FORMATTER));
     message.success(t('syncDatabaseSchemaSuccess'));
   };
 
@@ -503,7 +503,7 @@ export function SourceDetailPage() {
                     message: `${t('form.name')}${tg('validation.required')}`,
                   },
                   {
-                    validator: debounce((_, value) => {
+                    validator: debouncePromise((_, value) => {
                       if (value === editingSource?.name) {
                         return Promise.resolve();
                       }

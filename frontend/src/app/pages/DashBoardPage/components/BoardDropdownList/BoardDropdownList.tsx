@@ -181,9 +181,7 @@ export const useBoardDropdownItems = ({
   ]);
 };
 
-export const BoardDropdownList: FC<Props> = memo(
-  props => {
-    const menuItems = useBoardDropdownItems(props);
-    return <Menu items={menuItems} />;
-  },
-);
+export const BoardDropdownList: FC<Props> = memo(props => {
+  const menuItems = useBoardDropdownItems(props);
+  return <Menu items={menuItems} />;
+});

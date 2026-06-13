@@ -95,11 +95,7 @@ export const parseColorString = (value?: string) => {
   return parseRgbColor(normalizedValue);
 };
 
-export const toHexColor = (color: {
-  r: number;
-  g: number;
-  b: number;
-}) => {
+export const toHexColor = (color: { r: number; g: number; b: number }) => {
   const toHex = (value: number) => {
     return clamp(Math.round(value), 0, 255).toString(16).padStart(2, '0');
   };

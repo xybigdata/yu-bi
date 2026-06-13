@@ -17,8 +17,6 @@
  */
 
 import { ConfigProvider } from 'antd';
-import echartsDefaultTheme from 'app/assets/theme/echarts_default_theme.json';
-import { registerTheme } from 'echarts';
 import { PUBLIC_URL } from 'globalConstants';
 import { antdLocales } from 'locales/i18n';
 import { useTranslation } from 'react-i18next';
@@ -26,8 +24,6 @@ import { BrowserRouter } from 'app/routerCompat';
 import { GlobalStyles } from 'styles/globalStyles';
 import HelmetPageTitle from '../components/HelmetPageTitle';
 import { LazyShareDashboard } from './Loadable';
-
-registerTheme('default', echartsDefaultTheme);
 
 export function Router() {
   const { i18n } = useTranslation();

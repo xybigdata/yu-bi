@@ -16,12 +16,15 @@
  * limitations under the License.
  */
 
-import MonacoEditor, { monaco } from 'app/components/MonacoEditor';
+import MonacoEditor from 'app/components/MonacoEditor';
+import {
+  ensureMonacoSqlLanguage,
+  loadMonaco,
+} from 'app/components/MonacoEditor/runtime';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import classnames from 'classnames';
 import { CommonFormTypes } from 'globalConstants';
 import debounce from 'lodash/debounce';
-import { language } from 'monaco-editor/esm/vs/basic-languages/sql/sql';
 import React, {
   memo,
   useCallback,
@@ -35,6 +38,7 @@ import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { FONT_SIZE_BASE } from 'styles/StyleConstants';
 import { selectThemeKey } from 'styles/theme/slice/selectors';
+import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { RootState } from 'types';
 import { getInsertedNodeIndex } from 'utils/utils';
 import { ViewStatus, ViewViewModelStages } from '../../constants';
@@ -130,13 +134,12 @@ export const SQLEditor = memo(() => {
   }, [dispatch, actions, stage, status, id, save, showSaveForm, viewsData, t]);
 
   const editorWillMount = useCallback(
-    editor => {
-      editor.languages.register({ id: 'sql' });
-      editor.languages.setMonarchTokensProvider('sql', language);
+    async monaco => {
+      await ensureMonacoSqlLanguage(monaco);
       dispatch(
         getEditorProvideCompletionItems({
           resolve: getItems => {
-            const providerRef = editor.languages.registerCompletionItemProvider(
+            const providerRef = monaco.languages.registerCompletionItemProvider(
               'sql',
               {
                 provideCompletionItems: getItems,
@@ -153,7 +156,7 @@ export const SQLEditor = memo(() => {
   );
 
   const editorDidMount = useCallback(
-    (editor: monaco.editor.IStandaloneCodeEditor) => {
+    (editor: Monaco.editor.IStandaloneCodeEditor) => {
       setEditor(editor);
       // Removing the tooltip on the read-only editor
       // https://github.com/microsoft/monaco-editor/issues/1742
@@ -196,14 +199,26 @@ export const SQLEditor = memo(() => {
   }, [initActions, run, callSave]);
 
   useEffect(() => {
-    editorInstance?.addCommand(
-      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-      run,
-    );
-    editorInstance?.addCommand(
-      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
-      callSave,
-    );
+    let cancelled = false;
+    if (!editorInstance) {
+      return;
+    }
+    void loadMonaco().then(monaco => {
+      if (cancelled || !editorInstance) {
+        return;
+      }
+      editorInstance.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+        run,
+      );
+      editorInstance.addCommand(
+        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+        callSave,
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [editorInstance, run, callSave]);
 
   useHotkeys(

@@ -23,7 +23,7 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useParams } from 'app/routerCompat';
 import { User } from 'app/slice/types';
 import { fetchCheckName } from 'app/utils/fetch';
-import debounce from 'debounce-promise';
+import { debouncePromise } from 'utils/debouncePromise';
 import { CommonFormTypes, DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -192,7 +192,7 @@ export function RoleDetailPage() {
                   message: `${t('roleName')}${tg('validation.required')}`,
                 },
                 {
-                  validator: debounce((_, value) => {
+                  validator: debouncePromise((_, value) => {
                     if (value === editingRole?.info.name) {
                       return Promise.resolve();
                     }

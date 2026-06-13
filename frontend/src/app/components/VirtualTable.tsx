@@ -20,6 +20,8 @@ import { Empty, Table, TableProps } from 'antd';
 import classNames from 'classnames';
 import { TABLE_DATA_INDEX } from 'globalConstants';
 import React, {
+  CSSProperties,
+  MutableRefObject,
   memo,
   useCallback,
   useEffect,
@@ -27,15 +29,54 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { VariableSizeGrid as Grid } from 'react-window';
+import type {
+  CustomizeScrollBody,
+  DataIndex,
+  ScrollConfig,
+} from 'rc-table/es/interface';
 import styled from 'styled-components';
 import { SPACE_TIMES } from 'styles/StyleConstants';
+import {
+  loadVirtualTableRuntime,
+  VirtualTableGridModule,
+} from './virtualTableRuntime';
 
-interface VirtualTableProps extends TableProps<object> {
+type VirtualGridInstance = InstanceType<
+  VirtualTableGridModule['VariableSizeGrid']
+>;
+
+type VirtualTableRecord = object;
+
+type VirtualTableColumn = NonNullable<TableProps<VirtualTableRecord>['columns']>[number];
+
+type InternalVirtualTableColumn = VirtualTableColumn & {
+  dataIndex?: DataIndex<VirtualTableRecord>;
+  width?: number;
+  align?: CSSProperties['textAlign'];
+};
+
+type VirtualScrollBodyRef = {
+  scrollLeft: number;
+  scrollTo?: (scrollConfig: ScrollConfig) => void;
+};
+
+type WidthColumn = {
+  dataIndex?: DataIndex<VirtualTableRecord>;
+  width?: number;
+};
+
+interface VirtualTableProps extends TableProps<VirtualTableRecord> {
   width: number;
   scroll: { x: number; y: number };
-  columns: any;
+  columns: NonNullable<TableProps<VirtualTableRecord>['columns']>;
 }
+
+const getWidthColumnCount = (widthColumns: WidthColumn[]) => {
+  const count = widthColumns.filter(
+    ({ width, dataIndex }) => !width || dataIndex !== TABLE_DATA_INDEX,
+  ).length;
+  return count > 0 ? count : 1;
+};
 
 /**
  * Table组件中使用了虚拟滚动条 渲染的速度变快 基于（react-windows）
@@ -49,18 +90,19 @@ interface VirtualTableProps extends TableProps<object> {
  */
 export const VirtualTable = memo((props: VirtualTableProps) => {
   const { columns, scroll, width: boxWidth, dataSource } = props;
-  const widthColumns = columns.map(v => {
+  const typedColumns = columns as InternalVirtualTableColumn[];
+  const widthColumns: WidthColumn[] = typedColumns.map(v => {
     return { width: v.width, dataIndex: v.dataIndex };
   });
-  const gridRef: any = useRef();
+  const gridRef = useRef<VirtualGridInstance | null>(null);
   const isFull = useRef<boolean>(false);
-  const widthColumnCount = widthColumns.filter(
-    ({ width, dataIndex }) => !width || dataIndex !== TABLE_DATA_INDEX,
-  ).length;
+  const widthColumnCount = getWidthColumnCount(widthColumns);
   const [connectObject] = useState(() => {
-    const obj = {};
+    const obj: VirtualScrollBodyRef = {
+      scrollLeft: 0,
+    };
     Object.defineProperty(obj, 'scrollLeft', {
-      get: () => null,
+      get: () => 0,
       set: scrollLeft => {
         if (gridRef.current) {
           gridRef.current.scrollTo({
@@ -71,27 +113,47 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
     });
     return obj;
   });
+  const [Grid, setGrid] = useState<Awaited<
+    ReturnType<typeof loadVirtualTableRuntime>
+  >['VariableSizeGrid'] | null>(null);
   isFull.current = boxWidth > scroll.x;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    loadVirtualTableRuntime().then(module => {
+      if (!cancelled) {
+        setGrid(() => module.VariableSizeGrid);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   if (isFull.current === true) {
     widthColumns.forEach((v, i) => {
+      const currentWidth = widthColumns[i].width;
       return (widthColumns[i].width =
-        widthColumns[i].dataIndex === TABLE_DATA_INDEX
-          ? widthColumns[i].width
-          : widthColumns[i].width + (boxWidth - scroll.x) / widthColumnCount);
+        widthColumns[i].dataIndex === TABLE_DATA_INDEX ||
+        typeof currentWidth !== 'number'
+          ? currentWidth
+          : currentWidth + (boxWidth - scroll.x) / widthColumnCount);
     });
   }
 
   const mergedColumns = useMemo(() => {
-    return columns.map((column, i) => {
+    return typedColumns.map((column, i) => {
+      const normalizedWidth = widthColumns[i]?.width;
       return {
         ...column,
-        width: column.width
-          ? widthColumns[i].width
+        width: typeof column.width === 'number'
+          ? normalizedWidth
           : Math.floor(boxWidth / widthColumnCount),
       };
     });
-  }, [boxWidth, columns, widthColumnCount, widthColumns]);
+  }, [boxWidth, typedColumns, widthColumnCount, widthColumns]);
 
   const resetVirtualGrid = useCallback(() => {
     gridRef.current?.resetAfterIndices({
@@ -100,16 +162,27 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
     });
   }, [gridRef]);
 
-  useEffect(() => resetVirtualGrid, [boxWidth, dataSource, resetVirtualGrid]);
+  useEffect(() => {
+    resetVirtualGrid();
+  }, [boxWidth, dataSource, resetVirtualGrid]);
 
-  const renderVirtualList = useCallback(
+  const renderVirtualList = useCallback<CustomizeScrollBody<VirtualTableRecord>>(
     (rawData, { scrollbarSize, ref, onScroll }) => {
-      ref.current = connectObject;
+      if (typeof ref === 'function') {
+        ref(connectObject);
+      } else if (ref) {
+        (ref as MutableRefObject<VirtualScrollBodyRef | null>).current =
+          connectObject;
+      }
       const totalHeight = rawData.length * 39;
 
       if (!dataSource?.length) {
         //If the data is empty
         return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />;
+      }
+
+      if (!Grid) {
+        return <VirtualTablePlaceholder style={{ height: scroll.y }} />;
       }
 
       return (
@@ -118,7 +191,7 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
           className="virtual-grid"
           columnCount={mergedColumns.length}
           columnWidth={index => {
-            const { width } = mergedColumns[index];
+            const width = Number(mergedColumns[index]?.width || 0);
             return totalHeight > scroll.y && index === mergedColumns.length - 1
               ? width - scrollbarSize - 16
               : width;
@@ -134,7 +207,7 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
           }}
         >
           {({ rowIndex, columnIndex, style }) => {
-            style = {
+            const cellStyle: CSSProperties = {
               padding: `${SPACE_TIMES(2)}`,
               textAlign: mergedColumns[columnIndex].align,
               ...style,
@@ -145,10 +218,15 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
                   'virtual-table-cell-last':
                     columnIndex === mergedColumns.length - 1,
                 })}
-                style={style}
+                style={cellStyle}
                 key={columnIndex}
               >
-                {rawData[rowIndex][mergedColumns[columnIndex].dataIndex]}
+                {mergedColumns[columnIndex].dataIndex
+                  ? rawData[rowIndex][
+                      mergedColumns[columnIndex]
+                        .dataIndex as keyof (typeof rawData)[number]
+                    ]
+                  : null}
               </TableCell>
             );
           }}
@@ -173,3 +251,9 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
 const TableCell = styled.div`
   border-bottom: 1px solid ${p => p.theme.borderColorSplit};
 `;
+
+const VirtualTablePlaceholder = styled.div`
+  width: 100%;
+`;
+
+export { getWidthColumnCount };

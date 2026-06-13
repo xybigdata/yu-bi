@@ -16,42 +16,42 @@
  * limitations under the License.
  */
 
-import {
-  AreaChart,
-  BasicDoubleYChart,
-  BasicFunnelChart,
-  BasicGaugeChart,
-  BasicRichText,
-  BasicScatterChart,
-  ClusterBarChart,
-  ClusterColumnChart,
-  DoughnutChart,
-  LineChart,
-  MingXiTableChart,
-  NormalOutlineMapChart,
-  PercentageStackBarChart,
-  PercentageStackColumnChart,
-  PieChart,
-  PivotSheetChart,
-  RoseChart,
-  ScatterOutlineMapChart,
-  Scorecard,
-  StackAreaChart,
-  StackBarChart,
-  StackColumnChart,
-  WaterfallChart,
-  WordCloudChart,
-} from 'app/components/ChartGraph';
 import { IChart } from 'app/types/Chart';
-import { getChartPluginPaths } from 'app/utils/fetch';
+import { ChartConfig, ChartI18NSectionConfig } from 'app/types/ChartConfig';
+import ChartMetadata from 'app/types/ChartMetadata';
 import { Debugger } from 'utils/debugger';
 import { CloneValueDeep } from 'utils/object';
-import PluginChartLoader from './PluginChartLoader';
+import { preloadChartPlugins } from 'app/services/chartPluginService';
+import PluginChartLoader, {
+  PluginChartDefinition,
+  PluginChartPaletteSeed,
+} from './PluginChartLoader';
+import {
+  ChartPaletteSeed,
+  basicChartPaletteSeeds,
+  basicChartRegistry,
+} from './chartRegistry';
+import { isChartMatchRequirement } from './chartRequirement';
+
+type ChartPaletteSeedLike = ChartPaletteSeed | PluginChartPaletteSeed;
+
+export type ChartPaletteItem = {
+  meta: ChartMetadata;
+  datas?: ChartConfig['datas'];
+  i18ns?: ChartI18NSectionConfig[];
+  isMatchRequirement: (targetConfig?: ChartConfig) => boolean;
+};
 
 class ChartManager {
   private _loader = new PluginChartLoader();
   private _isLoaded = false;
-  private _charts: IChart[] = this._basicCharts();
+  private _loadPromise: Promise<PluginChartPaletteSeed[] | void> | null = null;
+  private _basicChartFactoryMap = new Map(
+    basicChartRegistry.map(item => [item.id, item.create]),
+  );
+  private _customChartDefinitionMap = new Map<string, PluginChartDefinition>();
+  private _customChartInstanceMap = new Map<string, IChart>();
+  private _customChartPaletteSeeds: PluginChartPaletteSeed[] = [];
   private static _manager: ChartManager | null = null;
 
   public static instance() {
@@ -63,76 +63,124 @@ class ChartManager {
 
   public async load() {
     if (this._isLoaded) {
-      return;
+      return this._customChartPaletteSeeds;
     }
-    const pluginsPaths = await getChartPluginPaths();
-    return Debugger.instance.measure('Plugin Charts | ', async () => {
-      await this._loadCustomizeCharts(pluginsPaths);
-    });
+    if (!this._loadPromise) {
+      this._loadPromise = (async () => {
+        const pluginsPaths = await preloadChartPlugins();
+        return Debugger.instance.measure('Plugin Charts | ', async () => {
+          return this._loadCustomizeCharts(pluginsPaths || []);
+        });
+      })().finally(() => {
+        if (!this._isLoaded) {
+          this._loadPromise = null;
+        }
+      });
+    }
+    return this._loadPromise;
   }
 
   public getAllCharts(): IChart[] {
-    return this._charts || [];
+    return this._getAllChartIds()
+      .map(id => this.getById(id))
+      .filter(Boolean) as IChart[];
+  }
+
+  public getAllChartPalette(): ChartPaletteItem[] {
+    return this._createPaletteItems(this._getAllPaletteSeeds());
   }
 
   public getAllChartIcons() {
-    return this._charts.reduce((acc, cur) => {
+    return this._getAllPaletteSeeds().reduce((acc, cur) => {
       acc[cur.meta.id] = cur.meta.icon;
       return acc;
-    }, {});
+    }, {} as Record<string, string | undefined>);
   }
 
   public getById(id?: string) {
     if (id === null || id === undefined) {
       return;
     }
-    return CloneValueDeep(this._charts.find(c => c.meta?.id === id));
+    const basicChartFactory = this._basicChartFactoryMap.get(id);
+    if (basicChartFactory) {
+      return basicChartFactory();
+    }
+    return this._getCustomChartById(id);
   }
 
-  public getDefaultChart() {
-    return CloneValueDeep(this._charts[0]);
+  public getDefaultChart(): IChart {
+    const defaultChartId = basicChartRegistry[0]?.id;
+    if (!defaultChartId) {
+      const firstCustomChartId = this._getCustomChartIds()[0];
+      if (!firstCustomChartId) {
+        throw new Error('ChartManager has no registered charts');
+      }
+      return this.getById(firstCustomChartId)!;
+    }
+    return this.getById(defaultChartId)!;
   }
 
   private async _loadCustomizeCharts(paths: string[]) {
     if (this._isLoaded) {
-      return this._charts;
+      return this._customChartPaletteSeeds;
     }
 
-    const customCharts = await this._loader.loadPlugins(paths);
-    this._charts = this._charts.concat(
-      customCharts?.filter(Boolean) as IChart[],
+    const pluginDefinitions = await this._loader.loadPluginDefinitions(paths);
+    this._customChartPaletteSeeds = pluginDefinitions.map(pluginDefinition =>
+      this._loader.getPluginPaletteSeed(pluginDefinition),
     );
+    this._customChartDefinitionMap = new Map(
+      pluginDefinitions.map(pluginDefinition => [
+        String(pluginDefinition.meta.id),
+        pluginDefinition,
+      ]),
+    );
+    this._customChartInstanceMap = new Map();
     this._isLoaded = true;
-    return this._charts;
+    return this._customChartPaletteSeeds;
   }
 
-  private _basicCharts(): IChart[] {
-    return [
-      new MingXiTableChart(),
-      new PivotSheetChart(),
-      new Scorecard(),
-      new ClusterColumnChart(),
-      new ClusterBarChart(),
-      new StackColumnChart(),
-      new StackBarChart(),
-      new PercentageStackColumnChart(),
-      new PercentageStackBarChart(),
-      new WaterfallChart(),
-      new LineChart(),
-      new AreaChart(),
-      new StackAreaChart(),
-      new BasicScatterChart(),
-      new PieChart(),
-      new DoughnutChart(),
-      new RoseChart(),
-      new BasicFunnelChart(),
-      new BasicDoubleYChart(),
-      new WordCloudChart(),
-      new NormalOutlineMapChart(),
-      new ScatterOutlineMapChart(),
-      new BasicGaugeChart(),
-      new BasicRichText(),
-    ];
+  private _getAllChartIds(): string[] {
+    return basicChartRegistry
+      .map(item => item.id)
+      .concat(this._getCustomChartIds());
+  }
+
+  private _getCustomChartIds(): string[] {
+    return Array.from(this._customChartDefinitionMap.keys());
+  }
+
+  private _getCustomChartById(id: string): IChart | undefined {
+    const chartId = String(id);
+    const cachedChart = this._customChartInstanceMap.get(chartId);
+    if (cachedChart) {
+      return CloneValueDeep(cachedChart);
+    }
+
+    const pluginDefinition = this._customChartDefinitionMap.get(chartId);
+    if (!pluginDefinition) {
+      return;
+    }
+
+    const chart = this._loader.convertToDatartChartModel(pluginDefinition);
+    this._customChartInstanceMap.set(chartId, chart);
+    return CloneValueDeep(chart);
+  }
+
+  private _getAllPaletteSeeds(): ChartPaletteSeedLike[] {
+    return [...basicChartPaletteSeeds, ...this._customChartPaletteSeeds];
+  }
+
+  private _createPaletteItems(
+    seeds: ChartPaletteSeedLike[],
+  ): ChartPaletteItem[] {
+    return seeds.map(item => ({
+      meta: CloneValueDeep(item.meta),
+      datas: CloneValueDeep(item.datas || []),
+      i18ns: CloneValueDeep(item.i18ns || []),
+      isMatchRequirement: targetConfig =>
+        isChartMatchRequirement({ datas: item.datas }, targetConfig),
+    }));
   }
 }
 

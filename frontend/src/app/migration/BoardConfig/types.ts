@@ -35,7 +35,7 @@ export const WidgetTypesBeta3 = [
   'query',
   'reset',
 ] as const;
-export type WidgetTypeBeta3 = typeof WidgetTypesBeta3[number];
+export type WidgetTypeBeta3 = (typeof WidgetTypesBeta3)[number];
 export interface WidgetBeta3 {
   id: string;
   dashboardId: string;

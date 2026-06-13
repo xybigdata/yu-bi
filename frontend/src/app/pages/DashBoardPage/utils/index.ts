@@ -36,7 +36,7 @@ import {
 import ChartDataView from 'app/types/ChartDataView';
 import { convertToChartConfigDTO } from 'app/utils/ChartDtoHelper';
 import { findPathByNameInMeta, getStyles } from 'app/utils/chartHelper';
-import { datartDayjs } from 'app/utils/date';
+import { datartDayjs, formatDatartDate, toDatartDayjs } from 'app/utils/date';
 import { getTime, splitRangerDateFilters } from 'app/utils/time';
 import {
   DATE_FORMATTER,
@@ -363,7 +363,9 @@ export const getControllerDateValues = (obj: {
 
   if (obj.execute) {
     timeValues.forEach((v, i) => {
-      timeValues[i] = v ? datartDayjs(v).format(dateFormatObj[pickerType]) : v;
+      timeValues[i] = v
+        ? formatDatartDate(v, dateFormatObj[pickerType])!
+        : v;
     });
   }
 
@@ -376,7 +378,11 @@ export const adjustRangeDataEndValue = (
   if (!timeValue) {
     return timeValue;
   }
-  let adjustTime = datartDayjs(timeValue);
+  const parsedTime = toDatartDayjs(timeValue);
+  if (!parsedTime) {
+    return formatDatartDate(timeValue, TIME_FORMATTER);
+  }
+  let adjustTime = parsedTime;
   switch (pickerType) {
     case 'dateTime':
       // 比较特殊 不做增值处理
@@ -399,8 +405,7 @@ export const adjustRangeDataEndValue = (
     default:
       break;
   }
-  let end = adjustTime.format(TIME_FORMATTER);
-  return end;
+  return formatDatartDate(adjustTime, TIME_FORMATTER);
 };
 export const getChartWidgetRequestParams = (obj: {
   widgetId: string;

@@ -16,11 +16,13 @@
  * limitations under the License.
  */
 import { Form, Select } from 'antd';
-import type { SelectValue } from 'antd/es/select';
+import type { SelectProps } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ControlOption } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import React, { memo } from 'react';
 import styled from 'styled-components';
+
+type SelectValue = SelectProps['value'];
 
 export interface SelectControllerProps {
   options?: ControlOption[];

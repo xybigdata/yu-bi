@@ -18,12 +18,13 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import sqlReservedWords from 'app/assets/javascripts/sqlReservedWords';
-import { monaco } from 'app/components/MonacoEditor';
+import { MONACO_COMPLETION_ITEM_KIND_KEYWORD } from 'app/components/MonacoEditor/runtime';
 import migrationViewConfig from 'app/migration/ViewConfig/migrationViewConfig';
 import { migrateViewConfig } from 'app/migration/ViewConfig/migrationViewDetailConfig';
 import beginViewModelMigration from 'app/migration/ViewConfig/migrationViewModelConfig';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import i18n from 'i18next';
+import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { RootState } from 'types';
 import { request2 } from 'utils/request';
 import { errorHandle, getErrorMessage, rejectHandle } from 'utils/utils';
@@ -470,13 +471,13 @@ export const getEditorProvideCompletionItems = createAsyncThunk<
       return {
         suggestions: dataSource
           .filter(({ keywords }) => !!keywords)
-          .reduce<monaco.languages.CompletionItem[]>(
+          .reduce<Monaco.languages.CompletionItem[]>(
             (arr, { detail, keywords }) =>
               arr.concat(
                 keywords!.map(str => ({
                   label: str,
                   detail,
-                  kind: monaco.languages.CompletionItemKind.Keyword,
+                  kind: MONACO_COMPLETION_ITEM_KIND_KEYWORD,
                   insertText: detail === 'Variable' ? `$${str}$` : str,
                   range,
                 })),

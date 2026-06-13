@@ -167,9 +167,7 @@ export function FolderTree({
                 {
                   key: 'info',
                   label: (
-                    <MenuItemContent
-                      prefix={<EditOutlined className="icon" />}
-                    >
+                    <MenuItemContent prefix={<EditOutlined className="icon" />}>
                       {tg('button.info')}
                     </MenuItemContent>
                   ),
@@ -212,22 +210,22 @@ export function FolderTree({
               ];
 
               return (
-            <Popup
-              trigger={['click']}
-              placement="bottom"
-              content={
-                <Menu
-                  prefixCls="ant-dropdown-menu"
-                  selectable={false}
-                  onClick={moreMenuClick(node)}
-                  items={items}
-                />
-              }
-            >
-              <span className="action" onClick={stopPPG}>
-                <MoreOutlined />
-              </span>
-            </Popup>
+                <Popup
+                  trigger={['click']}
+                  placement="bottom"
+                  content={
+                    <Menu
+                      prefixCls="ant-dropdown-menu"
+                      selectable={false}
+                      onClick={moreMenuClick(node)}
+                      items={items}
+                    />
+                  }
+                >
+                  <span className="action" onClick={stopPPG}>
+                    <MoreOutlined />
+                  </span>
+                </Popup>
               );
             })()}
           </CascadeAccess>

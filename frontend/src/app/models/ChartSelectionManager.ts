@@ -19,7 +19,7 @@
 import { ChartInteractionEvent } from 'app/constants';
 import { ChartMouseEvent } from 'app/types/Chart';
 import { SelectedItem } from 'app/types/ChartConfig';
-import { EChartsType } from 'echarts';
+import type { EChartsType } from 'echarts';
 import { KEYBOARD_EVENT_NAME } from 'globalConstants';
 import { isEmptyArray } from 'utils/object';
 

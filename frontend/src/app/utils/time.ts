@@ -65,9 +65,7 @@ const normalizeManipulateUnit = (
   }
 };
 
-const normalizeOpUnit = (
-  unitTime?: LegacyOpUnit,
-): OpUnitType | QUnitType => {
+const normalizeOpUnit = (unitTime?: LegacyOpUnit): OpUnitType | QUnitType => {
   switch (unitTime) {
     case 'W':
       return 'week';
@@ -151,14 +149,6 @@ export function getTime(
       normalizedTimeUnit,
     );
   };
-}
-
-export function formatTime(time: string | DatartDayjs, format?): string {
-  const dayValue = datartDayjs(time);
-  if (!dayValue.isValid()) {
-    return 'Invalid date';
-  }
-  return dayValue.format(format || TIME_FORMATTER);
 }
 
 export function recommendTimeRangeConverter(relativeTimeRange, dateFormat?) {

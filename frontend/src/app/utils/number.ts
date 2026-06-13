@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-import currency from 'currency.js';
 import { CalculationType } from 'globalConstants';
 import isFinite from 'lodash/isFinite';
 import { isEmpty } from 'utils/object';
@@ -76,20 +75,63 @@ function getPrecision(num: string | number) {
     : num.split('.')?.[1]?.length || 0;
 }
 
+export function toSafeNumber(value: unknown): number {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : 0;
+}
+
+function calculateWithPrecision(
+  type: CalculationType.ADD | CalculationType.SUBTRACT,
+  left: number,
+  right: number,
+  precision: number,
+) {
+  const scale = 10 ** precision;
+  const leftScaled = Math.round(left * scale);
+  const rightScaled = Math.round(right * scale);
+  const resultScaled =
+    type === CalculationType.ADD
+      ? leftScaled + rightScaled
+      : leftScaled - rightScaled;
+
+  return resultScaled / scale;
+}
+
 export function precisionCalculation(
   type: CalculationType,
   numberList: Array<string | number>,
 ): number {
+  const normalizedList = numberList
+    .filter(item => !isEmpty(item))
+    .map(item => toSafeNumber(item));
+
   switch (type) {
     default:
       return 0;
     case CalculationType.ADD:
-    case CalculationType.SUBTRACT:
-      return numberList.reduce((acc, cur) => {
-        const num = isNaN(Number(cur)) ? 0 : Number(cur);
+      return normalizedList.reduce((acc, num) => {
         const precision = Math.max(getPrecision(acc), getPrecision(num));
-        const result = Number(currency(num, { precision })[type](acc).value);
+        const result = calculateWithPrecision(
+          CalculationType.ADD,
+          acc,
+          num,
+          precision,
+        );
         return isNaN(result) ? 0 : result;
-      }, 0) as number;
+      }, 0);
+    case CalculationType.SUBTRACT:
+      if (!normalizedList.length) {
+        return 0;
+      }
+      return normalizedList.slice(1).reduce((acc, num) => {
+        const precision = Math.max(getPrecision(acc), getPrecision(num));
+        const result = calculateWithPrecision(
+          CalculationType.SUBTRACT,
+          acc,
+          num,
+          precision,
+        );
+        return isNaN(result) ? 0 : result;
+      }, normalizedList[0]);
   }
 }

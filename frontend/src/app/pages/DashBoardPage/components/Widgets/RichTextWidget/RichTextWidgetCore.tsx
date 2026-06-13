@@ -38,7 +38,7 @@ import React, {
   useState,
 } from 'react';
 import { useAppDispatch } from 'app/hooks/useRedux';
-import { DeltaStatic } from 'app/components/ChartGraph/BasicRichText/quillCompat';
+import type { DeltaStatic } from 'app/components/ChartGraph/BasicRichText/quillCompat';
 import styled from 'styled-components';
 import { SPACE_TIMES } from 'styles/StyleConstants';
 import { WidgetActionContext } from '../../ActionProvider/WidgetActionProvider';

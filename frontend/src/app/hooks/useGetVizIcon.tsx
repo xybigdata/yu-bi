@@ -29,7 +29,11 @@ function useGetVizIcon() {
             <FundFilled />
           );
         case 'DATACHART':
-          return avatar ? renderIcon(chartIcons[avatar]) : <BarChartOutlined />;
+          return avatar && chartIcons[avatar] ? (
+            renderIcon(chartIcons[avatar]!)
+          ) : (
+            <BarChartOutlined />
+          );
         default:
           return p => (p.expanded ? <FolderOpenFilled /> : <FolderFilled />);
       }

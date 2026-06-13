@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { DatePicker, FormItemProps } from 'antd';
-import { datartDayjs } from 'app/utils/date';
+import { toDatartDayjs } from 'app/utils/date';
 import React, { memo } from 'react';
 import { PickerType } from '../../../types';
 import { formatDateByPickType } from '../../../utils';
@@ -25,32 +25,39 @@ export interface SingleTimeSetProps extends FormItemProps<any> {
   value?: any;
   onChange?: any;
 }
+
+const isDateTimePickerType = (
+  pickerType: PickerType,
+): pickerType is 'dateTime' => {
+  return pickerType === 'dateTime';
+};
+
 export const SingleTimeSet: React.FC<SingleTimeSetProps> = memo(
   ({ pickerType, value, onChange }) => {
-    function _onChange(date, dateString) {
+    function handleTimeChange(date) {
       if (!date) {
         onChange?.(date);
         return;
       }
-      const value = formatDateByPickType(pickerType, date);
+      const nextValue = formatDateByPickType(pickerType, date);
 
-      onChange?.(value ? datartDayjs(value) : null);
+      onChange?.(toDatartDayjs(nextValue));
     }
     return (
       <>
-        {pickerType === 'dateTime' ? (
+        {isDateTimePickerType(pickerType) ? (
           <DatePicker
-            value={value}
+            value={toDatartDayjs(value)}
             allowClear={true}
             showTime
-            onChange={_onChange}
+            onChange={handleTimeChange}
           />
         ) : (
           <DatePicker
-            value={value}
+            value={toDatartDayjs(value)}
             allowClear={true}
-            onChange={_onChange}
-            picker={pickerType as any}
+            onChange={handleTimeChange}
+            picker={pickerType}
           />
         )}
       </>

@@ -137,7 +137,7 @@ export const widgetActionTypes = [
   'group',
   'unGroup',
 ] as const;
-export type widgetActionType = typeof widgetActionTypes[number];
+export type widgetActionType = (typeof widgetActionTypes)[number];
 
 export type WidgetMapping = Record<
   string,

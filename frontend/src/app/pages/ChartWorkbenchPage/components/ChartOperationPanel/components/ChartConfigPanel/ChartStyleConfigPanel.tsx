@@ -77,9 +77,7 @@ const ChartStyleConfigPanel: FC<{
                 ],
               } as CollapseItemsCompatProps;
 
-              return (
-                <Collapse key={c.key} ghost {...(collapseProps as any)} />
-              );
+              return <Collapse key={c.key} ghost {...(collapseProps as any)} />;
             } else {
               return (
                 <ItemLayout

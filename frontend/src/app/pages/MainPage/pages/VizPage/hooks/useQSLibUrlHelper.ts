@@ -16,11 +16,11 @@
  * limitations under the License.
  */
 
-import qs from 'qs';
+import { parseQuery, stringifyQuery } from 'utils/queryString';
 
 const useQSLibUrlHelper = () => {
-  const parse = qs.parse;
-  const stringify = qs.stringify;
+  const parse = parseQuery;
+  const stringify = stringifyQuery;
 
   return {
     parse,

@@ -148,8 +148,8 @@ export function MemberDetailPage() {
             formType === CommonFormTypes.Add
               ? 'add'
               : isPlatformMode
-              ? 'update'
-              : 'edit',
+                ? 'update'
+                : 'edit',
           orgId,
           ...values,
           resolve: () => {

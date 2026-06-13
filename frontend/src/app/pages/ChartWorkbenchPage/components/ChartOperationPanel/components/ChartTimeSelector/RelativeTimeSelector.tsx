@@ -18,7 +18,6 @@
 
 import { InputNumber, Select, Space } from 'antd';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
-import { TimeFilterConditionValue } from 'app/types/ChartConfig';
 import {
   RelativeTimeUnit,
   TIME_DIRECTION,
@@ -26,20 +25,23 @@ import {
 } from 'globalConstants';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
+import type { ManualTimeValue } from './ManualSingleTimeSelector';
 
 const RelativeTimeSelector: FC<
   {
-    time?: TimeFilterConditionValue;
-    onChange: (time) => void;
+    time?: ManualTimeValue;
+    onChange: (time: Exclude<ManualTimeValue, string>) => void;
   } & I18NComponentProps
 > = memo(({ time, i18nPrefix, onChange }) => {
   const t = useI18NPrefix(i18nPrefix);
-  const [amount, setAmount] = useState(() => (time as any)?.amount || 1);
+  const [amount, setAmount] = useState(() =>
+    typeof time === 'object' && time ? time.amount : 1,
+  );
   const [unit, setUnit] = useState<RelativeTimeUnit>(
-    () => (time as any)?.unit || 'd',
+    () => (typeof time === 'object' && time ? time.unit : 'd'),
   );
   const [direction, setDirection] = useState(
-    () => (time as any)?.direction || '-',
+    () => (typeof time === 'object' && time ? time.direction : '-') || '-',
   );
 
   const handleTimeChange = (

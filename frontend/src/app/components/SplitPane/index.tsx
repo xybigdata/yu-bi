@@ -10,7 +10,6 @@ interface SplitPaneProps {
   primary?: 'first' | 'second';
   minSize?: string | number;
   maxSize?: string | number;
-  // eslint-disable-next-line react/no-unused-prop-types
   defaultSize?: string | number;
   size?: string | number;
   split?: 'vertical' | 'horizontal';
@@ -168,7 +167,6 @@ export class SplitPane extends Component<SplitPaneProps, SplitPaneStates> {
               return;
             }
             // Integer division
-            // eslint-disable-next-line no-bitwise
             positionDelta = ~~(positionDelta / step) * step;
           }
           let sizeDelta = isPrimaryFirst ? positionDelta : -positionDelta;
@@ -426,7 +424,6 @@ function unFocus(document, window) {
   } else {
     try {
       window.getSelection().removeAllRanges();
-      // eslint-disable-next-line no-empty
     } catch (e) {}
   }
 }

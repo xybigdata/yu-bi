@@ -19,45 +19,44 @@
 import { DatePicker } from 'antd';
 import { FilterConditionType } from 'app/constants';
 import { ConditionBuilder } from 'app/models/ChartFilterCondition';
-import { datartDayjs, toDatartDayjs } from 'app/utils/date';
-import {
-  formatTime,
-  getTime,
-  recommendTimeRangeConverter,
-} from 'app/utils/time';
+import { DatartDayjs, datartDayjs, toDatartDayjs } from 'app/utils/date';
+import { getTime, recommendTimeRangeConverter } from 'app/utils/time';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo, useMemo } from 'react';
 import { PresentControllerFilterProps } from '.';
 const { RangePicker } = DatePicker;
 
-const toDayjs = t => {
+const toRangeTimeValue = (t): DatartDayjs => {
   if (!t) {
     return datartDayjs();
   }
   if (Boolean(t) && typeof t === 'object' && 'unit' in t) {
-    const time = getTime(+(t.direction + t.amount), t.unit)(t.unit, t.isStart);
-    return datartDayjs(formatTime(time, TIME_FORMATTER));
+    return getTime(+(t.direction + t.amount), t.unit)(t.unit, t.isStart);
   }
-  return datartDayjs(t);
+  return toDatartDayjs(t) || datartDayjs();
 };
 
 const RangeTimePickerFilter: FC<PresentControllerFilterProps> = memo(
   ({ condition, onConditionChange }) => {
-    const handleTimeChange = (moments, dateStrings) => {
+    const handleTimeChange = (_, dateStrings: [string, string]) => {
       const filterRow = new ConditionBuilder(condition)
         .setValue(dateStrings)
         .asRangeTime();
       onConditionChange?.(filterRow);
     };
 
-    const rangeTimes = useMemo(() => {
+    const rangeTimes = useMemo<[DatartDayjs, DatartDayjs]>(() => {
       if (condition?.type === FilterConditionType.RangeTime) {
-        const startTime = toDayjs(condition?.value?.[0]);
-        const endTime = toDayjs(condition?.value?.[1]);
+        const startTime = toRangeTimeValue(condition?.value?.[0]);
+        const endTime = toRangeTimeValue(condition?.value?.[1]);
         return [startTime, endTime];
       }
       if (condition?.type === FilterConditionType.RecommendTime) {
-        return recommendTimeRangeConverter(condition?.value)?.map(toDayjs);
+        const recommendedRange = recommendTimeRangeConverter(condition?.value);
+        return [
+          toRangeTimeValue(recommendedRange?.[0]),
+          toRangeTimeValue(recommendedRange?.[1]),
+        ];
       }
       return [datartDayjs(), datartDayjs()];
     }, [condition?.type, condition?.value]);
@@ -66,7 +65,7 @@ const RangeTimePickerFilter: FC<PresentControllerFilterProps> = memo(
       <RangePicker
         showTime
         format={TIME_FORMATTER}
-        value={rangeTimes.map(time => toDatartDayjs(time)) as any}
+        value={rangeTimes}
         onChange={handleTimeChange}
       />
     );

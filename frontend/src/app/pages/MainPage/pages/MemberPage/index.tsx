@@ -25,8 +25,10 @@ import { useMemberSlice } from './slice';
 
 export function MemberPage() {
   useMemberSlice();
-  const { memberId, roleId } =
-    useParams<{ memberId?: string; roleId?: string }>();
+  const { memberId, roleId } = useParams<{
+    memberId?: string;
+    roleId?: string;
+  }>();
 
   return (
     <Container>

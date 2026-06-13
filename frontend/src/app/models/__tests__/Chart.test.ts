@@ -17,6 +17,7 @@
  */
 
 import Chart from '../Chart';
+import { isChartDataConfigMatchRequirement } from '../chartRequirement';
 
 describe('Chart Tests', () => {
   test('should get correct chart model', () => {
@@ -238,5 +239,31 @@ describe('Chart Tests', () => {
     const chart = new Chart(chartId, chartName);
     chart.init(chartConfig);
     expect(chart.isMatchRequirement(targetConfig as any)).toBeTruthy();
+  });
+
+  test('should match requirement with shared pure helper', () => {
+    const current = [
+      {
+        label: 'dimension',
+        key: 'dimension',
+        required: true,
+        type: 'group',
+        limit: 1,
+        rows: [{ id: 1 }],
+      },
+    ];
+    const target = [
+      {
+        label: 'dimension',
+        key: 'dimension',
+        required: true,
+        type: 'group',
+        limit: 1,
+        rows: [{ id: 1 }],
+      },
+    ];
+    expect(isChartDataConfigMatchRequirement(current as any, target as any)).toBe(
+      true,
+    );
   });
 });

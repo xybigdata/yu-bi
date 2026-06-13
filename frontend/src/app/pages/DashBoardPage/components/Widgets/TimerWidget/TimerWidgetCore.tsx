@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { datartDayjs } from 'app/utils/date';
+import { formatDatartDate } from 'app/utils/date';
 import { TIME_FORMATTER } from 'globalConstants';
 import { memo, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -29,18 +29,19 @@ export const TimerWidgetCore: React.FC = memo(() => {
   const { time, font } = timerWidgetToolkit.getTimer(
     widget.config.customConfig.props,
   );
+  const timeFormat = time?.format || TIME_FORMATTER;
   const [currentTime, setCurrentTime] = useState(
-    datartDayjs().format(time?.format || TIME_FORMATTER),
+    formatDatartDate(Date.now(), timeFormat),
   );
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(datartDayjs().format(time?.format || TIME_FORMATTER));
+      setCurrentTime(formatDatartDate(Date.now(), timeFormat));
     }, time?.duration);
     return () => {
       clearInterval(timer);
     };
-  }, [time]);
+  }, [time?.duration, timeFormat]);
 
   return (
     <Wrapper {...font}>

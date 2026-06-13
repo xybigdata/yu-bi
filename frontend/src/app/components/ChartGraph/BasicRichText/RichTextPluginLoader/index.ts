@@ -3,6 +3,7 @@ import { ImageDropModule } from '../modules/ImageDropModule';
 import {
   Quill,
   QuillInstance,
+  QuillWithContainerAndKeyboard,
   RangeStatic,
 } from '../quillCompat';
 import CalcFieldBlot from './CalcFieldBlot';
@@ -60,9 +61,7 @@ type SourceExecutionToken = {
   abandoned: boolean;
 };
 
-type AllowedCharsResolver =
-  | RegExp
-  | ((denotationChar: string) => RegExp);
+type AllowedCharsResolver = RegExp | ((denotationChar: string) => RegExp);
 
 type CalcFieldSource = (
   searchTerm: string,
@@ -90,10 +89,7 @@ type CalcFieldOptions = {
   selectKeys: number[];
 };
 
-function getFieldCharIndex(
-  text: string,
-  numberFieldDenotationChars: string[],
-) {
+function getFieldCharIndex(text: string, numberFieldDenotationChars: string[]) {
   return numberFieldDenotationChars.reduce(
     (prev, numberFieldChar) => {
       const numberFieldCharIndex = text.lastIndexOf(numberFieldChar);
@@ -145,10 +141,10 @@ class CalcField {
   private numberFieldCharPos: number | null = null;
   private cursorPos: number | null = null;
   private readonly options: CalcFieldOptions;
-  private readonly quill: QuillInstance;
+  private readonly quill: QuillWithContainerAndKeyboard;
 
   constructor(quill: QuillInstance, options: Partial<CalcFieldOptions> = {}) {
-    this.quill = quill;
+    this.quill = quill as unknown as QuillWithContainerAndKeyboard;
     const dataAttributes = Array.isArray(options.dataAttributes)
       ? [...defaultDataAttributes, ...options.dataAttributes]
       : defaultDataAttributes;
@@ -179,10 +175,10 @@ class CalcField {
 
     quill.on('text-change', this.onTextChange);
     quill.on('selection-change', this.onSelectionChange);
-    (quill as any).container.addEventListener('paste', this.handlePaste);
+    this.quill.container.addEventListener('paste', this.handlePaste);
 
     this.options.selectKeys.forEach(selectKey => {
-      (quill.keyboard as any).addBinding({
+      this.quill.keyboard.addBinding({
         key: selectKey,
       });
     });
@@ -211,12 +207,7 @@ class CalcField {
       insertAtPos = this.cursorPos;
     }
 
-    this.quill.insertEmbed(
-      insertAtPos,
-      this.options.blotName,
-      render,
-      'user',
-    );
+    this.quill.insertEmbed(insertAtPos, this.options.blotName, render, 'user');
 
     if (this.options.spaceAfterInsert) {
       this.quill.insertText(insertAtPos + 1, ' ', 'user');

@@ -25,8 +25,8 @@ import {
 import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
 import ChartDataSetDTO from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
-import ChartMetadata from 'app/types/ChartMetadata';
-import { isInRange } from 'app/utils/internalChartHelper';
+import ChartMetadata, { ChartRequirement } from 'app/types/ChartMetadata';
+import { isChartDataConfigMatchRequirement } from './chartRequirement';
 
 class Chart implements IChart, IChartLifecycle {
   private _state: ChartStatus = 'init';
@@ -49,7 +49,12 @@ class Chart implements IChart, IChartLifecycle {
     return this._state;
   }
 
-  constructor(id: string, name: string, icon?: string, requirements?: []) {
+  constructor(
+    id: string,
+    name: string,
+    icon?: string,
+    requirements?: ChartRequirement[],
+  ) {
     this.meta = {
       id,
       name,
@@ -71,7 +76,7 @@ class Chart implements IChart, IChartLifecycle {
     if (!targetConfig) {
       return true;
     }
-    return this.isMatchRequiredSectionLimitation(
+    return isChartDataConfigMatchRequirement(
       this.config?.datas,
       targetConfig?.datas,
     );
@@ -94,49 +99,6 @@ class Chart implements IChart, IChartLifecycle {
   }
 
   public onResize(options: BrokerOption, context: BrokerContext): void {}
-
-  private isMatchRequiredSectionLimitation(
-    current?: ChartDataConfig[],
-    target?: ChartDataConfig[],
-  ) {
-    const getDrillableRowCount = (
-      isDrillable = false,
-      originalRowLength = 0,
-    ) => {
-      return isDrillable ? Math.min(1, originalRowLength) : originalRowLength;
-    };
-
-    return (current || [])
-      .filter(cc => Boolean(cc?.required))
-      .every(cc => {
-        // The typed chart config section relation matching logic:
-        // 1. If section type exactly match, use it
-        // 2. Else if, section type and key exactly match, use it
-        // 3. Else if, section is drillable and target rows length is min value between 1 and rows length
-        // 4. Else, current section will match all target typed sections
-        const tc = target?.filter(tc => tc.type === cc.type) || [];
-        if (tc?.length > 1) {
-          const subTc = tc?.find(stc => stc.key === cc.key);
-          if (!subTc) {
-            const subTcTotalLength = tc
-              .flatMap(tc => tc.rows)
-              ?.filter(Boolean)?.length;
-            return isInRange(
-              cc?.limit,
-              getDrillableRowCount(cc?.drillable, subTcTotalLength),
-            );
-          }
-          return isInRange(
-            cc?.limit,
-            getDrillableRowCount(cc?.drillable, subTc?.rows?.length),
-          );
-        }
-        return isInRange(
-          cc?.limit,
-          getDrillableRowCount(cc?.drillable, tc?.[0]?.rows?.length),
-        );
-      });
-  }
 }
 
 export default Chart;

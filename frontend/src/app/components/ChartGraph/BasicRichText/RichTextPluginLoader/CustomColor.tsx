@@ -5,6 +5,7 @@ import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
 import { ReactNode } from 'react';
 import styled from 'styled-components';
 import type { RichTextEditorHandle } from '../RichTextEditor';
+import type { RangeStatic, Sources } from '../quillCompat';
 
 export interface RichTextCustomColorType {
   background: string;
@@ -40,7 +41,10 @@ export class QuillPalette {
     color: '#000',
   };
 
-  constructor(quillJS: RichTextEditorHandle, options = {} as QuillPaletteOptions) {
+  constructor(
+    quillJS: RichTextEditorHandle,
+    options = {} as QuillPaletteOptions,
+  ) {
     this.quillJS = quillJS;
     this.options = options;
     this.styleNode = null;
@@ -61,7 +65,11 @@ export class QuillPalette {
    * @param range
    * @returns
    */
-  private selectionChange = (range: { index: number; length: number }) => {
+  private selectionChange = (
+    range: RangeStatic | null,
+    _oldRange?: RangeStatic | null,
+    _source?: Sources,
+  ) => {
     const { toolbarId, onChange } = this.options;
     if (!range || range.index < 0) return;
     if (!toolbarId) return;
@@ -75,10 +83,10 @@ export class QuillPalette {
       const delta = this.quillJS.getContents(index, length);
 
       if (delta.ops?.length === 1 && delta.ops[0]?.attributes) {
-        const {
-          background,
-          color,
-        } = delta.ops[0].attributes as Record<string, string | undefined>;
+        const { background, color } = delta.ops[0].attributes as Record<
+          string,
+          string | undefined
+        >;
 
         const colorNode = document.querySelector(
           `#${toolbarId} .ql-color .ql-color-label`,

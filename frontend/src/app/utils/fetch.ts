@@ -29,10 +29,9 @@ import {
   filterSqlOperatorName,
   transformToViewConfig,
 } from 'app/utils/internalChartHelper';
-import { saveAs } from 'file-saver';
 import { BASE_RESOURCE_URL } from 'globalConstants';
 import i18next from 'i18next';
-import qs from 'qs';
+import { stringifyQuery } from 'utils/queryString';
 import { request2, requestWithHeader } from 'utils/request';
 import { convertToChartDto } from './ChartDtoHelper';
 import { getAllColumnInMeta } from './chartHelper';
@@ -173,7 +172,7 @@ export async function checkComputedFieldAsync(sourceId, expression) {
       snippet: expression,
     },
     paramsSerializer: function (params) {
-      return qs.stringify(params, { arrayFormat: 'brackets' });
+      return stringifyQuery(params, { arrayFormat: 'brackets' });
     },
   });
   return !!response;
@@ -231,13 +230,44 @@ export async function generateShareLinkAsync({
   return response?.data;
 }
 
-export const dealFileSave = (data, headers) => {
-  const fileNames = /filename[^;\n=]*=((['"]).*?\2|[^;\n]*)/g.exec(
-    headers?.['content-disposition'] || '',
+function getDownloadFileName(contentDisposition: string | undefined) {
+  if (!contentDisposition) {
+    return 'unknown.xlsx';
+  }
+
+  const encodedMatch = /filename\*\s*=\s*([^;]+)/i.exec(contentDisposition);
+
+  if (encodedMatch?.[1]) {
+    const encodedFileName = encodedMatch[1].trim().replace(/^UTF-8''/i, '');
+    return decodeURIComponent(encodedFileName).split('"').join('');
+  }
+
+  const normalMatch = /filename\s*=\s*((['"]).*?\2|[^;\n]*)/i.exec(
+    contentDisposition,
   );
-  const encodeFileName = decodeURIComponent(fileNames?.[1] || '');
+
+  if (normalMatch?.[1]) {
+    return decodeURIComponent(normalMatch[1]).split('"').join('');
+  }
+
+  return 'unknown.xlsx';
+}
+
+export const dealFileSave = (data, headers) => {
+  const fileName =
+    getDownloadFileName(headers?.['content-disposition']) || 'unknown.xlsx';
   const blob = new Blob([data], { type: '**application/octet-stream**' });
-  saveAs(blob, String(encodeFileName?.replaceAll('"', '')) || 'unknown.xlsx');
+  const downloadUrl = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+
+  anchor.href = downloadUrl;
+  anchor.download = fileName;
+  anchor.style.display = 'none';
+
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(downloadUrl);
 };
 
 export async function downloadFile(id) {

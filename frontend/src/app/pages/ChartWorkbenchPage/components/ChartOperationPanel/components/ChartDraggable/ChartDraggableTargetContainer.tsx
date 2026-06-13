@@ -404,8 +404,8 @@ const StyledContainer = styled.div<{
     props.canDrop
       ? rgba(props.theme.success, 0.25)
       : props.isOver
-      ? rgba(props.theme.error, 0.25)
-      : props.theme.emphasisBackground};
+        ? rgba(props.theme.error, 0.25)
+        : props.theme.emphasisBackground};
   border-radius: ${BORDER_RADIUS};
 
   .draggable-element:last-child {

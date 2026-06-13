@@ -19,6 +19,7 @@
 import useMount from 'app/hooks/useMount';
 import useRouteQuery from 'app/hooks/useRouteQuery';
 import ChartManager from 'app/models/ChartManager';
+import { preloadChartPlugins } from 'app/services/chartPluginService';
 import { useLocation } from 'app/routerCompat';
 import { login } from 'app/slice/thunks';
 import { useCallback, useEffect, useMemo } from 'react';
@@ -94,10 +95,11 @@ function ShareStoryPlayerPage() {
     }
   };
   useMount(() => {
-    ChartManager.instance()
-      .load()
+    preloadChartPlugins()
       .then(() => loadVizData())
-      .catch(err => console.error('Fail to load customize charts with ', err));
+      .catch(err =>
+        console.error('Fail to preload customize charts with ', err),
+      );
   });
 
   const fetchShareVizInfoImpl = useCallback(

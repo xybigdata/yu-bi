@@ -37,9 +37,9 @@ import {
   getVariablesByInteractionRule,
   variableToFilter,
 } from 'app/utils/internalChartHelper';
-import qs from 'qs';
 import { useCallback } from 'react';
 import { isEmpty, isEmptyArray } from 'utils/object';
+import { stringifyQuery } from 'utils/queryString';
 import { urlSearchTransfer } from 'utils/urlSearchTransfer';
 
 interface DrillThroughEventParams {
@@ -246,7 +246,7 @@ const useChartInteractions = (props: {
                 queryVariables,
                 rule,
               );
-              const urlFiltersStr: string = qs.stringify({
+              const urlFiltersStr: string = stringifyQuery({
                 filters: urlFilters || [],
                 variables: clickVariables,
               });

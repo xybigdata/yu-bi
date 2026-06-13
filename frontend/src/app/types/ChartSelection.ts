@@ -17,7 +17,7 @@
  */
 
 import { SelectedItem } from 'app/types/ChartConfig';
-import { ECharts } from 'echarts';
+import type { ECharts } from 'echarts';
 import { ChartMouseEvent } from './Chart';
 
 export interface ChartSelectionOptions {

@@ -79,8 +79,10 @@ export interface ViewSimpleViewModel extends ViewSimple {
   deleteLoading: boolean;
 }
 
-export interface ViewViewModel<T = object>
-  extends Pick<View, 'name' | 'script' | 'type'> {
+export interface ViewViewModel<T = object> extends Pick<
+  View,
+  'name' | 'script' | 'type'
+> {
   id: string;
   description?: string;
   index: number | null;
@@ -177,8 +179,10 @@ export interface ColumnPermissionRaw {
   updateTime?: string;
 }
 
-export interface ColumnPermission
-  extends Omit<ColumnPermissionRaw, 'columnPermission'> {
+export interface ColumnPermission extends Omit<
+  ColumnPermissionRaw,
+  'columnPermission'
+> {
   columnPermission: string[];
 }
 

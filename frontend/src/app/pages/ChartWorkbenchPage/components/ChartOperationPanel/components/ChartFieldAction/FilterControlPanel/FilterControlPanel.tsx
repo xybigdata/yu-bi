@@ -246,21 +246,22 @@ const FilterControlPanel: FC<
         >
           <Input onChange={e => handleNameChange(e.target?.value)} />
         </FormItemEx>
-        {config.category === ChartDataViewFieldCategory.Field && aggregation && (
-          <FormItemEx
-            {...formItemStyles}
-            label={t('filterAggregate')}
-            name="filterAggregate"
-            rules={[{ required: true }]}
-            initialValue={aggregate}
-          >
-            <FilterAggregateConfiguration
-              config={config}
-              aggregate={aggregate}
-              onChange={handleAggregateTypeChange}
-            />
-          </FormItemEx>
-        )}
+        {config.category === ChartDataViewFieldCategory.Field &&
+          aggregation && (
+            <FormItemEx
+              {...formItemStyles}
+              label={t('filterAggregate')}
+              name="filterAggregate"
+              rules={[{ required: true }]}
+              initialValue={aggregate}
+            >
+              <FilterAggregateConfiguration
+                config={config}
+                aggregate={aggregate}
+                onChange={handleAggregateTypeChange}
+              />
+            </FormItemEx>
+          )}
         <FormItemEx
           {...formItemStyles}
           label={t('filterOption')}

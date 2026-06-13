@@ -1,4 +1,4 @@
-import type { ButtonType } from 'antd/es/button';
+import type { ButtonProps } from 'antd';
 /**
  * Datart
  *
@@ -20,7 +20,7 @@ import { createContext } from 'react';
 import { BoardType } from './../../../../Board/slice/types';
 export interface BoardToolBarContextProps {
   className?: string;
-  btnType?: ButtonType;
+  btnType?: ButtonProps['type'];
   size?: 'small' | 'middle' | 'large' | undefined;
   showLabel?: boolean;
   boardId: string;

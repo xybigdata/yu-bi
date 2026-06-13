@@ -16,6 +16,7 @@ export type DatartDayjs = Dayjs;
 export type DatartDateLike =
   | Dayjs
   | Date
+  | number
   | string
   | {
       format: (template?: string) => string;
@@ -37,4 +38,45 @@ export function toDatartDayjs(value?: DatartDateLike | null) {
     typeof value === 'object' && 'format' in value ? value.toString() : value;
   const dayValue = dayjs(dateInput);
   return dayValue.isValid() ? dayValue : null;
+}
+
+export function toDatartDayjsRange(
+  values?:
+    | readonly [DatartDateLike?, DatartDateLike?]
+    | DatartDateLike[]
+    | null,
+): [DatartDayjs | null, DatartDayjs | null] | null {
+  if (!values || !Array.isArray(values)) {
+    return null;
+  }
+
+  return [toDatartDayjs(values[0]), toDatartDayjs(values[1])];
+}
+
+export function toDatartDayjsList(
+  values?: readonly DatartDateLike[] | DatartDateLike[] | null,
+): DatartDayjs[] {
+  if (!values || !Array.isArray(values)) {
+    return [];
+  }
+
+  return values
+    .map(value => toDatartDayjs(value))
+    .filter((value): value is DatartDayjs => value !== null);
+}
+
+export function formatDatartDate(
+  value?: DatartDateLike | null,
+  template?: string,
+) {
+  const dayValue = toDatartDayjs(value);
+  return dayValue ? dayValue.format(template) : 'Invalid date';
+}
+
+export function formatDatartDateIfValid(
+  value?: DatartDateLike | null,
+  template?: string,
+) {
+  const dayValue = toDatartDayjs(value);
+  return dayValue ? dayValue.format(template) : undefined;
 }

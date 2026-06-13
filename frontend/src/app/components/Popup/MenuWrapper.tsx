@@ -5,11 +5,7 @@ interface MenuWrapperProps extends MenuProps {
   onClose?: () => void;
 }
 
-export function MenuWrapper({
-  onClose,
-  onClick,
-  ...rest
-}: MenuWrapperProps) {
+export function MenuWrapper({ onClose, onClick, ...rest }: MenuWrapperProps) {
   const handleClick = useCallback(
     v => {
       onClick?.(v);

@@ -17,13 +17,29 @@
  */
 
 import Chart from 'app/models/Chart';
+import { ChartConfig, ChartI18NSectionConfig } from 'app/types/ChartConfig';
+import ChartMetadata from 'app/types/ChartMetadata';
 import * as datartChartHelper from 'app/utils/chartHelper';
 import { fetchPluginChart } from 'app/utils/fetch';
-import { cond, Omit } from 'utils/object';
+import { CloneValueDeep, cond, Omit } from 'utils/object';
+
+export type PluginChartDefinition = {
+  config?: ChartConfig;
+  dependency?: string[];
+  isISOContainer?: boolean | string;
+  meta: ChartMetadata;
+  useIFrame?: boolean;
+  [key: string]: any;
+};
+
+export type PluginChartPaletteSeed = {
+  meta: ChartMetadata;
+  datas?: ChartConfig['datas'];
+  i18ns?: ChartI18NSectionConfig[];
+};
 
 const pureFuncLoader = ({ path, result }) => {
   if (/.js$/.test(path)) {
-    // eslint-disable-next-line no-new-func
     return Function(`"use strict"; return (${result})`)()({
       dHelper: { ...datartChartHelper },
     });
@@ -32,7 +48,6 @@ const pureFuncLoader = ({ path, result }) => {
 
 const iifeFuncLoader = ({ path, result }) => {
   if (/.iife.js$/.test(path)) {
-    // eslint-disable-next-line no-new-func
     return Function(`"use strict"; return ${result}`)()({
       dHelper: { ...datartChartHelper },
     });
@@ -40,32 +55,43 @@ const iifeFuncLoader = ({ path, result }) => {
 };
 
 class PluginChartLoader {
-  async loadPlugins(paths: string[]) {
-    const loadPluginTasks = paths.map(async path => {
-      try {
-        const result = await fetchPluginChart(path);
-        if (!result) {
-          return Promise.resolve(result);
-        }
+  async loadPluginDefinitions(paths: string[]) {
+    const loadPluginTasks: Array<Promise<PluginChartDefinition | null>> =
+      paths.map(
+      async path => {
+        try {
+          const result = await fetchPluginChart(path);
+          if (!result) {
+            return null;
+          }
 
-        /* Known Issue: file path only allow in src folder by create-react-app file scope limitation by CRA
-         * Git Issue: https://github.com/facebook/create-react-app/issues/5563
-         * Suggestions: Use es6 `import` api to load file and compatible with ES Modules
-         */
-        const customPlugin = cond(
-          iifeFuncLoader,
-          pureFuncLoader,
-        )({ path, result });
-        return this.convertToDatartChartModel(customPlugin);
-      } catch (e) {
-        console.error('ChartPluginLoader | plugin chart error: ', e);
-        return null;
-      }
-    });
-    return Promise.all(loadPluginTasks);
+          const customPlugin = cond(
+            iifeFuncLoader,
+            pureFuncLoader,
+          )({ path, result }) as PluginChartDefinition;
+          return customPlugin;
+        } catch (e) {
+          console.error('ChartPluginLoader | plugin chart error: ', e);
+          return null;
+        }
+      });
+    const pluginDefinitions = await Promise.all(loadPluginTasks);
+    return pluginDefinitions.filter(
+      Boolean,
+    ) as PluginChartDefinition[];
   }
 
-  convertToDatartChartModel(customPlugin) {
+  getPluginPaletteSeed(
+    customPlugin: PluginChartDefinition,
+  ): PluginChartPaletteSeed {
+    return {
+      meta: CloneValueDeep(customPlugin.meta),
+      datas: CloneValueDeep(customPlugin.config?.datas || []),
+      i18ns: CloneValueDeep(customPlugin.config?.i18ns || []),
+    };
+  }
+
+  convertToDatartChartModel(customPlugin: PluginChartDefinition) {
     const chart = new Chart(
       customPlugin.meta.id,
       customPlugin.meta.name,

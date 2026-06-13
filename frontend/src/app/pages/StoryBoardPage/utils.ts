@@ -49,16 +49,22 @@ export const getStoryPageMapForm = (pages: StoryPageOfServer[]) => {
 };
 
 export const getStoryPageMap = (pages: StoryPage[]) => {
-  return pages.reduce((acc, cur) => {
-    acc[cur.id] = cur;
-    return acc;
-  }, {} as Record<string, StoryPage>);
+  return pages.reduce(
+    (acc, cur) => {
+      acc[cur.id] = cur;
+      return acc;
+    },
+    {} as Record<string, StoryPage>,
+  );
 };
 export const getInitStoryPageInfoMap = (pages: StoryPage[]) => {
-  return pages.reduce((acc, cur) => {
-    acc[cur.id] = getInitStoryPageInfo(cur.id);
-    return acc;
-  }, {} as Record<string, StoryPageInfo>);
+  return pages.reduce(
+    (acc, cur) => {
+      acc[cur.id] = getInitStoryPageInfo(cur.id);
+      return acc;
+    },
+    {} as Record<string, StoryPageInfo>,
+  );
 };
 export const getInitStoryPageInfo = (id?: string): StoryPageInfo => {
   return {

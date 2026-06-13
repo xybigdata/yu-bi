@@ -58,7 +58,11 @@ export class ImageDropModule {
   ) {
     Array.prototype.forEach.call(files, item => {
       const file = item as File | DataTransferItem;
-      if (!file.type.match(/^image\/(gif|jpe?g|a?png|svg|webp|bmp|vnd\.microsoft\.icon)/i)) {
+      if (
+        !file.type.match(
+          /^image\/(gif|jpe?g|a?png|svg|webp|bmp|vnd\.microsoft\.icon)/i,
+        )
+      ) {
         return;
       }
 

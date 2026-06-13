@@ -16,9 +16,13 @@
  * limitations under the License.
  */
 
+import { ensureEChartsDefaultTheme } from 'app/utils/echartsThemeRuntime';
 import { defaultLazyLoad } from 'utils/loadable';
 
 export const LazyMainPage = defaultLazyLoad(
-  () => import('./index'),
+  () =>
+    ensureEChartsDefaultTheme().then(() => {
+      return import('./index');
+    }),
   module => module.MainPage,
 );

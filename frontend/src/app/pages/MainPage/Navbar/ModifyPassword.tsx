@@ -36,10 +36,7 @@ interface ModifyPasswordProps {
   open: boolean;
   onCancel: () => void;
 }
-export const ModifyPassword: FC<ModifyPasswordProps> = ({
-  open,
-  onCancel,
-}) => {
+export const ModifyPassword: FC<ModifyPasswordProps> = ({ open, onCancel }) => {
   const dispatch = useAppDispatch();
   const loggedInUser = useSelector(selectLoggedInUser);
   const loading = useSelector(selectModifyPasswordLoading);

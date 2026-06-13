@@ -16,9 +16,13 @@
  * limitations under the License.
  */
 
+import { ensureEChartsDefaultTheme } from 'app/utils/echartsThemeRuntime';
 import { defaultLazyLoad } from 'utils/loadable';
 
 export const LazyShareDashboard = defaultLazyLoad(
-  () => import('./ShareDashboardPage'),
+  () =>
+    ensureEChartsDefaultTheme().then(() => {
+      return import('./ShareDashboardPage');
+    }),
   module => module.default,
 );

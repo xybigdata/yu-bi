@@ -43,11 +43,10 @@ import {
   toFormattedValue,
   transformToDataSet,
 } from 'app/utils/chartHelper';
-import { precisionCalculation } from 'app/utils/number';
-import currency from 'currency.js';
-import { init } from 'echarts';
+import { precisionCalculation, toSafeNumber } from 'app/utils/number';
 import { CalculationType } from 'globalConstants';
 import { UniqArray } from 'utils/object';
+import { loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 import {
   OrderConfig,
@@ -59,6 +58,16 @@ class WaterfallChart extends Chart {
   config = Config;
   chart: any = null;
   selectionManager?: ChartSelectionManager;
+  protected container: HTMLElement | null = null;
+  private latestMountPayload?: {
+    options: BrokerOption;
+    context: BrokerContext;
+  };
+  private latestRenderPayload?: {
+    options: BrokerOption;
+    context: BrokerContext;
+  };
+  private runtimeLoadToken = 0;
 
   protected rowDataList: {
     rowData: { [x: string]: any };
@@ -83,28 +92,24 @@ class WaterfallChart extends Chart {
       return;
     }
 
-    this.chart = init(
-      context.document.getElementById(options.containerId)!,
-      'default',
-    );
-
-    this.selectionManager = new ChartSelectionManager(this.mouseEvents);
-    this.selectionManager.attachWindowListeners(context.window);
-    this.selectionManager.attachZRenderListeners(this.chart);
-    this.chart.on('click', ({ dataIndex, componentIndex, ...rest }) => {
-      // NOTE: 1. 累计不响应事件； 2. 下部透明柱状图不响应事件
-      if (this.rowDataList.length <= dataIndex || componentIndex === 0) return;
-      this.selectionManager?.echartsClickEventHandler({
-        ...rest,
-        dataIndex: dataIndex,
-        componentIndex: '',
-        data: { ...this.rowDataList[dataIndex] },
-      });
-    });
+    this.container = context.document.getElementById(options.containerId);
+    this.latestMountPayload = {
+      options,
+      context,
+    };
+    this.loadRuntimeAndReplay();
   }
 
   onUpdated(options: BrokerOption, context: BrokerContext): void {
     if (!options.dataset || !options.dataset.columns || !options.config) {
+      return;
+    }
+    this.latestRenderPayload = {
+      options,
+      context,
+    };
+    if (!this.chart) {
+      this.loadRuntimeAndReplay();
       return;
     }
     if (!this.isMatchRequirement(options.config)) {
@@ -122,16 +127,90 @@ class WaterfallChart extends Chart {
   }
 
   onUnMount(options: BrokerOption, context: BrokerContext): void {
+    this.runtimeLoadToken += 1;
+    this.latestMountPayload = undefined;
+    this.latestRenderPayload = undefined;
+    this.container = null;
     this.selectionManager?.removeWindowListeners(context.window);
     this.selectionManager?.removeZRenderListeners(this.chart);
     this.rowDataList = [];
     this.chart?.dispose();
+    this.chart = null;
+    this.selectionManager = undefined;
   }
 
   onResize(options: BrokerOption, context: BrokerContext): void {
     this.chart?.resize({ width: context?.width, height: context?.height });
     hadAxisLabelOverflowConfig(this.chart?.getOption()) &&
       this.onUpdated(options, context);
+  }
+
+  private loadRuntimeAndReplay() {
+    const token = ++this.runtimeLoadToken;
+
+    void loadEChartsRuntime()
+      .then(({ init }) => {
+        if (token !== this.runtimeLoadToken) {
+          return;
+        }
+
+        const latestMountPayload = this.latestMountPayload;
+        if (!latestMountPayload || !this.container) {
+          return;
+        }
+
+        if (!this.chart) {
+          this.chart = init(this.container, 'default');
+
+          this.selectionManager = new ChartSelectionManager(this.mouseEvents);
+          this.selectionManager.attachWindowListeners(
+            latestMountPayload.context.window,
+          );
+          this.selectionManager.attachZRenderListeners(this.chart);
+          this.chart.on('click', ({ dataIndex, componentIndex, ...rest }) => {
+            // NOTE: 1. 累计不响应事件； 2. 下部透明柱状图不响应事件
+            if (
+              this.rowDataList.length <= dataIndex ||
+              componentIndex === 0
+            ) {
+              return;
+            }
+            this.selectionManager?.echartsClickEventHandler({
+              ...rest,
+              dataIndex: dataIndex,
+              componentIndex: '',
+              data: { ...this.rowDataList[dataIndex] },
+            });
+          });
+        }
+
+        const latestRenderPayload = this.latestRenderPayload;
+        if (!latestRenderPayload) {
+          return;
+        }
+
+        const { options, context } = latestRenderPayload;
+        if (!options.dataset || !options.config) {
+          return;
+        }
+        if (!this.isMatchRequirement(options.config)) {
+          this.chart?.clear();
+          return;
+        }
+        this.selectionManager?.updateSelectedItems(options.selectedItems);
+        const newOptions = this.getOptions(
+          options.dataset,
+          options.config,
+          context,
+          options.selectedItems,
+        );
+        this.chart?.setOption(Object.assign({}, newOptions), true);
+        hadAxisLabelOverflowConfig(this.chart?.getOption()) &&
+          this.onUpdated(options, context);
+      })
+      .catch(error => {
+        console.error('Load echarts runtime failed in WaterfallChart', error);
+      });
   }
 
   private getOptions(
@@ -329,12 +408,8 @@ class WaterfallChart extends Chart {
     const ascendOrder: OrderConfig[] = [];
     const descendOrder: OrderConfig[] = [];
     dataList.forEach((data, index) => {
-      const newData: number = isNaN(currency(data).value)
-        ? 0
-        : currency(data).value;
-      const lastData: number = isNaN(currency(dataList[index - 1]).value)
-        ? 0
-        : currency(dataList[index - 1]).value;
+      const newData = toSafeNumber(data);
+      const lastData = toSafeNumber(dataList[index - 1]);
       if (index > 0) {
         if (isIncrement) {
           const result: number =

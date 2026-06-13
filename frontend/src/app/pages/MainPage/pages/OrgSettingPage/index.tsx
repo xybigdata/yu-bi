@@ -2,7 +2,7 @@ import { Button, Card, Form, Input, message, Upload } from 'antd';
 import { Avatar } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { fetchCheckName } from 'app/utils/fetch';
-import debounce from 'debounce-promise';
+import { debouncePromise } from 'utils/debouncePromise';
 import {
   BASE_API_URL,
   BASE_RESOURCE_URL,
@@ -126,7 +126,7 @@ export function OrgSettingPage() {
                 message: `${t('name')}${tg('validation.required')}`,
               },
               {
-                validator: debounce((_, value) => {
+                validator: debouncePromise((_, value) => {
                   if (value === currentOrganization?.name) {
                     return Promise.resolve();
                   }

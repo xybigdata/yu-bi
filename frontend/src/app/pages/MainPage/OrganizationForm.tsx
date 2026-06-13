@@ -20,7 +20,7 @@ import { Form, Input, Modal, ModalProps } from 'antd';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { fetchCheckName } from 'app/utils/fetch';
-import debounce from 'debounce-promise';
+import { debouncePromise } from 'utils/debouncePromise';
 import { DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
@@ -92,7 +92,7 @@ export function OrganizationForm({ open, onCancel }: OrganizationFormProps) {
               message: `${t('name')}${tg('validation.required')}`,
             },
             {
-              validator: debounce((_, value) => {
+              validator: debouncePromise((_, value) => {
                 if (!value) {
                   return Promise.resolve();
                 }

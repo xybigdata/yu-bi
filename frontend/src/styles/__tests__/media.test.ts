@@ -9,8 +9,7 @@ describe('media', () => {
       @media (min-width: ${sizes.small}px) {
         color: red;
       }
-    `
-      .join('');
+    `.join('');
     expect(mediaQuery).toEqual(normalizeCss(cssVersion));
   });
 });

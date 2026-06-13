@@ -42,7 +42,7 @@ const BasicMarginWidth: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       if (value === null || value === undefined) {
         return 0;
       }
-      return `${value}`.replaceAll(widthModeTypes[1], '');
+      return `${value}`.split(widthModeTypes[1]).join('');
     };
 
     const handleValueChange = newValue => {

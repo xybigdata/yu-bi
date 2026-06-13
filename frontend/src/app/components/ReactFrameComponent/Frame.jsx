@@ -53,7 +53,7 @@ export class Frame extends Component {
   }
 
   getDoc() {
-    return this.nodeRef.current ? this.nodeRef.current.contentDocument : null; // eslint-disable-line
+    return this.nodeRef.current ? this.nodeRef.current.contentDocument : null;
   }
 
   getMountTarget() {

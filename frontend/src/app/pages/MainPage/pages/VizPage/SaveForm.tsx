@@ -3,7 +3,7 @@ import { ModalForm, ModalFormProps } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { BoardTypes } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { fetchCheckName } from 'app/utils/fetch';
-import debounce from 'debounce-promise';
+import { debouncePromise } from 'utils/debouncePromise';
 import {
   CommonFormTypes,
   DatartFileSuffixes,
@@ -31,15 +31,8 @@ import {
 type SaveFormProps = Omit<ModalFormProps, 'type' | 'open' | 'onSave'>;
 
 export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
-  const {
-    vizType,
-    type,
-    open,
-    initialValues,
-    onSave,
-    onCancel,
-    onAfterClose,
-  } = useContext(SaveFormContext);
+  const { vizType, type, open, initialValues, onSave, onCancel, onAfterClose } =
+    useContext(SaveFormContext);
   const selectVizFolderTree = useMemo(makeSelectVizFolderTree, []);
   const selectStoryboradFolderTree = useMemo(
     makeSelectStoryboradFolderTree,
@@ -127,7 +120,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
             message: `${t('name')}${tg('validation.required')}`,
           },
           {
-            validator: debounce((_, value) => {
+            validator: debouncePromise((_, value) => {
               if (!value || initialValues?.name === value) {
                 return Promise.resolve();
               }

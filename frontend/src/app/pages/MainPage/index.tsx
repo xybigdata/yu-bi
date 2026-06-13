@@ -19,8 +19,8 @@
 import type { ChartEditorBaseProps } from 'app/components/ChartEditor';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useMount from 'app/hooks/useMount';
-import ChartManager from 'app/models/ChartManager';
 import { useLocation } from 'app/routerCompat';
+import { preloadChartPlugins } from 'app/services/chartPluginService';
 import { useAppSlice } from 'app/slice';
 import React, { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
@@ -75,11 +75,9 @@ export function MainPage() {
 
   useMount(
     () => {
-      ChartManager.instance()
-        .load()
-        .catch(err =>
-          console.error('Fail to load customize charts with ', err),
-        );
+      preloadChartPlugins().catch(err =>
+        console.error('Fail to preload customize charts with ', err),
+      );
       dispatch(getUserSettings(orgId));
       dispatch(getDataProviders());
     },

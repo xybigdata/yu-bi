@@ -17,12 +17,13 @@
  */
 // import JSONFormatter from 'json-formatter-js';
 // import {languages} from 'monaco-editor/esm/vs/language/json/fillers/monaco-editor-core.js';
-import MonacoEditor, { monaco } from 'app/components/MonacoEditor';
+import MonacoEditor from 'app/components/MonacoEditor';
+import { ensureMonacoJavascriptLanguage } from 'app/components/MonacoEditor/runtime';
 import debounce from 'lodash/debounce';
-import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution';
 import { FC, memo, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import { FONT_SIZE_BASE } from 'styles/StyleConstants';
 import { selectThemeKey } from 'styles/theme/slice/selectors';
 export const MockDataEditor: FC<{ originalData: object; onDataChange: any }> =
@@ -31,10 +32,12 @@ export const MockDataEditor: FC<{ originalData: object; onDataChange: any }> =
     //   const formatter = new JSONFormatter(jsonVal);
     const editorValue = JSON.stringify(originalData, null, 4);
 
-    const editorWillMount = useCallback(editor => {}, []);
+    const editorWillMount = useCallback(async () => {
+      await ensureMonacoJavascriptLanguage();
+    }, []);
 
     const editorDidMount = useCallback(
-      (editor: monaco.editor.IStandaloneCodeEditor) => {
+      (editor: Monaco.editor.IStandaloneCodeEditor) => {
         // Removing the tooltip on the read-only editor
         // https://github.com/microsoft/monaco-editor/issues/1742
 
