@@ -38,7 +38,7 @@ The current maintenance line is focused on:
 - Spring Boot: `3.5.12`
 - Spring Cloud: `2025.0.1`
 - Node.js: `24.x`
-- Frontend build: `Vite 5`
+- Frontend build: `Vite 6`
 - React: `18.3.x`
 
 ## Local Development

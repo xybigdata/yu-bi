@@ -38,7 +38,7 @@
 - Spring Boot：`3.5.12`
 - Spring Cloud：`2025.0.1`
 - Node.js：`24.x`
-- 前端构建：`Vite 5`
+- 前端构建：`Vite 6`
 - React：`18.3.x`
 
 ## 本地开发
