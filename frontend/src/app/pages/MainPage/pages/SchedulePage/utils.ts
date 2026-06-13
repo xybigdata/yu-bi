@@ -1,5 +1,9 @@
 import { TIME_FORMATTER } from 'globalConstants';
-import { datartDayjs, formatDatartDate, toDatartDayjs } from 'app/utils/date';
+import {
+  datartDayjs,
+  formatDatartDate,
+  toDatartDayjsRange,
+} from 'app/utils/date';
 import { PermissionLevels, ResourceTypes } from '../PermissionPage/constants';
 import { JobTypes, TimeModes, VizTypes } from './constants';
 import { AddScheduleParams, Schedule, VizContentsItem } from './slice/types';
@@ -145,9 +149,10 @@ export const toEchoFormValues = ({
     dateRange:
       startDate && endDate
         ? (() => {
-            const start = toDatartDayjs(startDate);
-            const end = toDatartDayjs(endDate);
-            return start && end ? [start, end] : undefined;
+            const range = toDatartDayjsRange([startDate, endDate]);
+            return range?.[0] && range?.[1]
+              ? [range[0], range[1]]
+              : undefined;
           })()
         : undefined,
     subject: configObj?.subject,

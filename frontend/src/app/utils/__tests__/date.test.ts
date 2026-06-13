@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { toDatartDayjsRange } from '../date';
+import { toDatartDayjsList, toDatartDayjsRange } from '../date';
 
 describe('toDatartDayjsRange', () => {
   test('should convert range values to dayjs tuple', () => {
@@ -45,5 +45,25 @@ describe('toDatartDayjsRange', () => {
   test('should return null for empty input', () => {
     expect(toDatartDayjsRange()).toBeNull();
     expect(toDatartDayjsRange(null)).toBeNull();
+  });
+});
+
+describe('toDatartDayjsList', () => {
+  test('should convert valid values and filter invalid values', () => {
+    const values = toDatartDayjsList([
+      '2024-01-01 00:00:00',
+      'invalid-date',
+      '2024-01-02 00:00:00',
+    ]);
+
+    expect(values.map(value => value.format('YYYY-MM-DD HH:mm:ss'))).toEqual([
+      '2024-01-01 00:00:00',
+      '2024-01-02 00:00:00',
+    ]);
+  });
+
+  test('should return empty list for empty input', () => {
+    expect(toDatartDayjsList()).toEqual([]);
+    expect(toDatartDayjsList(null)).toEqual([]);
   });
 });

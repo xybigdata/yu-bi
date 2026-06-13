@@ -53,6 +53,18 @@ export function toDatartDayjsRange(
   return [toDatartDayjs(values[0]), toDatartDayjs(values[1])];
 }
 
+export function toDatartDayjsList(
+  values?: readonly DatartDateLike[] | DatartDateLike[] | null,
+): DatartDayjs[] {
+  if (!values || !Array.isArray(values)) {
+    return [];
+  }
+
+  return values
+    .map(value => toDatartDayjs(value))
+    .filter((value): value is DatartDayjs => value !== null);
+}
+
 export function formatDatartDate(
   value?: DatartDateLike | null,
   template?: string,
