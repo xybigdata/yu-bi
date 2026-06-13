@@ -20,7 +20,7 @@ import { Checkbox, Form, FormInstance, Input, Radio } from 'antd';
 import { ModalForm, ModalFormProps } from 'app/components';
 import { DateFormat } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { datartDayjs } from 'app/utils/date';
+import { DatartDayjs, toDatartDayjs } from 'app/utils/date';
 import { fetchCheckName } from 'app/utils/fetch';
 import { debouncePromise } from 'utils/debouncePromise';
 import { DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
@@ -44,6 +44,9 @@ interface VariableFormProps extends ModalFormProps {
 type ModalDestroyOnHiddenCompatProps = {
   destroyOnHidden?: boolean;
 };
+
+const isDatartDayjsValue = (value: DatartDayjs | null): value is DatartDayjs =>
+  value !== null;
 
 export const VariableForm = memo(
   ({
@@ -82,7 +85,9 @@ export const VariableForm = memo(
             ? JSON.parse(editingVariable.defaultValue)
             : [];
           if (valueType === VariableValueTypes.Date && !expression) {
-            defaultValue = defaultValue.map(str => datartDayjs(str));
+            defaultValue = defaultValue
+              .map(str => toDatartDayjs(str))
+              .filter(isDatartDayjsValue);
           }
           setType(type);
           setValueType(valueType);

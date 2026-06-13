@@ -18,7 +18,7 @@
 
 import { Modal, ModalProps, Tabs } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { datartDayjs } from 'app/utils/date';
+import { DatartDayjs, toDatartDayjs } from 'app/utils/date';
 import { Key, memo, useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -46,6 +46,9 @@ interface SubjectFormProps extends ModalProps {
 type ModalDestroyOnHiddenCompatProps = {
   destroyOnHidden?: boolean;
 };
+
+const isDatartDayjsValue = (value: DatartDayjs | null): value is DatartDayjs =>
+  value !== null;
 
 export const SubjectForm = memo(
   ({
@@ -106,7 +109,9 @@ export const SubjectForm = memo(
             useDefaultValue: permission ? permission.useDefaultValue : true,
             value: permission?.value
               ? editingVariable.valueType === VariableValueTypes.Date
-                ? permission.value.map(str => datartDayjs(str))
+                ? permission.value
+                    .map(str => toDatartDayjs(str))
+                    .filter(isDatartDayjsValue)
                 : permission.value
               : void 0,
           });
@@ -138,7 +143,9 @@ export const SubjectForm = memo(
             useDefaultValue: permission ? permission.useDefaultValue : true,
             value: permission?.value
               ? editingVariable.valueType === VariableValueTypes.Date
-                ? permission.value.map(str => datartDayjs(str))
+                ? permission.value
+                    .map(str => toDatartDayjs(str))
+                    .filter(isDatartDayjsValue)
                 : permission.value
               : void 0,
           });
