@@ -67,7 +67,7 @@ import {
   NumberUnitKey,
   NumericUnitDescriptions,
 } from 'globalConstants';
-import { datartDayjs } from './date';
+import { formatDatartDate } from './date';
 import { Debugger } from 'utils/debugger';
 import {
   CloneValueDeep,
@@ -309,7 +309,7 @@ function dateFormater(value, config?: FormatFieldAction[FieldFormatType.Date]) {
     return value;
   }
 
-  return datartDayjs(value).format(config?.format);
+  return formatDatartDate(value, config?.format);
 }
 
 /**
