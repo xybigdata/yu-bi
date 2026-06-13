@@ -1,18 +1,18 @@
 # yu-bi 技术栈现代化改造执行板
 
-本文档只保留当前有效结论，用来指导后续逐批改造。
+本文档只保留当前有效结论，用于指导后续逐批改造。
 
 现代化的含义是：在兼容、正确、可回归前提下，收口到较新的稳定版，而不是盲目追最新。
 
-## 1. 固定目标
+## 1. 改造目标
 
-- 后端兼容 `JDK 21`
-- 前端工程链兼容 `Node 26`
-- 默认开发基线保持稳定 LTS 主线
-- 只做分批、可验证、可回退的升级
-- 一个提交只处理一个专题，不把高低风险内容混在一起
+- 后端稳定兼容 `JDK 21`
+- 前端工程链稳定兼容 `Node 26`
+- 优先收口到较新的稳定版本，不追逐最新版本号
+- 所有改造都必须分批、可验证、可回退
+- 一个提交只处理一个专题，不混入无关改动
 
-## 2. 固定约束
+## 2. 固定边界
 
 ### 2.1 仓库与分支
 
@@ -34,38 +34,36 @@
   - `.tmp/`
   - `logs/`
 - 仅提交当前专题相关文件
-- 文档只记录当前有效状态，不恢复成长流水账
+- 文档只记录当前有效状态，不写过程流水账
 
-## 3. 当前技术栈基线
+## 3. 当前基线
 
-### 3.1 后端
+### 3.1 后端基线
 
-| 项目 | 当前基线 | 判断 |
+| 项目 | 当前基线 | 结论 |
 | --- | --- | --- |
-| Java | `21` | 已达目标基线 |
+| Java | `21` | 已达目标 |
 | Spring Boot | `3.5.12` | 稳定主线，暂不追更 |
 | Spring Cloud | `2025.0.1` | 与 Boot 3.5 配套 |
 | Maven | `3.9+` | 已由 Enforcer 限制 |
 | MyBatis Spring Boot | `3.0.4` | 已适配 Boot 3 |
-| Shiro | `2.0.5` | 仍是高风险遗留 |
-| Druid | `1.2.28` | 可继续观察，但不优先动 |
+| Shiro | `2.0.5` | 明确高风险遗留 |
+| Druid | `1.2.28` | 暂不优先动 |
 | H2 | `2.4.240` | 已进入新主线 |
 | Selenium | `4.31.0` | 已完成主升级 |
 | GraalJS | `25.0.1` | 已替代 Nashorn 主链 |
 | Springdoc | `2.8.17` | 已适配 Boot 3 |
-| Commons Lang3 | `3.20.0` | 稳定 |
-| Commons IO | `2.22.0` | 稳定 |
 
 补充：
 
 - `jjwt 0.12.7`、`httpclient5 5.5`、`poi-ooxml 5.5.1`、`commons-csv 1.14.1` 已收口到较新稳定线
-- `calcite-core` 仍在 `data-providers/data-provider-base` 主链，是明确高风险项
+- `calcite-core` 仍在主链，是明确高风险项
 
-### 3.2 前端
+### 3.2 前端基线
 
-| 项目 | 当前基线 | 判断 |
+| 项目 | 当前基线 | 结论 |
 | --- | --- | --- |
-| Node | `>=24.0.0` | 默认本地基线；必须保持对 `Node 26` 兼容 |
+| Node | `>=24.0.0` | 本地默认基线；必须兼容 `Node 26` |
 | npm | `>=11.0.0` | 已写入 `engines` |
 | React | `18.3.1` | 已完成主升级 |
 | React Router | `6.30.1` | 已完成主升级 |
@@ -76,13 +74,12 @@
 | Vite | `6.4.3` | 已替代 CRA 主工作流 |
 | Vitest | `4.1.8` | 已成为唯一主测试栈 |
 | styled-components | `6.1.19` | 已完成主升级 |
-| i18next | `26.0.2` | 已升级 |
-| react-i18next | `17.0.8` | 已升级 |
-| react-quill | `2.0.0` | 已升级，但仍属中风险稳定化专题 |
+| react-quill | `2.0.0` | 已升级，但仍需稳定化 |
+| react-resizable | `3.0.4` | 已完成收口 |
 
-### 3.3 工程化
+### 3.3 工程化基线
 
-| 项目 | 当前基线 | 判断 |
+| 项目 | 当前基线 | 结论 |
 | --- | --- | --- |
 | Husky | `9.1.7` | 已升级 |
 | lint-staged | `17.0.7` | 已升级 |
@@ -92,9 +89,9 @@
 | CI Node | `24.x` + `26.x` | 已覆盖 |
 | `frontend/.nvmrc` | `v24.0.0` | 本地默认基线仍是 24 |
 
-## 4. 当前进度总览
+## 4. 当前已完成
 
-### 4.1 已完成的大项
+### 4.1 主线结论
 
 - 项目已从 datart 独立为 `yu-bi`
 - 核心开源治理文档已完成独立项目收口
@@ -103,7 +100,16 @@
 - 前端已建立 `React 18 + Ant Design 5 + Vite 6 + Vitest 4` 主链
 - CRA / CRACO、IE11 主兼容链、Nashorn、PhantomJS 等历史主链已退出
 
-### 4.2 已完成的近期现代化里程碑
+### 4.2 近期里程碑
+
+- `7507ffe22 docs: 重整现代化改造执行板`
+- `502c3a61f docs: 补充前端安装健康度审计结论`
+- `2d840cadc chore: 收口 react-resizable 到 3.x`
+- `05a398439 chore: 收口一批时间选择器日期链路`
+- `e5758ff2f chore: 继续收口变量页日期格式化入口`
+- `d78d2522c chore: 继续收口控制器日期格式化入口`
+
+更早已完成：
 
 - `29b46197c chore: 移除前端未使用的 @antv/g2 直接依赖`
 - `e9a42dfae chore: 移除前端未使用的 html2canvas 直接依赖`
@@ -117,171 +123,98 @@
 - `492193acc chore: 收口 SelectController 的类型入口`
 - `5f538da70 chore: 移除前端安装脚本的 legacy-peer-deps`
 - `c9e022d4a chore: 收口一批时间值标准化入口`
-- `502c3a61f docs: 补充前端安装健康度审计结论`
 
-## 5. 当前结论
+## 5. 风险分层与处理策略
 
-### 5.1 已明确不再作为重点的方向
+### 5.1 低风险：持续推进
 
-这些栈已经在较新稳定线，当前重点应是稳定化和使用面收口，而不是继续追版本号：
-
-- Spring Boot 3.5.x
-- Spring Cloud 2025.0.x
-- React 18
-- React Router 6
-- Ant Design 5
-- Redux Toolkit 2
-- React Redux 9
-- TypeScript 5.9
-- Vite 6
-- Vitest 4
-- styled-components 6
-
-### 5.2 当前仍需关注的遗留点
-
-#### 低风险，可持续分批推进
-
-| 项目 | 当前判断 | 处理策略 |
+| 专题 | 当前判断 | 策略 |
 | --- | --- | --- |
-| 时间值标准化 | 已建立统一工具入口，但仍有零散调用点 | 继续小批量收口 |
-| 前端安装健康度 | `bootstrap` 已去掉 `legacy-peer-deps`，但安装生态还需观察 | 继续审计 peer 兼容与历史残留 |
-| 前端直接依赖收口 | 已清掉部分未使用依赖 | 按证据继续删减 |
-| Ant Design 历史深路径 | 前端源码仅剩 `SliderFilter.tsx` 一处 `antd/es/slider` | 先保留，避免类型退化 |
+| 时间值标准化 | 已有统一工具入口，仍有零散调用点 | 继续小批量收口 |
+| 前端安装健康度 | 历史残留问题已识别，生态还需观察 | 继续审计 peer 与锁文件健康度 |
+| 前端依赖收口 | 已清掉部分未使用依赖 | 按证据继续删减 |
+| Ant Design 历史入口 | 仅剩少量深路径或历史类型入口 | 不追求一次性清空，逐点收口 |
 
-#### 中风险，需要专项验证
+### 5.2 中风险：做专项稳定化，不做重写
 
-| 项目 | 当前判断 | 主要风险 |
+| 专题 | 当前判断 | 主要风险 |
 | --- | --- | --- |
 | 时间体系最终收口 | 主链已切到 `dayjs` | 日期控件、格式化、时区回归 |
-| 富文本专题 | `react-quill 2.0.0` 已在用，但兼容层仍重 | 编辑态、只读态、分享态回归 |
+| 富文本兼容层 | `react-quill 2.0.0` 已在用，但兼容层仍偏重 | 编辑态、只读态、分享态回归 |
 | Node 24 / 26 双线稳定性 | CI 已覆盖 | 本地安装、hooks、构建脚本差异 |
 | Docker / 安装包闭环 | 版本基线已收口 | 安装包结构、静态资源、启动链验证 |
-| Ant Design 5 稳定化 | 主升级已完成 | 表单、弹层、菜单、主题边角回归 |
+| Ant Design 5 稳定化 | 主升级已完成 | 表单、弹层、菜单、主题回归 |
 
-#### 高风险，暂不直接动
+### 5.3 高风险：暂不直接动
 
-| 项目 | 当前判断 | 原因 |
+| 专题 | 当前判断 | 原因 |
 | --- | --- | --- |
 | Shiro 2 -> Spring Security | 暂不进入实质迁移 | 登录、权限、分享、remember-me、OAuth2 影响面大 |
 | Calcite 升级或替换 | 暂不进入实质替换 | SQL 解析与 provider 体系深耦合 |
-| 数据源 / 脚本深层架构收口 | 暂不直接动 | 方言、脚本、解析链牵一发动全身 |
+| 数据源 / 脚本深层架构收口 | 暂不直接动 | 方言、脚本、解析链耦合深 |
 | 内部命名与稳定标识重构 | 明确禁止 | 影响面不可控 |
 
-## 6. 当前执行面
+## 6. 当前有效结论
 
-### 6.1 当前工作区状态
+### 6.1 前端安装健康度
 
-截至本次整理：
+已确认：
 
-- 当前分支：`codex/modernization-vite-vitest`
-- 工作区干净
-- 仅保留未跟踪目录 `.tmp/`、`logs/`
+- `npm prune` 可以清掉 `frontend/node_modules` 中的历史残留包
+- 大批 `extraneous` 主要来自历史安装目录残留，不是 `package.json` 失真
+- 当前主要关注点已回落为少量“源码仍在使用，但 peer 声明偏旧”的依赖
 
-### 6.2 当前批次已完成
+当前依赖判断：
 
-当前批次已完成并提交：
-
-- 时间值标准化入口第一轮收口
-- 新增统一日期格式化入口 `formatDatartDate`
-- 几处分散的 `datartDayjs(... as any)`、`toDate()`、旧式格式化调用已回收到工具层
-
-### 6.3 下一批优先顺序
-
-按这个顺序继续，避免主题扩散：
-
-1. 时间体系剩余调用点继续收口
-2. 富文本兼容层稳定化审计
-3. `react-window` / `react-dev-inspector` 后续处置评估
-
-## 7. Wave A 审计结论
-
-### 7.1 安装健康度结论
-
-本轮已确认：
-
-- `npm prune` 可以清掉当前 `frontend/node_modules` 中的历史残留包
-- 清理后，`npm ls --all --omit=optional` 不再出现大批 `extraneous`
-- 当前安装树的主要关注点，已回落为少量“源码仍在使用，但 peer 声明偏旧”的依赖
-
-结论：
-
-- 现阶段前端安装健康度的主要问题，不是 `package.json` 失真
-- 主要是历史安装目录残留，以及少数旧包对 React 18 的 peer 声明滞后
-
-### 7.2 候选依赖处置策略
-
-| 依赖 | 当前判断 | 处置策略 |
+| 依赖 | 判断 | 策略 |
 | --- | --- | --- |
-| `flexlayout-react` | 源码仍直接使用；锁文件当前解析到 `0.5.21`；仍属旧代布局库 | 先保留，后续做兼容与替代预研，不在本轮贸然更换 |
-| `react-resizable` | 当前源码用法与 `3.0.4` 兼容，现有前端门禁已验证通过 | 已完成从 `1.11.1` 到 `3.0.4` 的依赖收口 |
-| `react-window` | 仅在虚拟表格运行时使用，接入面较窄，但 React peer 声明老旧 | 先保留，后续单独评估升级或替代，不与当前批次混做 |
-| `react-dev-inspector` | 仅开发态按需加载；当前库自身仍带明显 webpack / umi 历史包袱 | 倾向后续替换或移除，不作为生产运行时问题处理 |
+| `flexlayout-react` | 源码仍直接使用，锁文件解析较旧 | 先保留，后续做替代预研 |
+| `react-resizable` | 已验证与当前源码兼容 | 已完成收口到 `3.0.4` |
+| `react-window` | 接入面较窄，但 peer 声明老旧 | 后续单独评估升级或替代 |
+| `react-dev-inspector` | 仅开发态使用，历史包袱重 | 倾向后续替换或移除 |
 
-## 8. 下一批执行清单
+### 6.2 时间体系收口
 
-### Wave A：前端安装健康度
+已完成三批收口，方向明确：
 
-目标：
-
-- 识别当前 `node_modules` 健康问题的主要来源
-- 判断哪些是历史残留，哪些是仍需保留但版本偏旧的依赖
-
-优先核查：
-
-- `flexlayout-react`
-- `react-resizable`
-- `react-window`
-- `react-dev-inspector`
-
-完成标准：
-
-- 给出每个包的现状判断：保留、升级、替换、暂缓
-- 不做无证据的大改
+- 减少 `datartDayjs(...).format(...)` 的分散调用
+- 减少 `formatTime(datartDayjs(...), ...)` 的重复链路
+- 减少“先格式化字符串再回转 dayjs”的路径
+- 优先收口到 `formatDatartDate(...)` 与 `toDatartDayjs(...)`
 
 当前状态：
 
-- `react-resizable` 已完成从 `1.11.1` 到 `3.0.4` 的依赖收口
-- 运行证据：
-  - `npm run checkTs`
-  - `npm run build:all`
-  - `npm run test:ci -- --silent`
-  均已通过
+- 时间选择器、变量页、控制器相关链路已完成一批收口
+- 每批均已通过前端门禁
 
-### Wave B：时间体系继续收口
+### 6.3 富文本专题
 
-目标：
+当前判断：
 
-- 继续清理零散的日期值转换和格式化入口
-- 不改业务语义，只收口调用方式
+- `react-quill 2.0.0` 版本本身先不动
+- 下一步不是重写富文本，而是做兼容层稳定化小修
+- 优先减少显式 `any`、非空断言和过重的历史兼容写法
+- 不改 Quill blot / calcfield 业务逻辑
 
-重点检索：
+重点文件：
 
-- `datartDayjs(... as any)`
-- `toDate()`
-- 分散的日期字符串回转
+- `frontend/src/app/components/ChartGraph/BasicRichText/quillCompat.ts`
+- `frontend/src/app/components/ChartGraph/BasicRichText/RichTextEditor.tsx`
+- `frontend/src/app/components/ChartGraph/BasicRichText/RichTextEditorRuntime.tsx`
+- `frontend/src/app/components/ChartGraph/BasicRichText/RichTextPluginLoader/index.ts`
+- `frontend/src/app/components/ChartGraph/BasicRichText/runtime.ts`
+- `frontend/src/app/components/ChartGraph/BasicRichText/ChartRichTextAdapter.tsx`
+- `frontend/src/app/pages/DashBoardPage/components/Widgets/RichTextWidget/RichTextWidgetCore.tsx`
 
-完成标准：
+## 7. 当前执行顺序
 
-- 每批改动都能独立通过前端门禁
+按这个顺序推进，避免专题扩散：
 
-当前状态：
+1. 富文本兼容层稳定化审计与小修
+2. 时间体系剩余调用点继续收口
+3. `react-window` / `react-dev-inspector` 处置评估
 
-- 已收口一批时间选择器与控制器中的重复转换链路
-- 重点去掉了“先格式化字符串再回转 dayjs”的重复路径
-
-### Wave C：富文本专题稳定化
-
-目标：
-
-- 审计 `react-quill 2.0.0` 当前兼容层是否还有明显历史负担
-- 优先做证据充分的小修，不做重写
-
-重点关注：
-
-- `quillCompat.ts`
-- 编辑态 / 只读态 / 分享态是否仍有分叉兼容逻辑
-
-## 9. 每轮固定门禁
+## 8. 每轮固定门禁
 
 ### 8.1 范围规则
 
@@ -315,13 +248,13 @@
 - 到达里程碑再 push
 - commit message 使用中文
 
-## 10. 文档维护规则
+## 9. 文档维护规则
 
-后续只在四种情况下更新本文档：
+后续只在以下情况更新本文档：
 
 - 技术栈基线变化
 - 某个专题完成
-- 当前批次切换
+- 当前执行顺序变化
 - 风险判断发生变化
 
 除此之外，不记录过程流水账。
