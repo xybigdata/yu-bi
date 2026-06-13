@@ -113,6 +113,7 @@
 - 前端安装健康度审计与锁文件收口
 - 未使用前端依赖清理：`@antv/g2`、`html2canvas`
 - `react-resizable` 收口到 `3.0.4`
+- `react-window` 运行时包装第一批稳定化小修
 - 一批 Ant Design 深路径导入与历史类型入口收口
 - 富文本兼容层第一批稳定化小修
 - 时间体系多批次收口：
@@ -163,6 +164,7 @@
 
 - `react-dev-inspector` 已完成移除，不再作为后续事项
 - `react-window` 仍是运行时依赖，但使用面较窄，适合作为后续单独审计专题
+- `react-window` 当前已开始做运行时包装与类型边界稳定化，小修优先于替代
 - `flexlayout-react`、`react-grid-layout` 版本偏旧，但仍在关键交互主链，不适合无证据替换
 - `react-quill 2` 当前先以稳定化小修为主，不进入重写或替代
 

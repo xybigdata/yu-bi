@@ -1,10 +1,10 @@
 import type { VariableSizeGrid } from 'react-window';
 
-type GridModule = {
+export type VirtualTableGridModule = {
   VariableSizeGrid: typeof VariableSizeGrid;
 };
 
-let reactWindowPromise: Promise<GridModule> | null = null;
+let reactWindowPromise: Promise<VirtualTableGridModule> | null = null;
 
 export function loadVirtualTableRuntime() {
   if (!reactWindowPromise) {
