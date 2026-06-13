@@ -18,7 +18,7 @@
 
 import { DataViewFieldType } from 'app/constants';
 import { ChartDataRequestFilter } from 'app/types/ChartDataRequest';
-import { datartDayjs, DatartDayjs, formatDatartDate } from 'app/utils/date';
+import { datartDayjs, DatartDayjs } from 'app/utils/date';
 import {
   FilterSqlOperator,
   RECOMMEND_TIME,
@@ -149,10 +149,6 @@ export function getTime(
       normalizedTimeUnit,
     );
   };
-}
-
-export function formatTime(time: string | DatartDayjs, format?): string {
-  return formatDatartDate(time, format || TIME_FORMATTER);
 }
 
 export function recommendTimeRangeConverter(relativeTimeRange, dateFormat?) {
