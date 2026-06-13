@@ -46,7 +46,11 @@ const ChartRichTextAdapter: FC<{
   initContent: string | undefined;
   onChange: (delta: string | undefined) => void;
   openQuillMarkdown?: boolean;
-  t?: (key: string, disablePrefix?: boolean, options?: any) => any;
+  t?: (
+    key: string,
+    disablePrefix?: boolean,
+    options?: Record<string, unknown>,
+  ) => string | undefined;
 }> = memo(
   ({
     dataList,
@@ -90,19 +94,19 @@ const ChartRichTextAdapter: FC<{
           toolbar: {
             container: isEditing ? `#${newId}` : null,
             handlers: {
-              color: function (value) {
+              color: function (value: string) {
                 if (value === QuillPalette.RICH_TEXT_CUSTOM_COLOR) {
                   setCustomColorType('color');
                   setCustomColorVisible(true);
                 }
-                quillEditRef.current!.format('color', value);
+                quillEditRef.current?.format('color', value);
               },
-              background: function (value) {
+              background: function (value: string) {
                 if (value === QuillPalette.RICH_TEXT_CUSTOM_COLOR) {
                   setCustomColorType('background');
                   setCustomColorVisible(true);
                 }
-                quillEditRef.current!.format('background', value);
+                quillEditRef.current?.format('background', value);
               },
             },
           },
@@ -184,9 +188,9 @@ const ChartRichTextAdapter: FC<{
       };
     }, [openQuillMarkdown, quillModules]);
 
-    const customColorChange = color => {
-      if (color) {
-        quillEditRef.current!.format(customColorType, color);
+    const customColorChange = (color: string | boolean) => {
+      if (typeof color === 'string') {
+        quillEditRef.current?.format(customColorType, color);
       }
       setCustomColorVisible(false);
     };
@@ -208,7 +212,7 @@ const ChartRichTextAdapter: FC<{
     );
 
     const selectField = useCallback(
-      (field: any) => () => {
+      (field: { id?: string; name: string; value: string } | undefined) => () => {
         if (quillEditRef.current) {
           if (field) {
             const text = `[${field.name}]`;
@@ -315,7 +319,7 @@ const ChartRichTextAdapter: FC<{
       [quillModules, quillValue, isEditing, toolbar, quillChange, id, t],
     );
 
-    const ssp = e => {
+    const ssp = (e: React.MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
     };
 

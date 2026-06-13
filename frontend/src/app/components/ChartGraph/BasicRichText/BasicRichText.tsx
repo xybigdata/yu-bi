@@ -30,6 +30,13 @@ import {
 import ChartRichTextAdapter from './ChartRichTextAdapter';
 import Config from './config';
 
+type RichTextChangeContext = {
+  type: 'change';
+  chartType: 'rich-text';
+  interactionType: ChartInteractionEvent.ChangeContext;
+  value: string | undefined;
+};
+
 class BasicRichText extends ReactChart {
   useIFrame = false;
   isISOContainer = 'react-rich-text';
@@ -141,7 +148,9 @@ class BasicRichText extends ReactChart {
     return '';
   }
 
-  getOnChange(): { [key: string]: any } | undefined {
+  getOnChange():
+    | { onChange?: (delta: string | undefined) => void }
+    | undefined {
     return this.mouseEvents?.reduce((acc, cur) => {
       if (cur.name === 'click') {
         Object.assign(acc, {
@@ -151,11 +160,11 @@ class BasicRichText extends ReactChart {
               chartType: 'rich-text',
               interactionType: ChartInteractionEvent.ChangeContext,
               value: delta,
-            }),
+            } as RichTextChangeContext),
         });
       }
       return acc;
-    }, {});
+    }, {} as { onChange?: (delta: string | undefined) => void });
   }
 }
 

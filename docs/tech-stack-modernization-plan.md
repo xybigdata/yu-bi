@@ -115,6 +115,10 @@
 - `react-resizable` 收口到 `3.0.4`
 - Ant Design 深路径导入与历史类型入口收口
 - 富文本兼容层第一批稳定化小修
+- 富文本兼容层第二批稳定化小修：
+  - `RichTextEditor` 的 `onChange` 类型边界收紧
+  - `ChartRichTextAdapter` 的弱类型参数与运行时保护收口
+  - `BasicRichText` 的 `getOnChange()` 返回类型收口
 - 时间体系多批次收口：
   - 时间选择器回填链路
   - 展示与表单日期回填链路
@@ -169,29 +173,24 @@
 
 ## 6. 当前进行中专题
 
-当前工作区除 `.tmp/`、`logs/` 外，还有一组未提交改动，属于正在进行的“富文本兼容层第二批稳定化小修”：
+当前工作区正在推进的下一批仍是低到中风险交界处的小范围稳定化，不进入结构性替换。
 
-- `frontend/src/app/components/ChartGraph/BasicRichText/BasicRichText.tsx`
-- `frontend/src/app/components/ChartGraph/BasicRichText/ChartRichTextAdapter.tsx`
-- `frontend/src/app/components/ChartGraph/BasicRichText/RichTextEditor.tsx`
+当前最近完成的是“富文本兼容层第二批稳定化小修”，已通过：
 
-这批改动的目标是：
+- `npm run checkTs`
+- `npm run build:all`
+- `npm run test:ci -- --silent`
 
-- 收紧 `RichTextEditor` 的 `onChange` 类型边界
-- 收口 `ChartRichTextAdapter` 的弱类型参数和运行时保护
-- 放宽 `BasicRichText` 中 `getOnChange()` 的返回类型声明
-
-这批改动完成后，应先执行完整前端门禁，再提交为单独里程碑。
+因此当前进行中专题应顺延到下一批，而不是继续停留在富文本第二批。
 
 ## 7. 下一阶段执行顺序
 
 按这个顺序推进，避免专题扩散：
 
-1. 完成富文本兼容层第二批稳定化小修并提交
-2. 时间体系剩余调用点继续收口
-3. `react-window` 专项审计，确认是继续小修还是进入替代预研
-4. `flexlayout-react` / `react-grid-layout` 使用面盘点与风险评估
-5. Docker / 安装包闭环验证
+1. 时间体系剩余调用点继续收口
+2. `react-window` 专项审计，确认是继续小修还是进入替代预研
+3. `flexlayout-react` / `react-grid-layout` 使用面盘点与风险评估
+4. Docker / 安装包闭环验证
 
 ## 8. 每轮固定门禁
 

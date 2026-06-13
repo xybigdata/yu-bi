@@ -11,13 +11,38 @@ import styled from 'styled-components';
 import type MarkdownModule from './modules/MarkdownModule';
 import type {
   DeltaStatic,
+  EditorChangeHandler,
   RichTextEditorEventName,
   SelectionChangeHandler,
   Sources,
   TextChangeHandler,
-  EditorChangeHandler,
 } from './quillCompat';
 import { loadRichTextEditorRuntime } from './runtime';
+
+type RichTextModuleConfig = Record<string, unknown>;
+type RichTextChangeHandler = (
+  content: string,
+  delta: DeltaStatic,
+  source: Sources,
+  editor: {
+    getHTML: () => string;
+    getText: () => string;
+    getLength: () => number;
+    getContents: (index?: number, length?: number) => DeltaStatic;
+    getSelection: () => { index: number; length: number } | null;
+    getBounds: (
+      index: number,
+      length?: number,
+    ) => {
+      bottom: number;
+      height: number;
+      left: number;
+      right: number;
+      top: number;
+      width: number;
+    };
+  },
+) => void;
 
 export interface RichTextEditorHandle {
   blur: () => void;
@@ -46,8 +71,8 @@ export interface RichTextEditorProps {
   className?: string;
   defaultValue?: string | DeltaStatic;
   formats?: string[];
-  modules?: Record<string, any>;
-  onChange?: (...args: any[]) => void;
+  modules?: RichTextModuleConfig;
+  onChange?: RichTextChangeHandler;
   placeholder?: string;
   readOnly?: boolean;
   theme?: string;
