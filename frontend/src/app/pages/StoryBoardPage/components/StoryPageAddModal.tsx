@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { Modal, Table } from 'antd';
-import type { RowSelectionType } from 'antd/es/table/interface';
+import type { TableProps } from 'antd';
 import { Folder } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import i18next from 'i18next';
 import React, { useEffect, useState } from 'react';
@@ -54,8 +54,10 @@ const StoryPageAddModal: React.FC<IProps> = props => {
       render: (text: string) => text,
     },
   ];
+  type StoryRowSelectionType =
+    NonNullable<TableProps<Folder>['rowSelection']>['type'];
   const rowSelection = {
-    type: 'checkbox' as RowSelectionType,
+    type: 'checkbox' as StoryRowSelectionType,
     selectedRowKeys: selectedDataChartIds,
     onChange: (keys: React.Key[]) => {
       setSelectedDataChartIds(keys as string[]);
