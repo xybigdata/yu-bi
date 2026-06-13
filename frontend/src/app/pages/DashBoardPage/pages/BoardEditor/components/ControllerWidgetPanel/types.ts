@@ -1,4 +1,4 @@
-import type { RadioGroupOptionType } from 'antd/es/radio';
+import type { RadioGroupProps } from 'antd';
 import { DataViewFieldType, TimeFilterValueCategory } from 'app/constants';
 import {
   ControllerVisibleType,
@@ -47,7 +47,7 @@ export interface ControllerConfig {
   minValue?: number; // slider min
   maxValue?: number; // slider max
 
-  radioButtonType?: RadioGroupOptionType; //按钮样式
+  radioButtonType?: RadioGroupProps['optionType']; //按钮样式
 
   sliderConfig?: SliderConfig;
 }

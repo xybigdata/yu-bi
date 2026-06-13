@@ -1,5 +1,5 @@
 import { List } from 'antd';
-import type { ListItemProps } from 'antd/es/list';
+import type { GetProps } from 'antd';
 import classnames from 'classnames';
 import { memo, ReactNode } from 'react';
 import styled from 'styled-components';
@@ -11,6 +11,8 @@ import {
   SPACE_XS,
 } from 'styles/StyleConstants';
 const { Item } = List;
+
+type ListItemProps = Omit<GetProps<typeof List.Item>, 'ref'>;
 
 interface Props extends ListItemProps {
   selected?: boolean;

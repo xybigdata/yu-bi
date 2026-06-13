@@ -16,11 +16,13 @@
  * limitations under the License.
  */
 import { Form, FormItemProps, InputNumber } from 'antd';
-import type { StatisticProps } from 'antd/es/statistic';
+import type { InputNumberProps } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import React, { memo, useEffect, useState } from 'react';
 import { ControllerValuesName } from '../..';
 import { rangeNumberValidator } from '../../../utils';
+
+type NumberValue = InputNumberProps['value'];
 
 export const RangeNumberSetter: React.FC<{}> = memo(() => {
   const tc = useI18NPrefix(`viz.control`);
@@ -54,8 +56,8 @@ export interface RangeNumberSetProps {
 }
 export const RangeNumberSet: React.FC<RangeNumberSetProps> = memo(
   ({ onChange, value }) => {
-    const [startVal, setStartVal] = useState<StatisticProps['value']>();
-    const [endVal, setEndVal] = useState<StatisticProps['value']>();
+    const [startVal, setStartVal] = useState<NumberValue>();
+    const [endVal, setEndVal] = useState<NumberValue>();
     const onStartChange = start => {
       onChange?.([start, endVal]);
     };
