@@ -27,7 +27,7 @@
 
 - JDK 21 兼容
 - Spring Boot 3 / Spring Cloud 新基线
-- Node 26 本地开发兼容
+- Node 24 本地开发兼容
 - 基于 Vite 的前端构建链
 - 在尽量不破坏既有功能的前提下推进依赖升级
 - 逐步降低测试链、Shiro、安全体系、富文本和旧运行时集成等历史技术包袱
@@ -37,7 +37,7 @@
 - Java：`21`
 - Spring Boot：`3.5.12`
 - Spring Cloud：`2025.0.1`
-- Node.js：`26.x`
+- Node.js：`24.x`
 - 前端构建：`Vite 5`
 - React：`18.3.x`
 

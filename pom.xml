@@ -25,8 +25,8 @@
         <selenium.version>4.31.0</selenium.version>
     </properties>
 
-    <groupId>datart</groupId>
-    <artifactId>datart-parent</artifactId>
+    <groupId>yubi</groupId>
+    <artifactId>yu-bi-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0-rc.3</version>
 
@@ -161,7 +161,7 @@
                             <fileset>
                                 <directory>${project.basedir}</directory>
                                 <includes>
-                                    <include>datart-server-*-install.zip</include>
+                                    <include>yu-bi-server-*-install.zip</include>
                                 </includes>
                             </fileset>
                         </filesets>

@@ -56,7 +56,7 @@ datart.webdriver-path=http://127.0.0.1:4444/wd/hub
 
 - JDK 21+
 - MySql5.7+
-- datart安装包（datart-server-1.0.0-beta.x-install.zip)
+- yu-bi 安装包（yu-bi-server-1.0.0-beta.x-install.zip)
 - Mail Server （可选）
 - [ChromeWebDriver](https://chromedriver.chromium.org/) （可选）
 - Redis （可选）
@@ -64,29 +64,29 @@ datart.webdriver-path=http://127.0.0.1:4444/wd/hub
 方式1 :解压安装包 (官方提供的包)
 
 ```bash
-unzip datart-server-1.0.0-beta.x-install.zip
+unzip yu-bi-server-1.0.0-beta.x-install.zip
 ```
 
 方式2 :自行编译
 
 ```bash
-git clone https://github.com/running-elephant/datart.git
+git clone https://github.com/xybigdata/yu-bi.git
 
-cd datart
+cd yu-bi
 
 mvn clean package -Dmaven.test.skip=true
 
-cp ./datart-server-1.0.0-beta.x-install.zip  ${deployment_basedir}
+cp ./yu-bi-server-1.0.0-beta.x-install.zip  ${deployment_basedir}
 
 cd ${deployment_basedir}
 
-unzip datart-server-1.0.0-beta.x-install.zip 
+unzip yu-bi-server-1.0.0-beta.x-install.zip 
 
 ```
 
 ## 2.2. 以独立模式运行
 
-安装包解压后，即可运行 ./bin/datart-server.sh start 来启动datart,启动后默认访问地址是: <http://127.0.0.1:8080>,默认用户`demo/123456`
+安装包解压后，即可运行 `./bin/yu-bi-server.sh start` 启动 yu-bi，启动后默认访问地址是 <http://127.0.0.1:8080>，默认用户 `demo/123456`
 
 ***独立模式使用内置数据库作为应用数据库，数据的安全性和数据迁移无法保证，建议配置外部数据库作为应用数据库***
 
@@ -216,7 +216,7 @@ docker run -p 4444:4444 -d --name selenium-chrome --shm-size="2g" selenium/stand
 *注意：启动脚本 已更新了 start|stop|status|restart*
 
 ```base
-${DATART_HOME}/bin/datart-server.sh (start|stop|status|restart)
+${DATART_HOME}/bin/yu-bi-server.sh (start|stop|status|restart)
 ```
 
 ### 2.5 访问服务

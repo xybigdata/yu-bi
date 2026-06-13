@@ -4,12 +4,12 @@ LABEL "author"="tl"
 
 WORKDIR /datart
 
-COPY datart-server-*-install.zip /tmp/datart-install.zip
+COPY yu-bi-server-*-install.zip /tmp/yu-bi-install.zip
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends unzip \
-    && unzip -q /tmp/datart-install.zip -d /datart \
-    && rm -f /tmp/datart-install.zip \
+    && unzip -q /tmp/yu-bi-install.zip -d /datart \
+    && rm -f /tmp/yu-bi-install.zip \
     && apt-get purge -y --auto-remove unzip \
     && rm -rf /var/lib/apt/lists/*
 

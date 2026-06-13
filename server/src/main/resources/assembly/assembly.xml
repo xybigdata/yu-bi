@@ -11,7 +11,7 @@
             <outputDirectory>bin</outputDirectory>
             <lineEnding>unix</lineEnding>
             <includes>
-                <include>datart-server.sh</include>
+                <include>yu-bi-server.sh</include>
             </includes>
         </fileSet>
         <fileSet>
@@ -19,7 +19,7 @@
             <outputDirectory>bin</outputDirectory>
             <lineEnding>dos</lineEnding>
             <includes>
-                <include>datart-server.cmd</include>
+                <include>yu-bi-server.cmd</include>
             </includes>
         </fileSet>
         <fileSet>

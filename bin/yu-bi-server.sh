@@ -111,6 +111,6 @@ case $1 in
      ;;
 
     * )
-        echo "Usage: datart-server.sh (start|stop|status|restart)"
+        echo "Usage: yu-bi-server.sh (start|stop|status|restart)"
 
 esac

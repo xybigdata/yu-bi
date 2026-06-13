@@ -2,7 +2,7 @@
 
 ## Near Term
 
-- keep `JDK 21 + Spring Boot 3 + Node 26 + Vite 5` baseline stable
+- keep `JDK 21 + Spring Boot 3 + Node 24 + Vite 5` baseline stable
 - continue reducing legacy Jest compatibility surfaces
 - continue staged migration from Shiro runtime entrypoints toward Spring Security
 - finalize rich text modernization path
