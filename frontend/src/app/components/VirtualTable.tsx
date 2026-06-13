@@ -71,6 +71,13 @@ interface VirtualTableProps extends TableProps<VirtualTableRecord> {
   columns: NonNullable<TableProps<VirtualTableRecord>['columns']>;
 }
 
+const getWidthColumnCount = (widthColumns: WidthColumn[]) => {
+  const count = widthColumns.filter(
+    ({ width, dataIndex }) => !width || dataIndex !== TABLE_DATA_INDEX,
+  ).length;
+  return count > 0 ? count : 1;
+};
+
 /**
  * Table组件中使用了虚拟滚动条 渲染的速度变快 基于（react-windows）
  * 使用方法：import { VirtualTable } from 'app/components/VirtualTable';
@@ -89,9 +96,7 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
   });
   const gridRef = useRef<VirtualGridInstance | null>(null);
   const isFull = useRef<boolean>(false);
-  const widthColumnCount = widthColumns.filter(
-    ({ width, dataIndex }) => !width || dataIndex !== TABLE_DATA_INDEX,
-  ).length;
+  const widthColumnCount = getWidthColumnCount(widthColumns);
   const [connectObject] = useState(() => {
     const obj: VirtualScrollBodyRef = {
       scrollLeft: 0,
@@ -157,7 +162,9 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
     });
   }, [gridRef]);
 
-  useEffect(() => resetVirtualGrid, [boxWidth, dataSource, resetVirtualGrid]);
+  useEffect(() => {
+    resetVirtualGrid();
+  }, [boxWidth, dataSource, resetVirtualGrid]);
 
   const renderVirtualList = useCallback<CustomizeScrollBody<VirtualTableRecord>>(
     (rawData, { scrollbarSize, ref, onScroll }) => {
@@ -248,3 +255,5 @@ const TableCell = styled.div`
 const VirtualTablePlaceholder = styled.div`
   width: 100%;
 `;
+
+export { getWidthColumnCount };
