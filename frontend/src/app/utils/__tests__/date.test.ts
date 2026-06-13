@@ -16,7 +16,11 @@
  * limitations under the License.
  */
 
-import { toDatartDayjsList, toDatartDayjsRange } from '../date';
+import {
+  formatDatartDateIfValid,
+  toDatartDayjsList,
+  toDatartDayjsRange,
+} from '../date';
 
 describe('toDatartDayjsRange', () => {
   test('should convert range values to dayjs tuple', () => {
@@ -65,5 +69,20 @@ describe('toDatartDayjsList', () => {
   test('should return empty list for empty input', () => {
     expect(toDatartDayjsList()).toEqual([]);
     expect(toDatartDayjsList(null)).toEqual([]);
+  });
+});
+
+describe('formatDatartDateIfValid', () => {
+  test('should format valid values', () => {
+    expect(
+      formatDatartDateIfValid('2024-01-01 00:00:00', 'YYYY-MM-DD HH:mm:ss'),
+    ).toEqual('2024-01-01 00:00:00');
+  });
+
+  test('should return undefined for invalid values', () => {
+    expect(
+      formatDatartDateIfValid('invalid-date', 'YYYY-MM-DD HH:mm:ss'),
+    ).toBeUndefined();
+    expect(formatDatartDateIfValid()).toBeUndefined();
   });
 });

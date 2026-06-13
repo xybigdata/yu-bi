@@ -72,3 +72,11 @@ export function formatDatartDate(
   const dayValue = toDatartDayjs(value);
   return dayValue ? dayValue.format(template) : 'Invalid date';
 }
+
+export function formatDatartDateIfValid(
+  value?: DatartDateLike | null,
+  template?: string,
+) {
+  const dayValue = toDatartDayjs(value);
+  return dayValue ? dayValue.format(template) : undefined;
+}

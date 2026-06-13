@@ -20,7 +20,7 @@ import { DatePicker } from 'antd';
 import { updateBy } from 'app/utils/mutation';
 import {
   DatartDateLike,
-  formatDatartDate,
+  formatDatartDateIfValid,
   toDatartDayjs,
 } from 'app/utils/date';
 import { TIME_FORMATTER } from 'globalConstants';
@@ -31,10 +31,7 @@ const serializeTimeValue = (time: DatartDateLike | null) => {
   if (!time) {
     return '';
   }
-  if (typeof time === 'object' && 'format' in time) {
-    return time.format(TIME_FORMATTER);
-  }
-  return formatDatartDate(time, TIME_FORMATTER);
+  return formatDatartDateIfValid(time, TIME_FORMATTER) || '';
 };
 
 const TimeFilter: FC<PresentControllerFilterProps> = memo(
