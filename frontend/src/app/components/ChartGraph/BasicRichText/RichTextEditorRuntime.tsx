@@ -5,7 +5,12 @@ import type {
   RichTextEditorProps,
 } from './RichTextEditor';
 import MarkdownModule from './modules/MarkdownModule';
-import ReactQuill from './quillCompat';
+import ReactQuill, {
+  QuillWithCalcFieldModule,
+  SelectionChangeHandler,
+  TextChangeHandler,
+  EditorChangeHandler,
+} from './quillCompat';
 
 function RichTextEditorRuntimeImpl(
   props: RichTextEditorProps,
@@ -13,7 +18,13 @@ function RichTextEditorRuntimeImpl(
 ) {
   const editorRef = useRef<ReactQuill>(null);
 
-  const getEditorInstance = () => editorRef.current!.getEditor();
+  const getEditorInstance = (): QuillWithCalcFieldModule => {
+    if (!editorRef.current) {
+      throw new Error('富文本编辑器尚未挂载');
+    }
+
+    return editorRef.current.getEditor() as QuillWithCalcFieldModule;
+  };
 
   useImperativeHandle(
     ref,
@@ -32,10 +43,31 @@ function RichTextEditorRuntimeImpl(
         getEditorInstance()
           .getModule('calcfield')
           .insertItem(item, programmaticInsert),
-      off: (eventName, handler) =>
-        (getEditorInstance() as any).off(eventName, handler),
-      on: (eventName, handler) =>
-        (getEditorInstance() as any).on(eventName, handler),
+      off: ((eventName, handler) => {
+        if (eventName === 'text-change') {
+          getEditorInstance().off(eventName, handler as TextChangeHandler);
+          return;
+        }
+        if (eventName === 'selection-change') {
+          getEditorInstance().off(
+            eventName,
+            handler as SelectionChangeHandler,
+          );
+          return;
+        }
+        getEditorInstance().off(eventName, handler as EditorChangeHandler);
+      }) as RichTextEditorHandle['off'],
+      on: ((eventName, handler) => {
+        if (eventName === 'text-change') {
+          getEditorInstance().on(eventName, handler as TextChangeHandler);
+          return;
+        }
+        if (eventName === 'selection-change') {
+          getEditorInstance().on(eventName, handler as SelectionChangeHandler);
+          return;
+        }
+        getEditorInstance().on(eventName, handler as EditorChangeHandler);
+      }) as RichTextEditorHandle['on'],
     }),
     [],
   );

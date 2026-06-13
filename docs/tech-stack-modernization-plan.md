@@ -196,6 +196,14 @@
 - 优先减少显式 `any`、非空断言和过重的历史兼容写法
 - 不改 Quill blot / calcfield 业务逻辑
 
+当前状态：
+
+- 已完成第一步兼容层稳定化小修
+- `RichTextEditor` / `RichTextEditorRuntime` 已补齐运行时未就绪保护
+- `quillCompat.ts` 已集中承接富文本事件、`calcfield` 模块与键盘扩展类型
+- `RichTextPluginLoader` 已把 `container` / `keyboard` 相关 `any` 收口到局部扩展类型
+- 当前改动已通过 `npm run checkTs`、`npm run build:all`、`npm run test:ci -- --silent`
+
 重点文件：
 
 - `frontend/src/app/components/ChartGraph/BasicRichText/quillCompat.ts`

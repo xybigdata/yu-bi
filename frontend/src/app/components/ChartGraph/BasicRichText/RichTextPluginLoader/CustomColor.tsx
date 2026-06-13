@@ -5,6 +5,7 @@ import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
 import { ReactNode } from 'react';
 import styled from 'styled-components';
 import type { RichTextEditorHandle } from '../RichTextEditor';
+import type { RangeStatic, Sources } from '../quillCompat';
 
 export interface RichTextCustomColorType {
   background: string;
@@ -64,7 +65,11 @@ export class QuillPalette {
    * @param range
    * @returns
    */
-  private selectionChange = (range: { index: number; length: number }) => {
+  private selectionChange = (
+    range: RangeStatic | null,
+    _oldRange?: RangeStatic | null,
+    _source?: Sources,
+  ) => {
     const { toolbarId, onChange } = this.options;
     if (!range || range.index < 0) return;
     if (!toolbarId) return;

@@ -1,6 +1,11 @@
 import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
 import { ImageDropModule } from '../modules/ImageDropModule';
-import { Quill, QuillInstance, RangeStatic } from '../quillCompat';
+import {
+  Quill,
+  QuillInstance,
+  QuillWithContainerAndKeyboard,
+  RangeStatic,
+} from '../quillCompat';
 import CalcFieldBlot from './CalcFieldBlot';
 import TagBlot from './TagBlot';
 
@@ -136,10 +141,10 @@ class CalcField {
   private numberFieldCharPos: number | null = null;
   private cursorPos: number | null = null;
   private readonly options: CalcFieldOptions;
-  private readonly quill: QuillInstance;
+  private readonly quill: QuillWithContainerAndKeyboard;
 
   constructor(quill: QuillInstance, options: Partial<CalcFieldOptions> = {}) {
-    this.quill = quill;
+    this.quill = quill as unknown as QuillWithContainerAndKeyboard;
     const dataAttributes = Array.isArray(options.dataAttributes)
       ? [...defaultDataAttributes, ...options.dataAttributes]
       : defaultDataAttributes;
@@ -170,10 +175,10 @@ class CalcField {
 
     quill.on('text-change', this.onTextChange);
     quill.on('selection-change', this.onSelectionChange);
-    (quill as any).container.addEventListener('paste', this.handlePaste);
+    this.quill.container.addEventListener('paste', this.handlePaste);
 
     this.options.selectKeys.forEach(selectKey => {
-      (quill.keyboard as any).addBinding({
+      this.quill.keyboard.addBinding({
         key: selectKey,
       });
     });
