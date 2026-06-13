@@ -17,7 +17,16 @@
  */
 import { useMemo } from 'react';
 import { Layouts } from 'react-grid-layout';
+import { LAYOUT_COLS_MAP } from '../constants';
+import { RectConfig } from '../pages/Board/slice/types';
 import { Widget } from '../types/widgetTypes';
+
+const getNormalizedRect = (rect?: Partial<RectConfig>) => ({
+  x: rect?.x ?? 0,
+  y: rect?.y ?? 0,
+  width: rect?.width ?? LAYOUT_COLS_MAP.lg / 2,
+  height: rect?.height ?? LAYOUT_COLS_MAP.lg / 2,
+});
 
 export default function useGridLayoutMap(layoutWidgets: Widget[]) {
   const layoutMap = useMemo(() => {
@@ -26,8 +35,8 @@ export default function useGridLayoutMap(layoutWidgets: Widget[]) {
       sm: [],
     };
     layoutWidgets.forEach(widget => {
-      const lg = widget.config.pRect || widget.config.mRect || {};
-      const sm = widget.config.mRect || widget.config.pRect || {};
+      const lg = getNormalizedRect(widget.config.pRect || widget.config.mRect);
+      const sm = getNormalizedRect(widget.config.mRect || widget.config.pRect);
       const lock = widget.config.lock;
       layoutMap.lg.push({
         i: widget.id,
@@ -50,3 +59,5 @@ export default function useGridLayoutMap(layoutWidgets: Widget[]) {
   }, [layoutWidgets]);
   return layoutMap;
 }
+
+export { getNormalizedRect };
