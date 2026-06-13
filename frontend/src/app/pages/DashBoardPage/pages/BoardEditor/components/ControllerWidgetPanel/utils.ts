@@ -28,7 +28,11 @@ import {
 } from 'app/pages/DashBoardPage/constants';
 import { VariableValueTypes } from 'app/pages/MainPage/pages/VariablePage/constants';
 import { RelationFilterValue } from 'app/types/ChartConfig';
-import { datartDayjs, DatartDateLike, toDatartDayjs } from 'app/utils/date';
+import {
+  DatartDateLike,
+  formatDatartDate,
+  toDatartDayjs,
+} from 'app/utils/date';
 import { FilterSqlOperator, TIME_FORMATTER } from 'globalConstants';
 import i18next from 'i18next';
 import {
@@ -136,16 +140,16 @@ export const formatControlDateToDayjs = (config: ControllerConfig) => {
     const filterDate = config.controllerDate;
     if (filterDate.startTime && filterDate.startTime.exactValue) {
       if (typeof filterDate.startTime.exactValue === 'string') {
-        let exactTime = filterDate.startTime.exactValue;
-        let newExactTime = datartDayjs(exactTime, TIME_FORMATTER);
-        config.controllerDate.startTime.exactValue = newExactTime;
+        config.controllerDate.startTime.exactValue = toDatartDayjs(
+          filterDate.startTime.exactValue,
+        );
       }
     }
     if (filterDate.endTime && filterDate.endTime.exactValue) {
       if (typeof filterDate.endTime.exactValue === 'string') {
-        let exactTime = filterDate.endTime.exactValue;
-        let newExactTime = datartDayjs(exactTime, TIME_FORMATTER);
-        config.controllerDate.endTime!.exactValue = newExactTime;
+        config.controllerDate.endTime!.exactValue = toDatartDayjs(
+          filterDate.endTime.exactValue,
+        );
       }
     }
   }
@@ -157,16 +161,18 @@ export const formatControlDateToStr = (config: ControllerConfig) => {
     const filterDate = config.controllerDate;
     if (filterDate.startTime && filterDate.startTime.exactValue) {
       if (isFormattableDateValue(filterDate.startTime.exactValue)) {
-        let exactTime = filterDate.startTime.exactValue;
-        let newExactTime = exactTime.format(TIME_FORMATTER);
-        config.controllerDate.startTime.exactValue = newExactTime;
+        config.controllerDate.startTime.exactValue = formatDatartDate(
+          filterDate.startTime.exactValue,
+          TIME_FORMATTER,
+        );
       }
     }
     if (filterDate.endTime && filterDate.endTime.exactValue) {
       if (isFormattableDateValue(filterDate.endTime.exactValue)) {
-        let exactTime = filterDate.endTime.exactValue;
-        let newExactTime = exactTime.format(TIME_FORMATTER);
-        config.controllerDate.endTime!.exactValue = newExactTime;
+        config.controllerDate.endTime!.exactValue = formatDatartDate(
+          filterDate.endTime.exactValue,
+          TIME_FORMATTER,
+        );
       }
     }
   }
