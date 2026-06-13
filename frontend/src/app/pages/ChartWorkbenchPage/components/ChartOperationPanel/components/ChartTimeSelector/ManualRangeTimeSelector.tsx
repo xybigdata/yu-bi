@@ -23,7 +23,8 @@ import ChartFilterCondition, {
   ConditionBuilder,
 } from 'app/models/ChartFilterCondition';
 import { FilterCondition } from 'app/types/ChartConfig';
-import { formatTime, getTime } from 'app/utils/time';
+import { formatDatartDate } from 'app/utils/date';
+import { getTime } from 'app/utils/time';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo, useState } from 'react';
 import CurrentRangeTime from './CurrentRangeTime';
@@ -62,7 +63,7 @@ const ManualRangeTimeSelector: FC<
           t.unit,
           t.isStart,
         );
-        return formatTime(time, TIME_FORMATTER);
+        return formatDatartDate(time, TIME_FORMATTER);
       }
       return t;
     });

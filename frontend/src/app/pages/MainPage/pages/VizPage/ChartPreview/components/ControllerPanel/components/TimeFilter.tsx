@@ -18,8 +18,11 @@
 
 import { DatePicker } from 'antd';
 import { updateBy } from 'app/utils/mutation';
-import { DatartDateLike, datartDayjs, toDatartDayjs } from 'app/utils/date';
-import { formatTime } from 'app/utils/time';
+import {
+  DatartDateLike,
+  formatDatartDate,
+  toDatartDayjs,
+} from 'app/utils/date';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo, useState } from 'react';
 import { PresentControllerFilterProps } from '.';
@@ -31,7 +34,7 @@ const serializeTimeValue = (time: DatartDateLike | null) => {
   if (typeof time === 'object' && 'format' in time) {
     return time.format(TIME_FORMATTER);
   }
-  return formatTime(datartDayjs(time), TIME_FORMATTER);
+  return formatDatartDate(time, TIME_FORMATTER);
 };
 
 const TimeFilter: FC<PresentControllerFilterProps> = memo(

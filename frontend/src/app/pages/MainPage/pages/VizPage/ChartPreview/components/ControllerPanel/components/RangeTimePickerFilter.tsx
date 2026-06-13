@@ -20,11 +20,7 @@ import { DatePicker } from 'antd';
 import { FilterConditionType } from 'app/constants';
 import { ConditionBuilder } from 'app/models/ChartFilterCondition';
 import { datartDayjs, toDatartDayjs } from 'app/utils/date';
-import {
-  formatTime,
-  getTime,
-  recommendTimeRangeConverter,
-} from 'app/utils/time';
+import { getTime, recommendTimeRangeConverter } from 'app/utils/time';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo, useMemo } from 'react';
 import { PresentControllerFilterProps } from '.';
@@ -35,8 +31,7 @@ const toDayjs = t => {
     return datartDayjs();
   }
   if (Boolean(t) && typeof t === 'object' && 'unit' in t) {
-    const time = getTime(+(t.direction + t.amount), t.unit)(t.unit, t.isStart);
-    return datartDayjs(formatTime(time, TIME_FORMATTER));
+    return getTime(+(t.direction + t.amount), t.unit)(t.unit, t.isStart);
   }
   return datartDayjs(t);
 };
