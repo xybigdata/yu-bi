@@ -3,19 +3,19 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>datart-data-provider</artifactId>
-        <groupId>datart</groupId>
+        <artifactId>yu-bi-data-provider</artifactId>
+        <groupId>yubi</groupId>
         <version>1.0.0-rc.3</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>datart-http-data-provider</artifactId>
+    <artifactId>yu-bi-http-data-provider</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>datart</groupId>
-            <artifactId>datart-data-provider-base</artifactId>
+            <groupId>yubi</groupId>
+            <artifactId>yu-bi-data-provider-base</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>

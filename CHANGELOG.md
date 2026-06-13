@@ -11,7 +11,7 @@
 
 - upgraded backend baseline to JDK 21, Spring Boot 3, and Spring Cloud current compatible lines
 - moved frontend primary build workflow to Vite
-- aligned frontend local development with Node 26
+- aligned frontend local development with Node 24
 
 ### Incremental modernization work
 

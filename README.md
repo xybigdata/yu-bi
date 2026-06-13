@@ -27,7 +27,7 @@ The current maintenance line is focused on:
 
 - JDK 21 compatibility
 - Spring Boot 3 / Spring Cloud modern baseline
-- Node 26 local development compatibility
+- Node 24 local development compatibility
 - Vite-based frontend build pipeline
 - dependency upgrades that do not unnecessarily break existing behavior
 - gradual migration away from aging technical stacks such as legacy test setup, Shiro coupling, and old editor/runtime integrations
@@ -37,7 +37,7 @@ The current maintenance line is focused on:
 - Java: `21`
 - Spring Boot: `3.5.12`
 - Spring Cloud: `2025.0.1`
-- Node.js: `26.x`
+- Node.js: `24.x`
 - Frontend build: `Vite 5`
 - React: `18.3.x`
 

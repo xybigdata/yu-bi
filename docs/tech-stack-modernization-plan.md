@@ -8,7 +8,7 @@
 
 - 后端稳定兼容 `JDK 21`
 - 前端工程链稳定兼容 `Node 24`
-- CI 同时覆盖 `Node 24.x` 与 `Node 26.x`
+- 前端 CI 与本地开发基线统一使用 `Node 24.x`
 - 改造按专题拆分，做到可验证、可回退、可持续推进
 
 ## 2. 固定边界
@@ -17,7 +17,7 @@
 
 - 工作目录：`/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi`
 - `main` 只允许 merge，不直接开发
-- 当前执行分支：`codex/modernization-vite-vitest`
+- 当前执行分支按专题单独创建，不在文档中写死分支名
 - 默认自动 `git add`、`git commit --no-verify`
 
 ### 2.2 不直接触碰的高风险标识
@@ -93,7 +93,7 @@
 | lint-staged | `17.0.7` | 已升级 |
 | commitlint | `21.0.2` | 已升级 |
 | Docker 运行时 | `eclipse-temurin:21-jre` | 与 JDK 21 对齐 |
-| 前端 CI | `Node 24.x` + `26.x` | 已覆盖 |
+| 前端 CI | `Node 24.x` | 与当前基线一致 |
 | Java CI | `JDK 21` | 已覆盖 |
 
 ## 4. 已完成的有效成果
@@ -134,9 +134,14 @@
   - 列宽分摊逻辑补齐除零保护
 - `flexlayout-react` / `react-grid-layout` 使用面盘点与布局映射收口：
   - `flexlayout-react` 实际使用面确认集中在图表工作台 `ChartOperationPanel`
-  - `react-grid-layout` 实际使用面确认集中在看板编辑态 `AutoBoardEditor` 与查看态 `AutoBoardCore`
+- `react-grid-layout` 实际使用面确认集中在看板编辑态 `AutoBoardEditor` 与查看态 `AutoBoardCore`
   - 看板布局映射入口补齐 `pRect / mRect` 缺省值归一化，避免不完整布局数据直接传入 RGL
 - `react-dev-inspector` 开发态接入移除
+- Node 运行时基线明确统一回 `Node 24`
+- Maven 对外品牌命名开始从 `datart` 向 `yu-bi` 收口：
+  - Maven 模块坐标改为 `yubi` / `yu-bi-*`
+  - 安装包、脚本名、Docker 打包输入改为 `yu-bi-server`
+  - 保持 `datart.*` Java 包名、配置前缀与稳定内部标识不变
 
 ### 4.3 近期里程碑提交
 
@@ -157,7 +162,7 @@
 | 时间体系剩余调用点 | 已有统一工具入口，仍有零散调用 | 继续小批量收口 |
 | 前端依赖收口 | 仍有少量历史依赖可继续审计 | 按证据逐个清理 |
 | Ant Design 历史入口 | 只剩局部残留 | 按调用点逐步消化 |
-| 安装健康度维护 | 当前已稳定，但需防止锁文件回退 | 持续关注 Node 24 / 26 安装表现 |
+| 安装健康度维护 | 当前已稳定，但需防止锁文件回退 | 持续关注 Node 24 安装表现 |
 
 ### 5.2 中风险：做专项稳定化，不做重写
 
@@ -226,7 +231,7 @@
 
 工程化专题至少检查：
 
-- `engines` / `.nvmrc` / Maven Enforcer 是否一致
+- `engines` / `.nvmrc` / CI / Maven Enforcer 是否一致
 - CI 是否覆盖目标运行时
 - Dockerfile / 安装包链是否仍匹配当前基线
 

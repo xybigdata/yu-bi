@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_DIR="${ROOT_DIR}/.tmp"
 LOG_FILE="${LOG_DIR}/demo-health.log"
-INSTALL_ZIP_GLOB="${DATART_DEMO_INSTALL_ZIP_GLOB:-datart-server-*-install.zip}"
+INSTALL_ZIP_GLOB="${DATART_DEMO_INSTALL_ZIP_GLOB:-yu-bi-server-*-install.zip}"
 PORT="${DATART_DEMO_PORT:-8080}"
 HEALTH_URL="${DATART_DEMO_HEALTH_URL:-http://127.0.0.1:${PORT}/api/v1/sys/info}"
 STARTUP_TIMEOUT_SECONDS="${DATART_DEMO_TIMEOUT_SECONDS:-180}"

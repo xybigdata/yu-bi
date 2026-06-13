@@ -1,6 +1,6 @@
 spring:
   application:
-    name: datart-server
+    name: yu-bi-server
 
   main:
     banner-mode: off
