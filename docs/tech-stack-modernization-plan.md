@@ -1,28 +1,20 @@
 # yu-bi 技术栈现代化改造计划
 
-本文档是 yu-bi 技术栈现代化改造的执行底稿，只保留当前有效的信息：
+本文档只保留当前有效的信息，作为现代化改造执行板使用。
 
-- 改造目标是什么
-- 当前基线是什么
-- 哪些事情已经完成
-- 哪些事情还要做
-- 下一步按什么顺序推进
-
-不再继续堆叠逐轮流水账。每一轮完成后，只更新状态、证据和下一步。
+目标是：在兼容、正确、可回归的前提下，把 yu-bi 收口到较新的稳定技术栈，而不是盲目追最新。
 
 ## 1. 改造目标
 
-现代化改造不追求“全部升到最新”，而是在兼容、正确、可回归的前提下，收口到较新的稳定版本。
+本轮现代化改造的固定目标：
 
-本项目当前目标：
+- 后端兼容 `JDK 21`
+- 前端工程链兼容 `Node 26`
+- 默认开发基线保持在稳定 LTS 主线
+- 只做分批、可验证、可回退的升级
+- 不把多个高耦合专题混在同一批提交里
 
-- 后端必须兼容 `JDK 21`
-- 前端工程链必须兼容 `Node 26`
-- 默认开发和构建基线保持在稳定 LTS 主线
-- 不做高风险内部命名重构
-- 不把多个高风险专题混在同一批改动里
-
-明确不在本轮贸然调整的内容：
+本轮明确不直接触碰：
 
 - Java 包名 `datart.*`
 - 配置前缀 `datart.*`
@@ -31,25 +23,29 @@
 
 ## 2. 当前约束
 
-### 2.1 分支与提交流程
+### 2.1 仓库与分支
 
+- 工作目录：`/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi`
 - `main` 只允许 merge，不直接开发
 - 当前工作分支：`codex/modernization-vite-vitest`
-- 后续改造按专题分批提交
 - 默认自动 `git add`、`git commit --no-verify`
 
 ### 2.2 工作区边界
 
-- 工作目录：`/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi`
 - 不动未跟踪目录：
   - `.tmp/`
   - `logs/`
+- 每次只提交当前专题相关文件
+- 除当前专题外，工作区应尽量保持干净
 
-### 2.3 当前工作区要求
+### 2.3 当前工作区状态
 
-- 除正在处理的单一专题外，工作区应尽量保持干净
-- `.tmp/` 和 `logs/` 保持未跟踪，不纳入改造提交
-- 每一轮改造只提交与当前专题直接相关的文件
+当前仍有一批未提交的低风险前端改动，属于上轮收尾项：
+
+- `frontend/src/app/pages/StoryBoardPage/components/StoryPageAddModal.tsx`
+- `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/BoardToolBar/context/BoardToolBarContext.ts`
+
+两处都属于 Ant Design 历史类型导入收口，尚未完成最终验证与提交。
 
 ## 3. 当前技术栈基线
 
@@ -58,24 +54,29 @@
 | 项目 | 当前基线 | 说明 |
 | --- | --- | --- |
 | Java | `21` | 根 POM 已锁定 |
-| Spring Boot | `3.5.12` | 已进入稳定主线 |
-| Spring Cloud | `2025.0.1` | 已进入当前兼容主线 |
+| Spring Boot | `3.5.12` | 当前稳定主线 |
+| Spring Cloud | `2025.0.1` | 当前兼容主线 |
 | Maven | `3.9+` | Enforcer 已限制最低版本 |
 | MyBatis Spring Boot | `3.0.4` | 已适配 Boot 3 |
-| MySQL 驱动 | `com.mysql:mysql-connector-j` | 坐标已收口 |
-| JWT | `jjwt 0.12.7` | 已替换旧版链路 |
-| HTTP 客户端 | `httpclient5 5.5` | 已完成主链替换 |
-| H2 | `2.4.240` | demo/test 基线已升级 |
-| POI | `5.5.1` | 已进入较新稳定线 |
-| Commons CSV | `1.14.1` | 已升级 |
+| Shiro | `2.0.5` | 仍在主认证链 |
+| H2 | `2.4.240` | demo / test 基线 |
 | Selenium | `4.31.0` | 已退出 PhantomJS 主链 |
-| 脚本引擎 | `GraalJS 25.0.1` | 已替换 Nashorn 主链 |
+| GraalJS | `25.0.1` | 已替换 Nashorn 主链 |
+| Commons Lang3 | `3.20.0` | 当前根依赖版本 |
+| Commons IO | `2.22.0` | 由 dependencyManagement 管理 |
+| Springdoc | `2.8.17` | 已适配 Boot 3 |
+| Druid | `1.2.28` | 仍在使用 |
+
+补充说明：
+
+- `jjwt 0.12.7`、`httpclient5 5.5`、`poi-ooxml 5.5.1`、`commons-csv 1.14.1` 已进入较新稳定线
+- `calcite-core` 仍保留在 `data-providers/data-provider-base` 主链，是高风险遗留项
 
 ### 3.2 前端基线
 
 | 项目 | 当前基线 | 说明 |
 | --- | --- | --- |
-| Node | `>=24.0.0` | 默认基线；需兼容 Node 26 |
+| Node | `>=24.0.0` | 默认本地基线；需兼容 Node 26 |
 | npm | `>=11.0.0` | 已写入 engines |
 | React | `18.3.1` | 已完成主升级 |
 | React Router | `6.30.1` | 已进入 Router 6 主线 |
@@ -88,30 +89,30 @@
 | styled-components | `6.1.19` | 已完成主升级 |
 | i18next | `26.0.2` | 已升级 |
 | react-i18next | `17.0.8` | 已升级 |
-| react-quill | `2.0.0` | 已升级，但仍属专题保留项 |
+| react-quill | `2.0.0` | 已升级，但仍属中风险专题 |
 
 ### 3.3 工程化基线
 
 | 项目 | 当前基线 | 说明 |
 | --- | --- | --- |
-| Git hooks | `husky 9` | 已升级 |
-| staged 校验 | `lint-staged 17` | 已升级 |
-| 提交规范 | `commitlint 21` | 已升级 |
+| Husky | `9.1.7` | Git hooks 已升级 |
+| lint-staged | `17.0.7` | staged 校验已升级 |
+| commitlint | `21.0.2` | 提交规范链已升级 |
 | CI Node 矩阵 | `24.x` + `26.x` | GitHub Actions 已覆盖 |
 | CI Java | `21` | GitHub Actions 已覆盖 |
 | Docker 运行时 | `eclipse-temurin:21-jre` | 与 JDK 21 对齐 |
-| 前端 Node 版本文件 | `frontend/.nvmrc = v24.0.0` | 默认本地基线 |
+| frontend/.nvmrc | `v24.0.0` | 默认本地 Node 基线 |
 
-## 4. 已完成的现代化改造成果
+## 4. 已完成里程碑
 
-这里只保留对后续执行仍有意义的结果，不再按提交轮次展开流水账。
+这里只保留对后续执行仍有参考价值的成果。
 
 ### 4.1 项目独立化与品牌收口
 
 已完成：
 
 - 仓库已从 datart 独立为 `yu-bi`
-- `README`、`README_zh`、`ROADMAP`、`MAINTAINERS`、`SECURITY`、`CHANGELOG`、`NOTICE` 已收口
+- `README`、`README_zh`、`ROADMAP`、`MAINTAINERS`、`SECURITY`、`CHANGELOG`、`NOTICE` 已完成项目表述收口
 - 前端标题、manifest、分享页、部分国际化文案、issue template 已切到 yu-bi 品牌
 
 ### 4.2 后端主链现代化
@@ -127,8 +128,8 @@
 - `fastjson` 主运行时退出，Web 层 JSON 主链回收至 Jackson
 - H2 升级到 `2.x`
 - Apache POI、Commons CSV、AspectJ 等基础库升级
-- Selenium 4 主链建立，PhantomJS 已退出主运行时
-- GraalJS 主链建立，Nashorn 已退出主运行时
+- Selenium 4 主链建立
+- GraalJS 主链建立
 - HikariCP 已成为主连接池路线
 
 ### 4.3 前端主链现代化
@@ -142,130 +143,125 @@
 - Ant Design 5 已落地
 - styled-components 6 已落地
 - IE11 主运行时兼容链已退出
-- 多轮页面与图表运行时按需加载已完成，重点包括：
-  - MonacoEditor
-  - StoryBoard / reveal.js
-  - 富文本运行时
-  - PivotSheet / S2
-  - WordCloud
-  - ECharts 图表与 ChartManager 注册链
+- 多轮页面与图表运行时按需加载已完成，覆盖 Monaco、StoryBoard、富文本运行时、PivotSheet / S2、WordCloud、ECharts 注册链
 
-### 4.4 前端依赖清单收口
+### 4.4 前端依赖与接入方式收口
 
 已完成：
 
-- 多个“历史直接声明但已不再直接消费”的依赖已清理
-- 多个大体积运行时已改为按需加载
-- 当前前端依赖治理方向已经明确：只保留仓库源码真实直接消费的依赖
-- `@antv/g2` 已从前端直接依赖中移除，继续由 `@antv/s2` / `@antv/s2-react` 作为传递依赖提供
-- `html2canvas` 已从前端直接依赖中移除，继续由 `@antv/s2 -> @antv/g` 作为传递依赖提供
+- `@antv/g2` 前端直接依赖已移除
+- `html2canvas` 前端直接依赖已移除
+- 一批 `antd/locale/*` 与历史深路径类型导入已完成收口
+- 未接入当前构建链的 Ant Design 历史 Less 变量残留文件已删除
 
-## 5. 当前遗留问题分层
+最近已完成并提交的里程碑：
 
-这一节只保留仍影响后续改造顺序的内容。
+- `c00573a69 docs: 重整现代化改造计划文档`
+- `29b46197c chore: 移除前端未使用的 @antv/g2 直接依赖`
+- `e9a42dfae chore: 移除前端未使用的 html2canvas 直接依赖`
+- `2e6c1d8a5 chore: 收口一批 Ant Design 深路径导入`
+- `9de952f11 chore: 继续收口 Ant Design 深路径类型导入`
+- `3c395c940 chore: 删除未使用的 Ant Design Less 变量残留`
+- `2477307d6 chore: 收口 RangeNumber 的 Ant Design 内部类型依赖`
 
-### 5.1 低风险，可继续推进
+## 5. 当前遗留项分层
+
+### 5.1 低风险，继续推进
 
 这类任务可以继续分批做，小步提交。
 
 | 项目 | 当前情况 | 建议动作 |
 | --- | --- | --- |
-| 前端直接依赖收口 | 仍有少量“未直接使用但仍声明”的依赖 | 继续逐个检索、删除、构建验证 |
-| 前端深路径类型导入 | 仍存在 `antd/es/*`、`antd/lib/*` 等历史导入 | 改为公共导出入口或更稳定的类型入口 |
-| AntD 历史 Less 变量链 | `frontend/src/styles/antd/variables.less` 仍使用 `~antd/lib/style/*` | 评估迁到 token / CSS variables，减少历史 Less 耦合 |
-| 本地安装脚本 | `npm install --legacy-peer-deps` 仍保留在 `bootstrap` | 评估是否可以移除，避免掩盖依赖问题 |
-| 文档与验证记录 | 之前过于流水账 | 改为按状态维护，避免继续膨胀 |
+| 前端剩余深路径类型导入 | 仍有少量 `antd/es/*` 历史类型入口 | 优先改为 `antd` 公共导出或更稳定的 props 推导 |
+| 前端直接依赖收口 | 仍需持续确认是否存在“声明但未直接消费”的依赖 | 逐项检索、删除、构建验证 |
+| 本地安装脚本 | `bootstrap` 仍保留 `npm install --legacy-peer-deps` | 评估是否可移除，避免掩盖 peer 依赖问题 |
+| 文档状态同步 | 当前文档已收口，但需要保持与仓库进度同步 | 每轮只更新状态和下一步 |
+
+当前已知剩余 Ant Design 历史类型入口：
+
+- `antd/es/radio`
+- `antd/es/statistic`
+- `antd/es/cascader`
+- `antd/es/list`
+- `antd/es/button`
+- `antd/es/checkbox`
+- `antd/es/slider`
+- `antd/es/select`
+
+其中当前批次已经在处理：
+
+- `StoryPageAddModal.tsx` 中的 `antd/es/table/interface` 已改为 `TableProps` 推导
+- `BoardToolBarContext.ts` 中的 `ButtonType` 已改为 `ButtonProps['type']`
 
 ### 5.2 中风险，需要专项验证
-
-这类任务可以做，但不能和别的高耦合专题混在一起。
 
 | 项目 | 当前情况 | 风险点 | 建议顺序 |
 | --- | --- | --- | --- |
 | 时间体系最终收口 | 主链已切到 `dayjs`，但仍需确认页面值链完整性 | 日期控件、格式化、时区回归 | 优先级中 |
-| 富文本专题 | `react-quill 2.0.0` 已在用，但自定义 compat 层仍较重 | 自定义 blot、只读态、编辑态、分享态回归 | 优先级中 |
-| Node 24/26 双线稳定性 | CI 已覆盖，但本地与 hooks 行为仍需持续观察 | lint/test/build 与不同 Node 行为差异 | 持续回归 |
-| Docker/安装包闭环 | 配置已收口，但镜像级实测证据不足 | 安装包结构、静态资源复制、启动链 | 优先级中 |
-| Ant Design 5 稳定化 | 主升级已完成，但还留有历史 API 与样式兼容边角 | 弹层、表单、菜单、主题回归 | 结合触达渐进处理 |
+| 富文本专题 | `react-quill 2.0.0` 已在用，但兼容层仍较重 | 自定义 blot、只读态、编辑态、分享态回归 | 优先级中 |
+| Node 24 / 26 双线稳定性 | CI 已覆盖，但仍需持续观察本地和 hooks 行为 | lint / test / build 在不同 Node 版本下的差异 | 持续回归 |
+| Docker / 安装包闭环 | 配置已收口，但镜像级与安装包级实测证据不足 | 安装包结构、静态资源复制、启动链 | 优先级中 |
+| Ant Design 5 稳定化 | 主升级已完成，但仍有历史 API 和样式兼容边角 | 弹层、表单、菜单、主题回归 | 结合触达渐进处理 |
 
 ### 5.3 高风险，暂不直接动
 
-这些项必须单独立项，当前阶段只做调研、拆障、补证据。
-
 | 项目 | 当前情况 | 原因 |
 | --- | --- | --- |
-| Shiro 2 -> Spring Security 全量接管 | 仍存在完整 Shiro 运行链 | 涉及登录、权限、分享、remember-me、OAuth2 |
-| Calcite 升级或替换 | `calcite-core 1.26.0` 深度耦合 SQL 解析与 JDBC provider | 影响 SQL parser、函数、脚本渲染 |
-| 数据源/脚本深层架构收口 | Provider、脚本解析、方言处理耦合深 | 需要独立设计和回归矩阵 |
-| 内部命名与稳定标识重构 | 明确禁止贸然调整 | 影响面不可控 |
+| Shiro 2 -> Spring Security 全量接管 | 仍存在完整 Shiro 运行链 | 牵涉登录、权限、分享、remember-me、OAuth2 |
+| Calcite 升级或替换 | `calcite-core` 仍深度耦合 SQL 解析与 provider 体系 | 影响 SQL parser、函数、脚本渲染 |
+| 数据源 / 脚本深层架构收口 | Provider、脚本解析、方言处理耦合深 | 需要独立设计与回归矩阵 |
+| 内部命名与稳定标识重构 | 当前明确禁止贸然调整 | 影响面不可控 |
 
-## 6. 当前判断：哪些栈还算“偏老”
+## 6. 当前批次
 
-这里的“偏老”不是简单看版本号，而是看维护状态、兼容性和长期维护成本。
+当前批次主题：
 
-### 6.1 优先关注
+- 继续收口前端 Ant Design 历史类型导入
 
-- `Shiro 2`
-  - 不是马上替换，但已经是后端安全栈里最主要的长期保留项
-- `Calcite 1.26.0`
-  - 版本明显偏老，且强耦合，是后端侧最典型的高风险遗留栈
-- `react-quill` 兼容层
-  - 版本已不算旧，但局部实现仍偏历史化，维护成本高
-- AntD 历史 Less / 深路径导入
-  - 版本不旧，接入方式偏旧
-- `bootstrap` 脚本里的 `--legacy-peer-deps`
-  - 不是依赖版本问题，而是工程化健康度问题
+当前已改未提：
 
-### 6.2 已进入较新稳定线，可先不追更高版本
+1. `frontend/src/app/pages/StoryBoardPage/components/StoryPageAddModal.tsx`
+   - `RowSelectionType` 深路径类型已替换为 `TableProps<Folder>['rowSelection']['type']` 推导
+2. `frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/BoardToolBar/context/BoardToolBarContext.ts`
+   - `ButtonType` 已替换为 `ButtonProps['type']`
 
-- Spring Boot 3.5.x
-- Spring Cloud 2025.0.x
-- React 18
-- React Router 6
-- Ant Design 5
-- Redux Toolkit 2
-- React Redux 9
-- TypeScript 5.9
-- Vite 6
-- Vitest 4
-- styled-components 6
-- jjwt 0.12.7
-- HttpClient 5.5
-- H2 2.4.x
-- POI 5.5.x
-- Commons CSV 1.14.x
+当前批次门禁：
 
-结论：这些栈当前重点应放在稳定化和使用面收口，不应为了“看起来更新”继续盲目追版本。
+- `npm run checkTs`
+- `npm run build:all`
+- `npm run test:ci -- --silent`
 
-## 7. 下一批建议执行顺序
+当前批次完成标准：
 
-后续按这个顺序推进，避免主题扩散。
+- 上述三项验证通过
+- 仅提交当前专题相关文件
+- 不引入新的深路径回退
 
-### Wave A：继续做低风险前端依赖收口
+## 7. 下一批执行顺序
+
+按以下顺序推进，避免主题扩散。
+
+### Wave A：收尾当前批次
 
 目标：
 
-- 清理未直接使用的前端直接依赖
-- 保证 `checkTs`、`build`、`build:task`、`test:ci` 持续通过
+- 完成当前两处 Ant Design 类型收口验证
+- 提交当前未收尾的低风险改动
 
-当前第一项：
-
-- 继续筛查剩余“未直接使用但仍声明”的前端依赖，并逐项独立提交
-
-### Wave B：收口前端历史接入方式
+### Wave B：继续收口前端历史入口
 
 目标：
 
-- 压缩 `antd/es/*`、`antd/lib/*` 深路径导入
-- 评估并缩减 AntD 历史 Less 变量链
-- 检查 `styled-components/cssprop`、`react-app-env.d.ts` 等历史壳是否还能进一步收口
+- 继续审计 `antd/es/*`、`antd/lib/*` 剩余入口
+- 优先处理可通过 props 类型推导替代的项
 
-当前进展：
+候选项：
 
-- 已完成一小批 Ant Design 深路径类型与 locale 导入收口，优先改为 `antd` 公共导出和 `antd/locale/*` 入口
-- 已删除未接入当前构建链的 Ant Design 历史 Less 变量残留文件
+- `SelectValue`
+- `SliderRangeProps`
+- 其他仍可安全替换的历史类型入口
 
-### Wave C：做中风险稳定化专题
+### Wave C：中风险稳定化专题
 
 按顺序建议：
 
@@ -273,24 +269,22 @@
 2. 富文本专题稳定化
 3. Docker / 安装包闭环补证据
 
-### Wave D：高风险专题只做预研
+### Wave D：高风险专题仅做预研
 
 按顺序建议：
 
 1. Shiro -> Spring Security 迁移设计
-2. Calcite 升级/替代预研
+2. Calcite 升级 / 替代预研
 
-这两项在没有完整迁移设计和专项回归矩阵前，不进入实质替换。
+在没有完整迁移设计和专项回归矩阵前，不进入实质替换。
 
-## 8. 每一轮改造的固定门禁
-
-每次提交都要满足以下规则：
+## 8. 每轮固定门禁
 
 ### 8.1 范围规则
 
 - 一个提交只处理一个专题
 - 低风险与高风险不混提
-- 文档更新只记录当前仍有效的结论
+- 文档只记录当前有效结论，不恢复成长流水账
 
 ### 8.2 验证规则
 
@@ -318,33 +312,46 @@
 - 到达里程碑再 push
 - commit message 使用中文
 
-## 9. 当前里程碑状态
+## 9. 当前判断：哪些栈值得继续关注
 
-### 已完成
+优先关注但不等于立即替换：
 
-- 项目独立化与 yu-bi 品牌基础收口
-- JDK 21 / Node 24+26 / Vite 6 / Vitest 4 / React 18 / AntD 5 等主链现代化
-- 后端主要基础库和前端主工作流现代化
+- `Shiro 2.0.5`
+- `calcite-core`
+- `react-quill` 兼容层
+- Ant Design 历史深路径导入与历史接入方式
+- `bootstrap` 脚本中的 `--legacy-peer-deps`
 
-### 进行中
+当前已在较新稳定线、暂不追更高版本：
 
-- 前端剩余直接依赖清单收口
-- 前端历史接入方式收口
-- 中风险专题的稳定化回归
+- Spring Boot 3.5.x
+- Spring Cloud 2025.0.x
+- React 18
+- React Router 6
+- Ant Design 5
+- Redux Toolkit 2
+- React Redux 9
+- TypeScript 5.9
+- Vite 6
+- Vitest 4
+- styled-components 6
+- `jjwt 0.12.7`
+- `httpclient5 5.5`
+- `h2 2.4.x`
+- `poi 5.5.x`
+- `commons-csv 1.14.x`
 
-### 暂不启动实做
+结论：
 
-- Shiro 全量迁移
-- Calcite 升级或替代
-- 高风险内部命名重构
+这些栈当前重点应放在稳定化和使用面收口，而不是继续为了“更高版本号”做无收益升级。
 
-## 10. 本文档的维护方式
+## 10. 文档维护方式
 
 后续只按下面方式更新本文档：
 
 - 基线变化了，更新“当前技术栈基线”
-- 某个专题完成了，更新“已完成的现代化改造成果”
-- 优先级变化了，更新“遗留问题分层”和“下一批建议执行顺序”
-- 不再新增长篇历史过程记录
+- 某个专题完成了，更新“已完成里程碑”
+- 当前批次变了，更新“当前批次”和“下一批执行顺序”
+- 风险判断变了，更新“遗留项分层”
 
-这样文档才能持续作为改造执行板使用，而不是变成第二份提交日志。
+不再新增长篇过程记录。
