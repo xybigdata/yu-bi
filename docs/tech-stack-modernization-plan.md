@@ -132,6 +132,10 @@
   - 实际使用面确认仅剩 `VirtualTable -> SchemaTable`
   - 虚拟表格 reset 时机修正为依赖变化即时触发
   - 列宽分摊逻辑补齐除零保护
+- `flexlayout-react` / `react-grid-layout` 使用面盘点与布局映射收口：
+  - `flexlayout-react` 实际使用面确认集中在图表工作台 `ChartOperationPanel`
+  - `react-grid-layout` 实际使用面确认集中在看板编辑态 `AutoBoardEditor` 与查看态 `AutoBoardCore`
+  - 看板布局映射入口补齐 `pRect / mRect` 缺省值归一化，避免不完整布局数据直接传入 RGL
 - `react-dev-inspector` 开发态接入移除
 
 ### 4.3 近期里程碑提交
@@ -179,7 +183,7 @@
 
 当前工作区正在推进的下一批仍是低到中风险交界处的小范围稳定化，不进入结构性替换。
 
-当前最近完成的是“react-window 专项审计与运行时包装边界收口”，已通过：
+当前最近完成的是“flexlayout-react / react-grid-layout 使用面盘点与布局映射收口”，已通过：
 
 - `npm run checkTs`
 - `npm run build:all`
@@ -187,18 +191,17 @@
 
 当前结论是：
 
-- `react-window` 暂不进入替代
-- 继续保留当前包装层
-- 后续只在真实使用面上做小范围稳定化
+- `flexlayout-react` 暂不进入替代，继续保留工作台布局主链
+- `react-grid-layout` 暂不进入替代，继续保留看板自动布局主链
+- 后续优先做真实使用面上的小范围稳定化，而不是结构性重写
 
 ## 7. 下一阶段执行顺序
 
 按这个顺序推进，避免专题扩散：
 
 1. 时间体系剩余调用点继续收口
-2. `react-window` 专项审计，确认是继续小修还是进入替代预研
-3. `flexlayout-react` / `react-grid-layout` 使用面盘点与风险评估
-4. Docker / 安装包闭环验证
+2. `flexlayout-react` / `react-grid-layout` 进一步盘点可补的小范围稳定化点
+3. Docker / 安装包闭环验证
 
 ## 8. 每轮固定门禁
 
