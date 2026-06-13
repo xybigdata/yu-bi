@@ -27,6 +27,7 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { WidgetInfo } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { editBoardStackActions } from 'app/pages/DashBoardPage/pages/BoardEditor/slice';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
+import { getDatartNowMillis } from 'app/utils/date';
 import produce from 'immer';
 import React, {
   useCallback,
@@ -120,7 +121,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
   ]);
 
   useEffect(() => {
-    const newId = `rich-text-${widgetInfo.id + new Date().getTime()}`;
+    const newId = `rich-text-${widgetInfo.id + getDatartNowMillis()}`;
     setContainerId(newId);
     const modules = {
       toolbar: {

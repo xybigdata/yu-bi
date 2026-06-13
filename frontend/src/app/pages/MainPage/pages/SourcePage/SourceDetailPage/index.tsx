@@ -24,7 +24,7 @@ import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useParams } from 'app/routerCompat';
 import { useAccess, useCascadeAccess } from 'app/pages/MainPage/Access';
-import { formatDatartDate } from 'app/utils/date';
+import { formatCurrentDatartDate } from 'app/utils/date';
 import {
   PermissionLevels,
   ResourceTypes,
@@ -406,7 +406,7 @@ export function SourceDetailPage() {
       return;
     }
     await dispatch(syncSourceSchema({ sourceId: editingSource.id }));
-    setLastUpdateTime(formatDatartDate(Date.now(), TIME_FORMATTER));
+    setLastUpdateTime(formatCurrentDatartDate(TIME_FORMATTER));
     message.success(t('syncDatabaseSchemaSuccess'));
   };
 

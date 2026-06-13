@@ -18,7 +18,7 @@
 
 import { Badge, BadgeProps } from 'antd';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { datartDayjs } from 'app/utils/date';
+import { datartDayjs, getDatartNowMillis } from 'app/utils/date';
 import styled from 'styled-components';
 import { FONT_SIZE_LABEL } from 'styles/StyleConstants';
 
@@ -48,9 +48,9 @@ export function Chronograph({ running, status }: ChronographProps) {
 
   useEffect(() => {
     if (running) {
-      const start = Number(new Date());
+      const start = getDatartNowMillis();
       intervalRef.current = setInterval(() => {
-        const current = Number(new Date());
+        const current = getDatartNowMillis();
         setLabel(formatElapsed(current - start));
       }, 10);
     } else {
