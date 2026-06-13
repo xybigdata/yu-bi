@@ -40,6 +40,19 @@ export function toDatartDayjs(value?: DatartDateLike | null) {
   return dayValue.isValid() ? dayValue : null;
 }
 
+export function toDatartDayjsRange(
+  values?:
+    | readonly [DatartDateLike?, DatartDateLike?]
+    | DatartDateLike[]
+    | null,
+): [DatartDayjs | null, DatartDayjs | null] | null {
+  if (!values || !Array.isArray(values)) {
+    return null;
+  }
+
+  return [toDatartDayjs(values[0]), toDatartDayjs(values[1])];
+}
+
 export function formatDatartDate(
   value?: DatartDateLike | null,
   template?: string,

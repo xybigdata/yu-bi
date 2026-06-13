@@ -17,16 +17,13 @@
  */
 
 import { DatePicker } from 'antd';
-import { DatartDayjs, toDatartDayjs } from 'app/utils/date';
+import { toDatartDayjsRange } from 'app/utils/date';
 import { FC, memo } from 'react';
 const { RangePicker } = DatePicker;
 
 const CurrentRangeTime: FC<{ times?: [string, string]; disabled?: boolean }> =
   memo(({ times, disabled = true }) => {
-    const rangeValue: [DatartDayjs | null, DatartDayjs | null] = [
-      toDatartDayjs(times?.[0]),
-      toDatartDayjs(times?.[1]),
-    ];
+    const rangeValue = toDatartDayjsRange(times);
 
     return (
       <RangePicker
