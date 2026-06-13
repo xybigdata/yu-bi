@@ -18,7 +18,7 @@
 
 import 'antd/dist/reset.css';
 import 'app/assets/fonts/iconfont.css';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
 import { Provider } from 'react-redux';
@@ -27,34 +27,22 @@ import { ThemeProvider } from 'styles/theme/ThemeProvider';
 import { Debugger } from 'utils/debugger';
 import './locales/i18n';
 
-async function resolveInspectorWrapper(isDevelopment: boolean) {
-  if (!isDevelopment) {
-    return Fragment;
-  }
-
-  const inspectorModule = await import('react-dev-inspector');
-  return inspectorModule.Inspector;
-}
-
 export const generateEntryPoint = async EntryPointComponent => {
   const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
   const MOUNT_NODE = document.getElementById('root') as HTMLElement;
   const store = configureAppStore();
   Debugger.instance.setEnable(IS_DEVELOPMENT);
 
-  const InspectorWrapper = await resolveInspectorWrapper(IS_DEVELOPMENT);
   createRoot(MOUNT_NODE).render(
-    <InspectorWrapper>
-      <Provider store={store}>
-        <ThemeProvider>
-          <HelmetProvider>
-            <React.StrictMode>
-              <EntryPointComponent />
-            </React.StrictMode>
-          </HelmetProvider>
-        </ThemeProvider>
-      </Provider>
-    </InspectorWrapper>,
+    <Provider store={store}>
+      <ThemeProvider>
+        <HelmetProvider>
+          <React.StrictMode>
+            <EntryPointComponent />
+          </React.StrictMode>
+        </HelmetProvider>
+      </ThemeProvider>
+    </Provider>,
   );
 
   // Hot reLoadable translation json files

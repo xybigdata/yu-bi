@@ -171,7 +171,7 @@
 | `flexlayout-react` | 源码仍直接使用，锁文件解析较旧 | 先保留，后续做替代预研 |
 | `react-resizable` | 已验证与当前源码兼容 | 已完成收口到 `3.0.4` |
 | `react-window` | 接入面较窄，但 peer 声明老旧 | 后续单独评估升级或替代 |
-| `react-dev-inspector` | 仅开发态使用，历史包袱重 | 倾向后续替换或移除 |
+| `react-dev-inspector` | 仅开发态动态加载，且仍携带明显 webpack / CRA 历史包袱 | 已移除开发态接入与依赖声明 |
 
 ### 6.2 时间体系收口
 
