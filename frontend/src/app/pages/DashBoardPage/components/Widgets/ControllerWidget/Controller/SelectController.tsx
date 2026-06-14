@@ -29,7 +29,7 @@ export interface SelectControllerProps {
   options?: ControlOption[];
   value?: SelectValue;
   placeholder?: string;
-  onChange: (values) => void;
+  onChange: (value?: SelectValue) => void;
   label?: React.ReactNode;
   name?: string;
   required?: boolean;

@@ -28,7 +28,7 @@ export interface CheckboxGroupControllerProps {
   options?: ControlOption[];
   value?: CheckboxValueType[];
   placeholder?: string;
-  onChange: (values) => void;
+  onChange: (values?: CheckboxValueType[]) => void;
   label?: React.ReactNode;
   name?: string;
   required?: boolean;

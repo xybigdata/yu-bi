@@ -16,16 +16,35 @@
  * limitations under the License.
  */
 import { Form, Tree, TreeSelect } from 'antd';
+import type { TreeProps, TreeSelectProps } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { RelationFilterValue } from 'app/types/ChartConfig';
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
 
+type TreeSelectValue = string[];
+type TreeSelectRawValue = TreeSelectProps<string[]>['value'];
+type TreeCheckedValue = Parameters<NonNullable<TreeProps['onCheck']>>[0];
+type TreeSelectChangeArgs = Parameters<
+  NonNullable<TreeSelectProps<unknown>['onChange']>
+>;
+
+const normalizeTreeValue = (value: unknown): string | undefined => {
+  if (typeof value === 'string') {
+    return value;
+  }
+  return undefined;
+};
+
+const isTreeCheckedValueObject = (value: unknown): value is { value?: unknown } => {
+  return typeof value === 'object' && value !== null;
+};
+
 export interface TreeControllerFormProps {
   treeData?: RelationFilterValue[];
   value?: string[];
   placeholder?: string;
-  onChange: (values) => void;
+  onChange: (values?: TreeSelectValue) => void;
   label?: React.ReactNode;
   name?: string;
   required?: boolean;
@@ -49,9 +68,25 @@ export const TreeControllerForm: React.FC<TreeControllerFormProps> = memo(
 export const TreeSelectController: React.FC<TreeControllerFormProps> = memo(
   ({ treeData, onChange, value }) => {
     const t = useI18NPrefix(`viz.common.enum.controllerPlaceHolders`);
+    const handleTreeSelectChange = useCallback(
+      (...args: TreeSelectChangeArgs) => {
+        const [nextValue] = args;
+        onChange((nextValue as TreeSelectRawValue as TreeSelectValue | undefined) ?? undefined);
+      },
+      [onChange],
+    );
     const handleonChange = useCallback(
-      checkedObj => {
-        onChange(checkedObj?.checked);
+      (checkedKeys: TreeCheckedValue) => {
+        const nextValue = Array.isArray(checkedKeys)
+          ? checkedKeys
+              .map(key =>
+                isTreeCheckedValueObject(key)
+                  ? normalizeTreeValue(key.value)
+                  : normalizeTreeValue(key),
+              )
+              .filter((key): key is string => !!key)
+          : undefined;
+        onChange(nextValue);
       },
       [onChange],
     );
@@ -64,7 +99,7 @@ export const TreeSelectController: React.FC<TreeControllerFormProps> = memo(
         placeholder={t('treeSelectController')}
         maxTagTextLength={4}
         maxTagCount={3}
-        onChange={onChange}
+        onChange={handleTreeSelectChange}
         multiple
         bordered={false}
         treeData={treeData}
