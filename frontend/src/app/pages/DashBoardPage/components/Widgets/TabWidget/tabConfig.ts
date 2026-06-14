@@ -25,6 +25,7 @@ import type {
   WidgetToolkit,
 } from 'app/pages/DashBoardPage/types/widgetTypes';
 import { getJsonConfigs } from 'app/pages/DashBoardPage/utils';
+import { getDatartNowMillis } from 'app/utils/date';
 import { WHITE } from 'styles/StyleConstants';
 import { uuidv4 } from 'utils/utils';
 import {
@@ -168,7 +169,7 @@ export const widgetToolkit: TabToolkit = {
     const content: TabWidgetContent = {
       itemMap: {
         [newTabId]: {
-          index: Date.now(),
+          index: getDatartNowMillis(),
           tabId: newTabId,
           name: 'tab',
           childWidgetId: '',
