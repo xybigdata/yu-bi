@@ -19,6 +19,7 @@
 import { MIN_MARGIN, MIN_PADDING } from 'app/pages/DashBoardPage/constants';
 import { DashboardConfigBeta3 } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import {
+  beta4,
   beta0,
   migrateBoardConfig,
   parseBoardConfig,
@@ -27,6 +28,7 @@ import {
   APP_CURRENT_VERSION,
   APP_VERSION_BETA_0,
   APP_VERSION_BETA_1,
+  APP_VERSION_BETA_2,
 } from '../constants';
 describe('test migrateBoard ', () => {
   test('parse board.config', () => {
@@ -82,6 +84,13 @@ describe('test migrateBoard ', () => {
     expect(beta0(config2)).toMatchObject(config2);
   });
 
+  test('test hasResetControl keeps its own value', () => {
+    const config = { hasResetControl: true } as DashboardConfigBeta3;
+    expect(beta0(config)).toMatchObject({
+      hasResetControl: true,
+    });
+  });
+
   test('test beta0 version', () => {
     const config = {} as DashboardConfigBeta3;
     expect(beta0(config)).toMatchObject({
@@ -97,5 +106,49 @@ describe('test migrateBoard ', () => {
       type: 'auto',
       version: APP_CURRENT_VERSION,
     } as DashboardConfigBeta3);
+  });
+
+  test('should keep board config with jsonConfig unchanged before latest version normalization', () => {
+    const config = {
+      type: 'auto',
+      version: APP_VERSION_BETA_1,
+      jsonConfig: {
+        props: [],
+        i18ns: [],
+      },
+    };
+
+    expect(beta4(config as any)).toBe(config);
+  });
+
+  test('should migrate auto board spacing into jsonConfig', () => {
+    const config = {
+      type: 'auto',
+      version: APP_VERSION_BETA_2,
+      initialQuery: false,
+      allowOverlap: true,
+      background: { color: '#000', image: '', size: '100% 100%', repeat: 'no-repeat' },
+      containerPadding: [18, 20],
+      margin: [22, 24],
+      mobileContainerPadding: [26, 28],
+      mobileMargin: [30, 32],
+    } as DashboardConfigBeta3;
+
+    const result = beta4(config);
+    const props = result.jsonConfig.props;
+    const basic = props.find(item => item.key === 'basic');
+    const space = props.find(item => item.key === 'space');
+    const mSpace = props.find(item => item.key === 'mSpace');
+
+    expect(basic?.rows?.find(row => row.key === 'initialQuery')?.value).toBe(false);
+    expect(basic?.rows?.find(row => row.key === 'allowOverlap')?.value).toBe(true);
+    expect(space?.rows?.find(row => row.key === 'paddingTB')?.value).toBe(20);
+    expect(space?.rows?.find(row => row.key === 'paddingLR')?.value).toBe(18);
+    expect(space?.rows?.find(row => row.key === 'marginTB')?.value).toBe(24);
+    expect(space?.rows?.find(row => row.key === 'marginLR')?.value).toBe(22);
+    expect(mSpace?.rows?.find(row => row.key === 'paddingTB')?.value).toBe(26);
+    expect(mSpace?.rows?.find(row => row.key === 'paddingLR')?.value).toBe(28);
+    expect(mSpace?.rows?.find(row => row.key === 'marginTB')?.value).toBe(30);
+    expect(mSpace?.rows?.find(row => row.key === 'marginLR')?.value).toBe(32);
   });
 });

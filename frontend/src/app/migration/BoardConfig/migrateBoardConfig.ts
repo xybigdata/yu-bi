@@ -16,7 +16,10 @@
  * limitations under the License.
  */
 import { MIN_MARGIN, MIN_PADDING } from 'app/pages/DashBoardPage/constants';
-import { BoardTypes } from 'app/pages/DashBoardPage/pages/Board/slice/types';
+import {
+  BoardTypes,
+  DashboardConfigBeta3,
+} from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { BoardConfig } from 'app/pages/DashBoardPage/types/boardTypes';
 import {
   getInitBoardConfig,
@@ -29,21 +32,52 @@ import {
 } from '../constants';
 import { setLatestVersion, versionCanDo } from '../utils';
 
-export const parseBoardConfig = (boardConfig: string) => {
+type BoardConfigMigrationTarget = DashboardConfigBeta3 | BoardConfig;
+
+const isBoardType = (value: unknown): value is (typeof BoardTypes)[number] => {
+  return BoardTypes.includes(value as (typeof BoardTypes)[number]);
+};
+
+const isBoardConfig = (config: unknown): config is BoardConfig => {
+  return Boolean(
+    config &&
+      typeof config === 'object' &&
+      isBoardType((config as BoardConfig).type) &&
+      (config as BoardConfig).jsonConfig,
+  );
+};
+
+const hasMigrationSourceFields = (
+  config: DashboardConfigBeta3,
+): boolean => {
+  return (
+    Boolean(config.background) ||
+    typeof config.initialQuery === 'boolean' ||
+    typeof config.allowOverlap === 'boolean' ||
+    Boolean(config.containerPadding) ||
+    Boolean(config.margin) ||
+    Boolean(config.mobileContainerPadding) ||
+    Boolean(config.mobileMargin) ||
+    typeof config.scaleMode === 'string' ||
+    typeof config.width === 'number' ||
+    typeof config.height === 'number'
+  );
+};
+
+export const parseBoardConfig = (boardConfig: string): BoardConfigMigrationTarget => {
   try {
-    let nextConfig = JSON.parse(boardConfig);
-    if (!BoardTypes.includes(nextConfig?.type)) {
+    const nextConfig = JSON.parse(boardConfig) as BoardConfigMigrationTarget;
+    if (!isBoardType(nextConfig?.type)) {
       return getInitBoardConfigBeta3('auto');
     }
     return nextConfig;
   } catch (error) {
     console.log('解析 config 出错');
-    let nextConfig = getInitBoardConfigBeta3('auto');
-    return nextConfig;
+    return getInitBoardConfigBeta3('auto');
   }
 };
 
-export const beta0 = config => {
+export const beta0 = (config: DashboardConfigBeta3) => {
   if (!versionCanDo(APP_VERSION_BETA_0, config.version)) return config;
   // 1. initialQuery 新增属性 检测没有这个属性就设置为 true,如果已经设置为false，则保持false
   if (!config.hasOwnProperty('initialQuery')) {
@@ -60,14 +94,14 @@ export const beta0 = config => {
   }
   // 3 QueryButton and ResetButton
   config.hasQueryControl = Boolean(config.hasQueryControl);
-  config.hasResetControl = Boolean(config.hasQueryControl);
+  config.hasResetControl = Boolean(config.hasResetControl);
 
   // reset config.version
   config.version = APP_VERSION_BETA_0;
   return config;
 };
 
-export const beta2 = config => {
+export const beta2 = (config: DashboardConfigBeta3) => {
   if (!versionCanDo(APP_VERSION_BETA_2, config.version)) return config;
   if (!config.allowOverlap) {
     config.allowOverlap = false;
@@ -76,14 +110,14 @@ export const beta2 = config => {
   return config;
 };
 
-export const beta4 = (config: any) => {
-  if (!versionCanDo(APP_VERSION_BETA_4, config.version)) return config;
+export const beta4 = (config: BoardConfigMigrationTarget): BoardConfig => {
+  if (isBoardConfig(config)) {
+    return config;
+  }
 
   if (config.type === 'auto') {
-    let newConfig: BoardConfig = config.jsonConfig
-      ? config
-      : getInitBoardConfig('auto');
-    if (config.background || config.initialQuery) {
+    const newConfig = getInitBoardConfig('auto');
+    if (hasMigrationSourceFields(config)) {
       newConfig.jsonConfig.props.forEach(item => {
         if (item.key === 'basic') {
           item!.rows!.forEach(row => {
@@ -134,12 +168,11 @@ export const beta4 = (config: any) => {
         }
       });
     }
+    newConfig.version = config.version;
     return newConfig;
   } else {
-    let newConfig: BoardConfig = config.jsonConfig
-      ? config
-      : getInitBoardConfig('free');
-    if (config.background || config.initialQuery) {
+    const newConfig = getInitBoardConfig('free');
+    if (hasMigrationSourceFields(config)) {
       newConfig.jsonConfig.props.forEach(item => {
         if (item.key === 'basic') {
           item!.rows!.forEach(row => {
@@ -168,14 +201,17 @@ export const beta4 = (config: any) => {
         }
       });
     }
+    newConfig.version = config.version;
     return newConfig;
   }
 };
 export const migrateBoardConfig = (boardConfig: string) => {
   let config = parseBoardConfig(boardConfig);
-  config = beta0(config);
-  config = beta2(config);
+  if (!isBoardConfig(config)) {
+    config = beta0(config);
+    config = beta2(config);
+  }
   config = beta4(config);
   config = setLatestVersion(config);
-  return config as BoardConfig;
+  return config;
 };
