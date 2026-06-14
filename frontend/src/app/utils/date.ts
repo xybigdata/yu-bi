@@ -25,6 +25,8 @@ export type DatartDateLike =
 
 export const datartDayjs = dayjs;
 
+const isDatartDayjs = (value: unknown): value is Dayjs => dayjs.isDayjs(value);
+
 export function setDatartDayjsLocale(locale: string) {
   dayjs.locale(locale);
 }
@@ -46,8 +48,17 @@ export function toDatartDayjs(value?: DatartDateLike | null) {
     return null;
   }
 
+  if (isDatartDayjs(value)) {
+    return value.isValid() ? value.clone() : null;
+  }
+
+  if (value instanceof Date) {
+    const dayValue = dayjs(value);
+    return dayValue.isValid() ? dayValue : null;
+  }
+
   const dateInput =
-    typeof value === 'object' && 'format' in value ? value.toString() : value;
+    typeof value === 'object' && 'toString' in value ? value.toString() : value;
   const dayValue = dayjs(dateInput);
   return dayValue.isValid() ? dayValue : null;
 }
