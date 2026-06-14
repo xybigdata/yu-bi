@@ -17,6 +17,7 @@
  */
 
 import {
+  datartDayjs,
   formatCurrentDatartDate,
   formatDatartDateIfValid,
   getDatartDateAfter,
@@ -54,6 +55,19 @@ describe('toDatartDayjsRange', () => {
     expect(toDatartDayjsRange()).toBeNull();
     expect(toDatartDayjsRange(null)).toBeNull();
   });
+
+  test('should preserve dayjs inputs without reparsing string output', () => {
+    const utcRange = [
+      datartDayjs.utc('2024-01-01 08:00:00'),
+      datartDayjs.utc('2024-01-02 08:00:00'),
+    ] as const;
+
+    const range = toDatartDayjsRange(utcRange);
+
+    expect(range?.[0]?.toISOString()).toBe(utcRange[0].toISOString());
+    expect(range?.[1]?.toISOString()).toBe(utcRange[1].toISOString());
+    expect(range?.[0]).not.toBe(utcRange[0]);
+  });
 });
 
 describe('toDatartDayjsList', () => {
@@ -73,6 +87,18 @@ describe('toDatartDayjsList', () => {
   test('should return empty list for empty input', () => {
     expect(toDatartDayjsList()).toEqual([]);
     expect(toDatartDayjsList(null)).toEqual([]);
+  });
+
+  test('should preserve valid dayjs and date inputs', () => {
+    const utcValue = datartDayjs.utc('2024-01-01 08:00:00');
+    const nativeDate = new Date('2024-01-03T08:00:00.000Z');
+
+    const values = toDatartDayjsList([utcValue, nativeDate]);
+
+    expect(values).toHaveLength(2);
+    expect(values[0].toISOString()).toBe(utcValue.toISOString());
+    expect(values[0]).not.toBe(utcValue);
+    expect(values[1].toISOString()).toBe(nativeDate.toISOString());
   });
 });
 
