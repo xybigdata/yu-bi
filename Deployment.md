@@ -4,14 +4,14 @@
 
 # 0. 在线体验 Demo
 
-- http://datart-demo.retech.cc
+- 当前不再维护公开 Demo，请以本地或自建环境验证为准
 - 用户名：demo
 - 密码：123456
 
 # 1. Docker 部署
 
 ```shell
-docker run -p 8080:8080 datart/datart 
+docker run -p 8080:8080 yubi/yu-bi
 ```
 启动后可访问 <http://docker_ip:8080>  
 默认账户:用户名`demo`,密码`123456`
@@ -19,7 +19,7 @@ docker run -p 8080:8080 datart/datart
 ## 1.1. 配置外部数据库
 在没有外部数据库配置的情况下，Datart使用H2作为应用程序数据库。 强烈建议您将自己的Mysql数据库配置为应用程序数据库。  
 
-创建空文件 `datart.conf` ,将以下内容粘贴到到文件中。
+创建空文件 `datart.conf`，将以下内容写入。
 
 ```shell
 # 数据库连接配置
@@ -33,23 +33,23 @@ datasource.password=
 server.port=8080
 server.address=0.0.0.0
 
-# datart config
+# yu-bi config
 datart.address=http://127.0.0.1
 datart.send-mail=false
 datart.webdriver-path=http://127.0.0.1:4444/wd/hub
 ```
 
-运行 `docker run -d --name datart -v your_path/datart.conf:/datart/config/datart.conf -p 8080:8080 datart/datart`
+运行 `docker run -d --name yu-bi -v your_path/datart.conf:/datart/config/datart.conf -p 8080:8080 yubi/yu-bi`
 
 ## 1.2. 将用户文件挂载到外部
 
 默认配置下，用户文件（头像，文件数据源等）保存在 `files` 文件夹下，将这个路径挂载到外部，以在进行应用升级时，能够保留这些文件。
 
-在配置文件中增加参数 `-v your_path/files:/datart/files` 即可。以下是完整命令
+在命令中增加参数 `-v your_path/files:/datart/files` 即可。以下是完整命令：
 
-`docker run -d --name datart -v your_path/datart.conf:/datart/config/datart.conf -v your_path/files:/datart/files -p 8080:8080 datart/datart`
+`docker run -d --name yu-bi -v your_path/datart.conf:/datart/config/datart.conf -v your_path/files:/datart/files -p 8080:8080 yubi/yu-bi`
 
-***更多配置，访问 <http://running-elephant.gitee.io/datart-docs/docs/index.html> ***
+***更多配置请以当前仓库文档与配置文件示例为准。***
 
 # 2. 本地部署 
 ## 2.1. 环境准备
@@ -98,7 +98,7 @@ unzip yu-bi-server-1.0.0-beta.x-install.zip
 mysql> CREATE DATABASE `datart` CHARACTER SET 'utf8' COLLATE 'utf8_general_ci';
 ```
 
-***注意：1.0.0-beta.2版本以前，需要手动执行`bin/datart.sql`来初始化数据库。此版本及以上版本，创建好数据库即可，在初次连接时会自动初始化数据库***
+***注意：较老历史版本曾需要额外初始化脚本；当前维护线下，创建好数据库即可，在初次连接时会自动初始化数据库。***
 
 ***首次连接数据库(或者版本升级)时,建议使用一个权限较高的数据库账号登录(如root账号)。因为首次连接会执行数据库初始化脚本，如果使用的数据库账号权限太低，会导致数据库初始化失败***
 
@@ -216,7 +216,7 @@ docker run -p 4444:4444 -d --name selenium-chrome --shm-size="2g" selenium/stand
 *注意：启动脚本 已更新了 start|stop|status|restart*
 
 ```base
-${DATART_HOME}/bin/yu-bi-server.sh (start|stop|status|restart)
+${YUBI_HOME}/bin/yu-bi-server.sh (start|stop|status|restart)
 ```
 
 ### 2.5 访问服务

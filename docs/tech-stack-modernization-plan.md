@@ -144,6 +144,10 @@
   - Maven 模块坐标改为 `yubi` / `yu-bi-*`
   - 安装包、脚本名、Docker 打包输入改为 `yu-bi-server`
   - 保持 `datart.*` Java 包名、配置前缀与稳定内部标识不变
+- 安装包闭环验证已打通：
+  - `yu-bi-server-*.zip` 可正常解压
+  - `scripts/check-demo-health.sh` 在真实端口绑定环境中可通过健康检查
+  - 当前沙箱内的端口绑定失败属于环境限制，不是安装包链缺陷
 
 ### 4.3 近期里程碑提交
 
@@ -208,7 +212,7 @@
 
 1. 时间体系剩余调用点继续收口
 2. `flexlayout-react` / `react-grid-layout` 进一步盘点可补的小范围稳定化点
-3. Docker / 安装包闭环验证
+3. Docker / 安装包对外文档与运行指引继续收口
 
 ## 8. 每轮固定门禁
 
