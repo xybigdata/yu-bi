@@ -15,10 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Form, FormItemProps, InputNumber } from 'antd';
+import { Form, InputNumber } from 'antd';
+import type { InputNumberProps } from 'antd';
 import React, { memo } from 'react';
-export interface NumberSetFormProps extends FormItemProps<any> {
-  onChange?: (value) => any;
+type NumberValue = InputNumberProps['value'];
+
+export interface NumberSetFormProps {
+  onChange?: (value: NumberValue | null) => void;
+  name?: string | number | (string | number)[];
+  label?: React.ReactNode;
+  required?: boolean;
+  preserve?: boolean;
 }
 export const NumberSetForm: React.FC<NumberSetFormProps> = memo(
   ({ onChange, required, ...rest }) => {

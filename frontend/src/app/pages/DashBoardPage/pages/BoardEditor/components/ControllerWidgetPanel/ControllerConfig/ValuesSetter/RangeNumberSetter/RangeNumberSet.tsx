@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Form, FormItemProps, InputNumber } from 'antd';
+import { Form, InputNumber } from 'antd';
 import type { InputNumberProps } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import React, { memo, useEffect, useState } from 'react';
@@ -23,10 +23,11 @@ import { ControllerValuesName } from '../..';
 import { rangeNumberValidator } from '../../../utils';
 
 type NumberValue = InputNumberProps['value'];
+type RangeNumberValue = [NumberValue?, NumberValue?];
 
 export const RangeNumberSetter: React.FC<{}> = memo(() => {
   const tc = useI18NPrefix(`viz.control`);
-  const itemProps: FormItemProps<any> = {
+  const itemProps = {
     preserve: true,
     name: ControllerValuesName,
     label: tc('defaultValue'),
@@ -34,9 +35,13 @@ export const RangeNumberSetter: React.FC<{}> = memo(() => {
   };
   return <RangeNumberSetForm {...itemProps} />;
 });
-export interface RangeNumberSetFormProps extends FormItemProps<any> {
-  onChange?: () => any;
-  value?: any[];
+export interface RangeNumberSetFormProps {
+  onChange?: (value?: RangeNumberValue) => void;
+  value?: RangeNumberValue;
+  name?: string | number | (string | number)[];
+  label?: React.ReactNode;
+  required?: boolean;
+  preserve?: boolean;
 }
 export const RangeNumberSetForm: React.FC<RangeNumberSetFormProps> = memo(
   ({ onChange, value, ...rest }) => {
@@ -51,17 +56,19 @@ export const RangeNumberSetForm: React.FC<RangeNumberSetFormProps> = memo(
   },
 );
 export interface RangeNumberSetProps {
-  onChange?: (value) => any;
-  value?: any[];
+  onChange?: (value?: RangeNumberValue) => void;
+  value?: RangeNumberValue;
 }
 export const RangeNumberSet: React.FC<RangeNumberSetProps> = memo(
   ({ onChange, value }) => {
     const [startVal, setStartVal] = useState<NumberValue>();
     const [endVal, setEndVal] = useState<NumberValue>();
-    const onStartChange = start => {
+    const onStartChange = (start: NumberValue) => {
+      setStartVal(start);
       onChange?.([start, endVal]);
     };
-    const onEndChange = end => {
+    const onEndChange = (end: NumberValue) => {
+      setEndVal(end);
       onChange?.([startVal, end]);
     };
     useEffect(() => {

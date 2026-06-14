@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { FormItemProps } from 'antd';
 import React from 'react';
 import { ControllerValuesName } from '../..';
 import { NumberSetForm } from './NumberSetFrom';
@@ -24,7 +23,7 @@ export interface NumberSetterProps {
   label: string;
 }
 export const NumberSetter: React.FC<NumberSetterProps> = ({ label }) => {
-  const itemProps: FormItemProps<any> = {
+  const itemProps = {
     preserve: true,
     name: ControllerValuesName,
     label: label,
