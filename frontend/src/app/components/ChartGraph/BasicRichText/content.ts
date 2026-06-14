@@ -8,6 +8,11 @@ const isDeltaStatic = (value: unknown): value is DeltaStatic => {
   return !!value && typeof value === 'object' && Array.isArray((value as DeltaLike).ops);
 };
 
+const looksLikeStructuredRichText = (value: string) => {
+  const trimmed = value.trim();
+  return trimmed.startsWith('{') || trimmed.startsWith('[');
+};
+
 export const normalizeRichTextValue = (
   value: unknown,
 ): DeltaStatic | string => {
@@ -27,6 +32,10 @@ export const parseRichTextContent = (
 ): DeltaStatic | string => {
   if (!value) {
     return '';
+  }
+
+  if (!looksLikeStructuredRichText(value)) {
+    return value;
   }
 
   try {
