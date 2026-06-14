@@ -289,27 +289,29 @@
 
 ### 6.1 正在推进
 
-当前专题：`View 消费链解析边界收口`
+当前专题：`前端配置字符串解析入口收口`
 
 本轮目标：
 
-- 继续清理消费链中残留的 `view.model`、`view.config` 裸 `JSON.parse`
-- 统一复用 `internalChartHelper` 中的兼容解析入口
-- 为无效 JSON 补齐显式回退语义，避免坏数据直接打断编辑态、看板态、图表态链路
+- 继续清理图表配置、看板配置等消费链中残留的裸 `JSON.parse(config)`
+- 优先复用现有迁移函数与局部兼容解析入口，不新造大抽象
+- 为无效配置字符串补齐显式回退语义，避免坏数据直接打断任务下载、图表详情、看板详情与复制链路
 
 当前已落地范围：
 
-- `transformMeta`、`transformHierarchyMeta`、`transformToHierarchyModel`、`transformToViewConfig` 统一走兼容解析入口
-- `ChartEditor`、`ChartWorkbenchPage`、`DashBoardPage board/widget`、`ValuesOptionsSetter`、`ChartDtoHelper` 已改为复用统一解析入口
-- 去掉上述消费链中的局部 `try/catch + JSON.parse(view.model/config)` 与重复解析逻辑
+- `migrateChartConfig` 补齐无效 JSON 字符串回退，避免迁移入口直接抛错
+- `ChartDtoHelper`、`task`、`DashBoardPage board` 改为复用图表配置兼容解析入口
+- `SaveToDashboard`、`useSaveAsViz`、`ControllerList` 改为复用看板/组件既有解析入口，减少局部裸 `JSON.parse`
+- 去掉当前专题链路中的若干重复配置解析逻辑，保持既有业务语义不变
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/utils/__tests__/internalChartHelper.test.ts src/app/utils/__tests__/chartDtoHelper.test.ts src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts src/app/pages/DashBoardPage/utils/__tests__/board.test.ts`
+- `npm run test:ci -- src/app/migration/__tests__/migrateChartConfig.test.ts src/app/utils/__tests__/chartDtoHelper.test.ts src/__tests__/task.test.ts src/app/pages/DashBoardPage/utils/__tests__/board.test.ts`
 
 ### 6.2 最近已完成
 
+- View 消费链解析边界收口
 - 前端历史类型入口收口补强
 - 控制器配置态滑块 setter 值类型边界收口
 - 控制器配置态相对时间 setter 值类型边界收口

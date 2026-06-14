@@ -104,7 +104,12 @@ const migrationChartConfig = (config: string): string => {
   if (!config) {
     return config;
   }
-  const chartConfig = JSON.parse(config);
+  let chartConfig;
+  try {
+    chartConfig = JSON.parse(config);
+  } catch (error) {
+    return config;
+  }
   const event = new MigrationEvent(APP_VERSION_RC_0, RC0);
   const event2 = new MigrationEvent(APP_VERSION_RC_2, RC2);
   const dispatcher = new MigrationEventDispatcher(event, event2);

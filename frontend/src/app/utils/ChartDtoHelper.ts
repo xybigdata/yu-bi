@@ -37,13 +37,24 @@ import {
 } from 'app/utils/internalChartHelper';
 import { Omit } from 'utils/object';
 
+const parseChartConfig = (config?: string) => {
+  if (!config) {
+    return {};
+  }
+  try {
+    return JSON.parse(config);
+  } catch (error) {
+    return {};
+  }
+};
+
 export function convertToChartDto(data): ChartDTO {
   if (data?.view) {
     data.view = migrateView(data.view);
   }
   data.config = migrateChartConfig(data?.config);
 
-  const config = JSON.parse(data?.config || '{}');
+  const config = parseChartConfig(data?.config);
   const meta = transformHierarchyMeta(data?.view?.model);
   const viewModel = transformToHierarchyModel(data?.view?.model);
 
@@ -94,6 +105,8 @@ export function buildUpdateChartRequest({
     avatar: graphId,
   };
 }
+
+export { parseChartConfig };
 
 function extractChartConfigValueModel(config: ChartConfig): ChartConfigDTO {
   return {

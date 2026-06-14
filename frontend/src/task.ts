@@ -17,6 +17,7 @@
  */
 
 import { migrateWidgets } from 'app/migration/BoardConfig/migrateWidgets';
+import migrateChartConfig from 'app/migration/ChartConfig/migrateChartConfig';
 import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
 import {
   DataChart,
@@ -32,7 +33,7 @@ import { getWidgetMap } from 'app/pages/DashBoardPage/utils/widget';
 import { ChartConfig } from 'app/types/ChartConfig';
 import { ChartDetailConfigDTO } from 'app/types/ChartConfigDTO';
 import { ChartDTO } from 'app/types/ChartDTO';
-import { convertToChartDto } from 'app/utils/ChartDtoHelper';
+import { convertToChartDto, parseChartConfig } from 'app/utils/ChartDtoHelper';
 
 // import 'core-js/stable/map';
 // need polyfill [Object.values,Array.prototype.find,new Map]
@@ -83,10 +84,14 @@ const getBoardQueryData = (dataStr: string) => {
 
 const getChartQueryData = (dataStr: string) => {
   // see  handleCreateDownloadDataTask
-  const data: ChartDTO = JSON.parse(dataStr || '{}');
+  const data = JSON.parse(dataStr || '{}') as ChartDTO & { config?: string };
+  const migratedConfig = migrateChartConfig(data.config);
+  const chartDetailConfig = parseChartConfig(
+    migratedConfig,
+  ) as ChartDetailConfigDTO;
 
   const chartData = convertToChartDto(data);
-  const dataConfig: ChartDetailConfigDTO = chartData.config;
+  const dataConfig: ChartDetailConfigDTO = chartData.config || chartDetailConfig;
 
   const chartConfig: ChartConfig = dataConfig.chartConfig as ChartConfig;
   const builder = new ChartDataRequestBuilder(

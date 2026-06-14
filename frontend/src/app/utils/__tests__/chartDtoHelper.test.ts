@@ -51,6 +51,32 @@ describe('chartDtoHelper Test', () => {
     });
   });
 
+  test('should keep empty config object when chart config is invalid json', () => {
+    const data = {
+      config: '{invalid-json}',
+      view: {
+        model: JSON.stringify({ name: 2 }),
+      },
+    };
+    const dto = convertToChartDto(data);
+    expect(dto).toEqual({
+      config: { computedFields: [] },
+      view: {
+        meta: [
+          {
+            name: 'name',
+            path: ['name'],
+            subType: undefined,
+            category: 'field',
+            children: undefined,
+          },
+        ],
+        type: 'SQL',
+        version: APP_VERSION_BETA_4,
+      },
+    });
+  });
+
   test('should convert to chart dto for computedFields', () => {
     const data = {
       config: JSON.stringify({ id: 1 }),

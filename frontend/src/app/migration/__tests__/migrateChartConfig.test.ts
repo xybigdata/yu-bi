@@ -75,6 +75,12 @@ describe('test migrateChartConfig  ', () => {
     expect(result).toEqual(null);
   });
 
+  test('should keep original string when config is invalid json', () => {
+    const chartConfig = '{invalid-json}' as any;
+    const result = migrateChartConfig(chartConfig);
+    expect(result).toEqual(chartConfig);
+  });
+
   test('should add name fields for chartConfig computedFields', () => {
     const chartConfig = JSON.stringify({
       computedFields: [{ id: '1' }],

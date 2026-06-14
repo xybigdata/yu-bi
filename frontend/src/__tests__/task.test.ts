@@ -197,4 +197,44 @@ describe('Test getQueryData', () => {
       },
     ]);
   });
+
+  test('should keep empty download params config when chart config is invalid json', () => {
+    const dataStr = JSON.stringify({
+      name: 'invalid-chart',
+      config: '{invalid-json}',
+      view: {
+        id: 'view-1',
+        model: JSON.stringify({}),
+        config:
+          '{"concurrencyControl":true,"concurrencyControlMode":"DIRTYREAD","cache":false,"cacheExpires":0,"expensiveQuery":false}',
+      },
+    });
+
+    const params = getQueryData('chart', dataStr);
+
+    expect(JSON.parse(params)).toEqual({
+      fileName: 'invalid-chart',
+      downloadParams: [
+        {
+          cache: false,
+          cacheExpires: 0,
+          concurrencyControl: true,
+          concurrencyControlMode: 'DIRTYREAD',
+          expensiveQuery: false,
+          viewId: 'view-1',
+          groups: [],
+          aggregators: [],
+          filters: [],
+          orders: [],
+          pageInfo: {
+            countTotal: false,
+            pageSize: 1000,
+          },
+          functionColumns: [],
+          columns: [],
+          script: false,
+        },
+      ],
+    });
+  });
 });

@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { parseBoardConfig } from 'app/migration/BoardConfig/migrateBoardConfig';
+import { parseChartConfig } from 'app/utils/ChartDtoHelper';
 import { CommonFormTypes } from 'globalConstants';
 import { useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
@@ -57,7 +59,8 @@ export function useSaveAsViz() {
       let vizData = await getVizDetail(vizId, type).then(data => {
         return data;
       });
-      const boardType = JSON.parse(vizData.config || '{}')?.type;
+      const boardType = parseBoardConfig(vizData.config || '')?.type;
+      const chartConfig = parseChartConfig(vizData.config);
 
       showSaveForm({
         vizType: type,
@@ -78,7 +81,7 @@ export function useSaveAsViz() {
               ...values,
               parentId: values.parentId || null,
               index,
-              avatar: JSON.parse(vizData.config)?.chartGraphId,
+              avatar: chartConfig?.chartGraphId,
             });
 
             await dispatch(
