@@ -16,16 +16,17 @@
  * limitations under the License.
  */
 import { Form, Radio } from 'antd';
+import type { RadioChangeEvent, RadioGroupProps } from 'antd';
 import { ControlOption } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import React, { memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 export interface RadioControllerProps {
-  radioButtonType?: any;
+  radioButtonType?: RadioGroupProps['optionType'];
   options?: ControlOption[];
-  value?: any;
+  value?: string;
   placeholder?: string;
-  onChange: (values) => void;
+  onChange: (values?: string[]) => void;
   label?: React.ReactNode;
   name?: string;
   required?: boolean;
@@ -46,7 +47,7 @@ export const RadioGroupControllerForm: React.FC<RadioControllerProps> = memo(
 );
 export const RadioGroupController: React.FC<RadioControllerProps> = memo(
   ({ options, onChange, value, radioButtonType, ...rest }) => {
-    const _onChange = e => {
+    const _onChange = (e: RadioChangeEvent) => {
       onChange([e.target.value]);
     };
     const RadioItem = useMemo(() => {

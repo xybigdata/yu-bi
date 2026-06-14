@@ -121,6 +121,7 @@
   - 控制器筛选组件的 `options`、选中值和多选回调不再使用宽泛 `any`
   - `translations.ts` 的语言 JSON 递归转换补齐对象分支类型
   - 运行态控制器组件的 `value` / `onChange` / 本地状态继续按真实数值或字符串边界收紧，避免 `Slider / Number / RangeNumber / Text` 继续透传宽泛 `any`
+  - 运行态单选与时间控制器的值边界继续收紧，`RadioGroup / Time / RangeTime` 改为按真实单值、区间值和日期回调语义透传，避免继续使用宽泛 `any`
 - 富文本兼容层第一批稳定化小修
 - 富文本兼容层第二批稳定化小修：
   - `RichTextEditor` 的 `onChange` 类型边界收紧
@@ -234,10 +235,10 @@
 - 避免继续依赖 `rc-field-form/lib/interface`、`antd/es/slider` 这类内部路径
 - 这一批仍只做类型依赖收口，不改运行时行为
 
-当前正在推进的是“运行态控制器组件值类型边界收口”：
+当前正在推进的是“运行态控制器组件值类型边界收口补强”：
 
-- `Slider / Number / RangeNumber / Text` 控制器仍有少量宽泛 `any`
-- 本轮只按当前真实使用形态收紧 `value`、`onChange` 和本地状态类型
+- `RadioGroup / Time / RangeTime` 控制器仍有少量宽泛 `any`
+- 本轮只按当前真实使用形态收紧 `value`、`onChange` 和日期回调类型
 - 不改表单交互，不改运行时行为
 
 上一个已完成专题“富文本纯文本 JSON 误判保护补强”已通过：

@@ -170,7 +170,7 @@ export const ControllerWidgetCore: React.FC<{}> = memo(() => {
   //   [refreshWidgetsByFilter, widget, widgetUpdate],
   // );
   const onRangeTimeChange = useCallback(
-    (timeValues: string[] | null) => {
+    (timeValues: [string | null, string | null] | null) => {
       const nextFilterDate: ControllerDate = {
         ...controllerDate!,
         startTime: {

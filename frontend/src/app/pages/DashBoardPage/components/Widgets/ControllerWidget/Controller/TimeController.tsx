@@ -15,17 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { DatePicker, Form, FormItemProps } from 'antd';
+import { DatePicker, Form } from 'antd';
 import { PickerType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import { formatDateByPickType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/utils';
-import { toDatartDayjs } from 'app/utils/date';
+import { DatartDayjs, toDatartDayjs } from 'app/utils/date';
 import React, { memo } from 'react';
 import styled from 'styled-components';
 
+type TimeValue = string | null;
+
 export interface TimeControllerProps {
-  value?: any;
+  value?: TimeValue;
   placeholder?: string;
-  onChange: (values) => void;
+  onChange: (value: TimeValue) => void;
   label?: React.ReactNode;
   name?: string;
   required?: boolean;
@@ -47,10 +49,10 @@ export const TimeControllerForm: React.FC<TimeControllerProps> = memo(
   },
 );
 
-export interface SingleTimeSetProps extends FormItemProps<any> {
+export interface SingleTimeSetProps {
   pickerType: PickerType;
-  value?: any;
-  onChange?: any;
+  value?: TimeValue;
+  onChange?: (value: TimeValue) => void;
 }
 
 const isDateTimePickerType = (
@@ -61,13 +63,13 @@ const isDateTimePickerType = (
 
 export const TimeController: React.FC<SingleTimeSetProps> = memo(
   ({ pickerType, value, onChange }) => {
-    const handleTimeChange = time => {
+    const handleTimeChange = (time: DatartDayjs | null) => {
       if (!time) {
-        return onChange(null);
+        return onChange?.(null);
       }
 
       const newValues = formatDateByPickType(pickerType, time);
-      onChange(newValues);
+      onChange?.(newValues);
     };
 
     const pickerValue = toDatartDayjs(value);
