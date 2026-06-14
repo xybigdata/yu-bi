@@ -35,18 +35,28 @@ const toPositiveNumber = (value: unknown, fallback: number) => {
   return value;
 };
 
+const toLayoutUnit = (value: number) => Math.floor(value);
+
 const getNormalizedRect = (
   rect?: Partial<RectConfig>,
   cols: number = LAYOUT_COLS_MAP.lg,
-) => ({
-  x: toNonNegativeNumber(rect?.x, 0),
-  y: toNonNegativeNumber(rect?.y, 0),
-  width: Math.min(
-    toPositiveNumber(rect?.width, cols / 2),
+) => {
+  const width = Math.min(
+    toLayoutUnit(toPositiveNumber(rect?.width, cols / 2)),
     cols,
-  ),
-  height: toPositiveNumber(rect?.height, cols / 2),
-});
+  );
+  const x = Math.min(
+    toLayoutUnit(toNonNegativeNumber(rect?.x, 0)),
+    Math.max(cols - width, 0),
+  );
+
+  return {
+    x,
+    y: toLayoutUnit(toNonNegativeNumber(rect?.y, 0)),
+    width,
+    height: toLayoutUnit(toPositiveNumber(rect?.height, cols / 2)),
+  };
+};
 
 export default function useGridLayoutMap(layoutWidgets: Widget[]) {
   const layoutMap = useMemo(() => {

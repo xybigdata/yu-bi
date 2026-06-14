@@ -44,4 +44,41 @@ describe('getNormalizedRect', () => {
       height: LAYOUT_COLS_MAP.sm / 2,
     });
   });
+
+  test('should clamp x to keep layout item inside current cols', () => {
+    expect(
+      getNormalizedRect(
+        {
+          x: 10,
+          width: 4,
+          height: 3,
+        },
+        12,
+      ),
+    ).toEqual({
+      x: 8,
+      y: 0,
+      width: 4,
+      height: 3,
+    });
+  });
+
+  test('should normalize float values into stable layout units', () => {
+    expect(
+      getNormalizedRect(
+        {
+          x: 2.9,
+          y: 3.7,
+          width: 4.8,
+          height: 5.2,
+        },
+        12,
+      ),
+    ).toEqual({
+      x: 2,
+      y: 3,
+      width: 4,
+      height: 5,
+    });
+  });
 });
