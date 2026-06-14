@@ -26,10 +26,10 @@ import {
   Select,
   Switch,
 } from 'antd';
+import type { FormRule } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { QueryResult } from 'app/pages/MainPage/pages/ViewPage/slice/types';
 import { DataProviderAttribute } from 'app/pages/MainPage/slice/types';
-import { Rule } from 'rc-field-form/lib/interface';
 import { ReactElement } from 'react';
 import { ArrayConfig } from './ArrayConfig';
 import { FileUpload } from './FileUpload';
@@ -201,7 +201,7 @@ export function ConfigComponent({
       break;
   }
 
-  let rules: Rule[] = [];
+  let rules: FormRule[] = [];
 
   if (required) {
     rules.push({

@@ -16,11 +16,13 @@
  * limitations under the License.
  */
 import { Form, InputNumber, Select } from 'antd';
+import type { FormItemProps } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { TIME_DIRECTION, TIME_UNIT_OPTIONS } from 'globalConstants';
-import { NamePath } from 'rc-field-form/lib/interface';
 import React, { memo, useEffect, useState } from 'react';
 import { RelativeDate } from '../../../types';
+
+type NamePath = NonNullable<FormItemProps['name']>;
 export interface RelativeTimeSetProps {
   relativeName: NamePath;
   value?: any;

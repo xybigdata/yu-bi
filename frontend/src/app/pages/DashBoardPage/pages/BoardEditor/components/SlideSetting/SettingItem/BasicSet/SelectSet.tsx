@@ -16,10 +16,13 @@
  * limitations under the License.
  */
 import { Form, Select } from 'antd';
-import { NamePath } from 'rc-field-form/lib/interface';
+import type { FormItemProps } from 'antd';
 import React, { FC, memo } from 'react';
+
+type NamePath = NonNullable<FormItemProps['name']>;
+
 export const SelectSet: FC<{
-  options: any;
+  options: Array<{ value: string; name: string }>;
   value: string | undefined;
   defaultValue?: string;
   name: NamePath;
