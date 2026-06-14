@@ -15,6 +15,8 @@ export interface ControllerVisibility {
   condition?: VisibilityCondition;
 }
 export type ValueTypes = DataViewFieldType | VariableValueTypes;
+export type ControllerValue = string | number;
+export type ControllerValues = ControllerValue[];
 export interface ControlOption {
   label: string;
   value: string;
@@ -36,7 +38,7 @@ export interface ControllerConfig {
   visibility: ControllerVisibility;
   sqlOperator: FilterSqlOperator;
   valueOptions: RelationFilterValue[];
-  controllerValues: any[];
+  controllerValues: ControllerValues;
   required: boolean; // 是否允许空值
   canChangeSqlOperator?: boolean; // 是否显示 sqlOperator 切换
   assistViewFields?: string[]; //辅助添加view字段

@@ -20,7 +20,7 @@ import { Form, FormInstance, Radio, Tooltip } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ControllerWidgetContent } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { useCallback } from 'react';
-import { ControllerConfig } from '../../../types';
+import { ControllerConfig, ControllerValues } from '../../../types';
 
 export interface TreeTypeSetterProps {
   form: FormInstance<ControllerWidgetContent> | undefined;
@@ -28,6 +28,7 @@ export interface TreeTypeSetterProps {
 
 function TreeTypeSetter({ form }: TreeTypeSetterProps) {
   const t = useI18NPrefix('viz.control');
+  const EMPTY_CONTROLLER_VALUES: ControllerValues = [];
 
   const getControllerConfig = useCallback(() => {
     return form?.getFieldValue('config') as ControllerConfig;
@@ -38,12 +39,12 @@ function TreeTypeSetter({ form }: TreeTypeSetterProps) {
       config: {
         ...getControllerConfig,
         parentFields: undefined,
-        controllerValues: [],
+        controllerValues: EMPTY_CONTROLLER_VALUES,
         valueOptions: [],
         assistViewFields: [],
       },
     });
-  }, [form, getControllerConfig]);
+  }, [EMPTY_CONTROLLER_VALUES, form, getControllerConfig]);
 
   return (
     <Form.Item
