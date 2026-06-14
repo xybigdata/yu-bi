@@ -37,6 +37,10 @@ export function getDatartNowMillis() {
   return getDatartNow().valueOf();
 }
 
+export function getDatartDateAfter(offsetMillis: number) {
+  return getDatartNow().add(offsetMillis, 'millisecond').toDate();
+}
+
 export function toDatartDayjs(value?: DatartDateLike | null) {
   if (!value) {
     return null;
