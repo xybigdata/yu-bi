@@ -42,6 +42,8 @@ import {
 } from 'app/pages/MainPage/pages/VariablePage/slice/types';
 import { SubjectForm } from 'app/pages/MainPage/pages/VariablePage/SubjectForm';
 import { VariableFormModel } from 'app/pages/MainPage/pages/VariablePage/types';
+import type { VariableDefaultValueItem } from 'app/pages/MainPage/pages/VariablePage/slice/types';
+import { serializeVariableDefaultValue } from 'app/pages/MainPage/pages/VariablePage/utils';
 import { VariableForm } from 'app/pages/MainPage/pages/VariablePage/VariableForm';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import classnames from 'classnames';
@@ -192,12 +194,11 @@ export const Variables = memo(() => {
 
   const save = useCallback(
     (values: VariableFormModel) => {
-      let defaultValue: any = values.defaultValue;
-      if (values.valueType === VariableValueTypes.Date && !values.expression) {
-        defaultValue = values.defaultValue.map(d =>
-          formatDatartDate(d, values.dateFormat),
-        );
-      }
+      let defaultValue:
+        | VariableDefaultValueItem[]
+        | string
+        | undefined
+        | null = serializeVariableDefaultValue(values);
 
       try {
         if (defaultValue !== void 0 && defaultValue !== null) {

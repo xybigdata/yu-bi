@@ -19,13 +19,12 @@
 import { Select, Space } from 'antd';
 import { TimeFilterValueCategory } from 'app/constants';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
-import { formatCurrentDatartDate } from 'app/utils/date';
 import { RelativeTimeUnit } from 'globalConstants';
-import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
 import ExactTimeSelector from './ExactTimeSelector';
 import RelativeTimeSelector from './RelativeTimeSelector';
+import { getDefaultExactTime } from './utils';
 
 export type ManualTimeValue =
   | string
@@ -53,7 +52,7 @@ const ManualSingleTimeSelector: FC<
   const handleTimeCategoryChange = type => {
     setType(type);
     if (type === TimeFilterValueCategory.Exact) {
-      onTimeChange?.(formatCurrentDatartDate(TIME_FORMATTER));
+      onTimeChange?.(getDefaultExactTime());
     } else if (type === TimeFilterValueCategory.Relative) {
       onTimeChange?.({ unit: 'd', amount: 1, direction: '-' });
     } else {

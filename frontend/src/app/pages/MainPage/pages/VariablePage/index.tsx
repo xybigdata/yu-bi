@@ -78,6 +78,7 @@ import {
 } from './slice/types';
 import { SubjectForm } from './SubjectForm';
 import { VariableFormModel } from './types';
+import { serializeVariableDefaultValue } from './utils';
 import { VariableForm } from './VariableForm';
 
 export function VariablePage() {
@@ -187,12 +188,7 @@ export function VariablePage() {
   const save = useCallback(
     (values: VariableFormModel) => {
       let defaultValue: VariableDefaultValueItem[] | string | undefined | null =
-        values.defaultValue;
-      if (values.valueType === VariableValueTypes.Date && !values.expression) {
-        defaultValue = values.defaultValue.map(d =>
-          formatDatartDate(d, values.dateFormat),
-        );
-      }
+        serializeVariableDefaultValue(values);
 
       try {
         if (defaultValue !== void 0 && defaultValue !== null) {

@@ -19,22 +19,16 @@
 import { DatePicker } from 'antd';
 import { FilterConditionType } from 'app/constants';
 import { ConditionBuilder } from 'app/models/ChartFilterCondition';
-import { DatartDayjs, getDatartNow, toDatartDayjs } from 'app/utils/date';
-import { getTime, recommendTimeRangeConverter } from 'app/utils/time';
+import { DatartDayjs, getDatartNow } from 'app/utils/date';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo, useMemo } from 'react';
+import {
+  getRecommendRangeTimeValue,
+  toRangeTimeValue,
+} from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/utils';
+import type { ManualTimeValue } from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/ManualSingleTimeSelector';
 import { PresentControllerFilterProps } from '.';
 const { RangePicker } = DatePicker;
-
-const toRangeTimeValue = (t, fallbackNow: DatartDayjs): DatartDayjs => {
-  if (!t) {
-    return fallbackNow;
-  }
-  if (Boolean(t) && typeof t === 'object' && 'unit' in t) {
-    return getTime(+(t.direction + t.amount), t.unit)(t.unit, t.isStart);
-  }
-  return toDatartDayjs(t) || fallbackNow;
-};
 
 const RangeTimePickerFilter: FC<PresentControllerFilterProps> = memo(
   ({ condition, onConditionChange }) => {
@@ -47,13 +41,23 @@ const RangeTimePickerFilter: FC<PresentControllerFilterProps> = memo(
 
     const rangeTimes = useMemo<[DatartDayjs, DatartDayjs]>(() => {
       const now = getDatartNow();
+      const conditionValue = condition?.value;
       if (condition?.type === FilterConditionType.RangeTime) {
-        const startTime = toRangeTimeValue(condition?.value?.[0], now);
-        const endTime = toRangeTimeValue(condition?.value?.[1], now);
+        const rangeValue = Array.isArray(conditionValue) ? conditionValue : [];
+        const startTime = toRangeTimeValue(
+          rangeValue[0] as ManualTimeValue | null | undefined,
+          now,
+        );
+        const endTime = toRangeTimeValue(
+          rangeValue[1] as ManualTimeValue | null | undefined,
+          now,
+        );
         return [startTime, endTime];
       }
       if (condition?.type === FilterConditionType.RecommendTime) {
-        const recommendedRange = recommendTimeRangeConverter(condition?.value);
+        const recommendedRange = getRecommendRangeTimeValue(
+          typeof conditionValue === 'string' ? conditionValue : undefined,
+        );
         return [
           toRangeTimeValue(recommendedRange?.[0], now),
           toRangeTimeValue(recommendedRange?.[1], now),

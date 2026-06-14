@@ -23,14 +23,12 @@ import ChartFilterCondition, {
   ConditionBuilder,
 } from 'app/models/ChartFilterCondition';
 import { FilterCondition, TimeFilterConditionValue } from 'app/types/ChartConfig';
-import { formatDatartDate } from 'app/utils/date';
-import { getTime } from 'app/utils/time';
-import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo, useState } from 'react';
 import CurrentRangeTime from './CurrentRangeTime';
 import ManualSingleTimeSelector, {
   ManualTimeValue,
 } from './ManualSingleTimeSelector';
+import { serializeManualTimeValue } from './utils';
 
 type RangeTimeValue = [ManualTimeValue | undefined, ManualTimeValue | undefined];
 
@@ -61,16 +59,10 @@ const ManualRangeTimeSelector: FC<
   };
 
   const getRangeStringTimes = () => {
-    return rangeTimes.map(t => {
-      if (Boolean(t) && typeof t === 'object' && 'unit' in t) {
-        const time = getTime(+((t.direction || '-') + t.amount), t.unit)(
-          t.unit,
-          t.isStart,
-        );
-        return formatDatartDate(time, TIME_FORMATTER);
-      }
-      return t || '';
-    }) as [string, string];
+    return rangeTimes.map(time => serializeManualTimeValue(time)) as [
+      string,
+      string,
+    ];
   };
 
   return (

@@ -18,10 +18,11 @@
 
 import { DatePicker } from 'antd';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
-import { formatDatartDate, toDatartDayjs } from 'app/utils/date';
+import { toDatartDayjs } from 'app/utils/date';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo } from 'react';
 import type { ManualTimeValue } from './ManualSingleTimeSelector';
+import { serializeExactTime } from './utils';
 
 const ExactTimeSelector: FC<
   {
@@ -32,8 +33,7 @@ const ExactTimeSelector: FC<
   const t = useI18NPrefix(i18nPrefix);
 
   const handleTimeChange = timeValue => {
-    const timeStr = formatDatartDate(timeValue, TIME_FORMATTER);
-    onChange?.(timeStr);
+    onChange?.(serializeExactTime(timeValue));
   };
 
   return (

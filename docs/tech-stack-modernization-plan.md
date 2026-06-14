@@ -290,27 +290,27 @@
 
 ### 6.1 正在推进
 
-当前专题：`富文本兼容层运行时边界收口`
+当前专题：`时间值序列化入口收口`
 
 本轮目标：
 
-- 收口富文本编辑态与只读态共用的运行时装配逻辑
-- 去掉 `containerId` / `modules` 依赖 `useEffect + useState` 的二次同步
-- 统一 Markdown 模块、调色板和引用字段翻译的运行时边界
-- 保持富文本内容结构、保存语义与预览行为不变
+- 收口时间选择器里“精确时间 / 相对时间 -> 字符串”的重复逻辑
+- 收口变量页与视图属性页的日期默认值序列化入口
+- 保持现有时间格式、相对时间计算和保存结构不变
 
 当前已落地范围：
 
-- 新增 `runtimeHelpers.ts`，统一富文本 toolbar handlers、modules、Markdown 挂载与调色板挂载 helper
-- `ChartRichTextAdapter` 改为直接基于 `useMemo` 生成 `containerId` / `modules`
-- `ChartRichTextAdapter` 的引用字段翻译逻辑收口到纯函数，补齐 debounce 清理
-- `RichTextWidgetCore` 改为复用统一富文本运行时 helper，去掉本地重复装配逻辑
-- 新增 `runtimeHelpers.test.ts` 覆盖容器 ID、modules 构造与引用字段翻译边界
+- `ChartTimeSelector/utils.ts` 新增统一时间序列化与范围值转换 helper
+- `ExactTimeSelector`、`ManualSingleTimeSelector`、`ManualRangeTimeSelector` 改为复用统一 helper
+- `RangeTimePickerFilter` 改为复用统一范围时间转换与推荐时间区间入口
+- `VariablePage/utils.ts` 新增变量默认值日期序列化 helper
+- `VariablePage/index.tsx` 与 `ViewPage/Main/Properties/Variables.tsx` 改为复用统一日期默认值序列化入口
+- 新增时间选择器与变量默认值序列化测试
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts`
+- `npm run test:ci -- src/app/utils/__tests__/date.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/__tests__/utils.test.ts src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts`
 
 ### 6.2 最近已完成
 
@@ -329,7 +329,7 @@
 
 按这个顺序推进，避免专题扩散：
 
-1. 完成当前富文本兼容层运行时边界专题并验证通过
+1. 完成当前时间值序列化入口专题并验证通过
 2. 时间体系剩余调用点继续收口
 3. 前端依赖收口与历史入口审计继续逐个推进
 4. 安装健康度与锁文件一致性持续检查
