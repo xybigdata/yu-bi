@@ -169,6 +169,10 @@
   - 布局归一化继续补齐非法值兜底与断点列数约束，避免异常宽高或负值直接进入 RGL
   - 布局归一化继续补齐整数化与 `x + width` 越界保护，避免浮点布局值或超界坐标直接进入 RGL
   - `package.json` 依赖声明已与当前锁文件和真实运行版本同步到 `flexlayout-react 0.5.21`、`react-grid-layout 1.3.4`
+- 前端锁文件根元数据继续收口：
+  - `package-lock.json` 根依赖声明重新与 `package.json` 对齐
+  - 重点修正 `flexlayout-react`、`react-grid-layout` 与 `@types/react-grid-layout` 的历史声明残留
+  - 保持实际安装解析结果不扩散到无关依赖升级
 - `react-dev-inspector` 开发态接入移除
 - Node 运行时基线明确统一回 `Node 24`
 - Maven 对外品牌命名开始从 `datart` 向 `yu-bi` 收口：
