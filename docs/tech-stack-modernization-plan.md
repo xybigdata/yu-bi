@@ -177,6 +177,10 @@
   - `migrateBoardConfig.ts` 补齐显式迁移目标类型与 `jsonConfig` 识别，避免看板配置入口继续依赖宽泛对象分支
   - 修正 beta0 阶段 `hasResetControl` 误跟随 `hasQueryControl` 的历史逻辑，保持查询与重置开关各自独立
   - `BoardConfigProvider` 读取移动端间距时改为真实使用 `mSpace` 配置组，并补齐回归测试，确保移动端间距配置真正生效
+- widget chart 配置迁移入口继续补强：
+  - `migrateWidgetChartConfig.ts` 把历史字符串配置解析收口到显式兼容函数，不再在迁移主链里直接裸 `JSON.parse`
+  - RC2 事件分发改为走局部显式迁移目标类型，减少 widget chart 配置入口的宽泛对象透传
+  - 补齐字符串配置输入的回归测试，确保旧版字符串配置在迁移后仍能正确得到日期层级字段改写结果
 - `react-window` 专项审计与运行时包装边界收口：
   - 实际使用面确认仅剩 `VirtualTable -> SchemaTable`
   - 虚拟表格 reset 时机修正为依赖变化即时触发

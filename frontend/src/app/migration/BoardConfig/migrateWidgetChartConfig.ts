@@ -22,27 +22,62 @@ import { APP_VERSION_RC_2 } from '../constants';
 import MigrationEvent from '../MigrationEvent';
 import MigrationEventDispatcher from '../MigrationEventDispatcher';
 
+type WidgetChartConfigMigrationTarget = {
+  version?: string;
+  chartConfig?: {
+    datas?: Array<{
+      rows?: Array<{
+        category?: string;
+        colName?: string;
+        expression?: string;
+        field?: string;
+        id?: string;
+      }>;
+    }>;
+  };
+  computedFields?: Array<{
+    category?: string;
+    expression?: string;
+    name?: string;
+    id?: string;
+    type?: string;
+  }>;
+};
+
+const parseLegacyWidgetChartConfig = (
+  rawConfig: unknown,
+): WidgetChartConfigMigrationTarget | undefined => {
+  if (typeof rawConfig === 'string') {
+    try {
+      return JSON.parse(rawConfig) as WidgetChartConfigMigrationTarget;
+    } catch (error) {
+      return undefined;
+    }
+  }
+  if (rawConfig && typeof rawConfig === 'object') {
+    return rawConfig as WidgetChartConfigMigrationTarget;
+  }
+  return undefined;
+};
+
 const migrateWidgetChartConfig = (widgets: Widget[]): Widget[] => {
   if (!Array.isArray(widgets)) {
     return [];
   }
+  const eventRc2 = new MigrationEvent<WidgetChartConfigMigrationTarget>(
+    APP_VERSION_RC_2,
+    RC2,
+  );
+  const dispatcherRc2 =
+    new MigrationEventDispatcher<WidgetChartConfigMigrationTarget>(eventRc2);
   return widgets
     .map(widget => {
-      // ------------------------------------------------
-      // FIXME 1.0.0-rc.3 hotfix, will remove in next version.
-      if (typeof widget?.config?.content?.dataChart?.config === 'string') {
-        widget.config.content.dataChart.config = JSON.parse(
-          widget.config.content.dataChart.config,
-        );
-      }
-      // ------------------------------------------------
-      if (widget?.config?.content?.dataChart?.config) {
-        const event_rc_2 = new MigrationEvent(APP_VERSION_RC_2, RC2);
-        const dispatcher_rc_2 = new MigrationEventDispatcher(event_rc_2);
-
-        widget.config.content.dataChart.config = dispatcher_rc_2.process(
-          widget.config.content.dataChart.config,
-        );
+      const widgetChartConfig = parseLegacyWidgetChartConfig(
+        widget?.config?.content?.dataChart?.config,
+      );
+      if (widgetChartConfig) {
+        widget.config.content.dataChart.config =
+          dispatcherRc2.process(widgetChartConfig);
       }
 
       return widget;
