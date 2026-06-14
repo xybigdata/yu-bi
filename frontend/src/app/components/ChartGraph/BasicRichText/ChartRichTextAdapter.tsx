@@ -31,6 +31,7 @@ import {
 } from 'react';
 import styled from 'styled-components';
 import { BLUE } from 'styles/StyleConstants';
+import { normalizeRichTextValue, parseRichTextContent } from './content';
 import RichTextEditor, { RichTextEditorHandle } from './RichTextEditor';
 import type { DeltaStatic } from './quillCompat';
 import { CustomColor, QuillPalette } from './RichTextPluginLoader/CustomColor';
@@ -82,8 +83,7 @@ const ChartRichTextAdapter: FC<{
     >('color');
 
     useEffect(() => {
-      const value = (initContent && JSON.parse(initContent || '{}')) || '';
-      setQuillValue(value);
+      setQuillValue(parseRichTextContent(initContent));
     }, [initContent]);
 
     useEffect(() => {
@@ -127,7 +127,7 @@ const ChartRichTextAdapter: FC<{
 
     const quillChange = useCallback(() => {
       if (quillEditRef.current) {
-        const contents = quillEditRef.current.getContents();
+        const contents = normalizeRichTextValue(quillEditRef.current.getContents());
         setQuillValue(contents);
         contents && debouncedDataChange(JSON.stringify(contents));
       }
@@ -227,7 +227,9 @@ const ChartRichTextAdapter: FC<{
               true,
             );
             setImmediate(() => {
-              setQuillValue(quillEditRef.current?.getContents() || '');
+              setQuillValue(
+                normalizeRichTextValue(quillEditRef.current?.getContents()),
+              );
             });
           }
         }

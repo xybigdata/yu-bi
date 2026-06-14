@@ -119,6 +119,7 @@
   - `RichTextEditor` 的 `onChange` 类型边界收紧
   - `ChartRichTextAdapter` 的弱类型参数与运行时保护收口
   - `BasicRichText` 的 `getOnChange()` 返回类型收口
+  - 富文本内容安全解析与最小 Delta 结构归一化补齐，避免脏 JSON 或异常对象直接打断编辑态/只读态
 - 时间体系多批次收口：
   - 时间选择器回填链路
   - 展示与表单日期回填链路
