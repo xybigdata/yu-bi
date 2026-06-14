@@ -32,7 +32,7 @@ import {
   filterCurrentUsedComputedFields,
   mergeChartAndViewComputedField,
 } from 'app/utils/chartHelper';
-import { formatDatartDate } from 'app/utils/date';
+import { formatDatartDate, getDatartNowMillis } from 'app/utils/date';
 import { updateBy } from 'app/utils/mutation';
 import {
   BOARD_COPY_CHART_SUFFIX,
@@ -784,7 +784,7 @@ export function cloneWidgets(args: {
       let dataChart = dashboardDataChartMap[newWidget.datachartId];
       const newDataChart: DataChart = CloneValueDeep({
         ...dataChart,
-        id: dataChart.id + Date.now() + BOARD_COPY_CHART_SUFFIX,
+        id: dataChart.id + getDatartNowMillis() + BOARD_COPY_CHART_SUFFIX,
       });
       newWidget.config.originalType = ORIGINAL_TYPE_MAP.ownedChart;
       newWidget.datachartId = newDataChart.id;
