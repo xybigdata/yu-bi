@@ -18,7 +18,7 @@
 
 import { DataViewFieldType } from 'app/constants';
 import { ChartDataRequestFilter } from 'app/types/ChartDataRequest';
-import { datartDayjs, DatartDayjs } from 'app/utils/date';
+import { DatartDayjs, getDatartNow } from 'app/utils/date';
 import {
   FilterSqlOperator,
   RECOMMEND_TIME,
@@ -112,11 +112,11 @@ export function getTimeRange(
     const normalizedUnit = normalizeManipulateUnit(unit);
     const normalizedTimeUnit = normalizeOpUnit(timeUnit);
     const startTime = startOfUnit(
-      addByUnit(datartDayjs(), amount?.[0] || 0, normalizedUnit),
+      addByUnit(getDatartNow(), amount?.[0] || 0, normalizedUnit),
       normalizedTimeUnit,
     );
     const endTime = endOfUnit(
-      addByUnit(datartDayjs(), amount?.[1] || 0, normalizedUnit),
+      addByUnit(getDatartNow(), amount?.[1] || 0, normalizedUnit),
       normalizedTimeUnit,
     );
     return [
@@ -136,13 +136,13 @@ export function getTime(
     const normalizedTimeUnit = normalizeOpUnit(timeUnit);
     if (!!isStart) {
       return startOfUnit(
-        addByUnit(datartDayjs(), amountValue, normalizedUnit),
+        addByUnit(getDatartNow(), amountValue, normalizedUnit),
         normalizedTimeUnit,
       );
     }
     return startOfUnit(
       addByUnit(
-        addByUnit(datartDayjs(), amountValue, normalizedUnit),
+        addByUnit(getDatartNow(), amountValue, normalizedUnit),
         1,
         normalizedUnit,
       ),

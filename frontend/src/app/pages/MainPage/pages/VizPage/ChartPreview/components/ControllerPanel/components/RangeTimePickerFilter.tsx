@@ -19,7 +19,7 @@
 import { DatePicker } from 'antd';
 import { FilterConditionType } from 'app/constants';
 import { ConditionBuilder } from 'app/models/ChartFilterCondition';
-import { DatartDayjs, datartDayjs, toDatartDayjs } from 'app/utils/date';
+import { DatartDayjs, getDatartNow, toDatartDayjs } from 'app/utils/date';
 import { getTime, recommendTimeRangeConverter } from 'app/utils/time';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo, useMemo } from 'react';
@@ -28,12 +28,12 @@ const { RangePicker } = DatePicker;
 
 const toRangeTimeValue = (t): DatartDayjs => {
   if (!t) {
-    return datartDayjs();
+    return getDatartNow();
   }
   if (Boolean(t) && typeof t === 'object' && 'unit' in t) {
     return getTime(+(t.direction + t.amount), t.unit)(t.unit, t.isStart);
   }
-  return toDatartDayjs(t) || datartDayjs();
+  return toDatartDayjs(t) || getDatartNow();
 };
 
 const RangeTimePickerFilter: FC<PresentControllerFilterProps> = memo(
@@ -58,7 +58,7 @@ const RangeTimePickerFilter: FC<PresentControllerFilterProps> = memo(
           toRangeTimeValue(recommendedRange?.[1]),
         ];
       }
-      return [datartDayjs(), datartDayjs()];
+      return [getDatartNow(), getDatartNow()];
     }, [condition?.type, condition?.value]);
 
     return (

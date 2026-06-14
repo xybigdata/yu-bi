@@ -19,7 +19,12 @@
 import { DatePicker, Form, Modal, Radio, Select, Space } from 'antd';
 import { FormItemEx } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { DatartDayjs, datartDayjs, formatDatartDate, toDatartDayjs } from 'app/utils/date';
+import {
+  DatartDayjs,
+  formatDatartDate,
+  getDatartNow,
+  toDatartDayjs,
+} from 'app/utils/date';
 import { useMemberSlice } from 'app/pages/MainPage/pages/MemberPage/slice';
 import {
   selectMembers,
@@ -52,7 +57,7 @@ const normalizeExpiryDate = (value?: string | Date | null) => {
 };
 
 const isExpiredDateDisabled = (current?: DatartDayjs | null) => {
-  return !!current && current.isBefore(datartDayjs().endOf('day'));
+  return !!current && current.isBefore(getDatartNow().endOf('day'));
 };
 
 const ShareLinkModal: FC<{
