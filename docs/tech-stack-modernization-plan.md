@@ -165,6 +165,10 @@
   - 看板标签容器默认标签项索引的时间来源统一改走 `getDatartNowMillis()`，避免前端编辑态继续混用原生 `Date.now()`
   - 看板复制图表生成新图表 ID 的毫秒时间来源统一改走 `getDatartNowMillis()`，保持 ID 结构不变，只统一当前时间入口
   - 看板 beta4 迁移里 tab 项默认索引的时间来源统一改走 `getDatartNowMillis()`，避免迁移链路继续保留原生 `Date.now()`
+- 看板 beta4 迁移链路局部弱类型继续收口：
+  - `beta4utils.ts` 中 `nameConfig`、`padding`、tab `itemMap` 的访问改为按局部显式结构读取
+  - 去掉局部 `@ts-ignore`、`as any`、`as any[]`
+  - 保持迁移输出结构与转换语义不变
 - `react-window` 专项审计与运行时包装边界收口：
   - 实际使用面确认仅剩 `VirtualTable -> SchemaTable`
   - 虚拟表格 reset 时机修正为依赖变化即时触发
