@@ -40,8 +40,26 @@ import {
   MarkdownOptions,
 } from './RichTextPluginLoader/RichTextConfig';
 
+type RichTextField = { id?: string; name: string; value: string };
+type RichTextModuleConfig = {
+  toolbar: {
+    container: string | null;
+    handlers: {
+      color: (value: string) => void;
+      background: (value: string) => void;
+    };
+  };
+  calcfield: Record<string, never>;
+  imageDrop: boolean;
+};
+type CalcFieldInsert = {
+  calcfield?: {
+    name?: string;
+  };
+};
+
 const ChartRichTextAdapter: FC<{
-  dataList: Array<{ id: string | undefined; name: string; value: string }>;
+  dataList: RichTextField[];
   id: string;
   isEditing?: boolean;
   initContent: string | undefined;
@@ -63,7 +81,8 @@ const ChartRichTextAdapter: FC<{
     t,
   }) => {
     const [containerId, setContainerId] = useState<string>();
-    const [quillModules, setQuillModules] = useState<any>(null);
+    const [quillModules, setQuillModules] =
+      useState<RichTextModuleConfig | undefined>(undefined);
     const [open, setOpen] = useState<boolean>(false);
     const [quillValue, setQuillValue] = useState<DeltaStatic | string>('');
     const [translate, setTranslate] = useState<DeltaStatic | string>('');
@@ -94,14 +113,14 @@ const ChartRichTextAdapter: FC<{
           toolbar: {
             container: isEditing ? `#${newId}` : null,
             handlers: {
-              color: function (value: string) {
+              color: (value: string) => {
                 if (value === QuillPalette.RICH_TEXT_CUSTOM_COLOR) {
                   setCustomColorType('color');
                   setCustomColorVisible(true);
                 }
                 quillEditRef.current?.format('color', value);
               },
-              background: function (value: string) {
+              background: (value: string) => {
                 if (value === QuillPalette.RICH_TEXT_CUSTOM_COLOR) {
                   setCustomColorType('background');
                   setCustomColorVisible(true);
@@ -141,7 +160,7 @@ const ChartRichTextAdapter: FC<{
         const ops = quill.ops?.concat().map(item => {
           let insert = item.insert;
           if (insert && typeof insert !== 'string') {
-            const calcfield = (insert as Record<string, any>).calcfield;
+            const calcfield = (insert as CalcFieldInsert).calcfield;
             if (calcfield) {
               const name = calcfield?.name;
               const config = name
@@ -214,33 +233,33 @@ const ChartRichTextAdapter: FC<{
     );
 
     const selectField = useCallback(
-      (field: { id?: string; name: string; value: string } | undefined) =>
-        () => {
-          if (quillEditRef.current) {
-            if (field) {
-              if (!quillEditRef.current?.isReady()) {
-                return;
-              }
-              const text = `[${field.name}]`;
-              quillEditRef.current.insertCalcFieldItem(
-                {
-                  denotationChar: '',
-                  id: field.id,
-                  name: field.name,
-                  value: field.value,
-                  text,
-                },
-                true,
-              );
-              setImmediate(() => {
-                setQuillValue(
-                  normalizeRichTextValue(quillEditRef.current?.getContents()),
-                );
-              });
-            }
+      (field: RichTextField | undefined) => () => {
+        if (!field || !quillEditRef.current?.isReady()) {
+          return;
+        }
+
+        const text = `[${field.name}]`;
+        quillEditRef.current.insertCalcFieldItem(
+          {
+            denotationChar: '',
+            id: field.id,
+            name: field.name,
+            value: field.value,
+            text,
+          },
+          true,
+        );
+
+        queueMicrotask(() => {
+          if (!quillEditRef.current?.isReady()) {
+            return;
           }
-        },
-      [quillEditRef],
+          setQuillValue(
+            normalizeRichTextValue(quillEditRef.current.getContents()),
+          );
+        });
+      },
+      [],
     );
 
     const fieldItems = useMemo<MenuProps['items']>(() => {
