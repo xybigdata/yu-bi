@@ -29,12 +29,10 @@ import { loadMonaco } from 'app/components/MonacoEditor/runtime';
 import { ListItem } from 'app/components';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { formatDatartDate } from 'app/utils/date';
 import { getRoles } from 'app/pages/MainPage/pages/MemberPage/slice/thunks';
 import {
   VariableScopes,
   VariableTypes,
-  VariableValueTypes,
 } from 'app/pages/MainPage/pages/VariablePage/constants';
 import {
   RowPermission,
@@ -43,11 +41,14 @@ import {
 import { SubjectForm } from 'app/pages/MainPage/pages/VariablePage/SubjectForm';
 import { VariableFormModel } from 'app/pages/MainPage/pages/VariablePage/types';
 import type { VariableDefaultValueItem } from 'app/pages/MainPage/pages/VariablePage/slice/types';
-import { serializeVariableDefaultValue } from 'app/pages/MainPage/pages/VariablePage/utils';
+import {
+  serializeVariableDefaultValue,
+  serializeVariableRelationValue,
+} from 'app/pages/MainPage/pages/VariablePage/utils';
 import { VariableForm } from 'app/pages/MainPage/pages/VariablePage/VariableForm';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import classnames from 'classnames';
-import { CommonFormTypes, TIME_FORMATTER } from 'globalConstants';
+import { CommonFormTypes } from 'globalConstants';
 import {
   memo,
   ReactElement,
@@ -251,16 +252,13 @@ export const Variables = memo(() => {
     (changedRowPermissions: RowPermission[]) => {
       try {
         const changedRowPermissionsRaw = changedRowPermissions.map(cr => {
-          const dateFormat =
-            variables.find(v => v.id === cr.variableId)?.dateFormat ||
-            TIME_FORMATTER;
           return {
             ...cr,
             value: JSON.stringify(
-              cr.value &&
-                (editingVariable?.valueType === VariableValueTypes.Date
-                  ? cr.value.map(d => formatDatartDate(d, dateFormat))
-                  : cr.value),
+              serializeVariableRelationValue(
+                cr.value,
+                variables.find(v => v.id === cr.variableId),
+              ),
             ),
           };
         });

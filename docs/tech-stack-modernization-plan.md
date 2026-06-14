@@ -17,7 +17,8 @@
 
 - 工作目录：`/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi`
 - `main` 只允许 merge，不直接开发
-- 当前执行分支按专题单独创建，不在文档中写死分支名
+- 低风险改造阶段改为在单一长期分支持续推进，累计到足够批量后再 merge 回 `main`
+- 高风险或跨域专题仍单独建分支，不在文档中写死分支名
 - 默认自动 `git add`、`git commit --no-verify`
 
 ### 2.2 不直接触碰的高风险标识
@@ -290,25 +291,32 @@
 
 ### 6.1 正在推进
 
-当前专题：`时间过滤器边界收口`
+当前累计专题：`时间体系剩余调用点收口（长期低风险分支持续推进）`
 
-本轮目标：
+本批目标：
 
-- 收口图表预览控制器里的单时间与范围时间过滤器边界
-- 去掉时间过滤器中的宽泛状态值与 `as any`
-- 统一复用已有时间序列化与范围值归一化 helper
+- 收口变量权限链路里的日期数组序列化重复逻辑
+- 收口分享与调度页里的时间格式化重复逻辑
+- 继续把零散时间处理收敛到已有日期工具，不改交互语义
+
+当前累计清单：
+
+- 已完成：时间过滤器边界收口
+- 正在推进：变量权限日期序列化收口、分享/调度时间格式化收口
+- 下一批候选：看板工具层剩余 `TIME_FORMATTER` 调用点、局部历史时间 helper 继续减重
 
 当前已落地范围：
 
-- `timeFilterUtils.ts` 新增单时间与范围时间过滤器值归一化 helper
-- `TimeFilter` 改为复用统一单时间字符串序列化与读取入口
-- `RangeTimeFilter` 改为使用显式范围时间元组类型，去掉局部 `as any`
-- 补充时间过滤器局部测试，覆盖单值与范围值归一化边界
+- `VariablePage/utils.ts` 继续沉淀变量权限日期值序列化 helper
+- `VariablePage/index.tsx` 与 `ViewPage/Main/Properties/Variables.tsx` 改为复用统一 relation 序列化入口
+- `date.ts` 继续补齐范围时间格式化与“今天结束前禁用” helper
+- `date.ts` 新增标准时间串 helper，继续承接 `TIME_FORMATTER` 的零散重复调用
+- `SchedulePage/utils.ts`、`ShareLinkModal.tsx`、`DashBoardPage/utils/*`、`ChartTimeSelector/utils.ts` 改为复用统一日期工具
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/__tests__/utils.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts`
+- `npm run test:ci -- src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts src/app/utils/__tests__/date.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx`
 
 ### 6.2 最近已完成
 

@@ -1,7 +1,7 @@
 import { TIME_FORMATTER } from 'globalConstants';
 import {
   datartDayjs,
-  formatDatartDate,
+  formatDatartDateRange,
   toDatartDayjsRange,
 } from 'app/utils/date';
 import { PermissionLevels, ResourceTypes } from '../PermissionPage/constants';
@@ -92,6 +92,10 @@ export const toScheduleSubmitParams = (
     parentId,
     index,
   } = values;
+  const [startDate, endDate] = formatDatartDateRange(
+    dateRange,
+    TIME_FORMATTER,
+  );
   const jobConfig = {
       subject,
       vizContents: folderContent,
@@ -111,12 +115,8 @@ export const toScheduleSubmitParams = (
       ? cronExpression
       : getCronExpressionByPartition(values),
     type: jobType as JobTypes,
-    startDate: dateRange[0]
-      ? formatDatartDate(dateRange[0], TIME_FORMATTER)
-      : undefined,
-    endDate: dateRange[1]
-      ? formatDatartDate(dateRange[1], TIME_FORMATTER)
-      : undefined,
+    startDate,
+    endDate,
     orgId,
     parentId,
     index,

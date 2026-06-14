@@ -1,13 +1,12 @@
 import {
   type DatartDateLike,
-  formatCurrentDatartDate,
-  formatDatartDate,
+  formatCurrentDatartDateTime,
+  formatDatartDateTime,
   type DatartDayjs,
   getDatartNow,
   toDatartDayjs,
 } from 'app/utils/date';
 import { getTime, recommendTimeRangeConverter } from 'app/utils/time';
-import { TIME_FORMATTER } from 'globalConstants';
 import type { RelativeTimeUnit } from 'globalConstants';
 import type { ManualTimeValue } from './ManualSingleTimeSelector';
 
@@ -20,23 +19,22 @@ export const isRelativeTimeValue = (
 };
 
 export const getDefaultExactTime = () => {
-  return formatCurrentDatartDate(TIME_FORMATTER);
+  return formatCurrentDatartDateTime();
 };
 
 export const serializeExactTime = (time: DatartDateLike | null) => {
-  return formatDatartDate(time, TIME_FORMATTER);
+  return formatDatartDateTime(time);
 };
 
 export const serializeRelativeTime = (
   time: RelativeTimeValue,
   fallbackDirection = '-',
 ) => {
-  return formatDatartDate(
+  return formatDatartDateTime(
     getTime(+(`${time.direction || fallbackDirection}${time.amount}`), time.unit)(
       time.unit,
       time.isStart,
     ),
-    TIME_FORMATTER,
   );
 };
 

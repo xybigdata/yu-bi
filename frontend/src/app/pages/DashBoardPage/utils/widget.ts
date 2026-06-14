@@ -32,13 +32,12 @@ import {
   filterCurrentUsedComputedFields,
   mergeChartAndViewComputedField,
 } from 'app/utils/chartHelper';
-import { formatDatartDate, getDatartNowMillis } from 'app/utils/date';
+import { formatDatartDateTime, getDatartNowMillis } from 'app/utils/date';
 import { transformToHierarchyModel } from 'app/utils/internalChartHelper';
 import { updateBy } from 'app/utils/mutation';
 import {
   BOARD_COPY_CHART_SUFFIX,
   FilterSqlOperator,
-  TIME_FORMATTER,
 } from 'globalConstants';
 import produce from 'immer';
 import { CSSProperties } from 'react';
@@ -620,7 +619,7 @@ export const getWidgetMap = (
                 ...(content.config.controllerDate as any),
                 startTime: {
                   relativeOrExact: TimeFilterValueCategory.Exact,
-                  exactValue: formatDatartDate(_value?.[0], TIME_FORMATTER),
+                  exactValue: formatDatartDateTime(_value?.[0]),
                 },
               };
               break;

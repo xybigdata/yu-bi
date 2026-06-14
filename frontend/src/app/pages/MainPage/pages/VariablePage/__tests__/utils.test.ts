@@ -1,7 +1,10 @@
 import { describe, expect, test } from 'vitest';
 import { DateFormat } from 'app/constants';
 import { VariableTypes, VariableValueTypes } from '../constants';
-import { serializeVariableDefaultValue } from '../utils';
+import {
+  serializeVariableDefaultValue,
+  serializeVariableRelationValue,
+} from '../utils';
 
 describe('serializeVariableDefaultValue', () => {
   test('should format date default values with variable date format', () => {
@@ -50,5 +53,27 @@ describe('serializeVariableDefaultValue', () => {
         dateFormat: DateFormat.Date,
       }),
     ).toEqual(['demo']);
+  });
+});
+
+describe('serializeVariableRelationValue', () => {
+  test('should format relation date values with variable date format', () => {
+    expect(
+      serializeVariableRelationValue(['2024-01-02 03:04:05'], {
+        valueType: VariableValueTypes.Date,
+        dateFormat: DateFormat.Date,
+      }),
+    ).toEqual(['2024-01-02']);
+  });
+
+  test('should keep non-date relation values unchanged', () => {
+    const values = ['demo'];
+
+    expect(
+      serializeVariableRelationValue(values, {
+        valueType: VariableValueTypes.String,
+        dateFormat: DateFormat.DateTime,
+      }),
+    ).toBe(values);
   });
 });

@@ -4,6 +4,7 @@ import localeData from 'dayjs/plugin/localeData';
 import quarterOfYear from 'dayjs/plugin/quarterOfYear';
 import utc from 'dayjs/plugin/utc';
 import weekday from 'dayjs/plugin/weekday';
+import { TIME_FORMATTER } from 'globalConstants';
 import 'dayjs/locale/zh-cn';
 
 dayjs.extend(isoWeek);
@@ -100,10 +101,40 @@ export function formatCurrentDatartDate(template?: string) {
   return formatDatartDate(getDatartNow(), template);
 }
 
+export function formatDatartDateTime(value?: DatartDateLike | null) {
+  return formatDatartDate(value, TIME_FORMATTER);
+}
+
+export function formatCurrentDatartDateTime() {
+  return formatCurrentDatartDate(TIME_FORMATTER);
+}
+
 export function formatDatartDateIfValid(
   value?: DatartDateLike | null,
   template?: string,
 ) {
   const dayValue = toDatartDayjs(value);
   return dayValue ? dayValue.format(template) : undefined;
+}
+
+export function formatDatartDateRange(
+  values?:
+    | readonly [DatartDateLike?, DatartDateLike?]
+    | DatartDateLike[]
+    | null,
+  template?: string,
+) {
+  if (!values || !Array.isArray(values)) {
+    return [undefined, undefined] as const;
+  }
+
+  return [
+    formatDatartDateIfValid(values[0], template),
+    formatDatartDateIfValid(values[1], template),
+  ] as const;
+}
+
+export function isDatartDayBeforeTodayEnd(value?: DatartDateLike | null) {
+  const dayValue = toDatartDayjs(value);
+  return !!dayValue && dayValue.isBefore(getDatartNow().endOf('day'));
 }
