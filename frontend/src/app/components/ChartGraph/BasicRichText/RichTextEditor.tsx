@@ -50,6 +50,7 @@ export interface RichTextEditorHandle {
   focus: () => void;
   format: (name: string, value: unknown, source?: Sources) => DeltaStatic;
   getContents: (index?: number, length?: number) => DeltaStatic;
+  isReady: () => boolean;
   insertCalcFieldItem: (
     item: Record<string, unknown>,
     programmaticInsert?: boolean,
@@ -106,6 +107,7 @@ function RichTextEditorImpl(
     ref,
     () => ({
       blur: () => editorRef.current?.blur(),
+      isReady: () => !!editorRef.current,
       createMarkdownModule: options => {
         if (!editorRef.current) {
           throw new Error('富文本运行时尚未就绪，无法创建 Markdown 模块');
@@ -132,9 +134,15 @@ function RichTextEditorImpl(
         editorRef.current.insertCalcFieldItem(item, programmaticInsert);
       },
       off: ((eventName, handler) =>
-        editorRef.current?.off(eventName, handler)) as RichTextEditorHandle['off'],
+        editorRef.current?.off(
+          eventName,
+          handler,
+        )) as RichTextEditorHandle['off'],
       on: ((eventName, handler) =>
-        editorRef.current?.on(eventName, handler)) as RichTextEditorHandle['on'],
+        editorRef.current?.on(
+          eventName,
+          handler,
+        )) as RichTextEditorHandle['on'],
     }),
     [],
   );

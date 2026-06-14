@@ -30,6 +30,7 @@ function RichTextEditorRuntimeImpl(
     ref,
     () => ({
       blur: () => editorRef.current?.blur(),
+      isReady: () => !!editorRef.current,
       createMarkdownModule: options =>
         new MarkdownModule(getEditorInstance(), options),
       focus: () => editorRef.current?.focus(),
@@ -49,10 +50,7 @@ function RichTextEditorRuntimeImpl(
           return;
         }
         if (eventName === 'selection-change') {
-          getEditorInstance().off(
-            eventName,
-            handler as SelectionChangeHandler,
-          );
+          getEditorInstance().off(eventName, handler as SelectionChangeHandler);
           return;
         }
         getEditorInstance().off(eventName, handler as EditorChangeHandler);

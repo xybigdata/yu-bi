@@ -20,9 +20,7 @@ import {
   CustomColor,
   QuillPalette,
 } from 'app/components/ChartGraph/BasicRichText/RichTextPluginLoader/CustomColor';
-import {
-  normalizeRichTextValue,
-} from 'app/components/ChartGraph/BasicRichText/content';
+import { normalizeRichTextValue } from 'app/components/ChartGraph/BasicRichText/content';
 import RichTextEditor, {
   RichTextEditorHandle,
 } from 'app/components/ChartGraph/BasicRichText/RichTextEditor';
@@ -65,11 +63,11 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
 
   const { onEditClearActiveWidgets } = useContext(WidgetActionContext);
   const initContent = useMemo(() => {
-    return normalizeRichTextValue((widget.config.content as any).richText?.content);
+    return normalizeRichTextValue(
+      (widget.config.content as any).richText?.content,
+    );
   }, [widget.config.content]);
-  const [quillValue, setQuillValue] = useState<RichTextValue>(
-    initContent,
-  );
+  const [quillValue, setQuillValue] = useState<RichTextValue>(initContent);
   const [containerId, setContainerId] = useState<string>();
   const [quillModules, setQuillModules] = useState<any>(null);
   const markdownModuleRef = useRef<{ destroy: () => void } | null>(null);
@@ -160,7 +158,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
   const quillRef = useRef<RichTextEditorHandle>(null);
 
   useLayoutEffect(() => {
-    if (quillRef.current) {
+    if (quillRef.current?.isReady()) {
       markdownModuleRef.current?.destroy();
       markdownModuleRef.current =
         quillRef.current.createMarkdownModule(MarkdownOptions);
@@ -174,7 +172,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
 
   useEffect(() => {
     let palette: QuillPalette | null = null;
-    if (quillRef.current && containerId) {
+    if (quillRef.current?.isReady() && containerId) {
       palette = new QuillPalette(quillRef.current, {
         toolbarId: containerId,
         onChange: setCustomColor,
@@ -203,7 +201,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
   );
 
   const customColorChange = color => {
-    if (color) {
+    if (color && quillRef.current?.isReady()) {
       quillRef.current!.format(customColorType, color);
     }
     setCustomColorVisible(false);
