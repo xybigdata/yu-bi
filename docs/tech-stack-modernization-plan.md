@@ -143,6 +143,10 @@
   - `RichTextWidgetCore` 改为按显式 `richText.content` 结构读取与写回内容
   - 去掉保存链路里的裸 `JSON.parse` 与局部 `any`，保持写回结构不变
   - 富文本模块配置与自定义颜色回调按真实值类型声明
+- 富文本适配器编辑链路边界继续收口：
+  - `ChartRichTextAdapter` 的模块配置与字段引用值按真实结构声明
+  - calcfield 引用字段读取改为显式对象形态收口，减少 `Record<string, any>`
+  - 插入引用字段后的异步回写改为显式微任务调度，避免继续依赖 `setImmediate`
 - 时间体系多批次收口：
   - 时间选择器回填链路
   - 展示与表单日期回填链路
