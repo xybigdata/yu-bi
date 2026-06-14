@@ -19,9 +19,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import sqlReservedWords from 'app/assets/javascripts/sqlReservedWords';
 import { MONACO_COMPLETION_ITEM_KIND_KEYWORD } from 'app/components/MonacoEditor/runtime';
-import migrationViewConfig from 'app/migration/ViewConfig/migrationViewConfig';
-import { migrateViewConfig } from 'app/migration/ViewConfig/migrationViewDetailConfig';
-import beginViewModelMigration from 'app/migration/ViewConfig/migrationViewModelConfig';
+import { migrateView } from 'app/migration/ViewConfig/migrationViewConfig';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import i18n from 'i18next';
 import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
@@ -122,9 +120,7 @@ export const getViewDetail = createAsyncThunk<
         return rejectHandle(error, rejectWithValue);
       },
     });
-    data = migrationViewConfig(data);
-    data.config = migrateViewConfig(data.config);
-    data.model = beginViewModelMigration(data?.model, data.type);
+    data = migrateView(data) as View;
     return transformModelToViewModel(data, null, tempViewModel);
   },
 );

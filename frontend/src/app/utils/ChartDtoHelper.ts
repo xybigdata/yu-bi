@@ -17,8 +17,7 @@
  */
 
 import migrateChartConfig from 'app/migration/ChartConfig/migrateChartConfig';
-import migrationViewConfig from 'app/migration/ViewConfig/migrationViewConfig';
-import beginViewModelMigration from 'app/migration/ViewConfig/migrationViewModelConfig';
+import { migrateView } from 'app/migration/ViewConfig/migrationViewConfig';
 import {
   ChartConfig,
   ChartDataConfig,
@@ -39,10 +38,7 @@ import { Omit } from 'utils/object';
 
 export function convertToChartDto(data): ChartDTO {
   if (data?.view) {
-    data.view = migrationViewConfig(data.view);
-  }
-  if (data?.view?.model) {
-    data.view.model = beginViewModelMigration(data.view.model, data.view.type);
+    data.view = migrateView(data.view);
   }
   data.config = migrateChartConfig(data?.config);
 

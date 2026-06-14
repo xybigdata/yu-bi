@@ -29,8 +29,7 @@ import {
 } from 'antd';
 import { ControllerFacadeTypes } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import migrationViewConfig from 'app/migration/ViewConfig/migrationViewConfig';
-import beginViewModelMigration from 'app/migration/ViewConfig/migrationViewModelConfig';
+import { migrateView } from 'app/migration/ViewConfig/migrationViewConfig';
 import { BoardContext } from 'app/pages/DashBoardPage/components/BoardProvider/BoardProvider';
 import {
   OPERATOR_TYPE_OPTION,
@@ -164,10 +163,7 @@ const ValuesOptionsSetter: FC<{
       return { option: [], data: undefined };
     }
     if (data) {
-      data = migrationViewConfig(data);
-    }
-    if (data?.model) {
-      data.model = beginViewModelMigration(data.model, data.type);
+      data = migrateView(data) as View;
     }
     let meta = transformMeta(data?.model);
     const viewComputedField =

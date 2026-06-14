@@ -31,6 +31,8 @@ import {
 } from './constants';
 import {
   Column,
+  ColumnPermission,
+  ColumnPermissionRaw,
   ColumnRole,
   ColumnsModel,
   ColumnsProps,
@@ -42,6 +44,41 @@ import {
   ViewType,
   ViewViewModel,
 } from './slice/types';
+
+const parseViewConfig = (config: string): object | undefined => {
+  try {
+    return JSON.parse(config) as object;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+const parseViewModel = (model: string): HierarchyModel | undefined => {
+  try {
+    return JSON.parse(model) as HierarchyModel;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+const parseColumnPermission = (
+  permission: string,
+): string[] | undefined => {
+  try {
+    return JSON.parse(permission) as string[];
+  } catch (error) {
+    return undefined;
+  }
+};
+
+const normalizeColumnPermission = (
+  permission: ColumnPermissionRaw,
+): ColumnPermission => {
+  return {
+    ...permission,
+    columnPermission: parseColumnPermission(permission.columnPermission) || [],
+  };
+};
 
 export function generateEditingView(
   attrs?: Partial<ViewViewModel>,
@@ -345,22 +382,18 @@ export function transformModelToViewModel(
     relSubjectColumns,
     ...rest
   } = data;
+  const parsedConfig = parseViewConfig(config) || {};
+  const parsedModel = parseViewModel(model) || {};
 
   return {
     ...tempViewModel,
     ...rest,
-    config: JSON.parse(config),
-    model: JSON.parse(model),
+    config: parsedConfig,
+    model: parsedModel,
     originVariables: variables.map(v => ({ ...v, relVariableSubjects })),
     variables: variables.map(v => ({ ...v, relVariableSubjects })),
-    originColumnPermissions: relSubjectColumns.map(r => ({
-      ...r,
-      columnPermission: JSON.parse(r.columnPermission),
-    })),
-    columnPermissions: relSubjectColumns.map(r => ({
-      ...r,
-      columnPermission: JSON.parse(r.columnPermission),
-    })),
+    originColumnPermissions: relSubjectColumns.map(normalizeColumnPermission),
+    columnPermissions: relSubjectColumns.map(normalizeColumnPermission),
   };
 }
 
