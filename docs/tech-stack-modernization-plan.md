@@ -136,8 +136,10 @@
   - 列宽分摊逻辑补齐除零保护
 - `flexlayout-react` / `react-grid-layout` 使用面盘点与布局映射收口：
   - `flexlayout-react` 实际使用面确认集中在图表工作台 `ChartOperationPanel`
+  - `ChartOperationPanel` 补齐布局节点尺寸读取兜底，避免布局节点未就绪时直接取空
 - `react-grid-layout` 实际使用面确认集中在看板编辑态 `AutoBoardEditor` 与查看态 `AutoBoardCore`
   - 看板布局映射入口补齐 `pRect / mRect` 缺省值归一化，避免不完整布局数据直接传入 RGL
+  - 布局归一化继续补齐非法值兜底与断点列数约束，避免异常宽高或负值直接进入 RGL
 - `react-dev-inspector` 开发态接入移除
 - Node 运行时基线明确统一回 `Node 24`
 - Maven 对外品牌命名开始从 `datart` 向 `yu-bi` 收口：
@@ -212,7 +214,7 @@
 
 1. 时间体系剩余调用点继续收口
 2. `flexlayout-react` / `react-grid-layout` 进一步盘点可补的小范围稳定化点
-3. Docker / 安装包对外文档与运行指引继续收口
+3. 富文本兼容层继续按真实使用面补运行时防护与类型边界
 
 ## 8. 每轮固定门禁
 
