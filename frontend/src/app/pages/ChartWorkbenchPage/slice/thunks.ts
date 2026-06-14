@@ -17,8 +17,7 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import migrationViewConfig from 'app/migration/ViewConfig/migrationViewConfig';
-import beginViewModelMigration from 'app/migration/ViewConfig/migrationViewModelConfig';
+import { migrateView } from 'app/migration/ViewConfig/migrationViewConfig';
 import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
 import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
 import { ChartDataRequest } from 'app/types/ChartDataRequest';
@@ -116,13 +115,7 @@ export const fetchViewDetailAction = createAsyncThunk(
       url: `views/${arg}`,
     });
     if (response?.data) {
-      response.data = migrationViewConfig(response.data);
-    }
-    if (response?.data?.model) {
-      response.data.model = beginViewModelMigration(
-        response.data?.model,
-        response.data.type,
-      );
+      response.data = migrateView(response.data) as View;
     }
     return response.data;
   },

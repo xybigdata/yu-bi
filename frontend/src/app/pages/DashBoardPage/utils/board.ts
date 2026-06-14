@@ -17,8 +17,7 @@
  */
 import { migrateBoardConfig } from 'app/migration/BoardConfig/migrateBoardConfig';
 import migrateChartConfig from 'app/migration/ChartConfig/migrateChartConfig';
-import migrationViewConfig from 'app/migration/ViewConfig/migrationViewConfig';
-import beginViewModelMigration from 'app/migration/ViewConfig/migrationViewModelConfig';
+import { migrateView } from 'app/migration/ViewConfig/migrationViewConfig';
 import {
   BoardInfo,
   BoardType,
@@ -199,10 +198,7 @@ export const getChartDataView = (views: View[], dataCharts: DataChart[]) => {
     const dataChart = dataCharts.find(dc => dc.viewId === view.id);
 
     if (view) {
-      view = migrationViewConfig(view);
-    }
-    if (view?.model) {
-      view.model = beginViewModelMigration(view.model, view.type);
+      view = migrateView(view) as View;
     }
     const meta = transformMeta(view.model);
     const viewComputedFields =

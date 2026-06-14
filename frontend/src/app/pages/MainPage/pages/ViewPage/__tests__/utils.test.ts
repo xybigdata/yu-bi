@@ -22,6 +22,7 @@ import {
   addPathToHierarchyStructureAndChangeName,
   dataModelColumnSorter,
   diffMergeHierarchyModel,
+  transformModelToViewModel,
 } from '../utils';
 
 describe('dataModelColumnSorter test', () => {
@@ -458,5 +459,67 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
         ],
       },
     });
+  });
+});
+
+describe('transformModelToViewModel test', () => {
+  test('should fallback when config or model is invalid json', () => {
+    const result = transformModelToViewModel(
+      {
+        id: 'view-1',
+        name: 'view-1',
+        parentId: null,
+        index: 1,
+        script: 'select 1',
+        type: 'SQL',
+        config: '{invalid-json}',
+        model: '{invalid-json}',
+        variables: [],
+        relVariableSubjects: [],
+        relSubjectColumns: [],
+      },
+      null,
+    );
+
+    expect(result.config).toEqual({});
+    expect(result.model).toEqual({});
+  });
+
+  test('should fallback invalid column permission to empty array', () => {
+    const result = transformModelToViewModel(
+      {
+        id: 'view-2',
+        name: 'view-2',
+        parentId: null,
+        index: 1,
+        script: 'select 1',
+        type: 'SQL',
+        config: '{}',
+        model: '{}',
+        variables: [],
+        relVariableSubjects: [],
+        relSubjectColumns: [
+          {
+            id: 'permission-1',
+            viewId: 'view-2',
+            subjectId: 'subject-1',
+            subjectType: 'USER',
+            columnPermission: '{invalid-json}',
+          },
+        ],
+      },
+      null,
+    );
+
+    expect(result.originColumnPermissions).toEqual([
+      expect.objectContaining({
+        columnPermission: [],
+      }),
+    ]);
+    expect(result.columnPermissions).toEqual([
+      expect.objectContaining({
+        columnPermission: [],
+      }),
+    ]);
   });
 });

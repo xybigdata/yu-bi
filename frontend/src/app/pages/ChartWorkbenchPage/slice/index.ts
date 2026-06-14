@@ -18,7 +18,6 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { migrateChartConfig } from 'app/migration';
-import { migrateViewConfig } from 'app/migration/ViewConfig/migrationViewDetailConfig';
 import ChartManager from 'app/models/ChartManager';
 import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
 import ChartDataView from 'app/types/ChartDataView';
@@ -194,7 +193,6 @@ const workbenchSlice = createSlice({
         if (index !== undefined) {
           state.currentDataView = {
             ...payload,
-            config: migrateViewConfig(payload.config),
             meta,
             computedFields,
           };
