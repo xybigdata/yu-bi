@@ -16,20 +16,26 @@
  * limitations under the License.
  */
 import { Form, InputNumber } from 'antd';
+import type { InputNumberProps } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import React, { memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-export interface TextControllerProps {
-  value?: any;
+type NumberValue = InputNumberProps['value'];
+type InputEnterEvent = React.KeyboardEvent<HTMLInputElement> & {
+  currentTarget: HTMLInputElement;
+};
+
+export interface NumberControllerProps {
+  value?: NumberValue;
   placeholder?: string;
-  onChange: (values) => void;
+  onChange: (value?: NumberValue | string) => void;
   label?: React.ReactNode;
   name?: string;
   required?: boolean;
 }
 
-export const NumberControllerForm: React.FC<TextControllerProps> = memo(
+export const NumberControllerForm: React.FC<NumberControllerProps> = memo(
   ({ label, name, required, ...rest }) => {
     return (
       <Form.Item
@@ -43,14 +49,14 @@ export const NumberControllerForm: React.FC<TextControllerProps> = memo(
     );
   },
 );
-export const NumberController: React.FC<TextControllerProps> = memo(
+export const NumberController: React.FC<NumberControllerProps> = memo(
   ({ onChange, value }) => {
-    const [val, setVal] = useState();
-    const _onChange = numberVal => {
+    const [val, setVal] = useState<NumberValue>();
+    const _onChange = (numberVal: NumberValue) => {
       setVal(numberVal);
     };
-    const _onChangeEnter = e => {
-      onChange(e.target.value);
+    const _onChangeEnter = (e: InputEnterEvent) => {
+      onChange(e.currentTarget.value);
     };
     const _onBlur = () => {
       if (val !== value) {

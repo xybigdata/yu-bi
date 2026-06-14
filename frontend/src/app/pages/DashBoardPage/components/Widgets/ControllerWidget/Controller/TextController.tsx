@@ -21,9 +21,9 @@ import React, { memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 export interface TextControllerProps {
-  value?: any;
+  value?: string;
   placeholder?: string;
-  onChange: (values) => void;
+  onChange: (value?: string) => void;
   label?: React.ReactNode;
   name?: string;
   required?: boolean;
@@ -45,12 +45,16 @@ export const TextControllerForm: React.FC<TextControllerProps> = memo(
 );
 export const TextController: React.FC<TextControllerProps> = memo(
   ({ onChange, value }) => {
-    const [val, setVal] = useState();
-    const _onChange = e => {
+    const [val, setVal] = useState<string>();
+    const _onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setVal(e.target.value);
     };
-    const _onChangeEnter = e => {
-      onChange(e.target.value);
+    const _onChangeEnter = (
+      e: React.KeyboardEvent<HTMLInputElement> & {
+        currentTarget: HTMLInputElement;
+      },
+    ) => {
+      onChange(e.currentTarget.value);
     };
     const _onBlur = () => {
       if (val !== value) {

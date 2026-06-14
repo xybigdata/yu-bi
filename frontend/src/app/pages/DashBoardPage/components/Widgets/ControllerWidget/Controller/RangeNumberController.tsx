@@ -23,11 +23,15 @@ import React, { memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 type NumberValue = InputNumberProps['value'];
+type RangeNumberValue = [NumberValue?, NumberValue?];
+type InputEnterEvent = React.KeyboardEvent<HTMLInputElement> & {
+  currentTarget: HTMLInputElement;
+};
 
 export interface NumberControllerFormProps {
-  value?: any;
+  value?: RangeNumberValue;
   placeholder?: string;
-  onChange: (values) => void;
+  onChange: (values?: RangeNumberValue) => void;
   label?: React.ReactNode;
   name?: string;
   required?: boolean;
@@ -47,27 +51,27 @@ export const RangeNumberControllerForm: React.FC<NumberControllerFormProps> =
     );
   });
 export interface RangeNumberSetProps {
-  onChange?: (value) => any;
-  value?: any[];
+  onChange?: (value?: RangeNumberValue) => void;
+  value?: RangeNumberValue;
 }
 export const RangeNumberController: React.FC<RangeNumberSetProps> = memo(
   ({ onChange, value }) => {
     const [startVal, setStartVal] = useState<NumberValue>();
     const [endVal, setEndVal] = useState<NumberValue>();
 
-    const _onStartValEnter = e => {
-      onChange?.([e.target.value, endVal]);
+    const _onStartValEnter = (e: InputEnterEvent) => {
+      onChange?.([e.currentTarget.value, endVal]);
     };
 
-    const _onEndValEnter = e => {
-      onChange?.([startVal, e.target.value]);
+    const _onEndValEnter = (e: InputEnterEvent) => {
+      onChange?.([startVal, e.currentTarget.value]);
     };
 
-    const onStartChange = start => {
+    const onStartChange = (start: NumberValue) => {
       setStartVal(start);
     };
 
-    const onEndChange = end => {
+    const onEndChange = (end: NumberValue) => {
       setEndVal(end);
     };
 
