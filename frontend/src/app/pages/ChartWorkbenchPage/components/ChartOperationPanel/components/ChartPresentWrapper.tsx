@@ -27,6 +27,7 @@ import styled from 'styled-components';
 import { SPACE_MD } from 'styles/StyleConstants';
 import ChartGraphPanel from './ChartGraphPanel';
 import ChartPresentPanel from './ChartPresentPanel';
+import { getStableContainerSize } from '../layoutRuntime';
 
 const ChartPresentWrapper: FC<{
   containerHeight?: number;
@@ -64,6 +65,7 @@ const ChartPresentWrapper: FC<{
     const borderWidth = useMemo(() => {
       return +SPACE_MD.replace('px', '');
     }, []);
+    const graphPanelHeight = ChartGraphPanelRef?.current?.offsetHeight ?? 0;
 
     return (
       <StyledChartPresentWrapper borderWidth={borderWidth}>
@@ -76,12 +78,8 @@ const ChartPresentWrapper: FC<{
             />
           </div>
           <ChartPresentPanel
-            containerHeight={
-              (containerHeight || 0) -
-              borderWidth -
-              (ChartGraphPanelRef?.current?.offsetHeight || 0)
-            }
-            containerWidth={(containerWidth || 0) - borderWidth}
+            containerHeight={getStableContainerSize(containerHeight, borderWidth + graphPanelHeight)}
+            containerWidth={getStableContainerSize(containerWidth, borderWidth)}
             chart={chart}
             dataset={dataset}
             expensiveQuery={expensiveQuery}

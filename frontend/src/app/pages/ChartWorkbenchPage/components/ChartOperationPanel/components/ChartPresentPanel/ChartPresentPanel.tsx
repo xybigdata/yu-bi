@@ -46,6 +46,7 @@ import Chart404Graph from './components/Chart404Graph';
 import ChartTypeSelector, {
   ChartPresentType,
 } from './components/ChartTypeSelector';
+import { getStableContainerSize } from '../../layoutRuntime';
 
 const CHART_TYPE_SELECTOR_HEIGHT_OFFSET = 50;
 const CHART_DRILL_PATH_HEIGHT = 40;
@@ -113,10 +114,7 @@ const ChartPresentPanel: FC<{
     const renderReusableChartContainer = () => {
       const style = {
         width: containerWidth,
-        height:
-          (containerHeight || CHART_TYPE_SELECTOR_HEIGHT_OFFSET) -
-          CHART_TYPE_SELECTOR_HEIGHT_OFFSET -
-          CHART_DRILL_PATH_HEIGHT,
+        height: getStableContainerSize(containerHeight, CHART_TYPE_SELECTOR_HEIGHT_OFFSET + CHART_DRILL_PATH_HEIGHT),
       };
 
       const containerId = chart?.isISOContainer

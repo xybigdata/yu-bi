@@ -142,6 +142,7 @@
 - `flexlayout-react` / `react-grid-layout` 使用面盘点与布局映射收口：
   - `flexlayout-react` 实际使用面确认集中在图表工作台 `ChartOperationPanel`
   - `ChartOperationPanel` 补齐布局节点尺寸读取兜底，避免布局节点未就绪时直接取空
+  - `ChartOperationPanel` 尺寸适配链继续补齐有限数值、非负整数与预留空间扣减保护，避免布局瞬态下向图表容器透传负值或异常尺寸
 - `react-grid-layout` 实际使用面确认集中在看板编辑态 `AutoBoardEditor` 与查看态 `AutoBoardCore`
   - 看板布局映射入口补齐 `pRect / mRect` 缺省值归一化，避免不完整布局数据直接传入 RGL
   - 布局归一化继续补齐非法值兜底与断点列数约束，避免异常宽高或负值直接进入 RGL
@@ -210,7 +211,7 @@
 
 当前工作区正在推进的下一批仍是低到中风险交界处的小范围稳定化，不进入结构性替换。
 
-当前最近完成的是“`react-grid-layout` 布局归一化补强”，已通过：
+当前最近完成的是“`flexlayout-react` 尺寸适配保护补强”，已通过：
 
 - `npm run checkTs`
 - `npm run build:all`
@@ -218,9 +219,15 @@
 
 本轮结论是：
 
-- 布局映射统一在 `useGridLayoutMap` 收敛为稳定整数布局单元
-- 同步补齐 `x + width <= cols` 约束，避免响应式断点下布局项横向越界
-- 这一批仍然只做入口稳定化，不改看板交互语义与数据结构
+- 图表工作台布局节点尺寸统一先归一化为有限、非负整数
+- 图表预览区域的边框、标题区和钻取路径高度扣减统一走非负保护，避免向渲染容器透传负宽高
+- 这一批仍只做运行时入口稳定化，不改工作台布局模型和交互行为
+
+上一个已完成专题“`react-grid-layout` 布局归一化补强”已通过：
+
+- `npm run checkTs`
+- `npm run build:all`
+- `npm run test:ci -- --silent`
 
 上一个已完成专题“时间体系剩余调用点跟进收口（当前时间入口补齐与 UI 时间默认值统一）”已通过：
 
