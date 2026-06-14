@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { FormItemProps } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import React, { memo } from 'react';
 import { MaxValueName, MinValueName } from '../..';
@@ -25,7 +24,7 @@ export interface NumberSetterProps {
   label: string;
 }
 export const MaxValueSetter: React.FC<NumberSetterProps> = memo(({ label }) => {
-  const itemProps: FormItemProps<any> = {
+  const itemProps = {
     preserve: true,
     name: MaxValueName,
     label: label,
@@ -34,7 +33,7 @@ export const MaxValueSetter: React.FC<NumberSetterProps> = memo(({ label }) => {
   return <NumberSetForm {...itemProps} />;
 });
 export const MinValueSetter: React.FC<NumberSetterProps> = memo(({ label }) => {
-  const itemProps: FormItemProps<any> = {
+  const itemProps = {
     preserve: true,
     name: MinValueName,
     label: label,
