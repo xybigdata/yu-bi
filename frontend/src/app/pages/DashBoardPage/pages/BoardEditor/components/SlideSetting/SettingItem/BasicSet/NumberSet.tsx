@@ -16,8 +16,11 @@
  * limitations under the License.
  */
 import { Form, InputNumber } from 'antd';
-import { NamePath } from 'rc-field-form/lib/interface';
+import type { FormItemProps } from 'antd';
 import { FC, memo } from 'react';
+
+type NamePath = NonNullable<FormItemProps['name']>;
+
 export const NumberSet: FC<{ label: string; name: NamePath; onChange: any }> =
   memo(({ label, name, onChange }) => {
     return (

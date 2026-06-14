@@ -114,6 +114,7 @@
 - 未使用前端依赖清理：`@antv/g2`、`html2canvas`
 - `react-resizable` 收口到 `3.0.4`
 - Ant Design 深路径导入与历史类型入口收口
+  - `rc-field-form/lib/interface` 与 `antd/es/slider` 等历史类型深路径继续收口到公开导出入口，降低对内部目录结构的耦合
 - 富文本兼容层第一批稳定化小修
 - 富文本兼容层第二批稳定化小修：
   - `RichTextEditor` 的 `onChange` 类型边界收紧
@@ -213,7 +214,7 @@
 
 当前工作区正在推进的下一批仍是低到中风险交界处的小范围稳定化，不进入结构性替换。
 
-当前最近完成的是“富文本纯文本 JSON 误判保护补强”，已通过：
+当前最近完成的是“前端历史类型入口收口补强”，已通过：
 
 - `npm run checkTs`
 - `npm run build:all`
@@ -221,11 +222,11 @@
 
 本轮结论是：
 
-- 富文本内容解析只对对象或数组形态的字符串尝试 `JSON.parse`
-- 纯文本的 `123`、`true`、`null` 不再因为被解析成原语后落入兜底分支而被清空
-- 这一批仍只做富文本内容解析边界收口，不改编辑器运行时与保存结构
+- `FormRule`、`NamePath`、`SliderProps` 等类型入口优先切回 `antd` 公开导出
+- 避免继续依赖 `rc-field-form/lib/interface`、`antd/es/slider` 这类内部路径
+- 这一批仍只做类型依赖收口，不改运行时行为
 
-上一个已完成专题“日期工具输入转换一致性补强”已通过：
+上一个已完成专题“富文本纯文本 JSON 误判保护补强”已通过：
 
 - `npm run checkTs`
 - `npm run build:all`

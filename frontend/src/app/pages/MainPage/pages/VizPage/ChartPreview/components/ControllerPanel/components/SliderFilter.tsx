@@ -16,10 +16,11 @@
  * limitations under the License.
  */
 import { Slider } from 'antd';
-import type { SliderRangeProps } from 'antd/es/slider';
 import { updateBy } from 'app/utils/mutation';
 import { FC, memo, useState } from 'react';
 import { PresentControllerFilterProps } from '.';
+
+type SliderRangeOnChange = (value: number[]) => void;
 
 const SliderFilter: FC<PresentControllerFilterProps> = memo(
   ({ condition, options, onConditionChange }) => {
@@ -29,7 +30,7 @@ const SliderFilter: FC<PresentControllerFilterProps> = memo(
       }
     });
 
-    const handleValueChange: NonNullable<SliderRangeProps['onChange']> = values => {
+    const handleValueChange: SliderRangeOnChange = values => {
       if (!Array.isArray(values) || values.length !== 2) {
         return;
       }
