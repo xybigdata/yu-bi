@@ -39,6 +39,7 @@ import {
   transformMeta,
   transformToHierarchyModel,
 } from 'app/utils/internalChartHelper';
+import { parseChartConfig } from 'app/utils/ChartDtoHelper';
 import { adaptBoardImageUrl } from '.';
 import { BoardConfigValue } from '../components/BoardProvider/BoardConfigProvider';
 import {
@@ -176,7 +177,7 @@ export const getDataChartsByServer = (
   const dataCharts: DataChart[] = serverDataCharts.map(item => {
     item.config = migrateChartConfig(item.config);
 
-    const config = JSON.parse(item.config || '{}');
+    const config = parseChartConfig(item.config);
     const viewComputerFields = transformToHierarchyModel(
       view.find(v => v.id === item.viewId)?.model,
     )?.computedFields || [];

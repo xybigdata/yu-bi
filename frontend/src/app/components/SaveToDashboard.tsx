@@ -20,6 +20,7 @@ import { Button, Input, message, Modal, Space } from 'antd';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useGetVizIcon from 'app/hooks/useGetVizIcon';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { parseBoardConfig } from 'app/migration/BoardConfig/migrateBoardConfig';
 import { ServerDashboard } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { getCascadeAccess } from 'app/pages/MainPage/Access';
 import {
@@ -98,11 +99,7 @@ const SaveToDashboard: FC<SaveToDashboardTypes> = memo(
           message.error(t('haveCharts'));
           return false;
         }
-        try {
-          handleOk(selectId, JSON.parse(data?.config || '{}')?.type);
-        } catch (error) {
-          console.log(error);
-        }
+        handleOk(selectId, parseBoardConfig(data?.config)?.type);
       },
       [handleOk, backendChartId, t],
     );

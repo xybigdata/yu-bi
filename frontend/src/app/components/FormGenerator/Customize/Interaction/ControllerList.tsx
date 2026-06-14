@@ -19,6 +19,7 @@
 import { Button, Radio, Select, Table } from 'antd';
 import type { TableColumnsType as ColumnsType } from 'antd';
 import useMount from 'app/hooks/useMount';
+import { parseServerWidget } from 'app/migration/BoardConfig/migrateWidgets';
 import { handleDateLevelsName } from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/utils';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { fetchDashboardDetail } from 'app/utils/fetch';
@@ -54,9 +55,10 @@ const ControllerList: FC<
   } as SelectPopupMatchSelectWidthCompatProps;
   const getControllerNames = data => {
     return (data?.widgets || [])
-      .map(w => JSON.parse(w.config || '{}'))
-      .filter(c => c.type === 'controller')
-      .map(c => c.name);
+      .map(w => parseServerWidget(w))
+      .filter(w => w?.config?.type === 'controller')
+      .map(w => w?.config?.name)
+      .filter(Boolean);
   };
 
   useMount(async () => {
