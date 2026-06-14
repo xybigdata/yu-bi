@@ -130,6 +130,7 @@
   - 图表预览时间筛选器的单值序列化与范围值回填边界
   - 当前时间获取入口补齐为 `getDatartNow()` / `getDatartNowMillis()` / `formatCurrentDatartDate()`
   - 图表筛选默认时间、计时器组件、同步时间提示与秒表计时链路继续收口
+  - 认证 token 过期时间计算收口到统一日期工具，避免局部直接叠加原生时间戳
 - `react-window` 专项审计与运行时包装边界收口：
   - 实际使用面确认仅剩 `VirtualTable -> SchemaTable`
   - 虚拟表格 reset 时机修正为依赖变化即时触发

@@ -19,6 +19,7 @@
 import {
   formatCurrentDatartDate,
   formatDatartDateIfValid,
+  getDatartDateAfter,
   getDatartNow,
   getDatartNowMillis,
   toDatartDayjsList,
@@ -103,6 +104,16 @@ describe('current datart time helpers', () => {
   test('should format current time with template', () => {
     expect(formatCurrentDatartDate('YYYY-MM-DD HH:mm:ss')).toMatch(
       /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
+    );
+  });
+
+  test('should create date after current time offset', () => {
+    const nowMillis = getDatartNowMillis();
+    const expiresAt = getDatartDateAfter(1500);
+
+    expect(expiresAt).toBeInstanceOf(Date);
+    expect(Math.abs(expiresAt.getTime() - (nowMillis + 1500))).toBeLessThan(
+      1000,
     );
   });
 });
