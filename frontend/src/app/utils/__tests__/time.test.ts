@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import * as dateUtils from '../date';
 import { getTime, getTimeRange, splitRangerDateFilters } from '../time';
 
 describe('test splitRangerDateFilters', () => {
@@ -124,5 +125,14 @@ describe('current time helpers in time utils', () => {
     expect(start.isValid()).toBe(true);
     expect(end.isValid()).toBe(true);
     expect(start.isBefore(end) || start.isSame(end)).toBe(true);
+  });
+
+  test('should snapshot current time once for each range calculation', () => {
+    const nowSpy = vi.spyOn(dateUtils, 'getDatartNow');
+
+    getTimeRange([0, 0], 'd')('d', 'YYYY-MM-DD HH:mm:ss');
+    getTime(0, 'd')('d', false);
+
+    expect(nowSpy).toHaveBeenCalledTimes(2);
   });
 });

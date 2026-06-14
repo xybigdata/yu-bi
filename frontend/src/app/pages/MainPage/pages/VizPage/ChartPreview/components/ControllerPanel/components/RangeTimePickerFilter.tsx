@@ -26,14 +26,14 @@ import { FC, memo, useMemo } from 'react';
 import { PresentControllerFilterProps } from '.';
 const { RangePicker } = DatePicker;
 
-const toRangeTimeValue = (t): DatartDayjs => {
+const toRangeTimeValue = (t, fallbackNow: DatartDayjs): DatartDayjs => {
   if (!t) {
-    return getDatartNow();
+    return fallbackNow;
   }
   if (Boolean(t) && typeof t === 'object' && 'unit' in t) {
     return getTime(+(t.direction + t.amount), t.unit)(t.unit, t.isStart);
   }
-  return toDatartDayjs(t) || getDatartNow();
+  return toDatartDayjs(t) || fallbackNow;
 };
 
 const RangeTimePickerFilter: FC<PresentControllerFilterProps> = memo(
@@ -46,19 +46,20 @@ const RangeTimePickerFilter: FC<PresentControllerFilterProps> = memo(
     };
 
     const rangeTimes = useMemo<[DatartDayjs, DatartDayjs]>(() => {
+      const now = getDatartNow();
       if (condition?.type === FilterConditionType.RangeTime) {
-        const startTime = toRangeTimeValue(condition?.value?.[0]);
-        const endTime = toRangeTimeValue(condition?.value?.[1]);
+        const startTime = toRangeTimeValue(condition?.value?.[0], now);
+        const endTime = toRangeTimeValue(condition?.value?.[1], now);
         return [startTime, endTime];
       }
       if (condition?.type === FilterConditionType.RecommendTime) {
         const recommendedRange = recommendTimeRangeConverter(condition?.value);
         return [
-          toRangeTimeValue(recommendedRange?.[0]),
-          toRangeTimeValue(recommendedRange?.[1]),
+          toRangeTimeValue(recommendedRange?.[0], now),
+          toRangeTimeValue(recommendedRange?.[1], now),
         ];
       }
-      return [getDatartNow(), getDatartNow()];
+      return [now, now];
     }, [condition?.type, condition?.value]);
 
     return (
