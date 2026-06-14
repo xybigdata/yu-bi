@@ -26,6 +26,7 @@ import RichTextEditor, {
 } from 'app/components/ChartGraph/BasicRichText/RichTextEditor';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { WidgetInfo } from 'app/pages/DashBoardPage/pages/Board/slice/types';
+import type { MediaWidgetContent } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { editBoardStackActions } from 'app/pages/DashBoardPage/pages/BoardEditor/slice';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
 import { getDatartNowMillis } from 'app/utils/date';
@@ -47,6 +48,22 @@ import { WidgetActionContext } from '../../ActionProvider/WidgetActionProvider';
 import { Formats, MarkdownOptions } from './config';
 
 type RichTextValue = DeltaStatic | string;
+type RichTextModuleConfig = {
+  toolbar: {
+    container: string;
+    handlers: {
+      color: (value: string) => void;
+      background: (value: string) => void;
+    };
+  };
+  imageDrop: boolean;
+};
+type RichTextWidgetRuntimeContent = MediaWidgetContent & {
+  type: 'richText';
+  richText?: {
+    content?: unknown;
+  };
+};
 
 type RichTextWidgetProps = {
   widget: Widget;
@@ -62,14 +79,16 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
   const dispatch = useAppDispatch();
 
   const { onEditClearActiveWidgets } = useContext(WidgetActionContext);
+  const widgetContent = (widget.config.content || {
+    type: 'richText',
+  }) as RichTextWidgetRuntimeContent;
   const initContent = useMemo(() => {
-    return normalizeRichTextValue(
-      (widget.config.content as any).richText?.content,
-    );
-  }, [widget.config.content]);
+    return normalizeRichTextValue(widgetContent?.richText?.content);
+  }, [widgetContent]);
   const [quillValue, setQuillValue] = useState<RichTextValue>(initContent);
   const [containerId, setContainerId] = useState<string>();
-  const [quillModules, setQuillModules] = useState<any>(null);
+  const [quillModules, setQuillModules] =
+    useState<RichTextModuleConfig | null>(null);
   const markdownModuleRef = useRef<{ destroy: () => void } | null>(null);
 
   const [customColorVisible, setCustomColorVisible] = useState<boolean>(false);
@@ -96,16 +115,14 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
           setContentSavable(false);
           return;
         }
-        const strContents = JSON.stringify(contents);
-        if (strContents !== JSON.stringify(initContent)) {
+        if (JSON.stringify(contents) !== JSON.stringify(initContent)) {
           const nextMediaWidgetContent = produce(
-            widget.config.content,
+            widgetContent,
             draft => {
-              (draft as any).richText = {
-                content: JSON.parse(strContents || '{}'),
-              };
+              draft.type = 'richText';
+              draft.richText = { content: contents };
             },
-          ) as any;
+          );
 
           dispatch(
             editBoardStackActions.changeMediaWidgetConfig({
@@ -122,7 +139,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
     dispatch,
     initContent,
     contentSavable,
-    widget.config.content,
+    widgetContent,
     widget.id,
     widgetInfo.editing,
   ]);
@@ -134,14 +151,14 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
       toolbar: {
         container: `#${newId}`,
         handlers: {
-          color: function (value) {
+          color: value => {
             if (value === QuillPalette.RICH_TEXT_CUSTOM_COLOR) {
               setCustomColorType('color');
               setCustomColorVisible(true);
             }
             quillRef.current!.format('color', value);
           },
-          background: function (value) {
+          background: value => {
             if (value === QuillPalette.RICH_TEXT_CUSTOM_COLOR) {
               setCustomColorType('background');
               setCustomColorVisible(true);
@@ -196,13 +213,13 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
   }, []);
 
   const toolbar = useMemo(
-    () => QuillPalette.getToolbar({ id: containerId as string, t }),
+    () => QuillPalette.getToolbar({ id: containerId || '', t }),
     [containerId, t],
   );
 
-  const customColorChange = color => {
+  const customColorChange = (color: string | boolean) => {
     if (color && quillRef.current?.isReady()) {
-      quillRef.current!.format(customColorType, color);
+      quillRef.current.format(customColorType, color);
     }
     setCustomColorVisible(false);
   };
