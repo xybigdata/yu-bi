@@ -15,15 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { DatePicker, FormItemProps } from 'antd';
-import { toDatartDayjs } from 'app/utils/date';
+import { DatePicker } from 'antd';
+import { DatartDayjs, toDatartDayjs } from 'app/utils/date';
 import React, { memo } from 'react';
 import { PickerType } from '../../../types';
 import { formatDateByPickType } from '../../../utils';
-export interface SingleTimeSetProps extends FormItemProps<any> {
+
+type SingleTimeValue = DatartDayjs | null;
+
+export interface SingleTimeSetProps {
   pickerType: PickerType;
-  value?: any;
-  onChange?: any;
+  value?: SingleTimeValue;
+  onChange?: (value: SingleTimeValue) => void;
 }
 
 const isDateTimePickerType = (
@@ -34,7 +37,7 @@ const isDateTimePickerType = (
 
 export const SingleTimeSet: React.FC<SingleTimeSetProps> = memo(
   ({ pickerType, value, onChange }) => {
-    function handleTimeChange(date) {
+    function handleTimeChange(date: DatartDayjs | null) {
       if (!date) {
         onChange?.(date);
         return;

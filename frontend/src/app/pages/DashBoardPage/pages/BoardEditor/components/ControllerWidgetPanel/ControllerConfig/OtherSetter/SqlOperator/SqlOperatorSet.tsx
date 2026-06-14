@@ -16,16 +16,18 @@
  * limitations under the License.
  */
 import { Select } from 'antd';
+import type { SelectProps } from 'antd';
 import React, { memo } from 'react';
+type SqlOperatorValue = SelectProps['value'];
 export interface SqlOperatorSetProps {
-  value?: any;
-  onChange?: any;
+  value?: SqlOperatorValue;
+  onChange?: (value?: SqlOperatorValue) => void;
   options: { name: string; value: string }[];
 }
 export const SqlOperatorSet: React.FC<SqlOperatorSetProps> = memo(
   ({ value, onChange, options }) => {
-    function _onChange(date) {
-      onChange?.(date);
+    function _onChange(nextValue: SqlOperatorValue) {
+      onChange?.(nextValue);
     }
 
     return (

@@ -15,17 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { FormItemProps, Radio } from 'antd';
+import { Radio } from 'antd';
+import type { RadioChangeEvent, RadioGroupProps } from 'antd';
 import React, { memo } from 'react';
-export interface RadioStyleSetProps extends FormItemProps<any> {
-  value?: any;
-  onChange?: any;
+type RadioStyleValue = RadioGroupProps['defaultValue'];
+
+export interface RadioStyleSetProps {
+  value?: RadioStyleValue;
+  onChange?: (value?: string) => void;
   options: { label: string; value: string }[];
 }
 export const RadioStyleSet: React.FC<RadioStyleSetProps> = memo(
   ({ value, onChange, options }) => {
-    function _onChange(val) {
-      onChange?.(val);
+    function _onChange(event: RadioChangeEvent) {
+      onChange?.(event.target.value);
     }
     return (
       <Radio.Group onChange={_onChange} defaultValue={value}>
