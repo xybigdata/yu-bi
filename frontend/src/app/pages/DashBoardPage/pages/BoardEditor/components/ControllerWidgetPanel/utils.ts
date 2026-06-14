@@ -42,6 +42,11 @@ import {
 } from './constants';
 import { ControllerConfig, PickerType } from './types';
 
+type ControllerFilterValueType =
+  | DataViewFieldType
+  | VariableValueTypes
+  | undefined;
+
 type FormattableDateValue = Exclude<DatartDateLike, string | Date> & {
   format: (template?: string) => string;
 };
@@ -311,8 +316,11 @@ export const getDropdownTreeControllerConfig = () => {
 
 export const filterValueTypeByControl = (
   controlType: ControllerFacadeTypes,
-  valueType: any,
+  valueType: ControllerFilterValueType,
 ) => {
+  if (!valueType) {
+    return true;
+  }
   if (NumericalControllerTypes.includes(controlType)) {
     return [VariableValueTypes.Number, DataViewFieldType.NUMERIC].includes(
       valueType,
