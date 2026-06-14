@@ -127,7 +127,9 @@ const ChartRichTextAdapter: FC<{
 
     const quillChange = useCallback(() => {
       if (quillEditRef.current) {
-        const contents = normalizeRichTextValue(quillEditRef.current.getContents());
+        const contents = normalizeRichTextValue(
+          quillEditRef.current.getContents(),
+        );
         setQuillValue(contents);
         contents && debouncedDataChange(JSON.stringify(contents));
       }
@@ -158,7 +160,7 @@ const ChartRichTextAdapter: FC<{
 
     useEffect(() => {
       let palette: QuillPalette | null = null;
-      if (quillEditRef.current && containerId) {
+      if (quillEditRef.current?.isReady() && containerId) {
         palette = new QuillPalette(quillEditRef.current, {
           toolbarId: containerId,
           onChange: setCustomColor,
@@ -171,7 +173,7 @@ const ChartRichTextAdapter: FC<{
     }, [containerId]);
 
     useLayoutEffect(() => {
-      if (quillEditRef.current) {
+      if (quillEditRef.current?.isReady()) {
         if (openQuillMarkdown) {
           quillMarkdownConfigRef.current?.destroy();
           quillMarkdownConfigRef.current =
@@ -212,28 +214,32 @@ const ChartRichTextAdapter: FC<{
     );
 
     const selectField = useCallback(
-      (field: { id?: string; name: string; value: string } | undefined) => () => {
-        if (quillEditRef.current) {
-          if (field) {
-            const text = `[${field.name}]`;
-            quillEditRef.current.insertCalcFieldItem(
-              {
-                denotationChar: '',
-                id: field.id,
-                name: field.name,
-                value: field.value,
-                text,
-              },
-              true,
-            );
-            setImmediate(() => {
-              setQuillValue(
-                normalizeRichTextValue(quillEditRef.current?.getContents()),
+      (field: { id?: string; name: string; value: string } | undefined) =>
+        () => {
+          if (quillEditRef.current) {
+            if (field) {
+              if (!quillEditRef.current?.isReady()) {
+                return;
+              }
+              const text = `[${field.name}]`;
+              quillEditRef.current.insertCalcFieldItem(
+                {
+                  denotationChar: '',
+                  id: field.id,
+                  name: field.name,
+                  value: field.value,
+                  text,
+                },
+                true,
               );
-            });
+              setImmediate(() => {
+                setQuillValue(
+                  normalizeRichTextValue(quillEditRef.current?.getContents()),
+                );
+              });
+            }
           }
-        }
-      },
+        },
       [quillEditRef],
     );
 
