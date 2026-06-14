@@ -21,11 +21,31 @@ import { LAYOUT_COLS_MAP } from '../constants';
 import { RectConfig } from '../pages/Board/slice/types';
 import { Widget } from '../types/widgetTypes';
 
-const getNormalizedRect = (rect?: Partial<RectConfig>) => ({
-  x: rect?.x ?? 0,
-  y: rect?.y ?? 0,
-  width: rect?.width ?? LAYOUT_COLS_MAP.lg / 2,
-  height: rect?.height ?? LAYOUT_COLS_MAP.lg / 2,
+const toNonNegativeNumber = (value: unknown, fallback: number) => {
+  if (typeof value !== 'number' || Number.isNaN(value) || value < 0) {
+    return fallback;
+  }
+  return value;
+};
+
+const toPositiveNumber = (value: unknown, fallback: number) => {
+  if (typeof value !== 'number' || Number.isNaN(value) || value <= 0) {
+    return fallback;
+  }
+  return value;
+};
+
+const getNormalizedRect = (
+  rect?: Partial<RectConfig>,
+  cols: number = LAYOUT_COLS_MAP.lg,
+) => ({
+  x: toNonNegativeNumber(rect?.x, 0),
+  y: toNonNegativeNumber(rect?.y, 0),
+  width: Math.min(
+    toPositiveNumber(rect?.width, cols / 2),
+    cols,
+  ),
+  height: toPositiveNumber(rect?.height, cols / 2),
 });
 
 export default function useGridLayoutMap(layoutWidgets: Widget[]) {
@@ -35,8 +55,14 @@ export default function useGridLayoutMap(layoutWidgets: Widget[]) {
       sm: [],
     };
     layoutWidgets.forEach(widget => {
-      const lg = getNormalizedRect(widget.config.pRect || widget.config.mRect);
-      const sm = getNormalizedRect(widget.config.mRect || widget.config.pRect);
+      const lg = getNormalizedRect(
+        widget.config.pRect || widget.config.mRect,
+        LAYOUT_COLS_MAP.lg,
+      );
+      const sm = getNormalizedRect(
+        widget.config.mRect || widget.config.pRect,
+        LAYOUT_COLS_MAP.sm,
+      );
       const lock = widget.config.lock;
       layoutMap.lg.push({
         i: widget.id,

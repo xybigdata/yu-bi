@@ -4,11 +4,11 @@ import { getNormalizedRect } from '../useGridLayoutMap';
 
 describe('getNormalizedRect', () => {
   test('should fallback to default auto rect when value missing', () => {
-    expect(getNormalizedRect()).toEqual({
+    expect(getNormalizedRect(undefined, LAYOUT_COLS_MAP.sm)).toEqual({
       x: 0,
       y: 0,
-      width: LAYOUT_COLS_MAP.lg / 2,
-      height: LAYOUT_COLS_MAP.lg / 2,
+      width: LAYOUT_COLS_MAP.sm / 2,
+      height: LAYOUT_COLS_MAP.sm / 2,
     });
   });
 
@@ -23,6 +23,25 @@ describe('getNormalizedRect', () => {
       y: 0,
       width: 3,
       height: LAYOUT_COLS_MAP.lg / 2,
+    });
+  });
+
+  test('should normalize invalid values and clamp width to current cols', () => {
+    expect(
+      getNormalizedRect(
+        {
+          x: -1,
+          y: Number.NaN,
+          width: 999,
+          height: 0,
+        },
+        LAYOUT_COLS_MAP.sm,
+      ),
+    ).toEqual({
+      x: 0,
+      y: 0,
+      width: LAYOUT_COLS_MAP.sm,
+      height: LAYOUT_COLS_MAP.sm / 2,
     });
   });
 });

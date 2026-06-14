@@ -27,6 +27,7 @@ import styled from 'styled-components';
 import ChartDatasetContext from '../../contexts/ChartDatasetContext';
 import ChartDataViewContext from '../../contexts/ChartDataViewContext';
 import layoutConfig, { LayoutComponentType } from './ChartOperationPanelLayout';
+import { getLayoutNodeRectSize } from './layoutRuntime';
 import ChartConfigPanel from './components/ChartConfigPanel/ChartConfigPanel';
 import ChartDataViewPanel from './components/ChartDataViewPanel';
 import ChartPresentWrapper from './components/ChartPresentWrapper';
@@ -60,7 +61,8 @@ const ChartOperationPanel: FC<{
     );
 
     const layoutFactory = node => {
-      var component = node.getComponent();
+      const component = node.getComponent();
+      const presentRect = getLayoutNodeRectSize(layout, 'present-wrapper');
 
       if (component === LayoutComponentType.VIEW) {
         return (
@@ -86,12 +88,8 @@ const ChartOperationPanel: FC<{
       if (component === LayoutComponentType.PRESENT) {
         return (
           <ChartPresentWrapper
-            containerHeight={
-              layout.getNodeById('present-wrapper').getRect().height
-            }
-            containerWidth={
-              layout.getNodeById('present-wrapper').getRect().width
-            }
+            containerHeight={presentRect.height}
+            containerWidth={presentRect.width}
             dataView={dataView}
             chart={chart}
             dataset={dataset}
