@@ -49,10 +49,31 @@ type LegacyFilterWidgetBeta3 = Omit<WidgetBeta3, 'config'> & {
 };
 
 type MigratingWidget = Widget | WidgetBeta3;
+type ServerWidgetConfigTarget = WidgetBeta3['config'];
+type RelationConfigTarget = Relation['config'];
+
+const parseServerRelationConfig = (
+  rawConfig: string,
+): RelationConfigTarget | undefined => {
+  try {
+    return JSON.parse(rawConfig) as RelationConfigTarget;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+const parseServerWidgetConfig = (
+  rawConfig: string,
+): ServerWidgetConfigTarget | undefined => {
+  try {
+    return JSON.parse(rawConfig) as ServerWidgetConfigTarget;
+  } catch (error) {
+    return undefined;
+  }
+};
 
 /**
  *
- * JSON.parse(relation.config)
  * @param {ServerRelation[]} [relations=[]]
  * @return {*}  {Relation[]}
  */
@@ -64,11 +85,11 @@ export const convertWidgetRelationsToObj = (
   }
   return relations
     .map(relation => {
-      try {
-        return { ...relation, config: JSON.parse(relation.config) };
-      } catch (error) {
+      const parsedConfig = parseServerRelationConfig(relation.config);
+      if (!parsedConfig) {
         return { ...relation };
       }
+      return { ...relation, config: parsedConfig };
     })
     .filter(re => !!re) as Relation[];
 };
@@ -191,15 +212,15 @@ const finaleWidget = (widget?: Widget) => {
   return widget;
 };
 export const parseServerWidget = (sWidget: ServerWidget) => {
-  try {
-    sWidget.config = JSON.parse(sWidget.config);
-  } catch (error) {
+  const parsedConfig = parseServerWidgetConfig(sWidget.config);
+  if (!parsedConfig) {
     return undefined;
   }
-  sWidget.relations = convertWidgetRelationsToObj(
-    sWidget.relations,
-  ) as unknown as ServerRelation[];
-  return sWidget as unknown as WidgetBeta3;
+  return {
+    ...sWidget,
+    config: parsedConfig,
+    relations: convertWidgetRelationsToObj(sWidget.relations),
+  } as WidgetBeta3;
 };
 /**
  *

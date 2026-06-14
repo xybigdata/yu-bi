@@ -181,6 +181,10 @@
   - `migrateWidgetChartConfig.ts` 把历史字符串配置解析收口到显式兼容函数，不再在迁移主链里直接裸 `JSON.parse`
   - RC2 事件分发改为走局部显式迁移目标类型，减少 widget chart 配置入口的宽泛对象透传
   - 补齐字符串配置输入的回归测试，确保旧版字符串配置在迁移后仍能正确得到日期层级字段改写结果
+- widget 服务端解析入口继续补强：
+  - `migrateWidgets.ts` 中 widget 配置与 relation 配置的字符串解析收口到局部兼容函数，不再在主链里重复裸 `JSON.parse`
+  - `parseServerWidget` 与 `convertWidgetRelationsToObj` 的异常路径补齐显式回退语义，保持坏数据不扩散到迁移主流程
+  - 补齐无效 JSON 与正常解析的回归测试，确保服务端 widget 解析入口在兼容场景下行为稳定
 - `react-window` 专项审计与运行时包装边界收口：
   - 实际使用面确认仅剩 `VirtualTable -> SchemaTable`
   - 虚拟表格 reset 时机修正为依赖变化即时触发
