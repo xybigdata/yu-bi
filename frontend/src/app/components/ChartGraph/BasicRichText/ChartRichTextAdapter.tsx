@@ -24,7 +24,6 @@ import {
   memo,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -35,28 +34,20 @@ import { normalizeRichTextValue, parseRichTextContent } from './content';
 import RichTextEditor, { RichTextEditorHandle } from './RichTextEditor';
 import type { DeltaStatic } from './quillCompat';
 import { CustomColor, QuillPalette } from './RichTextPluginLoader/CustomColor';
+import { Formats } from './RichTextPluginLoader/RichTextConfig';
 import {
-  Formats,
-  MarkdownOptions,
-} from './RichTextPluginLoader/RichTextConfig';
+  createRichTextColorHandlers,
+  createRichTextModules,
+  getRichTextContainerId,
+  translateRichTextCalcFields,
+  useRichTextMarkdownModule,
+  useRichTextPalette,
+  type RichTextColorType,
+  type RichTextFieldReference,
+  type RichTextModules,
+} from './runtimeHelpers';
 
-type RichTextField = { id?: string; name: string; value: string };
-type RichTextModuleConfig = {
-  toolbar: {
-    container: string | null;
-    handlers: {
-      color: (value: string) => void;
-      background: (value: string) => void;
-    };
-  };
-  calcfield: Record<string, never>;
-  imageDrop: boolean;
-};
-type CalcFieldInsert = {
-  calcfield?: {
-    name?: string;
-  };
-};
+type RichTextField = RichTextFieldReference & { id?: string };
 
 const ChartRichTextAdapter: FC<{
   dataList: RichTextField[];
@@ -80,14 +71,10 @@ const ChartRichTextAdapter: FC<{
     openQuillMarkdown = false,
     t,
   }) => {
-    const [containerId, setContainerId] = useState<string>();
-    const [quillModules, setQuillModules] =
-      useState<RichTextModuleConfig | undefined>(undefined);
     const [open, setOpen] = useState<boolean>(false);
     const [quillValue, setQuillValue] = useState<DeltaStatic | string>('');
     const [translate, setTranslate] = useState<DeltaStatic | string>('');
 
-    const quillMarkdownConfigRef = useRef<{ destroy: () => void } | null>(null);
     const quillRef = useRef<RichTextEditorHandle>(null);
     const quillEditRef = useRef<RichTextEditorHandle>(null);
 
@@ -97,44 +84,35 @@ const ChartRichTextAdapter: FC<{
       background: string;
       color: string;
     }>({ ...QuillPalette.RICH_TEXT_CUSTOM_COLOR_INIT });
-    const [customColorType, setCustomColorType] = useState<
-      'color' | 'background'
-    >('color');
+    const [customColorType, setCustomColorType] =
+      useState<RichTextColorType>('color');
+
+    const containerId = useMemo(() => getRichTextContainerId(id), [id]);
+    const quillColorHandlers = useMemo(
+      () =>
+        createRichTextColorHandlers({
+          editorRef: quillEditRef,
+          onOpenCustomColor: type => {
+            setCustomColorType(type);
+            setCustomColorVisible(true);
+          },
+        }),
+      [],
+    );
+    const quillModules = useMemo<RichTextModules>(
+      () =>
+        createRichTextModules({
+          containerId,
+          handlers: quillColorHandlers,
+          editable: isEditing,
+          includeCalcField: true,
+        }),
+      [containerId, isEditing, quillColorHandlers],
+    );
 
     useEffect(() => {
       setQuillValue(parseRichTextContent(initContent));
     }, [initContent]);
-
-    useEffect(() => {
-      if (id) {
-        const newId = `rich-text-${id}`;
-        setContainerId(newId);
-        const modules = {
-          toolbar: {
-            container: isEditing ? `#${newId}` : null,
-            handlers: {
-              color: (value: string) => {
-                if (value === QuillPalette.RICH_TEXT_CUSTOM_COLOR) {
-                  setCustomColorType('color');
-                  setCustomColorVisible(true);
-                }
-                quillEditRef.current?.format('color', value);
-              },
-              background: (value: string) => {
-                if (value === QuillPalette.RICH_TEXT_CUSTOM_COLOR) {
-                  setCustomColorType('background');
-                  setCustomColorVisible(true);
-                }
-                quillEditRef.current?.format('background', value);
-              },
-            },
-          },
-          calcfield: {},
-          imageDrop: true,
-        };
-        setQuillModules(modules);
-      }
-    }, [id, isEditing]);
 
     const debouncedDataChange = useMemo(
       () =>
@@ -143,6 +121,12 @@ const ChartRichTextAdapter: FC<{
         }, 300),
       [onChange],
     );
+
+    useEffect(() => {
+      return () => {
+        debouncedDataChange.cancel();
+      };
+    }, [debouncedDataChange]);
 
     const quillChange = useCallback(() => {
       if (quillEditRef.current) {
@@ -155,59 +139,18 @@ const ChartRichTextAdapter: FC<{
     }, [debouncedDataChange]);
 
     useEffect(() => {
-      if (typeof quillValue !== 'string') {
-        const quill = Object.assign({}, quillValue) as DeltaStatic;
-        const ops = quill.ops?.concat().map(item => {
-          let insert = item.insert;
-          if (insert && typeof insert !== 'string') {
-            const calcfield = (insert as CalcFieldInsert).calcfield;
-            if (calcfield) {
-              const name = calcfield?.name;
-              const config = name
-                ? dataList.find(items => items.name === name)
-                : null;
-              insert = config?.value;
-            }
-          }
-          return { ...item, insert };
-        });
-        setTranslate(ops?.length ? ({ ...quill, ops } as DeltaStatic) : '');
-      } else {
-        setTranslate(quillValue);
-      }
-    }, [quillValue, dataList, setTranslate]);
+      setTranslate(translateRichTextCalcFields(quillValue, dataList));
+    }, [quillValue, dataList]);
 
-    useEffect(() => {
-      let palette: QuillPalette | null = null;
-      if (quillEditRef.current?.isReady() && containerId) {
-        palette = new QuillPalette(quillEditRef.current, {
-          toolbarId: containerId,
-          onChange: setCustomColor,
-        });
-      }
-
-      return () => {
-        palette?.destroy();
-      };
-    }, [containerId]);
-
-    useLayoutEffect(() => {
-      if (quillEditRef.current?.isReady()) {
-        if (openQuillMarkdown) {
-          quillMarkdownConfigRef.current?.destroy();
-          quillMarkdownConfigRef.current =
-            quillEditRef.current.createMarkdownModule(MarkdownOptions);
-        } else {
-          quillMarkdownConfigRef.current?.destroy();
-          quillMarkdownConfigRef.current = null;
-        }
-      }
-
-      return () => {
-        quillMarkdownConfigRef.current?.destroy();
-        quillMarkdownConfigRef.current = null;
-      };
-    }, [openQuillMarkdown, quillModules]);
+    useRichTextPalette({
+      editorRef: quillEditRef,
+      containerId,
+      onChange: setCustomColor,
+    });
+    useRichTextMarkdownModule({
+      editorRef: quillEditRef,
+      enabled: openQuillMarkdown,
+    });
 
     const customColorChange = (color: string | boolean) => {
       if (typeof color === 'string') {
@@ -289,7 +232,7 @@ const ChartRichTextAdapter: FC<{
     const toolbar = useMemo(
       () =>
         QuillPalette.getToolbar({
-          id: containerId as string,
+          id: containerId,
           extendNodes: {
             4: (
               <Dropdown
@@ -353,8 +296,8 @@ const ChartRichTextAdapter: FC<{
     return (
       <TextWrap onClick={ssp}>
         <QuillBox id={`quill-box-${id}`}>
-          {quillModules && reactQuillEdit}
-          {quillModules && !isEditing && reactQuillView}
+          {reactQuillEdit}
+          {!isEditing && reactQuillView}
         </QuillBox>
         <Modal
           title={t?.('common.richTextPreview')}
