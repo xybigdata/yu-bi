@@ -20,14 +20,25 @@ import { getInitStoryPageConfig } from 'app/pages/StoryBoardPage/utils';
 import { setLatestVersion, versionCanDo } from '../utils';
 import { APP_VERSION_BETA_2 } from './../constants';
 
-export const parseStoryPageConfig = (storyConfig: string) => {
+const parseStoryPageConfigObject = (
+  storyConfig: string,
+): StoryPageConfig | undefined => {
   try {
-    let nextConfig: StoryPageConfig = JSON.parse(storyConfig);
-    return nextConfig;
+    return JSON.parse(storyConfig) as StoryPageConfig;
   } catch (error) {
-    let nextConfig = getInitStoryPageConfig();
-    return nextConfig;
+    return undefined;
   }
+};
+
+export const parseStoryPageConfig = (storyConfig: string) => {
+  if (!storyConfig) {
+    return getInitStoryPageConfig();
+  }
+  const nextConfig = parseStoryPageConfigObject(storyConfig);
+  if (!nextConfig) {
+    return getInitStoryPageConfig();
+  }
+  return nextConfig;
 };
 
 export const beta2 = (config: StoryPageConfig) => {
