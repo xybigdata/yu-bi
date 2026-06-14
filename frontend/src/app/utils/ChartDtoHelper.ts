@@ -32,6 +32,7 @@ import {
 import {
   mergeChartDataConfigs,
   mergeChartStyleConfigs,
+  transformToHierarchyModel,
   transformHierarchyMeta,
 } from 'app/utils/internalChartHelper';
 import { Omit } from 'utils/object';
@@ -44,12 +45,13 @@ export function convertToChartDto(data): ChartDTO {
 
   const config = JSON.parse(data?.config || '{}');
   const meta = transformHierarchyMeta(data?.view?.model);
+  const viewModel = transformToHierarchyModel(data?.view?.model);
 
   config.computedFields = createDateLevelComputedFieldForConfigComputedFields(
     meta,
     mergeChartAndViewComputedField(
       config.computedFields,
-      JSON.parse(data?.view?.model || '{}').computedFields,
+      viewModel.computedFields,
     ),
   );
 

@@ -75,6 +75,7 @@ describe('Test getQueryData', () => {
         cacheExpires: 0,
         concurrencyControl: true,
         concurrencyControlMode: 'DIRTYREAD',
+        expensiveQuery: false,
         viewId: 'e83684bc8e92431dbfb164195abe443e',
         aggregators: [
           {
@@ -160,6 +161,7 @@ describe('Test getQueryData', () => {
         cacheExpires: 0,
         concurrencyControl: true,
         concurrencyControlMode: 'DIRTYREAD',
+        expensiveQuery: false,
         viewId: '6236737d64954c8bac6cbaf478e17ff2',
         aggregators: [
           {

@@ -35,7 +35,10 @@ import {
   createDateLevelComputedFieldForConfigComputedFields,
   mergeChartAndViewComputedField,
 } from 'app/utils/chartHelper';
-import { transformMeta } from 'app/utils/internalChartHelper';
+import {
+  transformMeta,
+  transformToHierarchyModel,
+} from 'app/utils/internalChartHelper';
 import { adaptBoardImageUrl } from '.';
 import { BoardConfigValue } from '../components/BoardProvider/BoardConfigProvider';
 import {
@@ -174,9 +177,9 @@ export const getDataChartsByServer = (
     item.config = migrateChartConfig(item.config);
 
     const config = JSON.parse(item.config || '{}');
-    const viewComputerFields =
-      JSON.parse(view.find(v => v.id === item.viewId)?.model || '{}')
-        ?.computedFields || [];
+    const viewComputerFields = transformToHierarchyModel(
+      view.find(v => v.id === item.viewId)?.model,
+    )?.computedFields || [];
 
     config.computedFields = mergeChartAndViewComputedField(
       viewComputerFields,
@@ -202,7 +205,7 @@ export const getChartDataView = (views: View[], dataCharts: DataChart[]) => {
     }
     const meta = transformMeta(view.model);
     const viewComputedFields =
-      JSON.parse(view.model || '{}').computedFields || [];
+      transformToHierarchyModel(view.model).computedFields || [];
     const computedFields = createDateLevelComputedFieldForConfigComputedFields(
       meta,
       mergeChartAndViewComputedField(

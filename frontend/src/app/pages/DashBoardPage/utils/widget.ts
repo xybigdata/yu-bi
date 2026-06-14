@@ -33,6 +33,7 @@ import {
   mergeChartAndViewComputedField,
 } from 'app/utils/chartHelper';
 import { formatDatartDate, getDatartNowMillis } from 'app/utils/date';
+import { transformToHierarchyModel } from 'app/utils/internalChartHelper';
 import { updateBy } from 'app/utils/mutation';
 import {
   BOARD_COPY_CHART_SUFFIX,
@@ -561,8 +562,9 @@ export const getWidgetMap = (
       const chartViewId = dashboardDataChartMap[cur.datachartId]?.viewId;
       const viewIds = chartViewId ? [chartViewId] : cur.viewIds;
       const viewComputerFields =
-        JSON.parse(serverViews.find(v => v.id === viewIds[0])?.model || '{}')
-          ?.computedFields || [];
+        transformToHierarchyModel(
+          serverViews.find(v => v.id === viewIds[0])?.model,
+        )?.computedFields || [];
       if (
         cur.config.type === 'chart' &&
         cur.config?.content?.dataChart?.config

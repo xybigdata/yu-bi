@@ -67,6 +67,7 @@ import {
 import { makeDownloadDataTask } from 'app/utils/fetch';
 import {
   getChartDrillOption,
+  transformToViewConfig,
   transferChartConfigs,
 } from 'app/utils/internalChartHelper';
 import { updateBy } from 'app/utils/mutation';
@@ -147,14 +148,7 @@ export const ChartEditor: FC<ChartEditorProps> = ({
   const tg = useI18NPrefix('global');
 
   const expensiveQuery = useMemo(() => {
-    try {
-      return dataview?.config
-        ? Boolean(JSON.parse(dataview.config || '{}').expensiveQuery)
-        : false;
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
+    return Boolean(transformToViewConfig(dataview?.config)?.expensiveQuery);
   }, [dataview]);
 
   useMount(

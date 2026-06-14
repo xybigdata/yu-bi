@@ -27,7 +27,10 @@ import {
   createDateLevelComputedFieldForConfigComputedFields,
   mergeChartAndViewComputedField,
 } from 'app/utils/chartHelper';
-import { transformHierarchyMeta } from 'app/utils/internalChartHelper';
+import {
+  transformHierarchyMeta,
+  transformToHierarchyModel,
+} from 'app/utils/internalChartHelper';
 import { updateCollectionByAction } from 'app/utils/mutation';
 import { useInjectReducer } from 'utils/@reduxjs/injectReducer';
 import { ChartConfigReducerActionType } from './constant';
@@ -182,7 +185,7 @@ const workbenchSlice = createSlice({
           computedFields,
         );
         if (payload.model) {
-          const model = JSON.parse(payload.model || '{}');
+          const model = transformToHierarchyModel(payload.model);
           const viewComputerFields = model.computedFields || [];
           computedFields = mergeChartAndViewComputedField(
             computedFields,
