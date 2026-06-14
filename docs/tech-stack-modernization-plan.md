@@ -290,27 +290,25 @@
 
 ### 6.1 正在推进
 
-当前专题：`时间值序列化入口收口`
+当前专题：`时间过滤器边界收口`
 
 本轮目标：
 
-- 收口时间选择器里“精确时间 / 相对时间 -> 字符串”的重复逻辑
-- 收口变量页与视图属性页的日期默认值序列化入口
-- 保持现有时间格式、相对时间计算和保存结构不变
+- 收口图表预览控制器里的单时间与范围时间过滤器边界
+- 去掉时间过滤器中的宽泛状态值与 `as any`
+- 统一复用已有时间序列化与范围值归一化 helper
 
 当前已落地范围：
 
-- `ChartTimeSelector/utils.ts` 新增统一时间序列化与范围值转换 helper
-- `ExactTimeSelector`、`ManualSingleTimeSelector`、`ManualRangeTimeSelector` 改为复用统一 helper
-- `RangeTimePickerFilter` 改为复用统一范围时间转换与推荐时间区间入口
-- `VariablePage/utils.ts` 新增变量默认值日期序列化 helper
-- `VariablePage/index.tsx` 与 `ViewPage/Main/Properties/Variables.tsx` 改为复用统一日期默认值序列化入口
-- 新增时间选择器与变量默认值序列化测试
+- `timeFilterUtils.ts` 新增单时间与范围时间过滤器值归一化 helper
+- `TimeFilter` 改为复用统一单时间字符串序列化与读取入口
+- `RangeTimeFilter` 改为使用显式范围时间元组类型，去掉局部 `as any`
+- 补充时间过滤器局部测试，覆盖单值与范围值归一化边界
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/utils/__tests__/date.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/__tests__/utils.test.ts src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts`
+- `npm run test:ci -- src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/__tests__/utils.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts`
 
 ### 6.2 最近已完成
 
@@ -329,7 +327,7 @@
 
 按这个顺序推进，避免专题扩散：
 
-1. 完成当前时间值序列化入口专题并验证通过
+1. 完成当前时间过滤器边界专题并验证通过
 2. 时间体系剩余调用点继续收口
 3. 前端依赖收口与历史入口审计继续逐个推进
 4. 安装健康度与锁文件一致性持续检查

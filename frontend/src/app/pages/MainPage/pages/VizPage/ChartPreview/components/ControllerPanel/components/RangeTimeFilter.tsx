@@ -20,28 +20,30 @@ import { Space } from 'antd';
 import { FilterConditionType } from 'app/constants';
 import { ConditionBuilder } from 'app/models/ChartFilterCondition';
 import TimeSelector from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector';
+import type { ManualTimeValue } from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/ManualSingleTimeSelector';
 import { FC, memo, useState } from 'react';
 import { PresentControllerFilterProps } from '.';
+import { getRangeTimeFilterValue } from './timeFilterUtils';
+
+type RangeTimeValue = [ManualTimeValue | undefined, ManualTimeValue | undefined];
 
 const RangeTimeFilter: FC<PresentControllerFilterProps> = memo(
   ({ condition, onConditionChange }) => {
     const i18NPrefix = 'viz.common.filter.date';
-    const [rangeTimes, setRangeTimes] = useState(() => {
+    const [rangeTimes, setRangeTimes] = useState<RangeTimeValue>(() => {
       if (condition?.type === FilterConditionType.RangeTime) {
-        const startTime = condition?.value?.[0];
-        const endTime = condition?.value?.[1];
-        return [startTime, endTime];
+        return getRangeTimeFilterValue(condition);
       }
-      return [];
+      return [undefined, undefined];
     });
 
-    const handleTimeChange = index => time => {
-      const nextRangeTimes = [...rangeTimes];
-      nextRangeTimes[index] = time;
+    const handleTimeChange = (index: 0 | 1) => (time: ManualTimeValue | null) => {
+      const nextRangeTimes: RangeTimeValue = [...rangeTimes];
+      nextRangeTimes[index] = time || undefined;
       setRangeTimes(nextRangeTimes);
 
       const filterRow = new ConditionBuilder(condition)
-        .setValue(nextRangeTimes || [])
+        .setValue(nextRangeTimes)
         .asRangeTime();
       onConditionChange?.(filterRow);
     };
@@ -51,13 +53,13 @@ const RangeTimeFilter: FC<PresentControllerFilterProps> = memo(
         <Space direction="vertical" size={12}>
           <TimeSelector.ManualSingleTimeSelector
             i18nPrefix={i18NPrefix}
-            time={rangeTimes?.[0] as any}
+            time={rangeTimes[0]}
             isStart={true}
             onTimeChange={handleTimeChange(0)}
           />
           <TimeSelector.ManualSingleTimeSelector
             i18nPrefix={i18NPrefix}
-            time={rangeTimes?.[1] as any}
+            time={rangeTimes[1]}
             isStart={false}
             onTimeChange={handleTimeChange(1)}
           />
