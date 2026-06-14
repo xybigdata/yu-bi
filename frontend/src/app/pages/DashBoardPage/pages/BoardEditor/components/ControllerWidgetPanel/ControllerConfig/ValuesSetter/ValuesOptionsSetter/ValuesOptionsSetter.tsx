@@ -24,6 +24,7 @@ import {
   Select,
   Space,
   Tree,
+  TreeProps,
   TreeSelect,
 } from 'antd';
 import { ControllerFacadeTypes } from 'app/constants';
@@ -66,6 +67,34 @@ export interface optionProps {
 }
 
 type SelectOption = GetProp<typeof Select, 'options'>[number];
+type TreeCheckedValue = Parameters<NonNullable<TreeProps['onCheck']>>[0];
+
+const normalizeTreeTargetKey = (value: unknown): string | undefined => {
+  if (typeof value === 'string') {
+    return value;
+  }
+  return undefined;
+};
+
+const isTreeCheckedValueObject = (value: unknown): value is { value?: unknown } => {
+  return typeof value === 'object' && value !== null;
+};
+
+const getCheckedTreeTargetKeys = (
+  checkedKeys: TreeCheckedValue,
+): string[] | undefined => {
+  if (!Array.isArray(checkedKeys)) {
+    return undefined;
+  }
+
+  return checkedKeys
+    .map(key =>
+      isTreeCheckedValueObject(key)
+        ? normalizeTreeTargetKey(key.value)
+        : normalizeTreeTargetKey(key),
+    )
+    .filter((key): key is string => !!key);
+};
 
 const ValuesOptionsSetter: FC<{
   controllerType: ControllerFacadeTypes;
@@ -163,16 +192,16 @@ const ValuesOptionsSetter: FC<{
   }, []);
 
   const onTargetKeyChange = useCallback(
-    nextTargetKeys => {
+    (nextTargetKeys?: string[]) => {
       const config: ControllerConfig = getControllerConfig();
 
       form?.setFieldsValue({
         config: {
           ...config,
-          controllerValues: nextTargetKeys,
+          controllerValues: nextTargetKeys || [],
         },
       });
-      setTargetKeys(nextTargetKeys);
+      setTargetKeys(nextTargetKeys || []);
     },
     [form, getControllerConfig],
   );
@@ -450,8 +479,10 @@ const ValuesOptionsSetter: FC<{
                             return (
                               <TreeSelectProps
                                 checkedKeys={targetKeys}
-                                onCheck={(checkedObj: any) =>
-                                  onTargetKeyChange(checkedObj?.checked)
+                                onCheck={checkedKeys =>
+                                  onTargetKeyChange(
+                                    getCheckedTreeTargetKeys(checkedKeys),
+                                  )
                                 }
                                 checkable
                                 checkStrictly
