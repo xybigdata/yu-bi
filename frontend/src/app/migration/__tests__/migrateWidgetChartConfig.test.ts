@@ -112,4 +112,54 @@ describe('migrate Widget ChartConfig', () => {
       },
     ]);
   });
+
+  test('should parse string widget chart config before migration', () => {
+    const widget = [
+      {
+        config: {
+          content: {
+            dataChart: {
+              config: JSON.stringify({
+                chartConfig: {
+                  datas: [
+                    {
+                      rows: [
+                        {
+                          category:
+                            ChartDataViewFieldCategory.DateLevelComputedField,
+                          colName: 'birthday（Year）',
+                          expression: 'AGG_DATE_YEAR([birthday])',
+                          field: 'birthday',
+                        },
+                      ],
+                    },
+                  ],
+                },
+                computedFields: [
+                  {
+                    category:
+                      ChartDataViewFieldCategory.DateLevelComputedField,
+                    expression: 'AGG_DATE_YEAR([birthday])',
+                    name: 'birthday（Year）',
+                    type: 'DATE',
+                  },
+                ],
+              }),
+            },
+          },
+        },
+      },
+    ] as any;
+
+    const result = migrateWidgetChartConfig(widget);
+    expect(typeof result[0].config.content.dataChart.config).toBe('object');
+    expect(result[0].config.content.dataChart.config.computedFields).toEqual([
+      {
+        category: ChartDataViewFieldCategory.DateLevelComputedField,
+        expression: 'AGG_DATE_YEAR([birthday])',
+        name: 'birthday' + DATE_LEVEL_DELIMITER + 'AGG_DATE_YEAR',
+        type: 'DATE',
+      },
+    ]);
+  });
 });
