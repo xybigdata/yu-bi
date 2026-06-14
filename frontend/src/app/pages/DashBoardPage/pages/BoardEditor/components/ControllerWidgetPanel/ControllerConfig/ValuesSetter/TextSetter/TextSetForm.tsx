@@ -15,10 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Form, FormItemProps, Input } from 'antd';
+import { Form, Input } from 'antd';
 import React, { memo } from 'react';
-export interface TextSetFormProps extends FormItemProps<any> {
-  value?: any;
+export interface TextSetFormProps {
+  value?: string;
+  name?: string | number | (string | number)[];
+  label?: React.ReactNode;
+  required?: boolean;
+  preserve?: boolean;
 }
 export const TextSetForm: React.FC<TextSetFormProps> = memo(
   ({ value, ...rest }) => {

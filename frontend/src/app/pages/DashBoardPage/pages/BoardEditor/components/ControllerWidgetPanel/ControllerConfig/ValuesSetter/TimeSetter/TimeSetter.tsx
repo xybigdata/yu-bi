@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 import { Form, FormInstance, Select } from 'antd';
+import type { SelectProps } from 'antd';
 import { ControllerFacadeTypes, TimeFilterValueCategory } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ControllerWidgetContent } from 'app/pages/DashBoardPage/pages/Board/slice/types';
@@ -158,7 +159,7 @@ export const TimeSetter: React.FC<{
     [form, getControllerConfig],
   );
   const renderROE = useCallback(
-    (name, onChange: (value: any) => void) => {
+    (name, onChange: (value: SelectProps['value']) => void) => {
       return (
         <Form.Item
           name={name}

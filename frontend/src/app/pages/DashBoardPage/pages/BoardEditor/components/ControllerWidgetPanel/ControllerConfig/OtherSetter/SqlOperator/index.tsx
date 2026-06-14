@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { FormItemProps } from 'antd';
 import { ControllerFacadeTypes } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
@@ -36,7 +35,7 @@ export const SqlOperator: React.FC<SqlOperatorProps> = memo(
   ({ controllerType }) => {
     const tc = useI18NPrefix(`viz.control`);
     const hideForm = FixedSqlOperatorTypes.includes(controllerType);
-    const itemProps: FormItemProps<any> = {
+    const itemProps = {
       preserve: true,
       name: SqlOperatorName,
       label: tc('sqlOperator'),

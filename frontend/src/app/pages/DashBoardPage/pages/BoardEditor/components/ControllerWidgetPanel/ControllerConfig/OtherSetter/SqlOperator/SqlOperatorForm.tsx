@@ -15,11 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Form, FormItemProps } from 'antd';
+import { Form } from 'antd';
 import React, { memo } from 'react';
 import { SqlOperatorSet } from './SqlOperatorSet';
-export interface SqlOperatorFormProps extends FormItemProps<any> {
+export interface SqlOperatorFormProps {
   options: { name: string; value: string }[];
+  name?: string | number | (string | number)[];
+  label?: React.ReactNode;
+  hidden?: boolean;
+  preserve?: boolean;
 }
 export const SqlOperatorForm: React.FC<SqlOperatorFormProps> = memo(
   ({ options, ...rest }) => {
