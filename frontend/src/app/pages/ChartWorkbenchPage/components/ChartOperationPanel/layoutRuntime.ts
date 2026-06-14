@@ -29,6 +29,14 @@ type LayoutModelLike = {
   getNodeById?: (id: string) => LayoutNodeLike | undefined;
 };
 
+const normalizeLayoutSize = (value: unknown) => {
+  if (typeof value !== 'number' || Number.isNaN(value) || !Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(Math.floor(value), 0);
+};
+
 export const getLayoutNodeRectSize = (
   layout: LayoutModelLike | undefined,
   nodeId: string,
@@ -36,7 +44,17 @@ export const getLayoutNodeRectSize = (
   const rect = layout?.getNodeById?.(nodeId)?.getRect?.();
 
   return {
-    width: rect?.width ?? 0,
-    height: rect?.height ?? 0,
+    width: normalizeLayoutSize(rect?.width),
+    height: normalizeLayoutSize(rect?.height),
   };
+};
+
+export const getStableContainerSize = (
+  containerSize: unknown,
+  reservedSize: unknown = 0,
+) => {
+  const normalizedContainerSize = normalizeLayoutSize(containerSize);
+  const normalizedReservedSize = normalizeLayoutSize(reservedSize);
+
+  return Math.max(normalizedContainerSize - normalizedReservedSize, 0);
 };
