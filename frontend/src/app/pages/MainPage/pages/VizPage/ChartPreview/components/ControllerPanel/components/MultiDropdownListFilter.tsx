@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import type { TreeSelectProps } from 'antd';
 import { TreeSelect } from 'antd';
 import useFetchFilterDataByCondition from 'app/hooks/useFetchFilterDataByCondition';
 import { RelationFilterValue } from 'app/types/ChartConfig';
@@ -39,12 +40,22 @@ const MultiDropdownListFilter: FC<PresentControllerFilterProps> = memo(
       executeToken,
     );
 
-    const handleSelectedChange = (keys: any) => {
-      const newCondition = updateBy(condition!, draft => {
-        draft.value = keys;
-      });
-      onConditionChange(newCondition);
-    };
+    const handleSelectedChange: NonNullable<TreeSelectProps['onChange']> =
+      keys => {
+        if (
+          !Array.isArray(keys) ||
+          keys.some(key => typeof key !== 'string')
+        ) {
+          return;
+        }
+
+        const normalizedKeys = keys as string[];
+
+        const newCondition = updateBy(condition!, draft => {
+          draft.value = normalizedKeys;
+        });
+        onConditionChange(newCondition);
+      };
     const selectedNodes = useMemo(() => {
       if (Array.isArray(condition?.value)) {
         const item = condition?.value?.[0];
@@ -75,7 +86,7 @@ const MultiDropdownListFilter: FC<PresentControllerFilterProps> = memo(
           value: n.key,
           title: n.label,
         }))}
-        value={selectedNodes as any}
+        value={selectedNodes}
         onChange={handleSelectedChange}
       />
     );

@@ -24,6 +24,9 @@ type SliderRangeOnChange = (value: number[]) => void;
 
 const SliderFilter: FC<PresentControllerFilterProps> = memo(
   ({ condition, options, onConditionChange }) => {
+    const sliderOptions =
+      typeof options === 'object' && options ? options : undefined;
+
     const [valueRange, setValueRange] = useState(() => {
       if (Array.isArray(condition?.value)) {
         return condition?.value as [number, number];
@@ -48,8 +51,8 @@ const SliderFilter: FC<PresentControllerFilterProps> = memo(
         range
         value={valueRange}
         onChange={handleValueChange}
-        min={options?.min}
-        max={options?.max}
+        min={typeof sliderOptions?.min === 'number' ? sliderOptions.min : undefined}
+        max={typeof sliderOptions?.max === 'number' ? sliderOptions.max : undefined}
       />
     );
   },

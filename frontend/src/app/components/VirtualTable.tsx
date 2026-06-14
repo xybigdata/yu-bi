@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { Empty, Table, TableProps } from 'antd';
+import { Empty, Table, TableColumnType, TableProps } from 'antd';
 import classNames from 'classnames';
 import { TABLE_DATA_INDEX } from 'globalConstants';
 import React, {
@@ -29,11 +29,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import type {
-  CustomizeScrollBody,
-  DataIndex,
-  ScrollConfig,
-} from 'rc-table/es/interface';
+import type { Reference as RcTableReference } from 'rc-table';
 import styled from 'styled-components';
 import { SPACE_TIMES } from 'styles/StyleConstants';
 import {
@@ -48,6 +44,15 @@ type VirtualGridInstance = InstanceType<
 type VirtualTableRecord = object;
 
 type VirtualTableColumn = NonNullable<TableProps<VirtualTableRecord>['columns']>[number];
+
+type DataIndex<RecordType> = TableColumnType<RecordType>['dataIndex'];
+
+type CustomizeScrollBody<RecordType> = Extract<
+  NonNullable<NonNullable<TableProps<RecordType>['components']>['body']>,
+  (data: readonly RecordType[], info: any) => React.ReactNode
+>;
+
+type ScrollConfig = Parameters<RcTableReference['scrollTo']>[0];
 
 type InternalVirtualTableColumn = VirtualTableColumn & {
   dataIndex?: DataIndex<VirtualTableRecord>;
