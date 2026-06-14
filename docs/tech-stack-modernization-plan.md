@@ -130,6 +130,7 @@
   - 配置态树默认值选择链路的值边界继续收口，`ValuesOptionsSetter` 改为按树勾选返回的真实键值数组透传，避免继续保留 `onCheck={(checkedObj: any) => ...}` 这类未声明对象形态
   - 控制器关联字段值类型过滤链继续收口，`filterValueTypeByControl` 改为按字段类型和变量值类型联合约束，避免继续保留 `valueType: any`
   - 控制器配置默认值数组边界开始收口，`controllerValues` 改为显式 `string | number` 数组，先覆盖当前真实使用的单值、多值与区间数值场景
+  - 运行态控制器提交值边界继续收口，`ControllerWidgetCore.onFinish` 改为按单值、多值和区间值的真实表单输入形态归一化，避免继续保留未声明的 `value.value`
 - 富文本兼容层第一批稳定化小修
 - 富文本兼容层第二批稳定化小修：
   - `RichTextEditor` 的 `onChange` 类型边界收紧
@@ -267,10 +268,16 @@
 - `npm run build:all`
 - `npm run test:ci -- --silent`
 
-当前正在推进的是“控制器配置默认值数组边界收口”：
+当前最近完成的是“控制器配置默认值数组边界收口”，已通过：
 
-- `controllerValues` 仍保留 `any[]`
-- 本轮先按当前真实使用形态收紧为 `string | number` 数组，不触碰时间控制器的 `controllerDate` 链路
+- `npm run checkTs`
+- `npm run build:all`
+- `npm run test:ci -- --silent`
+
+当前正在推进的是“运行态控制器提交值边界收口”：
+
+- `ControllerWidgetCore.onFinish` 仍直接消费未声明的 `value.value`
+- 本轮只按当前真实使用形态收紧单值、多值和区间值归一化，不触碰时间控制器的 `controllerDate` 链路
 - 不改表单交互，不改运行时行为
 
 上一个已完成专题“富文本纯文本 JSON 误判保护补强”已通过：
