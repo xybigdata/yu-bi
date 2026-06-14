@@ -109,14 +109,15 @@ export function getTimeRange(
   unit?: LegacyManipulateUnit,
 ): (unitTime: LegacyOpUnit, dateFormat?) => [string, string] {
   return (timeUnit, dateFormat?) => {
+    const now = getDatartNow();
     const normalizedUnit = normalizeManipulateUnit(unit);
     const normalizedTimeUnit = normalizeOpUnit(timeUnit);
     const startTime = startOfUnit(
-      addByUnit(getDatartNow(), amount?.[0] || 0, normalizedUnit),
+      addByUnit(now, amount?.[0] || 0, normalizedUnit),
       normalizedTimeUnit,
     );
     const endTime = endOfUnit(
-      addByUnit(getDatartNow(), amount?.[1] || 0, normalizedUnit),
+      addByUnit(now, amount?.[1] || 0, normalizedUnit),
       normalizedTimeUnit,
     );
     return [
@@ -131,21 +132,18 @@ export function getTime(
   unit?: LegacyManipulateUnit,
 ): (unitTime: LegacyOpUnit, isStart?: boolean) => DatartDayjs {
   return (timeUnit, isStart?: boolean) => {
+    const now = getDatartNow();
     const amountValue = Number(amount ?? 0);
     const normalizedUnit = normalizeManipulateUnit(unit);
     const normalizedTimeUnit = normalizeOpUnit(timeUnit);
     if (!!isStart) {
       return startOfUnit(
-        addByUnit(getDatartNow(), amountValue, normalizedUnit),
+        addByUnit(now, amountValue, normalizedUnit),
         normalizedTimeUnit,
       );
     }
     return startOfUnit(
-      addByUnit(
-        addByUnit(getDatartNow(), amountValue, normalizedUnit),
-        1,
-        normalizedUnit,
-      ),
+      addByUnit(addByUnit(now, amountValue, normalizedUnit), 1, normalizedUnit),
       normalizedTimeUnit,
     );
   };
