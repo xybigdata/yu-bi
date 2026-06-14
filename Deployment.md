@@ -17,7 +17,7 @@ docker run -p 8080:8080 yubi/yu-bi
 默认账户:用户名`demo`,密码`123456`
 
 ## 1.1. 配置外部数据库
-在没有外部数据库配置的情况下，Datart使用H2作为应用程序数据库。 强烈建议您将自己的Mysql数据库配置为应用程序数据库。  
+在没有外部数据库配置的情况下，yu-bi 使用 H2 作为应用程序数据库。强烈建议您将自己的 Mysql 数据库配置为应用程序数据库。
 
 创建空文件 `datart.conf`，将以下内容写入。
 
@@ -39,15 +39,15 @@ datart.send-mail=false
 datart.webdriver-path=http://127.0.0.1:4444/wd/hub
 ```
 
-运行 `docker run -d --name yu-bi -v your_path/datart.conf:/datart/config/datart.conf -p 8080:8080 yubi/yu-bi`
+运行 `docker run -d --name yu-bi -v your_path/datart.conf:/yu-bi/config/datart.conf -p 8080:8080 yubi/yu-bi`
 
 ## 1.2. 将用户文件挂载到外部
 
 默认配置下，用户文件（头像，文件数据源等）保存在 `files` 文件夹下，将这个路径挂载到外部，以在进行应用升级时，能够保留这些文件。
 
-在命令中增加参数 `-v your_path/files:/datart/files` 即可。以下是完整命令：
+在命令中增加参数 `-v your_path/files:/yu-bi/files` 即可。以下是完整命令：
 
-`docker run -d --name yu-bi -v your_path/datart.conf:/datart/config/datart.conf -v your_path/files:/datart/files -p 8080:8080 yubi/yu-bi`
+`docker run -d --name yu-bi -v your_path/datart.conf:/yu-bi/config/datart.conf -v your_path/files:/yu-bi/files -p 8080:8080 yubi/yu-bi`
 
 ***更多配置请以当前仓库文档与配置文件示例为准。***
 

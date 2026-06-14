@@ -150,6 +150,10 @@
   - Maven 模块坐标改为 `yubi` / `yu-bi-*`
   - 安装包、脚本名、Docker 打包输入改为 `yu-bi-server`
   - 保持 `datart.*` Java 包名、配置前缀与稳定内部标识不变
+- 构建与交付层品牌残留继续收口：
+  - Docker 镜像运行目录从 `/datart` 调整为 `/yu-bi`
+  - 部署文档中的 Docker 挂载路径示例同步更新为 `/yu-bi`
+  - Maven 聚合模块中的失效 `datart` 注释依赖片段已清理
 - 安装包闭环验证已打通：
   - `yu-bi-server-*.zip` 可正常解压
   - `scripts/check-demo-health.sh` 在真实端口绑定环境中可通过健康检查

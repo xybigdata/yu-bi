@@ -2,13 +2,13 @@ FROM eclipse-temurin:21-jre
 
 LABEL "author"="tl"
 
-WORKDIR /datart
+WORKDIR /yu-bi
 
 COPY yu-bi-server-*-install.zip /tmp/yu-bi-install.zip
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends unzip \
-    && unzip -q /tmp/yu-bi-install.zip -d /datart \
+    && unzip -q /tmp/yu-bi-install.zip -d /yu-bi \
     && rm -f /tmp/yu-bi-install.zip \
     && apt-get purge -y --auto-remove unzip \
     && rm -rf /var/lib/apt/lists/*
