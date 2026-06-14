@@ -17,7 +17,10 @@
  */
 
 import { APP_VERSION_BETA_2 } from '../constants';
-import { migrateViewConfig } from '../ViewConfig/migrationViewDetailConfig';
+import {
+  beta2,
+  migrateViewConfig,
+} from '../ViewConfig/migrationViewDetailConfig';
 
 describe('migrateViewConfig Test', () => {
   test('Test when config is null', () => {
@@ -28,6 +31,11 @@ describe('migrateViewConfig Test', () => {
   test('Test when config is empty', () => {
     const config = '';
     expect(migrateViewConfig(config)).toEqual('');
+  });
+
+  test('Test when config is invalid json', () => {
+    const config = '{invalid-json}';
+    expect(migrateViewConfig(config)).toEqual(config);
   });
 
   test('Test config without expensiveQuery variable', () => {
@@ -49,6 +57,10 @@ describe('migrateViewConfig Test', () => {
     const config = `{"concurrencyControl":true,"concurrencyControlMode":"DIRTYREAD","cache":false,"cacheExpires":0,"expensiveQuery":true,"version":"${APP_VERSION_BETA_2}"}`;
     expect(migrateViewConfig(config)).toEqual(config);
     expect(migrateViewConfig(config)).toMatch(/"version":/);
+  });
+
+  test('beta2 should keep null config as null', () => {
+    expect(beta2(null)).toBeNull();
   });
 
   /**

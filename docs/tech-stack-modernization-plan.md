@@ -188,6 +188,10 @@
 - StoryConfig 迁移解析入口继续补强：
   - `migrateStoryConfig.ts` 与 `migrateStoryPageConfig.ts` 的字符串解析统一收口到局部兼容函数，去掉入口里的裸 `JSON.parse + console.log`
   - 补齐空字符串、无效 JSON、beta2 版本升级和最新版本归一化测试，确保 StoryConfig 迁移入口行为稳定
+- View 详情配置迁移入口继续补强：
+  - `migrationViewDetailConfig.ts` 的字符串解析收口到局部兼容函数，补齐无效 JSON 输入的显式回退语义
+  - beta2 事件分发改为走局部显式迁移目标类型，减少 view detail 配置入口的宽泛对象透传
+  - 补齐无效 JSON 与 `null` 配置回归测试，确保 view detail 配置迁移入口行为稳定
 - `react-window` 专项审计与运行时包装边界收口：
   - 实际使用面确认仅剩 `VirtualTable -> SchemaTable`
   - 虚拟表格 reset 时机修正为依赖变化即时触发
