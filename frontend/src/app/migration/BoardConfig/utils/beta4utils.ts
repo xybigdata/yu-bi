@@ -17,7 +17,10 @@
  */
 
 import { ORIGINAL_TYPE_MAP } from 'app/pages/DashBoardPage/constants';
-import { BoardType } from 'app/pages/DashBoardPage/pages/Board/slice/types';
+import {
+  BoardType,
+  ContainerItem,
+} from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import {
   ITimeDefault,
   Widget,
@@ -28,6 +31,22 @@ import widgetManagerInstance from '../../../pages/DashBoardPage/components/Widge
 import { RectConfig } from '../../../pages/DashBoardPage/pages/Board/slice/types';
 import { WidgetBeta3 } from '../types';
 
+type WidgetTitleConfigBeta3 = {
+  show: boolean;
+  textAlign?: string;
+  fontFamily?: string;
+  fontSize?: string | number;
+  fontWeight?: string | number;
+  fontStyle?: string;
+  color?: string;
+};
+type WidgetPaddingBeta3 = {
+  top?: number;
+  right?: number;
+  bottom?: number;
+  left?: number;
+};
+
 const commonBeta4Convert = (newWidget: Widget, oldW: WidgetBeta3) => {
   newWidget.id = oldW.id;
   newWidget.config.index = oldW.config.index;
@@ -35,8 +54,7 @@ const commonBeta4Convert = (newWidget: Widget, oldW: WidgetBeta3) => {
   newWidget.config.rect = oldW.config.rect;
   newWidget.config.version = oldW.config.version;
   newWidget.dashboardId = oldW.dashboardId;
-  // @ts-ignore
-  newWidget.config.pRect = oldW.config.pRect;
+  newWidget.config.pRect = oldW.config.rect;
   newWidget.config.content = oldW.config.content; //Todo
   newWidget.config.name = oldW.config.name;
   const oldConf = oldW.config;
@@ -50,7 +68,7 @@ const commonBeta4Convert = (newWidget: Widget, oldW: WidgetBeta3) => {
   newWidget.config.customConfig.props?.forEach(prop => {
     // titleGroup name nameConfig
     if (prop.key === 'titleGroup') {
-      const oNameConf = oldConf.nameConfig as any;
+      const oNameConf = oldConf.nameConfig as unknown as WidgetTitleConfigBeta3;
       prop.rows?.forEach(row => {
         if (row.key === 'showTitle') {
           row.value = oNameConf.show;
@@ -71,7 +89,7 @@ const commonBeta4Convert = (newWidget: Widget, oldW: WidgetBeta3) => {
     }
     // paddingGroup
     if (prop.key === 'paddingGroup') {
-      const oPad = oldConf.padding as any;
+      const oPad = oldConf.padding as WidgetPaddingBeta3;
       prop.rows?.forEach(row => {
         if (row.key === 'top') {
           row.value = oPad.top;
@@ -187,11 +205,10 @@ export const convertContainerWidgetToBeta4 = (widget: WidgetBeta3) => {
 
     const itemMap = newWidget.config.content?.itemMap;
     if (!itemMap) return newWidget;
-    const tabItems = Object.values(itemMap) as any[];
+    const tabItems = Object.values(itemMap) as ContainerItem[];
     let newIndex = getDatartNowMillis();
     tabItems.forEach(item => {
       item.index = newIndex;
-      delete item.config;
       newIndex++;
     });
     return newWidget;
