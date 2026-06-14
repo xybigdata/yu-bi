@@ -42,6 +42,14 @@ import {
   convertWidgetToBeta4,
 } from './utils/beta4utils';
 
+type LegacyFilterWidgetBeta3 = Omit<WidgetBeta3, 'config'> & {
+  config: WidgetBeta3['config'] & {
+    type: WidgetBeta3['config']['type'] | 'filter';
+  };
+};
+
+type MigratingWidget = Widget | WidgetBeta3;
+
 /**
  *
  * JSON.parse(relation.config)
@@ -71,12 +79,12 @@ export const convertWidgetRelationsToObj = (
  * @param {WidgetBeta3} [widget]
  * @return {*}
  */
-export const beta0 = (widget?: WidgetBeta3) => {
+export const beta0 = (widget?: WidgetBeta3 | LegacyFilterWidgetBeta3) => {
   if (!widget) return undefined;
   if (!versionCanDo(APP_VERSION_BETA_0, widget?.config.version)) return widget;
 
   // 1.放弃了 filter type 新的是 controller
-  if ((widget.config.type as any) === 'filter') {
+  if (String(widget.config.type) === 'filter') {
     return undefined;
   }
   // 2.migration about font 5 旧数据没有 widget.config.nameConfig。统一把旧数据填充上fontDefault
@@ -111,44 +119,45 @@ export const beta2 = (widget?: WidgetBeta3) => {
 // beta3 没有变动
 
 // beta4 widget 重构 支持group
-export const beta4 = (boardType: BoardType, widget?: Widget | WidgetBeta3) => {
+export const beta4 = (boardType: BoardType, widget?: MigratingWidget) => {
   if (!widget) return undefined;
   if (!versionCanDo(APP_VERSION_BETA_4, widget?.config.version))
     return widget as Widget;
-  let beta4Widget = widget as any;
-  beta4Widget = convertToBeta4AutoWidget(boardType, beta4Widget);
+  let beta4Widget = convertToBeta4AutoWidget(
+    boardType,
+    widget as unknown as Widget,
+  );
+  if (!beta4Widget) {
+    return undefined;
+  }
   if (widget.config.version !== APP_VERSION_BETA_4) {
-    beta4Widget = convertWidgetToBeta4(beta4Widget as WidgetBeta3);
+    beta4Widget = convertWidgetToBeta4(beta4Widget as unknown as WidgetBeta3);
   }
 
   return beta4Widget as Widget;
 };
 
-export const beta4_2 = (
-  boardType: BoardType,
-  widget?: Widget | WidgetBeta3,
-) => {
+export const beta4_2 = (_boardType: BoardType, widget?: Widget) => {
   if (!widget) {
     return undefined;
   }
   if (!versionCanDo(APP_VERSION_BETA_4_2, widget?.config.version)) {
-    return widget as Widget;
+    return widget;
   }
-  let beta4Widget = widget as any;
   const allowedOriginalTypes = [
     ORIGINAL_TYPE_MAP.ownedChart,
     ORIGINAL_TYPE_MAP.linkedChart,
   ];
-  if (!allowedOriginalTypes.includes(beta4Widget?.config?.originalType)) {
-    return beta4Widget as Widget;
+  if (!allowedOriginalTypes.includes(widget.config.originalType)) {
+    return widget;
   }
-  if (!beta4Widget?.config?.customConfig?.interactions) {
-    if (beta4Widget?.config?.customConfig) {
-      beta4Widget.config.customConfig.interactions = [...initInteractionTpl()];
-      beta4Widget.config.version = APP_VERSION_BETA_4_2;
+  if (!widget.config.customConfig?.interactions) {
+    if (widget.config.customConfig) {
+      widget.config.customConfig.interactions = [...initInteractionTpl()];
+      widget.config.version = APP_VERSION_BETA_4_2;
     }
   }
-  return beta4Widget as Widget;
+  return widget;
 };
 
 export const RC0 = (widget?: Widget) => {
@@ -158,13 +167,11 @@ export const RC0 = (widget?: Widget) => {
   if (
     !versionCanDo(APP_VERSION_RC_0, widget?.config?.content?.dataChart?.config)
   ) {
-    return widget as Widget;
+    return widget;
   }
-  let RC0Widget = widget as any;
-
-  if (RC0Widget?.config?.content?.dataChart?.config?.computedFields) {
-    RC0Widget.config.content.dataChart.config.computedFields =
-      RC0Widget.config.content.dataChart.config.computedFields.map(v => {
+  if (widget.config.content?.dataChart?.config?.computedFields) {
+    widget.config.content.dataChart.config.computedFields =
+      widget.config.content.dataChart.config.computedFields.map(v => {
         if (!v.name) {
           return {
             ...v,
@@ -173,9 +180,9 @@ export const RC0 = (widget?: Widget) => {
         }
         return v;
       });
-    RC0Widget.config.content.dataChart.config.version = APP_VERSION_RC_0;
+    widget.config.content.dataChart.config.version = APP_VERSION_RC_0;
   }
-  return RC0Widget as Widget;
+  return widget;
 };
 
 const finaleWidget = (widget?: Widget) => {
@@ -220,9 +227,9 @@ export const migrateWidgets = (
 
       let beta4Widget = beta4(boardType, resWidget);
 
-      beta4_2(boardType, resWidget);
+      beta4Widget = beta4_2(boardType, beta4Widget);
 
-      RC0(beta4Widget);
+      beta4Widget = RC0(beta4Widget);
 
       return finaleWidget(beta4Widget as Widget);
     })

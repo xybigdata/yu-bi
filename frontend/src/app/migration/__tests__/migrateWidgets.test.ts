@@ -22,6 +22,7 @@ import {
   beta0,
   beta4_2,
   convertWidgetRelationsToObj,
+  migrateWidgets,
   RC0,
 } from '../BoardConfig/migrateWidgets';
 import { WidgetBeta3 } from '../BoardConfig/types';
@@ -129,6 +130,25 @@ describe('test migrateWidgets ', () => {
     const result = beta4_2('auto', widget1 as any);
     expect(result?.config?.version).toBe(APP_VERSION_BETA_4_2);
     expect(result?.config?.customConfig?.interactions?.length).toBe(3);
+  });
+
+  test('should apply beta4_2 interactions in migrateWidgets main flow', () => {
+    const result = migrateWidgets(
+      [
+        {
+          config: JSON.stringify({
+            version: APP_VERSION_BETA_4_1,
+            originalType: 'linkedChart',
+            customConfig: {},
+          }),
+          relations: [],
+        },
+      ] as any,
+      'auto',
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.config?.customConfig?.interactions?.length).toBe(3);
   });
 
   test('should not migrate when widget version is APP_VERSION_BETA_4_2', () => {
