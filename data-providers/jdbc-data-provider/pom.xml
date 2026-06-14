@@ -12,6 +12,8 @@
     <artifactId>yu-bi-jdbc-data-provider</artifactId>
 
     <packaging>jar</packaging>
+    <name>yu-bi JDBC Data Provider</name>
+    <description>yu-bi JDBC 数据提供器模块</description>
     <dependencies>
         <dependency>
             <groupId>yubi</groupId>

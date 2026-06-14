@@ -11,6 +11,8 @@
 
     <artifactId>yu-bi-server</artifactId>
     <packaging>jar</packaging>
+    <name>yu-bi Server</name>
+    <description>yu-bi 服务端启动与安装包组装模块</description>
 
     <dependencies>
         <dependency>

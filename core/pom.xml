@@ -11,6 +11,8 @@
 
     <artifactId>yu-bi-core</artifactId>
     <packaging>jar</packaging>
+    <name>yu-bi Core</name>
+    <description>yu-bi 服务端核心能力模块</description>
 
     <dependencies>
         <dependency>

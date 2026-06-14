@@ -29,6 +29,24 @@
     <artifactId>yu-bi-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0-rc.3</version>
+    <name>yu-bi Parent</name>
+    <description>yu-bi 独立开源项目的父级构建与版本管理模块</description>
+    <url>https://github.com/xybigdata/yu-bi</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git@github.com:xybigdata/yu-bi.git</connection>
+        <developerConnection>scm:git:git@github.com:xybigdata/yu-bi.git</developerConnection>
+        <url>https://github.com/xybigdata/yu-bi</url>
+        <tag>main</tag>
+    </scm>
 
     <dependencies>
         <dependency>

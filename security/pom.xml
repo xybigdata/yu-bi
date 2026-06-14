@@ -10,6 +10,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>yu-bi-security</artifactId>
+    <name>yu-bi Security</name>
+    <description>yu-bi 认证与授权扩展模块</description>
 
     <dependencies>
         <dependency>

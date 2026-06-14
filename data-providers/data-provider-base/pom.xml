@@ -11,6 +11,8 @@
 
     <artifactId>yu-bi-data-provider-base</artifactId>
     <packaging>jar</packaging>
+    <name>yu-bi Data Provider Base</name>
+    <description>yu-bi 数据提供器公共基础模块</description>
 
     <dependencies>
         <dependency>

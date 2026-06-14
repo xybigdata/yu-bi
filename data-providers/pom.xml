@@ -11,6 +11,8 @@
 
     <artifactId>yu-bi-data-provider</artifactId>
     <packaging>pom</packaging>
+    <name>yu-bi Data Providers</name>
+    <description>yu-bi 数据提供器聚合模块</description>
     <modules>
         <module>data-provider-base</module>
         <module>jdbc-data-provider</module>
