@@ -35,29 +35,27 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import type { DeltaStatic } from 'app/components/ChartGraph/BasicRichText/quillCompat';
+import {
+  createRichTextColorHandlers,
+  createRichTextModules,
+  getRichTextContainerId,
+  useRichTextMarkdownModule,
+  useRichTextPalette,
+  type RichTextColorType,
+  type RichTextModules,
+} from 'app/components/ChartGraph/BasicRichText/runtimeHelpers';
 import styled from 'styled-components';
 import { SPACE_TIMES } from 'styles/StyleConstants';
 import { WidgetActionContext } from '../../ActionProvider/WidgetActionProvider';
-import { Formats, MarkdownOptions } from './config';
+import { Formats } from './config';
 
 type RichTextValue = DeltaStatic | string;
-type RichTextModuleConfig = {
-  toolbar: {
-    container: string;
-    handlers: {
-      color: (value: string) => void;
-      background: (value: string) => void;
-    };
-  };
-  imageDrop: boolean;
-};
 type RichTextWidgetRuntimeContent = MediaWidgetContent & {
   type: 'richText';
   richText?: {
@@ -86,20 +84,40 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
     return normalizeRichTextValue(widgetContent?.richText?.content);
   }, [widgetContent]);
   const [quillValue, setQuillValue] = useState<RichTextValue>(initContent);
-  const [containerId, setContainerId] = useState<string>();
-  const [quillModules, setQuillModules] =
-    useState<RichTextModuleConfig | null>(null);
-  const markdownModuleRef = useRef<{ destroy: () => void } | null>(null);
+  const quillRef = useRef<RichTextEditorHandle>(null);
 
   const [customColorVisible, setCustomColorVisible] = useState<boolean>(false);
   const [customColor, setCustomColor] = useState<{
     background: string;
     color: string;
   }>({ ...QuillPalette.RICH_TEXT_CUSTOM_COLOR_INIT });
-  const [customColorType, setCustomColorType] = useState<
-    'color' | 'background'
-  >('color');
+  const [customColorType, setCustomColorType] =
+    useState<RichTextColorType>('color');
   const [contentSavable, setContentSavable] = useState(false);
+  const containerId = useMemo(
+    () => getRichTextContainerId(`${widgetInfo.id}-${getDatartNowMillis()}`),
+    [widgetInfo.id],
+  );
+  const quillColorHandlers = useMemo(
+    () =>
+      createRichTextColorHandlers({
+        editorRef: quillRef,
+        onOpenCustomColor: type => {
+          setCustomColorType(type);
+          setCustomColorVisible(true);
+        },
+      }),
+    [],
+  );
+  const quillModules = useMemo<RichTextModules>(
+    () =>
+      createRichTextModules({
+        containerId,
+        handlers: quillColorHandlers,
+        editable: true,
+      }),
+    [containerId, quillColorHandlers],
+  );
 
   useEffect(() => {
     if (widgetInfo.editing) {
@@ -144,62 +162,15 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
     widgetInfo.editing,
   ]);
 
-  useEffect(() => {
-    const newId = `rich-text-${widgetInfo.id + getDatartNowMillis()}`;
-    setContainerId(newId);
-    const modules = {
-      toolbar: {
-        container: `#${newId}`,
-        handlers: {
-          color: value => {
-            if (value === QuillPalette.RICH_TEXT_CUSTOM_COLOR) {
-              setCustomColorType('color');
-              setCustomColorVisible(true);
-            }
-            quillRef.current!.format('color', value);
-          },
-          background: value => {
-            if (value === QuillPalette.RICH_TEXT_CUSTOM_COLOR) {
-              setCustomColorType('background');
-              setCustomColorVisible(true);
-            }
-            quillRef.current!.format('background', value);
-          },
-        },
-      },
-      imageDrop: true,
-    };
-    setQuillModules(modules);
-  }, [widgetInfo.id]);
-
-  const quillRef = useRef<RichTextEditorHandle>(null);
-
-  useLayoutEffect(() => {
-    if (quillRef.current?.isReady()) {
-      markdownModuleRef.current?.destroy();
-      markdownModuleRef.current =
-        quillRef.current.createMarkdownModule(MarkdownOptions);
-    }
-
-    return () => {
-      markdownModuleRef.current?.destroy();
-      markdownModuleRef.current = null;
-    };
-  }, [quillModules]);
-
-  useEffect(() => {
-    let palette: QuillPalette | null = null;
-    if (quillRef.current?.isReady() && containerId) {
-      palette = new QuillPalette(quillRef.current, {
-        toolbarId: containerId,
-        onChange: setCustomColor,
-      });
-    }
-
-    return () => {
-      palette?.destroy();
-    };
-  }, [containerId]);
+  useRichTextMarkdownModule({
+    editorRef: quillRef,
+    enabled: true,
+  });
+  useRichTextPalette({
+    editorRef: quillRef,
+    containerId,
+    onChange: setCustomColor,
+  });
 
   const ssp = e => {
     e.stopPropagation();
@@ -257,21 +228,19 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
         onOk={modalOk}
         onCancel={modalCancel}
       >
-        {quillModules && (
-          <ModalBody>
-            {toolbar}
-            <RichTextEditor
-              ref={quillRef}
-              className="react-quill"
-              placeholder={t('viz.board.setting.enterHere')}
-              value={quillValue}
-              onChange={quillChange}
-              modules={quillModules}
-              formats={Formats}
-              readOnly={false}
-            />
-          </ModalBody>
-        )}
+        <ModalBody>
+          {toolbar}
+          <RichTextEditor
+            ref={quillRef}
+            className="react-quill"
+            placeholder={t('viz.board.setting.enterHere')}
+            value={quillValue}
+            onChange={quillChange}
+            modules={quillModules}
+            formats={Formats}
+            readOnly={false}
+          />
+        </ModalBody>
       </Modal>
     </TextWrap>
   );

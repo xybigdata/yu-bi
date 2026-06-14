@@ -32,6 +32,7 @@
 - 不动未跟踪目录：`.tmp/`、`logs/`
 - 一个提交只处理一个专题
 - 只提交与当前专题直接相关的文件
+- 尽量按专题攒成一批再提交，避免高频提交带来重复回归成本
 
 ## 3. 当前基线
 
@@ -289,23 +290,27 @@
 
 ### 6.1 正在推进
 
-当前专题：`看板编辑链 setImmediate 收口`
+当前专题：`富文本兼容层运行时边界收口`
 
 本轮目标：
 
-- 继续清理看板编辑链中残留的 `setImmediate`
-- 统一改为显式微任务调度语义，避免继续依赖非标准 API
-- 保持当前编辑态、tab 切换、滚动绑定与保存回调的时序语义不变
+- 收口富文本编辑态与只读态共用的运行时装配逻辑
+- 去掉 `containerId` / `modules` 依赖 `useEffect + useState` 的二次同步
+- 统一 Markdown 模块、调色板和引用字段翻译的运行时边界
+- 保持富文本内容结构、保存语义与预览行为不变
 
 当前已落地范围：
 
-- `AutoBoardEditor`、`TabWidgetCore`、`useBoardScroll`、`EditorHeader` 改为复用局部微任务调度 helper
-- 去掉当前看板编辑链中残留的 `setImmediate`，保持现有回调时机不变
+- 新增 `runtimeHelpers.ts`，统一富文本 toolbar handlers、modules、Markdown 挂载与调色板挂载 helper
+- `ChartRichTextAdapter` 改为直接基于 `useMemo` 生成 `containerId` / `modules`
+- `ChartRichTextAdapter` 的引用字段翻译逻辑收口到纯函数，补齐 debounce 清理
+- `RichTextWidgetCore` 改为复用统一富文本运行时 helper，去掉本地重复装配逻辑
+- 新增 `runtimeHelpers.test.ts` 覆盖容器 ID、modules 构造与引用字段翻译边界
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts src/app/pages/DashBoardPage/utils/__tests__/board.test.ts`
+- `npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts`
 
 ### 6.2 最近已完成
 
@@ -324,10 +329,10 @@
 
 按这个顺序推进，避免专题扩散：
 
-1. 完成当前 `View` 消费链解析边界专题并验证通过
+1. 完成当前富文本兼容层运行时边界专题并验证通过
 2. 时间体系剩余调用点继续收口
-3. 富文本兼容层继续按真实使用面补运行时防护与类型边界
-4. 前端依赖收口与历史入口审计继续逐个推进
+3. 前端依赖收口与历史入口审计继续逐个推进
+4. 安装健康度与锁文件一致性持续检查
 
 ## 8. 每轮固定门禁
 
