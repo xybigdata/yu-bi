@@ -29,6 +29,16 @@ describe('parseRichTextContent', () => {
     expect(parseRichTextContent('<p>demo</p>')).toBe('<p>demo</p>');
   });
 
+  test('should keep plain json-like primitive text values', () => {
+    expect(parseRichTextContent('123')).toBe('123');
+    expect(parseRichTextContent('true')).toBe('true');
+    expect(parseRichTextContent('null')).toBe('null');
+  });
+
+  test('should keep non-delta json array text values', () => {
+    expect(parseRichTextContent('["demo"]')).toBe('');
+  });
+
   test('should fallback invalid parsed object to empty string', () => {
     expect(parseRichTextContent('{"foo":"bar"}')).toBe('');
   });
