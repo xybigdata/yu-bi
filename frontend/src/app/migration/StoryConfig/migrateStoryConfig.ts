@@ -20,17 +20,23 @@ import { getInitStoryConfig } from 'app/pages/StoryBoardPage/utils';
 import { setLatestVersion, versionCanDo } from '../utils';
 import { APP_VERSION_BETA_2 } from './../constants';
 
+const parseStoryConfigObject = (storyConfig: string): StoryConfig | undefined => {
+  try {
+    return JSON.parse(storyConfig) as StoryConfig;
+  } catch (error) {
+    return undefined;
+  }
+};
+
 export const parseStoryConfig = (storyConfig: string) => {
   if (!storyConfig) {
     return getInitStoryConfig();
   }
-  try {
-    let nextConfig: StoryConfig = JSON.parse(storyConfig);
-    return nextConfig;
-  } catch (error) {
-    console.log('解析 story.config 出错');
+  const nextConfig = parseStoryConfigObject(storyConfig);
+  if (!nextConfig) {
     return getInitStoryConfig();
   }
+  return nextConfig;
 };
 
 export const beta2 = (config: StoryConfig) => {

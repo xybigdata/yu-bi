@@ -16,12 +16,57 @@
  * limitations under the License.
  */
 
-import { parseStoryConfig } from '../StoryConfig/migrateStoryConfig';
+import {
+  beta2,
+  migrateStoryConfig,
+  parseStoryConfig,
+} from '../StoryConfig/migrateStoryConfig';
+import { APP_CURRENT_VERSION, APP_VERSION_BETA_2 } from '../constants';
 
 describe('test migrateBoard ', () => {
   test('handle parseStoryConfig is empty', () => {
     expect(parseStoryConfig('')).toMatchObject({
       version: '',
+    });
+  });
+
+  test('handle parseStoryConfig invalid json fallback', () => {
+    expect(parseStoryConfig('{invalid-json}')).toMatchObject({
+      version: '',
+    });
+  });
+
+  test('beta2 should upgrade version when needed', () => {
+    expect(
+      beta2({
+        version: '',
+        autoPlay: {
+          auto: false,
+          delay: 1,
+        },
+      }),
+    ).toMatchObject({
+      version: APP_VERSION_BETA_2,
+    });
+  });
+
+  test('migrateStoryConfig should normalize to latest version', () => {
+    expect(
+      migrateStoryConfig(
+        JSON.stringify({
+          version: '',
+          autoPlay: {
+            auto: true,
+            delay: 3,
+          },
+        }),
+      ),
+    ).toMatchObject({
+      version: APP_CURRENT_VERSION,
+      autoPlay: {
+        auto: true,
+        delay: 3,
+      },
     });
   });
 });
