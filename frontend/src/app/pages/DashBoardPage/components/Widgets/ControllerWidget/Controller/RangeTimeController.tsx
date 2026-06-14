@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { DatePicker, Form, FormItemProps } from 'antd';
+import { DatePicker, Form } from 'antd';
 import { PickerType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import { formatDateByPickType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/utils';
 import { DatartDayjs, toDatartDayjsRange } from 'app/utils/date';
@@ -23,10 +23,13 @@ import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 const { RangePicker } = DatePicker;
 
+type SingleTimeValue = string | null;
+type RangeTimeValue = [SingleTimeValue, SingleTimeValue] | null;
+
 export interface TimeControllerProps {
-  value?: any;
+  value?: RangeTimeValue;
   placeholder?: string;
-  onChange: (values) => void;
+  onChange: (values: RangeTimeValue) => void;
   label?: React.ReactNode;
   name?: string;
   required?: boolean;
@@ -48,10 +51,10 @@ export const RangeTimeControllerForm: React.FC<TimeControllerProps> = memo(
   },
 );
 
-export interface TimeSetProps extends FormItemProps<any> {
+export interface TimeSetProps {
   pickerType: PickerType;
-  value?: any;
-  onChange?: any;
+  value?: RangeTimeValue;
+  onChange?: (value: RangeTimeValue) => void;
 }
 
 const isDateTimePickerType = (
@@ -62,23 +65,28 @@ const isDateTimePickerType = (
 
 export const RangeTimeController: React.FC<TimeSetProps> = memo(
   ({ pickerType, value, onChange }) => {
-    const handleRangeChange = (times: [DatartDayjs | null, DatartDayjs | null] | null) => {
+    const handleRangeChange = (
+      times: [DatartDayjs | null, DatartDayjs | null] | null,
+    ) => {
       if (!times) {
         onChange?.(null);
         return;
       }
-      const newValues = [
+      const newValues: [SingleTimeValue, SingleTimeValue] = [
         formatDateByPickType(pickerType, times?.[0]),
         formatDateByPickType(pickerType, times?.[1]),
       ];
       onChange?.(newValues);
     };
-    const rangeValues = useMemo<[DatartDayjs | null, DatartDayjs | null] | null>(() => {
-      if (!value || !Array.isArray(value)) {
-        return null;
-      }
-      return toDatartDayjsRange(value);
-    }, [value]);
+    const rangeValues = useMemo<[DatartDayjs | null, DatartDayjs | null] | null>(
+      () => {
+        if (!value || !Array.isArray(value)) {
+          return null;
+        }
+        return toDatartDayjsRange([value[0] ?? undefined, value[1] ?? undefined]);
+      },
+      [value],
+    );
     return (
       <StyledWrap>
         {isDateTimePickerType(pickerType) ? (
