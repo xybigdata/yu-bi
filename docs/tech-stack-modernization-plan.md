@@ -125,6 +125,7 @@
   - 运行态选择类控制器的回调值边界继续收紧，`Select / MultiSelect / CheckboxGroup / Tree` 改为按真实单值、多值和树选择值语义透传，避免继续保留未声明的 `values` 形态
   - 配置态基础 setter 的值边界开始收口，`SingleTimeSet / TextSetForm / RadioStyleSet / SqlOperatorSet` 改为按真实日期、文本和选择值语义透传，减少 `FormItemProps<any>` 与宽泛 `onChange` 的扩散
   - 配置态数值 setter 的值边界继续收口，`NumberSetForm / RangeNumberSet / MaxAndMinSetter` 改为按真实数值与区间数值语义透传，减少 `FormItemProps<any>` 与宽泛数组值
+  - 配置态滑块 setter 的值边界继续收口，`SliderSet / RangeSliderSet` 改为按 antd 公开滑块单值与区间值语义透传，避免继续保留 `useState<any>` 与宽泛数组值
 - 富文本兼容层第一批稳定化小修
 - 富文本兼容层第二批稳定化小修：
   - `RichTextEditor` 的 `onChange` 类型边界收紧
@@ -238,10 +239,10 @@
 - 避免继续依赖 `rc-field-form/lib/interface`、`antd/es/slider` 这类内部路径
 - 这一批仍只做类型依赖收口，不改运行时行为
 
-当前正在推进的是“控制器配置态数值 setter 值类型边界收口”：
+当前正在推进的是“控制器配置态滑块 setter 值类型边界收口”：
 
-- `NumberSetForm / RangeNumberSet / MaxAndMinSetter` 仍保留较宽的 `value` / `onChange` / `FormItemProps<any>`
-- 本轮只按当前真实使用形态收紧配置态数值 setter 的值与回调类型
+- `SliderSet / RangeSliderSet` 仍保留较宽的 `value` / `onChange` / `useState<any>`
+- 本轮只按当前真实使用形态收紧配置态滑块 setter 的值与回调类型
 - 不改表单交互，不改运行时行为
 
 上一个已完成专题“富文本纯文本 JSON 误判保护补强”已通过：

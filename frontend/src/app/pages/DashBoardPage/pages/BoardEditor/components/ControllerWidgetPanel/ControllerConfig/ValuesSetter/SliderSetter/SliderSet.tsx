@@ -15,12 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Form, FormItemProps, Slider } from 'antd';
+import { Form, Slider } from 'antd';
+import type { SliderSingleProps } from 'antd';
 import React, { memo, useEffect, useState } from 'react';
 import { ControllerValuesName } from '../..';
 
+type SliderSingleValue = SliderSingleProps['value'];
+type SliderRangeValue = number[];
+type SliderSetterValue = [SliderSingleValue?];
+type RangeSliderSetterValue = SliderRangeValue;
+
 export const SliderSetter: React.FC<SliderSetFormProps> = memo(props => {
-  const itemProps: FormItemProps<any> = {
+  const itemProps = {
     preserve: true,
     name: ControllerValuesName,
     label: props.label,
@@ -30,7 +36,7 @@ export const SliderSetter: React.FC<SliderSetFormProps> = memo(props => {
 });
 
 export const RangeSliderSetter: React.FC<SliderSetFormProps> = memo(props => {
-  const itemProps: FormItemProps<any> = {
+  const itemProps = {
     preserve: true,
     name: ControllerValuesName,
     label: props.label,
@@ -39,8 +45,13 @@ export const RangeSliderSetter: React.FC<SliderSetFormProps> = memo(props => {
   return <RangeSliderSetForm {...itemProps} {...props} />;
 });
 
-export type SliderSetFormProps = { label: string } & FormItemProps<any> &
-  SliderSetProps;
+export type SliderSetFormProps = {
+  label: string;
+  name?: string | number | (string | number)[];
+  preserve?: boolean;
+  required?: boolean;
+  style?: React.CSSProperties;
+} & SliderSetProps;
 
 export const RangeSliderSetForm: React.FC<SliderSetFormProps> = memo(
   ({ ...rest }) => {
@@ -63,8 +74,8 @@ export const SliderSetForm: React.FC<SliderSetFormProps> = memo(
 );
 
 export interface SliderSetProps {
-  onChange?: (value) => any;
-  value?: any[];
+  onChange?: (value?: SliderSetterValue | RangeSliderSetterValue) => void;
+  value?: SliderSetterValue | RangeSliderSetterValue;
   maxValue: number;
   minValue: number;
   step: number;
@@ -72,17 +83,18 @@ export interface SliderSetProps {
 }
 export const SliderSet: React.FC<SliderSetProps> = memo(
   ({ onChange, value, maxValue, minValue, step, showMarks }) => {
-    const [val, setVal] = useState<any>();
-    const _onChange = _val => {
+    const [val, setVal] = useState<SliderSingleValue>();
+    const _onChange = (_val: SliderSingleValue) => {
+      setVal(_val);
       onChange?.([_val]);
     };
     const marks = {
       [minValue]: minValue,
       [maxValue]: maxValue,
-      [val]: val,
+      ...(typeof val === 'number' ? { [val]: val } : {}),
     };
     useEffect(() => {
-      setVal(value?.[0]);
+      setVal(Array.isArray(value) ? value[0] : undefined);
     }, [value]);
     return (
       <Slider
@@ -99,12 +111,17 @@ export const SliderSet: React.FC<SliderSetProps> = memo(
 
 export const RangeSliderSet: React.FC<SliderSetProps> = memo(
   ({ onChange, value }) => {
-    const [val, setVal] = useState<any>();
-    const _onChange = _val => {
+    const [val, setVal] = useState<SliderRangeValue>();
+    const _onChange = (_val: SliderRangeValue) => {
+      setVal(_val);
       onChange?.(_val);
     };
     useEffect(() => {
-      setVal([value?.[0], value?.[1]]);
+      if (Array.isArray(value) && value.length > 1) {
+        setVal(value as SliderRangeValue);
+      } else {
+        setVal(undefined);
+      }
     }, [value]);
     return <Slider range value={val} onChange={_onChange} />;
   },
