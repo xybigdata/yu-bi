@@ -22,6 +22,8 @@ import { ControllerWidgetContent } from 'app/pages/DashBoardPage/pages/Board/sli
 import {
   ControllerConfig,
   ControllerDate,
+  ControllerValue,
+  ControllerValues,
   ControlOption,
 } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
@@ -48,6 +50,37 @@ import { SlideControllerForm } from './Controller/SliderController';
 import { TextControllerForm } from './Controller/TextController';
 import { TimeControllerForm } from './Controller/TimeController';
 import { TreeControllerForm } from './Controller/TreeController';
+
+type ControllerSubmitScalar = ControllerValue | undefined;
+type ControllerSubmitRange = [ControllerSubmitScalar?, ControllerSubmitScalar?];
+type ControllerSubmitValue = ControllerSubmitScalar | ControllerValues | ControllerSubmitRange;
+type ControllerSubmitForm = {
+  value?: ControllerSubmitValue;
+};
+
+const isControllerValue = (value: unknown): value is ControllerValue => {
+  return typeof value === 'string' || typeof value === 'number';
+};
+
+const normalizeControllerSubmitValue = (
+  value?: ControllerSubmitValue,
+): ControllerValues => {
+  if (value === undefined || isEmpty(value)) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    const normalizedValues: ControllerValues = [];
+    value.forEach(item => {
+      if (isControllerValue(item)) {
+        normalizedValues.push(item);
+      }
+    });
+    return normalizedValues;
+  }
+
+  return isControllerValue(value) ? [value] : [];
+};
 
 export const ControllerWidgetCore: React.FC<{}> = memo(() => {
   const widget = useContext(WidgetContext);
@@ -134,16 +167,8 @@ export const ControllerWidgetCore: React.FC<{}> = memo(() => {
     form.submit();
   }, [form]);
 
-  const onFinish = value => {
-    const values = value.value;
-    if (values && typeof values === 'object' && !Array.isArray(values)) {
-      return;
-    }
-    const _values = !isEmpty(values)
-      ? Array.isArray(values)
-        ? values
-        : [values]
-      : [];
+  const onFinish = (formValue: ControllerSubmitForm) => {
+    const _values = normalizeControllerSubmitValue(formValue.value);
     const nextContent = produce(content, draft => {
       draft.config.controllerValues = _values;
     });
