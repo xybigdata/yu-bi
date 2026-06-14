@@ -75,8 +75,8 @@
 | styled-components | `6.1.19` | 已完成主升级 |
 | react-quill | `2.0.0` | 已升级，仍需稳定化 |
 | react-window | `1.8.6` | 仍在真实运行时链路 |
-| flexlayout-react | `0.5.12` | 版本偏旧，但仍在主链 |
-| react-grid-layout | `1.2.4` | 版本偏旧，但仍在主链 |
+| flexlayout-react | `0.5.21` | 已收口到当前稳定小版本 |
+| react-grid-layout | `1.3.4` | 已收口到当前稳定小版本 |
 | monaco-editor | `0.52.2` | 真实运行时依赖 |
 | reveal.js | `6.0.1` | 真实运行时依赖 |
 
@@ -142,6 +142,7 @@
 - `react-grid-layout` 实际使用面确认集中在看板编辑态 `AutoBoardEditor` 与查看态 `AutoBoardCore`
   - 看板布局映射入口补齐 `pRect / mRect` 缺省值归一化，避免不完整布局数据直接传入 RGL
   - 布局归一化继续补齐非法值兜底与断点列数约束，避免异常宽高或负值直接进入 RGL
+  - `package.json` 依赖声明已与当前锁文件和真实运行版本同步到 `flexlayout-react 0.5.21`、`react-grid-layout 1.3.4`
 - `react-dev-inspector` 开发态接入移除
 - Node 运行时基线明确统一回 `Node 24`
 - Maven 对外品牌命名开始从 `datart` 向 `yu-bi` 收口：
