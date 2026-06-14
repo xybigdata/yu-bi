@@ -23,6 +23,7 @@ import {
   beta4_2,
   convertWidgetRelationsToObj,
   migrateWidgets,
+  parseServerWidget,
   RC0,
 } from '../BoardConfig/migrateWidgets';
 import { WidgetBeta3 } from '../BoardConfig/types';
@@ -104,6 +105,55 @@ describe('test migrateWidgets ', () => {
       },
     ] as ServerRelation[];
     expect(convertWidgetRelationsToObj(relations1)).toMatchObject(relations2);
+  });
+
+  test('convertWidgetRelationsToObj should keep relation when config is invalid json', () => {
+    const relations = [
+      {
+        targetId: '11',
+        config: '{invalid-json}',
+        sourceId: '22',
+      },
+    ] as ServerRelation[];
+
+    expect(convertWidgetRelationsToObj(relations)).toMatchObject(relations);
+  });
+
+  test('parseServerWidget should return undefined when config is invalid json', () => {
+    expect(
+      parseServerWidget({
+        config: '{invalid-json}',
+        relations: [],
+      } as any),
+    ).toBeUndefined();
+  });
+
+  test('parseServerWidget should parse widget config and relation config', () => {
+    const result = parseServerWidget({
+      config: JSON.stringify({
+        version: APP_VERSION_BETA_0,
+        type: 'chart',
+      }),
+      relations: [
+        {
+          targetId: '11',
+          config: JSON.stringify({ type: 'widgetToWidget' }),
+          sourceId: '22',
+        },
+      ],
+    } as any);
+
+    expect(result?.config).toMatchObject({
+      version: APP_VERSION_BETA_0,
+      type: 'chart',
+    });
+    expect(result?.relations).toMatchObject([
+      {
+        targetId: '11',
+        config: { type: 'widgetToWidget' },
+        sourceId: '22',
+      },
+    ]);
   });
 
   test('should migrate when widget is owned chart for version APP_VERSION_BETA_4_2', () => {
