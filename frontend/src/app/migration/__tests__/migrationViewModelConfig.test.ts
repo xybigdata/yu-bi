@@ -20,6 +20,16 @@ import { APP_VERSION_BETA_4 } from '../constants';
 import beginViewModelMigration from '../ViewConfig/migrationViewModelConfig';
 
 describe('migrationViewModelConfig Test', () => {
+  test('should keep invalid json string', () => {
+    const model = '{invalid-json}';
+    expect(beginViewModelMigration(model, 'SQL')).toEqual(model);
+  });
+
+  test('should keep null model as null', () => {
+    const model = JSON.stringify(null);
+    expect(beginViewModelMigration(model, 'SQL')).toEqual('null');
+  });
+
   test('should get latest version after migration', () => {
     const model = JSON.stringify({});
     expect(beginViewModelMigration(model, 'SQL')).toEqual(
@@ -33,6 +43,29 @@ describe('migrationViewModelConfig Test', () => {
 
   test('should get latest version even model is empty', () => {
     expect(beginViewModelMigration('', 'SQL')).toEqual('');
+  });
+
+  test('should keep latest version model stable', () => {
+    const model = JSON.stringify({
+      hierarchy: {
+        column1: {
+          name: 'column1',
+          path: ['column1'],
+          role: 'role',
+          type: 'STRING',
+        },
+      },
+      columns: {
+        column1: {
+          name: 'column1',
+          role: 'role',
+          type: 'STRING',
+        },
+      },
+      version: APP_VERSION_BETA_4,
+    });
+
+    expect(beginViewModelMigration(model, 'SQL')).toEqual(model);
   });
 
   test('should migrate model to nested model object', () => {

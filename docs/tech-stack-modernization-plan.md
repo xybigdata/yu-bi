@@ -192,6 +192,10 @@
   - `migrationViewDetailConfig.ts` 的字符串解析收口到局部兼容函数，补齐无效 JSON 输入的显式回退语义
   - beta2 事件分发改为走局部显式迁移目标类型，减少 view detail 配置入口的宽泛对象透传
   - 补齐无效 JSON 与 `null` 配置回归测试，确保 view detail 配置迁移入口行为稳定
+- View model 配置迁移入口继续补强：
+  - `migrationViewModelConfig.ts` 的字符串解析收口到局部兼容函数，补齐无效 JSON 与 `null` 输入的显式回退语义
+  - beta2 / beta4 事件分发改为走局部显式迁移目标类型与视图类型闭包，减少 view model 配置入口的宽泛对象透传
+  - 补齐无效 JSON、`null` 配置与最新版本稳定性回归测试，确保 view model 配置迁移入口行为稳定
 - `react-window` 专项审计与运行时包装边界收口：
   - 实际使用面确认仅剩 `VirtualTable -> SchemaTable`
   - 虚拟表格 reset 时机修正为依赖变化即时触发
