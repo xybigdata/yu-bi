@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { splitRangerDateFilters } from '../time';
+import { getTime, getTimeRange, splitRangerDateFilters } from '../time';
 
 describe('test splitRangerDateFilters', () => {
   const rangerDateFilter = {
@@ -106,5 +106,23 @@ describe('test splitRangerDateFilters', () => {
     expect(res4).toEqual([]);
     const res5 = splitRangerDateFilters('string' as any);
     expect(res5).toEqual([]);
+  });
+});
+
+describe('current time helpers in time utils', () => {
+  test('should build current day range with formatter', () => {
+    const [start, end] = getTimeRange()('d', 'YYYY-MM-DD HH:mm:ss');
+
+    expect(start).toMatch(/^\d{4}-\d{2}-\d{2} 00:00:00$/);
+    expect(end).toMatch(/^\d{4}-\d{2}-\d{2} 23:59:59$/);
+  });
+
+  test('should build start and end anchors from current time', () => {
+    const start = getTime(0, 'd')('d', true);
+    const end = getTime(0, 'd')('d', false);
+
+    expect(start.isValid()).toBe(true);
+    expect(end.isValid()).toBe(true);
+    expect(start.isBefore(end) || start.isSame(end)).toBe(true);
   });
 });
