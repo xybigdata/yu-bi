@@ -18,34 +18,27 @@
 
 import { DatePicker } from 'antd';
 import { updateBy } from 'app/utils/mutation';
-import {
-  DatartDateLike,
-  formatDatartDateIfValid,
-  toDatartDayjs,
-} from 'app/utils/date';
+import { DatartDateLike, toDatartDayjs } from 'app/utils/date';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo, useState } from 'react';
 import { PresentControllerFilterProps } from '.';
-
-const serializeTimeValue = (time: DatartDateLike | null) => {
-  if (!time) {
-    return '';
-  }
-  return formatDatartDateIfValid(time, TIME_FORMATTER) || '';
-};
+import {
+  getSingleTimeFilterValue,
+  serializeSingleTimeFilterValue,
+} from './timeFilterUtils';
 
 const TimeFilter: FC<PresentControllerFilterProps> = memo(
   ({ condition, onConditionChange }) => {
     const [stringTime, setStringTime] = useState<string | undefined>(
-      String(condition?.value || ''),
+      getSingleTimeFilterValue(condition),
     );
 
     function onChange(time: DatartDateLike | null) {
       const newCondition = updateBy(condition!, draft => {
-        draft.value = serializeTimeValue(time);
+        draft.value = serializeSingleTimeFilterValue(time);
       });
       onConditionChange(newCondition);
-      setStringTime(newCondition.value as string);
+      setStringTime(getSingleTimeFilterValue(newCondition));
     }
     return (
       <DatePicker

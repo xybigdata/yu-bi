@@ -11,9 +11,9 @@ import { TIME_FORMATTER } from 'globalConstants';
 import type { RelativeTimeUnit } from 'globalConstants';
 import type { ManualTimeValue } from './ManualSingleTimeSelector';
 
-type RelativeTimeValue = Exclude<ManualTimeValue, string>;
+export type RelativeTimeValue = Exclude<ManualTimeValue, string>;
 
-const isRelativeTimeValue = (
+export const isRelativeTimeValue = (
   value: ManualTimeValue | null | undefined,
 ): value is RelativeTimeValue => {
   return !!value && typeof value === 'object' && 'unit' in value;
@@ -52,6 +52,31 @@ export const serializeManualTimeValue = (
   }
 
   return time;
+};
+
+export const normalizeManualTimeValue = (
+  value: unknown,
+): ManualTimeValue | undefined => {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  const manualValue = value as ManualTimeValue | null | undefined;
+  if (isRelativeTimeValue(manualValue)) {
+    return manualValue;
+  }
+
+  return undefined;
+};
+
+export const normalizeManualRangeTimeValue = (
+  value: unknown,
+): [ManualTimeValue | undefined, ManualTimeValue | undefined] => {
+  if (!Array.isArray(value)) {
+    return [undefined, undefined];
+  }
+
+  return [normalizeManualTimeValue(value[0]), normalizeManualTimeValue(value[1])];
 };
 
 export const toRangeTimeValue = (
