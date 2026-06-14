@@ -10,6 +10,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>yu-bi-file-data-provider</artifactId>
+    <name>yu-bi File Data Provider</name>
+    <description>yu-bi 文件数据提供器模块</description>
 
     <dependencies>
         <dependency>

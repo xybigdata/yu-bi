@@ -175,6 +175,10 @@
   - Maven 模块坐标改为 `yubi` / `yu-bi-*`
   - 安装包、脚本名、Docker 打包输入改为 `yu-bi-server`
   - 保持 `datart.*` Java 包名、配置前缀与稳定内部标识不变
+- Maven 对外品牌元数据继续收口：
+  - 根 POM 与各服务端模块补齐 `name`、`description` 等对外元数据，统一以 `yu-bi` 对外呈现
+  - SCM 与许可证信息指向 `yu-bi` 新仓库
+  - 明确保留 `datart.DatartServerApplication` 这类内部稳定入口不动
 - 构建与交付层品牌残留继续收口：
   - Docker 镜像运行目录从 `/datart` 调整为 `/yu-bi`
   - 部署文档中的 Docker 挂载路径示例同步更新为 `/yu-bi`

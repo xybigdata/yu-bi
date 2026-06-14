@@ -11,6 +11,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>yu-bi-http-data-provider</artifactId>
+    <name>yu-bi HTTP Data Provider</name>
+    <description>yu-bi HTTP 数据提供器模块</description>
 
     <dependencies>
         <dependency>
