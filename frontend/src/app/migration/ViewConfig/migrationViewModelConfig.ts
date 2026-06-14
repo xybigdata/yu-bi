@@ -17,10 +17,57 @@
  */
 
 import { addPathToHierarchyStructureAndChangeName } from 'app/pages/MainPage/pages/ViewPage/utils';
+import {
+  ColumnsModel,
+  Model,
+  ViewType,
+} from 'app/pages/MainPage/pages/ViewPage/slice/types';
 import { CloneValueDeep } from 'utils/object';
 import { APP_VERSION_BETA_2, APP_VERSION_BETA_4 } from '../constants';
 import MigrationEvent from '../MigrationEvent';
 import MigrationEventDispatcher from '../MigrationEventDispatcher';
+
+type ViewModelMigrationField = {
+  name?: string | string[];
+  role?: string;
+  type?: string;
+  children?: ViewModelMigrationField[] | null;
+  path?: string[];
+  [key: string]: unknown;
+};
+
+type ViewModelMigrationSource = Record<string, ViewModelMigrationField>;
+
+type ViewModelMigrationTarget = {
+  version?: string;
+  hierarchy?: ViewModelMigrationSource | Model;
+  columns?: ViewModelMigrationSource;
+  path?: string[];
+  computedFields?: unknown[];
+};
+
+const parseViewModelConfig = (
+  model: string,
+): ViewModelMigrationSource | ViewModelMigrationTarget | null | undefined => {
+  try {
+    return JSON.parse(model) as
+      | ViewModelMigrationSource
+      | ViewModelMigrationTarget
+      | null;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+const isViewModelMigrationTarget = (
+  model: ViewModelMigrationSource | ViewModelMigrationTarget | null,
+): model is ViewModelMigrationTarget => {
+  return !!model && ('hierarchy' in model || 'columns' in model);
+};
+
+const toColumnsModel = (model: ViewModelMigrationSource) => {
+  return model as unknown as ColumnsModel;
+};
 /**
  * Migrate @see View config in beta.2 version
  * Changes:
@@ -30,7 +77,7 @@ import MigrationEventDispatcher from '../MigrationEventDispatcher';
  * @param {object} [model]
  * @return {*}  {(object | undefined)}
  */
-const beta2 = model => {
+const beta2 = (model?: ViewModelMigrationSource | null) => {
   const clonedModel = CloneValueDeep(model) || {};
   if (model) {
     Object.keys(clonedModel).forEach(name => {
@@ -44,11 +91,22 @@ const beta2 = model => {
   return model;
 };
 
-const beta4 = view => {
-  const { viewType, result } = view;
+const beta2Task = (model?: ViewModelMigrationSource) => {
+  const result = beta2(model);
+  return result ?? model;
+};
+
+const beta4 = (
+  result: ViewModelMigrationTarget | undefined,
+  viewType: ViewType,
+) => {
+  if (!result?.hierarchy) {
+    return result;
+  }
+
   try {
     result.hierarchy = addPathToHierarchyStructureAndChangeName(
-      result.hierarchy,
+      toColumnsModel(result.hierarchy as ViewModelMigrationSource),
       viewType,
     );
     return result;
@@ -58,29 +116,48 @@ const beta4 = view => {
   }
 };
 
+const buildBeta4Task = (viewType: ViewType) => {
+  return (result?: ViewModelMigrationTarget) => {
+    return beta4(result, viewType) ?? result;
+  };
+};
+
 /**
  * main entry point of migration
  *
  * @param {string} model
  * @return {string}
  */
-const beginViewModelMigration = (model: string, viewType): string => {
+const beginViewModelMigration = (model: string, viewType?: ViewType): string => {
   if (!model?.trim().length) {
     return model;
   }
-  const modelObj = JSON.parse(model);
-  const event2 = new MigrationEvent(APP_VERSION_BETA_2, beta2);
-  const event4 = new MigrationEvent(APP_VERSION_BETA_4, beta4);
+
+  const resolvedViewType = viewType || 'SQL';
+  const modelObj = parseViewModelConfig(model);
+  if (typeof modelObj === 'undefined') {
+    return model;
+  }
+  if (modelObj === null) {
+    return JSON.stringify(modelObj);
+  }
+
+  const event2 = new MigrationEvent<ViewModelMigrationSource>(
+    APP_VERSION_BETA_2,
+    beta2Task,
+  );
+  const event4 = new MigrationEvent<ViewModelMigrationTarget>(
+    APP_VERSION_BETA_4,
+    buildBeta4Task(resolvedViewType),
+  );
 
   const dispatcher2 = new MigrationEventDispatcher(event2);
-  const result2 = dispatcher2.process(modelObj);
+  const result2 = isViewModelMigrationTarget(modelObj)
+    ? modelObj
+    : dispatcher2.process(modelObj);
 
   const dispatcher4 = new MigrationEventDispatcher(event4);
-
-  const result4 = dispatcher4.process({
-    result: result2,
-    viewType,
-  });
+  const result4 = dispatcher4.process(result2);
 
   return JSON.stringify(result4);
 };
