@@ -56,7 +56,7 @@ import {
 import styled from 'styled-components';
 import { request2 } from 'utils/request';
 import { convertToTree } from '../../../../../../../utils/widget';
-import { ControllerConfig } from '../../../types';
+import { ControllerConfig, ControllerValues } from '../../../types';
 import TreeSetter from '../TreeSetter';
 import { AssistViewFields } from './AssistViewFields';
 import { CustomOptions } from './CustomOptions';
@@ -104,7 +104,7 @@ const ValuesOptionsSetter: FC<{
   const tc = useI18NPrefix(`viz.control`);
   const { orgId } = useContext(BoardContext);
   const [optionValues, setOptionValues] = useState<RelationFilterValue[]>([]);
-  const [targetKeys, setTargetKeys] = useState<string[]>([]);
+  const [targetKeys, setTargetKeys] = useState<ControllerValues>([]);
   const [labelOptions, setLabelOptions] = useState<SelectOption[] | undefined>(
     [],
   );
@@ -192,7 +192,7 @@ const ValuesOptionsSetter: FC<{
   }, []);
 
   const onTargetKeyChange = useCallback(
-    (nextTargetKeys?: string[]) => {
+    (nextTargetKeys?: ControllerValues) => {
       const config: ControllerConfig = getControllerConfig();
 
       form?.setFieldsValue({
