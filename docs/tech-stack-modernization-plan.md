@@ -173,6 +173,10 @@
   - `migrateWidgets.ts` 中 beta4 / beta4_2 / RC0 的局部弱类型入口继续收口，去掉迁移主链上的宽泛 `any` 中转
   - `migrateWidgetConfig.ts` 的 RC1 事件分发改为直接走 `Widget` 类型，不再保留局部 `widget as any`
   - 修正 `migrateWidgets` 主流程未接回 `beta4_2` 结果的问题，并补齐回归测试，确保图表交互配置迁移真正生效
+- 看板配置链路继续补强：
+  - `migrateBoardConfig.ts` 补齐显式迁移目标类型与 `jsonConfig` 识别，避免看板配置入口继续依赖宽泛对象分支
+  - 修正 beta0 阶段 `hasResetControl` 误跟随 `hasQueryControl` 的历史逻辑，保持查询与重置开关各自独立
+  - `BoardConfigProvider` 读取移动端间距时改为真实使用 `mSpace` 配置组，并补齐回归测试，确保移动端间距配置真正生效
 - `react-window` 专项审计与运行时包装边界收口：
   - 实际使用面确认仅剩 `VirtualTable -> SchemaTable`
   - 虚拟表格 reset 时机修正为依赖变化即时触发
