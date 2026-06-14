@@ -128,6 +128,7 @@
   - 配置态滑块 setter 的值边界继续收口，`SliderSet / RangeSliderSet` 改为按 antd 公开滑块单值与区间值语义透传，避免继续保留 `useState<any>` 与宽泛数组值
   - 配置态相对时间 setter 的值边界继续收口，`RelativeTimeSetter` 改为按真实方向、数量和时间单位语义透传，避免继续保留宽泛 `value` / `onChange` 与未声明的数值输入类型
   - 配置态树默认值选择链路的值边界继续收口，`ValuesOptionsSetter` 改为按树勾选返回的真实键值数组透传，避免继续保留 `onCheck={(checkedObj: any) => ...}` 这类未声明对象形态
+  - 控制器关联字段值类型过滤链继续收口，`filterValueTypeByControl` 改为按字段类型和变量值类型联合约束，避免继续保留 `valueType: any`
 - 富文本兼容层第一批稳定化小修
 - 富文本兼容层第二批稳定化小修：
   - `RichTextEditor` 的 `onChange` 类型边界收紧
@@ -253,10 +254,16 @@
 - `npm run build:all`
 - `npm run test:ci -- --silent`
 
-当前正在推进的是“控制器配置态树默认值选择链路类型收口”：
+当前最近完成的是“控制器配置态树默认值选择链路类型收口”，已通过：
 
-- `ValuesOptionsSetter` 里的树默认值选择仍保留 `checkedObj: any` 与未声明的勾选值形态
-- 本轮只按当前真实使用形态收紧 `checkedKeys -> targetKeys -> controllerValues` 这条链
+- `npm run checkTs`
+- `npm run build:all`
+- `npm run test:ci -- --silent`
+
+当前正在推进的是“控制器关联字段值类型过滤链收口”：
+
+- `filterValueTypeByControl` 仍保留 `valueType: any`
+- 本轮只按当前真实使用形态收紧字段类型与变量值类型过滤输入
 - 不改表单交互，不改运行时行为
 
 上一个已完成专题“富文本纯文本 JSON 误判保护补强”已通过：
