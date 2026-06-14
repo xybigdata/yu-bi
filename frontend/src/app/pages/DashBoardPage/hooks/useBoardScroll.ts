@@ -17,6 +17,7 @@
  */
 import throttle from 'lodash/throttle';
 import { RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
+import { scheduleMicrotask } from '../utils/scheduleMicrotask';
 import { boardScroll } from '../pages/BoardEditor/slice/events';
 export default function useBoardScroll(boardId: string) {
   const gridWrapRef: RefObject<HTMLDivElement> = useRef(null);
@@ -34,7 +35,7 @@ export default function useBoardScroll(boardId: string) {
 
   useEffect(() => {
     const shadowGridWrapRef = gridWrapRef?.current;
-    setImmediate(() => {
+    scheduleMicrotask(() => {
       shadowGridWrapRef?.removeEventListener('scroll', thEmitScroll, false);
       if (shadowGridWrapRef) {
         shadowGridWrapRef.addEventListener('scroll', thEmitScroll, false);

@@ -32,6 +32,7 @@ import useEditAutoLayoutMap from 'app/pages/DashBoardPage/hooks/useEditAutoLayou
 import useGridLayoutMap from 'app/pages/DashBoardPage/hooks/useGridLayoutMap';
 import { DeviceType } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { getBoardMarginPadding } from 'app/pages/DashBoardPage/utils/board';
+import { scheduleMicrotask } from 'app/pages/DashBoardPage/utils/scheduleMicrotask';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import debounce from 'lodash/debounce';
 import {
@@ -84,7 +85,7 @@ export const AutoBoardEditor: React.FC<{}> = memo(() => {
 
   const updateCurWH = useCallback((values: number[]) => {
     setCurWH(values);
-    setImmediate(() => {
+    scheduleMicrotask(() => {
       dispatchResize();
     });
   }, []);

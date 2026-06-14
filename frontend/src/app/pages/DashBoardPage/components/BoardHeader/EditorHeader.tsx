@@ -20,6 +20,7 @@ import { CloseOutlined, LeftOutlined, SaveOutlined } from '@ant-design/icons';
 import { Button, Space } from 'antd';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { scheduleMicrotask } from 'app/pages/DashBoardPage/utils/scheduleMicrotask';
 import classnames from 'classnames';
 import { FC, PropsWithChildren, memo, useContext } from 'react';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -55,7 +56,7 @@ const EditorHeader: FC<PropsWithChildren<{}>> = memo(({ children }) => {
   };
   const onUpdateBoard = () => {
     onEditClearActiveWidgets();
-    setImmediate(() => {
+    scheduleMicrotask(() => {
       updateBoard?.(onCloseBoardEditor);
     });
   };

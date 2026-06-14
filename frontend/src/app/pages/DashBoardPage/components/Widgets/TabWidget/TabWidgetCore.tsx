@@ -19,6 +19,7 @@ import { Tabs } from 'antd';
 import { TabWidgetContent } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { memo, useCallback, useContext, useEffect, useState } from 'react';
 import { useAppDispatch } from 'app/hooks/useRedux';
+import { scheduleMicrotask } from 'app/pages/DashBoardPage/utils/scheduleMicrotask';
 import styled from 'styled-components';
 import { PRIMARY } from 'styles/StyleConstants';
 import { uuidv4 } from 'utils/utils';
@@ -83,7 +84,7 @@ export const TabWidgetCore: React.FC<{}> = memo(() => {
         },
       }),
     );
-    setImmediate(() => {
+    scheduleMicrotask(() => {
       SetActiveKey(nextIndex);
     });
   }, [dispatch, tabsCons, widget.id]);
@@ -99,7 +100,7 @@ export const TabWidgetCore: React.FC<{}> = memo(() => {
           mode: boardType,
         }),
       );
-      setImmediate(() => {
+      scheduleMicrotask(() => {
         SetActiveKey(tabsCons[0].index);
       });
     },
