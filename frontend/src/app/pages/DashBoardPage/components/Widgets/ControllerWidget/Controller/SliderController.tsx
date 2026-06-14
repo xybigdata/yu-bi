@@ -16,17 +16,20 @@
  * limitations under the License.
  */
 import { Form, Slider } from 'antd';
+import type { SliderSingleProps } from 'antd';
 import React, { memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
+
+type SliderValue = SliderSingleProps['value'];
 
 export interface SelectControllerProps {
   showMarks: boolean;
   step: number;
   minValue: number;
   maxValue: number;
-  value?: any;
+  value?: SliderValue;
   placeholder?: string;
-  onChange: (values) => void;
+  onChange: (value?: SliderValue) => void;
   label?: React.ReactNode;
   name?: string;
   required?: boolean;
@@ -47,7 +50,7 @@ export const SlideControllerForm: React.FC<SelectControllerProps> = memo(
 );
 export const SlideController: React.FC<SelectControllerProps> = memo(
   ({ onChange, value, minValue, maxValue, step, showMarks }) => {
-    const [val, setVal] = useState<any>();
+    const [val, setVal] = useState<SliderValue>();
 
     useEffect(() => {
       setVal(value);
@@ -56,7 +59,7 @@ export const SlideController: React.FC<SelectControllerProps> = memo(
     const marks = {
       [minValue]: minValue,
       [maxValue]: maxValue,
-      [val]: val,
+      ...(typeof val === 'number' ? { [val]: val } : {}),
     };
     return (
       <StyledWrap>
@@ -67,7 +70,7 @@ export const SlideController: React.FC<SelectControllerProps> = memo(
           min={minValue}
           max={maxValue}
           step={step}
-          {...(showMarks && { marks: marks })}
+          {...(showMarks ? { marks } : {})}
         />
       </StyledWrap>
     );
