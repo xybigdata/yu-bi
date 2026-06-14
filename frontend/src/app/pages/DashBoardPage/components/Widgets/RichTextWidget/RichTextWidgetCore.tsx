@@ -20,6 +20,9 @@ import {
   CustomColor,
   QuillPalette,
 } from 'app/components/ChartGraph/BasicRichText/RichTextPluginLoader/CustomColor';
+import {
+  normalizeRichTextValue,
+} from 'app/components/ChartGraph/BasicRichText/content';
 import RichTextEditor, {
   RichTextEditorHandle,
 } from 'app/components/ChartGraph/BasicRichText/RichTextEditor';
@@ -45,6 +48,8 @@ import { SPACE_TIMES } from 'styles/StyleConstants';
 import { WidgetActionContext } from '../../ActionProvider/WidgetActionProvider';
 import { Formats, MarkdownOptions } from './config';
 
+type RichTextValue = DeltaStatic | string;
+
 type RichTextWidgetProps = {
   widget: Widget;
   widgetInfo: WidgetInfo;
@@ -60,9 +65,9 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
 
   const { onEditClearActiveWidgets } = useContext(WidgetActionContext);
   const initContent = useMemo(() => {
-    return (widget.config.content as any).richText?.content;
+    return normalizeRichTextValue((widget.config.content as any).richText?.content);
   }, [widget.config.content]);
-  const [quillValue, setQuillValue] = useState<DeltaStatic | undefined>(
+  const [quillValue, setQuillValue] = useState<RichTextValue>(
     initContent,
   );
   const [containerId, setContainerId] = useState<string>();
@@ -88,7 +93,11 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
   useEffect(() => {
     if (widgetInfo.editing === false && contentSavable && boardEditing) {
       if (quillRef.current) {
-        let contents = quillRef.current.getContents();
+        const contents = normalizeRichTextValue(quillRef.current.getContents());
+        if (typeof contents === 'string') {
+          setContentSavable(false);
+          return;
+        }
         const strContents = JSON.stringify(contents);
         if (strContents !== JSON.stringify(initContent)) {
           const nextMediaWidgetContent = produce(
@@ -183,7 +192,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
 
   const quillChange = useCallback(() => {
     if (quillRef.current) {
-      let contents = quillRef.current.getContents();
+      const contents = normalizeRichTextValue(quillRef.current.getContents());
       setQuillValue(contents);
     }
   }, []);
