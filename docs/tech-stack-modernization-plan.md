@@ -285,75 +285,48 @@
 
 ## 6. 当前进行中专题
 
-当前工作区正在推进的下一批仍是低到中风险交界处的小范围稳定化，不进入结构性替换。
+当前工作区只推进低风险、小范围、可回归的专题，不进入结构性替换。
 
-当前最近完成的是“前端历史类型入口收口补强”，已通过：
+### 6.1 正在推进
 
-- `npm run checkTs`
-- `npm run build:all`
-- `npm run test:ci -- --silent`
+当前专题：`View 消费链解析边界收口`
 
-本轮结论是：
+本轮目标：
 
-- `FormRule`、`NamePath`、`SliderProps` 等类型入口优先切回 `antd` 公开导出
-- 避免继续依赖 `rc-field-form/lib/interface`、`antd/es/slider` 这类内部路径
-- 这一批仍只做类型依赖收口，不改运行时行为
+- 继续清理消费链中残留的 `view.model`、`view.config` 裸 `JSON.parse`
+- 统一复用 `internalChartHelper` 中的兼容解析入口
+- 为无效 JSON 补齐显式回退语义，避免坏数据直接打断编辑态、看板态、图表态链路
 
-当前最近完成的是“控制器配置态滑块 setter 值类型边界收口”，已通过：
+当前已落地范围：
 
-- `npm run checkTs`
-- `npm run build:all`
-- `npm run test:ci -- --silent`
+- `transformMeta`、`transformHierarchyMeta`、`transformToHierarchyModel`、`transformToViewConfig` 统一走兼容解析入口
+- `ChartEditor`、`ChartWorkbenchPage`、`DashBoardPage board/widget`、`ValuesOptionsSetter`、`ChartDtoHelper` 已改为复用统一解析入口
+- 去掉上述消费链中的局部 `try/catch + JSON.parse(view.model/config)` 与重复解析逻辑
 
-当前最近完成的是“控制器配置态相对时间 setter 值类型边界收口”，已通过：
+当前验证计划：
 
 - `npm run checkTs`
-- `npm run build:all`
-- `npm run test:ci -- --silent`
+- `npm run test:ci -- src/app/utils/__tests__/internalChartHelper.test.ts src/app/utils/__tests__/chartDtoHelper.test.ts src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts src/app/pages/DashBoardPage/utils/__tests__/board.test.ts`
 
-当前最近完成的是“控制器配置态树默认值选择链路类型收口”，已通过：
+### 6.2 最近已完成
 
-- `npm run checkTs`
-- `npm run build:all`
-- `npm run test:ci -- --silent`
-
-当前最近完成的是“控制器关联字段值类型过滤链收口”，已通过：
-
-- `npm run checkTs`
-- `npm run build:all`
-- `npm run test:ci -- --silent`
-
-当前最近完成的是“控制器配置默认值数组边界收口”，已通过：
-
-- `npm run checkTs`
-- `npm run build:all`
-- `npm run test:ci -- --silent`
-
-当前正在推进的是“运行态控制器提交值边界收口”：
-
-- `ControllerWidgetCore.onFinish` 仍直接消费未声明的 `value.value`
-- 本轮只按当前真实使用形态收紧单值、多值和区间值归一化，不触碰时间控制器的 `controllerDate` 链路
-- 不改表单交互，不改运行时行为
-
-上一个已完成专题“富文本纯文本 JSON 误判保护补强”已通过：
-
-- `npm run checkTs`
-- `npm run build:all`
-- `npm run test:ci -- --silent`
-
-上一个已完成专题“时间体系剩余调用点跟进收口（当前时间入口补齐与 UI 时间默认值统一）”已通过：
-
-- `npm run checkTs`
-- `npm run build:all`
-- `npm run test:ci -- --silent`
+- 前端历史类型入口收口补强
+- 控制器配置态滑块 setter 值类型边界收口
+- 控制器配置态相对时间 setter 值类型边界收口
+- 控制器配置态树默认值选择链路类型收口
+- 控制器关联字段值类型过滤链收口
+- 控制器配置默认值数组边界收口
+- 富文本纯文本 JSON 误判保护补强
+- 时间体系剩余调用点跟进收口
 
 ## 7. 下一阶段执行顺序
 
 按这个顺序推进，避免专题扩散：
 
-1. 时间体系剩余调用点继续收口
-2. 富文本兼容层继续按真实使用面补运行时防护与类型边界
-3. 前端依赖收口与历史入口审计继续逐个推进
+1. 完成当前 `View` 消费链解析边界专题并验证通过
+2. 时间体系剩余调用点继续收口
+3. 富文本兼容层继续按真实使用面补运行时防护与类型边界
+4. 前端依赖收口与历史入口审计继续逐个推进
 
 ## 8. 每轮固定门禁
 
@@ -386,3 +359,4 @@
 
 - 默认直接在当前专题分支提交
 - 不直接改 `main`
+- 同一专题尽量攒成更完整的一批再提交，避免高频触发整套回归

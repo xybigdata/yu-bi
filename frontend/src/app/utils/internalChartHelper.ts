@@ -67,6 +67,37 @@ import {
 } from 'utils/object';
 import { getDrillableRows, round } from './chartHelper';
 
+const parseViewModel = (model?: string): Record<string, any> | undefined => {
+  if (!model) {
+    return undefined;
+  }
+  try {
+    return JSON.parse(model) as Record<string, any>;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+const parseViewConfig = (
+  viewConfig?: string | object,
+): Record<string, any> | undefined => {
+  if (!viewConfig) {
+    return undefined;
+  }
+  if (typeof viewConfig === 'string') {
+    try {
+      return JSON.parse(viewConfig) as Record<string, any>;
+    } catch (error) {
+      return undefined;
+    }
+  }
+  return viewConfig as Record<string, any>;
+};
+
+export const transformToHierarchyModel = (model?: string) => {
+  return parseViewModel(model) || {};
+};
+
 export const transferChartConfigs = (
   targetConfig?: ChartConfig,
   sourceConfig?: ChartConfig,
@@ -384,7 +415,10 @@ export function transformMeta(model?: string) {
   if (!model) {
     return undefined;
   }
-  const jsonObj = JSON.parse(model || '{}');
+  const jsonObj = parseViewModel(model);
+  if (!jsonObj) {
+    return undefined;
+  }
   const HierarchyModel = 'hierarchy' in jsonObj ? jsonObj.hierarchy : jsonObj;
   return Object.keys(HierarchyModel || {}).flatMap(colKey => {
     const column = HierarchyModel[colKey];
@@ -407,7 +441,10 @@ export function transformHierarchyMeta(model?: string): ChartDataViewMeta[] {
   if (!model) {
     return [];
   }
-  const modelObj = JSON.parse(model || '{}');
+  const modelObj = parseViewModel(model);
+  if (!modelObj) {
+    return [];
+  }
   const hierarchyMeta = !Object.keys(modelObj?.hierarchy || {}).length
     ? modelObj.columns
     : modelObj.hierarchy;
@@ -687,16 +724,15 @@ export const transformToViewConfig = (
   cacheExpires?: number;
   concurrencyControl?: boolean;
   concurrencyControlMode?: string;
+  expensiveQuery?: boolean;
 } => {
-  let viewConfigMap = viewConfig;
-  if (typeof viewConfig === 'string') {
-    viewConfigMap = JSON.parse(viewConfig || '{}');
-  }
+  const viewConfigMap = parseViewConfig(viewConfig);
   const fields = [
     'cache',
     'cacheExpires',
     'concurrencyControl',
     'concurrencyControlMode',
+    'expensiveQuery',
   ];
   return fields.reduce((acc, cur) => {
     acc[cur] = viewConfigMap?.[cur];

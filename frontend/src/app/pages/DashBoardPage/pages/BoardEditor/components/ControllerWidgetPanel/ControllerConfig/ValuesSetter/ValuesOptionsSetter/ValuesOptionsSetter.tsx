@@ -42,7 +42,10 @@ import ChartDataView from 'app/types/ChartDataView';
 import { View } from 'app/types/View';
 import { hasAggregationFunction } from 'app/utils/chartHelper';
 import { getDistinctFields } from 'app/utils/fetch';
-import { transformMeta } from 'app/utils/internalChartHelper';
+import {
+  transformMeta,
+  transformToHierarchyModel,
+} from 'app/utils/internalChartHelper';
 import {
   FC,
   memo,
@@ -167,7 +170,7 @@ const ValuesOptionsSetter: FC<{
     }
     let meta = transformMeta(data?.model);
     const viewComputedField =
-      JSON.parse(data.model || '{}')?.computedFields?.filter(
+      transformToHierarchyModel(data.model)?.computedFields?.filter(
         field => !hasAggregationFunction(field?.expression),
       ) || [];
 

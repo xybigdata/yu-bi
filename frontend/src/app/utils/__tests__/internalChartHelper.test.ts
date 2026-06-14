@@ -32,6 +32,8 @@ import {
   transferChartConfigs,
   transformHierarchyMeta,
   transformMeta,
+  transformToHierarchyModel,
+  transformToViewConfig,
 } from '../internalChartHelper';
 
 describe('Internal Chart Helper ', () => {
@@ -1471,6 +1473,11 @@ describe('Internal Chart Helper ', () => {
       expect(metas).toEqual(undefined);
     });
 
+    test('should not transform meta when config model is invalid json', () => {
+      const metas = transformMeta('{invalid-json}');
+      expect(metas).toEqual(undefined);
+    });
+
     test('should transform meta without hierarchy and no children', () => {
       const model = JSON.stringify({ a: { type: 'STRING' } });
       const metas = transformMeta(model);
@@ -1542,6 +1549,11 @@ describe('Internal Chart Helper ', () => {
   describe('transformHierarchyMeta Test', () => {
     test('should get empty array when metas is null', () => {
       const metas = transformHierarchyMeta(undefined);
+      expect(metas).toEqual([]);
+    });
+
+    test('should get empty array when metas is invalid json', () => {
+      const metas = transformHierarchyMeta('{invalid-json}');
       expect(metas).toEqual([]);
     });
 
@@ -1705,6 +1717,26 @@ describe('Internal Chart Helper ', () => {
           children: undefined,
         },
       ]);
+    });
+  });
+
+  describe('transformToHierarchyModel Test', () => {
+    test('should get empty object when model is invalid json', () => {
+      const model = transformToHierarchyModel('{invalid-json}');
+      expect(model).toEqual({});
+    });
+  });
+
+  describe('transformToViewConfig Test', () => {
+    test('should get empty config fields when config is invalid json', () => {
+      const viewConfig = transformToViewConfig('{invalid-json}');
+      expect(viewConfig).toEqual({
+        cache: undefined,
+        cacheExpires: undefined,
+        concurrencyControl: undefined,
+        concurrencyControlMode: undefined,
+        expensiveQuery: undefined,
+      });
     });
   });
 
