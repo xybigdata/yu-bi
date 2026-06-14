@@ -22,6 +22,7 @@ import {
   ITimeDefault,
   Widget,
 } from 'app/pages/DashBoardPage/types/widgetTypes';
+import { getDatartNowMillis } from 'app/utils/date';
 import { IFontDefault } from 'types';
 import widgetManagerInstance from '../../../pages/DashBoardPage/components/WidgetManager';
 import { RectConfig } from '../../../pages/DashBoardPage/pages/Board/slice/types';
@@ -187,7 +188,7 @@ export const convertContainerWidgetToBeta4 = (widget: WidgetBeta3) => {
     const itemMap = newWidget.config.content?.itemMap;
     if (!itemMap) return newWidget;
     const tabItems = Object.values(itemMap) as any[];
-    let newIndex = Number(Date.now());
+    let newIndex = getDatartNowMillis();
     tabItems.forEach(item => {
       item.index = newIndex;
       delete item.config;

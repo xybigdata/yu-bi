@@ -160,6 +160,7 @@
   - 日期工具内部补齐 `Dayjs` / `Date` 输入的稳定转换语义，避免已有时间对象先字符串化再重解析导致时间语义漂移
   - 看板标签容器默认标签项索引的时间来源统一改走 `getDatartNowMillis()`，避免前端编辑态继续混用原生 `Date.now()`
   - 看板复制图表生成新图表 ID 的毫秒时间来源统一改走 `getDatartNowMillis()`，保持 ID 结构不变，只统一当前时间入口
+  - 看板 beta4 迁移里 tab 项默认索引的时间来源统一改走 `getDatartNowMillis()`，避免迁移链路继续保留原生 `Date.now()`
 - `react-window` 专项审计与运行时包装边界收口：
   - 实际使用面确认仅剩 `VirtualTable -> SchemaTable`
   - 虚拟表格 reset 时机修正为依赖变化即时触发
