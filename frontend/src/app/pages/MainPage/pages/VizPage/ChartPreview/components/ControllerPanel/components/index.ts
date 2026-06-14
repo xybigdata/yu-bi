@@ -17,8 +17,13 @@
  */
 
 import { ExecuteToken } from 'app/pages/SharePage/slice/types';
-import { FilterCondition } from 'app/types/ChartConfig';
+import {
+  FilterCondition,
+  FilterFacade,
+  RelationFilterValue,
+} from 'app/types/ChartConfig';
 import { ChartDTO } from 'app/types/ChartDTO';
+import { ControllerRadioFacadeTypes } from 'app/constants';
 import DropdownListFilter from './DropdownListFilter';
 import MultiDropdownListFilter from './MultiDropdownListFilter';
 import RadioGroupFilter from './RadioGroupFilter';
@@ -37,7 +42,13 @@ export type PresentControllerFilterProps = {
   view?: ChartDTO['view'];
   condition?: FilterCondition;
   onConditionChange: (condition: FilterCondition) => void;
-  options: any;
+  options?:
+    | FilterFacade
+    | {
+        type?: Lowercase<keyof typeof ControllerRadioFacadeTypes>;
+        min?: number;
+        max?: number;
+      };
   executeToken?: Record<string, ExecuteToken>;
 };
 

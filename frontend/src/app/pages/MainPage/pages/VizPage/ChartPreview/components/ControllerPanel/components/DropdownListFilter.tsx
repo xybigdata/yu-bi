@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import type { SelectProps } from 'antd';
 import { Select } from 'antd';
 import useFetchFilterDataByCondition from 'app/hooks/useFetchFilterDataByCondition';
 import { RelationFilterValue } from 'app/types/ChartConfig';
@@ -30,7 +31,7 @@ const DropdownListFilter: FC<PresentControllerFilterProps> = memo(
     const [originalNodes, setOriginalNodes] = useState<RelationFilterValue[]>(
       condition?.value as RelationFilterValue[],
     );
-    const [selectedNode, setSelectedNode] = useState<string>(() => {
+    const [selectedNode, setSelectedNode] = useState<string | undefined>(() => {
       if (Array.isArray(condition?.value)) {
         const firstValue = (condition?.value as [])?.find(n => {
           if (IsKeyIn(n as RelationFilterValue, 'key')) {
@@ -38,7 +39,7 @@ const DropdownListFilter: FC<PresentControllerFilterProps> = memo(
           }
           return false;
         });
-        return (firstValue as any)?.key;
+        return (firstValue as RelationFilterValue | undefined)?.key;
       }
     });
 
@@ -50,7 +51,11 @@ const DropdownListFilter: FC<PresentControllerFilterProps> = memo(
       executeToken,
     );
 
-    const handleSelectedChange = value => {
+    const handleSelectedChange: NonNullable<SelectProps['onChange']> = value => {
+      if (typeof value !== 'string') {
+        return;
+      }
+
       const newCondition = updateBy(condition!, draft => {
         const newNodes = originalNodes.map(n =>
           Object.assign({}, n, { isSelected: n.key === value }),

@@ -30,7 +30,9 @@ const RadioGroupFilter: FC<PresentControllerFilterProps> = memo(
     const [originalNodes, setOriginalNodes] = useState<RelationFilterValue[]>(
       condition?.value as RelationFilterValue[],
     );
-    const [selectedNode, setSelectedNode] = useState<string>(() => {
+    const radioOptions =
+      typeof options === 'object' && options ? options : undefined;
+    const [selectedNode, setSelectedNode] = useState<string | undefined>(() => {
       if (Array.isArray(condition?.value)) {
         const firstValue = (condition?.value as [])?.find(n => {
           if (IsKeyIn(n as RelationFilterValue, 'key')) {
@@ -38,7 +40,7 @@ const RadioGroupFilter: FC<PresentControllerFilterProps> = memo(
           }
           return false;
         });
-        return (firstValue as any)?.key;
+        return (firstValue as RelationFilterValue | undefined)?.key;
       }
     });
 
@@ -52,7 +54,7 @@ const RadioGroupFilter: FC<PresentControllerFilterProps> = memo(
 
     const handleSelectedNodeChange = (nodeKey: string) => {
       if (selectedNode === nodeKey) {
-        nodeKey = [] as any;
+        nodeKey = '';
       }
 
       const newCondition = updateBy(condition!, draft => {
@@ -60,10 +62,14 @@ const RadioGroupFilter: FC<PresentControllerFilterProps> = memo(
       });
 
       onConditionChange(newCondition);
-      setSelectedNode(newCondition.value as string);
+      setSelectedNode(
+        typeof newCondition.value === 'string' ? newCondition.value : undefined,
+      );
     };
 
-    const renderChildrenByRadioType = type => {
+    const renderChildrenByRadioType = (
+      type: Lowercase<keyof typeof ControllerRadioFacadeTypes>,
+    ) => {
       const _getProps = (n: RelationFilterValue) => ({
         key: n.key,
         value: n.key,
@@ -87,7 +93,9 @@ const RadioGroupFilter: FC<PresentControllerFilterProps> = memo(
     return (
       <Radio.Group value={selectedNode}>
         {renderChildrenByRadioType(
-          options?.type || ControllerRadioFacadeTypes.Default,
+          radioOptions?.type === ControllerRadioFacadeTypes.Button
+            ? ControllerRadioFacadeTypes.Button
+            : ControllerRadioFacadeTypes.Default,
         )}
       </Radio.Group>
     );

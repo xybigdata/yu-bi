@@ -115,6 +115,11 @@
 - `react-resizable` 收口到 `3.0.4`
 - Ant Design 深路径导入与历史类型入口收口
   - `rc-field-form/lib/interface` 与 `antd/es/slider` 等历史类型深路径继续收口到公开导出入口，降低对内部目录结构的耦合
+- `rc-table` 历史类型入口继续收口
+  - `VirtualTable` 的 `CustomizeScrollBody`、`DataIndex`、`ScrollConfig` 改为基于 `antd` 公开表格 props 与 `rc-table` 包根公开类型反推，去掉 `rc-table/es/interface` 依赖
+- 前端展示与控制器弱类型边界继续收口
+  - 控制器筛选组件的 `options`、选中值和多选回调不再使用宽泛 `any`
+  - `translations.ts` 的语言 JSON 递归转换补齐对象分支类型
 - 富文本兼容层第一批稳定化小修
 - 富文本兼容层第二批稳定化小修：
   - `RichTextEditor` 的 `onChange` 类型边界收紧
@@ -225,6 +230,13 @@
 - `FormRule`、`NamePath`、`SliderProps` 等类型入口优先切回 `antd` 公开导出
 - 避免继续依赖 `rc-field-form/lib/interface`、`antd/es/slider` 这类内部路径
 - 这一批仍只做类型依赖收口，不改运行时行为
+
+当前正在推进的是“前端类型入口与弱类型边界收口”：
+
+- `VirtualTable` 仍存在 `rc-table/es/interface` 历史深路径依赖
+- 控制器筛选组件与本地化/样式工具层仍有少量低风险 `any`
+- 本轮目标是把这几处一并收口到更稳定的公开类型边界
+- 仍只做类型依赖与弱类型边界收口，不改运行时行为
 
 上一个已完成专题“富文本纯文本 JSON 误判保护补强”已通过：
 
