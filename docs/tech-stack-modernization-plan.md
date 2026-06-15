@@ -323,6 +323,8 @@
 - `SourcePage/Sidebar/Recycle` 的树节点标题渲染改为走局部显式节点类型，继续压缩 Source 侧 `as any`
 - `VariablePage/utils.ts` 新增变量关系值解析 helper，`ViewPage/Main/Properties/Variables.tsx` 改为复用统一入口，继续减少变量权限链路的局部裸 `JSON.parse`
 - `ViewPage/Main/Properties/Resource.tsx` 的资源树图标渲染改为走局部显式节点类型，继续压缩资源树节点上的 `as any`
+- `VariablePage/utils.ts` 新增变量默认值解析 helper，`VariableForm.tsx` 与 `VariablePage/index.tsx` 改为复用统一入口，继续减少变量链路的局部裸 `JSON.parse`
+- `ViewPage/Main/StructView/components/SelectDataSource.tsx` 的树节点与已选表结构改为走局部显式类型，继续压缩 StructView 数据源选择链路上的 `as any`
 
 当前验证计划：
 

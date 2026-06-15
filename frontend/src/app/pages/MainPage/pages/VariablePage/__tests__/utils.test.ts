@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { DateFormat } from 'app/constants';
 import { VariableTypes, VariableValueTypes } from '../constants';
 import {
+  parseVariableDefaultValue,
   parseVariableRelationValue,
   serializeVariableDefaultValue,
   serializeVariableRelationValue,
@@ -90,5 +91,17 @@ describe('parseVariableRelationValue', () => {
     expect(parseVariableRelationValue(undefined)).toBeUndefined();
     expect(parseVariableRelationValue(null)).toBeUndefined();
     expect(parseVariableRelationValue('')).toBeUndefined();
+  });
+});
+
+describe('parseVariableDefaultValue', () => {
+  test('should parse default value raw json', () => {
+    expect(parseVariableDefaultValue('["demo"]')).toEqual(['demo']);
+  });
+
+  test('should keep empty default value as empty array', () => {
+    expect(parseVariableDefaultValue(undefined)).toEqual([]);
+    expect(parseVariableDefaultValue(null)).toEqual([]);
+    expect(parseVariableDefaultValue('')).toEqual([]);
   });
 });

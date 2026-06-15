@@ -78,6 +78,7 @@ import {
 import { SubjectForm } from './SubjectForm';
 import { VariableFormModel } from './types';
 import {
+  parseVariableRelationValue,
   serializeVariableDefaultValue,
   serializeVariableRelationValue,
 } from './utils';
@@ -149,7 +150,7 @@ export function VariablePage() {
       setRowPermissions(
         data.map(d => ({
           ...d,
-          value: d.value && JSON.parse(d.value),
+          value: parseVariableRelationValue(d.value),
         })),
       );
       setRowPermissionLoading(false);

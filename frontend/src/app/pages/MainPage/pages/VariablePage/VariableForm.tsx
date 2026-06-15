@@ -33,6 +33,7 @@ import { VariableScopes, VariableTypes, VariableValueTypes } from './constants';
 import { DefaultValue } from './DefaultValue';
 import { Variable } from './slice/types';
 import { VariableFormModel } from './types';
+import { parseVariableDefaultValue } from './utils';
 
 interface VariableFormProps extends ModalFormProps {
   scope: VariableScopes;
@@ -71,9 +72,9 @@ export const VariableForm = memo(
       if (open && editingVariable) {
         try {
           const { type, valueType, expression, dateFormat } = editingVariable;
-          let defaultValue = editingVariable.defaultValue
-            ? JSON.parse(editingVariable.defaultValue)
-            : [];
+          let defaultValue = parseVariableDefaultValue(
+            editingVariable.defaultValue,
+          );
           if (valueType === VariableValueTypes.Date && !expression) {
             defaultValue = toDatartDayjsList(defaultValue);
           }

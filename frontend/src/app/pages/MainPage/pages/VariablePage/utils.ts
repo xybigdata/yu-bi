@@ -43,3 +43,13 @@ export const parseVariableRelationValue = (
 
   return JSON.parse(value) as VariableDefaultValueItem[];
 };
+
+export const parseVariableDefaultValue = (
+  value?: string | null,
+): VariableDefaultValueItem[] => {
+  if (!value) {
+    return [];
+  }
+
+  return JSON.parse(value) as VariableDefaultValueItem[];
+};
