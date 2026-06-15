@@ -18,11 +18,14 @@
 
 import { DataViewFieldType } from 'app/constants';
 import { ChartDataRequestFilter } from 'app/types/ChartDataRequest';
-import { DatartDayjs, getDatartNow } from 'app/utils/date';
+import {
+  DatartDayjs,
+  formatDatartDateTime,
+  getDatartNow,
+} from 'app/utils/date';
 import {
   FilterSqlOperator,
   RECOMMEND_TIME,
-  TIME_FORMATTER,
 } from 'globalConstants';
 import { ManipulateType, OpUnitType, QUnitType } from 'dayjs';
 
@@ -121,8 +124,10 @@ export function getTimeRange(
       normalizedTimeUnit,
     );
     return [
-      startTime.format(dateFormat || TIME_FORMATTER),
-      endTime.format(dateFormat || TIME_FORMATTER),
+      dateFormat
+        ? startTime.format(dateFormat)
+        : formatDatartDateTime(startTime),
+      dateFormat ? endTime.format(dateFormat) : formatDatartDateTime(endTime),
     ];
   };
 }

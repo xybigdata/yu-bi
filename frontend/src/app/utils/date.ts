@@ -117,6 +117,10 @@ export function formatDatartDateIfValid(
   return dayValue ? dayValue.format(template) : undefined;
 }
 
+export function formatDatartDateTimeIfValid(value?: DatartDateLike | null) {
+  return formatDatartDateIfValid(value, TIME_FORMATTER);
+}
+
 export function formatDatartDateRange(
   values?:
     | readonly [DatartDateLike?, DatartDateLike?]

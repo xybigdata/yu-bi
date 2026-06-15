@@ -24,7 +24,7 @@ import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useParams } from 'app/routerCompat';
 import { useAccess, useCascadeAccess } from 'app/pages/MainPage/Access';
-import { formatCurrentDatartDate } from 'app/utils/date';
+import { formatCurrentDatartDateTime } from 'app/utils/date';
 import {
   PermissionLevels,
   ResourceTypes,
@@ -34,7 +34,6 @@ import { debouncePromise } from 'utils/debouncePromise';
 import {
   CommonFormTypes,
   DEFAULT_DEBOUNCE_WAIT,
-  TIME_FORMATTER,
 } from 'globalConstants';
 import React, {
   useCallback,
@@ -406,7 +405,7 @@ export function SourceDetailPage() {
       return;
     }
     await dispatch(syncSourceSchema({ sourceId: editingSource.id }));
-    setLastUpdateTime(formatCurrentDatartDate(TIME_FORMATTER));
+    setLastUpdateTime(formatCurrentDatartDateTime());
     message.success(t('syncDatabaseSchemaSuccess'));
   };
 

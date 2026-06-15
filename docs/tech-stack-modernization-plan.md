@@ -311,12 +311,14 @@
 - `VariablePage/index.tsx` 与 `ViewPage/Main/Properties/Variables.tsx` 改为复用统一 relation 序列化入口
 - `date.ts` 继续补齐范围时间格式化与“今天结束前禁用” helper
 - `date.ts` 新增标准时间串 helper，继续承接 `TIME_FORMATTER` 的零散重复调用
+- `date.ts` 继续补齐标准时间串的可选格式化 helper，减少过滤器与当前时间默认值链路的直接模板耦合
 - `SchedulePage/utils.ts`、`ShareLinkModal.tsx`、`DashBoardPage/utils/*`、`ChartTimeSelector/utils.ts` 改为复用统一日期工具
+- `SourceDetailPage`、`DateConditionConfiguration`、`timeFilterUtils`、`ChartDataRequestBuilder`、`time.ts` 继续改为复用统一标准时间 helper
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts src/app/utils/__tests__/date.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx`
+- `npm run test:ci -- src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts src/app/utils/__tests__/date.test.ts src/app/utils/__tests__/time.test.ts src/app/models/__tests__/ChartDataRequestBuilder.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx`
 
 ### 6.2 最近已完成
 

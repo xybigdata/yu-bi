@@ -20,6 +20,7 @@ import {
   datartDayjs,
   formatDatartDateRange,
   formatDatartDateTime,
+  formatDatartDateTimeIfValid,
   formatCurrentDatartDate,
   formatCurrentDatartDateTime,
   formatDatartDateIfValid,
@@ -132,6 +133,10 @@ describe('standard datetime helpers', () => {
     expect(formatCurrentDatartDateTime()).toMatch(
       /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
     );
+  });
+
+  test('should return undefined for invalid standard datetime values', () => {
+    expect(formatDatartDateTimeIfValid('invalid-date')).toBeUndefined();
   });
 });
 

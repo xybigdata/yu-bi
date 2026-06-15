@@ -45,7 +45,7 @@ import {
   getRuntimeDateLevelFields,
   getValue,
 } from 'app/utils/chartHelper';
-import { formatDatartDate } from 'app/utils/date';
+import { formatDatartDate, formatDatartDateTime } from 'app/utils/date';
 import { transformToViewConfig } from 'app/utils/internalChartHelper';
 import {
   getTime,
@@ -55,7 +55,6 @@ import {
 import {
   FilterSqlOperator,
   RUNTIME_FILTER_KEY,
-  TIME_FORMATTER,
 } from 'globalConstants';
 import {
   isEmptyArray,
@@ -285,7 +284,7 @@ export class ChartDataRequestBuilder {
   }
 
   private normalizeFilters = (fields: ChartDataSectionField[]) => {
-    const _timeConverter = (visualType, value, dateFormat = TIME_FORMATTER) => {
+    const _timeConverter = (visualType, value, dateFormat?) => {
       if (visualType !== 'DATE') {
         return value;
       }
@@ -294,9 +293,13 @@ export class ChartDataRequestBuilder {
           value.unit,
           value.isStart,
         );
-        return formatDatartDate(time, dateFormat);
+        return dateFormat
+          ? formatDatartDate(time, dateFormat)
+          : formatDatartDateTime(time);
       }
-      return formatDatartDate(value, dateFormat);
+      return dateFormat
+        ? formatDatartDate(value, dateFormat)
+        : formatDatartDateTime(value);
     };
 
     const _transformFieldValues = (field: ChartDataSectionField) => {
