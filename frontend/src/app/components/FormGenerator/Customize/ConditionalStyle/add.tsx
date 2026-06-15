@@ -38,10 +38,6 @@ interface AddProps {
   onCancel: () => void;
 }
 
-type ModalDestroyOnHiddenCompatProps = {
-  destroyOnHidden?: boolean;
-};
-
 export default function Add({
   translate: t = title => title,
   values,
@@ -69,9 +65,6 @@ export default function Add({
     OperatorTypes.Equal,
   );
   const [form] = Form.useForm<ConditionalStyleFormValues>();
-  const modalDestroyOnHiddenProps = {
-    destroyOnHidden: true,
-  } as ModalDestroyOnHiddenCompatProps;
 
   useEffect(() => {
     if (type) {
@@ -149,7 +142,7 @@ export default function Add({
 
   return (
     <Modal
-      {...(modalDestroyOnHiddenProps as any)}
+      destroyOnHidden
       title={t('conditionalStyleTable.modal.title')}
       open={open}
       onOk={modalOk}

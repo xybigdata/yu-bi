@@ -316,6 +316,7 @@
 - `SourceDetailPage`、`DateConditionConfiguration`、`timeFilterUtils`、`ChartDataRequestBuilder`、`time.ts` 继续改为复用统一标准时间 helper
 - `ShareLinkModal`、`ShareManageModal`、`SubjectForm`、`VariableForm` 的 `destroyOnHidden` 兼容 props 改为直接透传，去掉对象展开配合 `as any`
 - `BasicFont`、`JumpToChart`、`JumpToDashboard`、`JumpToUrl`、`ControllerList`、`UrlParamList`、`ChartRelationList`、`BoardRelationList`、`ChartDrillContextMenu`、`CrossFilteringRuleList`、`MemberDetailPage` 的下拉/弹层兼容 props 继续改为直接透传，减少 `popupMatchSelectWidth`、`destroyOnHidden`、`popupRender`、`onOpenChange` 的局部 `as any`
+- `ConditionalStyle/add` 与 `ScorecardConditionalStyle/add` 的 `destroyOnHidden` 兼容 props 改为直接透传，继续压缩 modal 兼容层里的对象展开与局部 `as any`
 
 当前验证计划：
 
