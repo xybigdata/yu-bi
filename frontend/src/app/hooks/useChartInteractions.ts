@@ -27,6 +27,9 @@ import {
 } from 'app/components/FormGenerator/Customize/Interaction/types';
 import { ChartInteractionEvent } from 'app/constants';
 import useDrillThrough from 'app/hooks/useDrillThrough';
+import type { DisplayViewDetailProps } from 'app/pages/MainPage/pages/VizPage/hooks/useDisplayViewDetail';
+import type { VizType } from 'app/pages/MainPage/pages/VizPage/slice/types';
+import type { ModalFuncProps } from 'antd';
 import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
 import { getStyles, getValue } from 'app/utils/chartHelper';
 import {
@@ -79,10 +82,22 @@ interface CrossFilteringEventParams {
   chartConfig?: any;
 }
 
+type JumpVizDialogParams = {
+  orgId: string;
+  vizId: string;
+  vizType: VizType;
+  params?: string;
+};
+
+type JumpUrlDialogParams = Pick<
+  ModalFuncProps,
+  'width' | 'bodyStyle' | 'content'
+>;
+
 const useChartInteractions = (props: {
-  openViewDetailPanel?: Function;
-  openJumpVizDialogModal?: Function;
-  openJumpUrlDialogModal?: Function;
+  openViewDetailPanel?: (props: DisplayViewDetailProps) => void;
+  openJumpVizDialogModal?: (props: JumpVizDialogParams) => void;
+  openJumpUrlDialogModal?: (props: JumpUrlDialogParams) => void;
 }) => {
   const {
     openNewTab,
@@ -263,7 +278,7 @@ const useChartInteractions = (props: {
                   'DATACHART',
                   urlFiltersStr,
                 );
-                props?.openJumpVizDialogModal?.(modalContent as any);
+                props?.openJumpVizDialogModal?.(modalContent);
               }
             } else if (rule.category === InteractionCategory.JumpToDashboard) {
               const variableFilters = variableToFilter(
@@ -291,7 +306,7 @@ const useChartInteractions = (props: {
                   'DASHBOARD',
                   urlFiltersStr,
                 );
-                props?.openJumpVizDialogModal?.(modalContent as any);
+                props?.openJumpVizDialogModal?.(modalContent);
               }
             } else if (rule.category === InteractionCategory.JumpToUrl) {
               const variableFilters = variableToFilter(
@@ -315,7 +330,7 @@ const useChartInteractions = (props: {
               }
               if (rule?.action === InteractionAction.Dialog) {
                 const modalContent = getDialogContentByUrl(url, urlFiltersStr);
-                props?.openJumpUrlDialogModal?.(modalContent as any);
+                props?.openJumpUrlDialogModal?.(modalContent);
               }
             }
           });
@@ -424,11 +439,11 @@ const useChartInteractions = (props: {
         if (hasNoSelectedItems) {
           return;
         }
-        (props?.openViewDetailPanel as any)({
+        props?.openViewDetailPanel?.({
           currentDataView: view,
           chartConfig: chartConfig,
           drillOption: drillOption,
-          viewDetailSetting: viewDetailSetting,
+          viewDetailSetting: viewDetailSetting || undefined,
           clickFilters: clickFilters,
           authToken,
         });

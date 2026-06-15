@@ -122,9 +122,9 @@ export const DataChartWidgetCore: React.FC<{}> = memo(() => {
     handleCrossFilteringEvent,
     handleViewDataEvent,
   } = useChartInteractions({
-    openViewDetailPanel: openViewDetailPanel as Function,
+    openViewDetailPanel,
     openJumpUrlDialogModal: jumpDialogModal.info,
-    openJumpVizDialogModal: openJumpVizDialogModal as Function,
+    openJumpVizDialogModal,
   });
 
   useEffect(() => {

@@ -17,18 +17,38 @@
  */
 
 import useStateModal, { StateModalSize } from 'app/hooks/useStateModal';
+import type { VizType } from '../slice/types';
 import { VizContainer } from '../Main/VizContainer';
+
+export type JumpVizDialogParams = {
+  orgId: string;
+  vizId: string;
+  vizType: VizType;
+  params?: string;
+};
 
 const useDisplayJumpVizDialog = () => {
   const [openStateModal, contextHolder] = useStateModal({});
 
-  const openJumpVizDialogModal = ({ orgId, vizId, vizType, params }) => {
-    return (openStateModal as Function)({
+  const openJumpVizDialogModal = ({
+    orgId,
+    vizId,
+    vizType,
+    params,
+  }: JumpVizDialogParams) => {
+    return openStateModal({
       modalSize: StateModalSize.MIDDLE,
       content: () => (
         <div style={{ height: 600 }}>
           <VizContainer
-            tab={{ id: vizId, type: vizType, search: params } as any}
+            tab={{
+              id: vizId,
+              name: '',
+              type: vizType,
+              search: params,
+              parentId: null,
+              permissionId: vizId,
+            }}
             orgId={orgId}
             vizs={[]}
             selectedId={vizId}
@@ -36,10 +56,10 @@ const useDisplayJumpVizDialog = () => {
           />
         </div>
       ),
-    }) as VoidFunction;
+    });
   };
 
-  return [openJumpVizDialogModal, contextHolder];
+  return [openJumpVizDialogModal, contextHolder] as const;
 };
 
 export default useDisplayJumpVizDialog;

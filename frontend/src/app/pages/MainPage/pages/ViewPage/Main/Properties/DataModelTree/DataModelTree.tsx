@@ -565,7 +565,7 @@ const DataModelTree: FC = memo(() => {
       try {
         await checkComputedFieldAsync(sourceId, field.expression);
       } catch (error) {
-        message.error(error as any);
+        message.error(String(error));
         return;
       }
 

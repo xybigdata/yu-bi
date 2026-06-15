@@ -327,6 +327,9 @@
 - `ViewPage/Main/StructView/components/SelectDataSource.tsx` 的树节点与已选表结构改为走局部显式类型，继续压缩 StructView 数据源选择链路上的 `as any`
 - `ViewPage/Main/Editor/SQLEditor.tsx` 的只读提示贡献对象改为走局部显式接口，继续压缩 Monaco 编辑器链路上的单点 `as any`
 - `ViewPage/Main/Editor/Toolbar.tsx` 的导航 state 改为走局部显式类型，继续压缩编辑链路中的单点 `as any`
+- `useChartInteractions.ts` 与图表预览/分享/看板调用方改为走显式弹窗与详情参数类型，继续压缩交互链路上的 `Function` 与局部 `as any`
+- `VizPage/hooks/useDisplayJumpVizDialog.tsx`、`useDisplayViewDetail.tsx` 改为直接复用显式参数类型与 `openStateModal` 返回值，继续收口展示层局部 `Function`
+- `ViewPage/Main/Properties/DataModelTree.tsx` 的计算字段校验异常提示改为显式字符串化，继续压缩属性链路里的单点 `as any`
 
 当前验证计划：
 

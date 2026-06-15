@@ -109,9 +109,9 @@ const ChartPreviewBoardForShare: FC<{
       handleDrillThroughEvent,
       handleViewDataEvent,
     } = useChartInteractions({
-      openViewDetailPanel: openViewDetailPanel as Function,
+      openViewDetailPanel,
       openJumpUrlDialogModal: jumpDialogModal.info,
-      openJumpVizDialogModal: openJumpVizDialogModal as Function,
+      openJumpVizDialogModal,
     });
     const isLoadingData = useDebouncedLoadingStatus({
       isLoading: chartPreview?.isLoadingData,

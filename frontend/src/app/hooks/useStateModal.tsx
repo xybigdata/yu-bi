@@ -98,7 +98,7 @@ function useStateModal({ initState }: { initState?: any }) {
   };
 
   const showModal = (props: {
-    title: string;
+    title?: string;
     content: (
       cacheOnChangeValue: typeof handleSaveCacheValue,
       form?: FormInstance<any>,
@@ -132,7 +132,7 @@ function useStateModal({ initState }: { initState?: any }) {
     });
   };
 
-  return [showModal, contextHolder];
+  return [showModal, contextHolder] as const;
 }
 
 export default useStateModal;

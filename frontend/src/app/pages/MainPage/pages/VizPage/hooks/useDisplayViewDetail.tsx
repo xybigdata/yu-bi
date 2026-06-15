@@ -102,7 +102,7 @@ const TemplateTable: FC<{
   );
 });
 
-type DisplayViewDetailProps = {
+export type DisplayViewDetailProps = {
   currentDataView?: ChartDataView;
   chartConfig?: ChartConfig;
   drillOption?: ChartDrillOption;
@@ -156,7 +156,7 @@ const useDisplayViewDetail = () => {
   };
 
   const openModal = (props: DisplayViewDetailProps) => {
-    return (openStateModal as Function)({
+    return openStateModal({
       modalSize: StateModalSize.MIDDLE,
       content: () => {
         return (
@@ -180,7 +180,7 @@ const useDisplayViewDetail = () => {
       },
     });
   };
-  return [openModal, contextHolder];
+  return [openModal, contextHolder] as const;
 };
 
 export default useDisplayViewDetail;
