@@ -26,10 +26,6 @@ import { getServerDomain, request2 } from 'utils/request';
 import ShareLinkModal from './ShareLinkModal';
 import { ShareDetail } from './slice/type';
 
-type ModalDestroyOnHiddenCompatProps = {
-  destroyOnHidden?: boolean;
-};
-
 const ShareManageModal: FC<{
   vizId: string;
   orgId: string;
@@ -65,9 +61,6 @@ const ShareManageModal: FC<{
     const [manipulatedData, setManipulatedData] = useState<ShareDetail | null>(
       null,
     );
-    const modalDestroyOnHiddenProps = {
-      destroyOnHidden: true,
-    } as ModalDestroyOnHiddenCompatProps;
     const t = useI18NPrefix(`viz.action`);
 
     const fetchShareListFn = useCallback(async () => {
@@ -289,7 +282,7 @@ const ShareManageModal: FC<{
         open={visibility}
         onOk={onOk}
         onCancel={onCancel}
-        {...(modalDestroyOnHiddenProps as any)}
+        destroyOnHidden
         closable={false}
       >
         <Table

@@ -314,11 +314,12 @@
 - `date.ts` 继续补齐标准时间串的可选格式化 helper，减少过滤器与当前时间默认值链路的直接模板耦合
 - `SchedulePage/utils.ts`、`ShareLinkModal.tsx`、`DashBoardPage/utils/*`、`ChartTimeSelector/utils.ts` 改为复用统一日期工具
 - `SourceDetailPage`、`DateConditionConfiguration`、`timeFilterUtils`、`ChartDataRequestBuilder`、`time.ts` 继续改为复用统一标准时间 helper
+- `ShareLinkModal`、`ShareManageModal`、`SubjectForm`、`VariableForm` 的 `destroyOnHidden` 兼容 props 改为直接透传，去掉对象展开配合 `as any`
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts src/app/utils/__tests__/date.test.ts src/app/utils/__tests__/time.test.ts src/app/models/__tests__/ChartDataRequestBuilder.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx`
+- `npm run test:ci -- src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts src/app/utils/__tests__/date.test.ts src/app/utils/__tests__/time.test.ts src/app/models/__tests__/ChartDataRequestBuilder.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/NotFoundPage/__tests__/index.test.tsx`
 
 ### 6.2 最近已完成
 

@@ -41,10 +41,6 @@ interface VariableFormProps extends ModalFormProps {
   variables?: VariableHierarchy[];
 }
 
-type ModalDestroyOnHiddenCompatProps = {
-  destroyOnHidden?: boolean;
-};
-
 export const VariableForm = memo(
   ({
     scope,
@@ -70,9 +66,6 @@ export const VariableForm = memo(
     const formRef = useRef<FormInstance<VariableFormModel>>();
     const t = useI18NPrefix('variable');
     const tg = useI18NPrefix('global');
-    const modalDestroyOnHiddenProps = {
-      destroyOnHidden: true,
-    } as ModalDestroyOnHiddenCompatProps;
 
     useEffect(() => {
       if (open && editingVariable) {
@@ -178,7 +171,7 @@ export const VariableForm = memo(
         onSave={save}
         afterClose={onAfterClose}
         ref={formRef}
-        {...(modalDestroyOnHiddenProps as any)}
+        destroyOnHidden
       >
         <Form.Item
           name="name"
