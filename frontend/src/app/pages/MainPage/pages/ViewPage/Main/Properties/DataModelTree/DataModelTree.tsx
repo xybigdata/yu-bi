@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { Form, Input, message, Select } from 'antd';
+import { Form, Input, message, Select, TreeDataNode } from 'antd';
 import { DataViewFieldType, DateFormat } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import useStateModal, { StateModalSize } from 'app/hooks/useStateModal';
@@ -59,6 +59,12 @@ import DataModelComputerFieldNode from './DataModelComputerFieldNode';
 import DataModelNode from './DataModelNode';
 import { toModel } from './utils';
 
+type StructTreeNode = TreeDataNode & {
+  key: string;
+  title: string;
+  children?: StructTreeNode[];
+};
+
 const DataModelTree: FC = memo(() => {
   const t = useI18NPrefix('view');
   const { actions } = useViewSlice();
@@ -82,7 +88,7 @@ const DataModelTree: FC = memo(() => {
 
   const [hierarchy, setHierarchy] = useState<Nullable<Model>>();
   const [computedFields, setComputedFields] = useState<ChartDataViewMeta[]>();
-  const [fields, setFields] = useState<ChartDataViewMeta[]>();
+  const [fields, setFields] = useState<ChartDataViewMeta[] | TreeDataNode[]>();
   const [viewType, setViewType] = useState<ViewType>('SQL');
 
   useEffect(() => {
@@ -100,33 +106,37 @@ const DataModelTree: FC = memo(() => {
   useEffect(() => {
     if (viewType === 'STRUCT' && script.table) {
       const tableName = script.table;
-      const childrenData = script['columns']?.map((v, i) => {
-        return { title: v, key: [...tableName, v] };
-      });
-      const joinTable: any = [];
+      const childrenData: StructTreeNode[] | undefined = script['columns']?.map(
+        v => {
+          return { title: v, key: [...tableName, v].join('.') };
+        },
+      );
+      const joinTable: StructTreeNode[] = [];
 
       for (let i = 0; i < script.joins.length; i++) {
         const tableName = script.joins[i].table!;
-        const childrenData = script.joins[i]['columns']?.map((v, i) => {
-          return { title: v, key: [...tableName, v] };
+        const childrenData: StructTreeNode[] | undefined = script.joins[i][
+          'columns'
+        ]?.map(v => {
+          return { title: v, key: [...tableName, v].join('.') };
         });
         joinTable.push({
           title: tableName?.join('.'),
-          key: tableName,
+          key: tableName.join('.'),
           selectable: false,
           children: childrenData,
         });
       }
 
-      const treeData = [
+      const treeData: StructTreeNode[] = [
         {
           title: tableName?.join('.'),
-          key: tableName,
+          key: tableName.join('.'),
           selectable: false,
           children: childrenData,
         },
-        ...joinTable,
       ];
+      treeData.push(...joinTable);
 
       setFields(treeData);
     } else {
@@ -302,7 +312,7 @@ const DataModelTree: FC = memo(() => {
   };
 
   const openCreateHierarchyModal = (...nodes: Column[]) => {
-    return (openStateModal as Function)({
+    return openStateModal({
       title: t('model.newHierarchy'),
       modalSize: StateModalSize.XSMALL,
       onOk: hierarchyName => {
@@ -355,7 +365,7 @@ const DataModelTree: FC = memo(() => {
         !c?.children?.find(cn => cn.name === node.name),
     );
 
-    return (openStateModal as Function)({
+    return openStateModal({
       title: t('model.addToHierarchy'),
       modalSize: StateModalSize.XSMALL,
       onOk: hierarchyName => {
@@ -397,7 +407,7 @@ const DataModelTree: FC = memo(() => {
       })
       .filter(n => n !== node.name);
 
-    return (openStateModal as Function)({
+    return openStateModal({
       title: t('model.rename'),
       modalSize: StateModalSize.XSMALL,
       onOk: newName => {
@@ -608,7 +618,7 @@ const DataModelTree: FC = memo(() => {
 
   const addCallback = useCallback(
     (field?: ChartDataViewMeta) => {
-      (showModal as Function)({
+      showModal({
         title: t('model.createComputedFields'),
         modalSize: StateModalSize.MIDDLE,
         content: onChange => (

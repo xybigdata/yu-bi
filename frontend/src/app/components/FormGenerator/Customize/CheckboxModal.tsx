@@ -47,8 +47,8 @@ const CheckboxModal: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       onChange?.(ancestors, isCheck);
     };
 
-    const handleOpenModal = (e: any) => {
-      return (openStateModal as Function)({
+    const handleOpenModal = () => {
+      return openStateModal({
         modalSize: data?.options?.modalSize || StateModalSize.SMALL,
         onOk: handleConfirmModalDialogOrDataUpdate,
         content: onChangeEvent => {

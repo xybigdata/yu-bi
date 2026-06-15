@@ -260,6 +260,7 @@
 
 | 专题 | 当前判断 | 策略 |
 | --- | --- | --- |
+| 前端交互/弹窗类型收口 | 仍有局部 `Function`、宽泛回调与最小视图结构未声明 | 继续按调用链小批量收口 |
 | 时间体系剩余调用点 | 已有统一工具入口，仍有零散调用 | 继续小批量收口 |
 | 前端依赖收口 | 仍有少量历史依赖可继续审计 | 按证据逐个清理 |
 | Ant Design 历史入口 | 只剩局部残留 | 按调用点逐步消化 |
@@ -291,20 +292,20 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`Source 配置解析与局部弱类型入口收口（长期低风险分支持续推进）`
+当前累计专题：`交互事件 / 详情展示 / 状态弹窗类型收口（长期低风险分支持续推进）`
 
 本批目标：
 
-- 收口 Source 编辑态与图标链路里的配置字符串裸解析
-- 收口 Source 子表单与回收站中的局部弱类型入口
-- 保持 Source 配置保存、测试连接、图标展示与回收站交互语义不变
+- 收口图表交互事件链路中的局部宽泛参数
+- 收口详情展示与状态弹窗链路中的 `Function` / 宽泛回调
+- 保持预览、分享、看板与工作台中的交互、弹窗、详情展示语义不变
 
 当前累计清单：
 
-- 已完成：Source 编辑态配置解析局部安全入口
-- 已完成：Source 图标解析链路局部安全入口
-- 正在推进：Source 邻近弱类型入口继续收口
-- 下一批候选：ViewPage 邻近小型解析入口、Source 侧更小粒度显式类型补强
+- 已完成：交互事件入参与详情展示最小视图结构第一轮显式化
+- 已完成：状态弹窗公共 hook 与主要调用方第一轮类型收口
+- 正在推进：工作台/属性/配置面板中邻近弹窗调用链继续收口
+- 下一批候选：交互链路剩余 `any` 单点、时间体系零散调用点、历史入口残留审计
 
 当前已落地范围：
 
@@ -330,11 +331,16 @@
 - `useChartInteractions.ts` 与图表预览/分享/看板调用方改为走显式弹窗与详情参数类型，继续压缩交互链路上的 `Function` 与局部 `as any`
 - `VizPage/hooks/useDisplayJumpVizDialog.tsx`、`useDisplayViewDetail.tsx` 改为直接复用显式参数类型与 `openStateModal` 返回值，继续收口展示层局部 `Function`
 - `ViewPage/Main/Properties/DataModelTree.tsx` 的计算字段校验异常提示改为显式字符串化，继续压缩属性链路里的单点 `as any`
+- `useDisplayViewDetail.tsx` 的数据集行、列与授权令牌类型改为走显式最小结构，避免详情表格继续透传宽泛 `any`
+- `useChartInteractions.ts` 的 drill/view detail/cross filtering 入参改为复用 `IChartDrillOption`、`ChartConfig`、`SelectedItem`、最小 view 结构与真实交互枚举，避免预览/分享/看板继续混用未声明对象
+- `useStateModal.tsx` 的公共弹窗 API 补齐 `content`、`maskClosable`、`cancelButtonProps`、缓存回调等真实调用面，减少各处 `as Function` 绕过
+- `useFieldActionModal.tsx`、`CheckboxModal.tsx`、`GroupLayout.tsx`、`FilterTypeSection.tsx`、`ChartDataViewPanel.tsx`、`ChartDraggableTargetContainer.tsx`、`DataModelTree.tsx` 改为直接复用显式弹窗返回值，继续压缩工作台与属性链路的局部 `Function`
+- `ChartDataViewPanel.tsx` 与 `DataModelTree.tsx` 的计算字段树数据改为走显式 `TreeDataNode` 结构，避免树节点 key/children 继续保留宽泛对象
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts src/app/models/__tests__/ChartDataRequestBuilder.test.ts src/app/utils/__tests__/date.test.ts src/app/utils/__tests__/time.test.ts src/app/utils/__tests__/chartDtoHelper.test.ts`
+- `npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts src/app/models/__tests__/ChartDataRequestBuilder.test.ts src/app/utils/__tests__/date.test.ts src/app/utils/__tests__/time.test.ts src/app/utils/__tests__/chartDtoHelper.test.ts`
 
 ### 6.2 最近已完成
 

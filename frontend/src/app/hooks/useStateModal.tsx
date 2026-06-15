@@ -17,11 +17,13 @@
  */
 
 import { Form, FormInstance, Modal, ModalFuncProps } from 'antd';
-import { useRef } from 'react';
+import { ReactNode, useRef } from 'react';
 import { isPromise } from 'utils/object';
 
+export type StateModalCacheOnChange = (...args: any[]) => void;
+
 export interface IStateModalContentProps {
-  onChange: (o: any) => void;
+  onChange: StateModalCacheOnChange;
 }
 
 export enum StateModalSize {
@@ -38,18 +40,37 @@ const defaultBodyStyle: React.CSSProperties = {
   overflowX: 'auto',
 };
 
-function useStateModal({ initState }: { initState?: any }) {
+type StateModalOnOk = (...args: any[]) => unknown;
+type StateModalOnCancel = (close?: (() => void) | null) => void;
+type StateModalContent =
+  | ReactNode
+  | ((cacheOnChangeValue: StateModalCacheOnChange, form?: FormInstance) => ReactNode);
+
+type StateModalProps = {
+  title?: ReactNode;
+  content: StateModalContent;
+  bodyStyle?: React.CSSProperties;
+  modalSize?: string | number | StateModalSize;
+  onOk?: StateModalOnOk;
+  onCancel?: StateModalOnCancel;
+  okButtonProps?: ModalFuncProps['okButtonProps'];
+  cancelButtonProps?: ModalFuncProps['cancelButtonProps'];
+  maskClosable?: boolean;
+  centered?: boolean;
+};
+
+function useStateModal({ initState }: { initState?: unknown }) {
   const [form] = Form.useForm();
   const [modal, contextHolder] = Modal.useModal();
-  const okCallbackRef = useRef<Function>();
-  const cancelCallbackRef = useRef<Function>();
+  const okCallbackRef = useRef<StateModalOnOk>();
+  const cancelCallbackRef = useRef<StateModalOnCancel>();
   const stateRef = useRef<any[]>(initState ? [initState] : []);
 
-  const handleSaveCacheValue = (...args: any[]) => {
+  const handleSaveCacheValue: StateModalCacheOnChange = (...args) => {
     stateRef.current = args || [];
   };
 
-  const handleClickOKButton = closeFn => {
+  const handleClickOKButton = (closeFn?: () => void) => {
     return form
       .validateFields()
       .then(() => {
@@ -71,12 +92,12 @@ function useStateModal({ initState }: { initState?: any }) {
       });
   };
 
-  const handleClickCancelButton = () => {
+  const handleClickCancelButton = (closeFn?: () => void) => {
     stateRef.current = [];
-    cancelCallbackRef.current?.call(Object.create(null), null);
+    cancelCallbackRef.current?.call(Object.create(null), closeFn || null);
   };
 
-  const FormWrapper = content => {
+  const FormWrapper = (content: ReactNode) => {
     return (
       <Form form={form} name="state_modal_form">
         {content}
@@ -97,18 +118,14 @@ function useStateModal({ initState }: { initState?: any }) {
     return StateModalSize.MIDDLE;
   };
 
-  const showModal = (props: {
-    title?: string;
-    content: (
-      cacheOnChangeValue: typeof handleSaveCacheValue,
-      form?: FormInstance<any>,
-    ) => React.ReactElement<IStateModalContentProps>;
-    bodyStyle?: React.CSSProperties;
-    modalSize?: string | number | StateModalSize;
-    onOk?: typeof handleClickOKButton;
-    onCancel?: typeof handleClickCancelButton;
-    okButtonProps?: ModalFuncProps['okButtonProps'];
-  }) => {
+  const renderContent = (content: StateModalContent) => {
+    if (typeof content === 'function') {
+      return content.call(Object.create(null), handleSaveCacheValue, form);
+    }
+    return content;
+  };
+
+  const showModal = (props: StateModalProps) => {
     okCallbackRef.current = props.onOk;
     cancelCallbackRef.current = props.onCancel;
 
@@ -120,15 +137,14 @@ function useStateModal({ initState }: { initState?: any }) {
       title: props.title,
       width: getModalSize(props?.modalSize),
       bodyStyle: props.bodyStyle || defaultBodyStyle,
-      content: FormWrapper(
-        props?.content?.call(Object.create(null), handleSaveCacheValue, form),
-      ),
+      content: FormWrapper(renderContent(props.content)),
       onOk: handleClickOKButton,
       onCancel: handleClickCancelButton,
-      maskClosable: true,
+      maskClosable: props.maskClosable ?? true,
       icon: null,
-      centered: true,
+      centered: props.centered ?? true,
       okButtonProps: props.okButtonProps,
+      cancelButtonProps: props.cancelButtonProps,
     });
   };
 

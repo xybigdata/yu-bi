@@ -161,10 +161,11 @@ export const ChartDraggableTargetContainer: FC<ChartDataConfigSectionProps> =
         },
         canDrop: (item: ChartDataSectionField, monitor) => {
           let items = Array.isArray(item) ? item : [item];
+          const itemType = monitor.getItemType();
 
           if (
             [CHART_DRAG_ELEMENT_TYPE.DATASET_COLUMN_GROUP].includes(
-              monitor.getItemType() as any,
+              itemType as typeof CHART_DRAG_ELEMENT_TYPE.DATASET_COLUMN_GROUP,
             ) &&
             ![
               ChartDataSectionType.Group,
@@ -368,7 +369,7 @@ export const ChartDraggableTargetContainer: FC<ChartDataConfigSectionProps> =
     const handleOpenActionModal =
       (uid: string) =>
       (actionType: ValueOf<typeof ChartDataSectionFieldActionType>) => {
-        (showModal as Function)(
+        showModal(
           uid,
           actionType,
           currentConfig,

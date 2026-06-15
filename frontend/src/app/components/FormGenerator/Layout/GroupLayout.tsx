@@ -58,7 +58,7 @@ const GroupLayout: FC<FormGeneratorLayoutProps<ChartStyleConfig>> = memo(
     };
 
     const handleOpenStateModal = () => {
-      return (openStateModal as Function)({
+      return openStateModal({
         modalSize,
         onOk: handleConfirmModalDialogOrDataUpdate,
         content: onChangeEvent => {
