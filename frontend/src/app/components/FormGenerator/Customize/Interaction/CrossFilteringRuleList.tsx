@@ -28,14 +28,6 @@ import { InteractionFieldRelation } from '../../constants';
 import BoardRelationList from './BoardRelationList';
 import { CrossFilteringInteractionRule, I18nTranslator } from './types';
 
-type DropdownPopupRenderCompatProps = {
-  popupRender?: (originNode: React.ReactNode) => React.ReactNode;
-};
-
-type DropdownDestroyOnHiddenCompatProps = {
-  destroyOnHidden?: boolean;
-};
-
 const CrossFilteringRuleList: FC<
   {
     widgetId: string;
@@ -55,13 +47,6 @@ const CrossFilteringRuleList: FC<
   translate: t,
 }) => {
   const viewMap = useSelector(selectViewMap);
-  const dropdownDestroyOnHiddenProps = useMemo(
-    () =>
-      ({
-        destroyOnHidden: true,
-      }) as DropdownDestroyOnHiddenCompatProps,
-    [],
-  );
 
   const currentRules = useMemo(() => {
     return (boardVizs || [])
@@ -118,36 +103,33 @@ const CrossFilteringRuleList: FC<
                 </Select.Option>
               </Select>
               <Dropdown
-                {...(dropdownDestroyOnHiddenProps as any)}
+                destroyOnHidden
                 overlayStyle={{ margin: 4 }}
                 disabled={
                   record?.relation !== InteractionFieldRelation.Customize ||
                   !rules?.map(r => r.id).includes(record?.id)
                 }
-                {...({
-                  popupRender: () => (
-                    <BoardRelationList
-                      translate={t}
-                      targetRelId={record?.relId}
-                      boardVizs={boardVizs}
-                      viewMap={viewMap}
-                      sourceFields={
-                        dataview?.meta?.concat(
-                          dataview?.computedFields || [],
-                        ) || []
-                      }
-                      sourceVariables={dataview?.variables || []}
-                      relations={record?.[InteractionFieldRelation.Customize]}
-                      onRelationChange={newRelations => {
-                        onRuleChange(
-                          record?.id,
-                          InteractionFieldRelation.Customize,
-                          newRelations,
-                        );
-                      }}
-                    />
-                  ),
-                } as DropdownPopupRenderCompatProps as any)}
+                popupRender={() => (
+                  <BoardRelationList
+                    translate={t}
+                    targetRelId={record?.relId}
+                    boardVizs={boardVizs}
+                    viewMap={viewMap}
+                    sourceFields={
+                      dataview?.meta?.concat(dataview?.computedFields || []) ||
+                      []
+                    }
+                    sourceVariables={dataview?.variables || []}
+                    relations={record?.[InteractionFieldRelation.Customize]}
+                    onRelationChange={newRelations => {
+                      onRuleChange(
+                        record?.id,
+                        InteractionFieldRelation.Customize,
+                        newRelations,
+                      );
+                    }}
+                  />
+                )}
                 placement="bottomLeft"
                 trigger={['click']}
                 arrow
@@ -167,7 +149,6 @@ const CrossFilteringRuleList: FC<
       rules,
       onRuleChange,
       viewMap,
-      dropdownDestroyOnHiddenProps,
       dataview?.meta,
       dataview?.computedFields,
       dataview?.variables,

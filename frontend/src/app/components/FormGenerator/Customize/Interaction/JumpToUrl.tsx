@@ -24,14 +24,6 @@ import { InteractionFieldRelation } from '../../constants';
 import { I18nTranslator, JumpToUrlRule, VizType } from './types';
 import UrlParamList from './UrlParamList';
 
-type DropdownPopupRenderCompatProps = {
-  popupRender?: (originNode: React.ReactNode) => React.ReactNode;
-};
-
-type DropdownDestroyOnHiddenCompatProps = {
-  destroyOnHidden?: boolean;
-};
-
 const JumpToUrl: FC<
   {
     vizs?: VizType[];
@@ -64,26 +56,6 @@ const JumpToUrl: FC<
     },
     [onValueChange, value],
   );
-  const dropdownPopupRenderProps = {
-    popupRender: () => (
-      <UrlParamList
-        translate={t}
-        targetRelId={value?.relId}
-        sourceFields={
-          getAllColumnInMeta(dataview?.meta)?.concat(
-            dataview?.computedFields || [],
-          ) || []
-        }
-        sourceVariables={dataview?.variables || []}
-        relations={relations}
-        onRelationChange={handleUpdateRelations}
-      />
-    ),
-  } as DropdownPopupRenderCompatProps;
-  const dropdownDestroyOnHiddenProps = {
-    destroyOnHidden: true,
-  } as DropdownDestroyOnHiddenCompatProps;
-
   return (
     <Space>
       <Input
@@ -93,9 +65,22 @@ const JumpToUrl: FC<
         onChange={e => handleUpdateUrl(e.target.value)}
       />
       <Dropdown
-        {...(dropdownDestroyOnHiddenProps as any)}
+        destroyOnHidden
         overlayStyle={{ margin: 4 }}
-        {...(dropdownPopupRenderProps as any)}
+        popupRender={() => (
+          <UrlParamList
+            translate={t}
+            targetRelId={value?.relId}
+            sourceFields={
+              getAllColumnInMeta(dataview?.meta)?.concat(
+                dataview?.computedFields || [],
+              ) || []
+            }
+            sourceVariables={dataview?.variables || []}
+            relations={relations}
+            onRelationChange={handleUpdateRelations}
+          />
+        )}
         placement="bottomLeft"
         trigger={['click']}
         arrow

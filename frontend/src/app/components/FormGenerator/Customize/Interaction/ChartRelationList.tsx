@@ -34,10 +34,6 @@ import { errorHandle, uuidv4 } from 'utils/utils';
 import { InteractionRelationType } from '../../constants';
 import { CustomizeRelation, I18nTranslator } from './types';
 
-type SelectPopupMatchSelectWidthCompatProps = {
-  popupMatchSelectWidth?: boolean | number;
-};
-
 const ChartRelationList: FC<
   {
     targetRelId?: string;
@@ -56,9 +52,6 @@ const ChartRelationList: FC<
 }) => {
   const [targetFields, setTargetFields] = useState<ChartDataViewMeta[]>([]);
   const [targetVariables, setTargetVariables] = useState<Variable[]>([]);
-  const selectPopupMatchWidthProps = {
-    popupMatchSelectWidth: false,
-  } as SelectPopupMatchSelectWidthCompatProps;
 
   useMount(async () => {
     if (targetRelId) {
@@ -155,7 +148,7 @@ const ChartRelationList: FC<
           style={{ width: '150px' }}
           value={value}
           onChange={value => handleRelationChange(record.id, 'source', value)}
-          {...(selectPopupMatchWidthProps as any)}
+          popupMatchSelectWidth={false}
         >
           {(isFieldType(record) ? sourceFields : sourceVariables)?.map(sf => {
             return (
@@ -176,7 +169,7 @@ const ChartRelationList: FC<
           style={{ width: '150px' }}
           value={value}
           onChange={value => handleRelationChange(record.id, 'target', value)}
-          {...(selectPopupMatchWidthProps as any)}
+          popupMatchSelectWidth={false}
         >
           {(isFieldType(record) ? targetFields : targetVariables)?.map(sf => {
             return (

@@ -53,10 +53,6 @@ import {
   saveMember,
 } from '../slice/thunks';
 
-type SelectOpenChangeCompatProps = {
-  onOpenChange?: (open: boolean) => void;
-};
-
 export function MemberDetailPage() {
   const [formType, setFormType] = useState(CommonFormTypes.Add);
   const [passwordVisible, setPasswordVisible] = useState(true);
@@ -135,10 +131,6 @@ export function MemberDetailPage() {
   const save = useCallback(() => {
     form.submit();
   }, [form]);
-
-  const roleSelectOpenChangeProps = {
-    onOpenChange: handleRoleListOpenChange,
-  } as SelectOpenChangeCompatProps;
 
   const formSubmit = useCallback(
     async values => {
@@ -358,7 +350,7 @@ export function MemberDetailPage() {
                   mode="multiple"
                   optionFilterProp="children"
                   loading={roleListLoading}
-                  {...(roleSelectOpenChangeProps as any)}
+                  onOpenChange={handleRoleListOpenChange}
                 >
                   {roles?.map(({ id, name }) => (
                     <Select.Option key={id} value={id}>

@@ -29,10 +29,6 @@ import styled from 'styled-components';
 import { uuidv4 } from 'utils/utils';
 import { InteractionRelationType } from '../../constants';
 import { CustomizeRelation, I18nTranslator } from './types';
-
-type SelectPopupMatchSelectWidthCompatProps = {
-  popupMatchSelectWidth?: boolean | number;
-};
 const ControllerList: FC<
   {
     targetRelId?: string;
@@ -50,9 +46,6 @@ const ControllerList: FC<
   translate: t,
 }) => {
   const [controllerNames, setControllerNames] = useState<string[]>([]);
-  const selectPopupMatchWidthProps = {
-    popupMatchSelectWidth: false,
-  } as SelectPopupMatchSelectWidthCompatProps;
   const getControllerNames = data => {
     return (data?.widgets || [])
       .map(w => parseServerWidget(w))
@@ -146,7 +139,7 @@ const ControllerList: FC<
           style={{ width: '150px' }}
           value={value}
           onChange={value => handleRelationChange(record.id, 'source', value)}
-          {...(selectPopupMatchWidthProps as any)}
+          popupMatchSelectWidth={false}
         >
           {(isFieldType(record) ? sourceFields : sourceVariables)?.map(sf => {
             return (
@@ -167,7 +160,7 @@ const ControllerList: FC<
           style={{ width: '150px' }}
           value={value}
           onChange={value => handleRelationChange(record.id, 'target', value)}
-          {...(selectPopupMatchWidthProps as any)}
+          popupMatchSelectWidth={false}
         >
           {controllerNames?.map(name => {
             return <Select.Option value={name}>{name}</Select.Option>;

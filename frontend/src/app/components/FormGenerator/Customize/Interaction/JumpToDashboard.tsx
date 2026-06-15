@@ -24,18 +24,6 @@ import { InteractionFieldRelation } from '../../constants';
 import ControllerList from './ControllerList';
 import { I18nTranslator, JumpToDashboardRule, VizType } from './types';
 
-type SelectPopupMatchSelectWidthCompatProps = {
-  popupMatchSelectWidth?: boolean | number;
-};
-
-type DropdownPopupRenderCompatProps = {
-  popupRender?: (originNode: React.ReactNode) => React.ReactNode;
-};
-
-type DropdownDestroyOnHiddenCompatProps = {
-  destroyOnHidden?: boolean;
-};
-
 const JumpToDashboard: FC<
   {
     vizs?: VizType[];
@@ -56,29 +44,6 @@ const JumpToDashboard: FC<
       ...{ [InteractionFieldRelation.Customize]: newRelations },
     });
   };
-  const dropdownPopupRenderProps = {
-    popupRender: () => (
-      <ControllerList
-        translate={t}
-        targetRelId={value?.relId}
-        sourceFields={
-          getAllColumnInMeta(dataview?.meta)?.concat(
-            dataview?.computedFields || [],
-          ) || []
-        }
-        sourceVariables={dataview?.variables || []}
-        relations={relations}
-        onRelationChange={handleUpdateRelations}
-      />
-    ),
-  } as DropdownPopupRenderCompatProps;
-  const dropdownDestroyOnHiddenProps = {
-    destroyOnHidden: true,
-  } as DropdownDestroyOnHiddenCompatProps;
-  const selectPopupMatchWidthProps = {
-    popupMatchSelectWidth: false,
-  } as SelectPopupMatchSelectWidthCompatProps;
-
   return (
     <Space>
       <Select
@@ -86,7 +51,7 @@ const JumpToDashboard: FC<
         showSearch
         optionFilterProp="children"
         style={{ minWidth: 100, maxWidth: 200 }}
-        {...(selectPopupMatchWidthProps as any)}
+        popupMatchSelectWidth={false}
         value={value?.relId}
         placeholder={t('drillThrough.rule.reference.title')}
         onChange={relId => onValueChange({ ...value, ...{ relId } })}
@@ -102,9 +67,22 @@ const JumpToDashboard: FC<
           })}
       </Select>
       <Dropdown
-        {...(dropdownDestroyOnHiddenProps as any)}
+        destroyOnHidden
         overlayStyle={{ margin: 4 }}
-        {...(dropdownPopupRenderProps as any)}
+        popupRender={() => (
+          <ControllerList
+            translate={t}
+            targetRelId={value?.relId}
+            sourceFields={
+              getAllColumnInMeta(dataview?.meta)?.concat(
+                dataview?.computedFields || [],
+              ) || []
+            }
+            sourceVariables={dataview?.variables || []}
+            relations={relations}
+            onRelationChange={handleUpdateRelations}
+          />
+        )}
         placement="bottomLeft"
         trigger={['click']}
         arrow

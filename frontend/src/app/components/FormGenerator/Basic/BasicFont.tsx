@@ -34,16 +34,9 @@ import { itemLayoutComparer } from '../utils';
 import { BW } from './components/BasicWrapper';
 import { Group, WithColorPicker } from './components/Group';
 
-type SelectPopupMatchSelectWidthCompatProps = {
-  popupMatchSelectWidth?: boolean | number;
-};
-
 const BasicFont: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data, onChange }) => {
     const { comType, options, ...rest } = data;
-    const selectPopupMatchWidthProps = {
-      popupMatchSelectWidth: false,
-    } as SelectPopupMatchSelectWidthCompatProps;
 
     const handlePickerSelect = value => {
       handleSettingChange('color')(value);
@@ -62,7 +55,7 @@ const BasicFont: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
             className="datart-ant-select"
             placeholder={t('select')}
             value={data.value?.fontFamily}
-            {...(selectPopupMatchWidthProps as any)}
+            popupMatchSelectWidth={false}
             onChange={handleSettingChange('fontFamily')}
           >
             {(options?.fontFamilies || FONT_FAMILIES).map(o => (
