@@ -18,9 +18,15 @@
 
 import { useRef, useState } from 'react';
 
-export const useDebouncedLoadingStatus = ({ isLoading }) => {
+interface DebouncedLoadingStatusArgs {
+  isLoading?: boolean;
+}
+
+export const useDebouncedLoadingStatus = ({
+  isLoading,
+}: DebouncedLoadingStatusArgs) => {
   const [lazyLoading, setLazyLoading] = useState(false);
-  const timerIdRef = useRef();
+  const timerIdRef = useRef<ReturnType<typeof setTimeout>>();
 
   if (isLoading) {
     if (timerIdRef.current) {
@@ -28,7 +34,7 @@ export const useDebouncedLoadingStatus = ({ isLoading }) => {
     }
     timerIdRef.current = setTimeout(() => {
       setLazyLoading(true);
-    }, 500) as any;
+    }, 500);
   } else {
     if (timerIdRef.current) {
       clearTimeout(timerIdRef.current);
