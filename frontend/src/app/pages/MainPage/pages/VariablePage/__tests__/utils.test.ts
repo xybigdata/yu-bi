@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { DateFormat } from 'app/constants';
 import { VariableTypes, VariableValueTypes } from '../constants';
 import {
+  parseVariableRelationValue,
   serializeVariableDefaultValue,
   serializeVariableRelationValue,
 } from '../utils';
@@ -75,5 +76,19 @@ describe('serializeVariableRelationValue', () => {
         dateFormat: DateFormat.DateTime,
       }),
     ).toBe(values);
+  });
+});
+
+describe('parseVariableRelationValue', () => {
+  test('should parse relation raw json value', () => {
+    expect(parseVariableRelationValue('["2024-01-02 03:04:05"]')).toEqual([
+      '2024-01-02 03:04:05',
+    ]);
+  });
+
+  test('should keep empty relation raw value as undefined', () => {
+    expect(parseVariableRelationValue(undefined)).toBeUndefined();
+    expect(parseVariableRelationValue(null)).toBeUndefined();
+    expect(parseVariableRelationValue('')).toBeUndefined();
   });
 });

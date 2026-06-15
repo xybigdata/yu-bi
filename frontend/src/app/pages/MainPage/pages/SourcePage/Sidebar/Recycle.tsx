@@ -31,7 +31,7 @@ import {
   selectOrgId,
 } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
-import { memo, useCallback, useContext, useEffect } from 'react';
+import { Key, ReactNode, memo, useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import { getInsertedNodeIndex, stopPPG } from 'utils/utils';
@@ -46,6 +46,12 @@ import {
 interface ListData extends TreeDataNode {
   id: string;
   parentId: string | null;
+}
+
+interface SourceRecycleNode extends ListData {
+  key: Key;
+  title?: ReactNode;
+  isFolder?: boolean;
 }
 
 interface RecycleProps {
@@ -139,7 +145,7 @@ export const Recycle = memo(({ sourceId, list }: RecycleProps) => {
   );
 
   const renderTreeTitle = useCallback(
-    ({ key, title }) => {
+    ({ key, title }: SourceRecycleNode) => {
       const items: MenuProps['items'] = [
         {
           key: 'reset',
@@ -192,7 +198,7 @@ export const Recycle = memo(({ sourceId, list }: RecycleProps) => {
     <Tree
       loading={loading}
       treeData={list}
-      titleRender={node => renderTreeTitle(node as any)}
+      titleRender={node => renderTreeTitle(node as SourceRecycleNode)}
       onSelect={treeSelect}
     />
   );

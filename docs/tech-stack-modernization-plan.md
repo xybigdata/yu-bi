@@ -291,19 +291,20 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`时间体系剩余调用点收口（长期低风险分支持续推进）`
+当前累计专题：`Source 配置解析与局部弱类型入口收口（长期低风险分支持续推进）`
 
 本批目标：
 
-- 收口变量权限链路里的日期数组序列化重复逻辑
-- 收口分享与调度页里的时间格式化重复逻辑
-- 继续把零散时间处理收敛到已有日期工具，不改交互语义
+- 收口 Source 编辑态与图标链路里的配置字符串裸解析
+- 收口 Source 子表单与回收站中的局部弱类型入口
+- 保持 Source 配置保存、测试连接、图标展示与回收站交互语义不变
 
 当前累计清单：
 
-- 已完成：时间过滤器边界收口
-- 正在推进：变量权限日期序列化收口、分享/调度时间格式化收口
-- 下一批候选：看板工具层剩余 `TIME_FORMATTER` 调用点、局部历史时间 helper 继续减重
+- 已完成：Source 编辑态配置解析局部安全入口
+- 已完成：Source 图标解析链路局部安全入口
+- 正在推进：Source 邻近弱类型入口继续收口
+- 下一批候选：ViewPage 邻近小型解析入口、Source 侧更小粒度显式类型补强
 
 当前已落地范围：
 
@@ -317,11 +318,16 @@
 - `ShareLinkModal`、`ShareManageModal`、`SubjectForm`、`VariableForm` 的 `destroyOnHidden` 兼容 props 改为直接透传，去掉对象展开配合 `as any`
 - `BasicFont`、`JumpToChart`、`JumpToDashboard`、`JumpToUrl`、`ControllerList`、`UrlParamList`、`ChartRelationList`、`BoardRelationList`、`ChartDrillContextMenu`、`CrossFilteringRuleList`、`MemberDetailPage` 的下拉/弹层兼容 props 继续改为直接透传，减少 `popupMatchSelectWidth`、`destroyOnHidden`、`popupRender`、`onOpenChange` 的局部 `as any`
 - `ConditionalStyle/add` 与 `ScorecardConditionalStyle/add` 的 `destroyOnHidden` 兼容 props 改为直接透传，继续压缩 modal 兼容层里的对象展开与局部 `as any`
+- `SourceDetailPage` 的编辑态配置字符串解析补齐局部安全入口，`ArrayConfig` 的 `columns` 读取改为显式结构访问，开始收口 SourcePage 的局部弱类型与裸解析
+- `useGetSourceDbTypeIcon` 的数据源配置字符串解析补齐局部安全入口，继续减少 Source 侧直接裸 `JSON.parse`
+- `SourcePage/Sidebar/Recycle` 的树节点标题渲染改为走局部显式节点类型，继续压缩 Source 侧 `as any`
+- `VariablePage/utils.ts` 新增变量关系值解析 helper，`ViewPage/Main/Properties/Variables.tsx` 改为复用统一入口，继续减少变量权限链路的局部裸 `JSON.parse`
+- `ViewPage/Main/Properties/Resource.tsx` 的资源树图标渲染改为走局部显式节点类型，继续压缩资源树节点上的 `as any`
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/pages/NotFoundPage/__tests__/index.test.tsx src/app/models/__tests__/ChartDataRequestBuilder.test.ts src/app/utils/__tests__/date.test.ts src/app/utils/__tests__/time.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts`
+- `npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts src/app/models/__tests__/ChartDataRequestBuilder.test.ts src/app/utils/__tests__/date.test.ts src/app/utils/__tests__/time.test.ts src/app/utils/__tests__/chartDtoHelper.test.ts`
 
 ### 6.2 最近已完成
 

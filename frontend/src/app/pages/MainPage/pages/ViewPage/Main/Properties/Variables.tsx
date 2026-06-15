@@ -42,6 +42,7 @@ import { SubjectForm } from 'app/pages/MainPage/pages/VariablePage/SubjectForm';
 import { VariableFormModel } from 'app/pages/MainPage/pages/VariablePage/types';
 import type { VariableDefaultValueItem } from 'app/pages/MainPage/pages/VariablePage/slice/types';
 import {
+  parseVariableRelationValue,
   serializeVariableDefaultValue,
   serializeVariableRelationValue,
 } from 'app/pages/MainPage/pages/VariablePage/utils';
@@ -145,7 +146,7 @@ export const Variables = memo(() => {
     try {
       return editingVariable?.relVariableSubjects.map(r => ({
         ...r,
-        value: r.value && JSON.parse(r.value),
+        value: parseVariableRelationValue(r.value),
       }));
     } catch (error) {
       errorHandle(error);

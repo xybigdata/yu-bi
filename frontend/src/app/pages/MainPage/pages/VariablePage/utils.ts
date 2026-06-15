@@ -1,6 +1,7 @@
 import { VariableValueTypes } from './constants';
 import type {
   RowPermission,
+  RowPermissionRaw,
   VariableDefaultValueItem,
   VariableViewModel,
 } from './slice/types';
@@ -31,4 +32,14 @@ export const serializeVariableRelationValue = (
   }
 
   return value.map(item => formatDatartDate(item, variable.dateFormat));
+};
+
+export const parseVariableRelationValue = (
+  value?: RowPermissionRaw['value'] | null,
+): VariableDefaultValueItem[] | undefined => {
+  if (!value) {
+    return undefined;
+  }
+
+  return JSON.parse(value) as VariableDefaultValueItem[];
 };

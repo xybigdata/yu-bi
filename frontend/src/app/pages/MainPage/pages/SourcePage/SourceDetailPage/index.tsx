@@ -90,6 +90,11 @@ import { SourceFormModel, SourceSimple } from '../slice/types';
 import { allowManageSource } from '../utils';
 import { ConfigComponent } from './ConfigComponent';
 
+const parseSourceConfig = (config: string): SourceFormModel['config'] => {
+  const parsedConfig = JSON.parse(config);
+  return parsedConfig && typeof parsedConfig === 'object' ? parsedConfig : {};
+};
+
 export function SourceDetailPage() {
   const [formType, setFormType] = useState(CommonFormTypes.Add);
   const [providerType, setProviderType] = useState('');
@@ -165,7 +170,7 @@ export function SourceDetailPage() {
       try {
         setProviderType(type);
         setLastUpdateTime(editingSource?.schemaUpdateDate);
-        form.setFieldsValue({ name, type, config: JSON.parse(config) });
+        form.setFieldsValue({ name, type, config: parseSourceConfig(config) });
       } catch (error) {
         message.error(tg('operation.parseError'));
         throw error;

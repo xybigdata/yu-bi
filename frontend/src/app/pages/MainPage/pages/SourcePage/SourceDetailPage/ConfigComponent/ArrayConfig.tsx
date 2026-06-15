@@ -95,7 +95,10 @@ export function ArrayConfig({
     if (values) {
       onSubFormTest &&
         onSubFormTest(values.config, result => {
-          const columns = (values.config as any).columns;
+          const configWithColumns = values.config as Partial<{
+            columns: Schema[];
+          }>;
+          const columns = configWithColumns.columns;
           const lastModel = columns
             ? (columns as Schema[]).reduce<Model>(
                 (model, column) => ({
