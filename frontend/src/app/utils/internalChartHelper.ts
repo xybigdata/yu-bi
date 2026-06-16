@@ -48,7 +48,10 @@ import {
   ChartCommonConfig,
   ChartStyleConfigDTO,
 } from 'app/types/ChartConfigDTO';
-import { PendingChartDataRequestFilter } from 'app/types/ChartDataRequest';
+import {
+  ChartVariableParams,
+  PendingChartDataRequestFilter,
+} from 'app/types/ChartDataRequest';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { FilterSqlOperator } from 'globalConstants';
@@ -68,6 +71,23 @@ import {
 import { getDrillableRows, round } from './chartHelper';
 
 type CompatibleChartStyleRows = NonNullable<ChartStyleConfig['rows']>;
+
+const parseVariableParamValues = (
+  defaultValue?: string,
+): string[] | undefined => {
+  if (!defaultValue) {
+    return undefined;
+  }
+  try {
+    const values = JSON.parse(defaultValue);
+    if (!Array.isArray(values)) {
+      return undefined;
+    }
+    return values.map(value => String(value));
+  } catch (error) {
+    return undefined;
+  }
+};
 
 const parseViewModel = (model?: string): Record<string, any> | undefined => {
   if (!model) {
@@ -1018,7 +1038,7 @@ export const getJumpOperationFiltersByInteractionRule = (
 
 export const filterVariablesByInteractionRule = (
   rule?: InteractionRule,
-  variables?: Record<string, any[]>,
+  variables?: ChartVariableParams,
 ) => {
   if (rule?.[rule.category!]?.['relation'] === InteractionFieldRelation.Auto) {
     return undefined;
@@ -1030,18 +1050,21 @@ export const filterVariablesByInteractionRule = (
   if (isEmptyArray(customizeRelations)) {
     return undefined;
   }
-  return Object.keys(variables || {}).reduce((acc, cur) => {
-    if (customizeRelations.some(r => r.source === cur)) {
-      acc[cur] = variables?.[cur];
-    }
-    return acc;
-  }, {});
+  return Object.keys(variables || {}).reduce<ChartVariableParams>(
+    (acc, cur) => {
+      if (customizeRelations.some(r => r.source === cur)) {
+        acc[cur] = variables?.[cur] || [];
+      }
+      return acc;
+    },
+    {},
+  );
 };
 
 export const getVariablesByInteractionRule = (
   queryVariables?: Variable[],
   rule?: InteractionRule,
-): Record<string, any[]> | undefined => {
+): ChartVariableParams | undefined => {
   if (rule?.[rule.category!]?.['relation'] === InteractionFieldRelation.Auto) {
     return undefined;
   }
@@ -1053,12 +1076,13 @@ export const getVariablesByInteractionRule = (
   if (isEmptyArray(customizeRelations)) {
     return undefined;
   }
-  return customizeRelations?.reduce((acc, cur) => {
+  return customizeRelations?.reduce<ChartVariableParams>((acc, cur) => {
     const sourceVariableValueStr = queryVariables
       ?.filter(v => v.type === VariableTypes.Query)
       ?.find(v => v.name === cur.source)?.defaultValue;
-    if (sourceVariableValueStr && cur.target) {
-      acc[cur.target] = JSON.parse(sourceVariableValueStr || '{}');
+    const values = parseVariableParamValues(sourceVariableValueStr);
+    if (values && cur.target) {
+      acc[cur.target] = values;
       return acc;
     }
     return acc;
@@ -1066,7 +1090,7 @@ export const getVariablesByInteractionRule = (
 };
 
 export const variableToFilter = (
-  queryVariables?: Record<string, any[]>,
+  queryVariables?: ChartVariableParams,
 ): PendingChartDataRequestFilter[] => {
   return Object.entries(queryVariables || {}).map(([k, v]) => {
     return {

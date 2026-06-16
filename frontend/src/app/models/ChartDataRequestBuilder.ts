@@ -33,6 +33,7 @@ import { ChartStyleConfigDTO } from 'app/types/ChartConfigDTO';
 import {
   ChartDataRequest,
   ChartDataRequestFilter,
+  ChartVariableParams,
   PendingChartDataRequestFilter,
 } from 'app/types/ChartDataRequest';
 import { ChartDatasetPageInfo } from 'app/types/ChartDataSet';
@@ -72,7 +73,7 @@ export class ChartDataRequestBuilder {
   script: boolean;
   aggregation?: boolean;
   drillOption?: IChartDrillOption;
-  variableParams?: Record<string, any[]>;
+  variableParams?: ChartVariableParams;
 
   constructor(
     dataView: Pick<ChartDataView, 'id' | 'computedFields' | 'type' | 'meta'> & {
@@ -115,7 +116,7 @@ export class ChartDataRequestBuilder {
     return this;
   }
 
-  public addVariableParams(params?: Record<string, any[]>) {
+  public addVariableParams(params?: ChartVariableParams) {
     if (params) {
       this.variableParams = params;
     }

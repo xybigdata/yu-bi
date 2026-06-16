@@ -22,6 +22,11 @@ import {
   DataViewFieldType,
 } from 'app/constants';
 import {
+  InteractionCategory,
+  InteractionFieldRelation,
+  InteractionRelationType,
+} from 'app/components/FormGenerator/constants';
+import {
   ChartConfig,
   ChartDataConfig,
   ChartDataSectionField,
@@ -33,6 +38,7 @@ import {
   flattenHeaderRowsWithoutGroupRow,
   getColumnRenderOriginName,
   getUpdatedChartStyleValue,
+  getVariablesByInteractionRule,
   isInRange,
   isUnderUpperBound,
   mergeChartDataConfigs,
@@ -43,7 +49,12 @@ import {
   transformMeta,
   transformToHierarchyModel,
   transformToViewConfig,
+  variableToFilter,
 } from '../internalChartHelper';
+import {
+  VariableTypes,
+  VariableValueTypes,
+} from 'app/pages/MainPage/pages/VariablePage/constants';
 
 type MergeDataConfigCase = [
   ChartDataConfig[],
@@ -1783,6 +1794,91 @@ describe('Internal Chart Helper ', () => {
         concurrencyControlMode: undefined,
         expensiveQuery: undefined,
       });
+    });
+  });
+
+  describe('variable interaction params Test', () => {
+    test('should map query variable defaults to string variable params', () => {
+      const variables = getVariablesByInteractionRule(
+        [
+          {
+            id: 'variable-1',
+            orgId: 'org-1',
+            name: 'city',
+            type: VariableTypes.Query,
+            valueType: VariableValueTypes.String,
+            encrypt: false,
+            permission: 1,
+            defaultValue: JSON.stringify(['beijing', 100]),
+          },
+        ],
+        {
+          id: 'rule-1',
+          category: InteractionCategory.JumpToChart,
+          [InteractionCategory.JumpToChart]: {
+            relId: 'chart-1',
+            relation: InteractionFieldRelation.Customize,
+            [InteractionFieldRelation.Customize]: [
+              {
+                id: 'relation-1',
+                type: InteractionRelationType.Variable,
+                source: 'city',
+                target: 'targetCity',
+              },
+            ],
+          },
+        },
+      );
+
+      expect(variables).toEqual({ targetCity: ['beijing', '100'] });
+    });
+
+    test('should skip invalid query variable defaults', () => {
+      const variables = getVariablesByInteractionRule(
+        [
+          {
+            id: 'variable-1',
+            orgId: 'org-1',
+            name: 'city',
+            type: VariableTypes.Query,
+            valueType: VariableValueTypes.String,
+            encrypt: false,
+            permission: 1,
+            defaultValue: '{invalid-json}',
+          },
+        ],
+        {
+          id: 'rule-1',
+          category: InteractionCategory.JumpToChart,
+          [InteractionCategory.JumpToChart]: {
+            relId: 'chart-1',
+            relation: InteractionFieldRelation.Customize,
+            [InteractionFieldRelation.Customize]: [
+              {
+                id: 'relation-1',
+                type: InteractionRelationType.Variable,
+                source: 'city',
+                target: 'targetCity',
+              },
+            ],
+          },
+        },
+      );
+
+      expect(variables).toEqual({});
+    });
+
+    test('should transform variable params to string filters', () => {
+      expect(variableToFilter({ city: ['beijing', 'shanghai'] })).toEqual([
+        {
+          sqlOperator: 'IN',
+          column: 'city',
+          values: [
+            { value: 'beijing', valueType: 'STRING' },
+            { value: 'shanghai', valueType: 'STRING' },
+          ],
+        },
+      ]);
     });
   });
 

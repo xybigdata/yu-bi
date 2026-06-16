@@ -24,10 +24,7 @@ import {
   FilterConditionType,
   SortActionType,
 } from 'app/constants';
-import {
-  ChartDataConfig,
-  ChartDataSectionField,
-} from 'app/types/ChartConfig';
+import { ChartDataConfig, ChartDataSectionField } from 'app/types/ChartConfig';
 import { ChartDataRequest } from 'app/types/ChartDataRequest';
 import ChartDataView from 'app/types/ChartDataView';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
@@ -114,6 +111,21 @@ describe('ChartDataRequestBuild Test', () => {
       script: false,
       viewId: 'view-id',
     });
+  });
+
+  test('should pass variable params to request body', () => {
+    const dataView = createDataView();
+    const variableParams = {
+      city: ['beijing', 'shanghai'],
+      rangeStart: ['2024-01-01'],
+    };
+
+    const builder = new ChartDataRequestBuilder(dataView).addVariableParams(
+      variableParams,
+    );
+
+    expect(builder.build().params).toEqual(variableParams);
+    expect(builder.buildDetails().params).toEqual(variableParams);
   });
 
   test('should get aggregators with enabled aggregation', () => {
@@ -1445,10 +1457,7 @@ describe('ChartDataRequestBuild Test', () => {
 
   test('should get orders with unique extra sorters', () => {
     const dataView = createDataView({
-      meta: [
-        createMeta('fore-name'),
-        createMeta('age'),
-      ],
+      meta: [createMeta('fore-name'), createMeta('age')],
     });
     const chartDataConfigs: ChartDataConfig[] = [
       createSection({
@@ -1781,37 +1790,27 @@ describe('ChartDataRequestBuild Test', () => {
       createSection({
         type: ChartDataSectionType.Info,
         key: 'info',
-        rows: [
-          createStringField('sex'),
-        ],
+        rows: [createStringField('sex')],
       }),
       createSection({
         type: ChartDataSectionType.Color,
         key: 'info',
-        rows: [
-          createStringField('sex'),
-        ],
+        rows: [createStringField('sex')],
       }),
       createSection({
         type: ChartDataSectionType.Group,
         key: 'GROUP',
-        rows: [
-          createStringField('name'),
-        ],
+        rows: [createStringField('name')],
       }),
       createSection({
         type: ChartDataSectionType.Mixed,
         key: 'MIXED',
-        rows: [
-          createStringField('name'),
-        ],
+        rows: [createStringField('name')],
       }),
       createSection({
         type: ChartDataSectionType.Filter,
         key: 'filter',
-        rows: [
-          createStringField('filter'),
-        ],
+        rows: [createStringField('filter')],
       }),
     ];
     const chartSettingConfigs = [];

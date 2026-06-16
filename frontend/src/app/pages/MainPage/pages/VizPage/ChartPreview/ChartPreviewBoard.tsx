@@ -38,7 +38,10 @@ import { fetchAvailableSourceFunctionsForChart } from 'app/pages/ChartWorkbenchP
 import { ChartConfigPayloadType } from 'app/pages/ChartWorkbenchPage/slice/types';
 import { useMainSlice } from 'app/pages/MainPage/slice';
 import { ChartMouseEventParams, IChart } from 'app/types/Chart';
-import { PendingChartDataRequestFilter } from 'app/types/ChartDataRequest';
+import {
+  ChartVariableParams,
+  PendingChartDataRequestFilter,
+} from 'app/types/ChartDataRequest';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import {
   chartSelectionEventListener,
@@ -161,7 +164,7 @@ const ChartPreviewBoard: FC<{
         ignoreQueryPrefix: true,
       }) as {
         filters?: PendingChartDataRequestFilter[];
-        variables?: Record<string, any[]>;
+        variables?: ChartVariableParams;
       };
       const jumpFilterParams = parsedFilterSearchUrl.filters;
       const jumpVariableParams = parsedFilterSearchUrl.variables;

@@ -24,7 +24,10 @@ import { FilterSearchParams } from 'app/pages/MainPage/pages/VizPage/slice/types
 import { mainActions } from 'app/pages/MainPage/slice';
 import { shareActions } from 'app/pages/SharePage/slice';
 import { ExecuteToken, ShareVizInfo } from 'app/pages/SharePage/slice/types';
-import { PendingChartDataRequestFilter } from 'app/types/ChartDataRequest';
+import {
+  ChartVariableParams,
+  PendingChartDataRequestFilter,
+} from 'app/types/ChartDataRequest';
 import ChartDataSetDTO from 'app/types/ChartDataSet';
 import {
   fetchAvailableSourceFunctionsAsync,
@@ -225,7 +228,7 @@ export const syncBoardWidgetChartDataAsync = createAsyncThunk<
     option?: getDataOption;
     extraFilters?: PendingChartDataRequestFilter[];
     tempFilters?: PendingChartDataRequestFilter[];
-    variableParams?: Record<string, any[]>;
+    variableParams?: ChartVariableParams;
   } & {
     executeToken?: any;
   },

@@ -31,6 +31,7 @@ import { ChartDataConfig, ChartDataSectionField } from 'app/types/ChartConfig';
 import { ChartDetailConfigDTO } from 'app/types/ChartConfigDTO';
 import {
   ChartDataRequestFilter,
+  ChartVariableParams,
   PendingChartDataRequestFilter,
 } from 'app/types/ChartDataRequest';
 import ChartDataView from 'app/types/ChartDataView';
@@ -180,11 +181,11 @@ export function getTheWidgetFiltersAndParams<
 >(obj: {
   chartWidget: Widget;
   widgetMap: Record<string, Widget>;
-  params: Record<string, string[]> | undefined;
+  params: ChartVariableParams | undefined;
   view?: ChartDataView;
 }): {
   filterParams: T[];
-  variableParams: Record<string, any[]>;
+  variableParams: ChartVariableParams;
 } {
   // TODO chart 本身携带了变量，board没有相关配置的时候要拿到 chart本身的 变量值 Params
   const { chartWidget, widgetMap, view } = obj;
@@ -193,7 +194,7 @@ export function getTheWidgetFiltersAndParams<
   );
 
   let filterParams: T[] = [];
-  let variableParams: Record<string, any[]> = {};
+  let variableParams: ChartVariableParams = {};
 
   controllerWidgets.forEach(filterWidget => {
     const hasRelation = filterWidget.relations.find(
@@ -368,9 +369,7 @@ export const getControllerDateValues = (obj: {
 
   if (obj.execute) {
     timeValues.forEach((v, i) => {
-      timeValues[i] = v
-        ? formatDatartDate(v, dateFormatObj[pickerType])!
-        : v;
+      timeValues[i] = v ? formatDatartDate(v, dateFormatObj[pickerType])! : v;
     });
   }
 
@@ -558,13 +557,17 @@ export const getBoardChartRequests = (params: {
   return chartRequest;
 };
 //  filter 去重
-export const getDistinctFiltersByColumn = filter => {
+export const getDistinctFiltersByColumn = <
+  T extends { column: string | string[] },
+>(
+  filter?: T[],
+): T[] => {
   if (!filter) {
     return [];
   }
-  const filterMap: Record<string, any> = {};
+  const filterMap: Record<string, T> = {};
   filter.forEach(item => {
-    filterMap[item.column] = item;
+    filterMap[String(item.column)] = item;
   });
   return Object.values(filterMap);
 };

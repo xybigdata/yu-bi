@@ -39,6 +39,8 @@ export type PendingChartDataRequestFilter = {
   }>;
 };
 
+export type ChartVariableParams = Record<string, string[]>;
+
 export type ChartDataRequest = {
   limit?: number | [number, number];
   viewId: string;
@@ -62,7 +64,7 @@ export type ChartDataRequest = {
   cacheExpires?: number;
   concurrencyControl?: boolean;
   concurrencyControlMode?: string;
-  params?: Record<string, string[]>;
+  params?: ChartVariableParams;
   vizId?: string;
   vizName?: string;
   vizType?: string;

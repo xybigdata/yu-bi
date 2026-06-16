@@ -318,6 +318,9 @@
 - 已完成：`internalChartHelper.ts` 的样式值合并入口从宽泛 `any` 收口到 `unknown`，空目标 rows 兼容分支用局部类型承接
 - 已完成：`utils.ts` 的 `listToTree` 返回结构、`filterListOrTree` 叶子判断和 `getInsertedNodeIndex` 输入边界完成局部类型收口，并补齐对应工具测试
 - 已完成：`modelListFormsTreeByTableName` 改为基于 `ChartDataViewMeta` 的显式输入输出结构，保留 `analysisPage / viewPage` 差异字段，并补齐分组排序测试
+- 已完成：`ChartVariableParams` 统一图表请求变量参数类型，看板查看态、编辑态、图表预览态和请求构造器统一使用 `Record<string, string[]>`
+- 已完成：图表交互变量默认值解析补齐兼容保护，仅数组默认值进入变量参数，坏 JSON 或非数组输入不再打断交互链路
+- 已完成：看板过滤器去重 helper 改为泛型最小结构，保留同列后者覆盖前者的既有语义
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 下一批候选：`utils/chartHelper.ts`、`utils/internalChartHelper.ts` 中可隔离、已有测试覆盖的 helper 局部类型收口
@@ -389,12 +392,15 @@
 - `internalChartHelper.ts` 的样式值合并比较入口改为 `unknown`，保持布尔、数值、字符串、数组、对象和空值兼容规则不变
 - `utils.ts` 的树构造 helper 增加 `ListTreeNode<T>` 返回结构，`getInsertedNodeIndex` 改为只依赖 `parentId / index` 的最小输入结构，保持原索引计算语义不变
 - `utils.ts` 的模型字段按表分组 helper 去掉 `columnNameObj`、`columnTreeData` 和输出节点的宽泛 `any`，缺失 `path` 的字段显式跳过，避免字段树构建时异常扩散
+- `ChartDataRequest.ts` 新增 `ChartVariableParams`，`ChartDataRequestBuilder`、看板查看态/编辑态同步复用该类型，避免变量参数继续以 `Record<string, any[]>` 透传
+- `internalChartHelper.ts` 的变量交互 helper 复用 `ChartVariableParams`，并对变量默认值解析补齐数组判断、字符串化和异常回退
+- `DashBoardPage/utils/index.ts` 的过滤器去重 helper 改为基于 `column` 的泛型最小结构，去掉局部 `Record<string, any>` 中转
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/utils/__tests__/utils.test.ts`
-- `rg -n "columnNameObj: \\{ \\[key: string\\]: any \\}|columnTreeData: any|\\} as any|Record<string, any>|modelListFormsTreeByTableName" frontend/src/utils/utils.ts frontend/src/utils/__tests__/utils.test.ts`
+- `npm run test:ci -- src/app/models/__tests__/ChartDataRequestBuilder.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/utils/__tests__/internalChartHelper.test.ts`
+- `rg -n "Record<string, any\\[]>|variableParams\\?: Record<string, any\\[]>|variables\\?: Record<string, any\\[]>|jumpVariableParams\\?: Record<string, any\\[]>|filterMap: Record<string, any>" frontend/src/app/models/ChartDataRequestBuilder.ts frontend/src/app/pages/DashBoardPage/utils/index.ts frontend/src/app/pages/DashBoardPage/pages/Board/slice/thunk.ts frontend/src/app/pages/DashBoardPage/pages/BoardEditor/slice/thunk.ts frontend/src/app/pages/DashBoardPage/pages/Board/slice/types.ts frontend/src/app/pages/MainPage/pages/VizPage/slice/thunks.ts frontend/src/app/pages/MainPage/pages/VizPage/ChartPreview/ChartPreviewBoard.tsx frontend/src/app/utils/internalChartHelper.ts`
 
 ### 6.2 最近已完成
 
