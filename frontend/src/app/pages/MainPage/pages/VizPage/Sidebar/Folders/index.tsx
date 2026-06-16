@@ -100,7 +100,9 @@ export const Folders = memo(
     );
     const { filteredData: filteredListData, debouncedSearch: listSearch } =
       useDebouncedSearch(
-        (archivedDatachartsTreeData || []).concat(archivedDashboardsTreeData),
+        (archivedDatachartsTreeData || []).concat(
+          archivedDashboardsTreeData || [],
+        ),
         (keywords, d) => d.title.toLowerCase().includes(keywords.toLowerCase()),
       );
 

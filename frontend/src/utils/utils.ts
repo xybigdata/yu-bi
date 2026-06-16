@@ -129,6 +129,18 @@ export function stopPPG(e) {
   e.stopPropagation();
 }
 
+export type ListTreeNode<T> = T & {
+  key: string;
+  title: string;
+  value: string;
+  path: string[];
+  icon?: ReactElement | ((props: TreeNodeProps) => ReactElement);
+  disabled?: boolean;
+  selectable?: boolean;
+  children?: Array<ListTreeNode<T>>;
+  isLeaf?: boolean;
+};
+
 export function listToTree<
   T extends {
     id: string;
@@ -149,12 +161,12 @@ export function listToTree<
     getSelectable?: (o: T) => boolean;
     filter?: (path: string[], o: T) => boolean;
   },
-): undefined | any[] {
+): undefined | Array<ListTreeNode<T>> {
   if (!list) {
     return list;
   }
 
-  const treeNodes: any[] = [];
+  const treeNodes: Array<ListTreeNode<T>> = [];
   const childrenList: T[] = [];
 
   list.forEach(o => {
@@ -271,12 +283,12 @@ export const onDropTreeFn = ({ info, treeData, callback }) => {
 
 export const getInsertedNodeIndex = (
   AddData: Omit<SaveFormModel, 'config'> & { config?: object | string },
-  viewData: any,
+  viewData?: Array<{ parentId?: string | null; index?: number | null }>,
 ) => {
   let index: number = 0;
   if (viewData?.length) {
     let IndexArr = viewData
-      .filter((v: any) => v.parentId == AddData.parentId)
+      .filter(v => v.parentId == AddData.parentId)
       .map(val => Number(val.index) || 0);
     index = IndexArr?.length ? Math.max(...IndexArr) + 1 : 0;
   }
@@ -308,10 +320,12 @@ export function filterListOrTree<T>(
 ): T[] {
   return keywords
     ? dataSource.reduce<T[]>((filtered, d) => {
-        const treeNode = d as T & { children?: T[] };
+        const treeNode = d as T & {
+          children?: Array<T & { isLeaf?: boolean }>;
+        };
         const isMatch = filterFunc(keywords, d);
         let isChildrenMatch: T[] | undefined;
-        if (filterLeaf && treeNode.children?.every(c => (c as any).isLeaf)) {
+        if (filterLeaf && treeNode.children?.every(c => c.isLeaf)) {
           isChildrenMatch =
             isMatch || treeNode.children.some(c => filterFunc(keywords, c))
               ? treeNode.children

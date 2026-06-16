@@ -1,4 +1,10 @@
-import { universalUUID, uuidv4 } from 'utils/utils';
+import {
+  filterListOrTree,
+  getInsertedNodeIndex,
+  listToTree,
+  universalUUID,
+  uuidv4,
+} from 'utils/utils';
 
 const originalCrypto = globalThis.crypto;
 
@@ -66,5 +72,104 @@ describe('utils uuid', () => {
     expect(universalUUID()).toBe('00010203-0405-4607-8809-0a0b0c0d0e0f');
 
     randomSpy.mockRestore();
+  });
+});
+
+describe('utils tree helpers', () => {
+  type FlatNode = {
+    id: string;
+    name: string;
+    parentId: string | null;
+    isFolder: boolean;
+    index: number | null;
+  };
+
+  const nodes: FlatNode[] = [
+    {
+      id: 'child-b',
+      name: 'Child B',
+      parentId: 'root',
+      isFolder: false,
+      index: 2,
+    },
+    { id: 'root', name: 'Root', parentId: null, isFolder: true, index: 1 },
+    {
+      id: 'child-a',
+      name: 'Child A',
+      parentId: 'root',
+      isFolder: false,
+      index: 1,
+    },
+  ];
+
+  it('should convert flat list to sorted tree nodes', () => {
+    expect(listToTree(nodes)).toEqual([
+      {
+        id: 'root',
+        name: 'Root',
+        parentId: null,
+        isFolder: true,
+        index: 1,
+        key: 'root',
+        title: 'Root',
+        value: 'root',
+        path: ['root'],
+        children: [
+          {
+            id: 'child-a',
+            name: 'Child A',
+            parentId: 'root',
+            isFolder: false,
+            index: 1,
+            key: 'child-a',
+            title: 'Child A',
+            value: 'child-a',
+            path: ['root', 'child-a'],
+            isLeaf: true,
+          },
+          {
+            id: 'child-b',
+            name: 'Child B',
+            parentId: 'root',
+            isFolder: false,
+            index: 2,
+            key: 'child-b',
+            title: 'Child B',
+            value: 'child-b',
+            path: ['root', 'child-b'],
+            isLeaf: true,
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('should preserve leaf children when filterLeaf matches parent', () => {
+    const tree = listToTree(nodes) || [];
+
+    expect(
+      filterListOrTree(
+        tree,
+        'Root',
+        (_, node) => node.name.includes('Root'),
+        true,
+      ),
+    ).toEqual(tree);
+  });
+
+  it('should get next inserted node index in same parent', () => {
+    expect(
+      getInsertedNodeIndex({ name: 'new node', parentId: 'root' }, [
+        { parentId: 'root', index: 1 },
+        { parentId: 'root', index: 3 },
+        { parentId: null, index: 10 },
+      ]),
+    ).toBe(4);
+
+    expect(
+      getInsertedNodeIndex({ name: 'new node', parentId: 'missing' }, [
+        { parentId: 'root', index: 1 },
+      ]),
+    ).toBe(0);
   });
 });
