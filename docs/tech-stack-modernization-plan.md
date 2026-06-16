@@ -317,6 +317,7 @@
 - 已完成：`ChartDataRequestBuilder` 的 function columns 构造补齐显式返回类型，保留空字符串 snippet 的既有兼容语义
 - 已完成：`internalChartHelper.ts` 的样式值合并入口从宽泛 `any` 收口到 `unknown`，空目标 rows 兼容分支用局部类型承接
 - 已完成：`utils.ts` 的 `listToTree` 返回结构、`filterListOrTree` 叶子判断和 `getInsertedNodeIndex` 输入边界完成局部类型收口，并补齐对应工具测试
+- 已完成：`modelListFormsTreeByTableName` 改为基于 `ChartDataViewMeta` 的显式输入输出结构，保留 `analysisPage / viewPage` 差异字段，并补齐分组排序测试
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 下一批候选：`utils/chartHelper.ts`、`utils/internalChartHelper.ts` 中可隔离、已有测试覆盖的 helper 局部类型收口
@@ -387,12 +388,13 @@
 - `ChartDataRequestBuilder` 继续收口 computed function column 的返回结构，避免请求构造链路继续依赖隐式 `any`
 - `internalChartHelper.ts` 的样式值合并比较入口改为 `unknown`，保持布尔、数值、字符串、数组、对象和空值兼容规则不变
 - `utils.ts` 的树构造 helper 增加 `ListTreeNode<T>` 返回结构，`getInsertedNodeIndex` 改为只依赖 `parentId / index` 的最小输入结构，保持原索引计算语义不变
+- `utils.ts` 的模型字段按表分组 helper 去掉 `columnNameObj`、`columnTreeData` 和输出节点的宽泛 `any`，缺失 `path` 的字段显式跳过，避免字段树构建时异常扩散
 
 当前验证计划：
 
 - `npm run checkTs`
 - `npm run test:ci -- src/utils/__tests__/utils.test.ts`
-- `rg -n "undefined \\| any\\[\\]|const treeNodes: any\\[\\]|as any\\)\\.isLeaf|viewData: any|filter\\(\\(v: any\\)" frontend/src/utils/utils.ts frontend/src/utils/__tests__/utils.test.ts`
+- `rg -n "columnNameObj: \\{ \\[key: string\\]: any \\}|columnTreeData: any|\\} as any|Record<string, any>|modelListFormsTreeByTableName" frontend/src/utils/utils.ts frontend/src/utils/__tests__/utils.test.ts`
 
 ### 6.2 最近已完成
 
@@ -417,6 +419,7 @@
 - 通用错误处理与数组 helper 类型边界收口
 - 图表 helper 中 runtime date level 与样式值合并类型边界收口
 - 通用树 helper 与插入索引 helper 类型边界收口
+- 模型字段树分组 helper 类型边界收口
 
 ## 7. 下一阶段执行顺序
 

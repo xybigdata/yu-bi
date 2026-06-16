@@ -2,9 +2,11 @@ import {
   filterListOrTree,
   getInsertedNodeIndex,
   listToTree,
+  modelListFormsTreeByTableName,
   universalUUID,
   uuidv4,
 } from 'utils/utils';
+import { ColumnRole } from 'app/pages/MainPage/pages/ViewPage/slice/types';
 
 const originalCrypto = globalThis.crypto;
 
@@ -171,5 +173,68 @@ describe('utils tree helpers', () => {
         { parentId: 'root', index: 1 },
       ]),
     ).toBe(0);
+  });
+
+  it('should group model fields by table path', () => {
+    const model = [
+      {
+        name: 'order_id',
+        path: ['orders', 'order_id'],
+      },
+      {
+        name: 'customer_name',
+        path: ['customers', 'customer_name'],
+      },
+      {
+        name: 'amount',
+        path: ['orders', 'amount'],
+      },
+      {
+        name: 'ignored_without_path',
+      },
+    ];
+
+    expect(modelListFormsTreeByTableName(model, 'analysisPage')).toEqual([
+      {
+        name: 'customers',
+        category: 'hierarchy',
+        role: ColumnRole.Table,
+        subType: undefined,
+        type: 'STRING',
+        id: 'customers',
+        children: [
+          {
+            name: 'customer_name',
+            path: ['customers', 'customer_name'],
+            displayName: 'customer_name',
+          },
+        ],
+      },
+      {
+        name: 'orders',
+        category: 'hierarchy',
+        role: ColumnRole.Table,
+        subType: undefined,
+        type: 'STRING',
+        id: 'orders',
+        children: [
+          {
+            name: 'order_id',
+            path: ['orders', 'order_id'],
+            displayName: 'order_id',
+          },
+          {
+            name: 'amount',
+            path: ['orders', 'amount'],
+            displayName: 'amount',
+          },
+        ],
+      },
+    ]);
+
+    expect(modelListFormsTreeByTableName(model, 'viewPage')).toEqual([
+      expect.objectContaining({ name: 'customers', index: 0 }),
+      expect.objectContaining({ name: 'orders', index: 1 }),
+    ]);
   });
 });

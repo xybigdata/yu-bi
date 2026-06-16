@@ -1,5 +1,6 @@
 import { message, TreeDataNode, TreeNodeProps } from 'antd';
 import { ColumnRole } from 'app/pages/MainPage/pages/ViewPage/slice/types';
+import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { AxiosError, AxiosResponse } from 'axios';
 import classnames from 'classnames';
 import i18next from 'i18next';
@@ -481,13 +482,30 @@ export function newIssueUrl({ type, ...options }) {
   return url.toString();
 }
 
-export function modelListFormsTreeByTableName(model, type) {
+type ModelTreePageType = 'analysisPage' | 'viewPage';
+type ModelTreeColumn = ChartDataViewMeta & {
+  displayName?: string;
+};
+type ModelTreeTableNode = ChartDataViewMeta & {
+  role: ColumnRole.Table;
+  children: ModelTreeColumn[];
+  id?: string;
+  index?: number;
+};
+
+export function modelListFormsTreeByTableName(
+  model: ChartDataViewMeta[] | undefined,
+  type: ModelTreePageType,
+): ModelTreeTableNode[] {
   const tableNameList: string[] = [];
-  const columnNameObj: { [key: string]: any } = {};
-  const columnTreeData: any = [];
+  const columnNameObj: Record<string, ModelTreeColumn[]> = {};
+  const columnTreeData: ModelTreeTableNode[] = [];
 
   model?.forEach(v => {
     const path = v.path;
+    if (!path?.length) {
+      return;
+    }
     const tableName = path.slice(0, path.length - 1).join('.');
     if (!tableNameList.includes(tableName)) {
       tableNameList.push(tableName);
@@ -496,6 +514,9 @@ export function modelListFormsTreeByTableName(model, type) {
 
   model?.forEach(v => {
     const path = v.path;
+    if (!path?.length) {
+      return;
+    }
     const tableName = path.slice(0, path.length - 1).join('.');
     const fieldName = path[path.length - 1];
     if (tableNameList.includes(tableName)) {
@@ -516,7 +537,7 @@ export function modelListFormsTreeByTableName(model, type) {
       subType: undefined,
       type: 'STRING',
       children: columnNameObj[v],
-    } as any;
+    } as ModelTreeTableNode;
 
     if (type === 'analysisPage') {
       treeData.id = v;
