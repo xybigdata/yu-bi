@@ -17,6 +17,7 @@
  */
 
 import { Collapse } from 'antd';
+import type { CollapseProps } from 'antd';
 import { CollapseHeader, ItemLayout } from 'app/components/FormGenerator';
 import { FormGroupLayoutMode } from 'app/components/FormGenerator/constants';
 import GroupLayout from 'app/components/FormGenerator/Layout/GroupLayout';
@@ -27,14 +28,6 @@ import { ChartDataConfig, ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo, useContext } from 'react';
 import styled from 'styled-components';
 import widgetManagerInstance from '../../../../components/WidgetManager';
-
-type CollapseItemsCompatProps = {
-  items: Array<{
-    key: string;
-    label: React.ReactNode;
-    children: React.ReactNode;
-  }>;
-};
 
 const StyledWrapper = styled.div`
   width: 100%;
@@ -89,7 +82,7 @@ export const BoardConfigCollapse: FC<{
         ?.filter(c => !Boolean(c.hidden))
         .map((c, index) => {
           if (c.comType === 'group') {
-            const collapseProps = {
+            const collapseProps: Pick<CollapseProps, 'items'> = {
               items: [
                 {
                   key: c.key,
@@ -111,9 +104,9 @@ export const BoardConfigCollapse: FC<{
                   ),
                 },
               ],
-            } as CollapseItemsCompatProps;
+            };
 
-            return <Collapse key={c.key} ghost {...(collapseProps as any)} />;
+            return <Collapse key={c.key} ghost {...collapseProps} />;
           } else {
             return (
               <ItemLayout

@@ -327,6 +327,8 @@
 - 已完成：看板 widget 树选项转换 helper 补齐列表节点与树节点类型，去掉树构造链路里的 `any[]` / 宽泛中转，并增加路径转树测试
 - 已完成：看板编辑态图表数据请求错误处理改为复用 `getErrorMessage`，去掉局部 `error as any`
 - 已完成：看板编辑页导航 state 补齐最小结构类型，去掉 `navigate.location.state as any`
+- 已完成：看板配置面板与 widget 配置面板的 `Collapse.items` 改为复用 antd 公开 `CollapseProps`，去掉兼容层 `as any`
+- 已完成：TabWidget 的标签位置配置改为复用 antd `TabsProps['tabPosition']`，并对历史异常位置值补齐默认回退
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 下一批候选：`utils/chartHelper.ts`、`utils/internalChartHelper.ts` 中可隔离、已有测试覆盖的 helper 局部类型收口
@@ -408,12 +410,14 @@
 - `DashBoardPage/utils/widget.ts` 的 `handleRowDataForTree`、`convertListToTree` 补齐局部节点类型，保持原树节点字段结构不变
 - `BoardEditor/slice/thunk.ts` 的请求失败回调统一走 `getErrorMessage(error)`，避免错误对象继续通过 `any.message` 读取
 - `BoardEditor/index.tsx` 的历史导航 state 改为显式 `BoardEditorLocationState`，旧 `widgetInfo` 字符串解析结果只声明当前使用的最小字段
+- `SlideSetting/BoardConfigPanel.tsx` 与 `SlideSetting/WidgetConfigPanel.tsx` 的折叠面板 items 透传改为 `Pick<CollapseProps, 'items'>`
+- `TabWidget/tabConfig.ts` 与 `TabWidgetCore.tsx` 的标签位置从字符串强转改为显式合法值收口，保持旧配置异常值回退到 `top`
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts`
-- `rg -n "rangeNumberValidator = async \\(_, values: any\\[]\\)|convertListToTree = \\([\\s\\S]*\\): any\\[]|treeNodes: any\\[]|childrenList: any|handleRowDataForTree = collection|errInfo: \\(error as any\\)|navigate\\.location\\.state as any" frontend/src/app/pages/DashBoardPage/pages/BoardEditor frontend/src/app/pages/DashBoardPage/utils/widget.ts`
+- `npm run test:ci -- src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts`
+- `rg -n "CollapseItemsCompatProps|collapseProps as any|tabPosition=\\{position as any\\}" frontend/src/app/pages/DashBoardPage -g "*.tsx"`
 
 ### 6.2 最近已完成
 

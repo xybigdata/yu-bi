@@ -17,6 +17,7 @@
  */
 
 import { Collapse } from 'antd';
+import type { CollapseProps } from 'antd';
 import { CollapseHeader } from 'app/components/FormGenerator';
 import { FormGroupLayoutMode } from 'app/components/FormGenerator/constants';
 import GroupLayout from 'app/components/FormGenerator/Layout/GroupLayout';
@@ -28,14 +29,6 @@ import { FC, memo, useContext } from 'react';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { editBoardStackActions } from '../../slice';
-
-type CollapseItemsCompatProps = {
-  items: Array<{
-    key: string;
-    label: React.ReactNode;
-    children: React.ReactNode;
-  }>;
-};
 
 const StyledWrapper = styled.div`
   width: 100%;
@@ -97,9 +90,9 @@ export const BoardConfigCollapse: FC<{
       ),
     }));
 
-  const collapseProps = {
+  const collapseProps: Pick<CollapseProps, 'items'> = {
     items: collapseItems,
-  } as CollapseItemsCompatProps;
+  };
 
-  return <Collapse className="" ghost {...(collapseProps as any)} />;
+  return <Collapse className="" ghost {...collapseProps} />;
 });
