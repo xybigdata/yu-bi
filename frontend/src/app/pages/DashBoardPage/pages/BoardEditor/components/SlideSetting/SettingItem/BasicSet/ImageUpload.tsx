@@ -17,6 +17,7 @@
  */
 import { DeleteOutlined } from '@ant-design/icons';
 import { Upload } from 'antd';
+import type { UploadProps } from 'antd';
 import { BoardContext } from 'app/pages/DashBoardPage/components/BoardProvider/BoardProvider';
 import { convertImageUrl } from 'app/pages/DashBoardPage/utils';
 import { memo, useCallback, useContext, useMemo } from 'react';
@@ -27,13 +28,14 @@ import { uploadBoardImage } from '../../../../slice/thunk';
 
 export const UploadDragger: React.FC<{
   value: string;
-  onChange?: any;
+  onChange?: (url: string) => void;
   placeholder: string;
 }> = memo(({ value, onChange, placeholder }) => {
   const dispatch = useAppDispatch();
   const { boardId } = useContext(BoardContext);
+  const resolveChange = onChange || (() => {});
 
-  const beforeUpload = useCallback(
+  const beforeUpload: UploadProps['beforeUpload'] = useCallback(
     async info => {
       const formData = new FormData();
       formData.append('file', info);
@@ -42,20 +44,20 @@ export const UploadDragger: React.FC<{
           boardId,
           fileName: info.name,
           formData: formData,
-          resolve: onChange,
+          resolve: resolveChange,
         }),
       );
       return false;
     },
-    [boardId, dispatch, onChange],
+    [boardId, dispatch, resolveChange],
   );
   const getImageError = useCallback(() => {
     console.warn('get BackgroundImageError');
   }, []);
   const delImageUrl = useCallback(
-    e => {
+    (e: React.MouseEvent<HTMLElement>) => {
       e.stopPropagation();
-      onChange('');
+      onChange?.('');
     },
     [onChange],
   );

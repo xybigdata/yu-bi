@@ -424,6 +424,7 @@
 - `CategoryConditionEditableTable.tsx` 与 `SortAction/DraggableItem.tsx` 的拖拽行/拖拽项参数改为显式索引与 HTML 属性结构，继续压缩 Workbench 拖拽链路里的局部 `any`
 - `CategoryConditionConfiguration.tsx`、`FilterFacadeConfiguration.tsx`、`FilterVisibilityConfiguration.tsx` 的列表/树选中、facade 切换、slider 区间与可见性条件参数改为显式兼容类型，继续压缩筛选配置链路里的隐式 `any` 与宽泛状态值
 - `TextSetter/index.tsx` 与 `BasicSet/NumberSet.tsx` 的表单 props / 数值回调改为复用 antd 公开类型，减少控制器与看板配置链路里的宽泛 `FormItemProps<any>`、`onChange: any`
+- `WidgetConfigPanel.tsx`、`ImageUpload.tsx`、`AggregationColorizeAction.tsx`、`ChartComputedFieldSettingPanel.tsx` 的 context / 上传回调 / 颜色事件 / 树选择值改为显式兼容类型，继续压缩 Workbench 与看板配置链路中的局部 `any`
 - `.gitignore` 增加 `.tmp/`、`logs/`，减少低风险改造过程中本地运行产物干扰
 
 当前验证计划：
