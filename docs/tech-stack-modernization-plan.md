@@ -325,6 +325,8 @@
 - 已完成：看板联动点击过滤器值转换改为数组保护与字符串化，去掉局部 `(v as any)?.map` 中转
 - 已完成：控制器区间数值默认值校验改为显式区间值类型，补齐字符串数值转换和空值保护，并增加 validator 回归测试
 - 已完成：看板 widget 树选项转换 helper 补齐列表节点与树节点类型，去掉树构造链路里的 `any[]` / 宽泛中转，并增加路径转树测试
+- 已完成：看板编辑态图表数据请求错误处理改为复用 `getErrorMessage`，去掉局部 `error as any`
+- 已完成：看板编辑页导航 state 补齐最小结构类型，去掉 `navigate.location.state as any`
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 下一批候选：`utils/chartHelper.ts`、`utils/internalChartHelper.ts` 中可隔离、已有测试覆盖的 helper 局部类型收口
@@ -404,12 +406,14 @@
 - `DashBoardPage/actions/widgetAction.ts` 的联动点击过滤器转换补齐数组判断和字符串化，非数组输入按空值处理，避免未知值直接 `.map`
 - `ControllerWidgetPanel/utils.ts` 的 `rangeNumberValidator` 改为复用 `RangeNumberValue`，删除空分支，数值比较前显式处理 number/string 输入
 - `DashBoardPage/utils/widget.ts` 的 `handleRowDataForTree`、`convertListToTree` 补齐局部节点类型，保持原树节点字段结构不变
+- `BoardEditor/slice/thunk.ts` 的请求失败回调统一走 `getErrorMessage(error)`，避免错误对象继续通过 `any.message` 读取
+- `BoardEditor/index.tsx` 的历史导航 state 改为显式 `BoardEditorLocationState`，旧 `widgetInfo` 字符串解析结果只声明当前使用的最小字段
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts`
-- `rg -n "rangeNumberValidator = async \\(_, values: any\\[]\\)|convertListToTree = \\([\\s\\S]*\\): any\\[]|treeNodes: any\\[]|childrenList: any|handleRowDataForTree = collection" frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/utils.ts frontend/src/app/pages/DashBoardPage/utils/widget.ts`
+- `npm run test:ci -- src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts`
+- `rg -n "rangeNumberValidator = async \\(_, values: any\\[]\\)|convertListToTree = \\([\\s\\S]*\\): any\\[]|treeNodes: any\\[]|childrenList: any|handleRowDataForTree = collection|errInfo: \\(error as any\\)|navigate\\.location\\.state as any" frontend/src/app/pages/DashBoardPage/pages/BoardEditor frontend/src/app/pages/DashBoardPage/utils/widget.ts`
 
 ### 6.2 最近已完成
 

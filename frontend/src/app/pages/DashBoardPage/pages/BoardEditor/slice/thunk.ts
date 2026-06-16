@@ -645,7 +645,7 @@ export const getEditChartWidgetDataAsync = createAsyncThunk<
           await dispatch(
             editWidgetInfoActions.setWidgetErrInfo({
               widgetId,
-              errInfo: (error as any)?.message as any,
+              errInfo: getErrorMessage(error),
               errorType: 'request',
             }),
           );
