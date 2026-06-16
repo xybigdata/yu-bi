@@ -26,6 +26,7 @@ import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
 import { Variable } from 'app/pages/MainPage/pages/VariablePage/slice/types';
 import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
 import {
+  ChartDataRequest,
   ChartVariableParams,
   PendingChartDataRequestFilter,
 } from 'app/types/ChartDataRequest';
@@ -440,7 +441,7 @@ export interface ServerDatachart extends Omit<DataChart, 'config'> {
 
 export interface getDataOption {
   pageInfo?: Partial<PageInfo>;
-  sorters?: Array<{ column: string; operator?: string; aggOperator?: string }>;
+  sorters?: ChartDataRequest['orders'];
 }
 
 export type WidgetErrorType = 'request' | 'interaction';

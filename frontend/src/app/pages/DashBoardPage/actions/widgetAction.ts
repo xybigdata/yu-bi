@@ -16,10 +16,17 @@
  * limitations under the License.
  */
 
-import { ChartDataSectionType } from 'app/constants';
+import {
+  AggregateFieldActionType,
+  ChartDataSectionType,
+  SortActionType,
+} from 'app/constants';
 import { PageInfo } from 'app/pages/MainPage/pages/ViewPage/slice/types';
 import { ChartMouseEventParams } from 'app/types/Chart';
-import { PendingChartDataRequestFilter } from 'app/types/ChartDataRequest';
+import {
+  ChartDataRequest,
+  PendingChartDataRequestFilter,
+} from 'app/types/ChartDataRequest';
 import { tablePagingAndSortEventListener } from 'app/utils/ChartEventListenerHelper';
 import {
   filterFiltersByInteractionRule,
@@ -72,6 +79,63 @@ import {
   getValueByRowData,
 } from '../utils/widget';
 
+type TablePagingEventValue = {
+  pageNo?: number;
+};
+
+type TableSortEventValue = TablePagingEventValue & {
+  direction: SortActionType.ASC | SortActionType.DESC;
+  aggOperator?: AggregateFieldActionType;
+};
+
+type LinkFilterValueMap = Record<string, unknown>;
+
+type WidgetLinkEventParam = {
+  isUnSelectedAll: boolean;
+  filters?: LinkFilterValueMap;
+  rule;
+};
+
+const toTablePagingEventValue = (
+  value: ChartMouseEventParams['value'],
+): TablePagingEventValue | undefined => {
+  if (!value || typeof value !== 'object') {
+    return undefined;
+  }
+  const pageNo = (value as TablePagingEventValue).pageNo;
+  return { pageNo };
+};
+
+const toTableSortEventValue = (
+  value: ChartMouseEventParams['value'],
+): TableSortEventValue | undefined => {
+  if (!value || typeof value !== 'object') {
+    return undefined;
+  }
+  const eventValue = value as Partial<TableSortEventValue>;
+  const direction = eventValue.direction;
+  if (direction === SortActionType.ASC || direction === SortActionType.DESC) {
+    return {
+      pageNo: eventValue.pageNo,
+      direction,
+      aggOperator: eventValue.aggOperator,
+    };
+  }
+  return undefined;
+};
+
+const toClickFilterValues = (
+  value: LinkFilterValueMap[string],
+): PendingChartDataRequestFilter['values'] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.map(item => ({
+    value: String(item),
+    valueType: 'STRING',
+  }));
+};
+
 export const toggleLinkageAction =
   (boardEditing: boolean, boardId: string, widgetId: string, toggle: boolean) =>
   dispatch => {
@@ -103,15 +167,21 @@ export const tableChartClickAction =
     params: ChartMouseEventParams,
   ) =>
   dispatch => {
+    const pageEventValue = toTablePagingEventValue(params?.value);
+    const sortEventValue = toTableSortEventValue(params?.value);
+    const sorters: ChartDataRequest['orders'] =
+      sortEventValue && params?.seriesName
+        ? [
+            {
+              column: [params.seriesName],
+              operator: sortEventValue.direction,
+              aggOperator: sortEventValue.aggOperator,
+            },
+          ]
+        : [];
     const opt = {
-      pageInfo: { pageNo: params?.value?.pageNo },
-      sorters: [
-        {
-          column: params?.seriesName!,
-          operator: (params?.value as any)?.direction,
-          aggOperator: (params?.value as any)?.aggOperator,
-        },
-      ],
+      pageInfo: { pageNo: pageEventValue?.pageNo },
+      sorters,
     };
     if (editing) {
       dispatch(
@@ -194,11 +264,7 @@ export const widgetClickJumpAction =
   };
 
 export const widgetLinkEventAction =
-  (
-    renderMode,
-    widget: Widget,
-    params: Array<{ isUnSelectedAll: boolean; filters; rule }>,
-  ) =>
+  (renderMode, widget: Widget, params: WidgetLinkEventParam[]) =>
   async (dispatch, getState) => {
     const targetLinkDataChartIds = (params || []).map(p => p.rule?.relId);
     const rootState = getState() as RootState;
@@ -258,7 +324,7 @@ export const widgetLinkEventAction =
           return {
             sqlOperator: FilterSqlOperator.In,
             column: k,
-            values: (v as any)?.map(vv => ({ value: vv, valueType: 'STRING' })),
+            values: toClickFilterValues(v),
           };
         })
         .filter(f =>

@@ -321,6 +321,8 @@
 - 已完成：`ChartVariableParams` 统一图表请求变量参数类型，看板查看态、编辑态、图表预览态和请求构造器统一使用 `Record<string, string[]>`
 - 已完成：图表交互变量默认值解析补齐兼容保护，仅数组默认值进入变量参数，坏 JSON 或非数组输入不再打断交互链路
 - 已完成：看板过滤器去重 helper 改为泛型最小结构，保留同列后者覆盖前者的既有语义
+- 已完成：看板表格分页/排序事件入口补齐分页值与排序值的独立窄化，`getDataOption.sorters` 与 `ChartDataRequest['orders']` 对齐
+- 已完成：看板联动点击过滤器值转换改为数组保护与字符串化，去掉局部 `(v as any)?.map` 中转
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 下一批候选：`utils/chartHelper.ts`、`utils/internalChartHelper.ts` 中可隔离、已有测试覆盖的 helper 局部类型收口
@@ -395,12 +397,15 @@
 - `ChartDataRequest.ts` 新增 `ChartVariableParams`，`ChartDataRequestBuilder`、看板查看态/编辑态同步复用该类型，避免变量参数继续以 `Record<string, any[]>` 透传
 - `internalChartHelper.ts` 的变量交互 helper 复用 `ChartVariableParams`，并对变量默认值解析补齐数组判断、字符串化和异常回退
 - `DashBoardPage/utils/index.ts` 的过滤器去重 helper 改为基于 `column` 的泛型最小结构，去掉局部 `Record<string, any>` 中转
+- `DashBoardPage/actions/widgetAction.ts` 的表格分页/排序事件入口补齐局部事件值类型守卫，保持分页页码独立透传，排序仅在 `ASC/DESC` 合法时进入请求
+- `Board/slice/types.ts` 的 `getDataOption.sorters` 改为复用 `ChartDataRequest['orders']`，看板查看态、编辑态和图表请求 helper 不再需要 `as any[]` 强转
+- `DashBoardPage/actions/widgetAction.ts` 的联动点击过滤器转换补齐数组判断和字符串化，非数组输入按空值处理，避免未知值直接 `.map`
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/models/__tests__/ChartDataRequestBuilder.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/utils/__tests__/internalChartHelper.test.ts`
-- `rg -n "Record<string, any\\[]>|variableParams\\?: Record<string, any\\[]>|variables\\?: Record<string, any\\[]>|jumpVariableParams\\?: Record<string, any\\[]>|filterMap: Record<string, any>" frontend/src/app/models/ChartDataRequestBuilder.ts frontend/src/app/pages/DashBoardPage/utils/index.ts frontend/src/app/pages/DashBoardPage/pages/Board/slice/thunk.ts frontend/src/app/pages/DashBoardPage/pages/BoardEditor/slice/thunk.ts frontend/src/app/pages/DashBoardPage/pages/Board/slice/types.ts frontend/src/app/pages/MainPage/pages/VizPage/slice/thunks.ts frontend/src/app/pages/MainPage/pages/VizPage/ChartPreview/ChartPreviewBoard.tsx frontend/src/app/utils/internalChartHelper.ts`
+- `npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/utils/__tests__/board.test.ts src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx src/app/utils/__tests__/ChartEventListenerHelper.test.ts`
+- `rg -n "addExtraSorters\\(.*as any|option\\?\\.sorters as any|cur\\.type as any|params\\?\\.value as any|values: \\(v as any\\)" frontend/src/app/pages/DashBoardPage frontend/src/app/models/ChartDataRequestBuilder.ts`
 
 ### 6.2 最近已完成
 

@@ -277,7 +277,7 @@ export const syncBoardWidgetChartDataAsync = createAsyncThunk<
       dataChart?.config?.aggregation,
     )
       .addVariableParams(variableParams)
-      .addExtraSorters(option?.sorters as any[])
+      .addExtraSorters(option?.sorters)
       .addRuntimeFilters((extraFilters || []).concat(tempFilters || []))
       .addDrillOption(drillOption)
       .build();

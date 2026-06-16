@@ -144,7 +144,7 @@ export const getDataChartRequestParams = (obj: {
     dataChart?.config?.aggregation,
   );
   let requestParams = builder
-    .addExtraSorters((option?.sorters as any) || [])
+    .addExtraSorters(option?.sorters || [])
     .addDrillOption(drillOption)
     .addRuntimeFilters(tempFilters || [])
     .build();
@@ -154,13 +154,16 @@ export const getDataChartRequestParams = (obj: {
 export const getChartGroupColumns = (datas: ChartDataConfig[] | undefined) => {
   const chartDataConfigs = datas;
   if (!chartDataConfigs) return [] as ChartDataSectionField[];
-  const groupTypes = [ChartDataSectionType.Group, ChartDataSectionType.Color];
+  const groupTypes: Array<ChartDataConfig['type']> = [
+    ChartDataSectionType.Group,
+    ChartDataSectionType.Color,
+  ];
   const groupColumns = chartDataConfigs.reduce<ChartDataSectionField[]>(
     (acc, cur) => {
       if (!cur.rows) {
         return acc;
       }
-      if (groupTypes.includes(cur.type as any)) {
+      if (cur.type && groupTypes.includes(cur.type)) {
         return acc.concat(cur.rows);
       }
       if (cur.type === ChartDataSectionType.Mixed) {
