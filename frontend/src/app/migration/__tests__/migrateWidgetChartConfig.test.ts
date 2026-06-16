@@ -16,87 +16,132 @@
  * limitations under the License.
  */
 
-import { ChartDataViewFieldCategory } from 'app/constants';
+import { ChartDataViewFieldCategory, DataViewFieldType } from 'app/constants';
+import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
+import { ChartDetailConfigDTO } from 'app/types/ChartConfigDTO';
 import { DATE_LEVEL_DELIMITER } from 'globalConstants';
 import migrateWidgetChartConfig from '../BoardConfig/migrateWidgetChartConfig';
 
+type DateLevelRow = {
+  colName: string;
+  expression: string;
+  field: string;
+};
+
+type ComputedField = {
+  expression: string;
+  name: string;
+  type: DataViewFieldType.DATE;
+};
+
+type WidgetChartConfigValue = ChartDetailConfigDTO;
+
+type WidgetChartConfigFixture = Widget;
+
+const createDateLevelRow = (colName: string): DateLevelRow => ({
+  colName,
+  expression: 'AGG_DATE_YEAR([birthday])',
+  field: 'birthday',
+});
+
+const createComputedField = (name: string): ComputedField => ({
+  expression: 'AGG_DATE_YEAR([birthday])',
+  name,
+  type: DataViewFieldType.DATE,
+});
+
+const createWidgetChartConfigValue = (
+  legacyLabel: string,
+): WidgetChartConfigValue => ({
+  chartConfig: {
+    datas: [
+      {
+        key: 'group',
+        rows: [
+          {
+            ...createDateLevelRow(legacyLabel),
+            type: DataViewFieldType.DATE,
+            category: ChartDataViewFieldCategory.DateLevelComputedField,
+          },
+        ],
+      },
+    ],
+  },
+  computedFields: [
+    {
+      ...createComputedField(legacyLabel),
+      category: ChartDataViewFieldCategory.DateLevelComputedField,
+    },
+  ],
+  chartGraphId: 'chart-1',
+  aggregation: false,
+});
+
+const createWidget = (
+  config: WidgetChartConfigValue | string | null,
+): WidgetChartConfigFixture => ({
+  id: 'widget-1',
+  dashboardId: 'dashboard-1',
+  datachartId: 'datachart-1',
+  relations: [],
+  viewIds: [],
+  parentId: '',
+  config: {
+    version: '1.0.0',
+    name: 'widget',
+    boardType: 'auto',
+    clientId: 'client-1',
+    index: 0,
+    type: 'chart',
+    originalType: 'ownedChart',
+    lock: false,
+    customConfig: {},
+    rect: { x: 0, y: 0, width: 1, height: 1 },
+    pRect: { x: 0, y: 0, width: 1, height: 1 },
+    content: {
+      dataChart: config === null ? null : { config },
+    },
+  },
+});
+
 describe('migrate Widget ChartConfig', () => {
   test('should return empty array if widget is empty ', () => {
-    const widget = [];
+    const widget: Widget[] = [];
 
     const result = migrateWidgetChartConfig(widget);
     expect(result).toEqual([]);
   });
   test('should return null if widget is null ', () => {
-    const widget: any = null;
+    const widget = null as unknown as Widget[];
 
     const result = migrateWidgetChartConfig(widget);
     expect(result).toEqual([]);
   });
 
   test('should No processing of widgets', () => {
-    const widget: any = [
-      {
-        config: {
-          content: {
-            dataChart: null,
-          },
-        },
-      },
-    ] as any;
+    const widget: WidgetChartConfigFixture[] = [createWidget(null)];
 
     const result = migrateWidgetChartConfig(widget);
     expect(result).toEqual(widget);
   });
 
   test('should return array if widget is not empty ', () => {
-    // widget?.config?.content?.dataChart?.config
-    const widget = [
-      {
-        config: {
-          content: {
-            dataChart: {
-              config: {
-                chartConfig: {
-                  datas: [
-                    {
-                      rows: [
-                        {
-                          category:
-                            ChartDataViewFieldCategory.DateLevelComputedField,
-                          colName: 'birthday（Year）',
-                          expression: 'AGG_DATE_YEAR([birthday])',
-                          field: 'birthday',
-                        },
-                      ],
-                    },
-                  ],
-                },
-                computedFields: [
-                  {
-                    category: ChartDataViewFieldCategory.DateLevelComputedField,
-                    expression: 'AGG_DATE_YEAR([birthday])',
-                    name: 'birthday（Year）',
-                    type: 'DATE',
-                  },
-                ],
-              },
-            },
-          },
-        },
-      },
-    ] as any;
+    const widget: WidgetChartConfigFixture[] = [
+      createWidget(createWidgetChartConfigValue('birthday（Year）')),
+    ];
 
     const result = migrateWidgetChartConfig(widget);
     expect(result[0].config.content.dataChart.config.chartConfig.datas).toEqual(
       [
         {
+          key: 'group',
           rows: [
             {
               category: ChartDataViewFieldCategory.DateLevelComputedField,
               colName: 'birthday' + DATE_LEVEL_DELIMITER + 'AGG_DATE_YEAR',
               expression: 'AGG_DATE_YEAR([birthday])',
               field: 'birthday',
+              type: DataViewFieldType.DATE,
             },
           ],
         },
@@ -114,42 +159,11 @@ describe('migrate Widget ChartConfig', () => {
   });
 
   test('should parse string widget chart config before migration', () => {
-    const widget = [
-      {
-        config: {
-          content: {
-            dataChart: {
-              config: JSON.stringify({
-                chartConfig: {
-                  datas: [
-                    {
-                      rows: [
-                        {
-                          category:
-                            ChartDataViewFieldCategory.DateLevelComputedField,
-                          colName: 'birthday（Year）',
-                          expression: 'AGG_DATE_YEAR([birthday])',
-                          field: 'birthday',
-                        },
-                      ],
-                    },
-                  ],
-                },
-                computedFields: [
-                  {
-                    category:
-                      ChartDataViewFieldCategory.DateLevelComputedField,
-                    expression: 'AGG_DATE_YEAR([birthday])',
-                    name: 'birthday（Year）',
-                    type: 'DATE',
-                  },
-                ],
-              }),
-            },
-          },
-        },
-      },
-    ] as any;
+    const widget: WidgetChartConfigFixture[] = [
+      createWidget(
+        JSON.stringify(createWidgetChartConfigValue('birthday（Year）')),
+      ),
+    ];
 
     const result = migrateWidgetChartConfig(widget);
     expect(typeof result[0].config.content.dataChart.config).toBe('object');

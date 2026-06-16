@@ -15,7 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { ChartDataViewFieldCategory } from 'app/constants';
+import {
+  ChartDataViewFieldCategory,
+  DataViewFieldType,
+} from 'app/constants';
+import { ChartDetailConfigDTO } from 'app/types/ChartConfigDTO';
 import { DATE_LEVEL_DELIMITER } from 'globalConstants';
 import migrateChartConfig, {
   RC0,
@@ -23,12 +27,28 @@ import migrateChartConfig, {
 } from '../ChartConfig/migrateChartConfig';
 import { APP_VERSION_RC_2 } from '../constants';
 
+type MigrationChartConfig = Partial<ChartDetailConfigDTO> & {
+  computedFields?: Array<{
+    id?: string;
+    name: string;
+    expression?: string;
+    category?: ChartDataViewFieldCategory.DateLevelComputedField;
+    type?: DataViewFieldType.DATE;
+  }>;
+};
+
+const createChartConfig = (
+  overrides: MigrationChartConfig = {},
+): MigrationChartConfig => ({
+  ...overrides,
+});
+
 describe('test RC0 Function ', () => {
   test('should add name fields for chartConfig computedFields', () => {
-    const chartConfig = {
-      computedFields: [{ id: '1' }],
-    } as any;
-    const result = RC0(chartConfig as any);
+    const chartConfig = createChartConfig({
+      computedFields: [{ id: '1', name: '' }],
+    });
+    const result = RC0(chartConfig);
 
     expect(result).toMatchObject({
       computedFields: [{ id: '1', name: '1' }],
@@ -36,10 +56,10 @@ describe('test RC0 Function ', () => {
   });
 
   test('should not add name fields for chartConfig computedFields', () => {
-    const chartConfig = {
+    const chartConfig = createChartConfig({
       computedFields: [{ name: '1' }],
-    } as any;
-    const result = RC0(chartConfig as any);
+    });
+    const result = RC0(chartConfig);
 
     expect(result).toMatchObject({
       computedFields: [{ name: '1' }],
@@ -47,22 +67,22 @@ describe('test RC0 Function ', () => {
   });
 
   test('should not computedFields for chartConfig', () => {
-    const chartConfig = {} as any;
-    const result = RC0(chartConfig as any);
+    const chartConfig = createChartConfig();
+    const result = RC0(chartConfig);
 
     expect(result).toMatchObject({});
   });
   test('test chartConfig is null', () => {
     const chartConfig = {
       computedFields: '1111',
-    } as any;
-    const result = RC0(chartConfig as any);
+    } as unknown as MigrationChartConfig;
+    const result = RC0(chartConfig);
 
     expect(result).toEqual(chartConfig);
   });
   test('test RCO Try Catch function', () => {
-    const chartConfig = null as any;
-    const result = RC0(chartConfig as any);
+    const chartConfig = null;
+    const result = RC0(chartConfig);
 
     expect(result).toEqual(null);
   });
@@ -70,13 +90,13 @@ describe('test RC0 Function ', () => {
 
 describe('test migrateChartConfig  ', () => {
   test('test config is null', () => {
-    const chartConfig: any = null;
+    const chartConfig = null as unknown as string;
     const result = migrateChartConfig(chartConfig);
     expect(result).toEqual(null);
   });
 
   test('should keep original string when config is invalid json', () => {
-    const chartConfig = '{invalid-json}' as any;
+    const chartConfig = '{invalid-json}';
     const result = migrateChartConfig(chartConfig);
     expect(result).toEqual(chartConfig);
   });
@@ -84,7 +104,7 @@ describe('test migrateChartConfig  ', () => {
   test('should add name fields for chartConfig computedFields', () => {
     const chartConfig = JSON.stringify({
       computedFields: [{ id: '1' }],
-    }) as any;
+    });
     const result = migrateChartConfig(chartConfig);
 
     expect(result).toEqual(
@@ -98,8 +118,8 @@ describe('test migrateChartConfig  ', () => {
   test('should not add name fields for chartConfig computedFields', () => {
     const chartConfig = JSON.stringify({
       computedFields: [{ name: '1' }],
-    }) as any;
-    const result = migrateChartConfig(chartConfig as any);
+    });
+    const result = migrateChartConfig(chartConfig);
 
     expect(result).toEqual(
       JSON.stringify({
@@ -110,8 +130,8 @@ describe('test migrateChartConfig  ', () => {
   });
 
   test('should not computedFields for chartConfig', () => {
-    const chartConfig = JSON.stringify({}) as any;
-    const result = migrateChartConfig(chartConfig as any);
+    const chartConfig = JSON.stringify({});
+    const result = migrateChartConfig(chartConfig);
 
     expect(result).toEqual(JSON.stringify({ version: APP_VERSION_RC_2 }));
   });
@@ -129,12 +149,14 @@ describe('test RC2 Function ', () => {
       chartConfig: {
         datas: [
           {
+            key: 'group',
             rows: [
               {
                 category: ChartDataViewFieldCategory.DateLevelComputedField,
                 colName: 'birthday（Year）',
                 expression: 'AGG_DATE_YEAR([birthday])',
                 field: 'birthday',
+                type: DataViewFieldType.DATE,
               },
             ],
           },
@@ -145,11 +167,11 @@ describe('test RC2 Function ', () => {
           category: ChartDataViewFieldCategory.DateLevelComputedField,
           expression: 'AGG_DATE_YEAR([birthday])',
           name: 'birthday（Year）',
-          type: 'DATE',
+          type: DataViewFieldType.DATE,
         },
       ],
-    } as any;
-    const result = RC2(chartConfig as any);
+    } as MigrationChartConfig;
+    const result = RC2(chartConfig);
 
     expect(result.chartConfig.datas[0].rows[0].colName).toEqual(
       'birthday' + DATE_LEVEL_DELIMITER + 'AGG_DATE_YEAR',
@@ -162,8 +184,8 @@ describe('test RC2 Function ', () => {
   test('test try catch function', () => {
     const chartConfig = {
       chartConfig: {},
-    } as any;
-    const result = RC2(chartConfig as any);
+    } as MigrationChartConfig;
+    const result = RC2(chartConfig);
     expect(result).toEqual(chartConfig);
   });
 });

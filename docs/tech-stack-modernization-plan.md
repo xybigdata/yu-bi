@@ -352,11 +352,14 @@
 - `ChartDataSet.ts` 与 `ChartDataRequestBuilder.ts` 的列索引兜底、数组构造和过滤值归一化改为显式兼容类型，并同步收口对应测试中的局部 `any`
 - `PluginChartLoader.ts` 与 `ChartManager`、`Chart` 的模型层测试继续收口插件加载返回值、私有加载入口访问与生命周期入参中的局部 `any`
 - `ChartDataRequestBuilder.test.ts` 继续按测试 helper 收口 dataView、字段、section、过滤器与排序场景中的局部 `any`，补齐测试数据与真实类型约束的一致性
+- `migrateWidgetChartConfig.test.ts`、`alpha3.test.ts` 与 `migrateWidgetConfig.test.ts` 继续按最小测试结构收口 widget 配置、图表迁移配置与 tab 自定义配置中的局部 `any`，保持迁移逻辑与输出语义不变
+- `MigrationEventDispatcher.test.ts` 继续按显式迁移模型收口事件输入、回退值和任务回调中的局部 `any` / `undefined as any`，保持事件分发与异常回退语义不变
+- `migrateChartConfig.test.ts`、`migrateBoardConfig.test.ts`、`index.test.ts` 与 `migrateStoryPageConfig.test.ts` 继续按正式 DTO / 配置类型收口迁移测试中的局部 `any`，保持版本归一化、默认值补齐与异常回退语义不变
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts src/app/models/__tests__/ChartDataRequestBuilder.test.ts src/app/utils/__tests__/date.test.ts src/app/utils/__tests__/time.test.ts src/app/utils/__tests__/chartDtoHelper.test.ts`
+- `npm run test:ci -- src/app/migration/__tests__/migrateChartConfig.test.ts src/app/migration/__tests__/migrateBoardConfig.test.ts src/app/migration/__tests__/index.test.ts src/app/migration/__tests__/migrateStoryPageConfig.test.ts src/app/migration/__tests__/MigrationEventDispatcher.test.ts src/app/migration/__tests__/migrateWidgetChartConfig.test.ts src/app/migration/__tests__/alpha3.test.ts src/app/migration/__tests__/migrateWidgetConfig.test.ts`
 
 ### 6.2 最近已完成
 
@@ -370,12 +373,13 @@
 - 控制器配置默认值数组边界收口
 - 富文本纯文本 JSON 误判保护补强
 - 时间体系剩余调用点跟进收口
+- 迁移测试层局部弱类型继续收口
 
 ## 7. 下一阶段执行顺序
 
 按这个顺序推进，避免专题扩散：
 
-1. 完成当前时间过滤器边界专题并验证通过
+1. 继续完成迁移测试层剩余局部弱类型收口并验证通过
 2. 时间体系剩余调用点继续收口
 3. 前端依赖收口与历史入口审计继续逐个推进
 4. 安装健康度与锁文件一致性持续检查

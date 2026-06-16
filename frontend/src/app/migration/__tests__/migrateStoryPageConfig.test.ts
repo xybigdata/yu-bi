@@ -15,12 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { StoryPageConfig } from 'app/pages/StoryBoardPage/slice/types';
 import {
   beta2,
   migrateStoryPageConfig,
   parseStoryPageConfig,
 } from '../StoryConfig/migrateStoryPageConfig';
 import { APP_CURRENT_VERSION, APP_VERSION_BETA_2 } from '../constants';
+
+const createStoryPageConfig = (
+  overrides: Partial<StoryPageConfig> = {},
+): StoryPageConfig => ({
+  version: '',
+  index: 0,
+  transitionEffect: {
+    in: 'fade-in',
+    out: 'fade-out',
+    speed: 'slow',
+  },
+  ...overrides,
+});
 
 describe('test migrateBoard ', () => {
   test('handle parseStoryPageConfig is empty', () => {
@@ -37,15 +51,11 @@ describe('test migrateBoard ', () => {
 
   test('beta2 should upgrade story page version when needed', () => {
     expect(
-      beta2({
-        version: '',
-        index: 1,
-        transitionEffect: {
-          in: 'fade-in',
-          out: 'fade-out',
-          speed: 'slow',
-        },
-      } as any),
+      beta2(
+        createStoryPageConfig({
+          index: 1,
+        }),
+      ),
     ).toMatchObject({
       version: APP_VERSION_BETA_2,
     });
