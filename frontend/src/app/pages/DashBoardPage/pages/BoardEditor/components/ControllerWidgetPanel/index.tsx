@@ -67,10 +67,6 @@ import {
   preformatControlConfig,
 } from './utils';
 
-type ModalDestroyOnHiddenCompatProps = {
-  destroyOnHidden?: boolean;
-};
-
 const ControllerWidgetPanel: React.FC<WidgetControllerPanelParams> = memo(
   ({ type, widgetId, controllerType }) => {
     const dispatch = useAppDispatch();
@@ -237,7 +233,7 @@ const ControllerWidgetPanel: React.FC<WidgetControllerPanelParams> = memo(
           dispatch(addWidgetsToEditBoard([newWidget]));
           dispatch(getEditControllerOptions(newWidget.id));
 
-          refreshLinkedWidgets(newWidget as any);
+          refreshLinkedWidgets(newWidget);
         } else if (type === 'edit') {
           let newRelations = makeControlRelations({
             sourceId: curFilterWidget.id,
@@ -284,9 +280,6 @@ const ControllerWidgetPanel: React.FC<WidgetControllerPanelParams> = memo(
       labelCol: { span: 4 },
       wrapperCol: { span: 20 },
     };
-    const modalDestroyOnHiddenProps = {
-      destroyOnHidden: true,
-    } as ModalDestroyOnHiddenCompatProps;
     const afterClose = useCallback(() => {
       form.resetFields();
       setRelatedWidgets([]);
@@ -316,7 +309,7 @@ const ControllerWidgetPanel: React.FC<WidgetControllerPanelParams> = memo(
         open={open}
         onOk={onSubmit}
         centered
-        {...(modalDestroyOnHiddenProps as any)}
+        destroyOnHidden
         width={1160}
         afterClose={afterClose}
         onCancel={() => setOpen(false)}
