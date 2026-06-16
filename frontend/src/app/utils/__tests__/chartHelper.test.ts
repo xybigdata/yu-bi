@@ -17,6 +17,7 @@
  */
 
 import {
+  AggregateFieldActionType,
   ChartDataSectionType,
   ChartDataViewFieldCategory,
   DataViewFieldType,
@@ -59,6 +60,44 @@ import {
   transformToDataSet,
   valueFormatter,
 } from '../chartHelper';
+
+type MinimalStyleConfig = {
+  key: string;
+  value?: unknown;
+  other?: unknown;
+  rows?: MinimalStyleConfig[];
+};
+
+const createStyleConfigs = (
+  configs: MinimalStyleConfig[],
+): ChartStyleConfig[] => configs as unknown as ChartStyleConfig[];
+
+const createDataField = (
+  field: Partial<ChartDataSectionField> &
+    Pick<ChartDataSectionField, 'colName'>,
+): ChartDataSectionField => ({
+  type: DataViewFieldType.STRING,
+  category: ChartDataViewFieldCategory.Field,
+  ...field,
+});
+
+const createDataConfigs = (
+  configs: Array<
+    Omit<Partial<ChartDataConfig>, 'rows'> & {
+      rows?: Array<
+        Partial<ChartDataSectionField> & Pick<ChartDataSectionField, 'colName'>
+      >;
+    }
+  >,
+): ChartDataConfig[] =>
+  configs.map((config, index) => ({
+    key: config.key || `test-section-${index}`,
+    ...config,
+    rows: config.rows?.map(row => createDataField(row)),
+  }));
+
+const createLegacyDataConfigs = (configs: object[]): ChartDataConfig[] =>
+  configs as unknown as ChartDataConfig[];
 
 describe('Chart Helper ', () => {
   describe.each([
@@ -178,7 +217,9 @@ describe('Chart Helper ', () => {
     ],
   ])('getValue Test - ', (configs, paths, targetKey, expected) => {
     test(`get key of ${targetKey} from configs with path ${paths?.toString()} to be ${expected}`, () => {
-      expect(getValue(configs as any, paths, targetKey)).toBe(expected);
+      expect(getValue(createStyleConfigs(configs), paths, targetKey)).toBe(
+        expected,
+      );
     });
   });
 
@@ -283,7 +324,9 @@ describe('Chart Helper ', () => {
     ],
   ])('getStyles Test - ', (configs, paths, targetKeys, expected) => {
     test(`get keys of ${targetKeys} from configs with path ${paths?.toString()} to be ${expected}`, () => {
-      expect(getStyles(configs as any, paths, targetKeys)).toEqual(expected);
+      expect(getStyles(createStyleConfigs(configs), paths, targetKeys)).toEqual(
+        expected,
+      );
     });
   });
 
@@ -293,28 +336,28 @@ describe('Chart Helper ', () => {
     });
 
     test('should get column render name by data field when there is no aggregation', () => {
-      const field = {
+      const field = createDataField({
         colName: 'a',
-      } as any;
+      });
       expect(getColumnRenderName(field)).toEqual('a');
     });
 
     test('should get column render name by data field with aggregation', () => {
-      const field = {
+      const field = createDataField({
         colName: 'a',
-        aggregate: 'SUM',
-      } as any;
+        aggregate: AggregateFieldActionType.Sum,
+      });
       expect(getColumnRenderName(field)).toEqual('SUM(a)');
     });
 
     test('should get alias name by data field when there is alias and colName', () => {
-      const field = {
+      const field = createDataField({
         alias: {
           name: 'some alias name',
         },
         colName: 'a',
-        aggregate: 'SUM',
-      } as any;
+        aggregate: AggregateFieldActionType.Sum,
+      });
       expect(getColumnRenderName(field)).toEqual('some alias name');
     });
   });
@@ -442,30 +485,36 @@ describe('Chart Helper ', () => {
         { name: 'current(profession)' },
         { name: 'age' },
       ];
-      const chartDataSet = transformToDataSet(columns, metas, [
-        {
-          rows: [
-            {
-              colName: 'name',
-            },
-            {
-              colName: 'profession',
-              aggregate: 'current',
-            },
+      const chartDataSet = transformToDataSet(
+        columns,
+        metas,
+        createLegacyDataConfigs([
+          {
+            rows: [
+              {
+                colName: 'name',
+              },
+              {
+                colName: 'profession',
+                aggregate: 'current',
+              },
 
-            {
-              colName: 'age',
-            },
-          ],
-        },
-      ] as any);
+              {
+                colName: 'age',
+              },
+            ],
+          },
+        ]),
+      );
 
       expect(
         JSON.stringify(
           getColorizeGroupSeriesColumns(chartDataSet, {
             colName: 'profession',
-            aggregate: 'current',
-          } as any),
+            aggregate: 'current' as AggregateFieldActionType,
+            type: DataViewFieldType.STRING,
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ),
       ).toBe(
         JSON.stringify([
@@ -505,15 +554,15 @@ describe('Chart Helper ', () => {
         NAME: 'r2-c1-v',
         AGE: 'r2-c2-v',
       });
-      expect(chartDataSet[0].getCell({ colName: 'age' } as any)).toEqual(
-        'r1-c2-v',
-      );
-      expect(chartDataSet[0].getFieldKey({ colName: 'age' } as any)).toEqual(
-        'AGE',
-      );
-      expect(chartDataSet[0].getFieldIndex({ colName: 'age' } as any)).toEqual(
-        1,
-      );
+      expect(
+        chartDataSet[0].getCell(createDataField({ colName: 'age' })),
+      ).toEqual('r1-c2-v');
+      expect(
+        chartDataSet[0].getFieldKey(createDataField({ colName: 'age' })),
+      ).toEqual('AGE');
+      expect(
+        chartDataSet[0].getFieldIndex(createDataField({ colName: 'age' })),
+      ).toEqual(1);
       expect(chartDataSet[0].getCellByKey('age')).toEqual('r1-c2-v');
     });
 

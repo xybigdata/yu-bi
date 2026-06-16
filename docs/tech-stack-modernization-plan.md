@@ -260,6 +260,7 @@
 
 | 专题 | 当前判断 | 策略 |
 | --- | --- | --- |
+| 前端测试层弱类型收口 | 迁移测试和工具测试已完成多批收口，剩余集中在少数大测试文件 | 继续按文件分段推进，优先小范围、可定向验证的用例 |
 | 前端交互/弹窗类型收口 | 仍有局部 `Function`、宽泛回调与最小视图结构未声明 | 继续按调用链小批量收口 |
 | 时间体系剩余调用点 | 已有统一工具入口，仍有零散调用 | 继续小批量收口 |
 | 前端依赖收口 | 仍有少量历史依赖可继续审计 | 按证据逐个清理 |
@@ -292,20 +293,22 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`交互事件 / 详情展示 / 状态弹窗类型收口（长期低风险分支持续推进）`
+当前累计专题：`前端测试层弱类型收口（长期低风险分支持续推进）`
 
 本批目标：
 
-- 收口图表交互事件链路中的局部宽泛参数
-- 收口详情展示与状态弹窗链路中的 `Function` / 宽泛回调
-- 保持预览、分享、看板与工作台中的交互、弹窗、详情展示语义不变
+- 继续清理测试层中散落的 `as any` / 宽泛 `any`
+- 优先处理只影响测试数据表达、helper 类型和公开类型补正的低风险点
+- 保持迁移、工具函数、表单组件和图表 helper 的断言语义不变
+- 大文件只分段推进，不做整文件重写
 
 当前累计清单：
 
-- 已完成：交互事件入参与详情展示最小视图结构第一轮显式化
-- 已完成：状态弹窗公共 hook 与主要调用方第一轮类型收口
-- 正在推进：工作台/属性/配置面板中邻近弹窗调用链继续收口
-- 下一批候选：交互链路剩余 `any` 单点、时间体系零散调用点、历史入口残留审计
+- 已完成：迁移测试层局部弱类型收口
+- 已完成：工具测试层第一批局部弱类型收口
+- 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 前半段的局部弱类型收口
+- 正在推进：`chartHelper.test.ts` 剩余分段收口
+- 下一批候选：`chartHelper.test.ts` 中 style/config 大对象用例、`internalChartHelper` 邻近实现层局部类型债、生产工具函数中确认低风险的单点
 
 当前已落地范围：
 
@@ -358,11 +361,16 @@
 - `migrateWidgets.test.ts` 继续按 `WidgetBeta3` / `Widget` / `ServerWidget` helper 收口 widget 迁移主流程测试中的局部 `any`，仅保留旧 `filter` 兼容输入场景所需的单点显式兼容强转
 - `time.test.ts`、`chartDtoHelper.test.ts` 与 `ChartEventListenerHelper.test.ts` 继续按请求过滤器、图表 DTO 与鼠标事件最小类型收口工具测试中的局部 `any`，保持空输入保护、DTO 合并与事件分发语义不变
 - `number.test.ts` 与 `BasicDoubleYChart/utils.test.ts` 继续按数值输入、图表字段与数据集 helper 收口测试中的局部 `any`，保持精度计算、安全数值转换和双 Y 轴区间计算语义不变
+- `overflowFuncs.test.ts` 通过 ECharts options、漏斗图配置 helper 和集中 legacy helper 收口散落 `as any`，保持轴标签溢出判断与漏斗图 top 位置兼容语义不变
+- `FormGenerator/__tests__/utils.test.tsx` 与 `BasicFont.test.tsx` 改为按真实 translator 与字体 options 类型表达测试数据，去掉测试内宽泛 translator / fontFamilies 强转
+- `ChartConfig.ts` 补齐 `FontFamilyOption`，让 `BasicFont` 既有 `{ name, value }` 字体项形态进入正式类型表达，保持运行时行为不变
+- `internalChartHelper.test.ts` 改用 `ChartDataViewFieldCategory.Field`、表驱动类型和集中 legacy config helper，收口迁移/合并测试中的字段类别与历史配置强转
+- `chartHelper.test.ts` 前半段补充 style config、data field、legacy data config 测试 helper，先收口 `getValue`、`getStyles`、`getColumnRenderName`、dataset 基础访问等低风险用例
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/utils/__tests__/time.test.ts src/app/utils/__tests__/chartDtoHelper.test.ts src/app/utils/__tests__/ChartEventListenerHelper.test.ts src/app/utils/__tests__/number.test.ts src/app/components/ChartGraph/BasicDoubleYChart/__tests__/utils.test.ts src/app/migration/__tests__/migrateWidgets.test.ts src/app/migration/__tests__/migrateChartConfig.test.ts src/app/migration/__tests__/migrateBoardConfig.test.ts src/app/migration/__tests__/index.test.ts src/app/migration/__tests__/migrateStoryPageConfig.test.ts src/app/migration/__tests__/MigrationEventDispatcher.test.ts src/app/migration/__tests__/migrateWidgetChartConfig.test.ts src/app/migration/__tests__/alpha3.test.ts src/app/migration/__tests__/migrateWidgetConfig.test.ts`
+- `npm run test:ci -- src/app/utils/__tests__/overflowFuncs.test.ts src/app/utils/__tests__/internalChartHelper.test.ts src/app/utils/__tests__/chartHelper.test.ts src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx`
 
 ### 6.2 最近已完成
 
@@ -377,15 +385,17 @@
 - 富文本纯文本 JSON 误判保护补强
 - 时间体系剩余调用点跟进收口
 - 迁移测试层局部弱类型继续收口
+- 工具与表单测试层局部弱类型继续收口
 
 ## 7. 下一阶段执行顺序
 
 按这个顺序推进，避免专题扩散：
 
-1. 继续完成迁移测试层剩余局部弱类型收口并验证通过
-2. 时间体系剩余调用点继续收口
-3. 前端依赖收口与历史入口审计继续逐个推进
-4. 安装健康度与锁文件一致性持续检查
+1. 继续按分段方式完成 `chartHelper.test.ts` 剩余低风险测试数据类型收口
+2. 复扫工具测试层剩余真实 `as any`，只处理可定向验证的小块
+3. 时间体系剩余调用点继续收口
+4. 前端依赖收口与历史入口审计继续逐个推进
+5. 安装健康度与锁文件一致性持续检查
 
 ## 8. 每轮固定门禁
 

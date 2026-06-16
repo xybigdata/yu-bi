@@ -17,7 +17,11 @@
  */
 
 import { FormGroupLayoutMode } from '../constants';
+import type { ItemLayoutProps } from '../types';
 import * as utils from '../utils';
+
+type TestItemLayoutProps = ItemLayoutProps<number[]>;
+type TestTranslator = NonNullable<TestItemLayoutProps['translate']>;
 
 describe('itemLayoutComparer Tests', () => {
   test('should compare as different obj when translate changed', () => {
@@ -42,7 +46,7 @@ describe('itemLayoutComparer Tests', () => {
   });
 
   test('should compare as different obj when data changed', () => {
-    const mockTranslator: any = () => {};
+    const mockTranslator: TestTranslator = () => '';
     const result = utils.itemLayoutComparer(
       { ancestors: [], data: [1], translate: mockTranslator },
       { ancestors: [], data: [2], translate: mockTranslator },
@@ -51,7 +55,7 @@ describe('itemLayoutComparer Tests', () => {
   });
 
   test('should compare as different obj when dataConfigs changed', () => {
-    const mockTranslator: any = () => {};
+    const mockTranslator: TestTranslator = () => '';
     const mockDatas = [1, 2];
     const result = utils.itemLayoutComparer(
       {
@@ -92,7 +96,7 @@ describe('itemLayoutComparer Tests', () => {
   });
 
   test('should compare as same obj when ancestors changed', () => {
-    const mockTranslator: any = () => {};
+    const mockTranslator: TestTranslator = () => '';
     const mockDatas = [1, 2];
     const result = utils.itemLayoutComparer(
       { ancestors: [1], data: mockDatas, translate: mockTranslator },
