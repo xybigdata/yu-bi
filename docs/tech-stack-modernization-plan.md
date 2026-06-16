@@ -356,11 +356,13 @@
 - `MigrationEventDispatcher.test.ts` 继续按显式迁移模型收口事件输入、回退值和任务回调中的局部 `any` / `undefined as any`，保持事件分发与异常回退语义不变
 - `migrateChartConfig.test.ts`、`migrateBoardConfig.test.ts`、`index.test.ts` 与 `migrateStoryPageConfig.test.ts` 继续按正式 DTO / 配置类型收口迁移测试中的局部 `any`，保持版本归一化、默认值补齐与异常回退语义不变
 - `migrateWidgets.test.ts` 继续按 `WidgetBeta3` / `Widget` / `ServerWidget` helper 收口 widget 迁移主流程测试中的局部 `any`，仅保留旧 `filter` 兼容输入场景所需的单点显式兼容强转
+- `time.test.ts`、`chartDtoHelper.test.ts` 与 `ChartEventListenerHelper.test.ts` 继续按请求过滤器、图表 DTO 与鼠标事件最小类型收口工具测试中的局部 `any`，保持空输入保护、DTO 合并与事件分发语义不变
+- `number.test.ts` 与 `BasicDoubleYChart/utils.test.ts` 继续按数值输入、图表字段与数据集 helper 收口测试中的局部 `any`，保持精度计算、安全数值转换和双 Y 轴区间计算语义不变
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/migration/__tests__/migrateWidgets.test.ts src/app/migration/__tests__/migrateChartConfig.test.ts src/app/migration/__tests__/migrateBoardConfig.test.ts src/app/migration/__tests__/index.test.ts src/app/migration/__tests__/migrateStoryPageConfig.test.ts src/app/migration/__tests__/MigrationEventDispatcher.test.ts src/app/migration/__tests__/migrateWidgetChartConfig.test.ts src/app/migration/__tests__/alpha3.test.ts src/app/migration/__tests__/migrateWidgetConfig.test.ts`
+- `npm run test:ci -- src/app/utils/__tests__/time.test.ts src/app/utils/__tests__/chartDtoHelper.test.ts src/app/utils/__tests__/ChartEventListenerHelper.test.ts src/app/utils/__tests__/number.test.ts src/app/components/ChartGraph/BasicDoubleYChart/__tests__/utils.test.ts src/app/migration/__tests__/migrateWidgets.test.ts src/app/migration/__tests__/migrateChartConfig.test.ts src/app/migration/__tests__/migrateBoardConfig.test.ts src/app/migration/__tests__/index.test.ts src/app/migration/__tests__/migrateStoryPageConfig.test.ts src/app/migration/__tests__/MigrationEventDispatcher.test.ts src/app/migration/__tests__/migrateWidgetChartConfig.test.ts src/app/migration/__tests__/alpha3.test.ts src/app/migration/__tests__/migrateWidgetConfig.test.ts`
 
 ### 6.2 最近已完成
 

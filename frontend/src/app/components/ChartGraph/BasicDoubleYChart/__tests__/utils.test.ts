@@ -18,8 +18,41 @@
 
 import { DataViewFieldType } from 'app/constants';
 import { ChartDataSectionField } from 'app/types/ChartConfig';
+import { IChartDataSet } from 'app/types/ChartDataSet';
 import { getMinAndMaxNumber, transformToDataSet } from 'app/utils/chartHelper';
 import { getYAxisIntervalConfig } from '../utils';
+
+const createRows = (): ChartDataSectionField[] => [
+  {
+    colName: 'name',
+    category: 'field',
+    type: DataViewFieldType.STRING,
+  },
+  {
+    colName: 'age',
+    category: 'field',
+    type: DataViewFieldType.NUMERIC,
+  },
+  {
+    colName: 'number',
+    category: 'field',
+    type: DataViewFieldType.NUMERIC,
+  },
+];
+
+const createChartDataSet = (
+  columns: Array<Array<string | number | null | undefined>>,
+  rows: ChartDataSectionField[],
+): IChartDataSet<string | number | null | undefined> =>
+  transformToDataSet(
+    columns,
+    [{ name: 'name' }, { name: 'age' }, { name: 'number' }],
+    [{ key: 'metrics', rows }],
+  );
+
+const asStringDataSet = (
+  chartDataSet: IChartDataSet<string | number | null | undefined>,
+): IChartDataSet<string> => chartDataSet as IChartDataSet<string>;
 
 describe('DoubleYChart calc medthod', () => {
   describe('getYAxisIntervalConfig Test - ', () => {
@@ -30,36 +63,15 @@ describe('DoubleYChart calc medthod', () => {
         ['tom', '30', '3587'],
         ['john', '32', '324'],
       ];
-      const metas = [{ name: 'name' }, { name: 'age' }, { name: 'number' }];
-      const rows: ChartDataSectionField[] = [
-        {
-          colName: 'name',
-          category: 'field',
-          type: DataViewFieldType.STRING,
-        },
-        {
-          colName: 'age',
-          category: 'field',
-          type: DataViewFieldType.NUMERIC,
-        },
-        {
-          colName: 'number',
-          category: 'field',
-          type: DataViewFieldType.NUMERIC,
-        },
-      ];
-      const chartDataSet = transformToDataSet(columns, metas, [
-        { rows },
-      ] as any);
-      expect(getMinAndMaxNumber([rows[1]], chartDataSet as any)).toEqual([
+      const rows = createRows();
+      const chartDataSet = asStringDataSet(createChartDataSet(columns, rows));
+      expect(getMinAndMaxNumber([rows[1]], chartDataSet)).toEqual([
         0, 36,
       ]);
-      expect(getMinAndMaxNumber([rows[2]], chartDataSet as any)).toEqual([
+      expect(getMinAndMaxNumber([rows[2]], chartDataSet)).toEqual([
         0, 3587,
       ]);
-      expect(
-        getYAxisIntervalConfig([rows[1]], [rows[2]], chartDataSet as any),
-      ).toEqual({
+      expect(getYAxisIntervalConfig([rows[1]], [rows[2]], chartDataSet)).toEqual({
         leftInterval: 10,
         leftMax: 40,
         leftMin: 0,
@@ -76,36 +88,15 @@ describe('DoubleYChart calc medthod', () => {
         ['tom', 30, 3587],
         ['john', 32, 324],
       ];
-      const metas = [{ name: 'name' }, { name: 'age' }, { name: 'number' }];
-      const rows: ChartDataSectionField[] = [
-        {
-          colName: 'name',
-          category: 'field',
-          type: DataViewFieldType.STRING,
-        },
-        {
-          colName: 'age',
-          category: 'field',
-          type: DataViewFieldType.NUMERIC,
-        },
-        {
-          colName: 'number',
-          category: 'field',
-          type: DataViewFieldType.NUMERIC,
-        },
-      ];
-      const chartDataSet = transformToDataSet(columns, metas, [
-        { rows },
-      ] as any);
-      expect(getMinAndMaxNumber([rows[1]], chartDataSet as any)).toEqual([
+      const rows = createRows();
+      const chartDataSet = asStringDataSet(createChartDataSet(columns, rows));
+      expect(getMinAndMaxNumber([rows[1]], chartDataSet)).toEqual([
         0, 36,
       ]);
-      expect(getMinAndMaxNumber([rows[2]], chartDataSet as any)).toEqual([
+      expect(getMinAndMaxNumber([rows[2]], chartDataSet)).toEqual([
         0, 3587,
       ]);
-      expect(
-        getYAxisIntervalConfig([rows[1]], [rows[2]], chartDataSet as any),
-      ).toEqual({
+      expect(getYAxisIntervalConfig([rows[1]], [rows[2]], chartDataSet)).toEqual({
         leftInterval: 10,
         leftMax: 40,
         leftMin: 0,
@@ -122,36 +113,15 @@ describe('DoubleYChart calc medthod', () => {
         ['tom', -102, 105],
         ['john', -98, 95],
       ];
-      const metas = [{ name: 'name' }, { name: 'age' }, { name: 'number' }];
-      const rows: ChartDataSectionField[] = [
-        {
-          colName: 'name',
-          category: 'field',
-          type: DataViewFieldType.STRING,
-        },
-        {
-          colName: 'age',
-          category: 'field',
-          type: DataViewFieldType.NUMERIC,
-        },
-        {
-          colName: 'number',
-          category: 'field',
-          type: DataViewFieldType.NUMERIC,
-        },
-      ];
-      const chartDataSet = transformToDataSet(columns, metas, [
-        { rows },
-      ] as any);
-      expect(getMinAndMaxNumber([rows[1]], chartDataSet as any)).toEqual([
+      const rows = createRows();
+      const chartDataSet = asStringDataSet(createChartDataSet(columns, rows));
+      expect(getMinAndMaxNumber([rows[1]], chartDataSet)).toEqual([
         -102, 0,
       ]);
-      expect(getMinAndMaxNumber([rows[2]], chartDataSet as any)).toEqual([
+      expect(getMinAndMaxNumber([rows[2]], chartDataSet)).toEqual([
         0, 105,
       ]);
-      expect(
-        getYAxisIntervalConfig([rows[1]], [rows[2]], chartDataSet as any),
-      ).toEqual({
+      expect(getYAxisIntervalConfig([rows[1]], [rows[2]], chartDataSet)).toEqual({
         leftInterval: 20,
         leftMax: 120,
         leftMin: -120,
@@ -168,36 +138,15 @@ describe('DoubleYChart calc medthod', () => {
         ['tom', -102, null],
         ['john', -98, 95],
       ];
-      const metas = [{ name: 'name' }, { name: 'age' }, { name: 'number' }];
-      const rows: ChartDataSectionField[] = [
-        {
-          colName: 'name',
-          category: 'field',
-          type: DataViewFieldType.STRING,
-        },
-        {
-          colName: 'age',
-          category: 'field',
-          type: DataViewFieldType.NUMERIC,
-        },
-        {
-          colName: 'number',
-          category: 'field',
-          type: DataViewFieldType.NUMERIC,
-        },
-      ];
-      const chartDataSet = transformToDataSet(columns, metas, [
-        { rows },
-      ] as any);
-      expect(getMinAndMaxNumber([rows[1]], chartDataSet as any)).toEqual([
+      const rows = createRows();
+      const chartDataSet = asStringDataSet(createChartDataSet(columns, rows));
+      expect(getMinAndMaxNumber([rows[1]], chartDataSet)).toEqual([
         -102, 0,
       ]);
-      expect(getMinAndMaxNumber([rows[2]], chartDataSet as any)).toEqual([
+      expect(getMinAndMaxNumber([rows[2]], chartDataSet)).toEqual([
         0, 102,
       ]);
-      expect(
-        getYAxisIntervalConfig([rows[1]], [rows[2]], chartDataSet as any),
-      ).toEqual({
+      expect(getYAxisIntervalConfig([rows[1]], [rows[2]], chartDataSet)).toEqual({
         leftInterval: 20,
         leftMax: 120,
         leftMin: -120,
@@ -214,36 +163,15 @@ describe('DoubleYChart calc medthod', () => {
         ['tom', -102, NaN],
         ['john', -98, 95],
       ];
-      const metas = [{ name: 'name' }, { name: 'age' }, { name: 'number' }];
-      const rows: ChartDataSectionField[] = [
-        {
-          colName: 'name',
-          category: 'field',
-          type: DataViewFieldType.STRING,
-        },
-        {
-          colName: 'age',
-          category: 'field',
-          type: DataViewFieldType.NUMERIC,
-        },
-        {
-          colName: 'number',
-          category: 'field',
-          type: DataViewFieldType.NUMERIC,
-        },
-      ];
-      const chartDataSet = transformToDataSet(columns, metas, [
-        { rows },
-      ] as any);
-      expect(getMinAndMaxNumber([rows[1]], chartDataSet as any)).toEqual([
+      const rows = createRows();
+      const chartDataSet = asStringDataSet(createChartDataSet(columns, rows));
+      expect(getMinAndMaxNumber([rows[1]], chartDataSet)).toEqual([
         -102, 0,
       ]);
-      expect(getMinAndMaxNumber([rows[2]], chartDataSet as any)).toEqual([
+      expect(getMinAndMaxNumber([rows[2]], chartDataSet)).toEqual([
         0, 102,
       ]);
-      expect(
-        getYAxisIntervalConfig([rows[1]], [rows[2]], chartDataSet as any),
-      ).toEqual({
+      expect(getYAxisIntervalConfig([rows[1]], [rows[2]], chartDataSet)).toEqual({
         leftInterval: 20,
         leftMax: 120,
         leftMin: -120,
@@ -260,36 +188,15 @@ describe('DoubleYChart calc medthod', () => {
         ['tom', -102, Infinity],
         ['john', -98, 95],
       ];
-      const metas = [{ name: 'name' }, { name: 'age' }, { name: 'number' }];
-      const rows: ChartDataSectionField[] = [
-        {
-          colName: 'name',
-          category: 'field',
-          type: DataViewFieldType.STRING,
-        },
-        {
-          colName: 'age',
-          category: 'field',
-          type: DataViewFieldType.NUMERIC,
-        },
-        {
-          colName: 'number',
-          category: 'field',
-          type: DataViewFieldType.NUMERIC,
-        },
-      ];
-      const chartDataSet = transformToDataSet(columns, metas, [
-        { rows },
-      ] as any);
-      expect(getMinAndMaxNumber([rows[1]], chartDataSet as any)).toEqual([
+      const rows = createRows();
+      const chartDataSet = asStringDataSet(createChartDataSet(columns, rows));
+      expect(getMinAndMaxNumber([rows[1]], chartDataSet)).toEqual([
         -102, 0,
       ]);
-      expect(getMinAndMaxNumber([rows[2]], chartDataSet as any)).toEqual([
+      expect(getMinAndMaxNumber([rows[2]], chartDataSet)).toEqual([
         0, 102,
       ]);
-      expect(
-        getYAxisIntervalConfig([rows[1]], [rows[2]], chartDataSet as any),
-      ).toEqual({
+      expect(getYAxisIntervalConfig([rows[1]], [rows[2]], chartDataSet)).toEqual({
         leftInterval: 20,
         leftMax: 120,
         leftMin: -120,
@@ -305,36 +212,15 @@ describe('DoubleYChart calc medthod', () => {
         ['tom', undefined, undefined],
         ['john', undefined, undefined],
       ];
-      const metas = [{ name: 'name' }, { name: 'age' }, { name: 'number' }];
-      const rows: ChartDataSectionField[] = [
-        {
-          colName: 'name',
-          category: 'field',
-          type: DataViewFieldType.STRING,
-        },
-        {
-          colName: 'age',
-          category: 'field',
-          type: DataViewFieldType.NUMERIC,
-        },
-        {
-          colName: 'number',
-          category: 'field',
-          type: DataViewFieldType.NUMERIC,
-        },
-      ];
-      const chartDataSet = transformToDataSet(columns, metas, [
-        { rows },
-      ] as any);
-      expect(getMinAndMaxNumber([rows[1]], chartDataSet as any)).toEqual([
+      const rows = createRows();
+      const chartDataSet = asStringDataSet(createChartDataSet(columns, rows));
+      expect(getMinAndMaxNumber([rows[1]], chartDataSet)).toEqual([
         0, 0,
       ]);
-      expect(getMinAndMaxNumber([rows[2]], chartDataSet as any)).toEqual([
+      expect(getMinAndMaxNumber([rows[2]], chartDataSet)).toEqual([
         0, 0,
       ]);
-      expect(
-        getYAxisIntervalConfig([rows[1]], [rows[2]], chartDataSet as any),
-      ).toEqual({
+      expect(getYAxisIntervalConfig([rows[1]], [rows[2]], chartDataSet)).toEqual({
         leftInterval: 0.2,
         leftMax: 0,
         leftMin: 0,

@@ -17,6 +17,7 @@
  */
 
 import * as dateUtils from '../date';
+import { ChartDataRequestFilter } from 'app/types/ChartDataRequest';
 import { getTime, getTimeRange, splitRangerDateFilters } from '../time';
 
 describe('test splitRangerDateFilters', () => {
@@ -99,13 +100,21 @@ describe('test splitRangerDateFilters', () => {
   });
 
   test('should splitRangerDateFilters not arr to []', () => {
-    const res1 = splitRangerDateFilters(null as any);
+    const res1 = splitRangerDateFilters(
+      null as unknown as ChartDataRequestFilter[],
+    );
     expect(res1).toEqual([]);
-    const res2 = splitRangerDateFilters(undefined as any);
+    const res2 = splitRangerDateFilters(
+      undefined as unknown as ChartDataRequestFilter[],
+    );
     expect(res2).toEqual([]);
-    const res4 = splitRangerDateFilters({} as any);
+    const res4 = splitRangerDateFilters(
+      {} as unknown as ChartDataRequestFilter[],
+    );
     expect(res4).toEqual([]);
-    const res5 = splitRangerDateFilters('string' as any);
+    const res5 = splitRangerDateFilters(
+      'string' as unknown as ChartDataRequestFilter[],
+    );
     expect(res5).toEqual([]);
   });
 });

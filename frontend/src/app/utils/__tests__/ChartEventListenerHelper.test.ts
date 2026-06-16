@@ -19,6 +19,7 @@
 import { ChartInteractionEvent } from 'app/constants';
 import { ChartDrillOption } from 'app/models/ChartDrillOption';
 import { ChartConfigReducerActionType } from 'app/pages/ChartWorkbenchPage/slice/constant';
+import { ChartMouseEventParams } from 'app/types/Chart';
 import { vi } from 'vitest';
 import {
   chartSelectionEventListener,
@@ -27,6 +28,14 @@ import {
   richTextContextEventListener,
   tablePagingAndSortEventListener,
 } from '../ChartEventListenerHelper';
+
+const createDrillEventParam = (): ChartMouseEventParams => ({
+  data: {
+    name: 'row',
+    value: '',
+    rowData: {},
+  },
+});
 
 describe('ChartEventListenerHelper Tests', () => {
   test('should invoke tablePagingAndSortEventListener callback', () => {
@@ -75,11 +84,7 @@ describe('ChartEventListenerHelper Tests', () => {
     const mockCallback = vi.fn();
     const drillOption = new ChartDrillOption([]);
     drillOption.toggleSelectedDrill(true);
-    const param = {
-      data: {
-        rowData: {},
-      },
-    } as any;
+    const param = createDrillEventParam();
     drillDownEventListener(drillOption, param, mockCallback);
     expect(mockCallback.mock.calls.length).toBe(1);
   });
@@ -88,11 +93,7 @@ describe('ChartEventListenerHelper Tests', () => {
     const mockCallback = vi.fn();
     const drillOption = new ChartDrillOption([]);
     drillOption.toggleSelectedDrill(false);
-    const param = {
-      data: {
-        rowData: {},
-      },
-    } as any;
+    const param = createDrillEventParam();
     drillDownEventListener(drillOption, param, mockCallback);
     expect(mockCallback.mock.calls.length).toBe(0);
   });
