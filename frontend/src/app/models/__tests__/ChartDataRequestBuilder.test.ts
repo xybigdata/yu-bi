@@ -22,16 +22,70 @@ import {
   ChartDataViewFieldCategory,
   DataViewFieldType,
   FilterConditionType,
+  SortActionType,
 } from 'app/constants';
+import {
+  ChartDataConfig,
+  ChartDataSectionField,
+} from 'app/types/ChartConfig';
 import { ChartDataRequest } from 'app/types/ChartDataRequest';
+import ChartDataView from 'app/types/ChartDataView';
+import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { datartDayjs } from 'app/utils/date';
 import { getChartDrillOption } from 'app/utils/internalChartHelper';
 import { FilterSqlOperator, RECOMMEND_TIME } from 'globalConstants';
 import { ChartDataRequestBuilder } from '../ChartDataRequestBuilder';
 
+type BuilderDataView = Pick<
+  ChartDataView,
+  'id' | 'type' | 'meta' | 'computedFields'
+> & {
+  config: string | object;
+};
+
+const createDataView = (
+  overrides: Partial<BuilderDataView> = {},
+): BuilderDataView => ({
+  id: 'view-id',
+  config: '{}',
+  ...overrides,
+});
+
+const createMeta = (name: string, path?: string[]): ChartDataViewMeta => ({
+  name,
+  path: path || [name],
+});
+
+const createField = <
+  T extends Partial<ChartDataSectionField> &
+    Pick<ChartDataSectionField, 'colName'>,
+>(
+  overrides: T,
+): ChartDataSectionField & T => ({
+  type: DataViewFieldType.STRING,
+  category: ChartDataViewFieldCategory.Field,
+  ...overrides,
+});
+
+const createSection = <
+  T extends Partial<ChartDataConfig> & Pick<ChartDataConfig, 'key'>,
+>(
+  overrides: T,
+): ChartDataConfig & T => ({
+  rows: [],
+  ...overrides,
+});
+
+const createStringField = (colName: string) =>
+  createField({
+    colName,
+    type: DataViewFieldType.STRING,
+    category: ChartDataViewFieldCategory.Field,
+  });
+
 describe('ChartDataRequestBuild Test', () => {
   test('should get builder with default values', () => {
-    const dataView = { id: 'view-id' } as any;
+    const dataView = createDataView();
     const enableScript = false;
     const enableAggregation = false;
 
@@ -63,80 +117,80 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should get aggregators with enabled aggregation', () => {
-    const dataView = { id: 'view-id' } as any;
-    const chartDataConfigs = [
-      {
+    const dataView = createDataView();
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregation',
         rows: [
-          {
+          createField({
             colName: 'amount',
             aggregate: AggregateFieldActionType.Avg,
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
-          {
+            category: ChartDataViewFieldCategory.Field,
+          }),
+          createField({
             colName: 'sub-amount',
             aggregate: AggregateFieldActionType.Sum,
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.ComputedField as any,
-          },
+            category: ChartDataViewFieldCategory.ComputedField,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregation',
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Size,
         key: 'size',
         rows: [
-          {
+          createField({
             colName: 'total',
             aggregate: AggregateFieldActionType.Count,
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.ComputedField as any,
-          },
+            category: ChartDataViewFieldCategory.ComputedField,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Info,
         key: 'info',
         rows: [
-          {
+          createField({
             colName: 'sex',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Variable as any,
-          },
+            category: ChartDataViewFieldCategory.Variable,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Mixed,
         key: 'info',
         rows: [
-          {
+          createField({
             colName: 'sex',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Variable as any,
-          },
-          {
+            category: ChartDataViewFieldCategory.Variable,
+          }),
+          createField({
             colName: 'age',
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.Variable as any,
-          },
+            category: ChartDataViewFieldCategory.Variable,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Group,
         key: 'unknown',
         rows: [
-          {
+          createField({
             colName: 'name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Variable as any,
-          },
+            category: ChartDataViewFieldCategory.Variable,
+          }),
         ],
-      },
+      }),
     ];
     const chartSettingConfigs = [];
     const pageInfo = {};
@@ -163,84 +217,83 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should get aggregators with enabled aggregation for struct view', () => {
-    const dataView = {
-      id: 'view-id',
+    const dataView = createDataView({
       type: 'STRUCT',
-      meta: [{ path: ['dad', 'amount'], name: 'dad.amount' }],
-    } as any;
-    const chartDataConfigs = [
-      {
+      meta: [createMeta('dad.amount', ['dad', 'amount'])],
+    });
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregation',
         rows: [
-          {
+          createField({
             colName: 'dad.amount',
             aggregate: AggregateFieldActionType.Avg,
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
-          {
+            category: ChartDataViewFieldCategory.Field,
+          }),
+          createField({
             colName: 'sub-amount',
             aggregate: AggregateFieldActionType.Sum,
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.ComputedField as any,
-          },
+            category: ChartDataViewFieldCategory.ComputedField,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregation',
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Size,
         key: 'size',
         rows: [
-          {
+          createField({
             colName: 'total',
             aggregate: AggregateFieldActionType.Count,
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.ComputedField as any,
-          },
+            category: ChartDataViewFieldCategory.ComputedField,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Info,
         key: 'info',
         rows: [
-          {
+          createField({
             colName: 'sex',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Variable as any,
-          },
+            category: ChartDataViewFieldCategory.Variable,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Mixed,
         key: 'info',
         rows: [
-          {
+          createField({
             colName: 'sex',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Variable as any,
-          },
-          {
+            category: ChartDataViewFieldCategory.Variable,
+          }),
+          createField({
             colName: 'age',
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.Variable as any,
-          },
+            category: ChartDataViewFieldCategory.Variable,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Group,
         key: 'unknown',
         rows: [
-          {
+          createField({
             colName: 'dad.name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Variable as any,
-          },
+            category: ChartDataViewFieldCategory.Variable,
+          }),
         ],
-      },
+      }),
     ];
     const chartSettingConfigs = [];
     const pageInfo = {};
@@ -279,20 +332,20 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should not get aggregators with disable aggregation', () => {
-    const dataView = { id: 'view-id' } as any;
-    const chartDataConfigs = [
-      {
+    const dataView = createDataView();
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregation',
         rows: [
-          {
+          createField({
             colName: 'amount',
             aggregate: AggregateFieldActionType.Avg,
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
+      }),
     ];
     const chartSettingConfigs = [];
     const pageInfo = {};
@@ -313,32 +366,32 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should unique aggregators with colName and aggregation', () => {
-    const dataView = { id: 'view-id' } as any;
-    const chartDataConfigs = [
-      {
+    const dataView = createDataView();
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregation',
         rows: [
-          {
+          createField({
             colName: 'amount',
             aggregate: AggregateFieldActionType.Avg,
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Size,
         key: 'size',
         rows: [
-          {
+          createField({
             colName: 'amount',
             aggregate: AggregateFieldActionType.Avg,
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
+      }),
     ];
     const chartSettingConfigs = [];
     const pageInfo = {};
@@ -361,36 +414,35 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should unique aggregators with colName and aggregation for struct view', () => {
-    const dataView = {
-      id: 'view-id',
+    const dataView = createDataView({
       type: 'STRUCT',
-      meta: [{ name: 'dad.amount', path: ['dad', 'amount'] }],
-    } as any;
-    const chartDataConfigs = [
-      {
+      meta: [createMeta('dad.amount', ['dad', 'amount'])],
+    });
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregation',
         rows: [
-          {
+          createField({
             colName: 'dad.amount',
             aggregate: AggregateFieldActionType.Avg,
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Size,
         key: 'size',
         rows: [
-          {
+          createField({
             colName: 'dad.amount',
             aggregate: AggregateFieldActionType.Avg,
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
+      }),
     ];
     const chartSettingConfigs = [];
     const pageInfo = {};
@@ -417,50 +469,50 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should get groups', () => {
-    const dataView = { id: 'view-id' } as any;
-    const chartDataConfigs = [
-      {
+    const dataView = createDataView();
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Group,
         key: 'aggregation',
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Group,
         key: 'aggregation',
         rows: [
-          {
+          createField({
             colName: 'name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Color,
         key: 'aggregation',
         rows: [
-          {
+          createField({
             colName: 'age',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Mixed,
         key: 'address',
         rows: [
-          {
+          createField({
             colName: 'address',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
-          {
+            category: ChartDataViewFieldCategory.Field,
+          }),
+          createField({
             colName: 'post',
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
+      }),
     ];
     const chartSettingConfigs = [];
     const pageInfo = {};
@@ -499,58 +551,57 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should get groups for struct view', () => {
-    const dataView = {
-      id: 'view-id',
+    const dataView = createDataView({
       type: 'STRUCT',
       meta: [
-        { path: ['dad', 'name'], name: 'dad.name' },
-        { path: ['dad', 'age'], name: 'dad.age' },
-        { path: ['dad', 'address'], name: 'dad.address' },
+        createMeta('dad.name', ['dad', 'name']),
+        createMeta('dad.age', ['dad', 'age']),
+        createMeta('dad.address', ['dad', 'address']),
       ],
-    } as any;
-    const chartDataConfigs = [
-      {
+    });
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Group,
         key: 'aggregation',
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Group,
         key: 'aggregation',
         rows: [
-          {
+          createField({
             colName: 'dad.name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Color,
         key: 'aggregation',
         rows: [
-          {
+          createField({
             colName: 'dad.age',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Mixed,
         key: 'address',
         rows: [
-          {
+          createField({
             colName: 'dad.address',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
-          {
+            category: ChartDataViewFieldCategory.Field,
+          }),
+          createField({
             colName: 'dad.post',
             type: DataViewFieldType.NUMERIC,
-            category: ChartDataViewFieldCategory.Field as any,
-          },
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
+      }),
     ];
     const chartSettingConfigs = [];
     const pageInfo = {};
@@ -589,29 +640,28 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should get filters with meta info', () => {
-    const dataView = {
-      id: 'view-id',
+    const dataView = createDataView({
       meta: [
-        { path: ['name'], name: 'name' },
-        { path: ['address'], name: 'address' },
-        { path: ['family'], name: 'family' },
-        { path: ['born'], name: 'born' },
-        { path: ['birthday'], name: 'birthday' },
+        createMeta('name'),
+        createMeta('address'),
+        createMeta('family'),
+        createMeta('born'),
+        createMeta('birthday'),
       ],
-    } as any;
-    const chartDataConfigs = [
-      {
+    });
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Filter,
         key: 'filter1',
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Filter,
         key: 'filter2',
         rows: [
-          {
+          createField({
             colName: 'name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             aggregate: AggregateFieldActionType.None,
             filter: {
               condition: {
@@ -622,17 +672,17 @@ describe('ChartDataRequestBuild Test', () => {
                 value: ['a', 'b'],
               },
             },
-          },
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Filter,
         key: 'filter3',
         rows: [
-          {
+          createField({
             colName: 'name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             aggregate: AggregateFieldActionType.Avg,
             filter: {
               condition: {
@@ -643,11 +693,11 @@ describe('ChartDataRequestBuild Test', () => {
                 value: ['a', 'b'],
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'name-not-null',
@@ -656,11 +706,11 @@ describe('ChartDataRequestBuild Test', () => {
                 visualType: 'STRING',
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'name-is-null',
@@ -669,11 +719,11 @@ describe('ChartDataRequestBuild Test', () => {
                 visualType: 'STRING',
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'address',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'address-not-in',
@@ -683,11 +733,11 @@ describe('ChartDataRequestBuild Test', () => {
                 value: ['a', 'b'],
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'address',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'address-in',
@@ -696,11 +746,11 @@ describe('ChartDataRequestBuild Test', () => {
                 visualType: 'STRING',
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'family',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'family-list',
@@ -708,16 +758,16 @@ describe('ChartDataRequestBuild Test', () => {
                 operator: FilterSqlOperator.In,
                 visualType: 'STRING',
                 value: [
-                  { key: 'a', isSelected: true },
-                  { key: 'b', isSelected: false },
+                  { key: 'a', label: 'a', isSelected: true },
+                  { key: 'b', label: 'b', isSelected: false },
                 ],
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'born',
             type: DataViewFieldType.DATE,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'born-date',
@@ -727,11 +777,11 @@ describe('ChartDataRequestBuild Test', () => {
                 value: ['2022-03-16'],
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'born',
             type: DataViewFieldType.DATE,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'address-time',
@@ -741,11 +791,11 @@ describe('ChartDataRequestBuild Test', () => {
                 value: [{ unit: 'd', amount: 1, direction: '-' }],
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'born',
             type: DataViewFieldType.DATE,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'born-recommend',
@@ -755,11 +805,11 @@ describe('ChartDataRequestBuild Test', () => {
                 value: RECOMMEND_TIME.TODAY,
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'birthday',
             type: DataViewFieldType.DATE,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'born-recommend',
@@ -769,11 +819,11 @@ describe('ChartDataRequestBuild Test', () => {
                 value: RECOMMEND_TIME.TODAY,
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'born',
             type: DataViewFieldType.DATE,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'born-recommend',
@@ -783,10 +833,10 @@ describe('ChartDataRequestBuild Test', () => {
                 value: RECOMMEND_TIME.TODAY,
               },
             },
-          },
+          }),
         ],
-      },
-    ] as any;
+      }),
+    ];
     const chartSettingConfigs = [];
     const pageInfo = {};
     const enableScript = false;
@@ -889,31 +939,30 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should get filters for struct view', () => {
-    const dataView = {
-      id: 'view-id',
+    const dataView = createDataView({
       type: 'STRUCT',
       meta: [
-        { path: ['dad', 'name'], name: 'dad.name' },
-        { path: ['dad', 'age'], name: 'dad.age' },
-        { path: ['dad', 'address'], name: 'dad.address' },
-        { path: ['dad', 'family'], name: 'dad.family' },
-        { path: ['dad', 'born'], name: 'dad.born' },
-        { path: ['dad', 'birthday'], name: 'dad.birthday' },
+        createMeta('dad.name', ['dad', 'name']),
+        createMeta('dad.age', ['dad', 'age']),
+        createMeta('dad.address', ['dad', 'address']),
+        createMeta('dad.family', ['dad', 'family']),
+        createMeta('dad.born', ['dad', 'born']),
+        createMeta('dad.birthday', ['dad', 'birthday']),
       ],
-    } as any;
-    const chartDataConfigs = [
-      {
+    });
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Filter,
         key: 'filter1',
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Filter,
         key: 'filter2',
         rows: [
-          {
+          createField({
             colName: 'dad.name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             aggregate: AggregateFieldActionType.None,
             filter: {
               condition: {
@@ -924,17 +973,17 @@ describe('ChartDataRequestBuild Test', () => {
                 value: ['a', 'b'],
               },
             },
-          },
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Filter,
         key: 'filter3',
         rows: [
-          {
+          createField({
             colName: 'dad.name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             aggregate: AggregateFieldActionType.Avg,
             filter: {
               condition: {
@@ -945,11 +994,11 @@ describe('ChartDataRequestBuild Test', () => {
                 value: ['a', 'b'],
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'dad.name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'name-not-null',
@@ -958,11 +1007,11 @@ describe('ChartDataRequestBuild Test', () => {
                 visualType: 'STRING',
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'dad.name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'name-is-null',
@@ -971,11 +1020,11 @@ describe('ChartDataRequestBuild Test', () => {
                 visualType: 'STRING',
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'dad.address',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'address-not-in',
@@ -985,11 +1034,11 @@ describe('ChartDataRequestBuild Test', () => {
                 value: ['a', 'b'],
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'dad.address',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'address-in',
@@ -998,11 +1047,11 @@ describe('ChartDataRequestBuild Test', () => {
                 visualType: 'STRING',
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'dad.family',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'family-list',
@@ -1010,16 +1059,16 @@ describe('ChartDataRequestBuild Test', () => {
                 operator: FilterSqlOperator.In,
                 visualType: 'STRING',
                 value: [
-                  { key: 'a', isSelected: true },
-                  { key: 'b', isSelected: false },
+                  { key: 'a', label: 'a', isSelected: true },
+                  { key: 'b', label: 'b', isSelected: false },
                 ],
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'dad.born',
             type: DataViewFieldType.DATE,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'born-date',
@@ -1029,11 +1078,11 @@ describe('ChartDataRequestBuild Test', () => {
                 value: ['2022-03-16'],
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'dad.born',
             type: DataViewFieldType.DATE,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'address-time',
@@ -1043,11 +1092,11 @@ describe('ChartDataRequestBuild Test', () => {
                 value: [{ unit: 'd', amount: 1, direction: '-' }],
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'dad.born',
             type: DataViewFieldType.DATE,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'born-recommend',
@@ -1057,11 +1106,11 @@ describe('ChartDataRequestBuild Test', () => {
                 value: RECOMMEND_TIME.TODAY,
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'dad.birthday',
             type: DataViewFieldType.DATE,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'born-recommend',
@@ -1071,11 +1120,11 @@ describe('ChartDataRequestBuild Test', () => {
                 value: RECOMMEND_TIME.TODAY,
               },
             },
-          },
-          {
+          }),
+          createField({
             colName: 'dad.born',
             type: DataViewFieldType.DATE,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             filter: {
               condition: {
                 name: 'born-recommend',
@@ -1085,10 +1134,10 @@ describe('ChartDataRequestBuild Test', () => {
                 value: RECOMMEND_TIME.TODAY,
               },
             },
-          },
+          }),
         ],
-      },
-    ] as any;
+      }),
+    ];
     const chartSettingConfigs = [];
     const pageInfo = {};
     const enableScript = false;
@@ -1191,72 +1240,72 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should get orders', () => {
-    const dataView = { id: 'view-id' } as any;
-    const chartDataConfigs = [
-      {
+    const dataView = createDataView();
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregationL',
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregationR',
         rows: [
-          {
+          createField({
             colName: 'age',
             aggregate: AggregateFieldActionType.Avg,
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             sort: {
-              type: 'ASC',
+              type: SortActionType.ASC,
             },
-          },
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Group,
         key: 'group',
         rows: [
-          {
+          createField({
             colName: 'first-name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             sort: {
-              type: 'ASC',
+              type: SortActionType.ASC,
             },
-          },
-          {
+          }),
+          createField({
             colName: 'last-name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.ComputedField as any,
+            category: ChartDataViewFieldCategory.ComputedField,
             sort: {
-              type: 'DESC',
+              type: SortActionType.DESC,
             },
-          },
-          {
+          }),
+          createField({
             colName: 'middle-name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.ComputedField as any,
+            category: ChartDataViewFieldCategory.ComputedField,
             sort: {
-              type: 'CUSTOMIZE',
+              type: SortActionType.Customize,
             },
-          },
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Mixed,
         key: 'info',
         rows: [
-          {
+          createField({
             colName: 'address',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.ComputedField as any,
+            category: ChartDataViewFieldCategory.ComputedField,
             sort: {
-              type: 'DESC',
+              type: SortActionType.DESC,
             },
-          },
+          }),
         ],
-      },
-    ] as any;
+      }),
+    ];
     const chartSettingConfigs = [];
     const pageInfo = {};
     const enableScript = false;
@@ -1285,81 +1334,80 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should get orders for struct view', () => {
-    const dataView = {
-      id: 'view-id',
+    const dataView = createDataView({
       type: 'STRUCT',
       meta: [
-        { path: ['dad', 'age'], name: 'dad.age' },
-        { path: ['dad', 'first-name'], name: 'dad.first-name' },
-        { path: ['dad', 'last-name'], name: 'dad.last-name' },
-        { path: ['address'], name: 'address' },
+        createMeta('dad.age', ['dad', 'age']),
+        createMeta('dad.first-name', ['dad', 'first-name']),
+        createMeta('dad.last-name', ['dad', 'last-name']),
+        createMeta('address'),
       ],
-    } as any;
-    const chartDataConfigs = [
-      {
+    });
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregationL',
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregationR',
         rows: [
-          {
+          createField({
             colName: 'dad.age',
             aggregate: AggregateFieldActionType.Avg,
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             sort: {
-              type: 'ASC',
+              type: SortActionType.ASC,
             },
-          },
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Group,
         key: 'group',
         rows: [
-          {
+          createField({
             colName: 'dad.first-name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             sort: {
-              type: 'ASC',
+              type: SortActionType.ASC,
             },
-          },
-          {
+          }),
+          createField({
             colName: 'last-name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.ComputedField as any,
+            category: ChartDataViewFieldCategory.ComputedField,
             sort: {
-              type: 'DESC',
+              type: SortActionType.DESC,
             },
-          },
-          {
+          }),
+          createField({
             colName: 'middle-name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.ComputedField as any,
+            category: ChartDataViewFieldCategory.ComputedField,
             sort: {
-              type: 'CUSTOMIZE',
+              type: SortActionType.Customize,
             },
-          },
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Mixed,
         key: 'info',
         rows: [
-          {
+          createField({
             colName: 'address',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.ComputedField as any,
+            category: ChartDataViewFieldCategory.ComputedField,
             sort: {
-              type: 'DESC',
+              type: SortActionType.DESC,
             },
-          },
+          }),
         ],
-      },
-    ] as any;
+      }),
+    ];
     const chartSettingConfigs = [];
     const pageInfo = {};
     const enableScript = false;
@@ -1396,82 +1444,85 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should get orders with unique extra sorters', () => {
-    const dataView = {
-      id: 'view-id',
+    const dataView = createDataView({
       meta: [
-        { path: ['fore-name'], name: 'fore-name' },
-        { path: ['age'], name: 'age' },
+        createMeta('fore-name'),
+        createMeta('age'),
       ],
-    } as any;
-    const chartDataConfigs = [
-      {
+    });
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregationR',
         rows: [
-          {
+          createField({
             colName: 'age',
             aggregate: AggregateFieldActionType.Avg,
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             sort: {
-              type: 'ASC',
+              type: SortActionType.ASC,
             },
-          },
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Group,
         key: 'group',
         rows: [
-          {
+          createField({
             colName: 'first-name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.Field as any,
+            category: ChartDataViewFieldCategory.Field,
             sort: {
-              type: 'ASC',
+              type: SortActionType.ASC,
             },
-          },
-          {
+          }),
+          createField({
             colName: 'last-name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.ComputedField as any,
+            category: ChartDataViewFieldCategory.ComputedField,
             sort: {
-              type: 'DESC',
+              type: SortActionType.DESC,
             },
-          },
-          {
+          }),
+          createField({
             colName: 'middle-name',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.ComputedField as any,
+            category: ChartDataViewFieldCategory.ComputedField,
             sort: {
-              type: 'CUSTOMIZE',
+              type: SortActionType.Customize,
             },
-          },
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Mixed,
         key: 'info',
         rows: [
-          {
+          createField({
             colName: 'address',
             type: DataViewFieldType.STRING,
-            category: ChartDataViewFieldCategory.ComputedField as any,
+            category: ChartDataViewFieldCategory.ComputedField,
             sort: {
-              type: 'DESC',
+              type: SortActionType.DESC,
             },
-          },
+          }),
         ],
-      },
-    ] as any;
-    const extraSorters = [
+      }),
+    ];
+    const extraSorters: ChartDataRequest['orders'] = [
       {
-        column: 'age',
-        aggOperator: 'AVG',
-        operator: 'ASC',
+        column: 'age' as unknown as string[],
+        aggOperator: AggregateFieldActionType.Avg,
+        operator: SortActionType.ASC,
       },
-      { column: 'fore-name', operator: 'ASC', aggOperator: undefined },
-    ] as any;
+      {
+        column: 'fore-name' as unknown as string[],
+        operator: SortActionType.ASC,
+        aggOperator: undefined,
+      },
+    ];
     const chartSettingConfigs = [];
     const pageInfo = {};
     const enableScript = false;
@@ -1511,7 +1562,7 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should get pageInfo from setting config', () => {
-    const dataView = { id: 'view-id' } as any;
+    const dataView = createDataView();
     const chartDataConfigs = [];
     const chartSettingConfigs = [
       {
@@ -1550,21 +1601,23 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should computed functions', () => {
-    const dataView = {
-      id: 'view-id',
+    const dataView = createDataView({
       computedFields: [
         { name: 'f1', expression: '[a' },
         { name: 'f2', expression: '[b]' },
         { name: 'f3', expression: '' },
       ],
-    } as any;
-    const chartDataConfigs = [
-      {
+    });
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         key: 'dimension',
-
-        rows: [{ colName: 'f1' }, { colName: 'f2' }, { colName: 'f3' }],
-      },
-    ] as any;
+        rows: [
+          createField({ colName: 'f1' }),
+          createField({ colName: 'f2' }),
+          createField({ colName: 'f3' }),
+        ],
+      }),
+    ];
     const chartSettingConfigs = [];
     const pageInfo = {};
     const enableScript = false;
@@ -1588,21 +1641,24 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should computed functions for struct view', () => {
-    const dataView = {
-      id: 'view-id',
+    const dataView = createDataView({
       type: 'STRUCT',
       computedFields: [
         { name: 'f1', expression: '[dad].[a]' },
         { name: 'f2', expression: '[dad].[b]' },
         { name: 'f3', expression: '' },
       ],
-    } as any;
-    const chartDataConfigs = [
-      {
+    });
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         key: 'DATA',
-        rows: [{ colName: 'f1' }, { colName: 'f2' }, { colName: 'f3' }],
-      },
-    ] as any;
+        rows: [
+          createField({ colName: 'f1' }),
+          createField({ colName: 'f2' }),
+          createField({ colName: 'f3' }),
+        ],
+      }),
+    ];
     const chartSettingConfigs = [];
     const pageInfo = {};
     const enableScript = false;
@@ -1632,7 +1688,7 @@ describe('ChartDataRequestBuild Test', () => {
       concurrencyControl: false,
       concurrencyControlMode: 'a',
     };
-    const dataView = { config: JSON.stringify(viewConfig) } as any;
+    const dataView = createDataView({ config: JSON.stringify(viewConfig) });
     const chartDataConfigs = [];
     const chartSettingConfigs = [];
     const pageInfo = {};
@@ -1666,11 +1722,11 @@ describe('ChartDataRequestBuild Test', () => {
       concurrencyControl: false,
       concurrencyControlMode: 'a',
     };
-    const dataView = {
+    const dataView = createDataView({
       computedFields: [],
       id: '1',
       config: viewConfig,
-    };
+    });
     const chartDataConfigs = [];
     const chartSettingConfigs = [];
     const pageInfo = {};
@@ -1698,86 +1754,66 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should get select columns', () => {
-    const dataView = { id: 'view-id' } as any;
-    const chartDataConfigs = [
-      {
+    const dataView = createDataView();
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregation',
         rows: [
-          {
+          createField({
             colName: 'amount',
-            type: '',
-            category: '',
-          },
+            type: DataViewFieldType.STRING,
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Size,
         key: 'size',
         rows: [
-          {
+          createField({
             colName: 'total',
-            type: '',
-            category: '',
-          },
+            type: DataViewFieldType.STRING,
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Info,
         key: 'info',
         rows: [
-          {
-            colName: 'sex',
-            type: '',
-            category: '',
-          },
+          createStringField('sex'),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Color,
         key: 'info',
         rows: [
-          {
-            colName: 'sex',
-            type: '',
-            category: '',
-          },
+          createStringField('sex'),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Group,
         key: 'GROUP',
         rows: [
-          {
-            colName: 'name',
-            type: '',
-            category: '',
-          },
+          createStringField('name'),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Mixed,
         key: 'MIXED',
         rows: [
-          {
-            colName: 'name',
-            type: '',
-            category: '',
-          },
+          createStringField('name'),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Filter,
         key: 'filter',
         rows: [
-          {
-            colName: 'filter',
-            type: '',
-            category: '',
-          },
+          createStringField('filter'),
         ],
-      },
-    ] as any;
+      }),
+    ];
     const chartSettingConfigs = [];
     const pageInfo = {};
     const enableScript = false;
@@ -1804,95 +1840,94 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should get select columns for struct view', () => {
-    const dataView = {
-      id: 'view-id',
+    const dataView = createDataView({
       type: 'STRUCT',
       meta: [
-        { path: ['dad', 'amount'], name: 'dad.amount' },
-        { path: ['dad', 'total'], name: 'dad.total' },
-        { path: ['dad', 'sex'], name: 'dad.sex' },
-        { path: ['dad', 'name'], name: 'dad.name' },
+        createMeta('dad.amount', ['dad', 'amount']),
+        createMeta('dad.total', ['dad', 'total']),
+        createMeta('dad.sex', ['dad', 'sex']),
+        createMeta('dad.name', ['dad', 'name']),
       ],
-    } as any;
-    const chartDataConfigs = [
-      {
+    });
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregation',
         rows: [
-          {
+          createField({
             colName: 'dad.amount',
-            type: '',
+            type: DataViewFieldType.STRING,
             category: ChartDataViewFieldCategory.Field,
-          },
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Size,
         key: 'size',
         rows: [
-          {
+          createField({
             colName: 'dad.total',
-            type: '',
+            type: DataViewFieldType.STRING,
             category: ChartDataViewFieldCategory.Field,
-          },
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Info,
         key: 'info',
         rows: [
-          {
+          createField({
             colName: 'dad.sex',
-            type: '',
+            type: DataViewFieldType.STRING,
             category: ChartDataViewFieldCategory.Field,
-          },
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Color,
         key: 'info',
         rows: [
-          {
+          createField({
             colName: 'dad.sex',
-            type: '',
+            type: DataViewFieldType.STRING,
             category: ChartDataViewFieldCategory.Field,
-          },
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Group,
         key: 'GROUP',
         rows: [
-          {
+          createField({
             colName: 'dad.name',
-            type: '',
+            type: DataViewFieldType.STRING,
             category: ChartDataViewFieldCategory.Field,
-          },
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Mixed,
         key: 'MIXED',
         rows: [
-          {
+          createField({
             colName: 'dad.name',
-            type: '',
+            type: DataViewFieldType.STRING,
             category: ChartDataViewFieldCategory.Field,
-          },
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Filter,
         key: 'filter',
         rows: [
-          {
+          createField({
             colName: 'dad.filter',
-            type: '',
+            type: DataViewFieldType.STRING,
             category: ChartDataViewFieldCategory.Field,
-          },
+          }),
         ],
-      },
-    ] as any;
+      }),
+    ];
     const chartSettingConfigs = [];
     const pageInfo = {};
     const enableScript = false;
@@ -1919,102 +1954,94 @@ describe('ChartDataRequestBuild Test', () => {
   });
 
   test('should get select columns with drill option', () => {
-    const dataView = { id: 'view-id' } as any;
-    const chartDataConfigs = [
-      {
+    const dataView = createDataView();
+    const chartDataConfigs: ChartDataConfig[] = [
+      createSection({
         type: ChartDataSectionType.Group,
         key: 'GROUP',
         drillable: true,
         rows: [
-          {
+          createField({
             uid: 'group-r1',
             colName: 'group-r1',
-            id: 'group-r1',
-            type: '',
-            category: '',
-          },
-          {
+            type: DataViewFieldType.STRING,
+            category: ChartDataViewFieldCategory.Field,
+          }),
+          createField({
             uid: 'group-r2',
             colName: 'group-r2',
-            id: 'group-r2',
-            type: '',
-            category: '',
-          },
+            type: DataViewFieldType.STRING,
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Aggregate,
         key: 'aggregation',
         rows: [
-          {
+          createField({
             colName: 'amount',
-            id: 'amount',
-            type: '',
-            category: '',
-          },
+            type: DataViewFieldType.STRING,
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Size,
         key: 'size',
         rows: [
-          {
+          createField({
             colName: 'size',
-            id: 'size',
-            type: '',
-            category: '',
-          },
+            type: DataViewFieldType.STRING,
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Info,
         key: 'info',
         rows: [
-          {
+          createField({
             colName: 'info',
-            id: 'info',
-            type: '',
-            category: '',
-          },
+            type: DataViewFieldType.STRING,
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Color,
         key: 'color',
         rows: [
-          {
+          createField({
             colName: 'color',
-            id: 'color',
-            type: '',
-            category: '',
-          },
+            type: DataViewFieldType.STRING,
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Mixed,
         key: 'MIXED',
         rows: [
-          {
+          createField({
             colName: 'mix',
-            id: 'mix',
-            type: '',
-            category: '',
-          },
+            type: DataViewFieldType.STRING,
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-      {
+      }),
+      createSection({
         type: ChartDataSectionType.Filter,
         key: 'filter',
         rows: [
-          {
+          createField({
             colName: 'filter',
-            id: 'filter',
-            type: '',
-            category: '',
-          },
+            type: DataViewFieldType.STRING,
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ],
-      },
-    ] as any;
+      }),
+    ];
     const chartSettingConfigs = [];
     const pageInfo = {};
     const enableScript = false;

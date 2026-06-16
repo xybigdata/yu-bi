@@ -351,6 +351,7 @@
 - `useI18NPrefix.ts` 与 `ChartLifecycleBroker.ts` 的运行时翻译函数签名改为显式 `I18NTranslate` 类型，继续收口 iframe 生命周期上下文中的局部 `any`
 - `ChartDataSet.ts` 与 `ChartDataRequestBuilder.ts` 的列索引兜底、数组构造和过滤值归一化改为显式兼容类型，并同步收口对应测试中的局部 `any`
 - `PluginChartLoader.ts` 与 `ChartManager`、`Chart` 的模型层测试继续收口插件加载返回值、私有加载入口访问与生命周期入参中的局部 `any`
+- `ChartDataRequestBuilder.test.ts` 继续按测试 helper 收口 dataView、字段、section、过滤器与排序场景中的局部 `any`，补齐测试数据与真实类型约束的一致性
 
 当前验证计划：
 
