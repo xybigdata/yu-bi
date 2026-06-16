@@ -23,6 +23,7 @@ import {
   DataViewFieldType,
   FilterConditionType,
 } from 'app/constants';
+import { ChartDataRequest } from 'app/types/ChartDataRequest';
 import { datartDayjs } from 'app/utils/date';
 import { getChartDrillOption } from 'app/utils/internalChartHelper';
 import { FilterSqlOperator, RECOMMEND_TIME } from 'globalConstants';
@@ -1496,8 +1497,8 @@ describe('ChartDataRequestBuild Test', () => {
       { column: ['fore-name'], operator: 'ASC', aggOperator: undefined },
     ]);
 
-    const extraSorters2: any = null;
-    builder.addExtraSorters(extraSorters2);
+    const extraSorters2: ChartDataRequest['orders'] | null = null;
+    builder.addExtraSorters(extraSorters2 || undefined);
 
     expect(requestParams.orders).toEqual([
       {

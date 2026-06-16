@@ -284,6 +284,11 @@ export class ChartDataRequestBuilder {
   }
 
   private normalizeFilters = (fields: ChartDataSectionField[]) => {
+    type NormalizedFilterValue = {
+      value: string | number;
+      valueType: ChartDataSectionField['type'];
+    };
+
     const _timeConverter = (visualType, value, dateFormat?) => {
       if (visualType !== 'DATE') {
         return value;
@@ -306,7 +311,7 @@ export class ChartDataRequestBuilder {
       const conditionValue = field.filter?.condition?.value;
       const dateFormat = field.dateFormat;
       if (!conditionValue) {
-        return null;
+        return null as NormalizedFilterValue[] | null;
       }
       if (Array.isArray(conditionValue)) {
         return conditionValue
@@ -331,7 +336,7 @@ export class ChartDataRequestBuilder {
               };
             }
           })
-          .filter(Boolean) as any[];
+          .filter((value): value is NormalizedFilterValue => Boolean(value));
       }
       if (
         field?.filter?.condition?.type === FilterConditionType.RecommendTime

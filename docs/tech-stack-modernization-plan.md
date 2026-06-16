@@ -349,6 +349,7 @@
 - `ChartIFrameResourceLoader.ts`、`ChartIFrameEventBroker.ts`、`ReactChart.ts`、`ChartDataConfigSectionReplaceMenu.tsx` 的文档对象、事件 broker 入参、React 图表挂载入口和字段替换配置改为显式兼容类型，继续收口 runtime helper 与工作台替换菜单中的局部 `any`
 - `ChartDataRequest.ts`、`ChartDrillOption.ts`、`Chart.ts` 与对应实现/测试的 `limit`、drill filter 数据结构和图表初始化入参改为显式兼容类型，继续收口请求构建与 drill 运行链路中的局部 `any`
 - `useI18NPrefix.ts` 与 `ChartLifecycleBroker.ts` 的运行时翻译函数签名改为显式 `I18NTranslate` 类型，继续收口 iframe 生命周期上下文中的局部 `any`
+- `ChartDataSet.ts` 与 `ChartDataRequestBuilder.ts` 的列索引兜底、数组构造和过滤值归一化改为显式兼容类型，并同步收口对应测试中的局部 `any`
 
 当前验证计划：
 
