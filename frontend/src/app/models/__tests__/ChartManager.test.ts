@@ -2,12 +2,51 @@ import { vi } from 'vitest';
 import * as chartPluginService from 'app/services/chartPluginService';
 import ChartManager from '../ChartManager';
 import * as chartRegistry from '../chartRegistry';
-import PluginChartLoader from '../PluginChartLoader';
+import PluginChartLoader, {
+  PluginChartDefinition,
+  PluginChartPaletteSeed,
+} from '../PluginChartLoader';
+
+const resetChartManagerSingleton = () => {
+  Reflect.set(ChartManager as unknown as object, '_manager', null);
+};
+
+const loadCustomizeCharts = async (
+  manager: ChartManager,
+  paths: string[],
+): Promise<PluginChartPaletteSeed[]> => {
+  const loader = Reflect.get(
+    manager as unknown as object,
+    '_loadCustomizeCharts',
+  ) as ((paths: string[]) => Promise<PluginChartPaletteSeed[]>) | undefined;
+  if (!loader) {
+    throw new Error('ChartManager._loadCustomizeCharts is unavailable');
+  }
+  return loader.call(manager, paths);
+};
+
+const createPluginDefinition = (
+  overrides: Partial<PluginChartDefinition> = {},
+): PluginChartDefinition => ({
+  meta: {
+    id: 'plugin-chart',
+    name: 'plugin-chart',
+    icon: 'chart',
+    requirements: [],
+    ...overrides.meta,
+  },
+  config: overrides.config || {
+    datas: [],
+    i18ns: [],
+  },
+  dependency: overrides.dependency || [],
+  ...overrides,
+});
 
 describe('ChartManager Tests', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-    (ChartManager as any)._manager = null;
+    resetChartManagerSingleton();
   });
 
   test('should expose lightweight chart palette items', () => {
@@ -19,7 +58,7 @@ describe('ChartManager Tests', () => {
     expect(first.meta.id).toBeTruthy();
     expect(first.datas).toBeDefined();
     expect(typeof first.isMatchRequirement).toBe('function');
-    expect((first as any).onMount).toBeUndefined();
+    expect('onMount' in first).toBe(false);
   });
 
   test('should return cloned palette metadata for each read', () => {
@@ -84,23 +123,9 @@ describe('ChartManager Tests', () => {
       'convertToDatartChartModel',
     );
 
-    definitionSpy.mockResolvedValueOnce([
-      {
-        meta: {
-          id: 'plugin-chart',
-          name: 'plugin-chart',
-          icon: 'chart',
-          requirements: [],
-        },
-        config: {
-          datas: [],
-          i18ns: [],
-        },
-        dependency: [],
-      } as any,
-    ]);
+    definitionSpy.mockResolvedValueOnce([createPluginDefinition()]);
 
-    await (manager as any)._loadCustomizeCharts(['mock-plugin.js']);
+    await loadCustomizeCharts(manager, ['mock-plugin.js']);
     convertSpy.mockClear();
 
     const palette = manager.getAllChartPalette();
@@ -122,22 +147,17 @@ describe('ChartManager Tests', () => {
     );
 
     definitionSpy.mockResolvedValueOnce([
-      {
+      createPluginDefinition({
         meta: {
           id: 'plugin-chart-icon',
           name: 'plugin-chart-icon',
           icon: 'plugin-icon',
           requirements: [],
         },
-        config: {
-          datas: [],
-          i18ns: [],
-        },
-        dependency: [],
-      } as any,
+      }),
     ]);
 
-    await (manager as any)._loadCustomizeCharts(['mock-plugin-icon.js']);
+    await loadCustomizeCharts(manager, ['mock-plugin-icon.js']);
     convertSpy.mockClear();
 
     const icons = manager.getAllChartIcons();
@@ -162,22 +182,17 @@ describe('ChartManager Tests', () => {
     );
 
     definitionSpy.mockResolvedValueOnce([
-      {
+      createPluginDefinition({
         meta: {
           id: 'plugin-chart-lazy',
           name: 'plugin-chart-lazy',
           icon: 'chart',
           requirements: [],
         },
-        config: {
-          datas: [],
-          i18ns: [],
-        },
-        dependency: [],
-      } as any,
+      }),
     ]);
 
-    await (manager as any)._loadCustomizeCharts(['mock-plugin-lazy.js']);
+    await loadCustomizeCharts(manager, ['mock-plugin-lazy.js']);
 
     expect(convertSpy).not.toHaveBeenCalled();
   });
@@ -194,22 +209,17 @@ describe('ChartManager Tests', () => {
     );
 
     definitionSpy.mockResolvedValueOnce([
-      {
+      createPluginDefinition({
         meta: {
           id: 'plugin-chart-lazy',
           name: 'plugin-chart-lazy',
           icon: 'chart',
           requirements: [],
         },
-        config: {
-          datas: [],
-          i18ns: [],
-        },
-        dependency: [],
-      } as any,
+      }),
     ]);
 
-    await (manager as any)._loadCustomizeCharts(['mock-plugin-lazy.js']);
+    await loadCustomizeCharts(manager, ['mock-plugin-lazy.js']);
     convertSpy.mockClear();
 
     const charts = manager.getAllCharts();
@@ -229,19 +239,14 @@ describe('ChartManager Tests', () => {
     );
 
     definitionSpy.mockResolvedValue([
-      {
+      createPluginDefinition({
         meta: {
           id: 'plugin-chart-load',
           name: 'plugin-chart-load',
           icon: 'chart',
           requirements: [],
         },
-        config: {
-          datas: [],
-          i18ns: [],
-        },
-        dependency: [],
-      } as any,
+      }),
     ]);
 
     await Promise.all([manager.load(), manager.load()]);

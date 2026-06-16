@@ -64,7 +64,6 @@ vi.mock('app/utils/fetch', () => ({
   },
 }));
 
-import Chart from '../Chart';
 import PluginChartLoader from '../PluginChartLoader';
 
 describe('PluginChartLoader Tests', () => {
@@ -78,17 +77,15 @@ describe('PluginChartLoader Tests', () => {
     const plugins = await loader.loadPluginDefinitions(['b-chart.js']);
     const chart = loader.convertToDatartChartModel(plugins[0]!);
 
-    expect((chart as Chart).meta).toEqual({
+    expect(chart.meta).toEqual({
       id: 1,
       icon: 'chart',
       name: 'b-chart.js',
       requirements: [],
     });
-    expect((chart as Chart).config).toEqual([]);
-    expect((chart as Chart).dependency).toEqual(['echarts.min.js']);
-    expect((chart as Chart).isISOContainer).toEqual(
-      'pure-chart-container-id',
-    );
+    expect(chart.config).toEqual([]);
+    expect(chart.dependency).toEqual(['echarts.min.js']);
+    expect(chart.isISOContainer).toEqual('pure-chart-container-id');
   });
 
   test('should load pure js plugin definitions', async () => {
@@ -111,22 +108,20 @@ describe('PluginChartLoader Tests', () => {
     const plugins = await loader.loadPluginDefinitions(['a-chart.iife.js']);
     const chart = loader.convertToDatartChartModel(plugins[0]!);
 
-    expect((chart as Chart).meta).toEqual({
+    expect(chart.meta).toEqual({
       id: 1,
       icon: 'chart',
       name: 'a-chart.iife.js',
       requirements: [],
     });
-    expect((chart as Chart).config).toEqual({
+    expect(chart.config).toEqual({
       datas: [],
       i18ns: [],
       settings: [],
       styles: [],
     });
-    expect((chart as Chart).dependency).toEqual(['d3.min.js']);
-    expect((chart as Chart).isISOContainer).toEqual(
-      'iife-chart-container-id',
-    );
+    expect(chart.dependency).toEqual(['d3.min.js']);
+    expect(chart.isISOContainer).toEqual('iife-chart-container-id');
   });
 
   test('should create plugin palette seed from definition', async () => {

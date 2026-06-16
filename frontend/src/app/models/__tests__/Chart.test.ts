@@ -17,6 +17,11 @@
  */
 
 import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
+import {
+  BrokerContext,
+  BrokerOption,
+} from 'app/types/ChartLifecycleBroker';
+import { ChartRequirement } from 'app/types/ChartMetadata';
 import Chart from '../Chart';
 import { isChartDataConfigMatchRequirement } from '../chartRequirement';
 
@@ -32,12 +37,17 @@ const createGroupSection = (
   ...overrides,
 });
 
+const createLifecycleArgs = (): [BrokerOption, BrokerContext] => [
+  { containerId: 'chart-container' },
+  { window, document },
+];
+
 describe('Chart Tests', () => {
   test('should get correct chart model', () => {
     const chartId = 'some chart id';
     const chartName = 'chart name';
     const chartFontIcon = 'bar-chart';
-    const chartRequirements = [] as any;
+    const chartRequirements: ChartRequirement[] = [];
     const chart = new Chart(
       chartId,
       chartName,
@@ -62,16 +72,16 @@ describe('Chart Tests', () => {
     const chartId = 'some chart id';
     const chartName = 'chart name';
     const chart = new Chart(chartId, chartName);
-    expect(() => chart.onMount({} as any, {} as any)).toThrow(
+    expect(() => chart.onMount(...createLifecycleArgs())).toThrow(
       /onMount Method Not Implemented/,
     );
-    expect(() => chart.onUpdated({} as any, {} as any)).toThrow(
+    expect(() => chart.onUpdated(...createLifecycleArgs())).toThrow(
       /onUpdated Method Not Implemented/,
     );
-    expect(() => chart.onUnMount({} as any, {} as any)).toThrow(
+    expect(() => chart.onUnMount(...createLifecycleArgs())).toThrow(
       /onUnMount Method Not Implemented/,
     );
-    expect(() => chart.onResize({} as any, {} as any)).not.toThrow(
+    expect(() => chart.onResize(...createLifecycleArgs())).not.toThrow(
       /Method not implemented/,
     );
   });
