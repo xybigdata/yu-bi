@@ -35,8 +35,9 @@ import ChartManager from 'app/models/ChartManager';
 import { useWorkbenchSlice } from 'app/pages/ChartWorkbenchPage/slice';
 import { selectAvailableSourceFunctions } from 'app/pages/ChartWorkbenchPage/slice/selectors';
 import { fetchAvailableSourceFunctionsForChart } from 'app/pages/ChartWorkbenchPage/slice/thunks';
+import { ChartConfigPayloadType } from 'app/pages/ChartWorkbenchPage/slice/types';
 import { useMainSlice } from 'app/pages/MainPage/slice';
-import { IChart } from 'app/types/Chart';
+import { ChartMouseEventParams, IChart } from 'app/types/Chart';
 import { PendingChartDataRequestFilter } from 'app/types/ChartDataRequest';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import {
@@ -382,11 +383,11 @@ const ChartPreviewBoard: FC<{
     ]);
 
     const registerChartEvents = useCallback(
-      (chart, backendChartId) => {
+      (chart: IChart | undefined, backendChartId: string) => {
         chart?.registerMouseEvents([
           {
             name: 'click',
-            callback: param => {
+            callback: (param?: ChartMouseEventParams) => {
               if (
                 param?.interactionType === ChartInteractionEvent.PagingOrSort
               ) {
@@ -426,7 +427,7 @@ const ChartPreviewBoard: FC<{
           },
           {
             name: 'contextmenu',
-            callback: param => {},
+            callback: () => {},
           },
         ]);
       },
@@ -621,7 +622,10 @@ const ChartPreviewBoard: FC<{
       );
     }, [backendChartId, dispatch, redirect, tg]);
 
-    const handleDateLevelChange = (type, payload) => {
+    const handleDateLevelChange = (
+      type: 'data',
+      payload: ChartConfigPayloadType,
+    ) => {
       dispatch(
         updateGroupAndFetchDataset({
           backendChartId,

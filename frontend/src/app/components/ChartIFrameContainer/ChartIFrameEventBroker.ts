@@ -28,7 +28,10 @@ import debounce from 'lodash/debounce';
 import { Debugger } from 'utils/debugger';
 
 class ChartIFrameEventBroker {
-  private _listeners: Map<BrokerLifecycleEvent, Function> = new Map();
+  private _listeners: Map<
+    BrokerLifecycleEvent,
+    (options: BrokerOption, context: BrokerContext) => void
+  > = new Map();
   private _eventCache: Map<
     BrokerLifecycleEvent,
     { options: BrokerOption; context: BrokerContext }
@@ -50,7 +53,10 @@ class ChartIFrameEventBroker {
     this.registerListener(c);
   }
 
-  public subscribe(event: BrokerLifecycleEvent, callback?: Function) {
+  public subscribe(
+    event: BrokerLifecycleEvent,
+    callback?: (options: BrokerOption, context: BrokerContext) => void,
+  ) {
     if (!callback || this._listeners.has(event)) {
       return;
     }
@@ -130,6 +136,9 @@ class ChartIFrameEventBroker {
     options: any,
     context?: BrokerContext,
   ) {
+    if (!context) {
+      return;
+    }
     try {
       Debugger.instance.measure(
         `ChartEventBroker | ${this._chart?.meta?.id} | ${event} `,

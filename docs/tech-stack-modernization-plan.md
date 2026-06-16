@@ -336,6 +336,13 @@
 - `useStateModal.tsx` 的公共弹窗 API 补齐 `content`、`maskClosable`、`cancelButtonProps`、缓存回调等真实调用面，减少各处 `as Function` 绕过
 - `useFieldActionModal.tsx`、`CheckboxModal.tsx`、`GroupLayout.tsx`、`FilterTypeSection.tsx`、`ChartDataViewPanel.tsx`、`ChartDraggableTargetContainer.tsx`、`DataModelTree.tsx` 改为直接复用显式弹窗返回值，继续压缩工作台与属性链路的局部 `Function`
 - `ChartDataViewPanel.tsx` 与 `DataModelTree.tsx` 的计算字段树数据改为走显式 `TreeDataNode` 结构，避免树节点 key/children 继续保留宽泛对象
+- `useToggle.ts` 与 `useComputedState.ts` 的通用 hook 返回值与依赖类型改为显式声明，保持现有“切换 / 显式设值 / 延迟计算”语义不变，减少公共 hook 的 `Function` 与宽泛返回值
+- `ChartDrillContext.ts`、`ChartWorkbench.tsx` 与 `ChartEditor.tsx` 的 `onDateLevelChange` 改为复用显式 `ChartConfigPayloadType`，继续收口时间层级切换链路中的宽泛回调
+- `ChartPreviewBoard.tsx`、`ChartPreviewBoardForShare.tsx`、`DataChartWidgetCore.tsx` 的时间层级切换与图表鼠标事件入口改为复用显式 `ChartConfigPayloadType`、`ChartMouseEventParams`，继续压缩预览/分享/看板链路中的局部 `any`
+- `ChartEditor.tsx`、`ChartPreviewBoard.tsx`、`ChartPreviewBoardForShare.tsx` 的 `registerMouseEvents` 回调入口改为走显式 `ChartMouseEventParams`，继续压缩工作台/预览/分享链路里的未声明事件对象
+- `ChartSelectionManager.ts` 的点击回调数组与事件透传结构改为走显式 `ChartMouseEventParams` 兼容形态，并保留既有 `componentIndex / dataIndex / selectedItems` 语义不变
+- `ChartIFrameEventBroker.ts` 与 `useVisibiltyStyle.ts` 的通用 runtime 容器回调改为显式函数签名，继续压缩 iframe 生命周期代理与可见性样式 helper 中的 `Function`
+- `WaterfallChart.tsx` 的选择事件数据补齐最小 `name / value / rowData` 结构，避免运行时图表选择链路继续依赖未声明的裸对象拼装
 
 当前验证计划：
 

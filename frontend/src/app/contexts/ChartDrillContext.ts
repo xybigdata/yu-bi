@@ -21,8 +21,11 @@ import {
   DrillThroughSetting,
   ViewDetailSetting,
 } from 'app/components/FormGenerator/Customize/Interaction/types';
+import { ChartConfigPayloadType } from 'app/pages/ChartWorkbenchPage/slice/types';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { createContext } from 'react';
+
+type DateLevelChangeType = 'data';
 
 const ChartDrillContext = createContext<{
   drillOption?: IChartDrillOption;
@@ -31,7 +34,10 @@ const ChartDrillContext = createContext<{
   viewDetailSetting?: ViewDetailSetting;
   drillThroughSetting?: DrillThroughSetting;
   onDrillOptionChange?: (option: IChartDrillOption) => void;
-  onDateLevelChange?: (type: string, option: any) => void;
+  onDateLevelChange?: (
+    type: DateLevelChangeType,
+    option: ChartConfigPayloadType,
+  ) => void;
   onViewDataChange?: () => void;
   onCrossFilteringChange?: () => void;
   onDrillThroughChange?: (ruleId?: string) => void;

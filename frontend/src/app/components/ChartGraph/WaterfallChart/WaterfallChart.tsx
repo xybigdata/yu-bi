@@ -179,7 +179,11 @@ class WaterfallChart extends Chart {
               ...rest,
               dataIndex: dataIndex,
               componentIndex: '',
-              data: { ...this.rowDataList[dataIndex] },
+              data: {
+                name: String(rest?.name || ''),
+                value: String(rest?.value ?? ''),
+                ...this.rowDataList[dataIndex],
+              },
             });
           });
         }

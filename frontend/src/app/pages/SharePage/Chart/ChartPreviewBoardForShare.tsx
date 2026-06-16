@@ -27,9 +27,10 @@ import useDebouncedLoadingStatus from 'app/hooks/useDebouncedLoadingStatus';
 import useMount from 'app/hooks/useMount';
 import useResizeObserver from 'app/hooks/useResizeObserver';
 import ChartManager from 'app/models/ChartManager';
+import { ChartConfigPayloadType } from 'app/pages/ChartWorkbenchPage/slice/types';
 import useDisplayJumpVizDialog from 'app/pages/MainPage/pages/VizPage/hooks/useDisplayJumpVizDialog';
 import useDisplayViewDetail from 'app/pages/MainPage/pages/VizPage/hooks/useDisplayViewDetail';
-import { IChart } from 'app/types/Chart';
+import { ChartMouseEventParams, IChart } from 'app/types/Chart';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import {
   chartSelectionEventListener,
@@ -45,10 +46,7 @@ import styled from 'styled-components';
 import { isEmptyArray } from 'utils/object';
 import ChartDrillContext from '../../../contexts/ChartDrillContext';
 import ControllerPanel from '../../MainPage/pages/VizPage/ChartPreview/components/ControllerPanel';
-import {
-  ChartPreview,
-  FilterSearchParams,
-} from '../../MainPage/pages/VizPage/slice/types';
+import { ChartPreview, FilterSearchParams } from '../../MainPage/pages/VizPage/slice/types';
 import { HeadlessBrowserIdentifier } from '../components/HeadlessBrowserIdentifier';
 import { shareActions } from '../slice';
 import {
@@ -275,11 +273,11 @@ const ChartPreviewBoardForShare: FC<{
       buildViewDataEventParams,
     ]);
 
-    const registerChartEvents = chart => {
+    const registerChartEvents = (chart?: IChart) => {
       chart?.registerMouseEvents([
         {
           name: 'click',
-          callback: param => {
+          callback: (param?: ChartMouseEventParams) => {
             if (param?.interactionType === ChartInteractionEvent.PagingOrSort) {
               tablePagingAndSortEventListener(param, p => {
                 dispatch(
@@ -336,7 +334,10 @@ const ChartPreviewBoardForShare: FC<{
       );
     };
 
-    const handleDateLevelChange = (type, payload) => {
+    const handleDateLevelChange = (
+      type: 'data',
+      payload: ChartConfigPayloadType,
+    ) => {
       dispatch(
         updateGroupAndFetchDatasetForShare({
           backendChartId: chartPreview?.backendChart?.id!,

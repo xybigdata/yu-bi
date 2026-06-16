@@ -17,7 +17,7 @@
  */
 
 import { ChartInteractionEvent } from 'app/constants';
-import { ChartMouseEvent } from 'app/types/Chart';
+import { ChartMouseEvent, ChartMouseEventParams } from 'app/types/Chart';
 import { SelectedItem } from 'app/types/ChartConfig';
 import type { EChartsType } from 'echarts';
 import { KEYBOARD_EVENT_NAME } from 'globalConstants';
@@ -26,7 +26,15 @@ import { isEmptyArray } from 'utils/object';
 export class ChartSelectionManager {
   private _selectedItems: Array<SelectedItem> = [];
   private _multipleSelect: boolean = false;
-  private _clickCallbacks: Function[] = [];
+  private _clickCallbacks: Array<
+    (params?: ChartMouseEventParams) => void
+  > = [];
+
+  private static hasSelectableData(
+    data: unknown,
+  ): data is NonNullable<ChartMouseEventParams['data']> {
+    return data !== undefined;
+  }
 
   constructor(events?: ChartMouseEvent[]) {
     this._clickCallbacks =
@@ -103,12 +111,16 @@ export class ChartSelectionManager {
     componentIndex: string | number;
     componentType?: string;
     dataIndex: string | number;
-    data: any;
+    data?: unknown;
   }) {
     if (params.componentType === 'geo') return;
+    if (!ChartSelectionManager.hasSelectableData(params.data)) {
+      return;
+    }
+    const selectedData = params.data;
     const item = {
       index: params.componentIndex + ',' + params.dataIndex,
-      data: params.data,
+      data: selectedData,
     };
     let newSelectedItems = this._selectedItems.concat();
     const existingItemIndex = newSelectedItems.findIndex(
@@ -132,10 +144,13 @@ export class ChartSelectionManager {
     this._selectedItems = newSelectedItems;
     this._clickCallbacks.forEach(cb => {
       cb?.({
-        ...params,
+        componentIndex: params.componentIndex,
+        componentType: params.componentType,
+        data: selectedData,
         interactionType: isEmptyArray(this._selectedItems)
           ? ChartInteractionEvent.UnSelect
           : ChartInteractionEvent.Select,
+        dataIndex: params.dataIndex as ChartMouseEventParams['dataIndex'],
         selectedItems: this._selectedItems,
       });
     });

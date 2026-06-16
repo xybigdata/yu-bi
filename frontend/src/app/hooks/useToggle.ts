@@ -17,9 +17,17 @@
  */
 import { useCallback, useState } from 'react';
 
-const useToggle = (initialState = false): [boolean, Function] => {
+type ToggleHandler = (nextState?: boolean) => void;
+
+const useToggle = (initialState = false): [boolean, ToggleHandler] => {
   const [state, setState] = useState(initialState);
-  const toggle = useCallback(() => setState(state => !state), []);
+  const toggle = useCallback((nextState?: boolean) => {
+    if (typeof nextState === 'boolean') {
+      setState(nextState);
+      return;
+    }
+    setState(state => !state);
+  }, []);
   return [state, toggle];
 };
 
