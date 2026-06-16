@@ -293,14 +293,14 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`前端测试层弱类型收口（长期低风险分支持续推进）`
+当前累计专题：`前端生产代码低风险类型边界收口（长期低风险分支持续推进）`
 
 本批目标：
 
-- 继续清理测试层中散落的 `as any` / 宽泛 `any`
-- 优先处理只影响测试数据表达、helper 类型和公开类型补正的低风险点
-- 保持迁移、工具函数、表单组件和图表 helper 的断言语义不变
-- 大文件只分段推进，不做整文件重写
+- 继续清理生产代码中能用现有 DTO / APIResponse / Axios 类型表达的 `any`
+- 优先处理请求工具、下载工具、错误处理和“不消费响应体”的 API 调用
+- 保持接口路径、请求参数、错误提示和下载行为不变
+- 返回数据会进入业务拼装的链路先标记评估，不硬改
 
 当前累计清单：
 
@@ -308,8 +308,14 @@
 - 已完成：工具测试层第一批局部弱类型收口
 - 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 的局部弱类型收口
 - 已完成：工具测试层真实 `as any` / 宽泛 `any` 复扫，当前只剩 `expect.any(Function)` 这类断言 matcher
+- 已完成：`requestWithHeader<T>` 返回 `[data, headers]` 的显式类型边界，下载文件调用方不再通过 `as any` 解构
+- 已完成：`request2` 扩展点、默认错误处理和未授权处理的错误入参从宽泛 `any` 收口到 `unknown` + 局部最小结构
+- 已完成：下载任务、模板导出、资源导入导出、看板更新等“不消费响应体”的请求泛型从 `any` / `{}` 收口到 `null`
+- 已完成：数据源 schema 同步 thunk 修正为真实返回 `null`，View schema 拉取改为复用 `DatabaseSchema` 显式 payload
+- 已完成：`utils/utils.ts` 的 Axios 错误响应体改为 `APIResponse<unknown>`，`fastDeleteArrayElement` 改为泛型数组 helper
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
-- 下一批候选：`utils/fetch.ts` 的响应数据边界评估、`utils/chartHelper.ts` 中可隔离 helper 的局部类型收口
+- 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
+- 下一批候选：`utils/chartHelper.ts`、`utils/internalChartHelper.ts` 中可隔离、已有测试覆盖的 helper 局部类型收口
 
 当前已落地范围：
 
@@ -370,12 +376,15 @@
 - `number.ts` 的数值格式化入口改为 `unknown` 宽输入加显式数值转换 helper，保留非数值原样返回语义，减少生产工具函数里的宽泛 `any`
 - `mutation.ts` 的 Immer draft 更新桥接改为 `Draft<T>`，去掉泛型数组与递归更新链路中的局部 `as any`
 - `time.ts` 的 Dayjs 单位兼容桥接从 `any` 收窄到官方单位类型断言，保持 quarter 插件运行时语义不变
+- `request.ts` 的请求扩展点和 `requestWithHeader<T>` 响应头返回链路改为显式类型，减少请求工具层结构伪装与 `any` 中转
+- `fetch.ts` 的下载任务、分享链接、文件保存与名称校验入口补齐最小类型，保持 Blob 下载行为不变
+- `ChartWorkbenchPage`、`Board`、`BoardEditor`、`VizPage`、`ResourceMigrationPage`、`SourcePage`、`ViewPage` 中可确认响应体不消费或已有 DTO 的请求泛型完成局部收口
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/utils/__tests__/time.test.ts src/app/utils/__tests__/number.test.ts src/app/utils/__tests__/chartHelper.test.ts src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx`
-- `rg -n "as any|const .*: any|any\\[\\]|any\\b" frontend/src/app/utils/mutation.ts frontend/src/app/utils/time.ts frontend/src/app/utils/number.ts frontend/src/app/utils/__tests__ frontend/src/app/components/FormGenerator/__tests__ -g '*.ts' -g '*.tsx'`
+- `npm run test:ci -- src/app/utils/__tests__/fetch.test.ts src/utils/__tests__/utils.test.ts`
+- `rg -n "request2<any>|request2<any\\[\\]>|request2<\\{\\}>" frontend/src/app frontend/src/utils -g '*.ts' -g '*.tsx'`
 
 ### 6.2 最近已完成
 
@@ -395,15 +404,20 @@
 - `number.ts` 数值工具输入边界收口
 - `mutation.ts` Immer draft 更新边界收口
 - `time.ts` Dayjs 单位兼容桥接类型收口
+- 请求工具与下载工具响应边界收口
+- API thunk 中“不消费响应体”调用的泛型收口
+- 通用错误处理与数组 helper 类型边界收口
 
 ## 7. 下一阶段执行顺序
 
 按这个顺序推进，避免专题扩散：
 
-1. 复扫生产工具函数中的低风险单点类型债，只处理不改变运行时语义的局部收口
-2. 时间体系剩余调用点继续收口
-3. 前端依赖收口与历史入口审计继续逐个推进
-4. 安装健康度与锁文件一致性持续检查
+1. 继续复扫生产工具函数中的低风险单点类型债，只处理不改变运行时语义的局部收口
+2. 优先从 `chartHelper.ts` / `internalChartHelper.ts` 中挑已有测试覆盖、可隔离的 helper 继续收口
+3. `useSaveAsViz`、schema/复制保存这类返回数据会进入业务拼装的链路单独评估，不混入低风险批次
+4. 时间体系剩余调用点继续收口
+5. 前端依赖收口与历史入口审计继续逐个推进
+6. 安装健康度与锁文件一致性持续检查
 
 ## 8. 每轮固定门禁
 

@@ -328,7 +328,7 @@ export const exportChartTpl = createAsyncThunk(
       avatar: newConf.chartGraphId, //
       config: JSON.stringify(newConf),
     };
-    await request2<any>({
+    await request2<null>({
       url: `viz/export/datachart/template`,
       method: 'POST',
       data: { datachart: newChart },

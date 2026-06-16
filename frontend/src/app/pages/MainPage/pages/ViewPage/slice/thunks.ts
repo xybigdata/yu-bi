@@ -57,6 +57,7 @@ import {
   StructViewQueryProps,
   UnarchiveViewParams,
   UpdateViewBaseParams,
+  DatabaseSchema,
   VariableHierarchy,
   ViewBase,
   ViewSimple,
@@ -125,25 +126,33 @@ export const getViewDetail = createAsyncThunk<
   },
 );
 
-export const getSchemaBySourceId = createAsyncThunk<any, string>(
-  'source/getSchemaBySourceId',
-  async (sourceId, { getState }) => {
-    const sourceSchemas = selectSourceDatabaseSchemas(getState() as RootState, {
-      id: sourceId,
-    });
-    if (sourceSchemas) {
-      return;
-    }
-    const { data } = await request2<any>({
-      url: `/sources/schemas/${sourceId}`,
-      method: 'GET',
-    });
-    return {
-      sourceId,
-      data,
-    };
-  },
-);
+type SourceSchemaResponse = {
+  schemaItems: DatabaseSchema[];
+};
+type SourceSchemaPayload = {
+  sourceId: string;
+  data: SourceSchemaResponse;
+};
+
+export const getSchemaBySourceId = createAsyncThunk<
+  SourceSchemaPayload | undefined,
+  string
+>('source/getSchemaBySourceId', async (sourceId, { getState }) => {
+  const sourceSchemas = selectSourceDatabaseSchemas(getState() as RootState, {
+    id: sourceId,
+  });
+  if (sourceSchemas) {
+    return;
+  }
+  const { data } = await request2<SourceSchemaResponse>({
+    url: `/sources/schemas/${sourceId}`,
+    method: 'GET',
+  });
+  return {
+    sourceId,
+    data,
+  };
+});
 
 export const runSql = createAsyncThunk<
   QueryResult | null,

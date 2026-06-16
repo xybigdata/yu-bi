@@ -126,11 +126,11 @@ export const deleteSource = createAsyncThunk<null, DeleteSourceParams>(
 export const syncSourceSchema = createAsyncThunk<null, { sourceId: string }>(
   'source/syncSourceSchema',
   async ({ sourceId }) => {
-    const { data } = await request2<any>({
+    await request2<null>({
       url: `/sources/sync/schemas/${sourceId}`,
       method: 'GET',
     });
-    return data;
+    return null;
   },
 );
 

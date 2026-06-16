@@ -195,7 +195,7 @@ export const toUpdateDashboard = createAsyncThunk<
       widgetToDelete: group.widgetToDelete,
     };
 
-    await request2<any>({
+    await request2<null>({
       url: `viz/dashboards/${dashBoard.id}`,
       method: 'put',
       data: updateData,

@@ -35,7 +35,10 @@ function createUuidFromRandomBytes(randomBytes: number[]) {
 }
 
 export function uuidv4() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+  if (
+    typeof crypto !== 'undefined' &&
+    typeof crypto.randomUUID === 'function'
+  ) {
     return crypto.randomUUID();
   }
 
@@ -43,7 +46,9 @@ export function uuidv4() {
     typeof crypto !== 'undefined' &&
     typeof crypto.getRandomValues === 'function'
   ) {
-    return createUuidFromRandomBytes(Array.from(crypto.getRandomValues(new Uint8Array(16))));
+    return createUuidFromRandomBytes(
+      Array.from(crypto.getRandomValues(new Uint8Array(16))),
+    );
   }
 
   return createUuidFromRandomBytes(
@@ -59,7 +64,7 @@ export function universalUUID() {
 export function errorHandle(error) {
   if (error?.response) {
     // AxiosError
-    const { response } = error as AxiosError<APIResponse<any>>;
+    const { response } = error as AxiosError<APIResponse<unknown>>;
     switch (response?.status) {
       case 401:
         message.error({ key: '401', content: String(i18next.t('global.401')) });
@@ -83,7 +88,7 @@ export function getErrorMessage(error) {
     return error;
   }
   if (error?.response) {
-    const { response } = error as AxiosError<APIResponse<any>>;
+    const { response } = error as AxiosError<APIResponse<unknown>>;
     switch (response?.status) {
       case 401:
         removeToken();
@@ -109,8 +114,8 @@ export function rejectHandle(error, rejectWithValue) {
   }
   if ((error as AxiosError).response) {
     return rejectWithValue(
-      ((error as AxiosError).response as AxiosResponse<APIResponse<any>>).data
-        .message,
+      ((error as AxiosError).response as AxiosResponse<APIResponse<unknown>>)
+        .data.message,
     );
   } else {
     return rejectWithValue(error.message);
@@ -409,7 +414,7 @@ export function getDiffParams<T extends { id?: string }>(
   };
 }
 
-export function fastDeleteArrayElement(arr: any[], index: number) {
+export function fastDeleteArrayElement<T>(arr: T[], index: number) {
   arr[index] = arr[arr.length - 1];
   arr.pop();
 }
