@@ -355,11 +355,12 @@
 - `migrateWidgetChartConfig.test.ts`、`alpha3.test.ts` 与 `migrateWidgetConfig.test.ts` 继续按最小测试结构收口 widget 配置、图表迁移配置与 tab 自定义配置中的局部 `any`，保持迁移逻辑与输出语义不变
 - `MigrationEventDispatcher.test.ts` 继续按显式迁移模型收口事件输入、回退值和任务回调中的局部 `any` / `undefined as any`，保持事件分发与异常回退语义不变
 - `migrateChartConfig.test.ts`、`migrateBoardConfig.test.ts`、`index.test.ts` 与 `migrateStoryPageConfig.test.ts` 继续按正式 DTO / 配置类型收口迁移测试中的局部 `any`，保持版本归一化、默认值补齐与异常回退语义不变
+- `migrateWidgets.test.ts` 继续按 `WidgetBeta3` / `Widget` / `ServerWidget` helper 收口 widget 迁移主流程测试中的局部 `any`，仅保留旧 `filter` 兼容输入场景所需的单点显式兼容强转
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/migration/__tests__/migrateChartConfig.test.ts src/app/migration/__tests__/migrateBoardConfig.test.ts src/app/migration/__tests__/index.test.ts src/app/migration/__tests__/migrateStoryPageConfig.test.ts src/app/migration/__tests__/MigrationEventDispatcher.test.ts src/app/migration/__tests__/migrateWidgetChartConfig.test.ts src/app/migration/__tests__/alpha3.test.ts src/app/migration/__tests__/migrateWidgetConfig.test.ts`
+- `npm run test:ci -- src/app/migration/__tests__/migrateWidgets.test.ts src/app/migration/__tests__/migrateChartConfig.test.ts src/app/migration/__tests__/migrateBoardConfig.test.ts src/app/migration/__tests__/index.test.ts src/app/migration/__tests__/migrateStoryPageConfig.test.ts src/app/migration/__tests__/MigrationEventDispatcher.test.ts src/app/migration/__tests__/migrateWidgetChartConfig.test.ts src/app/migration/__tests__/alpha3.test.ts src/app/migration/__tests__/migrateWidgetConfig.test.ts`
 
 ### 6.2 最近已完成
 
