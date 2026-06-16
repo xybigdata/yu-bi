@@ -25,6 +25,7 @@ import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { ChartComputedFieldHandle } from 'app/types/ComputedFieldEditor';
 import { hasAggregationFunction } from 'app/utils/chartHelper';
 import { FC, useCallback, useRef, useState } from 'react';
+import type { Key } from 'react';
 import styled from 'styled-components';
 import ChartComputedFieldEditor from './ChartComputedFieldEditor/ChartComputedFieldEditor';
 import ChartSearchableList from './ChartSearchableList';
@@ -156,10 +157,9 @@ const ChartComputedFieldSettingPanel: FC<{
   };
 
   const handleOnSelectValue = useCallback(
-    selectKeys => {
+    (selectKeys: Key[]) => {
       if (selectKeys?.length) {
-        const selectKey = selectKeys[0] as any;
-        handleFieldSelected(selectKey);
+        handleFieldSelected(String(selectKeys[0]));
       }
     },
     [handleFieldSelected],

@@ -57,7 +57,7 @@ const ChartPresentWrapper: FC<{
     onCreateDownloadDataTask,
     selectedItems,
   }) => {
-    const { ref: ChartGraphPanelRef } = useResizeObserver<any>({
+    const { ref: ChartGraphPanelRef } = useResizeObserver<HTMLDivElement>({
       refreshMode: 'debounce',
       refreshRate: 500,
     });
@@ -78,7 +78,10 @@ const ChartPresentWrapper: FC<{
             />
           </div>
           <ChartPresentPanel
-            containerHeight={getStableContainerSize(containerHeight, borderWidth + graphPanelHeight)}
+            containerHeight={getStableContainerSize(
+              containerHeight,
+              borderWidth + graphPanelHeight,
+            )}
             containerWidth={getStableContainerSize(containerWidth, borderWidth)}
             chart={chart}
             dataset={dataset}
@@ -98,7 +101,7 @@ const ChartPresentWrapper: FC<{
 
 export default ChartPresentWrapper;
 
-const StyledChartPresentWrapper = styled.div<{ borderWidth }>`
+const StyledChartPresentWrapper = styled.div<{ borderWidth: number }>`
   display: flex;
   flex-direction: column;
   height: 100%;

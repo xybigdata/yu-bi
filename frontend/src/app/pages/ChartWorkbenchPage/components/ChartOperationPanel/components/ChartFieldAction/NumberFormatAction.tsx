@@ -26,6 +26,7 @@ import {
   Select,
   Space,
 } from 'antd';
+import type { FormItemProps } from 'antd';
 import { FormItemEx } from 'app/components';
 import { FieldFormatType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -43,6 +44,13 @@ import {
 import { FC, useState } from 'react';
 import styled from 'styled-components';
 import { SPACE_TIMES } from 'styles/StyleConstants';
+
+type FormatDetail = NonNullable<
+  Omit<FormatFieldAction, 'type'>[Exclude<
+    FieldFormatType,
+    FieldFormatType.Default
+  >]
+>;
 
 const DefaultFormatDetailConfig: FormatFieldAction = {
   type: FieldFormatType.Default,
@@ -77,8 +85,11 @@ const NumberFormatAction: FC<{
   config: ChartDataSectionField;
   onConfigChange: (config: ChartDataSectionField) => void;
 }> = ({ config, onConfigChange }) => {
-  const formItemLayout = {
-    labelAlign: 'right' as any,
+  const formItemLayout: Pick<
+    FormItemProps,
+    'labelAlign' | 'labelCol' | 'wrapperCol'
+  > = {
+    labelAlign: 'right',
     labelCol: { span: 8 },
     wrapperCol: { span: 8 },
   };
@@ -94,7 +105,7 @@ const NumberFormatAction: FC<{
     );
   });
 
-  const handleFormatTypeChanged = newType => {
+  const handleFormatTypeChanged = (newType: FieldFormatType) => {
     const defaultFormatDetail = DefaultFormatDetailConfig[newType];
     const newConfig = updateBy(config, draft => {
       draft.format = {
@@ -107,7 +118,7 @@ const NumberFormatAction: FC<{
     onConfigChange?.(newConfig);
   };
 
-  const handleFormatDetailChanged = newFormatDetail => {
+  const handleFormatDetailChanged = (newFormatDetail: FormatDetail) => {
     const newConfig = updateBy(config, draft => {
       draft.format = {
         type,

@@ -31,6 +31,12 @@ import {
   SPACE_TIMES,
 } from 'styles/StyleConstants';
 
+type RenderIconArgs = {
+  iconStr?: string;
+  isMatchRequirement?: boolean;
+  isActive?: boolean;
+};
+
 const ChartGraphIcon: FC<{
   chart?: Pick<ChartPaletteItem, 'meta'>;
   isActive?: boolean;
@@ -50,17 +56,14 @@ const ChartGraphIcon: FC<{
     [onChartChange],
   );
 
-  const renderIcon = ({
-    ...args
-  }: {
-    iconStr;
-    isMatchRequirement;
-    isActive;
-  }) => {
-    if (/^<svg/.test(args?.iconStr) || /^<\?xml/.test(args?.iconStr)) {
+  const renderIcon = ({ ...args }: RenderIconArgs) => {
+    if (!args.iconStr) {
+      return <SVGFontIconRender {...args} />;
+    }
+    if (/^<svg/.test(args.iconStr) || /^<\?xml/.test(args.iconStr)) {
       return <SVGImageRender {...args} />;
     }
-    if (/svg\+xml;base64/.test(args?.iconStr)) {
+    if (/svg\+xml;base64/.test(args.iconStr)) {
       return <Base64ImageRender {...args} />;
     }
     return <SVGFontIconRender {...args} />;
@@ -126,7 +129,7 @@ const ChartGraphIcon: FC<{
 
 export default ChartGraphIcon;
 
-const SVGFontIconRender = ({ iconStr, isMatchRequirement }) => {
+const SVGFontIconRender = ({ iconStr, isMatchRequirement }: RenderIconArgs) => {
   return (
     <StyledSVGFontIcon
       isMatchRequirement={isMatchRequirement}
@@ -135,8 +138,8 @@ const SVGFontIconRender = ({ iconStr, isMatchRequirement }) => {
   );
 };
 
-const SVGImageRender = ({ iconStr, isMatchRequirement, isActive }) => {
-  const encodedStr = window.encodeURIComponent(iconStr);
+const SVGImageRender = ({ iconStr, isMatchRequirement }: RenderIconArgs) => {
+  const encodedStr = window.encodeURIComponent(iconStr || '');
   return (
     <StyledInlineSVGIcon
       alt="svg icon"
@@ -147,12 +150,12 @@ const SVGImageRender = ({ iconStr, isMatchRequirement, isActive }) => {
   );
 };
 
-const Base64ImageRender = ({ iconStr, isMatchRequirement, isActive }) => {
+const Base64ImageRender = ({ iconStr, isMatchRequirement }: RenderIconArgs) => {
   return (
     <StyledBase64Icon
       alt="svg icon"
       style={{ height: FONT_SIZE_ICON_MD, width: FONT_SIZE_ICON_MD }}
-      src={iconStr}
+      src={iconStr || ''}
       isMatchRequirement={isMatchRequirement}
     />
   );
@@ -178,10 +181,8 @@ const StyledSVGFontIcon = styled.i<{ isMatchRequirement?: boolean }>`
   opacity: ${p => (p.isMatchRequirement ? 1 : 0.4)};
 `;
 
-const StyledBase64Icon = styled.i<{
+const StyledBase64Icon = styled.img<{
   isMatchRequirement?: boolean;
-  alt: any;
-  src: any;
 }>`
   opacity: ${p => (p.isMatchRequirement ? 1 : 0.4)};
 `;

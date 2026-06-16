@@ -29,6 +29,8 @@ import { FC, memo, useContext } from 'react';
 import styled from 'styled-components';
 import widgetManagerInstance from '../../../../components/WidgetManager';
 
+type WidgetConfigContext = unknown;
+
 const StyledWrapper = styled.div`
   width: 100%;
   min-height: 0;
@@ -38,7 +40,7 @@ const StyledWrapper = styled.div`
 export const WidgetConfigPanel: FC<{
   configs: ChartStyleConfig[];
   dataConfigs?: ChartDataConfig[];
-  context?: any;
+  context?: WidgetConfigContext;
   onChange: (
     ancestors: number[],
     config: ChartStyleConfig,
@@ -68,7 +70,7 @@ export const WidgetConfigPanel: FC<{
 export const BoardConfigCollapse: FC<{
   configs: ChartStyleConfig[];
   dataConfigs?: ChartDataConfig[];
-  context?: any;
+  context?: WidgetConfigContext;
   onChange: (
     ancestors: number[],
     config: ChartStyleConfig,

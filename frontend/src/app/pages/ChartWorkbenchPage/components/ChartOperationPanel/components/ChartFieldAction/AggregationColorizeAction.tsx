@@ -31,6 +31,8 @@ import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
 import { SPACE_MD, SPACE_XS } from 'styles/StyleConstants';
 
+type AggregationColor = { key: string; value: string };
+
 const AggregationColorizeAction: FC<{
   config: ChartDataSectionField;
   dataset?: ChartDataSetDTO;
@@ -42,14 +44,18 @@ const AggregationColorizeAction: FC<{
 }> = memo(({ config, dataset, onConfigChange, i18nPrefix }) => {
   const actionNeedNewRequest = true;
   const [themeColors, setThemeColors] = useState(Theme.color);
-  const [colors, setColors] = useState<{ key: string; value: string }[]>(
+  const [colors, setColors] = useState<AggregationColor[]>(
     setColorFn(config, dataset, themeColors),
   );
   const [selectColor, setSelectColor] = useState(colors[0]);
   const [selColorBoxStatus, setSelColorBoxStatus] = useState(false);
   const t = useI18NPrefix(i18nPrefix);
 
-  const handleColorChange = value => {
+  const handleColorChange = (value?: string) => {
+    if (!value) {
+      setSelColorBoxStatus(false);
+      return;
+    }
     if (selectColor) {
       const currentSelectColor = Object.assign({}, selectColor, {
         value,
@@ -78,7 +84,7 @@ const AggregationColorizeAction: FC<{
         {colors.map(c => (
           <li
             key={c.key}
-            onClick={(e: any) => {
+            onClick={() => {
               setSelColorBoxStatus(true);
               setSelectColor(c);
             }}
@@ -93,7 +99,7 @@ const AggregationColorizeAction: FC<{
     );
   };
 
-  const selectThemeColorFn = colorArr => {
+  const selectThemeColorFn = (colorArr: string[]) => {
     let selectColor1 = setColorFn(config, dataset, colorArr, true);
 
     setThemeColors(colorArr);
@@ -136,14 +142,14 @@ const AggregationColorizeAction: FC<{
 export default AggregationColorizeAction;
 
 function setColorFn(
-  config,
-  dataset,
-  themeColors,
+  config: ChartDataSectionField,
+  dataset: ChartDataSetDTO | undefined,
+  themeColors: string[],
   need = false,
-): { key: string; value: string }[] {
+): AggregationColor[] {
   const colorizedColumnName = config.colName;
   const colorizeIndex =
-    dataset?.columns?.findIndex(r => r.name[0] === colorizedColumnName) || 0;
+    dataset?.columns?.findIndex(r => r.name?.[0] === colorizedColumnName) || 0;
   const colorizedGroupValues = Array.from(
     new Set(dataset?.rows?.map(r => String(r[colorizeIndex]))),
   );

@@ -24,7 +24,7 @@ import { TextSetForm } from './TextSetForm';
 export interface TextSetterProps {}
 export const TextSetter: React.FC<TextSetterProps> = memo(() => {
   const tc = useI18NPrefix(`viz.control`);
-  const itemProps: FormItemProps<any> = {
+  const itemProps: FormItemProps = {
     preserve: true,
     name: ControllerValuesName,
     label: tc('defaultValue'),

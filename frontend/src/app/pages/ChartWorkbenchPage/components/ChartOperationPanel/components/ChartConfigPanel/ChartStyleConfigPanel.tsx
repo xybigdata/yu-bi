@@ -17,6 +17,7 @@
  */
 
 import { Collapse } from 'antd';
+import type { CollapseProps } from 'antd';
 import { ItemLayout } from 'app/components/FormGenerator';
 import { FormGroupLayoutMode } from 'app/components/FormGenerator/constants';
 import GroupLayout from 'app/components/FormGenerator/Layout/GroupLayout';
@@ -24,19 +25,11 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ChartDataConfig, ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo } from 'react';
 
-type CollapseItemsCompatProps = {
-  items: Array<{
-    key: string;
-    label: React.ReactNode;
-    children: React.ReactNode;
-  }>;
-};
-
 const ChartStyleConfigPanel: FC<{
   configs?: ChartStyleConfig[];
   dataConfigs?: ChartDataConfig[];
   i18nPrefix: string;
-  context?: any;
+  context?: unknown;
   onChange: (
     ancestors: number[],
     config: ChartStyleConfig,
@@ -52,7 +45,7 @@ const ChartStyleConfigPanel: FC<{
           ?.filter(c => !Boolean(c.hidden))
           ?.map((c, index) => {
             if (c.comType === 'group') {
-              const collapseProps = {
+              const collapseProps: Pick<CollapseProps, 'items'> = {
                 items: [
                   {
                     key: c.key,
@@ -75,9 +68,9 @@ const ChartStyleConfigPanel: FC<{
                     ),
                   },
                 ],
-              } as CollapseItemsCompatProps;
+              };
 
-              return <Collapse key={c.key} ghost {...(collapseProps as any)} />;
+              return <Collapse key={c.key} ghost {...collapseProps} />;
             } else {
               return (
                 <ItemLayout

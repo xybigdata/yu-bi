@@ -30,7 +30,16 @@ import { FC, memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { IsKeyIn } from 'utils/object';
 
-const isDisableSingleDropdownListFacade = condition => {
+type SliderFacadeConfig = Extract<FilterFacade, { facade: string }> & {
+  min?: number | null;
+  max?: number | null;
+};
+type FacadeType = Extract<FilterFacade, string>;
+type SliderRange = [number | null, number | null];
+
+const isDisableSingleDropdownListFacade = (
+  condition?: ChartFilterCondition,
+) => {
   let isDisableSingleDropdownList = true;
   if (Array.isArray(condition?.value)) {
     if (IsKeyIn(condition?.value?.[0], 'key')) {
@@ -41,7 +50,10 @@ const isDisableSingleDropdownListFacade = condition => {
   return isDisableSingleDropdownList;
 };
 
-const getFacadeOptions = (condition, category) => {
+const getFacadeOptions = (
+  condition?: ChartFilterCondition,
+  category?: string,
+): ControllerFacadeTypes[] => {
   if (!condition || !category) {
     return [];
   }
@@ -94,31 +106,39 @@ const FilterFacadeConfiguration: FC<
     category?: string;
     facade?: FilterFacade;
     condition?: ChartFilterCondition;
-    onChange;
+    onChange: (facade?: FilterFacade) => void;
   } & I18NComponentProps
 > = memo(
   ({ i18nPrefix, category, facade, condition, onChange: onFacadeChange }) => {
     const t = useI18NPrefix(i18nPrefix);
     const t2 = useI18NPrefix('viz.common.enum.controllerFacadeTypes');
-    const [currentFacade, setCurrentFacade] = useState<string | undefined>(
+    const [currentFacade, setCurrentFacade] = useState<FacadeType | undefined>(
       () => {
         if (typeof facade === 'string') {
-          return facade as string;
+          return facade as FacadeType;
         } else if (typeof facade === 'object') {
-          return facade.facade as string;
+          return facade.facade as FacadeType;
         }
       },
     );
-    const [radioType, setRedioType] = useState(() => {
+    const [radioType, setRedioType] = useState<ControllerRadioFacadeTypes>(
+      () => {
+        if (typeof facade === 'object') {
+          return facade.type === ControllerRadioFacadeTypes.Button
+            ? ControllerRadioFacadeTypes.Button
+            : ControllerRadioFacadeTypes.Default;
+        }
+        return ControllerRadioFacadeTypes.Default;
+      },
+    );
+    const [sliderOptions, setSliderOptions] = useState<SliderRange>(() => {
       if (typeof facade === 'object') {
-        return facade.type;
+        return [
+          typeof facade.min === 'number' ? facade.min : null,
+          typeof facade.max === 'number' ? facade.max : null,
+        ];
       }
-      return ControllerRadioFacadeTypes.Default;
-    });
-    const [sliderOptions, setSliderOptions] = useState(() => {
-      if (typeof facade === 'object') {
-        return [facade.min, facade.max];
-      }
+      return [null, null];
     });
     const [facadeOptions, setFacadeOptions] = useState<ControllerFacadeTypes[]>(
       [],
@@ -140,18 +160,27 @@ const FilterFacadeConfiguration: FC<
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [condition, category, currentFacade]);
 
-    const handleFacadeChange = facade => {
+    const handleFacadeChange = (facade?: FacadeType) => {
       setCurrentFacade(facade);
       onFacadeChange(facade);
     };
 
-    const handleSliderOptionChange = (min, max) => {
-      setSliderOptions([min, max]);
-      onFacadeChange({ facade: currentFacade, min, max });
+    const handleSliderOptionChange = (
+      min?: number | null,
+      max?: number | null,
+    ) => {
+      setSliderOptions([min ?? null, max ?? null]);
+      if (!currentFacade) {
+        return;
+      }
+      onFacadeChange({ facade: currentFacade, min, max } as SliderFacadeConfig);
     };
 
-    const handleRadioTypeChange = type => {
+    const handleRadioTypeChange = (type: ControllerRadioFacadeTypes) => {
       setRedioType(type);
+      if (!currentFacade) {
+        return;
+      }
       onFacadeChange({ facade: currentFacade, type });
     };
 
@@ -191,14 +220,20 @@ const FilterFacadeConfiguration: FC<
                 <InputNumber
                   value={sliderOptions?.[0]}
                   onChange={value =>
-                    handleSliderOptionChange(value, sliderOptions?.[1])
+                    handleSliderOptionChange(
+                      typeof value === 'number' ? value : null,
+                      sliderOptions?.[1] ?? null,
+                    )
                   }
                 />
                 {t('max')}
                 <InputNumber
                   value={sliderOptions?.[1]}
                   onChange={value =>
-                    handleSliderOptionChange(sliderOptions?.[0], value)
+                    handleSliderOptionChange(
+                      sliderOptions?.[0] ?? null,
+                      typeof value === 'number' ? value : null,
+                    )
                   }
                 />
               </Space>

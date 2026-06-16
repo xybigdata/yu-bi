@@ -18,6 +18,7 @@
 
 import { Button, Row, Select, Space, Tabs, Transfer, Tree } from 'antd';
 import type { TransferProps } from 'antd';
+import type { Key } from 'react';
 import { FilterConditionType } from 'app/constants';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import useMount from 'app/hooks/useMount';
@@ -47,6 +48,9 @@ import {
 import { FilterOptionForwardRef } from '.';
 import CategoryConditionEditableTable from './CategoryConditionEditableTable';
 import CategoryConditionRelationSelector from './CategoryConditionRelationSelector';
+
+type TransferItemValue = string | RelationFilterValue;
+type TreeCheckedKeys = string[] | { checked: string[]; halfChecked: string[] };
 
 const CategoryConditionConfiguration: ForwardRefRenderFunction<
   FilterOptionForwardRef,
@@ -145,7 +149,7 @@ const CategoryConditionConfiguration: ForwardRefRenderFunction<
     return dataView?.meta || [];
   };
 
-  const isChecked = (selectedKeys, eventKey) =>
+  const isChecked = (selectedKeys: string[] = [], eventKey: string) =>
     selectedKeys.indexOf(eventKey) !== -1;
 
   const fetchNewDataset = async (viewId, colName: string, dataView) => {
@@ -179,26 +183,31 @@ const CategoryConditionConfiguration: ForwardRefRenderFunction<
     });
   };
 
-  const handleGeneralListChange = async selectedKeys => {
-    const items = setListSelectedState(listDatas, selectedKeys);
-    setTargetKeys(selectedKeys);
-    setListDatas(items);
+  const handleGeneralListChange: TransferProps<RelationFilterValue>['onChange'] =
+    async targetKeys => {
+      const selectedKeys = targetKeys.map(String);
+      const items = setListSelectedState(listDatas, selectedKeys);
+      setTargetKeys(selectedKeys);
+      setListDatas(items);
 
-    const generalTypeItems = items?.filter(i => i.isSelected);
-    const filter = new ConditionBuilder(condition)
-      .setOperator(FilterSqlOperator.In)
-      .setValue(generalTypeItems)
-      .asGeneral();
-    onConditionChange(filter);
-  };
+      const generalTypeItems = items?.filter(i => i.isSelected);
+      const filter = new ConditionBuilder(condition)
+        .setOperator(FilterSqlOperator.In)
+        .setValue(generalTypeItems)
+        .asGeneral();
+      onConditionChange(filter);
+    };
 
   const filterGeneralListOptions = useCallback(
-    (inputValue, option) => option.label?.includes(inputValue) || false,
+    (inputValue: string, option?: RelationFilterValue) =>
+      option?.label?.includes(inputValue) || false,
     [],
   );
 
-  const handleGeneralTreeChange = async treeSelectedKeys => {
-    const selectedKeys = treeSelectedKeys.checked;
+  const handleGeneralTreeChange = async (treeSelectedKeys: TreeCheckedKeys) => {
+    const selectedKeys = Array.isArray(treeSelectedKeys)
+      ? treeSelectedKeys
+      : treeSelectedKeys.checked;
     const treeItems = setTreeCheckableState(treeDatas, selectedKeys);
     setTargetKeys(selectedKeys);
     setTreeDatas(treeItems);
@@ -237,8 +246,17 @@ const CategoryConditionConfiguration: ForwardRefRenderFunction<
     });
   };
 
-  const convertToList = (collection, selectedKeys) => {
-    const items: string[] = (collection || []).flatMap(c => c);
+  const convertToList = (
+    collection?: TransferItemValue[][],
+    selectedKeys: string[] = [],
+  ) => {
+    const items: string[] = (collection || []).flatMap(c =>
+      c.map(item =>
+        typeof item === 'string'
+          ? item
+          : item.key || item.label || String(item),
+      ),
+    );
     const uniqueKeys = Array.from(new Set(items));
     return uniqueKeys.map(item => ({
       key: item,
@@ -310,8 +328,12 @@ const CategoryConditionConfiguration: ForwardRefRenderFunction<
               defaultExpandAll
               checkedKeys={targetKeys}
               treeData={treeDatas}
-              onCheck={handleGeneralTreeChange}
-              onSelect={handleGeneralTreeChange}
+              onCheck={checkedKeys =>
+                handleGeneralTreeChange(checkedKeys as TreeCheckedKeys)
+              }
+              onSelect={selectedKeys =>
+                handleGeneralTreeChange(selectedKeys.map(String))
+              }
             />
           )}
           {!isTree && (
