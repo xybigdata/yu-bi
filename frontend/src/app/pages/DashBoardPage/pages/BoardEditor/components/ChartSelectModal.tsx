@@ -15,7 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Input, Modal } from 'antd';
+import { Input, Modal, TreeProps } from 'antd';
+import type { Key } from 'rc-tree/lib/interface';
 import { Tree } from 'app/components';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useGetVizIcon from 'app/hooks/useGetVizIcon';
@@ -25,7 +26,12 @@ import { Folder } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { listToTree } from 'utils/utils';
+import { ListTreeNode, listToTree } from 'utils/utils';
+
+type DataChartTreeNode = ListTreeNode<Folder & { isFolder: boolean }>;
+type DataChartTreeOnCheck = NonNullable<
+  TreeProps<DataChartTreeNode>['onCheck']
+>;
 
 export interface IProps {
   // dataCharts: DataChart[];
@@ -71,11 +77,15 @@ const ChartSelectModalModal: React.FC<IProps> = props => {
     onSelectedCharts(selectedDataChartRelIds);
   };
 
-  const onSelectChart = (SelectKeys, nodeData) => {
+  const handleSelectChart = (
+    _checkedKeys: Parameters<DataChartTreeOnCheck>[0],
+    nodeData: Parameters<DataChartTreeOnCheck>[1],
+  ) => {
     let Ids: string[] = [],
       RelIds: string[] = [];
 
-    nodeData.checkedNodes
+    const checkedNodes = nodeData.checkedNodes as DataChartTreeNode[];
+    checkedNodes
       .filter(
         node => !node.isFolder && !WidgetInfoDatachartIds.includes(node.relId),
       )
@@ -87,9 +97,14 @@ const ChartSelectModalModal: React.FC<IProps> = props => {
     setSelectedDataChartIds(Ids);
     setSelectedDataChartRelIds(RelIds);
   };
+  const onSelectChart: TreeProps['onCheck'] = (checkedKeys, nodeData) =>
+    handleSelectChart(
+      checkedKeys,
+      nodeData as Parameters<DataChartTreeOnCheck>[1],
+    );
 
   const setDefaultChartsIds = () => {
-    let ChartsIds: any = [];
+    let ChartsIds: Key[] = [];
     treeData?.forEach(treeNode => {
       let checkedLength = 0;
 

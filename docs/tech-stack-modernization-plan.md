@@ -30,7 +30,7 @@
 
 ### 2.3 工作区边界
 
-- 不动未跟踪目录：`.tmp/`、`logs/`
+- 本地运行目录 `.tmp/`、`logs/` 已加入 `.gitignore`
 - 一个提交只处理一个专题
 - 只提交与当前专题直接相关的文件
 - 尽量按专题攒成一批再提交，避免高频提交带来重复回归成本
@@ -329,6 +329,8 @@
 - 已完成：看板编辑页导航 state 补齐最小结构类型，去掉 `navigate.location.state as any`
 - 已完成：看板配置面板与 widget 配置面板的 `Collapse.items` 改为复用 antd 公开 `CollapseProps`，去掉兼容层 `as any`
 - 已完成：TabWidget 的标签位置配置改为复用 antd `TabsProps['tabPosition']`，并对历史异常位置值补齐默认回退
+- 已完成：看板 widget 工具、图表选择弹窗、自定义选项表格、添加控制器菜单与图层树节点的局部类型边界收口，保留运行时行为不变
+- 已完成：根目录 `.gitignore` 忽略 `.tmp/` 与 `logs/` 本地运行目录，避免后续误提交
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 下一批候选：`utils/chartHelper.ts`、`utils/internalChartHelper.ts` 中可隔离、已有测试覆盖的 helper 局部类型收口
@@ -412,11 +414,16 @@
 - `BoardEditor/index.tsx` 的历史导航 state 改为显式 `BoardEditorLocationState`，旧 `widgetInfo` 字符串解析结果只声明当前使用的最小字段
 - `SlideSetting/BoardConfigPanel.tsx` 与 `SlideSetting/WidgetConfigPanel.tsx` 的折叠面板 items 透传改为 `Pick<CollapseProps, 'items'>`
 - `TabWidget/tabConfig.ts` 与 `TabWidgetCore.tsx` 的标签位置从字符串强转改为显式合法值收口，保持旧配置异常值回退到 `top`
+- `DashBoardPage/utils/widget.ts` 的时间控制器 URL 参数回填与自有图表内容读取改为复用 `ControllerDate`、`ChartWidgetContent`，避免继续通过局部 `as any` 穿透
+- `ChartSelectModal.tsx` 的默认勾选 id 与树选中事件补齐显式节点类型，保留“过滤文件夹和已存在图表”的既有逻辑
+- `CustomOptions.tsx` 的拖拽行参数、`AddControler.tsx` 的菜单事件与按钮类型、`controlActions.ts` 的新增控制器 action 入参继续收口到显式边界
+- `LayerTreeItem.tsx` 的树节点内容改为复用 `WidgetConf['content']`，只表达既有 widget 配置结构
+- `.gitignore` 增加 `.tmp/`、`logs/`，减少低风险改造过程中本地运行产物干扰
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts`
+- `npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts`
 - `rg -n "CollapseItemsCompatProps|collapseProps as any|tabPosition=\\{position as any\\}" frontend/src/app/pages/DashBoardPage -g "*.tsx"`
 
 ### 6.2 最近已完成

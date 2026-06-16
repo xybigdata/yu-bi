@@ -56,6 +56,7 @@ import {
   WidgetPadding,
 } from '../pages/Board/slice/types';
 import { StrControlTypes } from '../pages/BoardEditor/components/ControllerWidgetPanel/constants';
+import { ControllerDate } from '../pages/BoardEditor/components/ControllerWidgetPanel/types';
 import { Widget, WidgetMapping } from '../types/widgetTypes';
 
 export const VALUE_SPLITTER = '###';
@@ -625,7 +626,10 @@ export const getWidgetMap = (
 
             case ControllerFacadeTypes.Time:
               content.config.controllerDate = {
-                ...(content.config.controllerDate as any),
+                ...(content.config.controllerDate ||
+                  ({
+                    pickerType: 'date',
+                  } as Pick<ControllerDate, 'pickerType'>)),
                 startTime: {
                   relativeOrExact: TimeFilterValueCategory.Exact,
                   exactValue: formatDatartDateTime(_value?.[0]),
@@ -658,11 +662,11 @@ export const getWidgetMap = (
   widgetList
     .filter(w => w.config.originalType === ORIGINAL_TYPE_MAP.ownedChart)
     .forEach(widget => {
-      let dataChart = (widget.config.content as any).dataChart as DataChart;
+      let dataChart = (widget.config.content as ChartWidgetContent).dataChart;
       if (dataChart) {
         wrappedDataCharts.push(dataChart!);
+        widget.datachartId = dataChart.id;
       }
-      widget.datachartId = dataChart?.id;
     });
 
   // 处理 widget包含关系 tab Widget 被包含的 widget.parentId 不为空

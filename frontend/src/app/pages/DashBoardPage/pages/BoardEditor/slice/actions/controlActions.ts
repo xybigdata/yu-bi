@@ -23,8 +23,13 @@ import { PageInfo } from './../../../../../MainPage/pages/ViewPage/slice/types';
 import { addWidgetsToEditBoard, getEditChartWidgetDataAsync } from './../thunk';
 import { HistoryEditBoard } from './../types';
 
+export type ControllerActionType =
+  | ControllerFacadeTypes
+  | 'queryBtn'
+  | 'resetBtn';
+
 export type BtnActionParams = {
-  type: any;
+  type: ControllerActionType;
   boardId: string;
   boardType: BoardType;
 };
