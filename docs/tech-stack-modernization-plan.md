@@ -428,6 +428,7 @@
 - `.gitignore` 增加 `.tmp/`、`logs/`，减少低风险改造过程中本地运行产物干扰
 - `ControllerWidgetPanel/types.ts`、`TimeSetter.tsx`、`ChartDataConfigSection/utils.ts`、`DateLevelMenuItems.tsx` 的共享模型与工具函数边界继续收口，开始把低风险改造从 UI 透传扩展到 Workbench 公共配置层
 - `BoardEditor/slice/thunk.ts` 的保存看板请求 thunk 返回值改为显式 `null`，继续压缩 Workbench 编辑链路中“不消费响应体”调用的宽泛泛型
+- `DashBoardPage/utils/index.ts` 的 `getWidgetControlValues` 返回结构改为显式控制器值类型，继续压缩看板过滤器参数构造链路里的 `value: any`
 
 当前验证计划：
 
