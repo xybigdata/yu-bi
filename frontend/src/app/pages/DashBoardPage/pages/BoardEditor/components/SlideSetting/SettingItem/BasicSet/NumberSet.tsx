@@ -20,14 +20,20 @@ import type { FormItemProps } from 'antd';
 import { FC, memo } from 'react';
 
 type NamePath = NonNullable<FormItemProps['name']>;
+type InputNumberOnChange = NonNullable<
+  React.ComponentProps<typeof InputNumber>['onChange']
+>;
 
-export const NumberSet: FC<{ label: string; name: NamePath; onChange: any }> =
-  memo(({ label, name, onChange }) => {
-    return (
-      <Form.Item label={label} name={name}>
-        <InputNumber className="datart-ant-input-number" onChange={onChange} />
-      </Form.Item>
-    );
-  });
+export const NumberSet: FC<{
+  label: string;
+  name: NamePath;
+  onChange: InputNumberOnChange;
+}> = memo(({ label, name, onChange }) => {
+  return (
+    <Form.Item label={label} name={name}>
+      <InputNumber className="datart-ant-input-number" onChange={onChange} />
+    </Form.Item>
+  );
+});
 
 export default NumberSet;

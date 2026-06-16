@@ -30,16 +30,16 @@ const style = {
 };
 
 interface DraggableItemProps {
-  id: any;
+  id: number;
   text: string;
   index: number;
   moveCard?: (dragIndex: number, hoverIndex: number) => void;
-  onDrop?: (dragIndex: any, hoverIndex: any) => void;
+  onDrop?: (dragIndex: number, hoverIndex: number) => void;
 }
 
 interface Item {
   index: number;
-  id: string;
+  id: number;
   type?: string;
 }
 

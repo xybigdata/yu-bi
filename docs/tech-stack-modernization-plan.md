@@ -330,6 +330,7 @@
 - 已完成：看板配置面板与 widget 配置面板的 `Collapse.items` 改为复用 antd 公开 `CollapseProps`，去掉兼容层 `as any`
 - 已完成：TabWidget 的标签位置配置改为复用 antd `TabsProps['tabPosition']`，并对历史异常位置值补齐默认回退
 - 已完成：看板 widget 工具、图表选择弹窗、自定义选项表格、添加控制器菜单与图层树节点的局部类型边界收口，保留运行时行为不变
+- 已完成：Chart Workbench 样式配置面板、图表图标渲染、分类条件拖拽表格、排序拖拽项、筛选配置交互与控制器文本/数值 setter 的局部类型边界收口，保留交互与配置语义不变
 - 已完成：根目录 `.gitignore` 忽略 `.tmp/` 与 `logs/` 本地运行目录，避免后续误提交
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
@@ -418,12 +419,17 @@
 - `ChartSelectModal.tsx` 的默认勾选 id 与树选中事件补齐显式节点类型，保留“过滤文件夹和已存在图表”的既有逻辑
 - `CustomOptions.tsx` 的拖拽行参数、`AddControler.tsx` 的菜单事件与按钮类型、`controlActions.ts` 的新增控制器 action 入参继续收口到显式边界
 - `LayerTreeItem.tsx` 的树节点内容改为复用 `WidgetConf['content']`，只表达既有 widget 配置结构
+- `ChartStyleConfigPanel.tsx` 的分组折叠面板改为直接复用 antd `CollapseProps['items']`，继续压缩 Workbench 样式配置链路中的兼容层强转
+- `ChartGraphIcon.tsx` 的图标渲染入参与 base64 图片节点改为显式结构，避免图标组件继续依赖未声明的 `iconStr/src/alt`
+- `CategoryConditionEditableTable.tsx` 与 `SortAction/DraggableItem.tsx` 的拖拽行/拖拽项参数改为显式索引与 HTML 属性结构，继续压缩 Workbench 拖拽链路里的局部 `any`
+- `CategoryConditionConfiguration.tsx`、`FilterFacadeConfiguration.tsx`、`FilterVisibilityConfiguration.tsx` 的列表/树选中、facade 切换、slider 区间与可见性条件参数改为显式兼容类型，继续压缩筛选配置链路里的隐式 `any` 与宽泛状态值
+- `TextSetter/index.tsx` 与 `BasicSet/NumberSet.tsx` 的表单 props / 数值回调改为复用 antd 公开类型，减少控制器与看板配置链路里的宽泛 `FormItemProps<any>`、`onChange: any`
 - `.gitignore` 增加 `.tmp/`、`logs/`，减少低风险改造过程中本地运行产物干扰
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts`
+- `npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/__tests__/utils.test.ts`
 - `rg -n "CollapseItemsCompatProps|collapseProps as any|tabPosition=\\{position as any\\}" frontend/src/app/pages/DashBoardPage -g "*.tsx"`
 
 ### 6.2 最近已完成

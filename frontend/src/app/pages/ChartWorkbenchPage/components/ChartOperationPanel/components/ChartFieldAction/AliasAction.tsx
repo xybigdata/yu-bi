@@ -17,6 +17,7 @@
  */
 
 import { Input, Space } from 'antd';
+import type { FormItemProps } from 'antd';
 import { FormItemEx } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ChartDataSectionField } from 'app/types/ChartConfig';
@@ -29,8 +30,11 @@ const AliasAction: FC<{
   config: ChartDataSectionField;
   onConfigChange: (config: ChartDataSectionField) => void;
 }> = ({ config, onConfigChange }) => {
-  const formItemLayout = {
-    labelAlign: 'right' as any,
+  const formItemLayout: Pick<
+    FormItemProps,
+    'labelAlign' | 'labelCol' | 'wrapperCol'
+  > = {
+    labelAlign: 'right',
     labelCol: { span: 8 },
     wrapperCol: { span: 8 },
   };
@@ -38,7 +42,7 @@ const AliasAction: FC<{
   const [aliasName, setAliasName] = useState(config?.alias?.name);
   const [nameDesc, setNameDesc] = useState(config?.alias?.desc);
 
-  const onChange = (alias, desc) => {
+  const onChange = (alias?: string, desc?: string) => {
     const newConfig = updateBy(config, draft => {
       draft.alias = { name: alias, desc: desc };
     });

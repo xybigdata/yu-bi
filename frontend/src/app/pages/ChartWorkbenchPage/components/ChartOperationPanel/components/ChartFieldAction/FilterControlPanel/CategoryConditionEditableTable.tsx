@@ -28,6 +28,11 @@ import { getDistinctFields } from 'app/utils/fetch';
 import { FilterSqlOperator } from 'globalConstants';
 import { FC, memo, useCallback, useEffect, useState } from 'react';
 
+type DragSortTableRowProps = React.HTMLAttributes<HTMLElement> & {
+  index?: number;
+  moveRow: (dragIndex: number, hoverIndex: number) => void;
+};
+
 const CategoryConditionEditableTable: FC<
   {
     condition?: ChartFilterCondition;
@@ -212,12 +217,10 @@ const CategoryConditionEditableTable: FC<
           bordered
           rowKey={(r: RelationFilterValue) => `${r.key}-${r.label}`}
           columns={columnsWithCell}
-          onRow={(_, index) =>
-            ({
-              index,
-              moveRow,
-            }) as any
-          }
+          onRow={(_, index): DragSortTableRowProps => ({
+            index,
+            moveRow,
+          })}
         />
       </div>
     );

@@ -24,6 +24,9 @@ import { FilterSqlOperator } from 'globalConstants';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
 
+type ConditionRelation = FilterSqlOperator.Equal | FilterSqlOperator.NotEqual;
+type ConditionVisibility = Extract<FilterVisibility, { visibility: string }>;
+
 const FilterVisibilityConfiguration: FC<
   {
     visibility?: FilterVisibility;
@@ -35,18 +38,21 @@ const FilterVisibilityConfiguration: FC<
   const t2 = useI18NPrefix('viz.common.enum.filterOperator');
   const [fieldUid, setFieldUid] = useState(() => {
     if (typeof visibility === 'object') {
-      return visibility?.fieldUid;
+      return visibility.fieldUid;
     }
+    return '';
   });
   const [relation, setRelation] = useState(() => {
     if (typeof visibility === 'object') {
-      return visibility?.relation;
+      return visibility.relation as ConditionRelation;
     }
+    return FilterSqlOperator.Equal as ConditionRelation;
   });
   const [value, setValue] = useState(() => {
     if (typeof visibility === 'object') {
-      return visibility?.value;
+      return visibility.value;
     }
+    return '';
   });
   const [visibilityType, setVisibilityType] = useState(() => {
     if (visibility === null || visibility === undefined) {
@@ -60,7 +66,9 @@ const FilterVisibilityConfiguration: FC<
     }
   });
 
-  const handleVisibilityTypeChange = type => {
+  const handleVisibilityTypeChange = (
+    type: ConditionVisibility['visibility'] | ControllerVisibilityTypes,
+  ) => {
     setVisibilityType(type);
     if (type === ControllerVisibilityTypes.Condition) {
       handleConditionChange(fieldUid, relation, value);
@@ -69,7 +77,11 @@ const FilterVisibilityConfiguration: FC<
     onVisibilityChange(type);
   };
 
-  const handleConditionChange = (fieldUid, relation, value) => {
+  const handleConditionChange = (
+    fieldUid: string,
+    relation: ConditionRelation,
+    value: string,
+  ) => {
     setFieldUid(fieldUid);
     setRelation(relation);
     setValue(value);
@@ -108,7 +120,9 @@ const FilterVisibilityConfiguration: FC<
             <Space>
               <Select
                 value={fieldUid}
-                onChange={uid => handleConditionChange(uid, relation, value)}
+                onChange={uid =>
+                  handleConditionChange(String(uid), relation, value)
+                }
               >
                 {(otherFilters || []).map(f => (
                   <Select.Option key={f.uid} value={f.uid || f.colName}>
@@ -118,7 +132,9 @@ const FilterVisibilityConfiguration: FC<
               </Select>
               <Select
                 value={relation}
-                onChange={r => handleConditionChange(fieldUid, r, value)}
+                onChange={r =>
+                  handleConditionChange(fieldUid, r as ConditionRelation, value)
+                }
               >
                 {[FilterSqlOperator.Equal, FilterSqlOperator.NotEqual].map(
                   f => (
