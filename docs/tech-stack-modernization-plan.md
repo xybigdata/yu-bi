@@ -306,9 +306,10 @@
 
 - 已完成：迁移测试层局部弱类型收口
 - 已完成：工具测试层第一批局部弱类型收口
-- 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 前半段的局部弱类型收口
-- 正在推进：`chartHelper.test.ts` 剩余分段收口
-- 下一批候选：`chartHelper.test.ts` 中 style/config 大对象用例、`internalChartHelper` 邻近实现层局部类型债、生产工具函数中确认低风险的单点
+- 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 的局部弱类型收口
+- 已完成：工具测试层真实 `as any` / 宽泛 `any` 复扫，当前只剩 `expect.any(Function)` 这类断言 matcher
+- 正在推进：生产工具函数中确认低风险的单点类型债复扫
+- 下一批候选：`utils/time.ts` 的日期单位类型收口、`utils/mutation.ts` 的泛型更新边界评估
 
 当前已落地范围：
 
@@ -365,12 +366,14 @@
 - `FormGenerator/__tests__/utils.test.tsx` 与 `BasicFont.test.tsx` 改为按真实 translator 与字体 options 类型表达测试数据，去掉测试内宽泛 translator / fontFamilies 强转
 - `ChartConfig.ts` 补齐 `FontFamilyOption`，让 `BasicFont` 既有 `{ name, value }` 字体项形态进入正式类型表达，保持运行时行为不变
 - `internalChartHelper.test.ts` 改用 `ChartDataViewFieldCategory.Field`、表驱动类型和集中 legacy config helper，收口迁移/合并测试中的字段类别与历史配置强转
-- `chartHelper.test.ts` 前半段补充 style config、data field、legacy data config 测试 helper，先收口 `getValue`、`getStyles`、`getColumnRenderName`、dataset 基础访问等低风险用例
+- `chartHelper.test.ts` 补充 style config、data field、legacy data config、runtime date level 测试 helper，收口 requirement、dataset、tooltip、drill、style value 与 runtime date level 配置用例中的局部弱类型
+- `number.ts` 的数值格式化入口改为 `unknown` 宽输入加显式数值转换 helper，保留非数值原样返回语义，减少生产工具函数里的宽泛 `any`
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/utils/__tests__/overflowFuncs.test.ts src/app/utils/__tests__/internalChartHelper.test.ts src/app/utils/__tests__/chartHelper.test.ts src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx`
+- `npm run test:ci -- src/app/utils/__tests__/number.test.ts src/app/utils/__tests__/chartHelper.test.ts`
+- `rg -n "as any|const .*: any|any\\[\\]|any\\b" frontend/src/app/utils/__tests__ frontend/src/app/components/FormGenerator/__tests__ -g '*.ts' -g '*.tsx'`
 
 ### 6.2 最近已完成
 
@@ -386,16 +389,17 @@
 - 时间体系剩余调用点跟进收口
 - 迁移测试层局部弱类型继续收口
 - 工具与表单测试层局部弱类型继续收口
+- `chartHelper.test.ts` 局部弱类型收口
+- `number.ts` 数值工具输入边界收口
 
 ## 7. 下一阶段执行顺序
 
 按这个顺序推进，避免专题扩散：
 
-1. 继续按分段方式完成 `chartHelper.test.ts` 剩余低风险测试数据类型收口
-2. 复扫工具测试层剩余真实 `as any`，只处理可定向验证的小块
-3. 时间体系剩余调用点继续收口
-4. 前端依赖收口与历史入口审计继续逐个推进
-5. 安装健康度与锁文件一致性持续检查
+1. 复扫生产工具函数中的低风险单点类型债，只处理不改变运行时语义的局部收口
+2. 时间体系剩余调用点继续收口
+3. 前端依赖收口与历史入口审计继续逐个推进
+4. 安装健康度与锁文件一致性持续检查
 
 ## 8. 每轮固定门禁
 
