@@ -343,6 +343,10 @@
 - `ChartSelectionManager.ts` 的点击回调数组与事件透传结构改为走显式 `ChartMouseEventParams` 兼容形态，并保留既有 `componentIndex / dataIndex / selectedItems` 语义不变
 - `ChartIFrameEventBroker.ts` 与 `useVisibiltyStyle.ts` 的通用 runtime 容器回调改为显式函数签名，继续压缩 iframe 生命周期代理与可见性样式 helper 中的 `Function`
 - `WaterfallChart.tsx` 的选择事件数据补齐最小 `name / value / rowData` 结构，避免运行时图表选择链路继续依赖未声明的裸对象拼装
+- `ChartIFrameContainerDispatcher.tsx` 的容器渲染缓存与 metadata 元组改为显式 `ReactNode` / `ChartDataSetDTO` / `ChartConfig` 结构，继续压缩 iframe 容器分发链路中的 `Function` 与未声明元组
+- `ChartDraggableElement.tsx`、`ChartDraggableElementField.tsx`、`ChartDraggableElementHierarchy.tsx`、`ChartDraggableSourceContainer.tsx`、`ChartDraggableSourceGroupContainer.tsx` 的拖拽内容渲染、日期层级 children 与操作菜单回调改为显式类型，继续收口工作台拖拽与字段替换链路中的局部 `Function` / `any`
+- `ChartIFrameContainer.tsx`、`ChartIFrameLifecycleAdapter.tsx`、`ReactLifecycleAdapter.ts` 的 dataset / widget 配置 / 容器尺寸 / React root 渲染入口改为显式兼容类型，继续压缩 iframe 生命周期容器里的局部 `any`
+- `ChartIFrameResourceLoader.ts`、`ChartIFrameEventBroker.ts`、`ReactChart.ts`、`ChartDataConfigSectionReplaceMenu.tsx` 的文档对象、事件 broker 入参、React 图表挂载入口和字段替换配置改为显式兼容类型，继续收口 runtime helper 与工作台替换菜单中的局部 `any`
 
 当前验证计划：
 

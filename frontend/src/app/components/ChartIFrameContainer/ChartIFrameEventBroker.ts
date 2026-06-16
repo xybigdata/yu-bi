@@ -133,7 +133,7 @@ class ChartIFrameEventBroker {
 
   private safeInvoke(
     event: BrokerLifecycleEvent,
-    options: any,
+    options: BrokerOption,
     context?: BrokerContext,
   ) {
     if (!context) {

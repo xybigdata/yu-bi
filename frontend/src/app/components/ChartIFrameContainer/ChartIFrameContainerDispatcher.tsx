@@ -21,26 +21,29 @@ import { IChart } from 'app/types/Chart';
 import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
 import ChartDataSetDTO from 'app/types/ChartDataSet';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
-import { CSSProperties } from 'react';
+import { CSSProperties, ReactNode } from 'react';
 
 const DEFAULT_CONTAINER_ID = 'frame-container-1';
+type ChartContainerEnv = { env: 'workbench' };
+type ContainerRenderer = (
+  style?: CSSProperties,
+  isShown?: boolean,
+) => (...metadata: ChartContainerMetadata) => ReactNode;
+type ChartContainerMetadata = [
+  chart: IChart,
+  dataset: ChartDataSetDTO | undefined,
+  config: ChartConfig,
+  drillOption?: IChartDrillOption,
+  selectedItems?: SelectedItem[],
+  isLoadingData?: boolean,
+];
 
 class ChartIFrameContainerDispatcher {
   private static dispatcher?: ChartIFrameContainerDispatcher;
   private currentContainerId = DEFAULT_CONTAINER_ID;
-  private chartContainerMap = new Map<string, Function>();
-  private chartMetadataMap = new Map<
-    string,
-    [
-      IChart,
-      any,
-      any,
-      IChartDrillOption | undefined,
-      SelectedItem[] | undefined,
-      boolean | undefined,
-    ]
-  >();
-  private editorEnv = { env: 'workbench' };
+  private chartContainerMap = new Map<string, ContainerRenderer>();
+  private chartMetadataMap = new Map<string, ChartContainerMetadata>();
+  private editorEnv: ChartContainerEnv = { env: 'workbench' };
 
   public static instance(): ChartIFrameContainerDispatcher {
     if (!this.dispatcher) {
@@ -58,13 +61,13 @@ class ChartIFrameContainerDispatcher {
   public getContainers(
     containerId: string,
     chart: IChart,
-    dataset: any,
+    dataset: ChartDataSetDTO | undefined,
     config: ChartConfig,
     style?: CSSProperties,
     drillOption?: IChartDrillOption,
     selectedItems?: SelectedItem[],
     isLoadingData?: boolean,
-  ): Function[] {
+  ): ReactNode[] {
     this.switchContainer(
       containerId,
       chart,
@@ -74,9 +77,13 @@ class ChartIFrameContainerDispatcher {
       selectedItems,
       isLoadingData,
     );
-    const renders: Function[] = [];
-    this.chartContainerMap.forEach((chartRenderer: Function, key) => {
+    const renders: ReactNode[] = [];
+    this.chartContainerMap.forEach((chartRenderer, key) => {
       const isShown = key === this.currentContainerId;
+      const metadata = this.chartMetadataMap.get(key);
+      if (!metadata) {
+        return;
+      }
       renders.push(
         chartRenderer
           .call(
@@ -84,7 +91,7 @@ class ChartIFrameContainerDispatcher {
             this.getVisibilityStyle(isShown, style),
             isShown,
           )
-          .apply(Object.create(null), this.chartMetadataMap.get(key)),
+          .apply(Object.create(null), metadata),
       );
     });
     return renders;
@@ -93,7 +100,7 @@ class ChartIFrameContainerDispatcher {
   private switchContainer(
     containerId: string,
     chart: IChart,
-    dataset: ChartDataSetDTO,
+    dataset: ChartDataSetDTO | undefined,
     config: ChartConfig,
     drillOption?: IChartDrillOption,
     selectedItems?: SelectedItem[],
@@ -113,8 +120,15 @@ class ChartIFrameContainerDispatcher {
   private createNewIfNotExist(containerId: string) {
     if (!this.chartContainerMap.has(containerId)) {
       const newContainer =
-        (style, isShown) =>
-        (chart, dataset, config, drillOption, selectedItems, isLoadingData) => {
+        (style?: CSSProperties, isShown?: boolean) =>
+        (
+          chart: IChart,
+          dataset: ChartDataSetDTO | undefined,
+          config: ChartConfig,
+          drillOption?: IChartDrillOption,
+          selectedItems?: SelectedItem[],
+          isLoadingData?: boolean,
+        ) => {
           return (
             <div key={containerId} style={style}>
               <ChartIFrameContainer
@@ -138,17 +152,17 @@ class ChartIFrameContainerDispatcher {
     this.currentContainerId = containerId;
   }
 
-  private getVisibilityStyle(isShown, style?: CSSProperties) {
+  private getVisibilityStyle(isShown: boolean, style?: CSSProperties) {
     return isShown
       ? {
           ...style,
           transform: 'none',
-          position: 'relative',
+          position: 'relative' as const,
         }
       : {
           ...style,
           transform: 'translate(-9999px, -9999px)',
-          position: 'absolute',
+          position: 'absolute' as const,
         };
   }
 }

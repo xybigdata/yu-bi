@@ -36,7 +36,7 @@ export type BrokerOption = {
   containerId: string;
   dataset?: ChartDataSetDTO;
   config?: ChartConfig;
-  widgetSpecialConfig?: { env: string | undefined; [x: string]: any };
+  widgetSpecialConfig?: { env?: string; [x: string]: unknown };
   drillOption?: ChartDrillOption;
   selectedItems?: Array<SelectedItem>;
 };

@@ -33,6 +33,7 @@ import { ChartDataViewFieldCategory, DataViewFieldType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import useToggle from 'app/hooks/useToggle';
 import { ColumnRole } from 'app/pages/MainPage/pages/ViewPage/slice/types';
+import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { buildDragItem } from 'app/utils/internalChartHelper';
 import { CHART_DRAG_ELEMENT_TYPE } from 'globalConstants';
 import { FC, memo, useEffect, useMemo } from 'react';
@@ -51,7 +52,10 @@ import {
 } from 'styles/StyleConstants';
 import { isEmpty } from 'utils/object';
 import { stopPPG } from 'utils/utils';
-import { renderMataProps } from '../../../../slice/types';
+import {
+  dateLevelFieldsProps,
+  renderMataProps,
+} from '../../../../slice/types';
 import DateLevelFieldContainer from './DateLevelFieldContainer';
 
 const { Panel } = Collapse;
@@ -124,7 +128,10 @@ export const ChartDraggableSourceContainer: FC<
   }, [isActive]);
 
   const renderContent = useMemo(() => {
-    const _handleMenuClick = (e, fieldName) => {
+    const _handleMenuClick = (
+      e: { key: string },
+      fieldName: string,
+    ) => {
       if (e.key === 'delete') {
         onDeleteComputedField?.(fieldName);
       } else {
@@ -246,11 +253,11 @@ export const ChartDraggableSourceContainer: FC<
                 </div>
               }
             >
-              {(children || []).map((item, i) => {
+              {((children || []) as dateLevelFieldsProps[]).map((item, i) => {
                 return (
                   <DateLevelFieldContainer
                     key={i}
-                    item={item as any}
+                    item={item}
                     folderRole={folderRole}
                     onClearCheckedList={onClearCheckedList}
                   />
@@ -327,7 +334,7 @@ export const ChartDraggableSourceContainer: FC<
         item =>
           !isEmpty(item.name) && !(item.category === 'dateLevelComputedField'),
       )
-      .map(item => (
+      .map((item: ChartDataViewMeta & { displayName?: string }) => (
         <ChartDraggableSourceContainer
           key={item.name}
           name={item.name}

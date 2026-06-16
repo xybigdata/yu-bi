@@ -18,11 +18,12 @@
 
 import Chart from './Chart';
 import ReactLifecycleAdapter from './ReactLifecycleAdapter';
+import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 
 export default class ReactChart extends Chart {
-  private _adapter;
+  private _adapter: ReactLifecycleAdapter;
 
-  constructor(wrapper, props) {
+  constructor(wrapper: unknown, props?: { id?: string; name?: string; icon?: string }) {
     super(
       props?.id || 'react-table',
       props?.name || '表格',
@@ -35,18 +36,18 @@ export default class ReactChart extends Chart {
     return this._adapter;
   }
 
-  public onMount(options, context?): void {
-    if (options.containerId === undefined || !context.document) {
+  public onMount(options: BrokerOption, context?: BrokerContext): void {
+    if (options.containerId === undefined || !context?.document) {
       return;
     }
-    this.adapter?.mounted(
-      context.document.getElementById(options.containerId),
-      options,
-      context,
-    );
+    const container = context.document.getElementById(options.containerId);
+    if (!container) {
+      return;
+    }
+    this.adapter?.mounted(container, options, context);
   }
 
-  public onUnMount(options, context?): void {
+  public onUnMount(_options?: BrokerOption | null, _context?: BrokerContext | null): void {
     this.adapter?.unmount();
   }
 }

@@ -23,6 +23,7 @@ import { ChartLifecycle } from 'app/constants';
 import usePrefixI18N from 'app/hooks/useI18NPrefix';
 import { IChart } from 'app/types/Chart';
 import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
+import ChartDataSetDTO from 'app/types/ChartDataSet';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
@@ -46,14 +47,14 @@ enum ContainerStatus {
 }
 
 const ChartIFrameLifecycleAdapter: FC<{
-  dataset: any;
+  dataset?: ChartDataSetDTO;
   chart: IChart;
   config: ChartConfig;
   style: CSSProperties;
   isShown?: boolean;
   drillOption?: IChartDrillOption;
   selectedItems?: SelectedItem[];
-  widgetSpecialConfig?: any;
+  widgetSpecialConfig?: BrokerOption['widgetSpecialConfig'];
   isLoadingData?: boolean;
 }> = ({
   dataset,
@@ -67,11 +68,25 @@ const ChartIFrameLifecycleAdapter: FC<{
   isLoadingData = false,
 }) => {
   const [chartResourceLoader] = useState(() => new ChartIFrameResourceLoader());
-  const eventBrokerRef = useRef<ChartIFrameEventBroker>();
+  const eventBrokerRef = useRef<ChartIFrameEventBroker | null>(null);
   const [containerStatus, setContainerStatus] = useState(ContainerStatus.INIT);
   const { document, window } = useFrame();
   const [containerId] = useState(() => `datart-${uuidv4()}`);
   const translator = usePrefixI18N();
+
+  const normalizeDimension = useCallback(
+    (value: CSSProperties['width'] | CSSProperties['height']) => {
+      if (typeof value === 'number') {
+        return value;
+      }
+      if (typeof value === 'string') {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : undefined;
+      }
+      return undefined;
+    },
+    [],
+  );
 
   const buildBrokerOption = useCallback(() => {
     return {
@@ -79,9 +94,9 @@ const ChartIFrameLifecycleAdapter: FC<{
       dataset,
       config,
       widgetSpecialConfig,
-      drillOption,
+      drillOption: drillOption as BrokerOption['drillOption'],
       selectedItems,
-    } as BrokerOption;
+    } satisfies BrokerOption;
   }, [
     config,
     containerId,
@@ -93,13 +108,20 @@ const ChartIFrameLifecycleAdapter: FC<{
 
   const buildBrokerContext = useCallback(() => {
     return {
-      document,
-      window,
-      width: style?.width,
-      height: style?.height,
+      document: document!,
+      window: window!,
+      width: normalizeDimension(style?.width),
+      height: normalizeDimension(style?.height),
       translator,
-    } as BrokerContext;
-  }, [document, style?.height, style?.width, translator, window]);
+    };
+  }, [
+    document,
+    normalizeDimension,
+    style?.height,
+    style?.width,
+    translator,
+    window,
+  ]);
 
   /**
    * Chart Mount Event

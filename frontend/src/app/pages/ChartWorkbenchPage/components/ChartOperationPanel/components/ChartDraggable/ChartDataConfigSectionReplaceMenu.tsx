@@ -17,22 +17,25 @@
  */
 
 import { Menu, MenuProps } from 'antd';
-import { ChartDataSectionField } from 'app/types/ChartConfig';
+import {
+  ChartDataConfig,
+  ChartDataSectionField,
+} from 'app/types/ChartConfig';
+import { ChartDataConfigSectionProps } from 'app/types/ChartDataConfigSection';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { FC } from 'react';
 import { getDefaultAggregate, updateDataConfigByField } from './utils';
 
 export const ChartDataConfigSectionReplaceMenu: FC<{
-  uid;
-  type;
+  uid: string;
+  type: ChartDataSectionField['type'];
   viewFields: ChartDataViewMeta[];
-  config;
-  ancestors;
+  config: ChartDataConfig;
+  ancestors: number[];
   columnConfig: ChartDataSectionField;
-  onConfigChanged;
+  onConfigChanged: ChartDataConfigSectionProps['onConfigChanged'];
 }> = ({
   uid,
-  type,
   viewFields,
   ancestors,
   config,
@@ -43,7 +46,7 @@ export const ChartDataConfigSectionReplaceMenu: FC<{
     const newFieldConfig: ChartDataSectionField = {
       ...item,
       aggregate: undefined,
-      category: item.category as any,
+      category: item.category || columnConfig.category,
       colName: item.name,
       type: item.type!,
       uid: columnConfig.uid,

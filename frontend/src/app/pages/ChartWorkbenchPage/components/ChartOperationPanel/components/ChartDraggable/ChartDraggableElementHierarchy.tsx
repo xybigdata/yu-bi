@@ -17,19 +17,22 @@
  */
 
 import { Space } from 'antd';
+import { StateModalSize } from 'app/hooks/useStateModal';
+import { ChartDataConfig, ChartDataSectionField } from 'app/types/ChartConfig';
+import { ChartDataConfigSectionProps } from 'app/types/ChartDataConfigSection';
 import { FC, memo } from 'react';
 import styled from 'styled-components';
 import ChartDraggableElementField from './ChartDraggableElementField';
 
 const ChartDraggableElementHierarchy: FC<{
-  modalSize;
-  config;
-  columnConfig;
-  ancestors;
-  aggregation;
-  availableSourceFunctions;
-  onConfigChanged;
-  handleOpenActionModal;
+  modalSize?: StateModalSize;
+  config: ChartDataConfig;
+  columnConfig: ChartDataSectionField & { children?: ChartDataSectionField[] };
+  ancestors: number[];
+  aggregation?: boolean;
+  availableSourceFunctions?: string[];
+  onConfigChanged: ChartDataConfigSectionProps['onConfigChanged'];
+  handleOpenActionModal: (uid: string) => (actionType: string) => void;
 }> = memo(
   ({
     modalSize,
@@ -53,7 +56,12 @@ const ChartDraggableElementHierarchy: FC<{
           onConfigChanged: onConfigChanged,
           handleOpenActionModal: handleOpenActionModal,
         };
-        return <ChartDraggableElementField {...contentProps} />;
+        return (
+          <ChartDraggableElementField
+            key={child.uid || child.colName}
+            {...contentProps}
+          />
+        );
       });
     };
 
