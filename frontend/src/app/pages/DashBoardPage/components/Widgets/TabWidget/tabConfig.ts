@@ -17,6 +17,7 @@
  */
 import { ORIGINAL_TYPE_MAP } from 'app/pages/DashBoardPage/constants';
 import { TabWidgetContent } from 'app/pages/DashBoardPage/pages/Board/slice/types';
+import type { TabsProps } from 'antd';
 import type {
   WidgetActionListItem,
   widgetActionType,
@@ -143,8 +144,23 @@ export const initTabsTpl = () => {
 export type TabToolkit = WidgetToolkit & {
   getCustomConfig: (props) => {
     align: string;
-    position: string;
+    position: TabsProps['tabPosition'];
   };
+};
+
+const TAB_POSITIONS: Array<NonNullable<TabsProps['tabPosition']>> = [
+  'top',
+  'bottom',
+  'left',
+  'right',
+];
+
+const toTabPosition = (position?: string): TabsProps['tabPosition'] => {
+  return TAB_POSITIONS.includes(
+    position as NonNullable<TabsProps['tabPosition']>,
+  )
+    ? (position as NonNullable<TabsProps['tabPosition']>)
+    : 'top';
 };
 export const widgetToolkit: TabToolkit = {
   create: opt => {
@@ -222,7 +238,7 @@ export const widgetToolkit: TabToolkit = {
     );
     return {
       align,
-      position,
+      position: toTabPosition(position),
     };
   },
 };

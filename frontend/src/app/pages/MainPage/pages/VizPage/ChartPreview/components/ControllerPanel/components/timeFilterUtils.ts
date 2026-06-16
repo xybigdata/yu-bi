@@ -1,5 +1,4 @@
-import { DatartDateLike, formatDatartDateIfValid } from 'app/utils/date';
-import { TIME_FORMATTER } from 'globalConstants';
+import { DatartDateLike, formatDatartDateTimeIfValid } from 'app/utils/date';
 import type { FilterCondition } from 'app/types/ChartConfig';
 import type { ManualTimeValue } from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/ManualSingleTimeSelector';
 import {
@@ -11,7 +10,7 @@ export const serializeSingleTimeFilterValue = (time: DatartDateLike | null) => {
   if (!time) {
     return '';
   }
-  return formatDatartDateIfValid(time, TIME_FORMATTER) || '';
+  return formatDatartDateTimeIfValid(time) || '';
 };
 
 export const getSingleTimeFilterValue = (

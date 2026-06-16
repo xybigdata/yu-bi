@@ -29,6 +29,13 @@ export interface CustomOptionsProps {
   fieldRowData: RelationFilterValue[];
   getControllerConfig: () => ControllerConfig;
 }
+type DragSortRowProps = {
+  index?: number;
+  moveRow: (dragIndex: number, hoverIndex: number) => void;
+};
+type DragSortTableRowProps = React.HTMLAttributes<HTMLElement> &
+  DragSortRowProps;
+
 export const CustomOptions: React.FC<CustomOptionsProps> = memo(
   ({ fieldRowData, form, getControllerConfig }) => {
     const [rows, setRows] = useState<RelationFilterValue[]>([]);
@@ -152,7 +159,7 @@ export const CustomOptions: React.FC<CustomOptionsProps> = memo(
       };
     });
     const moveRow = useCallback(
-      (dragIndex, hoverIndex) => {
+      (dragIndex: number, hoverIndex: number) => {
         const dragRow = rows[dragIndex];
         const newRows = rows.slice();
         newRows.splice(dragIndex, 1);
@@ -179,12 +186,10 @@ export const CustomOptions: React.FC<CustomOptionsProps> = memo(
             rowKey={(r: RelationFilterValue) => `${r.key}-${r.label}`}
             columns={columnsWithCell}
             pagination={false}
-            onRow={(_, index) =>
-              ({
-                index,
-                moveRow,
-              }) as any
-            }
+            onRow={(_, index): DragSortTableRowProps => ({
+              index,
+              moveRow,
+            })}
           />
         </div>
       </Wrapper>

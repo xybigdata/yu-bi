@@ -1,5 +1,6 @@
 import { message, TreeDataNode, TreeNodeProps } from 'antd';
 import { ColumnRole } from 'app/pages/MainPage/pages/ViewPage/slice/types';
+import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { AxiosError, AxiosResponse } from 'axios';
 import classnames from 'classnames';
 import i18next from 'i18next';
@@ -35,7 +36,10 @@ function createUuidFromRandomBytes(randomBytes: number[]) {
 }
 
 export function uuidv4() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+  if (
+    typeof crypto !== 'undefined' &&
+    typeof crypto.randomUUID === 'function'
+  ) {
     return crypto.randomUUID();
   }
 
@@ -43,7 +47,9 @@ export function uuidv4() {
     typeof crypto !== 'undefined' &&
     typeof crypto.getRandomValues === 'function'
   ) {
-    return createUuidFromRandomBytes(Array.from(crypto.getRandomValues(new Uint8Array(16))));
+    return createUuidFromRandomBytes(
+      Array.from(crypto.getRandomValues(new Uint8Array(16))),
+    );
   }
 
   return createUuidFromRandomBytes(
@@ -59,7 +65,7 @@ export function universalUUID() {
 export function errorHandle(error) {
   if (error?.response) {
     // AxiosError
-    const { response } = error as AxiosError<APIResponse<any>>;
+    const { response } = error as AxiosError<APIResponse<unknown>>;
     switch (response?.status) {
       case 401:
         message.error({ key: '401', content: String(i18next.t('global.401')) });
@@ -83,7 +89,7 @@ export function getErrorMessage(error) {
     return error;
   }
   if (error?.response) {
-    const { response } = error as AxiosError<APIResponse<any>>;
+    const { response } = error as AxiosError<APIResponse<unknown>>;
     switch (response?.status) {
       case 401:
         removeToken();
@@ -109,8 +115,8 @@ export function rejectHandle(error, rejectWithValue) {
   }
   if ((error as AxiosError).response) {
     return rejectWithValue(
-      ((error as AxiosError).response as AxiosResponse<APIResponse<any>>).data
-        .message,
+      ((error as AxiosError).response as AxiosResponse<APIResponse<unknown>>)
+        .data.message,
     );
   } else {
     return rejectWithValue(error.message);
@@ -123,6 +129,18 @@ export const mergeClassNames = (origin, added) =>
 export function stopPPG(e) {
   e.stopPropagation();
 }
+
+export type ListTreeNode<T> = T & {
+  key: string;
+  title: string;
+  value: string;
+  path: string[];
+  icon?: ReactElement | ((props: TreeNodeProps) => ReactElement);
+  disabled?: boolean;
+  selectable?: boolean;
+  children?: Array<ListTreeNode<T>>;
+  isLeaf?: boolean;
+};
 
 export function listToTree<
   T extends {
@@ -144,12 +162,12 @@ export function listToTree<
     getSelectable?: (o: T) => boolean;
     filter?: (path: string[], o: T) => boolean;
   },
-): undefined | any[] {
+): undefined | Array<ListTreeNode<T>> {
   if (!list) {
     return list;
   }
 
-  const treeNodes: any[] = [];
+  const treeNodes: Array<ListTreeNode<T>> = [];
   const childrenList: T[] = [];
 
   list.forEach(o => {
@@ -266,12 +284,12 @@ export const onDropTreeFn = ({ info, treeData, callback }) => {
 
 export const getInsertedNodeIndex = (
   AddData: Omit<SaveFormModel, 'config'> & { config?: object | string },
-  viewData: any,
+  viewData?: Array<{ parentId?: string | null; index?: number | null }>,
 ) => {
   let index: number = 0;
   if (viewData?.length) {
     let IndexArr = viewData
-      .filter((v: any) => v.parentId == AddData.parentId)
+      .filter(v => v.parentId == AddData.parentId)
       .map(val => Number(val.index) || 0);
     index = IndexArr?.length ? Math.max(...IndexArr) + 1 : 0;
   }
@@ -303,10 +321,12 @@ export function filterListOrTree<T>(
 ): T[] {
   return keywords
     ? dataSource.reduce<T[]>((filtered, d) => {
-        const treeNode = d as T & { children?: T[] };
+        const treeNode = d as T & {
+          children?: Array<T & { isLeaf?: boolean }>;
+        };
         const isMatch = filterFunc(keywords, d);
         let isChildrenMatch: T[] | undefined;
-        if (filterLeaf && treeNode.children?.every(c => (c as any).isLeaf)) {
+        if (filterLeaf && treeNode.children?.every(c => c.isLeaf)) {
           isChildrenMatch =
             isMatch || treeNode.children.some(c => filterFunc(keywords, c))
               ? treeNode.children
@@ -409,7 +429,7 @@ export function getDiffParams<T extends { id?: string }>(
   };
 }
 
-export function fastDeleteArrayElement(arr: any[], index: number) {
+export function fastDeleteArrayElement<T>(arr: T[], index: number) {
   arr[index] = arr[arr.length - 1];
   arr.pop();
 }
@@ -462,13 +482,30 @@ export function newIssueUrl({ type, ...options }) {
   return url.toString();
 }
 
-export function modelListFormsTreeByTableName(model, type) {
+type ModelTreePageType = 'analysisPage' | 'viewPage';
+type ModelTreeColumn = ChartDataViewMeta & {
+  displayName?: string;
+};
+type ModelTreeTableNode = ChartDataViewMeta & {
+  role: ColumnRole.Table;
+  children: ModelTreeColumn[];
+  id?: string;
+  index?: number;
+};
+
+export function modelListFormsTreeByTableName(
+  model: ChartDataViewMeta[] | undefined,
+  type: ModelTreePageType,
+): ModelTreeTableNode[] {
   const tableNameList: string[] = [];
-  const columnNameObj: { [key: string]: any } = {};
-  const columnTreeData: any = [];
+  const columnNameObj: Record<string, ModelTreeColumn[]> = {};
+  const columnTreeData: ModelTreeTableNode[] = [];
 
   model?.forEach(v => {
     const path = v.path;
+    if (!path?.length) {
+      return;
+    }
     const tableName = path.slice(0, path.length - 1).join('.');
     if (!tableNameList.includes(tableName)) {
       tableNameList.push(tableName);
@@ -477,6 +514,9 @@ export function modelListFormsTreeByTableName(model, type) {
 
   model?.forEach(v => {
     const path = v.path;
+    if (!path?.length) {
+      return;
+    }
     const tableName = path.slice(0, path.length - 1).join('.');
     const fieldName = path[path.length - 1];
     if (tableNameList.includes(tableName)) {
@@ -497,7 +537,7 @@ export function modelListFormsTreeByTableName(model, type) {
       subType: undefined,
       type: 'STRING',
       children: columnNameObj[v],
-    } as any;
+    } as ModelTreeTableNode;
 
     if (type === 'analysisPage') {
       treeData.id = v;

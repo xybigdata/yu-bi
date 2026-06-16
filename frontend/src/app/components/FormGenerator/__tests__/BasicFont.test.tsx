@@ -18,11 +18,20 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ChartStyleSectionRowOption } from 'app/types/ChartConfig';
 import { vi } from 'vitest';
 import BasicFont from '../Basic/BasicFont';
 
 describe('<BasicFont />', () => {
-  let translator;
+  type Translator = (label: string) => string;
+
+  const fontFamilies: NonNullable<ChartStyleSectionRowOption['fontFamilies']> =
+    [
+      { name: 'fontA', value: 'fontA' },
+      { name: 'fontB', value: 'fontB' },
+    ];
+
+  let translator: Translator;
   beforeAll(() => {
     translator = label => `This is a ${label}`;
   });
@@ -94,10 +103,7 @@ describe('<BasicFont />', () => {
           label: 'Component Label',
           options: {
             hideLabel: true,
-            fontFamilies: [
-              { name: 'fontA', value: 'fontA' },
-              { name: 'fontB', value: 'fontB' },
-            ] as any,
+            fontFamilies,
           },
         }}
       />,
@@ -148,10 +154,7 @@ describe('<BasicFont />', () => {
           label: 'Component Label',
           options: {
             hideLabel: true,
-            fontFamilies: [
-              { name: 'fontA', value: 'fontA' },
-              { name: 'fontB', value: 'fontB' },
-            ] as any,
+            fontFamilies,
           },
         }}
       />,

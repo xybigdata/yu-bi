@@ -237,7 +237,7 @@ export type ChartStyleSectionRowOption = {
   style?: React.CSSProperties;
   getItems?: (cols) => Array<ChartStyleSelectorItem>;
   needRefresh?: boolean;
-  fontFamilies?: string[];
+  fontFamilies?: Array<FontFamilyOption | string>;
   showFontSize?: boolean;
   showLineHeight?: boolean;
   showFontStyle?: boolean;
@@ -265,6 +265,11 @@ export type ChartStyleSelectorItem = {
   key?: any;
   label: any;
   value: any;
+};
+
+export type FontFamilyOption = {
+  name: string;
+  value: string;
 };
 
 export type ChartStyleSectionRowWatcher = {

@@ -78,6 +78,10 @@ import {
   UniqWith,
 } from 'utils/object';
 import { TableColumnsList } from '../components/ChartGraph/BasicTableChart/types';
+
+type RuntimeDateLevelSource<T> = T & {
+  [RUNTIME_DATE_LEVEL_KEY]?: T | null;
+};
 import {
   flattenHeaderRowsWithoutGroupRow,
   getAxisLengthByConfig,
@@ -1065,7 +1069,7 @@ export function transformToDataSet<T>(
 export function transformToObjectArray(
   columns?: string[][],
   metas?: ChartDatasetMeta[],
-) {
+): Array<Record<string, string>> {
   if (!columns || !metas) {
     return [];
   }
@@ -1073,9 +1077,12 @@ export function transformToObjectArray(
   return Debugger.instance.measure(
     'transformToObjectArray',
     () => {
-      const result: any[] = Array.apply(null, Array(columns.length));
+      const result: Array<Record<string, string>> = Array.from(
+        { length: columns.length },
+        () => ({}),
+      );
       for (let j = 0, outerLength = result.length; j < outerLength; j++) {
-        let objCol: any = {};
+        const objCol: Record<string, string> = {};
         for (let i = 0, innerLength = metas.length; i < innerLength; i++) {
           const key = metas?.[i]?.name?.[0];
           if (!!key) {
@@ -1593,30 +1600,44 @@ export const getDrillableRows = (
     });
 };
 
-export const getRuntimeDateLevelFields = (rows: any) => {
+export function getRuntimeDateLevelFields(
+  rows?: Array<RuntimeDateLevelSource<ChartDataSectionField>>,
+): ChartDataSectionField[] | undefined;
+export function getRuntimeDateLevelFields(
+  rows?: Array<RuntimeDateLevelSource<ChartDataViewMeta>>,
+): ChartDataViewMeta[] | undefined;
+export function getRuntimeDateLevelFields<T>(
+  rows?: Array<T | { [RUNTIME_DATE_LEVEL_KEY]?: T | null }>,
+): T[] | undefined;
+export function getRuntimeDateLevelFields<T>(
+  rows?: Array<T | { [RUNTIME_DATE_LEVEL_KEY]?: T | null }>,
+): T[] | undefined {
   const _rows = CloneValueDeep(rows);
 
   _rows?.forEach((v, i) => {
-    const symbolData = v?.[RUNTIME_DATE_LEVEL_KEY];
+    const symbolData = (v as { [RUNTIME_DATE_LEVEL_KEY]?: T | null })?.[
+      RUNTIME_DATE_LEVEL_KEY
+    ];
     if (symbolData) {
       _rows[i] = symbolData;
     }
   });
-  return _rows;
-};
+  return _rows as T[] | undefined;
+}
 
 /**
  * Merging runtime date level into computed fields
  */
 export const getRuntimeComputedFields = (
-  dateLevelComputedFields,
+  dateLevelComputedFields: ChartDataSectionField[],
   replacedConfig?: ChartDataSectionField,
   computedFields?: ChartDataViewMeta[],
   isRuntime?: boolean,
 ) => {
   let _computedFields = computedFields ? CloneValueDeep(computedFields) : [];
   if (isRuntime && replacedConfig?.field) {
-    const index = getRuntimeDateLevelFields(_computedFields).findIndex(
+    const runtimeFields = getRuntimeDateLevelFields(_computedFields) || [];
+    const index = runtimeFields.findIndex(
       v => v.name === replacedConfig?.colName,
     );
     const replacedConfigIndex = dateLevelComputedFields.findIndex(
@@ -1625,7 +1646,7 @@ export const getRuntimeComputedFields = (
     _computedFields = updateBy(_computedFields, draft => {
       const dateLevelConfig = dateLevelComputedFields[replacedConfigIndex];
 
-      if (dateLevelConfig) {
+      if (dateLevelConfig && draft[index]) {
         draft[index][RUNTIME_DATE_LEVEL_KEY] = {
           category: dateLevelConfig.category,
           name: dateLevelConfig.colName,
@@ -1636,16 +1657,19 @@ export const getRuntimeComputedFields = (
     });
   } else {
     if (dateLevelComputedFields.length) {
-      const expressionList: any = [];
+      const expressionList: string[] = [];
 
       _computedFields.forEach(v => {
-        if (v.category === ChartDataViewFieldCategory.DateLevelComputedField) {
+        if (
+          v.category === ChartDataViewFieldCategory.DateLevelComputedField &&
+          v.expression
+        ) {
           expressionList.push(v.expression);
         }
       });
 
       dateLevelComputedFields.forEach(v => {
-        if (!expressionList.includes(v.expression)) {
+        if (v.expression && !expressionList.includes(v.expression)) {
           _computedFields = updateBy(_computedFields, draft => {
             draft.push({
               category: v.category,

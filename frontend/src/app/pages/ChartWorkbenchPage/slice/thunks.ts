@@ -17,6 +17,7 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import type { AxiosResponse } from 'axios';
 import { migrateView } from 'app/migration/ViewConfig/migrationViewConfig';
 import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
 import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
@@ -73,7 +74,7 @@ export const initWorkbenchAction = createAsyncThunk(
 export const fetchDataSetAction = createAsyncThunk(
   'workbench/fetchDataSetAction',
   async (arg: ChartDataRequest, thunkAPI) => {
-    let errorData: any = null;
+    let errorData: AxiosResponse | undefined;
     const response = await request2(
       {
         method: 'POST',
@@ -83,7 +84,7 @@ export const fetchDataSetAction = createAsyncThunk(
       {},
       {
         onRejected: error => {
-          errorData = error.response;
+          errorData = (error as { response?: AxiosResponse }).response;
         },
       },
     );
@@ -98,7 +99,7 @@ export const fetchDataSetAction = createAsyncThunk(
 export const fetchDataViewsAction = createAsyncThunk(
   'workbench/fetchDataViewsAction',
   async (arg: { orgId }) => {
-    const response = await request2<any[]>({
+    const response = await request2<View[]>({
       method: 'GET',
       url: `views`,
       params: arg,

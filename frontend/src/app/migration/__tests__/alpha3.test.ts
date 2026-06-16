@@ -16,65 +16,109 @@
  * limitations under the License.
  */
 
+import { ChartDataViewFieldCategory, DataViewFieldType } from 'app/constants';
+import { ChartConfigDTO, ChartDetailConfigDTO } from 'app/types/ChartConfigDTO';
 import { alpha3, hasWrongDimensionName } from '../alpha3';
+
+type ChartDataSectionKey =
+  | 'dimension'
+  | 'metrics'
+  | 'deminsion'
+  | 'deminsionL'
+  | 'deminsionR'
+  | 'metricsL'
+  | 'metricsR';
+
+type MinimalChartDataSection = NonNullable<ChartConfigDTO['datas']>[number];
+
+type MinimalChartDataRow = {
+  key: ChartDataSectionKey;
+  rows?: NonNullable<MinimalChartDataSection['rows']>;
+};
+
+type MinimalChartConfig = {
+  datas?: MinimalChartDataRow[];
+};
+
+type MinimalChartDetailConfig = Pick<
+  ChartDetailConfigDTO,
+  'chartGraphId' | 'computedFields' | 'aggregation'
+> & {
+  chartConfig: MinimalChartConfig;
+};
+
+const createDetailConfig = (
+  chartConfig: MinimalChartConfig,
+): MinimalChartDetailConfig => ({
+  chartConfig,
+  chartGraphId: 'chart-1',
+  computedFields: [],
+  aggregation: false,
+});
+
+const createSection = (key: ChartDataSectionKey): MinimalChartDataRow => ({
+  key,
+  rows: [
+    {
+      colName: `${key}-field`,
+      type: DataViewFieldType.STRING,
+      category: ChartDataViewFieldCategory.Field,
+    },
+  ],
+});
 
 describe('alpha3 - ', () => {
   test('should return false when config is null', () => {
-    const config = null;
-    expect(hasWrongDimensionName(config as any)).toBe(false);
+    expect(hasWrongDimensionName(undefined)).toBe(false);
   });
 
   test('should not match has wrong dimension name when config datas is empty', () => {
-    const config = {
+    const config: MinimalChartConfig = {
       datas: [],
     };
-    expect(hasWrongDimensionName(config as any)).toBe(false);
+    expect(hasWrongDimensionName(config)).toBe(false);
   });
 
   test('should not match has wrong dimension name when config datas not contains deminsion key', () => {
-    const config = {
-      datas: [{ key: 'dimension' }, { key: 'metrics' }],
+    const config: MinimalChartConfig = {
+      datas: [createSection('dimension'), createSection('metrics')],
     };
-    expect(hasWrongDimensionName(config as any)).toBe(false);
+    expect(hasWrongDimensionName(config)).toBe(false);
   });
 
   test('should match has wrong dimension name when config datas contains deminsion key', () => {
-    const config = {
-      datas: [{ key: 'deminsion' }, { key: 'metrics' }],
+    const config: MinimalChartConfig = {
+      datas: [createSection('deminsion'), createSection('metrics')],
     };
-    expect(hasWrongDimensionName(config as any)).toBe(true);
+    expect(hasWrongDimensionName(config)).toBe(true);
   });
 
   test('should match has wrong dimension name when config datas contains deminsionL key', () => {
-    const config = {
-      datas: [{ key: 'deminsionL' }],
+    const config: MinimalChartConfig = {
+      datas: [createSection('deminsionL')],
     };
-    expect(hasWrongDimensionName(config as any)).toBe(true);
+    expect(hasWrongDimensionName(config)).toBe(true);
   });
 
   test('should match has wrong dimension name when config datas contains deminsionR key', () => {
-    const config = {
-      datas: [{ key: 'deminsionR' }],
+    const config: MinimalChartConfig = {
+      datas: [createSection('deminsionR')],
     };
-    expect(hasWrongDimensionName(config as any)).toBe(true);
+    expect(hasWrongDimensionName(config)).toBe(true);
   });
 
   test('should not change anything when datas is emtpy', () => {
-    const config = {
-      chartConfig: {
-        datas: [],
-      },
-    };
-    expect(alpha3(config as any)).toBe(config);
+    const config = createDetailConfig({
+      datas: [],
+    });
+    expect(alpha3(config)).toBe(config);
   });
 
   test('should change key when key name is matched', () => {
-    const config = {
-      chartConfig: {
-        datas: [{ key: 'deminsion' }],
-      },
-    };
-    expect(alpha3(config as any)).toMatchObject({
+    const config = createDetailConfig({
+      datas: [createSection('deminsion')],
+    });
+    expect(alpha3(config)).toMatchObject({
       chartConfig: {
         datas: [{ key: 'metrics' }],
       },
@@ -82,41 +126,27 @@ describe('alpha3 - ', () => {
   });
 
   test('should change key when key name is matched', () => {
-    const config = {
+    const config = createDetailConfig({
+      datas: [createSection('deminsion'), createSection('metrics')],
+    });
+    expect(alpha3(config)).toMatchObject({
       chartConfig: {
-        datas: [
-          { key: 'deminsion', value: 1 },
-          { key: 'metrics', value: 2 },
-        ],
-      },
-    };
-    expect(alpha3(config as any)).toMatchObject({
-      chartConfig: {
-        datas: [
-          { key: 'metrics', value: 1 },
-          { key: 'dimension', value: 2 },
-        ],
+        datas: [{ key: 'metrics' }, { key: 'dimension' }],
       },
     });
   });
 
   test('should change key when key name is matched', () => {
-    const config = {
+    const config = createDetailConfig({
+      datas: [
+        createSection('metrics'),
+        createSection('deminsionL'),
+        createSection('deminsionR'),
+      ],
+    });
+    expect(alpha3(config)).toMatchObject({
       chartConfig: {
-        datas: [
-          { key: 'metrics', rows: [2] },
-          { key: 'deminsionL', rows: [11] },
-          { key: 'deminsionR', rows: [12] },
-        ],
-      },
-    };
-    expect(alpha3(config as any)).toMatchObject({
-      chartConfig: {
-        datas: [
-          { key: 'dimension', rows: [2] },
-          { key: 'metricsL', rows: [11] },
-          { key: 'metricsR', rows: [12] },
-        ],
+        datas: [{ key: 'dimension' }, { key: 'metricsL' }, { key: 'metricsR' }],
       },
     });
   });

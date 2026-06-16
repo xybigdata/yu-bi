@@ -85,11 +85,10 @@ const FilterTypeSection: FC<ChartDataConfigSectionProps> = memo(
         close?.();
       };
 
-      (openStateModal as Function)({
+      openStateModal({
         title: translate('title'),
-        width: { small: 600, middle: 1000, large: 1600 }['middle'],
-        style: { maxHeight: 1000, overflowY: 'scroll', overflowX: 'auto' },
         modalSize: StateModalSize.SMALL,
+        bodyStyle: { maxHeight: 1000, overflowY: 'scroll', overflowX: 'auto' },
         onOk: handleExtraButtonConfirm,
         content: <FilterActions.ArrangeFilterAction {...props} />,
         onCancel: handleExtraButtonCancel,

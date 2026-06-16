@@ -4,6 +4,8 @@
 .DS_Store
 
 /static
+/.tmp/
+/logs/
 
 /server/src/main/resources/javascript/**
 **/target/**

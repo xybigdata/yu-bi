@@ -17,6 +17,7 @@
  */
 
 import { ChartLifecycle } from 'app/constants';
+import { I18NTranslate } from 'app/hooks/useI18NPrefix';
 import { ChartDrillOption } from 'app/models/ChartDrillOption';
 import { ValueOf } from 'types';
 import { ChartConfig, SelectedItem } from './ChartConfig';
@@ -29,14 +30,14 @@ export type BrokerContext = {
   document: Document;
   width?: number;
   height?: number;
-  translator?: (key: string, disablePrefix?: boolean, options?: any) => string;
+  translator?: I18NTranslate;
 };
 
 export type BrokerOption = {
   containerId: string;
   dataset?: ChartDataSetDTO;
   config?: ChartConfig;
-  widgetSpecialConfig?: { env: string | undefined; [x: string]: any };
+  widgetSpecialConfig?: { env?: string; [x: string]: unknown };
   drillOption?: ChartDrillOption;
   selectedItems?: Array<SelectedItem>;
 };

@@ -34,8 +34,7 @@ import {
   Tooltip,
 } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { formatDatartDate } from 'app/utils/date';
-import { CommonFormTypes, TIME_FORMATTER } from 'globalConstants';
+import { CommonFormTypes } from 'globalConstants';
 import { Key, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -55,7 +54,7 @@ import { errorHandle, getDiffParams } from 'utils/utils';
 import { selectOrgId } from '../../slice/selectors';
 import { useMemberSlice } from '../MemberPage/slice';
 import { getMembers, getRoles } from '../MemberPage/slice/thunks';
-import { VariableScopes, VariableTypes, VariableValueTypes } from './constants';
+import { VariableScopes, VariableTypes } from './constants';
 import { useVariableSlice } from './slice';
 import {
   selectDeleteVariablesLoading,
@@ -78,7 +77,11 @@ import {
 } from './slice/types';
 import { SubjectForm } from './SubjectForm';
 import { VariableFormModel } from './types';
-import { serializeVariableDefaultValue } from './utils';
+import {
+  parseVariableRelationValue,
+  serializeVariableDefaultValue,
+  serializeVariableRelationValue,
+} from './utils';
 import { VariableForm } from './VariableForm';
 
 export function VariablePage() {
@@ -147,7 +150,7 @@ export function VariablePage() {
       setRowPermissions(
         data.map(d => ({
           ...d,
-          value: d.value && JSON.parse(d.value),
+          value: parseVariableRelationValue(d.value),
         })),
       );
       setRowPermissionLoading(false);
@@ -226,16 +229,10 @@ export function VariablePage() {
   const saveRelations = useCallback(
     async (changedRowPermissions: RowPermission[]) => {
       let changedRowPermissionsRaw = changedRowPermissions.map(cr => {
-        const dateFormat =
-          variables.find(v => v.id === cr.variableId)?.dateFormat ||
-          TIME_FORMATTER;
+        const relationVariable = variables.find(v => v.id === cr.variableId);
         return {
           ...cr,
-          value:
-            cr.value &&
-            (editingVariable?.valueType === VariableValueTypes.Date
-              ? cr.value.map(m => formatDatartDate(m, dateFormat))
-              : cr.value),
+          value: serializeVariableRelationValue(cr.value, relationVariable),
         };
       });
 

@@ -20,38 +20,56 @@ import React from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 
+type ReactComponentFactoryDependencies = {
+  React: typeof React;
+  createRoot: typeof createRoot;
+  [key: string]: unknown;
+};
+
+type ReactComponentFactory =
+  | unknown
+  | ((dependencies: ReactComponentFactoryDependencies) => unknown);
+
 interface ReactLifecycleAdapterProps {
-  mounted: (container, options?, context?) => any;
-  updated: (options: any, context?) => any;
+  mounted: (
+    container: Element | null,
+    options?: unknown,
+    context?: unknown,
+  ) => Root | null;
+  updated: (options?: unknown, context?: unknown) => Root | null;
   unmount: () => void;
-  resize: (opt: any) => void;
-  init: (componentWrapper) => void;
+  resize: (options?: unknown, context?: unknown) => Root | null;
+  init: (componentWrapper: ReactComponentFactory) => void;
 }
 
 export default class ReactLifecycleAdapter implements ReactLifecycleAdapterProps {
-  private domContainer;
-  private reactComponent;
-  private externalLibs;
+  private domContainer: Element | null = null;
+  private reactComponent: ReactComponentFactory;
+  private externalLibs: unknown = {};
   private root: Root | null = null;
 
-  constructor(componentWrapper) {
+  constructor(componentWrapper: ReactComponentFactory) {
     this.reactComponent = componentWrapper;
   }
 
-  public init(componentWrapper) {
+  public init(componentWrapper: ReactComponentFactory) {
     this.reactComponent = componentWrapper;
   }
 
-  public registerImportDependencies(dependencies) {
+  public registerImportDependencies(dependencies: unknown) {
     this.externalLibs = dependencies;
   }
 
-  public mounted(container, options?, context?) {
+  public mounted(
+    container: Element | null,
+    options?: unknown,
+    context?: unknown,
+  ) {
     this.domContainer = container;
     return this.render(options, context);
   }
 
-  public updated(options, context?) {
+  public updated(options?: unknown, context?: unknown) {
     return this.render(options, context);
   }
 
@@ -61,11 +79,11 @@ export default class ReactLifecycleAdapter implements ReactLifecycleAdapterProps
     this.domContainer = null;
   }
 
-  public resize(options, context?) {
+  public resize(options?: unknown, context?: unknown) {
     return this.render(options, context);
   }
 
-  private render(options?, context?) {
+  private render(options?: unknown, context?: unknown) {
     if (!this.domContainer) {
       return null;
     }
@@ -75,17 +93,25 @@ export default class ReactLifecycleAdapter implements ReactLifecycleAdapterProps
     }
 
     this.root.render(
-      React.createElement(this.getComponent(), options, context),
+      React.createElement(
+        this.getComponent() as React.ElementType,
+        options,
+        context as unknown as React.ReactNode,
+      ),
     );
     return this.root;
   }
 
   private getComponent() {
     if (typeof this.reactComponent === 'function') {
-      return this.reactComponent({
+      return (
+        this.reactComponent as (
+          dependencies: ReactComponentFactoryDependencies,
+        ) => unknown
+      )({
         React,
         createRoot,
-        ...this.externalLibs,
+        ...(this.externalLibs as object),
       });
     }
     return this.reactComponent;

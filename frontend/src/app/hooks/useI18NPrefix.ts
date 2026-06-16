@@ -27,6 +27,13 @@ export interface I18NComponentProps {
   i18nPrefix?: string;
 }
 
+export type I18NTranslateOptions = Record<string, unknown>;
+export type I18NTranslate = (
+  key: string,
+  disablePrefix?: boolean,
+  options?: I18NTranslateOptions,
+) => string;
+
 export function prefixI18N(key) {
   return i18n.t(key);
 }
@@ -36,7 +43,11 @@ function usePrefixI18N(prefix?: string) {
   const { i18NConfigs: vizI18NConfigs } = useContext(ChartI18NContext);
 
   const cachedTranslateFn = useCallback(
-    (key: string, disablePrefix: boolean = false, options?: any) => {
+    (
+      key: string,
+      disablePrefix: boolean = false,
+      options?: I18NTranslateOptions,
+    ) => {
       let translationKey = key;
       const usePrefix =
         !disablePrefix && !translationKey.includes(DATART_TRANSLATE_HOLDER);

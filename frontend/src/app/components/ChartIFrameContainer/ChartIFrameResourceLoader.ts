@@ -21,12 +21,12 @@ import { loadScript } from 'app/utils/resource';
 class ChartIFrameResourceLoader {
   private resources: string[] = [];
 
-  loadResource(doc, deps?: string[]): Promise<any[]> {
+  loadResource(doc: Document, deps?: string[]): Promise<unknown[]> {
     const unloadedDeps = (deps || []).filter(d => !this.resources.includes(d));
     return this.loadDependencies(doc, unloadedDeps);
   }
 
-  private loadDependencies(doc, deps): Promise<any[]> {
+  private loadDependencies(doc: Document, deps: string[]): Promise<unknown[]> {
     this.resources = this.resources.concat(deps);
     const loadableDeps = deps.map(d => loadScript(d, doc));
     return Promise.all(loadableDeps);

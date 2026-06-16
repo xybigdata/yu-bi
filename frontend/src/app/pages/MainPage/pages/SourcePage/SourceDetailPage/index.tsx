@@ -24,18 +24,14 @@ import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useParams } from 'app/routerCompat';
 import { useAccess, useCascadeAccess } from 'app/pages/MainPage/Access';
-import { formatCurrentDatartDate } from 'app/utils/date';
+import { formatCurrentDatartDateTime } from 'app/utils/date';
 import {
   PermissionLevels,
   ResourceTypes,
 } from 'app/pages/MainPage/pages/PermissionPage/constants';
 import { fetchCheckName } from 'app/utils/fetch';
 import { debouncePromise } from 'utils/debouncePromise';
-import {
-  CommonFormTypes,
-  DEFAULT_DEBOUNCE_WAIT,
-  TIME_FORMATTER,
-} from 'globalConstants';
+import { CommonFormTypes, DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
 import React, {
   useCallback,
   useContext,
@@ -90,6 +86,11 @@ import {
 import { SourceFormModel, SourceSimple } from '../slice/types';
 import { allowManageSource } from '../utils';
 import { ConfigComponent } from './ConfigComponent';
+
+const parseSourceConfig = (config: string): SourceFormModel['config'] => {
+  const parsedConfig = JSON.parse(config);
+  return parsedConfig && typeof parsedConfig === 'object' ? parsedConfig : {};
+};
 
 export function SourceDetailPage() {
   const [formType, setFormType] = useState(CommonFormTypes.Add);
@@ -166,7 +167,7 @@ export function SourceDetailPage() {
       try {
         setProviderType(type);
         setLastUpdateTime(editingSource?.schemaUpdateDate);
-        form.setFieldsValue({ name, type, config: JSON.parse(config) });
+        form.setFieldsValue({ name, type, config: parseSourceConfig(config) });
       } catch (error) {
         message.error(tg('operation.parseError'));
         throw error;
@@ -406,7 +407,7 @@ export function SourceDetailPage() {
       return;
     }
     await dispatch(syncSourceSchema({ sourceId: editingSource.id }));
-    setLastUpdateTime(formatCurrentDatartDate(TIME_FORMATTER));
+    setLastUpdateTime(formatCurrentDatartDateTime());
     message.success(t('syncDatabaseSchemaSuccess'));
   };
 

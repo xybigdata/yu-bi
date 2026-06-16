@@ -21,7 +21,7 @@ import { ChartConfig, ChartI18NSectionConfig } from 'app/types/ChartConfig';
 import ChartMetadata from 'app/types/ChartMetadata';
 import * as datartChartHelper from 'app/utils/chartHelper';
 import { fetchPluginChart } from 'app/utils/fetch';
-import { CloneValueDeep, cond, Omit } from 'utils/object';
+import { CloneValueDeep, Omit } from 'utils/object';
 
 export type PluginChartDefinition = {
   config?: ChartConfig;
@@ -29,7 +29,7 @@ export type PluginChartDefinition = {
   isISOContainer?: boolean | string;
   meta: ChartMetadata;
   useIFrame?: boolean;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export type PluginChartPaletteSeed = {
@@ -38,37 +38,67 @@ export type PluginChartPaletteSeed = {
   i18ns?: ChartI18NSectionConfig[];
 };
 
-const pureFuncLoader = ({ path, result }) => {
-  if (/.js$/.test(path)) {
-    return Function(`"use strict"; return (${result})`)()({
-      dHelper: { ...datartChartHelper },
-    });
-  }
+type PluginChartLoaderInput = {
+  path: string;
+  result: string;
 };
 
-const iifeFuncLoader = ({ path, result }) => {
-  if (/.iife.js$/.test(path)) {
-    return Function(`"use strict"; return ${result}`)()({
-      dHelper: { ...datartChartHelper },
-    });
+type PluginChartRuntimeContext = {
+  dHelper: typeof datartChartHelper;
+};
+
+type PluginChartFactory = (
+  context: PluginChartRuntimeContext,
+) => PluginChartDefinition;
+
+const loadPurePluginDefinition = ({
+  path,
+  result,
+}: PluginChartLoaderInput): PluginChartDefinition | undefined => {
+  if (!/\.js$/.test(path) || /\.iife\.js$/.test(path)) {
+    return;
   }
+  const factory = Function(
+    `"use strict"; return (${result})`,
+  )() as PluginChartFactory;
+  return factory({
+    dHelper: { ...datartChartHelper },
+  });
+};
+
+const loadIifePluginDefinition = ({
+  path,
+  result,
+}: PluginChartLoaderInput): PluginChartDefinition | undefined => {
+  if (!/\.iife\.js$/.test(path)) {
+    return;
+  }
+  const factory = Function(
+    `"use strict"; return ${result}`,
+  )() as PluginChartFactory;
+  return factory({
+    dHelper: { ...datartChartHelper },
+  });
 };
 
 class PluginChartLoader {
-  async loadPluginDefinitions(paths: string[]) {
+  async loadPluginDefinitions(
+    paths: string[],
+  ): Promise<PluginChartDefinition[]> {
     const loadPluginTasks: Array<Promise<PluginChartDefinition | null>> =
-      paths.map(
-      async path => {
+      paths.map(async path => {
         try {
           const result = await fetchPluginChart(path);
-          if (!result) {
+          if (typeof result !== 'string' || !result) {
             return null;
           }
 
-          const customPlugin = cond(
-            iifeFuncLoader,
-            pureFuncLoader,
-          )({ path, result }) as PluginChartDefinition;
+          const customPlugin =
+            loadIifePluginDefinition({ path, result }) ||
+            loadPurePluginDefinition({ path, result });
+          if (!customPlugin) {
+            return null;
+          }
           return customPlugin;
         } catch (e) {
           console.error('ChartPluginLoader | plugin chart error: ', e);
@@ -76,9 +106,7 @@ class PluginChartLoader {
         }
       });
     const pluginDefinitions = await Promise.all(loadPluginTasks);
-    return pluginDefinitions.filter(
-      Boolean,
-    ) as PluginChartDefinition[];
+    return pluginDefinitions.filter(Boolean) as PluginChartDefinition[];
   }
 
   getPluginPaletteSeed(
@@ -91,7 +119,7 @@ class PluginChartLoader {
     };
   }
 
-  convertToDatartChartModel(customPlugin: PluginChartDefinition) {
+  convertToDatartChartModel(customPlugin: PluginChartDefinition): Chart {
     const chart = new Chart(
       customPlugin.meta.id,
       customPlugin.meta.name,

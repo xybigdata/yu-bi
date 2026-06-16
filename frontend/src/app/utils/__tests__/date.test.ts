@@ -18,9 +18,14 @@
 
 import {
   datartDayjs,
+  formatDatartDateRange,
+  formatDatartDateTime,
+  formatDatartDateTimeIfValid,
   formatCurrentDatartDate,
+  formatCurrentDatartDateTime,
   formatDatartDateIfValid,
   getDatartDateAfter,
+  isDatartDayBeforeTodayEnd,
   getDatartNow,
   getDatartNowMillis,
   toDatartDayjsList,
@@ -114,6 +119,53 @@ describe('formatDatartDateIfValid', () => {
       formatDatartDateIfValid('invalid-date', 'YYYY-MM-DD HH:mm:ss'),
     ).toBeUndefined();
     expect(formatDatartDateIfValid()).toBeUndefined();
+  });
+});
+
+describe('standard datetime helpers', () => {
+  test('should format value with standard datetime template', () => {
+    expect(formatDatartDateTime('2024-01-01 00:00:00')).toEqual(
+      '2024-01-01 00:00:00',
+    );
+  });
+
+  test('should format current value with standard datetime template', () => {
+    expect(formatCurrentDatartDateTime()).toMatch(
+      /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
+    );
+  });
+
+  test('should return undefined for invalid standard datetime values', () => {
+    expect(formatDatartDateTimeIfValid('invalid-date')).toBeUndefined();
+  });
+});
+
+describe('formatDatartDateRange', () => {
+  test('should format range values and keep empty entries undefined', () => {
+    expect(
+      formatDatartDateRange(
+        ['2024-01-01 00:00:00', undefined],
+        'YYYY-MM-DD HH:mm:ss',
+      ),
+    ).toEqual(['2024-01-01 00:00:00', undefined]);
+  });
+
+  test('should return undefined tuple for empty input', () => {
+    expect(formatDatartDateRange()).toEqual([undefined, undefined]);
+    expect(formatDatartDateRange(null)).toEqual([undefined, undefined]);
+  });
+});
+
+describe('isDatartDayBeforeTodayEnd', () => {
+  test('should detect dates before end of today', () => {
+    expect(isDatartDayBeforeTodayEnd(getDatartNow().subtract(1, 'day'))).toBe(
+      true,
+    );
+  });
+
+  test('should ignore dates after today and invalid inputs', () => {
+    expect(isDatartDayBeforeTodayEnd(getDatartNow().add(1, 'day'))).toBe(false);
+    expect(isDatartDayBeforeTodayEnd('invalid-date')).toBe(false);
   });
 });
 

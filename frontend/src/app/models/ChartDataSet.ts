@@ -36,7 +36,10 @@ class ChartDataSetBase extends Array {
     return indexes?.[this.toKey(field)];
   }
 
-  protected toIndex(indexes, key: string): any {
+  protected toIndex(
+    indexes: ColumnIndexTable,
+    key: string,
+  ): number | undefined {
     return indexes?.[this.toCaseInsensitive(key)];
   }
 
@@ -67,12 +70,14 @@ class ChartDataSetBase extends Array {
     [key: string]: number;
   } {
     return (metas || []).reduce((acc, cur, index) => {
-      acc[this.toCaseInsensitive(cur.name)] = index;
+      if (cur.name) {
+        acc[this.toCaseInsensitive(cur.name)] = index;
+      }
       return acc;
     }, {}) as { [key: string]: number };
   }
 
-  protected toCaseInsensitive(key) {
+  protected toCaseInsensitive(key: string) {
     return String(key).toUpperCase();
   }
 
@@ -114,9 +119,11 @@ export class ChartDataSet<T>
   }
 
   public getOriginFieldInfo(key: string) {
-    return this.originalFields?.[
-      this.toIndex(this.columnIndexTable, key)
-    ] as ChartDataSectionField;
+    const index = this.toIndex(this.columnIndexTable, key);
+    if (index === undefined) {
+      return this.originalFields?.[0] as ChartDataSectionField;
+    }
+    return this.originalFields?.[index] as ChartDataSectionField;
   }
 
   public getFieldKey(field: ChartDataSectionField) {
@@ -150,9 +157,13 @@ export class ChartDataSet<T>
     }
     const sortValues = order.sort.value || [];
     this.sort((prev, next) => {
+      const fieldIndex = this.getFieldIndex(order);
+      if (fieldIndex === undefined) {
+        return 0;
+      }
       return (
-        sortValues.indexOf(prev[this.getFieldIndex(order)]) -
-        sortValues.indexOf(next[this.getFieldIndex(order)])
+        sortValues.indexOf(prev[fieldIndex]) -
+        sortValues.indexOf(next[fieldIndex])
       );
     });
   }
@@ -179,8 +190,13 @@ export class ChartDataSetRow<T>
   private columnIndexTable: ColumnIndexTable = {};
   private originalFields?: ChartDataSectionField[];
 
-  constructor(indexes, items: T[], fields?: ChartDataSectionField[]) {
-    super(...(items as any));
+  constructor(
+    indexes: ColumnIndexTable,
+    items: T[],
+    fields?: ChartDataSectionField[],
+  ) {
+    super();
+    this.push(...items);
     this.columnIndexTable = indexes;
     this.originalFields = fields;
   }
@@ -198,7 +214,8 @@ export class ChartDataSetRow<T>
   }
 
   public getCellByKey(key: string) {
-    return this?.[this.toIndex(this.columnIndexTable, key)] as T;
+    const index = this.toIndex(this.columnIndexTable, key);
+    return index === undefined ? (undefined as T) : (this?.[index] as T);
   }
 
   public getFieldKey(field: ChartDataSectionField) {

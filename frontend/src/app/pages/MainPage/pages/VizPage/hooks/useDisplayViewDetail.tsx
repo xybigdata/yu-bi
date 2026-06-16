@@ -22,14 +22,16 @@ import { ViewDetailSetting } from 'app/components/FormGenerator/Customize/Intera
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import useMount from 'app/hooks/useMount';
 import useStateModal, { StateModalSize } from 'app/hooks/useStateModal';
+import { ExecuteToken } from 'app/pages/SharePage/slice/types';
 import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
-import { ChartDrillOption } from 'app/models/ChartDrillOption';
 import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
 import {
   ChartDataRequest,
   PendingChartDataRequestFilter,
 } from 'app/types/ChartDataRequest';
+import ChartDataSetDTO, { ChartDatasetMeta } from 'app/types/ChartDataSet';
 import ChartDataView from 'app/types/ChartDataView';
+import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { fetchChartDataSet } from 'app/utils/fetch';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
@@ -37,6 +39,13 @@ import { SPACE_XS } from 'styles/StyleConstants';
 import { errorHandle } from 'utils/utils';
 
 const { TabPane } = Tabs;
+
+type ViewDetailDataView = Pick<
+  ChartDataView,
+  'id' | 'meta' | 'computedFields' | 'type'
+> & {
+  config: string | object;
+};
 
 const filterTableColumnsByViewDetailSetting = (
   datas?: ChartDataConfig[],
@@ -55,10 +64,11 @@ const filterTableColumnsByViewDetailSetting = (
 const TemplateTable: FC<{
   requestParams: ChartDataRequest;
   chartConfig?: ChartConfig;
-  token?: any;
+  token?: ExecuteToken;
 }> = memo(({ chartConfig, requestParams, token }) => {
-  const [datas, setSDatas] = useState<any>();
-  const [columns, setColumns] = useState();
+  const [datas, setSDatas] = useState<ChartDataSetDTO['rows']>();
+  const [columns, setColumns] =
+    useState<Array<{ title: string; dataIndex: number }>>();
 
   useMount(async () => {
     try {
@@ -70,7 +80,7 @@ const TemplateTable: FC<{
     }
   });
 
-  const getTableColumns = columns => {
+  const getTableColumns = (columns?: ChartDatasetMeta[]) => {
     const allConfigFields = chartConfig?.datas?.flatMap(d => d.rows || []);
     return (columns || []).map((col, index) => {
       const renderName = getRenderTitle(col);
@@ -78,13 +88,13 @@ const TemplateTable: FC<{
         f => f.colName === renderName,
       );
       return {
-        title: currentConfig?.alias?.name || renderName,
+        title: currentConfig?.alias?.name || renderName || '',
         dataIndex: index,
       };
     });
   };
 
-  const getRenderTitle = column =>
+  const getRenderTitle = (column?: ChartDatasetMeta) =>
     Array.isArray(column?.name) ? column?.name?.join('.') : column?.name;
 
   return (
@@ -102,13 +112,13 @@ const TemplateTable: FC<{
   );
 });
 
-type DisplayViewDetailProps = {
-  currentDataView?: ChartDataView;
+export type DisplayViewDetailProps = {
+  currentDataView?: ViewDetailDataView;
   chartConfig?: ChartConfig;
-  drillOption?: ChartDrillOption;
+  drillOption?: IChartDrillOption;
   viewDetailSetting?: ViewDetailSetting;
   clickFilters?: PendingChartDataRequestFilter[];
-  authToken?: any;
+  authToken?: ExecuteToken;
 };
 
 const useDisplayViewDetail = () => {
@@ -156,7 +166,7 @@ const useDisplayViewDetail = () => {
   };
 
   const openModal = (props: DisplayViewDetailProps) => {
-    return (openStateModal as Function)({
+    return openStateModal({
       modalSize: StateModalSize.MIDDLE,
       content: () => {
         return (
@@ -180,7 +190,7 @@ const useDisplayViewDetail = () => {
       },
     });
   };
-  return [openModal, contextHolder];
+  return [openModal, contextHolder] as const;
 };
 
 export default useDisplayViewDetail;

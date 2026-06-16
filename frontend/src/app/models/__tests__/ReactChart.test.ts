@@ -35,7 +35,9 @@ describe('ReactChart Tests', () => {
     const mockWrapper = vi.fn(() => () => null);
     const chartMetaInfo = { id: 'react', name: 'react-chart', icon: 'chart' };
     const reactChart = new ReactChart(mockWrapper, chartMetaInfo);
-    reactChart.onMount({ containerId: 1 }, { document: { getElementById } });
+    reactChart.onMount({ containerId: '1' }, {
+      document: { getElementById } as unknown as Document,
+    } as never);
     reactChart.onUnMount(null, null);
     expect(reactChart).not.toBeNull();
     expect(reactChart).toBeInstanceOf(ReactChart);

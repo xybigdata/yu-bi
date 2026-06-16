@@ -31,6 +31,7 @@ import {
   Popover,
   Space,
   Tooltip,
+  TreeDataNode,
   TreeSelect,
 } from 'antd';
 import { ToolbarButton } from 'app/components';
@@ -201,7 +202,7 @@ const ChartDataViewPanel: FC<{
       try {
         await checkComputedFieldAsync(dataView?.sourceId, field.expression);
       } catch (error) {
-        message.error(error as any);
+        message.error(String(error));
         return;
       }
 
@@ -267,16 +268,18 @@ const ChartDataViewPanel: FC<{
   };
 
   const buildFieldsForComputedFieldSettingPanel = useCallback(
-    meta => {
+    (
+      meta?: ChartDataView['meta'],
+    ): ChartDataViewMeta[] | TreeDataNode[] | undefined => {
       if (dataView?.type === 'SQL') {
         return getAllColumnInMeta(meta);
       } else {
         const allColumn = getAllColumnInMeta(meta);
         const tableNameList: string[] = [];
-        const columnNameObj: { [key: string]: any } = {};
-        const columnTreeData: any = [];
+        const columnNameObj: Record<string, TreeDataNode[]> = {};
+        const columnTreeData: TreeDataNode[] = [];
 
-        allColumn?.forEach((v, i) => {
+        allColumn?.forEach(v => {
           const path = v.path;
           const tableName = path?.slice(0, path?.length - 1).join('.') || '';
           if (!tableNameList.includes(tableName)) {
@@ -284,15 +287,18 @@ const ChartDataViewPanel: FC<{
           }
         });
 
-        allColumn?.forEach((v, i) => {
+        allColumn?.forEach(v => {
           const path = v.path;
           const tableName = path?.slice(0, path?.length - 1).join('.') || '';
           if (tableNameList.includes(tableName)) {
             const fieldName = path?.[path.length - 1];
+            if (!fieldName || !path) {
+              return;
+            }
             const columnNameArr = columnNameObj[tableName];
             columnNameObj[tableName] = columnNameArr
-              ? [...columnNameArr, { title: fieldName, key: path }]
-              : [{ title: fieldName, key: path }];
+              ? [...columnNameArr, { title: fieldName, key: path.join('.') }]
+              : [{ title: fieldName, key: path.join('.') }];
           }
         });
 
@@ -313,7 +319,7 @@ const ChartDataViewPanel: FC<{
 
   const handleAddOrEditComputedField = useCallback(
     (field?: ChartDataViewMeta) => {
-      (showModal as Function)({
+      showModal({
         title: t('createComputedFields'),
         modalSize: StateModalSize.MIDDLE,
         content: onChange => (
@@ -331,7 +337,6 @@ const ChartDataViewPanel: FC<{
         ),
         onOk: newField =>
           handleAddNewOrUpdateComputedField(newField, field?.name),
-        onButtonProps: { display: field?.isViewComputedFields },
       });
     },
     [
@@ -347,7 +352,7 @@ const ChartDataViewPanel: FC<{
   );
 
   const GroupMetaFields = useCallback(
-    sortType => {
+    (sortType: string) => {
       const {
         hierarchyFields,
         stringFields,
@@ -379,7 +384,7 @@ const ChartDataViewPanel: FC<{
   );
 
   const noGroupMetaFields = useCallback(
-    sortType => {
+    (sortType: string) => {
       const {
         hierarchyFields,
         dateLevelFields,
@@ -407,7 +412,7 @@ const ChartDataViewPanel: FC<{
   );
 
   const buildAllMetaFields = useCallback(
-    (isGroup: boolean, sortType) => {
+    (isGroup: boolean, sortType: string) => {
       if (dataView?.type === 'SQL' || !isGroup) {
         setAllMetaFields(noGroupMetaFields(sortType));
       } else {
@@ -424,7 +429,7 @@ const ChartDataViewPanel: FC<{
   }, [dataView?.id, dataView?.orgId, navigate]);
 
   const handleConfirmVisible = useCallback(() => {
-    (showModal as Function)({
+    showModal({
       title: '',
       modalSize: StateModalSize.XSMALL,
       content: () => t('editViewTip'),

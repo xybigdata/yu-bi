@@ -17,6 +17,7 @@
  */
 
 import {
+  AggregateFieldActionType,
   ChartDataSectionType,
   ChartDataViewFieldCategory,
   DataViewFieldType,
@@ -25,12 +26,14 @@ import {
 import { ChartDataSetRow } from 'app/models/ChartDataSet';
 import { ChartDrillOption } from 'app/models/ChartDrillOption';
 import {
+  ChartConfig,
   ChartDataConfig,
   ChartDataSectionField,
   ChartStyleConfig,
   FormatFieldAction,
 } from 'app/types/ChartConfig';
 import { IChartDataSet } from 'app/types/ChartDataSet';
+import type ChartMetadata from 'app/types/ChartMetadata';
 import {
   clearRuntimeDateLevelFieldsInChartConfig,
   compareSelectedItems,
@@ -59,6 +62,63 @@ import {
   transformToDataSet,
   valueFormatter,
 } from '../chartHelper';
+
+type MinimalStyleConfig = {
+  key: string;
+  value?: unknown;
+  other?: unknown;
+  rows?: MinimalStyleConfig[];
+};
+
+type RuntimeDateLevelField = ChartDataSectionField & {
+  [RUNTIME_DATE_LEVEL_KEY]?: ChartDataSectionField;
+};
+
+const createStyleConfigs = (
+  configs: MinimalStyleConfig[],
+): ChartStyleConfig[] => configs as unknown as ChartStyleConfig[];
+
+const createDataField = (
+  field: Partial<ChartDataSectionField> &
+    Pick<ChartDataSectionField, 'colName'>,
+): ChartDataSectionField => ({
+  type: DataViewFieldType.STRING,
+  category: ChartDataViewFieldCategory.Field,
+  ...field,
+});
+
+const createRuntimeDateLevelField = (
+  field: RuntimeDateLevelField,
+): RuntimeDateLevelField => field;
+
+const createDataConfigs = (
+  configs: Array<
+    Omit<Partial<ChartDataConfig>, 'rows'> & {
+      rows?: Array<
+        Partial<ChartDataSectionField> & Pick<ChartDataSectionField, 'colName'>
+      >;
+    }
+  >,
+): ChartDataConfig[] =>
+  configs.map((config, index) => ({
+    key: config.key || `test-section-${index}`,
+    ...config,
+    rows: config.rows?.map(row => createDataField(row)),
+  }));
+
+const createLegacyDataConfigs = (configs: object[]): ChartDataConfig[] =>
+  configs as unknown as ChartDataConfig[];
+
+const createLegacyDataFields = (fields: object[]): ChartDataSectionField[] =>
+  fields as unknown as ChartDataSectionField[];
+
+const createChartMetadata = (
+  requirements: ChartMetadata['requirements'],
+): ChartMetadata => ({
+  id: 'test-chart',
+  name: 'test-chart',
+  requirements,
+});
 
 describe('Chart Helper ', () => {
   describe.each([
@@ -178,7 +238,9 @@ describe('Chart Helper ', () => {
     ],
   ])('getValue Test - ', (configs, paths, targetKey, expected) => {
     test(`get key of ${targetKey} from configs with path ${paths?.toString()} to be ${expected}`, () => {
-      expect(getValue(configs as any, paths, targetKey)).toBe(expected);
+      expect(getValue(createStyleConfigs(configs), paths, targetKey)).toBe(
+        expected,
+      );
     });
   });
 
@@ -283,7 +345,9 @@ describe('Chart Helper ', () => {
     ],
   ])('getStyles Test - ', (configs, paths, targetKeys, expected) => {
     test(`get keys of ${targetKeys} from configs with path ${paths?.toString()} to be ${expected}`, () => {
-      expect(getStyles(configs as any, paths, targetKeys)).toEqual(expected);
+      expect(getStyles(createStyleConfigs(configs), paths, targetKeys)).toEqual(
+        expected,
+      );
     });
   });
 
@@ -293,60 +357,51 @@ describe('Chart Helper ', () => {
     });
 
     test('should get column render name by data field when there is no aggregation', () => {
-      const field = {
+      const field = createDataField({
         colName: 'a',
-      } as any;
+      });
       expect(getColumnRenderName(field)).toEqual('a');
     });
 
     test('should get column render name by data field with aggregation', () => {
-      const field = {
+      const field = createDataField({
         colName: 'a',
-        aggregate: 'SUM',
-      } as any;
+        aggregate: AggregateFieldActionType.Sum,
+      });
       expect(getColumnRenderName(field)).toEqual('SUM(a)');
     });
 
     test('should get alias name by data field when there is alias and colName', () => {
-      const field = {
+      const field = createDataField({
         alias: {
           name: 'some alias name',
         },
         colName: 'a',
-        aggregate: 'SUM',
-      } as any;
+        aggregate: AggregateFieldActionType.Sum,
+      });
       expect(getColumnRenderName(field)).toEqual('some alias name');
     });
   });
 
   describe('isMatchRequirement Test', () => {
     test('should match meta requirement when no limition', () => {
-      const meta = {
-        requirements: [
-          {
-            group: null,
-            aggregate: null,
-          },
-        ],
-      } as any;
+      const meta = createChartMetadata([{}]);
       const config = {
-        datas: [{}],
-      } as any;
+        datas: [{ key: 'group', type: ChartDataSectionType.Group }],
+      };
       expect(isMatchRequirement(meta, config)).toBeTruthy();
     });
 
     test('should match meta requirement when only group have limition', () => {
-      const meta = {
-        requirements: [
-          {
-            group: 1,
-            aggregate: null,
-          },
-        ],
-      } as any;
+      const meta = createChartMetadata([
+        {
+          group: 1,
+        },
+      ]);
       const config = {
-        datas: [
+        datas: createDataConfigs([
           {
+            key: 'group',
             type: 'group',
             required: true,
             rows: [
@@ -355,23 +410,22 @@ describe('Chart Helper ', () => {
               },
             ],
           },
-        ],
-      } as any;
+        ]),
+      };
       expect(isMatchRequirement(meta, config)).toBeTruthy();
     });
 
     test('should match meta requirement when group and aggregate need more than one field', () => {
-      const meta = {
-        requirements: [
-          {
-            group: [1, 999],
-            aggregate: [1, 999],
-          },
-        ],
-      } as any;
+      const meta = createChartMetadata([
+        {
+          group: [1, 999],
+          aggregate: [1, 999],
+        },
+      ]);
       const config = {
-        datas: [
+        datas: createDataConfigs([
           {
+            key: 'group',
             type: 'group',
             required: true,
             rows: [
@@ -381,6 +435,7 @@ describe('Chart Helper ', () => {
             ],
           },
           {
+            key: 'aggregate',
             type: 'aggregate',
             required: true,
             rows: [
@@ -389,23 +444,22 @@ describe('Chart Helper ', () => {
               },
             ],
           },
-        ],
-      } as any;
+        ]),
+      };
       expect(isMatchRequirement(meta, config)).toBeTruthy();
     });
 
     test('should not match meta requirement when not match all requirement of fields', () => {
-      const meta = {
-        requirements: [
-          {
-            group: 1,
-            aggregate: 2,
-          },
-        ],
-      } as any;
+      const meta = createChartMetadata([
+        {
+          group: 1,
+          aggregate: 2,
+        },
+      ]);
       const config = {
-        datas: [
+        datas: createDataConfigs([
           {
+            key: 'group',
             type: 'group',
             required: true,
             rows: [
@@ -415,6 +469,7 @@ describe('Chart Helper ', () => {
             ],
           },
           {
+            key: 'aggregate',
             type: 'aggregate',
             required: true,
             rows: [
@@ -423,8 +478,8 @@ describe('Chart Helper ', () => {
               },
             ],
           },
-        ],
-      } as any;
+        ]),
+      };
       expect(isMatchRequirement(meta, config)).toBeFalsy();
     });
   });
@@ -442,30 +497,36 @@ describe('Chart Helper ', () => {
         { name: 'current(profession)' },
         { name: 'age' },
       ];
-      const chartDataSet = transformToDataSet(columns, metas, [
-        {
-          rows: [
-            {
-              colName: 'name',
-            },
-            {
-              colName: 'profession',
-              aggregate: 'current',
-            },
+      const chartDataSet = transformToDataSet(
+        columns,
+        metas,
+        createLegacyDataConfigs([
+          {
+            rows: [
+              {
+                colName: 'name',
+              },
+              {
+                colName: 'profession',
+                aggregate: 'current',
+              },
 
-            {
-              colName: 'age',
-            },
-          ],
-        },
-      ] as any);
+              {
+                colName: 'age',
+              },
+            ],
+          },
+        ]),
+      );
 
       expect(
         JSON.stringify(
           getColorizeGroupSeriesColumns(chartDataSet, {
             colName: 'profession',
-            aggregate: 'current',
-          } as any),
+            aggregate: 'current' as AggregateFieldActionType,
+            type: DataViewFieldType.STRING,
+            category: ChartDataViewFieldCategory.Field,
+          }),
         ),
       ).toBe(
         JSON.stringify([
@@ -505,15 +566,15 @@ describe('Chart Helper ', () => {
         NAME: 'r2-c1-v',
         AGE: 'r2-c2-v',
       });
-      expect(chartDataSet[0].getCell({ colName: 'age' } as any)).toEqual(
-        'r1-c2-v',
-      );
-      expect(chartDataSet[0].getFieldKey({ colName: 'age' } as any)).toEqual(
-        'AGE',
-      );
-      expect(chartDataSet[0].getFieldIndex({ colName: 'age' } as any)).toEqual(
-        1,
-      );
+      expect(
+        chartDataSet[0].getCell(createDataField({ colName: 'age' })),
+      ).toEqual('r1-c2-v');
+      expect(
+        chartDataSet[0].getFieldKey(createDataField({ colName: 'age' })),
+      ).toEqual('AGE');
+      expect(
+        chartDataSet[0].getFieldIndex(createDataField({ colName: 'age' })),
+      ).toEqual(1);
       expect(chartDataSet[0].getCellByKey('age')).toEqual('r1-c2-v');
     });
 
@@ -528,40 +589,36 @@ describe('Chart Helper ', () => {
         NAME: 'r1-c1-v',
         'AVG(AGE)': 'r1-c2-v',
       });
-      expect(
-        chartDataSet[0].getCell({ colName: 'age', aggregate: 'AVG' } as any),
-      ).toEqual('r1-c2-v');
-      expect(
-        chartDataSet[0].getFieldKey({
-          colName: 'age',
-          aggregate: 'AVG',
-        } as any),
-      ).toEqual('AVG(AGE)');
-      expect(
-        chartDataSet[0].getFieldIndex({
-          colName: 'age',
-          aggregate: 'AVG',
-        } as any),
-      ).toEqual(1);
+      const aggregateField = createDataField({
+        colName: 'age',
+        aggregate: AggregateFieldActionType.Avg,
+      });
+      expect(chartDataSet[0].getCell(aggregateField)).toEqual('r1-c2-v');
+      expect(chartDataSet[0].getFieldKey(aggregateField)).toEqual('AVG(AGE)');
+      expect(chartDataSet[0].getFieldIndex(aggregateField)).toEqual(1);
       expect(chartDataSet[0].getCellByKey('AVG(age)')).toEqual('r1-c2-v');
     });
 
     test('should get dataset row data with case sensitive', () => {
       const columns = [['r1-c1-v', 'r1-c2-v']];
       const metas = [{ name: 'name' }, { name: 'avg(age)' }];
-      const chartDataSet = transformToDataSet(columns, metas, [
-        {
-          rows: [
-            {
-              colName: 'Name',
-            },
-            {
-              colName: 'Age',
-              aggregate: 'AVG',
-            },
-          ],
-        },
-      ] as any);
+      const chartDataSet = transformToDataSet(
+        columns,
+        metas,
+        createDataConfigs([
+          {
+            rows: [
+              {
+                colName: 'Name',
+              },
+              {
+                colName: 'Age',
+                aggregate: AggregateFieldActionType.Avg,
+              },
+            ],
+          },
+        ]),
+      );
 
       expect(chartDataSet?.length).toEqual(1);
       expect(chartDataSet[0] instanceof ChartDataSetRow).toBeTruthy();
@@ -1757,16 +1814,21 @@ describe('Chart Helper ', () => {
     ],
   ])('getDataColumnMaxAndMin2 Test - ', (data, config, expected) => {
     test(`Get column max and min value`, () => {
-      const chartDataSet = transformToDataSet(data, [{ name: 'sum(num)' }], [
-        {
-          rows: [
-            {
-              colName: 'num',
-              aggregate: 'SUM',
-            },
-          ],
-        },
-      ] as any);
+      const chartDataSet = transformToDataSet(
+        data,
+        [{ name: 'sum(num)' }],
+        [
+          {
+            key: 'aggregate',
+            rows: createLegacyDataFields([
+              {
+                colName: 'num',
+                aggregate: 'SUM',
+              },
+            ]),
+          },
+        ],
+      );
       expect(
         JSON.stringify(
           getDataColumnMaxAndMin2(
@@ -1808,7 +1870,7 @@ describe('Chart Helper ', () => {
         { name: 'sum(info)' },
         { name: 'count(size)' },
       ];
-      const rows = [
+      const rows = createLegacyDataFields([
         {
           category: 'field',
           type: 'STRING',
@@ -1837,12 +1899,13 @@ describe('Chart Helper ', () => {
           type: 'NUMERIC',
           category: 'field',
         },
-      ];
+      ]);
       const chartDataSet = transformToDataSet(columns, metas, [
         {
+          key: 'fields',
           rows,
         },
-      ] as any);
+      ]);
 
       expect(
         getSeriesTooltips4Rectangular2(
@@ -1861,11 +1924,11 @@ describe('Chart Helper ', () => {
               },
             },
           },
-          [rows[0]] as ChartDataSectionField[],
-          [rows[2]] as ChartDataSectionField[],
-          [rows[1]] as ChartDataSectionField[],
-          [rows[3]] as ChartDataSectionField[],
-          [rows[4]] as ChartDataSectionField[],
+          [rows[0]],
+          [rows[2]],
+          [rows[1]],
+          [rows[3]],
+          [rows[4]],
         ),
       ).toEqual('');
 
@@ -1886,11 +1949,11 @@ describe('Chart Helper ', () => {
               },
             },
           },
-          [rows[0]] as ChartDataSectionField[],
-          [rows[2]] as ChartDataSectionField[],
-          rows as ChartDataSectionField[],
-          [rows[3]] as ChartDataSectionField[],
-          [rows[4]] as ChartDataSectionField[],
+          [rows[0]],
+          [rows[2]],
+          rows,
+          [rows[3]],
+          [rows[4]],
         ),
       ).toEqual(
         'Name: r1-c1-v<br />Color: #fff<br />AVG(Age): r1-c2-v<br />COUNT(Size): 20<br />SUM(Info): 10',
@@ -1913,11 +1976,11 @@ describe('Chart Helper ', () => {
               },
             },
           },
-          [rows[0]] as ChartDataSectionField[],
-          [rows[2]] as ChartDataSectionField[],
-          rows as ChartDataSectionField[],
-          [rows[3]] as ChartDataSectionField[],
-          [rows[4]] as ChartDataSectionField[],
+          [rows[0]],
+          [rows[2]],
+          rows,
+          [rows[3]],
+          [rows[4]],
         ),
       ).toEqual(
         'Name: r1-c1-v<br />Color: #fff<br />Name: r1-c1-v<br />COUNT(Size): 20<br />SUM(Info): 10',
@@ -1935,7 +1998,7 @@ describe('Chart Helper ', () => {
         { name: 'sum(info)' },
         { name: 'count(size)' },
       ];
-      const rows = [
+      const rows = createLegacyDataFields([
         {
           category: 'field',
           type: 'STRING',
@@ -1964,12 +2027,13 @@ describe('Chart Helper ', () => {
           type: 'NUMERIC',
           category: 'field',
         },
-      ];
+      ]);
       const chartDataSet = transformToDataSet(columns, metas, [
         {
+          key: 'fields',
           rows,
         },
-      ] as any);
+      ]);
       const tooltipParam = {
         data: {
           name: 'string',
@@ -1987,11 +2051,11 @@ describe('Chart Helper ', () => {
         getSeriesTooltips4Polar2(
           chartDataSet,
           tooltipParam,
-          [rows[0]] as ChartDataSectionField[],
-          [rows[2]] as ChartDataSectionField[],
-          [rows[1]] as ChartDataSectionField[],
-          [rows[3]] as ChartDataSectionField[],
-          [rows[4]] as ChartDataSectionField[],
+          [rows[0]],
+          [rows[2]],
+          [rows[1]],
+          [rows[3]],
+          [rows[4]],
         ),
       ).toEqual(
         'Name: r1-c1-v<br />Color: #fff<br />AVG(Age): r1-c2-v<br />COUNT(Size): 20<br />SUM(Info): 10',
@@ -2049,10 +2113,10 @@ describe('Chart Helper ', () => {
   describe('getStyleValue Test', () => {
     test('should get value', () => {
       expect(
-        getStyleValue([{ key: 'a', rows: [{ key: 'a-1', value: 1 }] }] as any, [
-          'a',
-          'a-1',
-        ]),
+        getStyleValue(
+          createStyleConfigs([{ key: 'a', rows: [{ key: 'a-1', value: 1 }] }]),
+          ['a', 'a-1'],
+        ),
       ).toEqual(1);
     });
   });
@@ -2061,7 +2125,7 @@ describe('Chart Helper ', () => {
     test('should get value', () => {
       expect(
         getSettingValue(
-          [{ key: 'a', rows: [{ key: 'a-1', value: 1 }] }] as any,
+          createStyleConfigs([{ key: 'a', rows: [{ key: 'a-1', value: 1 }] }]),
           'a.a-1',
           'value',
         ),
@@ -2073,7 +2137,7 @@ describe('Chart Helper ', () => {
     test('should get value', () => {
       expect(
         getStyleValueByGroup(
-          [{ key: 'a', rows: [{ key: 'a-1', value: 1 }] }] as any,
+          createStyleConfigs([{ key: 'a', rows: [{ key: 'a-1', value: 1 }] }]),
           'a',
           'a-1',
         ),
@@ -2083,23 +2147,34 @@ describe('Chart Helper ', () => {
 
   describe('getDrillableRows Test', () => {
     test('should get group section rows when drill option is null', () => {
-      const config = [
+      const rows = [
+        createDataField({ colName: 'col1' }),
+        createDataField({ colName: 'col2' }),
+      ];
+      const config: ChartDataConfig[] = [
         {
+          key: 'group',
           type: ChartDataSectionType.Group,
-          rows: [1, 2],
+          rows,
         },
-      ] as any[];
+      ];
       const drillRows = getDrillableRows(config, undefined);
-      expect(drillRows).toEqual([1, 2]);
+      expect(drillRows).toEqual(rows);
     });
 
     test('should not get group section rows when is not group section', () => {
-      const config = [
+      const config: ChartDataConfig[] = [
         {
+          key: 'aggregate',
           type: ChartDataSectionType.Aggregate,
-          rows: [1, 2],
+          rows: [
+            createDataField({
+              colName: 'amount',
+              type: DataViewFieldType.NUMERIC,
+            }),
+          ],
         },
-      ] as any[];
+      ];
       const drillRows = getDrillableRows(config, undefined);
       expect(drillRows).toEqual([]);
     });
@@ -2598,7 +2673,7 @@ describe('Chart Helper ', () => {
 
   describe('clearRuntimeDateLevelFieldsInChartConfig Test', () => {
     test('Clear all runtime state in chart config', () => {
-      const chartConfig: any = {
+      const chartConfig: ChartConfig = {
         datas: [
           {
             drillable: true,
@@ -2608,22 +2683,22 @@ describe('Chart Helper ', () => {
             required: true,
             type: 'group',
             rows: [
-              {
-                category: 'dateLevelComputedField',
+              createRuntimeDateLevelField({
+                category: ChartDataViewFieldCategory.DateLevelComputedField,
                 colName: '签署日期（按月）',
                 expression: 'AGG_DATE_MONTH(签署日期)',
                 field: '签署日期',
                 type: DataViewFieldType.DATE,
                 uid: 'd8a3ca7e-7513-4b31-b09c-ea3611bc3c54',
                 [RUNTIME_DATE_LEVEL_KEY]: {
-                  category: 'dateLevelComputedField',
+                  category: ChartDataViewFieldCategory.DateLevelComputedField,
                   colName: '签署日期（按季度）',
                   expression: 'AGG_DATE_QUARTER(签署日期)',
                   field: '签署日期',
-                  type: 'DATE',
+                  type: DataViewFieldType.DATE,
                   uid: 'd8a3ca7e-7513-4b31-b09c-ea3611bc3c54',
                 },
-              },
+              }),
             ],
           },
         ],
@@ -2655,7 +2730,7 @@ describe('Chart Helper ', () => {
 
   describe('setRuntimeDateLevelFieldsInChartConfig Test', () => {
     test('set all runtime state in chart config', () => {
-      const chartConfig: any = {
+      const chartConfig: ChartConfig = {
         datas: [
           {
             drillable: true,
@@ -2665,22 +2740,22 @@ describe('Chart Helper ', () => {
             required: true,
             type: 'group',
             rows: [
-              {
-                category: 'dateLevelComputedField',
+              createRuntimeDateLevelField({
+                category: ChartDataViewFieldCategory.DateLevelComputedField,
                 colName: '签署日期（按月）',
                 expression: 'AGG_DATE_MONTH(签署日期)',
                 field: '签署日期',
                 type: DataViewFieldType.DATE,
                 uid: 'd8a3ca7e-7513-4b31-b09c-ea3611bc3c54',
                 [RUNTIME_DATE_LEVEL_KEY]: {
-                  category: 'dateLevelComputedField',
+                  category: ChartDataViewFieldCategory.DateLevelComputedField,
                   colName: '签署日期（按季度）',
                   expression: 'AGG_DATE_QUARTER(签署日期)',
                   field: '签署日期',
                   type: DataViewFieldType.DATE,
                   uid: 'd8a3ca7e-7513-4b31-b09c-ea3611bc3c54',
                 },
-              },
+              }),
             ],
           },
         ],

@@ -33,6 +33,7 @@ import { ChartStyleConfigDTO } from 'app/types/ChartConfigDTO';
 import {
   ChartDataRequest,
   ChartDataRequestFilter,
+  ChartVariableParams,
   PendingChartDataRequestFilter,
 } from 'app/types/ChartDataRequest';
 import { ChartDatasetPageInfo } from 'app/types/ChartDataSet';
@@ -45,18 +46,14 @@ import {
   getRuntimeDateLevelFields,
   getValue,
 } from 'app/utils/chartHelper';
-import { formatDatartDate } from 'app/utils/date';
+import { formatDatartDate, formatDatartDateTime } from 'app/utils/date';
 import { transformToViewConfig } from 'app/utils/internalChartHelper';
 import {
   getTime,
   recommendTimeRangeConverter,
   splitRangerDateFilters,
 } from 'app/utils/time';
-import {
-  FilterSqlOperator,
-  RUNTIME_FILTER_KEY,
-  TIME_FORMATTER,
-} from 'globalConstants';
+import { FilterSqlOperator, RUNTIME_FILTER_KEY } from 'globalConstants';
 import {
   isEmptyArray,
   isEmptyString,
@@ -76,7 +73,7 @@ export class ChartDataRequestBuilder {
   script: boolean;
   aggregation?: boolean;
   drillOption?: IChartDrillOption;
-  variableParams?: Record<string, any[]>;
+  variableParams?: ChartVariableParams;
 
   constructor(
     dataView: Pick<ChartDataView, 'id' | 'computedFields' | 'type' | 'meta'> & {
@@ -119,7 +116,7 @@ export class ChartDataRequestBuilder {
     return this;
   }
 
-  public addVariableParams(params?: Record<string, any[]>) {
+  public addVariableParams(params?: ChartVariableParams) {
     if (params) {
       this.variableParams = params;
     }
@@ -285,7 +282,12 @@ export class ChartDataRequestBuilder {
   }
 
   private normalizeFilters = (fields: ChartDataSectionField[]) => {
-    const _timeConverter = (visualType, value, dateFormat = TIME_FORMATTER) => {
+    type NormalizedFilterValue = {
+      value: string | number;
+      valueType: ChartDataSectionField['type'];
+    };
+
+    const _timeConverter = (visualType, value, dateFormat?) => {
       if (visualType !== 'DATE') {
         return value;
       }
@@ -294,16 +296,20 @@ export class ChartDataRequestBuilder {
           value.unit,
           value.isStart,
         );
-        return formatDatartDate(time, dateFormat);
+        return dateFormat
+          ? formatDatartDate(time, dateFormat)
+          : formatDatartDateTime(time);
       }
-      return formatDatartDate(value, dateFormat);
+      return dateFormat
+        ? formatDatartDate(value, dateFormat)
+        : formatDatartDateTime(value);
     };
 
     const _transformFieldValues = (field: ChartDataSectionField) => {
       const conditionValue = field.filter?.condition?.value;
       const dateFormat = field.dateFormat;
       if (!conditionValue) {
-        return null;
+        return null as NormalizedFilterValue[] | null;
       }
       if (Array.isArray(conditionValue)) {
         return conditionValue
@@ -328,7 +334,7 @@ export class ChartDataRequestBuilder {
               };
             }
           })
-          .filter(Boolean) as any[];
+          .filter((value): value is NormalizedFilterValue => Boolean(value));
       }
       if (
         field?.filter?.condition?.type === FilterConditionType.RecommendTime
@@ -479,20 +485,27 @@ export class ChartDataRequestBuilder {
     };
   }
 
-  private buildFunctionColumns() {
+  private buildFunctionColumns(): Array<{ alias: string; snippet: string }> {
     const computedFields = getRuntimeDateLevelFields(
       this.dataView.computedFields,
-    );
+    ) as ChartDataViewMeta[] | undefined;
     const fieldsNameList = (this.chartDataConfigs || [])
-      .flatMap(config => getRuntimeDateLevelFields(config.rows) || [])
+      .flatMap(
+        config =>
+          (getRuntimeDateLevelFields(config.rows) as ChartDataSectionField[]) ||
+          [],
+      )
       .flatMap(row => row?.colName || []);
-    const currentUsedComputedFields = computedFields?.filter(v =>
-      fieldsNameList.includes(v.name),
+    const currentUsedComputedFields = computedFields?.filter(
+      v =>
+        Boolean(v.name) &&
+        v.expression !== undefined &&
+        fieldsNameList.includes(v.name),
     );
 
     return (currentUsedComputedFields || []).map(f => ({
-      alias: f.name!,
-      snippet: f.expression,
+      alias: f.name,
+      snippet: f.expression!,
     }));
   }
 

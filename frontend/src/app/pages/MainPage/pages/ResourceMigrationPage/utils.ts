@@ -23,7 +23,7 @@ export async function onImport(args: {
   orgId: string;
 }) {
   const { file, strategy, orgId } = args;
-  await request2<any>({
+  await request2<null>({
     method: 'POST',
     url: `viz/import?strategy=${strategy}&orgId=${orgId}`,
     data: file,
@@ -32,7 +32,7 @@ export async function onImport(args: {
 }
 
 export async function onExport(idList) {
-  await request2<any>({
+  await request2<null>({
     method: 'POST',
     url: `viz/export`,
     data: {

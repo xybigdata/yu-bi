@@ -14,7 +14,7 @@ function DateLevelFieldContainer({
   folderRole,
   item,
 }: {
-  onClearCheckedList?: () => any;
+  onClearCheckedList?: () => void;
   folderRole?: string;
   item: dateLevelFieldsProps;
 }) {

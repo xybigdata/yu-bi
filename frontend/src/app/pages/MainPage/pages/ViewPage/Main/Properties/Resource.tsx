@@ -24,7 +24,17 @@ import {
   SearchOutlined,
   TableOutlined,
 } from '@ant-design/icons';
-import { Button, Col, Dropdown, Input, Row, Space, TreeDataNode } from 'antd';
+import {
+  Button,
+  Col,
+  Dropdown,
+  Input,
+  Row,
+  Space,
+  TreeDataNode,
+  TreeProps,
+} from 'antd';
+import type { ReactNode } from 'react';
 import { loadMonaco } from 'app/components/MonacoEditor/runtime';
 import { Tree } from 'app/components';
 import { DataViewFieldType } from 'app/constants';
@@ -56,6 +66,21 @@ import { getEditorProvideCompletionItems } from '../../slice/thunks';
 import { DatabaseSchema } from '../../slice/types';
 import { buildAntdTreeNodeModel } from '../../utils';
 import Container from './Container';
+
+type ResourceTreeIconProps = Parameters<
+  Extract<TreeProps<TreeDataNode>['icon'], (props: any) => ReactNode>
+>[0];
+
+type ResourceTreeIconNode = ResourceTreeIconProps & {
+  value?: string[];
+  type?: DataViewFieldType | string;
+};
+
+const isResourceTreeIconNode = (
+  value: ResourceTreeIconProps,
+): value is ResourceTreeIconNode => {
+  return 'value' in value || 'type' in value;
+};
 
 export const Resource = memo(() => {
   const t = useI18NPrefix('view.resource');
@@ -143,8 +168,11 @@ export const Resource = memo(() => {
     };
   }, [dispatch, sourceId, databaseTreeModel, editorCompletionItemProviderRef]);
 
-  const renderIcon = useCallback(node => {
-    const { value, type } = node as any;
+  const renderIcon = useCallback((node: ResourceTreeIconProps) => {
+    if (!isResourceTreeIconNode(node)) {
+      return;
+    }
+    const { value, type } = node;
     if (Array.isArray(value)) {
       switch (value.length) {
         case 1:

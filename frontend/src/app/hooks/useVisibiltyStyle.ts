@@ -16,10 +16,13 @@
  * limitations under the License.
  */
 
+type VisibilityStyle = { transform: string; position: string };
+type VisibilityStyleResolver = (isVisible: boolean) => VisibilityStyle;
+
 const useVisibilityStyle = (
   visibility = true,
-): [{ transform: string; position: string }, Function] => {
-  const toggle = isVisible => {
+): [VisibilityStyle, VisibilityStyleResolver] => {
+  const toggle: VisibilityStyleResolver = isVisible => {
     return isVisible
       ? {
           transform: 'none',

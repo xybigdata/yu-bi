@@ -19,6 +19,7 @@ import ChartEditor from 'app/components/ChartEditor';
 import DndProviderCompat from 'app/components/DndProviderCompat';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { BOARD_SELF_CHART_PREFIX } from 'globalConstants';
+import ChartDataView from 'app/types/ChartDataView';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
@@ -51,6 +52,16 @@ import {
   selectEditBoardLoading,
 } from './slice/selectors';
 import { addChartWidget, fetchEditBoardDetail } from './slice/thunk';
+
+type BoardEditorLocationState = {
+  widgetInfo?: string;
+};
+
+type BoardEditorWidgetInfo = {
+  dashboardType: Parameters<typeof addChartWidget>[0]['boardType'];
+  dataChart: DataChart;
+  dataview: ChartDataView;
+};
 
 export const BoardEditor: React.FC<{
   boardId: string;
@@ -118,14 +129,17 @@ export const BoardEditor: React.FC<{
   ]);
   const initialization = useCallback(async () => {
     await dispatch(fetchEditBoardDetail(boardId));
-    const histState = navigate.location.state as any;
+    const histState = navigate.location
+      .state as BoardEditorLocationState | null;
     try {
       if (histState?.widgetInfo) {
         // TODO(Stephen): to be confirm if use history state widget info and for what
         console.error(
           'if you see the error on board editor, please contact to administrator',
         );
-        const widgetInfo = JSON.parse(histState.widgetInfo);
+        const widgetInfo = JSON.parse(
+          histState.widgetInfo,
+        ) as BoardEditorWidgetInfo;
         if (widgetInfo) {
           let subType: 'widgetChart' | 'dataChart' = 'dataChart';
           if (!widgetInfo.dataChart.id) {

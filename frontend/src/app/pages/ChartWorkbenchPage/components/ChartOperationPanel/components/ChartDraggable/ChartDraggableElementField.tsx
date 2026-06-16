@@ -28,11 +28,14 @@ import {
   SortDescendingOutlined,
 } from '@ant-design/icons';
 import { Dropdown } from 'antd';
+import { StateModalSize } from 'app/hooks/useStateModal';
 import { SortActionType } from 'app/constants';
 import ChartDataViewContext from 'app/pages/ChartWorkbenchPage/contexts/ChartDataViewContext';
+import { ChartDataConfig, ChartDataSectionField } from 'app/types/ChartConfig';
+import { ChartDataConfigSectionProps } from 'app/types/ChartDataConfigSection';
 import { getColumnRenderName } from 'app/utils/chartHelper';
 import classnames from 'classnames';
-import { FC, memo, useContext, useMemo } from 'react';
+import { FC, ReactNode, memo, useContext, useMemo } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { ERROR, WARNING, WHITE } from 'styles/StyleConstants';
 import {
@@ -52,14 +55,14 @@ type DropdownDestroyOnHiddenCompatProps = {
 };
 
 const ChartDraggableElementField: FC<{
-  modalSize;
-  config;
-  columnConfig;
-  ancestors;
-  aggregation;
-  availableSourceFunctions;
-  onConfigChanged;
-  handleOpenActionModal;
+  modalSize?: StateModalSize;
+  config: ChartDataConfig;
+  columnConfig: ChartDataSectionField;
+  ancestors: number[];
+  aggregation?: boolean;
+  availableSourceFunctions?: string[];
+  onConfigChanged: ChartDataConfigSectionProps['onConfigChanged'];
+  handleOpenActionModal: (uid: string) => (actionType: string) => void;
 }> = memo(
   ({
     modalSize,
@@ -139,8 +142,8 @@ const ChartDraggableElementField: FC<{
       destroyOnHidden: true,
     } as DropdownDestroyOnHiddenCompatProps;
 
-    const enableActionsIcons = col => {
-      const icons = [] as any;
+    const enableActionsIcons = (col: ChartDataSectionField) => {
+      const icons: ReactNode[] = [];
       if (col.alias) {
         icons.push(<DiffOutlined key="alias" />);
       }
@@ -174,8 +177,8 @@ const ChartDraggableElementField: FC<{
       <Dropdown
         key={columnConfig.uid}
         disabled={!config?.actions}
-        {...(dropdownDestroyOnHiddenProps as any)}
-        {...(dropdownPopupRenderProps as any)}
+        {...dropdownDestroyOnHiddenProps}
+        {...dropdownPopupRenderProps}
         overlayClassName="datart-data-section-dropdown"
         trigger={['click']}
       >

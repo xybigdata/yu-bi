@@ -17,12 +17,47 @@
  */
 
 import { APP_VERSION_BETA_4, APP_VERSION_RC_2 } from 'app/migration/constants';
+import { ChartStyleSectionComponentType } from 'app/constants';
+import { ChartConfig } from 'app/types/ChartConfig';
+import { ChartDetailConfigDTO } from 'app/types/ChartConfigDTO';
 import {
   buildUpdateChartRequest,
   convertToChartConfigDTO,
   convertToChartDto,
   mergeToChartConfig,
 } from '../ChartDtoHelper';
+
+const createChartConfig = (
+  overrides: Partial<ChartConfig> = {},
+): ChartConfig => ({
+  datas: [],
+  styles: [],
+  settings: [],
+  interactions: [],
+  ...overrides,
+});
+
+const createStyleConfig = (key: string, value?: unknown) => ({
+  key,
+  label: key,
+  comType: ChartStyleSectionComponentType.GROUP,
+  ...(value === undefined ? {} : { value }),
+});
+
+const createChartDetailConfig = (
+  overrides: Partial<ChartDetailConfigDTO> = {},
+): ChartDetailConfigDTO => ({
+  chartGraphId: '1',
+  computedFields: [],
+  aggregation: false,
+  chartConfig: {
+    datas: [],
+    styles: [],
+    settings: [],
+    interactions: [],
+  },
+  ...overrides,
+});
 
 describe('chartDtoHelper Test', () => {
   test('should convert to chart dto', () => {
@@ -195,48 +230,46 @@ describe('chartDtoHelper Test', () => {
   });
 
   test('should not merge config when source is empty ', () => {
-    const chartConfig = {
+    const chartConfig = createChartConfig({
       datas: [{ key: 'data-1' }],
-      styles: [{ key: 'style-1' }],
-      settings: [{ key: 'setting-1' }],
-    } as any;
+      styles: [createStyleConfig('style-1')],
+      settings: [createStyleConfig('setting-1')],
+    });
     const chartDetailConfigDto = undefined;
     const result = mergeToChartConfig(chartConfig, chartDetailConfigDto);
     expect(result).toEqual(chartConfig);
   });
 
   test('should merge chart config from chart detail config', () => {
-    const chartConfig = {
+    const chartConfig = createChartConfig({
       datas: [{ key: 'data-1' }],
-      styles: [{ key: 'style-1' }],
-      settings: [{ key: 'setting-1' }],
-    } as any;
-    const chartDetailConfigDto = {
-      chartGraphId: '1',
-      computedFields: [],
-      aggregation: false,
+      styles: [createStyleConfig('style-1')],
+      settings: [createStyleConfig('setting-1')],
+    });
+    const chartDetailConfigDto = createChartDetailConfig({
       chartConfig: {
         datas: [{ key: 'data-1', rows: [] }],
-        styles: [{ key: 'style-1', value: 2 }],
-        settings: [{ key: 'setting-1', value: 3 }],
+        styles: [createStyleConfig('style-1', 2)],
+        settings: [createStyleConfig('setting-1', 3)],
       },
-    };
+    });
     const result = mergeToChartConfig(chartConfig, chartDetailConfigDto);
     expect(result).toEqual({
       datas: [{ key: 'data-1', rows: [] }],
-      styles: [{ key: 'style-1', value: 2 }],
-      settings: [{ key: 'setting-1', value: 3 }],
+      styles: [createStyleConfig('style-1', 2)],
+      settings: [createStyleConfig('setting-1', 3)],
+      interactions: [],
     });
   });
 
   test('should get chartConfigDto', () => {
-    const chartDetailConfigDto = {
+    const chartDetailConfigDto = createChartDetailConfig({
       chartConfig: {
         datas: [],
         styles: [],
         settings: [],
       },
-    } as any;
+    });
     const result = convertToChartConfigDTO(chartDetailConfigDto);
     expect(result).toEqual({ datas: [], styles: [], settings: [] });
   });

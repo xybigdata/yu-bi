@@ -18,14 +18,14 @@
 
 import { ChartDataViewFieldCategory } from 'app/constants';
 import { StateModalSize } from 'app/hooks/useStateModal';
-import { ChartDataConfig } from 'app/types/ChartConfig';
+import { ChartDataConfig, ChartDataSectionField } from 'app/types/ChartConfig';
 import { ReactNode } from 'react';
 
 export interface ChartDataConfigSectionProps {
   ancestors: number[];
   config: ChartDataConfig;
   modalSize?: StateModalSize;
-  category?: Lowercase<keyof typeof ChartDataViewFieldCategory>;
+  category?: ChartDataSectionField['category'];
   aggregation?: boolean;
   expensiveQuery?: boolean;
   extra?: () => ReactNode;

@@ -26,17 +26,28 @@ import { ValueOf } from 'types';
 import useI18NPrefix, { I18NComponentProps } from './useI18NPrefix';
 import useStateModal, { StateModalSize } from './useStateModal';
 
+type FieldActionModalOnConfigChange = (
+  config: ChartDataSectionField,
+  needRefresh?: boolean,
+) => void;
+
+type FieldActionModalSubmit = (
+  columnUid: string,
+  config: ChartDataSectionField,
+  needRefresh?: boolean,
+) => void;
+
 function useFieldActionModal({ i18nPrefix }: I18NComponentProps) {
   const t = useI18NPrefix(i18nPrefix);
   const [show, contextHolder] = useStateModal({ initState: {} });
 
   const getContent = (
-    actionType,
+    actionType: ValueOf<typeof ChartDataSectionFieldActionType>,
     config?: ChartDataSectionField,
     dataset?: ChartDataSetDTO,
     dataView?: ChartDataView,
     dataConfig?: ChartDataConfig,
-    onChange?,
+    onChange?: FieldActionModalOnConfigChange,
     aggregation?: boolean,
     form?: FormInstance,
   ) => {
@@ -49,10 +60,10 @@ function useFieldActionModal({ i18nPrefix }: I18NComponentProps) {
       dataset,
       dataView,
       dataConfig,
-      onConfigChange: onChange,
       aggregation,
       i18nPrefix,
       form,
+      onConfigChange: onChange || (() => undefined),
     };
 
     switch (actionType) {
@@ -82,7 +93,8 @@ function useFieldActionModal({ i18nPrefix }: I18NComponentProps) {
   };
 
   const handleOk =
-    (onConfigChange, columnUid: string) => (config, needRefresh) => {
+    (onConfigChange: FieldActionModalSubmit, columnUid: string) =>
+    (config: ChartDataSectionField, needRefresh?: boolean) => {
       onConfigChange(columnUid, config, needRefresh);
     };
 
@@ -90,10 +102,10 @@ function useFieldActionModal({ i18nPrefix }: I18NComponentProps) {
     columnUid: string,
     actionType: ValueOf<typeof ChartDataSectionFieldActionType>,
     dataConfig: ChartDataConfig,
-    onConfigChange,
+    onConfigChange: FieldActionModalSubmit,
     dataset?: ChartDataSetDTO,
     dataView?: ChartDataView,
-    modalSize?: string,
+    modalSize?: string | StateModalSize,
     aggregation?: boolean,
   ) => {
     const currentConfig = dataConfig.rows?.find(c => c.uid === columnUid);
@@ -103,7 +115,7 @@ function useFieldActionModal({ i18nPrefix }: I18NComponentProps) {
     } else if (actionType === ChartDataSectionFieldActionType.ColorizeSingle) {
       _modalSize = StateModalSize.XSMALL;
     }
-    return (show as Function)({
+    return show({
       title: t(actionType),
       modalSize: modalSize || _modalSize,
       content: (onChange, from) =>
@@ -122,7 +134,7 @@ function useFieldActionModal({ i18nPrefix }: I18NComponentProps) {
     });
   };
 
-  return [showModal, contextHolder];
+  return [showModal, contextHolder] as const;
 }
 
 export default useFieldActionModal;

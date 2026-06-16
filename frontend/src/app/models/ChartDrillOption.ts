@@ -17,7 +17,10 @@
  */
 
 import { ChartDataSectionField, FilterCondition } from 'app/types/ChartConfig';
-import { IChartDrillOption } from 'app/types/ChartDrillOption';
+import {
+  ChartDrillFilterData,
+  IChartDrillOption,
+} from 'app/types/ChartDrillOption';
 import { FilterSqlOperator } from 'globalConstants';
 import { isEmptyArray } from 'utils/object';
 import { ConditionBuilder } from './ChartFilterCondition';
@@ -106,7 +109,7 @@ export class ChartDrillOption implements IChartDrillOption {
     return this.cursor + 1;
   }
 
-  public drillDown(filterData?: { [key in string]: any }) {
+  public drillDown(filterData?: ChartDrillFilterData) {
     if (this.drillFields.length === this.cursor + 2) {
       return;
     }

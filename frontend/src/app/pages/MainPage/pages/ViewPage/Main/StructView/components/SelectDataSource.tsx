@@ -30,6 +30,8 @@ import {
   Menu,
   MenuProps,
   Popover,
+  TreeDataNode,
+  TreeProps,
 } from 'antd';
 import { Tree } from 'app/components';
 import { MenuItemContent } from 'app/components/Popup/MenuListItem';
@@ -61,6 +63,43 @@ import { buildAntdTreeNodeModel, getTableAllColumns } from '../../../utils';
 
 const CheckboxGroup = Checkbox.Group;
 
+type SelectDataSourceTreeNode = TreeDataNode & {
+  value?: unknown;
+  columns?: unknown;
+};
+
+type SelectedTableSchema = {
+  table: string[];
+  columns: string[];
+  sourceId?: string;
+};
+
+type TreeIconNode = Parameters<
+  Extract<TreeProps['icon'], (...args: any[]) => unknown>
+>[0];
+
+type TreeSelectInfo = Parameters<NonNullable<TreeProps['onSelect']>>[1];
+
+const getNodeValue = (node: SelectDataSourceTreeNode): string[] => {
+  return Array.isArray(node.value) ? (node.value as string[]) : [];
+};
+
+const getNodeColumns = (
+  node: SelectDataSourceTreeNode,
+): Array<{ name: string[] }> => {
+  return Array.isArray(node.columns)
+    ? (node.columns as Array<{ name: string[] }>)
+    : [];
+};
+
+const hasNodeChildren = (node: SelectDataSourceTreeNode) => {
+  return Array.isArray(node.children) && node.children.length > 0;
+};
+
+const getNodeTitle = (node: SelectDataSourceTreeNode) => {
+  return typeof node.title === 'string' ? node.title : '';
+};
+
 interface SelectDataSourceProps {
   type?: 'MAIN' | 'JOINS';
   renderType?: 'READONLY' | 'MANAGE';
@@ -87,11 +126,12 @@ const SelectDataSource = memo(
     const t = useI18NPrefix(`view.structView`);
 
     const [currentSources, setCurrentSources] = useState<Source | null>(null);
-    const [selectedTableSchema, setSelectedTableSchema] = useState<any>(
-      structure && renderType === 'READONLY'
-        ? { table: structure.table, columns: structure.columns }
-        : null,
-    );
+    const [selectedTableSchema, setSelectedTableSchema] =
+      useState<SelectedTableSchema | null>(
+        structure && renderType === 'READONLY'
+          ? { table: structure.table, columns: structure.columns }
+          : null,
+      );
     const [sources, setSources] = useState<Source[]>(propsSources);
     const [open, setOpen] = useState<boolean>(false);
 
@@ -165,8 +205,8 @@ const SelectDataSource = memo(
       };
     };
 
-    const renderIcon = useCallback(node => {
-      const { value } = node as any;
+    const renderIcon = useCallback((node: TreeIconNode) => {
+      const value = getNodeValue(node as unknown as SelectDataSourceTreeNode);
       if (Array.isArray(value)) {
         switch (value.length) {
           case 1:
@@ -177,7 +217,7 @@ const SelectDataSource = memo(
       }
     }, []);
 
-    const databaseTreeModel = useMemo(() => {
+    const databaseTreeModel = useMemo<SelectDataSourceTreeNode[]>(() => {
       if (currentSources?.id) {
         const databaseSchemas = allDatabaseSchemas[currentSources.id];
         if (databaseSchemas?.length === 1) {
@@ -194,7 +234,8 @@ const SelectDataSource = memo(
     const { filteredData: tableSchema, debouncedSearch: tableSchemaSearch } =
       useSearchAndExpand(
         databaseTreeModel,
-        (keywords, data: any) => (data.title as string).includes(keywords),
+        (keywords, data: SelectDataSourceTreeNode) =>
+          getNodeTitle(data).includes(keywords),
         DEFAULT_DEBOUNCE_WAIT,
         true,
       );
@@ -202,7 +243,7 @@ const SelectDataSource = memo(
     const handleColumnCheck = useCallback(
       list => {
         setSelectedTableSchema({
-          ...selectedTableSchema,
+          ...(selectedTableSchema || { table: [], columns: [] }),
           columns: list,
         });
         onChange?.({ columns: list }, type);
@@ -216,7 +257,7 @@ const SelectDataSource = memo(
 
         onChange?.({ columns: checkedList }, type);
         setSelectedTableSchema({
-          ...selectedTableSchema,
+          ...(selectedTableSchema || { table: [], columns: [] }),
           columns: checkedList,
         });
       },
@@ -224,18 +265,19 @@ const SelectDataSource = memo(
     );
 
     const handleTableSelect = useCallback(
-      (key, { node }) => {
-        if (node.children) {
+      (_, info: TreeSelectInfo) => {
+        const currentNode = info.node as unknown as SelectDataSourceTreeNode;
+        if (hasNodeChildren(currentNode)) {
           return;
         }
 
         const databaseSchemas = allDatabaseSchemas[currentSources!.id];
-        const nodeList = node.value;
-        const sheetName = node.value[node.value.length - 1];
-        const columns = node.columns.map(v => v.name[0]);
-        const tableSchema: any = {
+        const nodeList = getNodeValue(currentNode);
+        const sheetName = nodeList[nodeList.length - 1];
+        const columns = getNodeColumns(currentNode).map(v => v.name[0]);
+        const tableSchema: SelectedTableSchema = {
           table: databaseSchemas.length === 1 ? [sheetName] : nodeList,
-          columns: columns,
+          columns,
           sourceId: currentSources!.id,
         };
 
@@ -264,13 +306,15 @@ const SelectDataSource = memo(
         if (leftContainer) {
           if (structure?.table?.every(val => leftContainer?.includes(val))) {
             setSelectedTableSchema({
-              table: structure?.['table'],
+              table: structure?.table || [],
+              columns: structure?.columns || [],
             });
           } else {
             structure?.joins.forEach(v => {
               if (v.table?.every(val => leftContainer?.includes(val))) {
                 setSelectedTableSchema({
-                  table: v?.['table'],
+                  table: v.table || [],
+                  columns: v.columns || [],
                 });
               }
             });
@@ -297,7 +341,7 @@ const SelectDataSource = memo(
       if (type === 'JOINS' && joinTable?.table) {
         setSelectedTableSchema({
           table: joinTable['table'],
-          columns: joinTable['columns'],
+          columns: joinTable['columns'] || [],
         });
       }
     }, [structure, type, joinTable, sources, sourceId]);

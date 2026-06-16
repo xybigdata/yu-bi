@@ -21,6 +21,21 @@ import {
   getIntervalShow,
   hadAxisLabelOverflowConfig,
 } from '../chartHelper';
+import type { ECharts } from 'echarts';
+import type { ECBasicOption } from 'echarts/types/dist/shared';
+
+type AxisLabelOption = {
+  axisLabel?: AxisLabelOption;
+  overflow?: string | null;
+  interval?: number | string | null;
+  show?: boolean;
+};
+
+type AxisOption = {
+  axisLabel?: AxisLabelOption;
+};
+
+type FunnelTopPositionConfig = Parameters<typeof getAutoFunnelTopPosition>[0];
 
 describe('test getIntervalShow return boolean', () => {
   it('getIntervalShow return true when arg is number', () => {
@@ -48,7 +63,10 @@ describe('test hadAxisLabelOverflowConfig return boolean', () => {
     show: true,
   };
 
-  const getOptions = (label: any = null, horizon = false) => ({
+  const getOptions = (
+    label: AxisOption | null = null,
+    horizon = false,
+  ): ECBasicOption => ({
     [horizon ? 'yAxis' : 'xAxis']: label ? [label] : null,
   });
 
@@ -119,61 +137,86 @@ describe('test hadAxisLabelOverflowConfig return boolean', () => {
 });
 
 describe('test getAutoFunnelTopPosition return number', () => {
+  const createChart = (height: number): ECharts =>
+    ({ getHeight: () => height }) as unknown as ECharts;
+
+  const createFunnelConfig = (
+    config: Partial<FunnelTopPositionConfig>,
+  ): FunnelTopPositionConfig => ({
+    chart: createChart(800),
+    height: 32,
+    sort: 'none',
+    legendPos: 'left',
+    ...config,
+  });
+
+  const createLegacyFunnelConfig = (
+    config: Partial<FunnelTopPositionConfig>,
+  ): FunnelTopPositionConfig => config as unknown as FunnelTopPositionConfig;
+
   it('getAutoFunnelTopPosition return 8 when legendPos is not left or right', () => {
     expect(
-      getAutoFunnelTopPosition({
-        legendPos: 'top',
-      } as any),
+      getAutoFunnelTopPosition(
+        createFunnelConfig({
+          legendPos: 'top',
+        }),
+      ),
     ).toEqual(8);
   });
   it('getAutoFunnelTopPosition return 16 when legendPos is left or right and height is 0 or null', () => {
     expect(
-      getAutoFunnelTopPosition({
-        legendPos: 'left',
-      } as any),
+      getAutoFunnelTopPosition(
+        createLegacyFunnelConfig({
+          legendPos: 'left',
+        }),
+      ),
     ).toEqual(16);
 
     expect(
-      getAutoFunnelTopPosition({
-        legendPos: 'left',
-        height: 0,
-      } as any),
+      getAutoFunnelTopPosition(
+        createFunnelConfig({
+          legendPos: 'left',
+          height: 0,
+        }),
+      ),
     ).toEqual(16);
   });
 
   it('getAutoFunnelTopPosition return 16 when sort is ascending', () => {
     expect(
-      getAutoFunnelTopPosition({
-        legendPos: 'left',
-        height: 32,
-        sort: 'ascending',
-      } as any),
+      getAutoFunnelTopPosition(
+        createFunnelConfig({
+          legendPos: 'left',
+          height: 32,
+          sort: 'ascending',
+        }),
+      ),
     ).toEqual(16);
   });
 
   it('getAutoFunnelTopPosition return 16 when chart.getHeight return null/0', () => {
     expect(
-      getAutoFunnelTopPosition({
-        legendPos: 'left',
-        height: 32,
-        sort: 'none',
-        chart: {
-          getHeight: () => 0,
-        },
-      } as any),
+      getAutoFunnelTopPosition(
+        createFunnelConfig({
+          legendPos: 'left',
+          height: 32,
+          sort: 'none',
+          chart: createChart(0),
+        }),
+      ),
     ).toEqual(16);
   });
 
   it('getAutoFunnelTopPosition return chart.getHeight - height - marginBottom', () => {
     expect(
-      getAutoFunnelTopPosition({
-        legendPos: 'left',
-        height: 100,
-        sort: 'none',
-        chart: {
-          getHeight: () => 800,
-        },
-      } as any),
+      getAutoFunnelTopPosition(
+        createFunnelConfig({
+          legendPos: 'left',
+          height: 100,
+          sort: 'none',
+          chart: createChart(800),
+        }),
+      ),
     ).toEqual(800 - 100 - 24);
   });
 });

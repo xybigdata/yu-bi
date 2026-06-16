@@ -56,6 +56,13 @@ import {
 } from '../../slice/thunks';
 import { isNewView } from '../../utils';
 
+type ReadonlyMessageContribution = {
+  showMessage?: (
+    message: string,
+    position: Monaco.Position | null | undefined,
+  ) => void;
+};
+
 // Text selected when "value" prop changes issue
 // https://github.com/react-monaco-editor/react-monaco-editor/issues/325
 
@@ -162,7 +169,7 @@ export const SQLEditor = memo(() => {
       // https://github.com/microsoft/monaco-editor/issues/1742
       const messageContribution = editor.getContribution(
         'editor.contrib.messageController',
-      );
+      ) as ReadonlyMessageContribution | null;
       editor.onDidChangeCursorSelection(e => {
         dispatch(
           actions.changeCurrentEditingView({
@@ -171,7 +178,7 @@ export const SQLEditor = memo(() => {
         );
       });
       editor.onDidAttemptReadOnlyEdit(() => {
-        (messageContribution as any).showMessage(
+        messageContribution?.showMessage?.(
           t('readonlyTip'),
           editor.getPosition(),
         );

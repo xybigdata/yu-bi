@@ -35,7 +35,10 @@ import {
   getWidgetMap,
 } from 'app/pages/DashBoardPage/utils/widget';
 import { Variable } from 'app/pages/MainPage/pages/VariablePage/slice/types';
-import { PendingChartDataRequestFilter } from 'app/types/ChartDataRequest';
+import {
+  ChartVariableParams,
+  PendingChartDataRequestFilter,
+} from 'app/types/ChartDataRequest';
 import ChartDataView from 'app/types/ChartDataView';
 import { View } from 'app/types/View';
 import { filterSqlOperatorName } from 'app/utils/internalChartHelper';
@@ -195,7 +198,7 @@ export const toUpdateDashboard = createAsyncThunk<
       widgetToDelete: group.widgetToDelete,
     };
 
-    await request2<any>({
+    await request2<null>({
       url: `viz/dashboards/${dashBoard.id}`,
       method: 'put',
       data: updateData,
@@ -472,7 +475,7 @@ export const syncEditBoardWidgetChartDataAsync = createAsyncThunk<
     option?: getDataOption;
     extraFilters?: PendingChartDataRequestFilter[];
     tempFilters?: PendingChartDataRequestFilter[];
-    variableParams?: Record<string, any[]>;
+    variableParams?: ChartVariableParams;
   },
   { state: RootState }
 >(
@@ -519,7 +522,7 @@ export const syncEditBoardWidgetChartDataAsync = createAsyncThunk<
       dataChart?.config?.aggregation,
     )
       .addVariableParams(variableParams)
-      .addExtraSorters(option?.sorters as any[])
+      .addExtraSorters(option?.sorters)
       .addRuntimeFilters((extraFilters || []).concat(tempFilters || []))
       .addDrillOption(drillOption)
       .build();
@@ -642,7 +645,7 @@ export const getEditChartWidgetDataAsync = createAsyncThunk<
           await dispatch(
             editWidgetInfoActions.setWidgetErrInfo({
               widgetId,
-              errInfo: (error as any)?.message as any,
+              errInfo: getErrorMessage(error),
               errorType: 'request',
             }),
           );

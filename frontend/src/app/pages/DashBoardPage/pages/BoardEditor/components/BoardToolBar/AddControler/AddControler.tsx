@@ -25,14 +25,17 @@ import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import { G60 } from 'styles/StyleConstants';
 import { ORIGINAL_TYPE_MAP } from '../../../../../constants';
-import { addControllerAction } from '../../../slice/actions/controlActions';
+import {
+  addControllerAction,
+  ControllerActionType,
+} from '../../../slice/actions/controlActions';
 import { selectHasQueryBtn, selectHasResetBtn } from '../../../slice/selectors';
 import { BoardToolBarContext } from '../context/BoardToolBarContext';
 
 export interface AddControlBtnProps {}
 export interface ButtonItemType<T> {
   name?: string;
-  icon: any;
+  icon: React.ReactNode;
   type: T;
   disabled?: boolean;
 }
@@ -45,10 +48,10 @@ export const AddController: React.FC<AddControlBtnProps> = () => {
   const dispatch = useAppDispatch();
   const hasQueryBtn = useSelector(selectHasQueryBtn);
   const hasResetBtn = useSelector(selectHasResetBtn);
-  const onAddController = (info: { key: any }) => {
+  const onAddController: MenuProps['onClick'] = info => {
     dispatch(
       addControllerAction({
-        type: info.key,
+        type: info.key as ControllerActionType,
         boardId: boardId,
         boardType: boardType,
       }),
@@ -115,15 +118,15 @@ export const AddController: React.FC<AddControlBtnProps> = () => {
       disabled: true,
     },
   ];
-  const buttons: ButtonItemType<any>[] = [
+  const buttons: ButtonItemType<ControllerActionType>[] = [
     {
       icon: '',
-      type: ORIGINAL_TYPE_MAP.queryBtn,
+      type: 'queryBtn',
       disabled: hasQueryBtn,
     },
     {
       icon: '',
-      type: ORIGINAL_TYPE_MAP.resetBtn,
+      type: 'resetBtn',
       disabled: hasResetBtn,
     },
   ];

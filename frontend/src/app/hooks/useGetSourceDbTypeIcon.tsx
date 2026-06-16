@@ -9,12 +9,17 @@ import { errorHandle } from 'utils/utils';
 import { SourceSimpleViewModel } from '../pages/MainPage/pages/SourcePage/slice/types';
 import { renderIcon } from './useGetVizIcon';
 
+const parseSourceConfig = (config: string) => {
+  const parsedConfig = JSON.parse(config);
+  return parsedConfig && typeof parsedConfig === 'object' ? parsedConfig : {};
+};
+
 const getType = (type: string, config: string) => {
   if (type === 'JDBC') {
     let desc = '';
     try {
-      const { dbType } = JSON.parse(config);
-      desc = dbType;
+      const { dbType } = parseSourceConfig(config) as { dbType?: string };
+      desc = dbType || '';
     } catch (error) {
       errorHandle(error);
       throw error;

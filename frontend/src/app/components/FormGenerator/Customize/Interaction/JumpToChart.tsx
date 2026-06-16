@@ -25,18 +25,6 @@ import { InteractionFieldRelation } from '../../constants';
 import ChartRelationList from './ChartRelationList';
 import { I18nTranslator, JumpToChartRule, VizType } from './types';
 
-type SelectPopupMatchSelectWidthCompatProps = {
-  popupMatchSelectWidth?: boolean | number;
-};
-
-type DropdownPopupRenderCompatProps = {
-  popupRender?: (originNode: React.ReactNode) => React.ReactNode;
-};
-
-type DropdownDestroyOnHiddenCompatProps = {
-  destroyOnHidden?: boolean;
-};
-
 const JumpToChart: FC<
   {
     vizs?: VizType[];
@@ -57,29 +45,6 @@ const JumpToChart: FC<
       ...{ [InteractionFieldRelation.Customize]: newRelations },
     });
   };
-  const dropdownPopupRenderProps = {
-    popupRender: () => (
-      <ChartRelationList
-        translate={t}
-        targetRelId={value?.relId}
-        sourceFields={
-          getAllColumnInMeta(dataview?.meta)?.concat(
-            dataview?.computedFields || [],
-          ) || []
-        }
-        sourceVariables={dataview?.variables || []}
-        relations={relations}
-        onRelationChange={handleUpdateRelations}
-      />
-    ),
-  } as DropdownPopupRenderCompatProps;
-  const dropdownDestroyOnHiddenProps = {
-    destroyOnHidden: true,
-  } as DropdownDestroyOnHiddenCompatProps;
-  const selectPopupMatchWidthProps = {
-    popupMatchSelectWidth: false,
-  } as SelectPopupMatchSelectWidthCompatProps;
-
   return (
     <Space>
       <Select
@@ -87,7 +52,7 @@ const JumpToChart: FC<
         showSearch
         optionFilterProp="children"
         style={{ minWidth: 100, maxWidth: 200 }}
-        {...(selectPopupMatchWidthProps as any)}
+        popupMatchSelectWidth={false}
         value={value?.relId}
         placeholder={t('drillThrough.rule.reference.title')}
         onChange={relId => onValueChange({ ...value, ...{ relId } })}
@@ -115,13 +80,26 @@ const JumpToChart: FC<
         </Select.Option>
       </Select>
       <Dropdown
-        {...(dropdownDestroyOnHiddenProps as any)}
+        destroyOnHidden
         overlayStyle={{ margin: 4 }}
         disabled={
           value?.relation !== InteractionFieldRelation.Customize ||
           isEmpty(value?.relId)
         }
-        {...(dropdownPopupRenderProps as any)}
+        popupRender={() => (
+          <ChartRelationList
+            translate={t}
+            targetRelId={value?.relId}
+            sourceFields={
+              getAllColumnInMeta(dataview?.meta)?.concat(
+                dataview?.computedFields || [],
+              ) || []
+            }
+            sourceVariables={dataview?.variables || []}
+            relations={relations}
+            onRelationChange={handleUpdateRelations}
+          />
+        )}
         placement="bottomLeft"
         trigger={['click']}
         arrow

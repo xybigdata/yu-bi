@@ -20,53 +20,64 @@ import { CalculationType } from 'globalConstants';
 import isFinite from 'lodash/isFinite';
 import { isEmpty } from 'utils/object';
 
-export function toPrecision(value: any, precision: number) {
-  if (isNaN(+value)) {
+const toNumberValue = (value: unknown): number => Number(value);
+
+export function toPrecision(value: unknown, precision: number) {
+  const numberValue = toNumberValue(value);
+  if (isNaN(numberValue)) {
     return value;
   }
   if (precision < 0 || precision > 100) {
     return value;
   }
 
-  return (+value).toFixed(precision);
+  return numberValue.toFixed(precision);
 }
 
-export function toSeperator(value: any, useThousandSeparator: boolean) {
-  if (isNaN(+value) || !useThousandSeparator) {
+export function toSeperator(value: unknown, useThousandSeparator: boolean) {
+  if (isNaN(toNumberValue(value)) || !useThousandSeparator) {
     return value;
   }
 
-  const parts = value.toString().split('.');
+  const parts = String(value).split('.');
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   const formatted = parts.join('.');
   return formatted;
 }
 
-export function toUnit(value: any, unit?: number) {
+export function toUnit(value: unknown, unit?: number) {
   if (isEmpty(unit)) {
     return value;
   }
 
-  if (isNaN(+value)) {
+  const numberValue = toNumberValue(value);
+  if (isNaN(numberValue)) {
     return value;
   }
 
-  return +value / unit!;
+  return numberValue / unit!;
 }
 
-export function toUnitDesc(value: any, desc: string) {
+export function toUnitDesc(value: unknown, desc: string) {
   return `${value} ${desc}`;
 }
 
-export function toExponential(value: any, precision: number) {
-  if (isNaN(+value)) {
+export function toExponential(value: unknown, precision: number) {
+  const numberValue = toNumberValue(value);
+  if (isNaN(numberValue)) {
     return value;
   }
-  return (+value).toExponential(precision);
+  return numberValue.toExponential(precision);
 }
 
-export function isNumber(value: any) {
-  return !isEmpty(value) && !isNaN(value) && isFinite(value) && value !== '';
+export function isNumber(value: unknown) {
+  const numberValue = toNumberValue(value);
+  return (
+    !isEmpty(value) &&
+    !isNaN(numberValue) &&
+    isFinite(numberValue) &&
+    value !== ''
+  );
 }
 
 function getPrecision(num: string | number) {

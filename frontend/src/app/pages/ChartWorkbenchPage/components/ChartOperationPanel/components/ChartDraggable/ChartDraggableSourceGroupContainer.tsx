@@ -48,8 +48,8 @@ export const ChartDraggableSourceGroupContainer: FC<{
   ) => {
     let interimSelectedItemsIds: Array<string> = [];
     let interimActiveItemId = '';
-    const dataViewMeta = getAllColumnInMeta(meta) || [];
-    const previousSelectedItemsIds: Array<any> = selectedItemsIds.slice();
+    const dataViewMeta = (getAllColumnInMeta(meta) || []) as renderMataProps[];
+    const previousSelectedItemsIds = selectedItemsIds.slice();
     const previousActiveItemId = activeItemId;
 
     if (cmdKeyActive) {
@@ -64,7 +64,7 @@ export const ChartDraggableSourceGroupContainer: FC<{
         interimSelectedItemsIds = [...previousSelectedItemsIds, dataItemId];
       }
     } else if (shiftKeyActive && dataItemId !== previousActiveItemId) {
-      const activeCardIndex: any = dataViewMeta.findIndex(
+      const activeCardIndex = dataViewMeta.findIndex(
         c => c.name === previousActiveItemId,
       );
       const cardIndex = dataViewMeta.findIndex(c => c.name === dataItemId);

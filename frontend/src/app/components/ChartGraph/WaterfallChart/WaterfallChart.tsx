@@ -169,17 +169,18 @@ class WaterfallChart extends Chart {
           this.selectionManager.attachZRenderListeners(this.chart);
           this.chart.on('click', ({ dataIndex, componentIndex, ...rest }) => {
             // NOTE: 1. 累计不响应事件； 2. 下部透明柱状图不响应事件
-            if (
-              this.rowDataList.length <= dataIndex ||
-              componentIndex === 0
-            ) {
+            if (this.rowDataList.length <= dataIndex || componentIndex === 0) {
               return;
             }
             this.selectionManager?.echartsClickEventHandler({
               ...rest,
               dataIndex: dataIndex,
               componentIndex: '',
-              data: { ...this.rowDataList[dataIndex] },
+              data: {
+                name: String(rest?.name || ''),
+                value: String(rest?.value ?? ''),
+                ...this.rowDataList[dataIndex],
+              },
             });
           });
         }

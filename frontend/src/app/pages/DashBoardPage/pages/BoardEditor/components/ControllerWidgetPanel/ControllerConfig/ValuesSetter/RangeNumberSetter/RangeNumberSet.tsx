@@ -20,10 +20,9 @@ import type { InputNumberProps } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import React, { memo, useEffect, useState } from 'react';
 import { ControllerValuesName } from '../..';
-import { rangeNumberValidator } from '../../../utils';
+import { RangeNumberValue, rangeNumberValidator } from '../../../utils';
 
 type NumberValue = InputNumberProps['value'];
-type RangeNumberValue = [NumberValue?, NumberValue?];
 
 export const RangeNumberSetter: React.FC<{}> = memo(() => {
   const tc = useI18NPrefix(`viz.control`);

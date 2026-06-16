@@ -18,12 +18,12 @@
 
 import { DataViewFieldType } from 'app/constants';
 import { ChartDataRequestFilter } from 'app/types/ChartDataRequest';
-import { DatartDayjs, getDatartNow } from 'app/utils/date';
 import {
-  FilterSqlOperator,
-  RECOMMEND_TIME,
-  TIME_FORMATTER,
-} from 'globalConstants';
+  DatartDayjs,
+  formatDatartDateTime,
+  getDatartNow,
+} from 'app/utils/date';
+import { FilterSqlOperator, RECOMMEND_TIME } from 'globalConstants';
 import { ManipulateType, OpUnitType, QUnitType } from 'dayjs';
 
 type LegacyManipulateUnit =
@@ -93,15 +93,17 @@ const addByUnit = (
   amount: number,
   unit?: ManipulateType | QUnitType,
 ) => {
-  return unit ? dayValue.add(amount, unit as any) : dayValue.add(amount);
+  return unit
+    ? dayValue.add(amount, unit as ManipulateType)
+    : dayValue.add(amount);
 };
 
 const startOfUnit = (dayValue: DatartDayjs, unit: OpUnitType | QUnitType) => {
-  return dayValue.startOf(unit as any);
+  return dayValue.startOf(unit as OpUnitType);
 };
 
 const endOfUnit = (dayValue: DatartDayjs, unit: OpUnitType | QUnitType) => {
-  return dayValue.endOf(unit as any);
+  return dayValue.endOf(unit as OpUnitType);
 };
 
 export function getTimeRange(
@@ -121,8 +123,10 @@ export function getTimeRange(
       normalizedTimeUnit,
     );
     return [
-      startTime.format(dateFormat || TIME_FORMATTER),
-      endTime.format(dateFormat || TIME_FORMATTER),
+      dateFormat
+        ? startTime.format(dateFormat)
+        : formatDatartDateTime(startTime),
+      dateFormat ? endTime.format(dateFormat) : formatDatartDateTime(endTime),
     ];
   };
 }

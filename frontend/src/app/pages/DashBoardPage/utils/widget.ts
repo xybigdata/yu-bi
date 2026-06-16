@@ -25,21 +25,16 @@ import {
 } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { FilterSearchParamsWithMatch } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import { ChartsEventData } from 'app/types/Chart';
-import { RelationFilterValue } from 'app/types/ChartConfig';
 import ChartDataView from 'app/types/ChartDataView';
 import { View } from 'app/types/View';
 import {
   filterCurrentUsedComputedFields,
   mergeChartAndViewComputedField,
 } from 'app/utils/chartHelper';
-import { formatDatartDate, getDatartNowMillis } from 'app/utils/date';
+import { formatDatartDateTime, getDatartNowMillis } from 'app/utils/date';
 import { transformToHierarchyModel } from 'app/utils/internalChartHelper';
 import { updateBy } from 'app/utils/mutation';
-import {
-  BOARD_COPY_CHART_SUFFIX,
-  FilterSqlOperator,
-  TIME_FORMATTER,
-} from 'globalConstants';
+import { BOARD_COPY_CHART_SUFFIX, FilterSqlOperator } from 'globalConstants';
 import produce from 'immer';
 import { CSSProperties } from 'react';
 import { CloneValueDeep } from 'utils/object';
@@ -61,9 +56,23 @@ import {
   WidgetPadding,
 } from '../pages/Board/slice/types';
 import { StrControlTypes } from '../pages/BoardEditor/components/ControllerWidgetPanel/constants';
+import { ControllerDate } from '../pages/BoardEditor/components/ControllerWidgetPanel/types';
 import { Widget, WidgetMapping } from '../types/widgetTypes';
 
 export const VALUE_SPLITTER = '###';
+
+type TreeListNode = {
+  id: string;
+  parentId: string | null;
+  label?: string;
+};
+
+export type FilterTreeNode = TreeListNode & {
+  key: string;
+  title: string;
+  children?: FilterTreeNode[];
+  isLeaf?: boolean;
+};
 
 // export const createInitWidgetConfig = (opt: {
 //   type: WidgetType;
@@ -617,10 +626,13 @@ export const getWidgetMap = (
 
             case ControllerFacadeTypes.Time:
               content.config.controllerDate = {
-                ...(content.config.controllerDate as any),
+                ...(content.config.controllerDate ||
+                  ({
+                    pickerType: 'date',
+                  } as Pick<ControllerDate, 'pickerType'>)),
                 startTime: {
                   relativeOrExact: TimeFilterValueCategory.Exact,
-                  exactValue: formatDatartDate(_value?.[0], TIME_FORMATTER),
+                  exactValue: formatDatartDateTime(_value?.[0]),
                 },
               };
               break;
@@ -650,11 +662,11 @@ export const getWidgetMap = (
   widgetList
     .filter(w => w.config.originalType === ORIGINAL_TYPE_MAP.ownedChart)
     .forEach(widget => {
-      let dataChart = (widget.config.content as any).dataChart as DataChart;
+      let dataChart = (widget.config.content as ChartWidgetContent).dataChart;
       if (dataChart) {
         wrappedDataCharts.push(dataChart!);
+        widget.datachartId = dataChart.id;
       }
-      widget.datachartId = dataChart?.id;
     });
 
   // 处理 widget包含关系 tab Widget 被包含的 widget.parentId 不为空
@@ -807,37 +819,39 @@ export function cloneWidgets(args: {
  * @param collection [[grandpa dad son,....]]
  * @returns [{id:'',parentId:'',value:''}....]
  */
-export const handleRowDataForTree = collection => {
-  let obj = {};
+export const handleRowDataForTree = (
+  collection?: string[][],
+): TreeListNode[] => {
+  const nodeMap: Record<string, TreeListNode & { isLeaf?: boolean }> = {};
   collection?.forEach(v => {
     v.forEach((val, ind) => {
-      if (!obj[val] || obj[val]?.isLeaf) {
-        obj[val] = {
+      if (!nodeMap[val] || nodeMap[val]?.isLeaf) {
+        nodeMap[val] = {
           id: val,
           parentId: ind ? v[ind - 1] : null,
         };
       }
     });
   });
-  return Object.values(obj);
+  return Object.values(nodeMap);
 };
 
 export const convertListToTree = (
-  list,
+  list?: TreeListNode[],
   parentId: null | string = null,
-): any[] => {
+): FilterTreeNode[] | undefined => {
   if (!list) {
     return list;
   }
-  const treeNodes: any[] = [];
-  const childrenList: any = [];
+  const treeNodes: FilterTreeNode[] = [];
+  const childrenList: TreeListNode[] = [];
   list.forEach(o => {
-    if (o['parentId'] === parentId) {
+    if (o.parentId === parentId) {
       treeNodes.push({
-        id: o['id'],
-        parentId: o['parentId'],
-        key: o['id'],
-        title: o['label'] || o['id'],
+        id: o.id,
+        parentId: o.parentId,
+        key: o.id,
+        title: o.label || o.id,
       });
     } else {
       childrenList.push(o);
@@ -855,7 +869,7 @@ export const convertToTree = (col, buildingMethod) => {
     return col;
   }
 
-  let data: RelationFilterValue[] = [];
+  let data: FilterTreeNode[] | undefined = [];
   let copyCol = CloneValueDeep(col);
   let emptyParentList = ['null', 'undefined', 'false'];
 

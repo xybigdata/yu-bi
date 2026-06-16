@@ -31,12 +31,18 @@ import { ChartDataConfig, ChartDataSectionField } from 'app/types/ChartConfig';
 import { ChartDetailConfigDTO } from 'app/types/ChartConfigDTO';
 import {
   ChartDataRequestFilter,
+  ChartVariableParams,
   PendingChartDataRequestFilter,
 } from 'app/types/ChartDataRequest';
 import ChartDataView from 'app/types/ChartDataView';
 import { convertToChartConfigDTO } from 'app/utils/ChartDtoHelper';
 import { findPathByNameInMeta, getStyles } from 'app/utils/chartHelper';
-import { datartDayjs, formatDatartDate, toDatartDayjs } from 'app/utils/date';
+import {
+  datartDayjs,
+  formatDatartDate,
+  formatDatartDateTime,
+  toDatartDayjs,
+} from 'app/utils/date';
 import { getTime, splitRangerDateFilters } from 'app/utils/time';
 import {
   DATE_FORMATTER,
@@ -138,7 +144,7 @@ export const getDataChartRequestParams = (obj: {
     dataChart?.config?.aggregation,
   );
   let requestParams = builder
-    .addExtraSorters((option?.sorters as any) || [])
+    .addExtraSorters(option?.sorters || [])
     .addDrillOption(drillOption)
     .addRuntimeFilters(tempFilters || [])
     .build();
@@ -148,13 +154,16 @@ export const getDataChartRequestParams = (obj: {
 export const getChartGroupColumns = (datas: ChartDataConfig[] | undefined) => {
   const chartDataConfigs = datas;
   if (!chartDataConfigs) return [] as ChartDataSectionField[];
-  const groupTypes = [ChartDataSectionType.Group, ChartDataSectionType.Color];
+  const groupTypes: Array<ChartDataConfig['type']> = [
+    ChartDataSectionType.Group,
+    ChartDataSectionType.Color,
+  ];
   const groupColumns = chartDataConfigs.reduce<ChartDataSectionField[]>(
     (acc, cur) => {
       if (!cur.rows) {
         return acc;
       }
-      if (groupTypes.includes(cur.type as any)) {
+      if (cur.type && groupTypes.includes(cur.type)) {
         return acc.concat(cur.rows);
       }
       if (cur.type === ChartDataSectionType.Mixed) {
@@ -175,11 +184,11 @@ export function getTheWidgetFiltersAndParams<
 >(obj: {
   chartWidget: Widget;
   widgetMap: Record<string, Widget>;
-  params: Record<string, string[]> | undefined;
+  params: ChartVariableParams | undefined;
   view?: ChartDataView;
 }): {
   filterParams: T[];
-  variableParams: Record<string, any[]>;
+  variableParams: ChartVariableParams;
 } {
   // TODO chart 本身携带了变量，board没有相关配置的时候要拿到 chart本身的 变量值 Params
   const { chartWidget, widgetMap, view } = obj;
@@ -188,7 +197,7 @@ export function getTheWidgetFiltersAndParams<
   );
 
   let filterParams: T[] = [];
-  let variableParams: Record<string, any[]> = {};
+  let variableParams: ChartVariableParams = {};
 
   controllerWidgets.forEach(filterWidget => {
     const hasRelation = filterWidget.relations.find(
@@ -338,7 +347,7 @@ export const getControllerDateValues = (obj: {
   } else {
     const { amount, unit, direction } = startTime.relativeValue!;
     const time = getTime(+(direction + amount), unit)(unit, true);
-    timeValues[0] = time.format(TIME_FORMATTER);
+    timeValues[0] = formatDatartDateTime(time);
   }
   if (endTime) {
     //end 精确时间
@@ -357,15 +366,13 @@ export const getControllerDateValues = (obj: {
       const { amount, unit, direction } = endTime.relativeValue!;
       const isStart = !obj.execute;
       const time = getTime(+(direction + amount), unit)(unit, isStart);
-      timeValues[1] = time.format(TIME_FORMATTER);
+      timeValues[1] = formatDatartDateTime(time);
     }
   }
 
   if (obj.execute) {
     timeValues.forEach((v, i) => {
-      timeValues[i] = v
-        ? formatDatartDate(v, dateFormatObj[pickerType])!
-        : v;
+      timeValues[i] = v ? formatDatartDate(v, dateFormatObj[pickerType])! : v;
     });
   }
 
@@ -380,7 +387,7 @@ export const adjustRangeDataEndValue = (
   }
   const parsedTime = toDatartDayjs(timeValue);
   if (!parsedTime) {
-    return formatDatartDate(timeValue, TIME_FORMATTER);
+    return formatDatartDateTime(timeValue);
   }
   let adjustTime = parsedTime;
   switch (pickerType) {
@@ -405,7 +412,7 @@ export const adjustRangeDataEndValue = (
     default:
       break;
   }
-  return formatDatartDate(adjustTime, TIME_FORMATTER);
+  return formatDatartDateTime(adjustTime);
 };
 export const getChartWidgetRequestParams = (obj: {
   widgetId: string;
@@ -553,13 +560,17 @@ export const getBoardChartRequests = (params: {
   return chartRequest;
 };
 //  filter 去重
-export const getDistinctFiltersByColumn = filter => {
+export const getDistinctFiltersByColumn = <
+  T extends { column: string | string[] },
+>(
+  filter?: T[],
+): T[] => {
   if (!filter) {
     return [];
   }
-  const filterMap: Record<string, any> = {};
+  const filterMap: Record<string, T> = {};
   filter.forEach(item => {
-    filterMap[item.column] = item;
+    filterMap[String(item.column)] = item;
   });
   return Object.values(filterMap);
 };

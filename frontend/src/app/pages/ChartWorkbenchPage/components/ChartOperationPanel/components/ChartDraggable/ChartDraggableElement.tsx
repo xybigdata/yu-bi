@@ -20,7 +20,7 @@ import { DeleteOutlined } from '@ant-design/icons';
 import { DataViewFieldType } from 'app/constants';
 import { ChartDataSectionField } from 'app/types/ChartConfig';
 import { CHART_DRAG_ELEMENT_TYPE } from 'globalConstants';
-import React, { useRef } from 'react';
+import React, { ReactNode, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import styled from 'styled-components';
 import {
@@ -36,7 +36,7 @@ interface ChartDraggableElementObject extends ChartDataSectionField {
 }
 
 interface ChartDraggableElementProps {
-  content: string | Function;
+  content: string | (() => ReactNode);
   index: number;
   config: ChartDataSectionField;
   moveCard: (
@@ -143,7 +143,7 @@ const ChartDraggableElement: React.FC<ChartDraggableElementProps> = ({
 export default ChartDraggableElement;
 
 const StyledChartDraggableElement = styled.div<{
-  isDragging;
+  isDragging: boolean;
   type: DataViewFieldType;
 }>`
   padding: ${SPACE_XS} ${SPACE_MD};

@@ -24,37 +24,49 @@ import {
 import ChartI18NContext from 'app/pages/ChartWorkbenchPage/contexts/Chart18NContext';
 import { IChart } from 'app/types/Chart';
 import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
+import ChartDataSetDTO from 'app/types/ChartDataSet';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
+import { BrokerOption } from 'app/types/ChartLifecycleBroker';
 import { setRuntimeDateLevelFieldsInChartConfig } from 'app/utils/chartHelper';
-import { FC, memo } from 'react';
+import { CSSProperties, FC, memo } from 'react';
 import styled, { StyleSheetManager } from 'styled-components';
 import { LEVEL_1000 } from 'styles/StyleConstants';
 import { isEmpty } from 'utils/object';
 import ChartIFrameLifecycleAdapter from './ChartIFrameLifecycleAdapter';
 
+type WidgetSpecialConfig = BrokerOption['widgetSpecialConfig'];
+type SafeChartContainerStyle = Pick<CSSProperties, 'width' | 'height'>;
+
 const ChartIFrameContainer: FC<{
-  dataset: any;
+  dataset?: ChartDataSetDTO;
   chart: IChart;
   config: ChartConfig;
   containerId?: string;
-  width?: any;
-  height?: any;
+  width?: CSSProperties['width'];
+  height?: CSSProperties['height'];
   isShown?: boolean;
   drillOption?: IChartDrillOption;
   selectedItems?: SelectedItem[];
-  widgetSpecialConfig?: any;
+  widgetSpecialConfig?: WidgetSpecialConfig;
   scale?: [number, number];
   isLoadingData?: boolean;
 }> = memo(props => {
   const iframeContainerId = `chart-iframe-root-${props.containerId}`;
   const config = setRuntimeDateLevelFieldsInChartConfig(props.config);
 
-  const transformToSafeCSSProps = (width, height) => {
-    let newStyle = { width, height };
-    if (isNaN(newStyle?.width) || isEmpty(newStyle?.width)) {
+  const isInvalidSizeValue = (
+    value?: CSSProperties['width'] | CSSProperties['height'],
+  ) => Number.isNaN(Number(value)) || isEmpty(value);
+
+  const transformToSafeCSSProps = (
+    width?: CSSProperties['width'],
+    height?: CSSProperties['height'],
+  ): SafeChartContainerStyle => {
+    let newStyle: SafeChartContainerStyle = { width, height };
+    if (isInvalidSizeValue(newStyle?.width)) {
       newStyle.width = 0;
     }
-    if (isNaN(newStyle?.height) || isEmpty(newStyle?.height)) {
+    if (isInvalidSizeValue(newStyle?.height)) {
       newStyle.height = 0;
     }
     return newStyle;
@@ -126,17 +138,12 @@ const ChartIFrameContainer: FC<{
                   if (iframe) {
                     const [scaleX = 1, scaleY = 1] = props.scale || [];
                     var boundingClientRect = iframe.getBoundingClientRect();
-                    var evt = new CustomEvent('contextmenu', {
+                    var evt = new MouseEvent('contextmenu', {
                       bubbles: true,
                       cancelable: false,
-                    }) as any;
-                    evt.clientX =
-                      event.clientX * scaleX + boundingClientRect.left;
-                    evt.pageX =
-                      event.clientX * scaleX + boundingClientRect.left;
-                    evt.clientY =
-                      event.clientY * scaleY + boundingClientRect.top;
-                    evt.pageY = event.clientY * scaleY + boundingClientRect.top;
+                      clientX: event.clientX * scaleX + boundingClientRect.left,
+                      clientY: event.clientY * scaleY + boundingClientRect.top,
+                    });
                     iframe.dispatchEvent(evt);
                   }
                 }}

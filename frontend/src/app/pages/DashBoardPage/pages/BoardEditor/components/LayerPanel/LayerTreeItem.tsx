@@ -22,6 +22,7 @@ import { WidgetDropdownList } from 'app/pages/DashBoardPage/components/WidgetCom
 import { widgetManagerInstance } from 'app/pages/DashBoardPage/components/WidgetManager/WidgetManager';
 import { WidgetContext } from 'app/pages/DashBoardPage/components/WidgetProvider/WidgetProvider';
 import { WidgetWrapProvider } from 'app/pages/DashBoardPage/components/WidgetProvider/WidgetWrapProvider';
+import { WidgetConf } from 'app/pages/DashBoardPage/types/widgetTypes';
 import { FC, memo, useContext } from 'react';
 import styled from 'styled-components';
 import { stopPPG } from 'utils/utils';
@@ -30,7 +31,7 @@ export interface LayerNode extends TreeDataNode {
   key: string;
   parentId: string;
   children: LayerNode[];
-  content: any;
+  content: WidgetConf['content'];
   widgetIndex: number;
   originalType: string;
   boardId: string;

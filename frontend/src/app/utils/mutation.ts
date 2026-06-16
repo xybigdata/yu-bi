@@ -32,7 +32,7 @@ export function updateBy<T>(base: T, updater: (draft: Draft<T>) => void) {
 
 export function addTo<T1>(base: T1[], value: T1): T1[] {
   return produce(base, draft => {
-    draft.push(value as any);
+    draft.push(value as Draft<T1>);
   });
 }
 
@@ -62,11 +62,11 @@ export function updateCollectionByAction<T extends ChartStyleConfig>(
     const index = keys.shift() as number;
     if (index !== undefined) {
       if (keys.length > 0) {
-        recursiveUpdateImpl(draft[index], keys, value as any);
+        recursiveUpdateImpl(draft[index], keys, value as Draft<T>);
 
         return;
       }
-      draft[index] = value as any;
+      draft[index] = value as Draft<T>;
     }
   });
   return nextState;
@@ -80,15 +80,15 @@ export function updateByAction<T extends ChartStyleConfig>(
   const keys = (action?.ancestors && [...action.ancestors]) || [];
 
   const nextState = produce(base, draft => {
-    recursiveUpdateImpl(draft, keys, value as any);
+    recursiveUpdateImpl(draft, keys, value as Draft<T>);
   });
   return nextState;
 }
 
 export function recursiveUpdateImpl<T extends ChartStyleConfig>(
-  draft: T,
+  draft: Draft<T>,
   keys: number[],
-  value: T,
+  value: Draft<T>,
 ) {
   if (!keys || keys.length === 0) {
     draft = value;

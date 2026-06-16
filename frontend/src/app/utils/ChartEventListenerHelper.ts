@@ -66,7 +66,7 @@ export const pivotTableDrillEventListener = (
 };
 
 export const richTextContextEventListener = (
-  row: any,
+  row: Record<string, unknown>,
   param?: ChartMouseEventParams,
   callback?: (newParams) => void,
 ) => {

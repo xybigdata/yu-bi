@@ -20,6 +20,7 @@ import ChartAggregationContext from 'app/pages/ChartWorkbenchPage/contexts/Chart
 import ChartDatasetContext from 'app/pages/ChartWorkbenchPage/contexts/ChartDatasetContext';
 import ChartDataViewContext from 'app/pages/ChartWorkbenchPage/contexts/ChartDataViewContext';
 import TimeConfigContext from 'app/pages/ChartWorkbenchPage/contexts/TimeConfigContext';
+import { ChartConfigPayloadType } from 'app/pages/ChartWorkbenchPage/slice/types';
 import { IChart } from 'app/types/Chart';
 import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
 import ChartDataSetDTO from 'app/types/ChartDataSet';
@@ -55,12 +56,12 @@ const ChartWorkbench: FC<{
     onChangeAggregation?: () => void;
   };
   onChartChange: (c: IChart) => void;
-  onChartConfigChange: (type, payload) => void;
+  onChartConfigChange: (type: string, payload: ChartConfigPayloadType) => void;
   onDataViewChange?: (clear?: boolean) => void;
   onRefreshDataset?: () => void;
   onCreateDownloadDataTask?: () => void;
   onChartDrillOptionChange?: (option: IChartDrillOption) => void;
-  onDateLevelChange?: (type: string, option: any) => void;
+  onDateLevelChange?: (type: 'data', option: ChartConfigPayloadType) => void;
 }> = memo(
   ({
     dataset,

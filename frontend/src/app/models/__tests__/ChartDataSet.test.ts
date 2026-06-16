@@ -17,7 +17,19 @@
  */
 
 import { ChartDataSectionType, SortActionType } from 'app/constants';
+import { ChartDataConfig, ChartDataSectionField } from 'app/types/ChartConfig';
+import { ChartDatasetMeta } from 'app/types/ChartDataSet';
 import { ChartDataSet, ChartDataSetRow } from '../ChartDataSet';
+
+const createMetas = (): ChartDatasetMeta[] => [
+  { name: 'column1' },
+  { name: 'column2' },
+];
+
+const createFields = (): ChartDataSectionField[] => [
+  { colName: 'column1' } as ChartDataSectionField,
+  { colName: 'column2' } as ChartDataSectionField,
+];
 
 describe('ChartDataSet Tests', () => {
   test('should get ChartDataSet Model', () => {
@@ -25,8 +37,8 @@ describe('ChartDataSet Tests', () => {
       [1, 2],
       [3, 4],
     ];
-    const metas = [{ name: 'column1' }, { name: 'column2' }];
-    const fields = [{ colName: 'column1' }, { colName: 'column2' }] as any[];
+    const metas = createMetas();
+    const fields = createFields();
 
     const dataset = new ChartDataSet(columns, metas, fields);
 
@@ -41,8 +53,8 @@ describe('ChartDataSet Tests', () => {
 
   test('should get ChartDataSet Model when columns only one', () => {
     const columns = [[1, 2]];
-    const metas = [{ name: 'column1' }, { name: 'column2' }];
-    const fields = [{ colName: 'column1' }, { colName: 'column2' }] as any[];
+    const metas = createMetas();
+    const fields = createFields();
 
     const dataset = new ChartDataSet(columns, metas, fields);
 
@@ -58,20 +70,28 @@ describe('ChartDataSet Tests', () => {
       [1, 2],
       [3, 4],
     ];
-    const metas = [{ name: 'column1' }, { name: 'column2' }];
-    const fields = [{ colName: 'column1' }, { colName: 'column2' }] as any[];
+    const metas = createMetas();
+    const fields = createFields();
 
     const dataset = new ChartDataSet(columns, metas, fields);
 
-    expect(dataset.getFieldKey({ colName: 'columnName' } as any)).toEqual(
-      'COLUMNNAME',
-    );
     expect(
-      dataset.getFieldKey({ colName: 'columnName', aggregate: 'AVG' } as any),
+      dataset.getFieldKey({ colName: 'columnName' } as ChartDataSectionField),
+    ).toEqual('COLUMNNAME');
+    expect(
+      dataset.getFieldKey({
+        colName: 'columnName',
+        aggregate: 'AVG',
+      } as ChartDataSectionField),
     ).toEqual('AVG(COLUMNNAME)');
-    expect(dataset.getFieldIndex({ colName: 'column1' } as any)).toEqual(0);
     expect(
-      dataset.getFieldIndex({ colName: 'column1', aggregate: 'AVG' } as any),
+      dataset.getFieldIndex({ colName: 'column1' } as ChartDataSectionField),
+    ).toEqual(0);
+    expect(
+      dataset.getFieldIndex({
+        colName: 'column1',
+        aggregate: 'AVG',
+      } as ChartDataSectionField),
     ).toEqual(undefined);
   });
 
@@ -80,8 +100,8 @@ describe('ChartDataSet Tests', () => {
       [1, 2],
       [3, 4],
     ];
-    const metas = [{ name: 'column1' }, { name: 'column2' }];
-    const fields = [{ colName: 'column1' }, { colName: 'column2' }] as any[];
+    const metas = createMetas();
+    const fields = createFields();
 
     const dataset = new ChartDataSet(columns, metas, fields);
     dataset.sortBy([
@@ -94,7 +114,7 @@ describe('ChartDataSet Tests', () => {
           },
         ],
       },
-    ] as any);
+    ] as ChartDataConfig[]);
 
     /* order by column1 desc
      * [3] [4]
@@ -114,8 +134,8 @@ describe('ChartDataSet Tests', () => {
       [1, 2],
       [3, 4],
     ];
-    const metas = [{ name: 'column1' }, { name: 'column2' }];
-    const fields = [{ colName: 'column1' }, { colName: 'column2' }] as any[];
+    const metas = createMetas();
+    const fields = createFields();
 
     const dataset = new ChartDataSet(columns, metas, fields);
     dataset.sortBy([
@@ -128,7 +148,7 @@ describe('ChartDataSet Tests', () => {
           },
         ],
       },
-    ] as any);
+    ] as ChartDataConfig[]);
 
     expect(dataset[0][0]).toEqual(1);
     expect(dataset[0][1]).toEqual(2);
@@ -141,8 +161,8 @@ describe('ChartDataSet Tests', () => {
       [1, 2],
       [3, 4],
     ];
-    const metas = [{ name: 'column1' }, { name: 'column2' }];
-    const fields = [{ colName: 'column1' }, { colName: 'column2' }] as any[];
+    const metas = createMetas();
+    const fields = createFields();
 
     const dataset = new ChartDataSet(columns, metas, fields);
     dataset.sortBy([
@@ -155,7 +175,7 @@ describe('ChartDataSet Tests', () => {
           },
         ],
       },
-    ] as any);
+    ] as ChartDataConfig[]);
 
     expect(dataset[0][0]).toEqual(1);
     expect(dataset[0][1]).toEqual(2);
@@ -171,13 +191,13 @@ describe('ChartDataSet Tests', () => {
       [3, 301],
       [3, 302],
     ];
-    const metas = [{ name: 'column1' }, { name: 'column2' }];
-    const fields = [{ colName: 'column1' }, { colName: 'column2' }] as any[];
+    const metas = createMetas();
+    const fields = createFields();
 
     const dataset = new ChartDataSet(columns, metas, fields);
     const groupedDataset = dataset.groupBy({
       colName: 'column1',
-    } as any);
+    } as ChartDataSectionField);
 
     expect(Object.keys(groupedDataset).length).toEqual(3);
     expect(groupedDataset['1'][0]).toEqual(

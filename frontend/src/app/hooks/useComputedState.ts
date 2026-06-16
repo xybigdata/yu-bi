@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 /**
  * Lazy initialized state when dependency object has correct value.
@@ -27,14 +27,14 @@ import { useEffect, useState } from 'react';
  * @param {*} defaultState optional, default state value
  * @return {*} [state, setState]
  */
-const useComputedState: <TS>(
+function useComputedState<TS, TD = unknown>(
   stateTransformer: () => TS,
-  shouldUpdate: (prev, next) => boolean,
-  dependency: any,
+  shouldUpdate: (prev: TD | undefined, next: TD) => boolean,
+  dependency: TD,
   defaultState?: TS,
-) => any = (stateTransformer, shouldUpdate, dependency, defaultState) => {
-  const [prevDep, setPrevDep] = useState();
-  const [state, setState] = useState(defaultState);
+): [TS | undefined, Dispatch<SetStateAction<TS | undefined>>] {
+  const [prevDep, setPrevDep] = useState<TD>();
+  const [state, setState] = useState<TS | undefined>(defaultState);
 
   useEffect(() => {
     if (shouldUpdate(prevDep, dependency)) {
@@ -46,6 +46,6 @@ const useComputedState: <TS>(
   }, [dependency]);
 
   return [state, setState];
-};
+}
 
 export default useComputedState;

@@ -23,7 +23,10 @@ import {
   DataChart,
 } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { mainActions } from 'app/pages/MainPage/slice';
-import { PendingChartDataRequestFilter } from 'app/types/ChartDataRequest';
+import {
+  ChartVariableParams,
+  PendingChartDataRequestFilter,
+} from 'app/types/ChartDataRequest';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { ChartDTO } from 'app/types/ChartDTO';
 import { convertToChartDto } from 'app/utils/ChartDtoHelper';
@@ -261,7 +264,7 @@ export const initChartPreviewData = createAsyncThunk<
     orgId: string;
     filterSearchParams?: FilterSearchParams;
     jumpFilterParams?: PendingChartDataRequestFilter[];
-    jumpVariableParams?: Record<string, any[]>;
+    jumpVariableParams?: ChartVariableParams;
   }
 >(
   'viz/initChartPreviewData',
@@ -328,7 +331,7 @@ export const exportChartTpl = createAsyncThunk(
       avatar: newConf.chartGraphId, //
       config: JSON.stringify(newConf),
     };
-    await request2<any>({
+    await request2<null>({
       url: `viz/export/datachart/template`,
       method: 'POST',
       data: { datachart: newChart },
@@ -345,7 +348,7 @@ export const fetchDataSetByPreviewChartAction = createAsyncThunk(
       pageInfo?;
       sorter?: { column: string; operator: string; aggOperator?: string };
       drillOption?: IChartDrillOption;
-      jumpVariableParams?: Record<string, any[]>;
+      jumpVariableParams?: ChartVariableParams;
     },
     thunkAPI,
   ) => {

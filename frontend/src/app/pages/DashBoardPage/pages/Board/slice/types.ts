@@ -25,7 +25,11 @@ import { BoardConfig } from 'app/pages/DashBoardPage/types/boardTypes';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
 import { Variable } from 'app/pages/MainPage/pages/VariablePage/slice/types';
 import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
-import { PendingChartDataRequestFilter } from 'app/types/ChartDataRequest';
+import {
+  ChartDataRequest,
+  ChartVariableParams,
+  PendingChartDataRequestFilter,
+} from 'app/types/ChartDataRequest';
 import { ChartDatasetMeta } from 'app/types/ChartDataSet';
 import ChartDataView from 'app/types/ChartDataView';
 import { Layout } from 'react-grid-layout';
@@ -437,7 +441,7 @@ export interface ServerDatachart extends Omit<DataChart, 'config'> {
 
 export interface getDataOption {
   pageInfo?: Partial<PageInfo>;
-  sorters?: Array<{ column: string; operator?: string; aggOperator?: string }>;
+  sorters?: ChartDataRequest['orders'];
 }
 
 export type WidgetErrorType = 'request' | 'interaction';
@@ -446,5 +450,5 @@ export type WidgetLinkInfo = {
   sourceWidgetId?: string;
   filters?: PendingChartDataRequestFilter[];
   tempFilters?: PendingChartDataRequestFilter[];
-  variables?: Record<string, any[]>;
+  variables?: ChartVariableParams;
 };

@@ -24,6 +24,14 @@ vi.mock('../alpha3', () => ({
 
 import { migrateChartConfig } from '..';
 import { alpha3 } from '../alpha3';
+import { ChartDetailConfigDTO } from 'app/types/ChartConfigDTO';
+
+const createChartDetailConfig = (): ChartDetailConfigDTO => ({
+  chartConfig: {},
+  chartGraphId: 'chart-1',
+  computedFields: [],
+  aggregation: false,
+});
 
 describe('migrateChartConfig Test', () => {
   test('should not begin migration if config is empty', () => {
@@ -32,7 +40,7 @@ describe('migrateChartConfig Test', () => {
   });
 
   test('should not begin migration if config is empty', () => {
-    const config = {} as any;
+    const config = createChartDetailConfig();
     migrateChartConfig(config);
     expect(alpha3).toHaveBeenCalledTimes(1);
   });

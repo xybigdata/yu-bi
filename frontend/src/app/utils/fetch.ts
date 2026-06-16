@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 import { message } from 'antd';
+import type { AxiosResponse } from 'axios';
 import { DownloadFileType } from 'app/constants';
 import {
   DownloadTask,
@@ -107,7 +108,7 @@ export const makeDownloadDataTask =
   async () => {
     const { downloadParams, fileName, resolve, downloadType, imageWidth } =
       params;
-    const res = await request2<{}>({
+    const res = await request2<null>({
       url: `download/submit/task`,
       method: 'POST',
       data: {
@@ -143,7 +144,7 @@ export const makeShareDownloadDataTask =
       password,
       shareToken,
     } = params;
-    const { success } = await request2<{}>({
+    const { success } = await request2<null>({
       url: `shares/download`,
       method: 'POST',
       data: {
@@ -210,7 +211,7 @@ export async function generateShareLinkAsync({
   rowPermissionBy,
 }) {
   const response = await request2<{
-    data: any;
+    data: unknown;
     errCode: number;
     message: string;
     success: boolean;
@@ -253,9 +254,13 @@ function getDownloadFileName(contentDisposition: string | undefined) {
   return 'unknown.xlsx';
 }
 
-export const dealFileSave = (data, headers) => {
+export const dealFileSave = (
+  data: BlobPart,
+  headers: AxiosResponse['headers'],
+) => {
   const fileName =
-    getDownloadFileName(headers?.['content-disposition']) || 'unknown.xlsx';
+    getDownloadFileName(String(headers?.['content-disposition'] || '')) ||
+    'unknown.xlsx';
   const blob = new Blob([data], { type: '**application/octet-stream**' });
   const downloadUrl = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
@@ -271,11 +276,11 @@ export const dealFileSave = (data, headers) => {
 };
 
 export async function downloadFile(id) {
-  const [data, headers] = (await requestWithHeader({
+  const [data, headers] = await requestWithHeader<BlobPart>({
     url: `download/files/${id}`,
     method: 'GET',
     responseType: 'blob',
-  })) as any;
+  });
   dealFileSave(data, headers);
 }
 
@@ -319,16 +324,16 @@ interface DownloadShareDashChartFileParams {
 export async function downloadShareDataChartFile(
   params: DownloadShareDashChartFileParams,
 ) {
-  const [data, headers] = (await requestWithHeader({
+  const [data, headers] = await requestWithHeader<BlobPart>({
     url: `shares/download`,
     method: 'GET',
     responseType: 'blob',
     params,
-  })) as any;
+  });
   dealFileSave(data, headers);
 }
 
-export async function fetchCheckName(url, data: any) {
+export async function fetchCheckName(url, data: unknown) {
   return await request2({
     url: `/${url}/check/name`,
     method: 'POST',

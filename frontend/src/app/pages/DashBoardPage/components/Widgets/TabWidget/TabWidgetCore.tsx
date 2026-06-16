@@ -121,7 +121,7 @@ export const TabWidgetCore: React.FC<{}> = memo(() => {
         onTabClick={editing ? onTabClick : undefined}
         size="small"
         tabBarGutter={1}
-        tabPosition={position as any}
+        tabPosition={position}
         activeKey={editing ? String(activeKey) : undefined}
         tabBarStyle={{ fontSize: '16px' }}
         type={editing ? 'editable-card' : undefined}

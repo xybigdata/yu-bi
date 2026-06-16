@@ -20,9 +20,8 @@ import { DatePicker, Form, Modal, Radio, Select, Space } from 'antd';
 import { FormItemEx } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
-  DatartDayjs,
-  formatDatartDate,
-  getDatartNow,
+  formatDatartDateTime,
+  isDatartDayBeforeTodayEnd,
   toDatartDayjs,
 } from 'app/utils/date';
 import { useMemberSlice } from 'app/pages/MainPage/pages/MemberPage/slice';
@@ -44,21 +43,15 @@ import { SPACE } from 'styles/StyleConstants';
 import { AuthenticationModeType, RowPermissionByType } from './slice/constants';
 import { ShareDetail } from './slice/type';
 
-type ModalDestroyOnHiddenCompatProps = {
-  destroyOnHidden?: boolean;
-};
-
 const normalizeExpiryDate = (value?: string | Date | null) => {
   if (!value) {
     return '';
   }
 
-  return formatDatartDate(value, TIME_FORMATTER);
+  return formatDatartDateTime(value);
 };
 
-const isExpiredDateDisabled = (current?: DatartDayjs | null) => {
-  return !!current && current.isBefore(getDatartNow().endOf('day'));
-};
+const isExpiredDateDisabled = isDatartDayBeforeTodayEnd;
 
 const ShareLinkModal: FC<{
   orgId: string;
@@ -83,9 +76,6 @@ const ShareLinkModal: FC<{
   const usersList = useSelector(selectMembers);
   const rolesList = useSelector(rdxSelectRoles);
   const isOwner = useSelector(selectIsOrgOwner);
-  const modalDestroyOnHiddenProps = {
-    destroyOnHidden: true,
-  } as ModalDestroyOnHiddenCompatProps;
 
   const handleOkFn = useCallback(
     async ({
@@ -180,7 +170,7 @@ const ShareLinkModal: FC<{
       }
       okButtonProps={{ loading: btnLoading }}
       onCancel={onCancel}
-      {...(modalDestroyOnHiddenProps as any)}
+      destroyOnHidden
       forceRender
     >
       <Form

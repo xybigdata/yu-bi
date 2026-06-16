@@ -63,6 +63,11 @@ import {
 import { saveView } from '../../slice/thunks';
 import { isNewView } from '../../utils';
 import { loadSqlFormatter } from './sqlFormatterRuntime';
+
+type ToolbarLocationState = {
+  sourcesId?: string;
+};
+
 interface ToolbarProps {
   allowManage: boolean;
   allowEnableViz: boolean | undefined;
@@ -77,7 +82,7 @@ export const Toolbar = memo(
     const { showSaveForm } = useContext(SaveFormContext);
     const sources = useSelector(selectSources);
     const navigate = useCompatNavigate();
-    const histState = navigate.location.state as any;
+    const histState = navigate.location.state as ToolbarLocationState | null;
     const viewsData = useSelector(selectViews);
     const t = useI18NPrefix('view.editor');
     const saveAsView = useSaveAsView();
@@ -187,10 +192,10 @@ export const Toolbar = memo(
     );
 
     useEffect(() => {
-      if (histState?.sourcesId && sources) {
+      if (histState?.sourcesId && sources.length) {
         sourceChange(histState.sourcesId);
       }
-    }, [histState?.sourcesId, sourceChange, sources]);
+    }, [histState?.sourcesId, sourceChange, sources.length]);
 
     return (
       <Container>

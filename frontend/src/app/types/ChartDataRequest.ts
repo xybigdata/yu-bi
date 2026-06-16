@@ -39,7 +39,10 @@ export type PendingChartDataRequestFilter = {
   }>;
 };
 
+export type ChartVariableParams = Record<string, string[]>;
+
 export type ChartDataRequest = {
+  limit?: number | [number, number];
   viewId: string;
   aggregators: Array<{ column: string[]; sqlOperator: string }>;
   expired?: number;
@@ -47,7 +50,6 @@ export type ChartDataRequest = {
   flush?: boolean;
   groups?: Array<{ column: string[] }>;
   functionColumns?: Array<{ alias: string; snippet: string }>;
-  limit?: any;
   nativeQuery?: boolean;
   orders: Array<{
     column: string[];
@@ -62,7 +64,7 @@ export type ChartDataRequest = {
   cacheExpires?: number;
   concurrencyControl?: boolean;
   concurrencyControlMode?: string;
-  params?: Record<string, string[]>;
+  params?: ChartVariableParams;
   vizId?: string;
   vizName?: string;
   vizType?: string;

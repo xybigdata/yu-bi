@@ -27,10 +27,6 @@ import { uuidv4 } from 'utils/utils';
 import { InteractionRelationType } from '../../constants';
 import { CustomizeRelation, I18nTranslator } from './types';
 
-type SelectPopupMatchSelectWidthCompatProps = {
-  popupMatchSelectWidth?: boolean | number;
-};
-
 const UrlParamList: FC<
   {
     targetRelId?: string;
@@ -47,9 +43,6 @@ const UrlParamList: FC<
   onRelationChange,
   translate: t,
 }) => {
-  const selectPopupMatchWidthProps = {
-    popupMatchSelectWidth: false,
-  } as SelectPopupMatchSelectWidthCompatProps;
   const handleAddRelation = () => {
     onRelationChange(
       relations?.concat({ id: uuidv4(), type: InteractionRelationType.Field }),
@@ -127,7 +120,7 @@ const UrlParamList: FC<
           style={{ width: '150px' }}
           value={value}
           onChange={value => handleRelationChange(record.id, 'source', value)}
-          {...(selectPopupMatchWidthProps as any)}
+          popupMatchSelectWidth={false}
         >
           {(isFieldType(record) ? sourceFields : sourceVariables)?.map(sf => {
             return (

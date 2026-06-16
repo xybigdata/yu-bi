@@ -26,6 +26,7 @@ import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
 import ChartManager from 'app/models/ChartManager';
 import { useWorkbenchSlice } from 'app/pages/ChartWorkbenchPage/slice';
 import { ChartConfigReducerActionType } from 'app/pages/ChartWorkbenchPage/slice/constant';
+import { ChartConfigPayloadType } from 'app/pages/ChartWorkbenchPage/slice/types';
 import {
   aggregationSelector,
   backendChartSelector,
@@ -49,7 +50,7 @@ import {
   SaveFormContext,
   useSaveFormContext,
 } from 'app/pages/MainPage/pages/VizPage/SaveFormContext';
-import { IChart } from 'app/types/Chart';
+import { ChartMouseEventParams, IChart } from 'app/types/Chart';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { ChartDTO } from 'app/types/ChartDTO';
 import {
@@ -230,11 +231,11 @@ export const ChartEditor: FC<ChartEditorProps> = ({
   );
 
   const registerChartEvents = useCallback(
-    chart => {
+    (chart?: IChart) => {
       chart?.registerMouseEvents([
         {
           name: 'click',
-          callback: param => {
+          callback: (param?: ChartMouseEventParams) => {
             drillDownEventListener(drillOptionRef?.current, param, p => {
               drillOptionRef.current = p;
               handleDrillOptionChange?.(p);
@@ -243,7 +244,7 @@ export const ChartEditor: FC<ChartEditorProps> = ({
               dispatch(refreshDatasetAction(p));
             });
             richTextContextEventListener(
-              chart.config.styles[1].rows[0] || {},
+              chart?.config?.styles?.[1]?.rows?.[0] || {},
               param,
               p => {
                 dispatch(updateChartConfigAndRefreshDatasetAction(p));
@@ -612,7 +613,10 @@ export const ChartEditor: FC<ChartEditorProps> = ({
     widgetId,
   ]);
 
-  const handleDateLevelChange = (type, payload) => {
+  const handleDateLevelChange = (
+    type: 'data',
+    payload: ChartConfigPayloadType,
+  ) => {
     dispatch(
       updateChartConfigAndRefreshDatasetAction({
         type,

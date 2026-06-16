@@ -19,6 +19,7 @@
 import {
   InteractionAction,
   InteractionCategory,
+  InteractionMouseEvent,
 } from 'app/components/FormGenerator/constants';
 import {
   CrossFilteringSetting,
@@ -27,7 +28,20 @@ import {
 } from 'app/components/FormGenerator/Customize/Interaction/types';
 import { ChartInteractionEvent } from 'app/constants';
 import useDrillThrough from 'app/hooks/useDrillThrough';
+import type { DisplayViewDetailProps } from 'app/pages/MainPage/pages/VizPage/hooks/useDisplayViewDetail';
+import type { ExecuteToken } from 'app/pages/SharePage/slice/types';
+import type { VizType } from 'app/pages/MainPage/pages/VizPage/slice/types';
+import type { ModalFuncProps } from 'antd';
 import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
+import type { IChartDrillOption } from 'app/types/ChartDrillOption';
+import type {
+  ChartConfig,
+  ChartStyleConfig,
+  SelectedItem,
+} from 'app/types/ChartConfig';
+import type { ChartMouseEventParams } from 'app/types/Chart';
+import type { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
+import type ChartDataView from 'app/types/ChartDataView';
 import { getStyles, getValue } from 'app/utils/chartHelper';
 import {
   buildClickEventBaseFilters,
@@ -42,47 +56,81 @@ import { isEmpty, isEmptyArray } from 'utils/object';
 import { stringifyQuery } from 'utils/queryString';
 import { urlSearchTransfer } from 'utils/urlSearchTransfer';
 
+type ChartInteractionClickEventParams = Pick<
+  ChartMouseEventParams,
+  'interactionType'
+> & {
+  selectedItems?: SelectedItem[];
+};
+
+type ChartInteractionConfigs = ChartStyleConfig[];
+type ChartInteractionView = Pick<
+  ChartDataView,
+  'id' | 'meta' | 'computedFields' | 'type'
+> & {
+  config: string | object;
+};
+
+type CrossFilteringLinkParam = {
+  rule: NonNullable<CrossFilteringSetting['rules']>[number];
+  isUnSelectedAll: boolean;
+  filters: ReturnType<typeof getLinkFiltersByInteractionRule>;
+  variables: ReturnType<typeof getVariablesByInteractionRule>;
+};
+
 interface DrillThroughEventParams {
-  drillOption?: any;
+  drillOption?: IChartDrillOption;
   drillThroughSetting?: DrillThroughSetting | null;
-  clickEventParams?: any;
-  targetEvent?: any;
-  ruleId?: any;
-  orgId?: any;
-  view?: any;
-  queryVariables?: any;
-  computedFields?: any;
-  aggregation?: any;
-  chartConfig?: any;
-  isJumpUrlOnly?: any;
+  clickEventParams?: ChartInteractionClickEventParams;
+  targetEvent?: InteractionMouseEvent | ChartInteractionEvent;
+  ruleId?: string;
+  orgId?: string;
+  view?: ChartInteractionView;
+  queryVariables?: ChartDataView['variables'];
+  computedFields?: ChartDataViewMeta[];
+  aggregation?: boolean;
+  chartConfig?: ChartConfig;
+  isJumpUrlOnly?: boolean;
 }
 
 interface ViewDataEventParams {
-  drillOption?: any;
-  clickEventParams?: any;
-  targetEvent?: any;
+  drillOption?: IChartDrillOption;
+  clickEventParams?: ChartInteractionClickEventParams;
+  targetEvent?: InteractionMouseEvent | ChartInteractionEvent;
   viewDetailSetting?: ViewDetailSetting | null;
-  chartConfig?: any;
-  view?: any;
-  authToken?: any;
+  chartConfig?: ChartConfig;
+  view?: ChartInteractionView;
+  authToken?: ExecuteToken;
 }
 
 interface CrossFilteringEventParams {
-  drillOption?: any;
+  drillOption?: IChartDrillOption;
   crossFilteringSetting?: CrossFilteringSetting | null;
-  clickEventParams?: any;
-  targetEvent?: any;
-  view?: any;
-  queryVariables?: any;
-  computedFields?: any;
-  aggregation?: any;
-  chartConfig?: any;
+  clickEventParams?: ChartInteractionClickEventParams;
+  targetEvent?: InteractionMouseEvent | ChartInteractionEvent;
+  view?: ChartInteractionView;
+  queryVariables?: ChartDataView['variables'];
+  computedFields?: ChartDataViewMeta[];
+  aggregation?: boolean;
+  chartConfig?: ChartConfig;
 }
 
+type JumpVizDialogParams = {
+  orgId: string;
+  vizId: string;
+  vizType: VizType;
+  params?: string;
+};
+
+type JumpUrlDialogParams = Pick<
+  ModalFuncProps,
+  'width' | 'bodyStyle' | 'content'
+>;
+
 const useChartInteractions = (props: {
-  openViewDetailPanel?: Function;
-  openJumpVizDialogModal?: Function;
-  openJumpUrlDialogModal?: Function;
+  openViewDetailPanel?: (props: DisplayViewDetailProps) => void;
+  openJumpVizDialogModal?: (props: JumpVizDialogParams) => void;
+  openJumpUrlDialogModal?: (props: JumpUrlDialogParams) => void;
 }) => {
   const {
     openNewTab,
@@ -94,84 +142,56 @@ const useChartInteractions = (props: {
   } = useDrillThrough();
 
   const getDrillThroughSetting = (
-    chartInteractions,
-    boardInteractions?,
+    chartInteractions: ChartInteractionConfigs = [],
+    boardInteractions: ChartInteractionConfigs = [],
   ): DrillThroughSetting | null => {
-    const enableBoardDrillThrough = getValue(boardInteractions || [], [
+    const enableBoardDrillThrough = getValue(boardInteractions, [
       'drillThrough',
     ]);
     if (enableBoardDrillThrough) {
-      return getStyles(
-        boardInteractions || [],
-        ['drillThrough'],
-        ['setting'],
-      )?.[0];
+      return getStyles(boardInteractions, ['drillThrough'], ['setting'])?.[0];
     }
-    const enableChartDrillThrough = getValue(chartInteractions || [], [
+    const enableChartDrillThrough = getValue(chartInteractions, [
       'drillThrough',
     ]);
     if (enableChartDrillThrough) {
-      return getStyles(
-        chartInteractions || [],
-        ['drillThrough'],
-        ['setting'],
-      )?.[0];
+      return getStyles(chartInteractions, ['drillThrough'], ['setting'])?.[0];
     } else {
       return null;
     }
   };
 
   const getCrossFilteringSetting = (
-    chartInteractions,
-    boardInteractions?,
+    chartInteractions: ChartInteractionConfigs = [],
+    boardInteractions: ChartInteractionConfigs = [],
   ): CrossFilteringSetting | null => {
-    const enableBoardCrossFiltering = getValue(boardInteractions || [], [
+    const enableBoardCrossFiltering = getValue(boardInteractions, [
       'crossFiltering',
     ]);
     if (enableBoardCrossFiltering) {
-      return getStyles(
-        boardInteractions || [],
-        ['crossFiltering'],
-        ['setting'],
-      )?.[0];
+      return getStyles(boardInteractions, ['crossFiltering'], ['setting'])?.[0];
     }
-    const enableChartCrossFiltering = getValue(chartInteractions || [], [
+    const enableChartCrossFiltering = getValue(chartInteractions, [
       'crossFiltering',
     ]);
     if (enableChartCrossFiltering) {
-      return getStyles(
-        chartInteractions || [],
-        ['crossFiltering'],
-        ['setting'],
-      )?.[0];
+      return getStyles(chartInteractions, ['crossFiltering'], ['setting'])?.[0];
     } else {
       return null;
     }
   };
 
   const getViewDetailSetting = (
-    chartInteractions,
-    boardInteractions?,
+    chartInteractions: ChartInteractionConfigs = [],
+    boardInteractions: ChartInteractionConfigs = [],
   ): ViewDetailSetting | null => {
-    const enableBoardViewDetail = getValue(boardInteractions || [], [
-      'viewDetail',
-    ]);
+    const enableBoardViewDetail = getValue(boardInteractions, ['viewDetail']);
     if (enableBoardViewDetail) {
-      return getStyles(
-        boardInteractions || [],
-        ['viewDetail'],
-        ['setting'],
-      )?.[0];
+      return getStyles(boardInteractions, ['viewDetail'], ['setting'])?.[0];
     }
-    const enableChartViewDetail = getValue(chartInteractions || [], [
-      'viewDetail',
-    ]);
+    const enableChartViewDetail = getValue(chartInteractions, ['viewDetail']);
     if (enableChartViewDetail) {
-      return getStyles(
-        chartInteractions || [],
-        ['viewDetail'],
-        ['setting'],
-      )?.[0];
+      return getStyles(chartInteractions, ['viewDetail'], ['setting'])?.[0];
     } else {
       return null;
     }
@@ -263,7 +283,7 @@ const useChartInteractions = (props: {
                   'DATACHART',
                   urlFiltersStr,
                 );
-                props?.openJumpVizDialogModal?.(modalContent as any);
+                props?.openJumpVizDialogModal?.(modalContent);
               }
             } else if (rule.category === InteractionCategory.JumpToDashboard) {
               const variableFilters = variableToFilter(
@@ -291,7 +311,7 @@ const useChartInteractions = (props: {
                   'DASHBOARD',
                   urlFiltersStr,
                 );
-                props?.openJumpVizDialogModal?.(modalContent as any);
+                props?.openJumpVizDialogModal?.(modalContent);
               }
             } else if (rule.category === InteractionCategory.JumpToUrl) {
               const variableFilters = variableToFilter(
@@ -315,7 +335,7 @@ const useChartInteractions = (props: {
               }
               if (rule?.action === InteractionAction.Dialog) {
                 const modalContent = getDialogContentByUrl(url, urlFiltersStr);
-                props?.openJumpUrlDialogModal?.(modalContent as any);
+                props?.openJumpUrlDialogModal?.(modalContent);
               }
             }
           });
@@ -345,7 +365,7 @@ const useChartInteractions = (props: {
         aggregation,
         chartConfig,
       }: CrossFilteringEventParams,
-      callback,
+      callback?: (linkParams: CrossFilteringLinkParam[]) => void,
     ) => {
       if (
         !crossFilteringSetting ||
@@ -353,7 +373,7 @@ const useChartInteractions = (props: {
       ) {
         return null;
       }
-      let nonAggChartFilters = new ChartDataRequestBuilder(
+      const nonAggChartFilters = new ChartDataRequestBuilder(
         {
           id: view?.id || '',
           config: view?.config || {},
@@ -370,7 +390,9 @@ const useChartInteractions = (props: {
         .getColNameStringFilter()
         ?.filter(f => !Boolean(f.aggOperator));
 
-      const linkParams = (crossFilteringSetting?.rules || []).map(rule => {
+      const linkParams: CrossFilteringLinkParam[] = (
+        crossFilteringSetting?.rules || []
+      ).map(rule => {
         const variableFilters = variableToFilter(
           getVariablesByInteractionRule(queryVariables, rule),
         );
@@ -424,11 +446,11 @@ const useChartInteractions = (props: {
         if (hasNoSelectedItems) {
           return;
         }
-        (props?.openViewDetailPanel as any)({
+        props?.openViewDetailPanel?.({
           currentDataView: view,
           chartConfig: chartConfig,
           drillOption: drillOption,
-          viewDetailSetting: viewDetailSetting,
+          viewDetailSetting: viewDetailSetting || undefined,
           clickFilters: clickFilters,
           authToken,
         });

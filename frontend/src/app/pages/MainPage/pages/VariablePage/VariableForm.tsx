@@ -33,6 +33,7 @@ import { VariableScopes, VariableTypes, VariableValueTypes } from './constants';
 import { DefaultValue } from './DefaultValue';
 import { Variable } from './slice/types';
 import { VariableFormModel } from './types';
+import { parseVariableDefaultValue } from './utils';
 
 interface VariableFormProps extends ModalFormProps {
   scope: VariableScopes;
@@ -40,10 +41,6 @@ interface VariableFormProps extends ModalFormProps {
   editingVariable: undefined | Variable;
   variables?: VariableHierarchy[];
 }
-
-type ModalDestroyOnHiddenCompatProps = {
-  destroyOnHidden?: boolean;
-};
 
 export const VariableForm = memo(
   ({
@@ -70,17 +67,14 @@ export const VariableForm = memo(
     const formRef = useRef<FormInstance<VariableFormModel>>();
     const t = useI18NPrefix('variable');
     const tg = useI18NPrefix('global');
-    const modalDestroyOnHiddenProps = {
-      destroyOnHidden: true,
-    } as ModalDestroyOnHiddenCompatProps;
 
     useEffect(() => {
       if (open && editingVariable) {
         try {
           const { type, valueType, expression, dateFormat } = editingVariable;
-          let defaultValue = editingVariable.defaultValue
-            ? JSON.parse(editingVariable.defaultValue)
-            : [];
+          let defaultValue = parseVariableDefaultValue(
+            editingVariable.defaultValue,
+          );
           if (valueType === VariableValueTypes.Date && !expression) {
             defaultValue = toDatartDayjsList(defaultValue);
           }
@@ -178,7 +172,7 @@ export const VariableForm = memo(
         onSave={save}
         afterClose={onAfterClose}
         ref={formRef}
-        {...(modalDestroyOnHiddenProps as any)}
+        destroyOnHidden
       >
         <Form.Item
           name="name"

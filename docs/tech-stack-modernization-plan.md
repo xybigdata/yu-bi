@@ -17,7 +17,8 @@
 
 - 工作目录：`/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi`
 - `main` 只允许 merge，不直接开发
-- 当前执行分支按专题单独创建，不在文档中写死分支名
+- 低风险改造阶段改为在单一长期分支持续推进，累计到足够批量后再 merge 回 `main`
+- 高风险或跨域专题仍单独建分支，不在文档中写死分支名
 - 默认自动 `git add`、`git commit --no-verify`
 
 ### 2.2 不直接触碰的高风险标识
@@ -29,7 +30,7 @@
 
 ### 2.3 工作区边界
 
-- 不动未跟踪目录：`.tmp/`、`logs/`
+- 本地运行目录 `.tmp/`、`logs/` 已加入 `.gitignore`
 - 一个提交只处理一个专题
 - 只提交与当前专题直接相关的文件
 - 尽量按专题攒成一批再提交，避免高频提交带来重复回归成本
@@ -259,6 +260,8 @@
 
 | 专题 | 当前判断 | 策略 |
 | --- | --- | --- |
+| 前端测试层弱类型收口 | 迁移测试和工具测试已完成多批收口，剩余集中在少数大测试文件 | 继续按文件分段推进，优先小范围、可定向验证的用例 |
+| 前端交互/弹窗类型收口 | 仍有局部 `Function`、宽泛回调与最小视图结构未声明 | 继续按调用链小批量收口 |
 | 时间体系剩余调用点 | 已有统一工具入口，仍有零散调用 | 继续小批量收口 |
 | 前端依赖收口 | 仍有少量历史依赖可继续审计 | 按证据逐个清理 |
 | Ant Design 历史入口 | 只剩局部残留 | 按调用点逐步消化 |
@@ -290,25 +293,138 @@
 
 ### 6.1 正在推进
 
-当前专题：`时间过滤器边界收口`
+当前累计专题：`前端生产代码低风险类型边界收口（长期低风险分支持续推进）`
 
-本轮目标：
+本批目标：
 
-- 收口图表预览控制器里的单时间与范围时间过滤器边界
-- 去掉时间过滤器中的宽泛状态值与 `as any`
-- 统一复用已有时间序列化与范围值归一化 helper
+- 继续清理生产代码中能用现有 DTO / APIResponse / Axios 类型表达的 `any`
+- 优先处理请求工具、下载工具、错误处理和“不消费响应体”的 API 调用
+- 保持接口路径、请求参数、错误提示和下载行为不变
+- 返回数据会进入业务拼装的链路先标记评估，不硬改
+
+当前累计清单：
+
+- 已完成：迁移测试层局部弱类型收口
+- 已完成：工具测试层第一批局部弱类型收口
+- 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 的局部弱类型收口
+- 已完成：工具测试层真实 `as any` / 宽泛 `any` 复扫，当前只剩 `expect.any(Function)` 这类断言 matcher
+- 已完成：`requestWithHeader<T>` 返回 `[data, headers]` 的显式类型边界，下载文件调用方不再通过 `as any` 解构
+- 已完成：`request2` 扩展点、默认错误处理和未授权处理的错误入参从宽泛 `any` 收口到 `unknown` + 局部最小结构
+- 已完成：下载任务、模板导出、资源导入导出、看板更新等“不消费响应体”的请求泛型从 `any` / `{}` 收口到 `null`
+- 已完成：数据源 schema 同步 thunk 修正为真实返回 `null`，View schema 拉取改为复用 `DatabaseSchema` 显式 payload
+- 已完成：`utils/utils.ts` 的 Axios 错误响应体改为 `APIResponse<unknown>`，`fastDeleteArrayElement` 改为泛型数组 helper
+- 已完成：`chartHelper.ts` 中对象数组转换、runtime date level 临时字段和 computed fields 合并链路的局部类型收口
+- 已完成：`ChartDataRequestBuilder` 的 function columns 构造补齐显式返回类型，保留空字符串 snippet 的既有兼容语义
+- 已完成：`internalChartHelper.ts` 的样式值合并入口从宽泛 `any` 收口到 `unknown`，空目标 rows 兼容分支用局部类型承接
+- 已完成：`utils.ts` 的 `listToTree` 返回结构、`filterListOrTree` 叶子判断和 `getInsertedNodeIndex` 输入边界完成局部类型收口，并补齐对应工具测试
+- 已完成：`modelListFormsTreeByTableName` 改为基于 `ChartDataViewMeta` 的显式输入输出结构，保留 `analysisPage / viewPage` 差异字段，并补齐分组排序测试
+- 已完成：`ChartVariableParams` 统一图表请求变量参数类型，看板查看态、编辑态、图表预览态和请求构造器统一使用 `Record<string, string[]>`
+- 已完成：图表交互变量默认值解析补齐兼容保护，仅数组默认值进入变量参数，坏 JSON 或非数组输入不再打断交互链路
+- 已完成：看板过滤器去重 helper 改为泛型最小结构，保留同列后者覆盖前者的既有语义
+- 已完成：看板表格分页/排序事件入口补齐分页值与排序值的独立窄化，`getDataOption.sorters` 与 `ChartDataRequest['orders']` 对齐
+- 已完成：看板联动点击过滤器值转换改为数组保护与字符串化，去掉局部 `(v as any)?.map` 中转
+- 已完成：控制器区间数值默认值校验改为显式区间值类型，补齐字符串数值转换和空值保护，并增加 validator 回归测试
+- 已完成：看板 widget 树选项转换 helper 补齐列表节点与树节点类型，去掉树构造链路里的 `any[]` / 宽泛中转，并增加路径转树测试
+- 已完成：看板编辑态图表数据请求错误处理改为复用 `getErrorMessage`，去掉局部 `error as any`
+- 已完成：看板编辑页导航 state 补齐最小结构类型，去掉 `navigate.location.state as any`
+- 已完成：看板配置面板与 widget 配置面板的 `Collapse.items` 改为复用 antd 公开 `CollapseProps`，去掉兼容层 `as any`
+- 已完成：TabWidget 的标签位置配置改为复用 antd `TabsProps['tabPosition']`，并对历史异常位置值补齐默认回退
+- 已完成：看板 widget 工具、图表选择弹窗、自定义选项表格、添加控制器菜单与图层树节点的局部类型边界收口，保留运行时行为不变
+- 已完成：根目录 `.gitignore` 忽略 `.tmp/` 与 `logs/` 本地运行目录，避免后续误提交
+- 正在推进：生产工具函数中确认低风险的单点类型债复扫
+- 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
+- 下一批候选：`utils/chartHelper.ts`、`utils/internalChartHelper.ts` 中可隔离、已有测试覆盖的 helper 局部类型收口
 
 当前已落地范围：
 
-- `timeFilterUtils.ts` 新增单时间与范围时间过滤器值归一化 helper
-- `TimeFilter` 改为复用统一单时间字符串序列化与读取入口
-- `RangeTimeFilter` 改为使用显式范围时间元组类型，去掉局部 `as any`
-- 补充时间过滤器局部测试，覆盖单值与范围值归一化边界
+- `VariablePage/utils.ts` 继续沉淀变量权限日期值序列化 helper
+- `VariablePage/index.tsx` 与 `ViewPage/Main/Properties/Variables.tsx` 改为复用统一 relation 序列化入口
+- `date.ts` 继续补齐范围时间格式化与“今天结束前禁用” helper
+- `date.ts` 新增标准时间串 helper，继续承接 `TIME_FORMATTER` 的零散重复调用
+- `date.ts` 继续补齐标准时间串的可选格式化 helper，减少过滤器与当前时间默认值链路的直接模板耦合
+- `SchedulePage/utils.ts`、`ShareLinkModal.tsx`、`DashBoardPage/utils/*`、`ChartTimeSelector/utils.ts` 改为复用统一日期工具
+- `SourceDetailPage`、`DateConditionConfiguration`、`timeFilterUtils`、`ChartDataRequestBuilder`、`time.ts` 继续改为复用统一标准时间 helper
+- `ShareLinkModal`、`ShareManageModal`、`SubjectForm`、`VariableForm` 的 `destroyOnHidden` 兼容 props 改为直接透传，去掉对象展开配合 `as any`
+- `BasicFont`、`JumpToChart`、`JumpToDashboard`、`JumpToUrl`、`ControllerList`、`UrlParamList`、`ChartRelationList`、`BoardRelationList`、`ChartDrillContextMenu`、`CrossFilteringRuleList`、`MemberDetailPage` 的下拉/弹层兼容 props 继续改为直接透传，减少 `popupMatchSelectWidth`、`destroyOnHidden`、`popupRender`、`onOpenChange` 的局部 `as any`
+- `ConditionalStyle/add` 与 `ScorecardConditionalStyle/add` 的 `destroyOnHidden` 兼容 props 改为直接透传，继续压缩 modal 兼容层里的对象展开与局部 `as any`
+- `SourceDetailPage` 的编辑态配置字符串解析补齐局部安全入口，`ArrayConfig` 的 `columns` 读取改为显式结构访问，开始收口 SourcePage 的局部弱类型与裸解析
+- `useGetSourceDbTypeIcon` 的数据源配置字符串解析补齐局部安全入口，继续减少 Source 侧直接裸 `JSON.parse`
+- `SourcePage/Sidebar/Recycle` 的树节点标题渲染改为走局部显式节点类型，继续压缩 Source 侧 `as any`
+- `VariablePage/utils.ts` 新增变量关系值解析 helper，`ViewPage/Main/Properties/Variables.tsx` 改为复用统一入口，继续减少变量权限链路的局部裸 `JSON.parse`
+- `ViewPage/Main/Properties/Resource.tsx` 的资源树图标渲染改为走局部显式节点类型，继续压缩资源树节点上的 `as any`
+- `VariablePage/utils.ts` 新增变量默认值解析 helper，`VariableForm.tsx` 与 `VariablePage/index.tsx` 改为复用统一入口，继续减少变量链路的局部裸 `JSON.parse`
+- `ViewPage/Main/StructView/components/SelectDataSource.tsx` 的树节点与已选表结构改为走局部显式类型，继续压缩 StructView 数据源选择链路上的 `as any`
+- `ViewPage/Main/Editor/SQLEditor.tsx` 的只读提示贡献对象改为走局部显式接口，继续压缩 Monaco 编辑器链路上的单点 `as any`
+- `ViewPage/Main/Editor/Toolbar.tsx` 的导航 state 改为走局部显式类型，继续压缩编辑链路中的单点 `as any`
+- `useChartInteractions.ts` 与图表预览/分享/看板调用方改为走显式弹窗与详情参数类型，继续压缩交互链路上的 `Function` 与局部 `as any`
+- `VizPage/hooks/useDisplayJumpVizDialog.tsx`、`useDisplayViewDetail.tsx` 改为直接复用显式参数类型与 `openStateModal` 返回值，继续收口展示层局部 `Function`
+- `ViewPage/Main/Properties/DataModelTree.tsx` 的计算字段校验异常提示改为显式字符串化，继续压缩属性链路里的单点 `as any`
+- `useDisplayViewDetail.tsx` 的数据集行、列与授权令牌类型改为走显式最小结构，避免详情表格继续透传宽泛 `any`
+- `useChartInteractions.ts` 的 drill/view detail/cross filtering 入参改为复用 `IChartDrillOption`、`ChartConfig`、`SelectedItem`、最小 view 结构与真实交互枚举，避免预览/分享/看板继续混用未声明对象
+- `useStateModal.tsx` 的公共弹窗 API 补齐 `content`、`maskClosable`、`cancelButtonProps`、缓存回调等真实调用面，减少各处 `as Function` 绕过
+- `useFieldActionModal.tsx`、`CheckboxModal.tsx`、`GroupLayout.tsx`、`FilterTypeSection.tsx`、`ChartDataViewPanel.tsx`、`ChartDraggableTargetContainer.tsx`、`DataModelTree.tsx` 改为直接复用显式弹窗返回值，继续压缩工作台与属性链路的局部 `Function`
+- `ChartDataViewPanel.tsx` 与 `DataModelTree.tsx` 的计算字段树数据改为走显式 `TreeDataNode` 结构，避免树节点 key/children 继续保留宽泛对象
+- `useToggle.ts` 与 `useComputedState.ts` 的通用 hook 返回值与依赖类型改为显式声明，保持现有“切换 / 显式设值 / 延迟计算”语义不变，减少公共 hook 的 `Function` 与宽泛返回值
+- `ChartDrillContext.ts`、`ChartWorkbench.tsx` 与 `ChartEditor.tsx` 的 `onDateLevelChange` 改为复用显式 `ChartConfigPayloadType`，继续收口时间层级切换链路中的宽泛回调
+- `ChartPreviewBoard.tsx`、`ChartPreviewBoardForShare.tsx`、`DataChartWidgetCore.tsx` 的时间层级切换与图表鼠标事件入口改为复用显式 `ChartConfigPayloadType`、`ChartMouseEventParams`，继续压缩预览/分享/看板链路中的局部 `any`
+- `ChartEditor.tsx`、`ChartPreviewBoard.tsx`、`ChartPreviewBoardForShare.tsx` 的 `registerMouseEvents` 回调入口改为走显式 `ChartMouseEventParams`，继续压缩工作台/预览/分享链路里的未声明事件对象
+- `ChartSelectionManager.ts` 的点击回调数组与事件透传结构改为走显式 `ChartMouseEventParams` 兼容形态，并保留既有 `componentIndex / dataIndex / selectedItems` 语义不变
+- `ChartIFrameEventBroker.ts` 与 `useVisibiltyStyle.ts` 的通用 runtime 容器回调改为显式函数签名，继续压缩 iframe 生命周期代理与可见性样式 helper 中的 `Function`
+- `WaterfallChart.tsx` 的选择事件数据补齐最小 `name / value / rowData` 结构，避免运行时图表选择链路继续依赖未声明的裸对象拼装
+- `ChartIFrameContainerDispatcher.tsx` 的容器渲染缓存与 metadata 元组改为显式 `ReactNode` / `ChartDataSetDTO` / `ChartConfig` 结构，继续压缩 iframe 容器分发链路中的 `Function` 与未声明元组
+- `ChartDraggableElement.tsx`、`ChartDraggableElementField.tsx`、`ChartDraggableElementHierarchy.tsx`、`ChartDraggableSourceContainer.tsx`、`ChartDraggableSourceGroupContainer.tsx` 的拖拽内容渲染、日期层级 children 与操作菜单回调改为显式类型，继续收口工作台拖拽与字段替换链路中的局部 `Function` / `any`
+- `ChartIFrameContainer.tsx`、`ChartIFrameLifecycleAdapter.tsx`、`ReactLifecycleAdapter.ts` 的 dataset / widget 配置 / 容器尺寸 / React root 渲染入口改为显式兼容类型，继续压缩 iframe 生命周期容器里的局部 `any`
+- `ChartIFrameResourceLoader.ts`、`ChartIFrameEventBroker.ts`、`ReactChart.ts`、`ChartDataConfigSectionReplaceMenu.tsx` 的文档对象、事件 broker 入参、React 图表挂载入口和字段替换配置改为显式兼容类型，继续收口 runtime helper 与工作台替换菜单中的局部 `any`
+- `ChartDataRequest.ts`、`ChartDrillOption.ts`、`Chart.ts` 与对应实现/测试的 `limit`、drill filter 数据结构和图表初始化入参改为显式兼容类型，继续收口请求构建与 drill 运行链路中的局部 `any`
+- `useI18NPrefix.ts` 与 `ChartLifecycleBroker.ts` 的运行时翻译函数签名改为显式 `I18NTranslate` 类型，继续收口 iframe 生命周期上下文中的局部 `any`
+- `ChartDataSet.ts` 与 `ChartDataRequestBuilder.ts` 的列索引兜底、数组构造和过滤值归一化改为显式兼容类型，并同步收口对应测试中的局部 `any`
+- `PluginChartLoader.ts` 与 `ChartManager`、`Chart` 的模型层测试继续收口插件加载返回值、私有加载入口访问与生命周期入参中的局部 `any`
+- `ChartDataRequestBuilder.test.ts` 继续按测试 helper 收口 dataView、字段、section、过滤器与排序场景中的局部 `any`，补齐测试数据与真实类型约束的一致性
+- `migrateWidgetChartConfig.test.ts`、`alpha3.test.ts` 与 `migrateWidgetConfig.test.ts` 继续按最小测试结构收口 widget 配置、图表迁移配置与 tab 自定义配置中的局部 `any`，保持迁移逻辑与输出语义不变
+- `MigrationEventDispatcher.test.ts` 继续按显式迁移模型收口事件输入、回退值和任务回调中的局部 `any` / `undefined as any`，保持事件分发与异常回退语义不变
+- `migrateChartConfig.test.ts`、`migrateBoardConfig.test.ts`、`index.test.ts` 与 `migrateStoryPageConfig.test.ts` 继续按正式 DTO / 配置类型收口迁移测试中的局部 `any`，保持版本归一化、默认值补齐与异常回退语义不变
+- `migrateWidgets.test.ts` 继续按 `WidgetBeta3` / `Widget` / `ServerWidget` helper 收口 widget 迁移主流程测试中的局部 `any`，仅保留旧 `filter` 兼容输入场景所需的单点显式兼容强转
+- `time.test.ts`、`chartDtoHelper.test.ts` 与 `ChartEventListenerHelper.test.ts` 继续按请求过滤器、图表 DTO 与鼠标事件最小类型收口工具测试中的局部 `any`，保持空输入保护、DTO 合并与事件分发语义不变
+- `number.test.ts` 与 `BasicDoubleYChart/utils.test.ts` 继续按数值输入、图表字段与数据集 helper 收口测试中的局部 `any`，保持精度计算、安全数值转换和双 Y 轴区间计算语义不变
+- `overflowFuncs.test.ts` 通过 ECharts options、漏斗图配置 helper 和集中 legacy helper 收口散落 `as any`，保持轴标签溢出判断与漏斗图 top 位置兼容语义不变
+- `FormGenerator/__tests__/utils.test.tsx` 与 `BasicFont.test.tsx` 改为按真实 translator 与字体 options 类型表达测试数据，去掉测试内宽泛 translator / fontFamilies 强转
+- `ChartConfig.ts` 补齐 `FontFamilyOption`，让 `BasicFont` 既有 `{ name, value }` 字体项形态进入正式类型表达，保持运行时行为不变
+- `internalChartHelper.test.ts` 改用 `ChartDataViewFieldCategory.Field`、表驱动类型和集中 legacy config helper，收口迁移/合并测试中的字段类别与历史配置强转
+- `chartHelper.test.ts` 补充 style config、data field、legacy data config、runtime date level 测试 helper，收口 requirement、dataset、tooltip、drill、style value 与 runtime date level 配置用例中的局部弱类型
+- `number.ts` 的数值格式化入口改为 `unknown` 宽输入加显式数值转换 helper，保留非数值原样返回语义，减少生产工具函数里的宽泛 `any`
+- `mutation.ts` 的 Immer draft 更新桥接改为 `Draft<T>`，去掉泛型数组与递归更新链路中的局部 `as any`
+- `time.ts` 的 Dayjs 单位兼容桥接从 `any` 收窄到官方单位类型断言，保持 quarter 插件运行时语义不变
+- `request.ts` 的请求扩展点和 `requestWithHeader<T>` 响应头返回链路改为显式类型，减少请求工具层结构伪装与 `any` 中转
+- `fetch.ts` 的下载任务、分享链接、文件保存与名称校验入口补齐最小类型，保持 Blob 下载行为不变
+- `ChartWorkbenchPage`、`Board`、`BoardEditor`、`VizPage`、`ResourceMigrationPage`、`SourcePage`、`ViewPage` 中可确认响应体不消费或已有 DTO 的请求泛型完成局部收口
+- `chartHelper.ts` 的 `transformToObjectArray` 改为显式对象数组返回，runtime date level helper 通过重载表达 `ChartDataSectionField` / `ChartDataViewMeta` 两类真实输入
+- `ChartDataRequestBuilder` 继续收口 computed function column 的返回结构，避免请求构造链路继续依赖隐式 `any`
+- `internalChartHelper.ts` 的样式值合并比较入口改为 `unknown`，保持布尔、数值、字符串、数组、对象和空值兼容规则不变
+- `utils.ts` 的树构造 helper 增加 `ListTreeNode<T>` 返回结构，`getInsertedNodeIndex` 改为只依赖 `parentId / index` 的最小输入结构，保持原索引计算语义不变
+- `utils.ts` 的模型字段按表分组 helper 去掉 `columnNameObj`、`columnTreeData` 和输出节点的宽泛 `any`，缺失 `path` 的字段显式跳过，避免字段树构建时异常扩散
+- `ChartDataRequest.ts` 新增 `ChartVariableParams`，`ChartDataRequestBuilder`、看板查看态/编辑态同步复用该类型，避免变量参数继续以 `Record<string, any[]>` 透传
+- `internalChartHelper.ts` 的变量交互 helper 复用 `ChartVariableParams`，并对变量默认值解析补齐数组判断、字符串化和异常回退
+- `DashBoardPage/utils/index.ts` 的过滤器去重 helper 改为基于 `column` 的泛型最小结构，去掉局部 `Record<string, any>` 中转
+- `DashBoardPage/actions/widgetAction.ts` 的表格分页/排序事件入口补齐局部事件值类型守卫，保持分页页码独立透传，排序仅在 `ASC/DESC` 合法时进入请求
+- `Board/slice/types.ts` 的 `getDataOption.sorters` 改为复用 `ChartDataRequest['orders']`，看板查看态、编辑态和图表请求 helper 不再需要 `as any[]` 强转
+- `DashBoardPage/actions/widgetAction.ts` 的联动点击过滤器转换补齐数组判断和字符串化，非数组输入按空值处理，避免未知值直接 `.map`
+- `ControllerWidgetPanel/utils.ts` 的 `rangeNumberValidator` 改为复用 `RangeNumberValue`，删除空分支，数值比较前显式处理 number/string 输入
+- `DashBoardPage/utils/widget.ts` 的 `handleRowDataForTree`、`convertListToTree` 补齐局部节点类型，保持原树节点字段结构不变
+- `BoardEditor/slice/thunk.ts` 的请求失败回调统一走 `getErrorMessage(error)`，避免错误对象继续通过 `any.message` 读取
+- `BoardEditor/index.tsx` 的历史导航 state 改为显式 `BoardEditorLocationState`，旧 `widgetInfo` 字符串解析结果只声明当前使用的最小字段
+- `SlideSetting/BoardConfigPanel.tsx` 与 `SlideSetting/WidgetConfigPanel.tsx` 的折叠面板 items 透传改为 `Pick<CollapseProps, 'items'>`
+- `TabWidget/tabConfig.ts` 与 `TabWidgetCore.tsx` 的标签位置从字符串强转改为显式合法值收口，保持旧配置异常值回退到 `top`
+- `DashBoardPage/utils/widget.ts` 的时间控制器 URL 参数回填与自有图表内容读取改为复用 `ControllerDate`、`ChartWidgetContent`，避免继续通过局部 `as any` 穿透
+- `ChartSelectModal.tsx` 的默认勾选 id 与树选中事件补齐显式节点类型，保留“过滤文件夹和已存在图表”的既有逻辑
+- `CustomOptions.tsx` 的拖拽行参数、`AddControler.tsx` 的菜单事件与按钮类型、`controlActions.ts` 的新增控制器 action 入参继续收口到显式边界
+- `LayerTreeItem.tsx` 的树节点内容改为复用 `WidgetConf['content']`，只表达既有 widget 配置结构
+- `.gitignore` 增加 `.tmp/`、`logs/`，减少低风险改造过程中本地运行产物干扰
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/__tests__/utils.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts`
+- `npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts`
+- `rg -n "CollapseItemsCompatProps|collapseProps as any|tabPosition=\\{position as any\\}" frontend/src/app/pages/DashBoardPage -g "*.tsx"`
 
 ### 6.2 最近已完成
 
@@ -322,15 +438,29 @@
 - 控制器配置默认值数组边界收口
 - 富文本纯文本 JSON 误判保护补强
 - 时间体系剩余调用点跟进收口
+- 迁移测试层局部弱类型继续收口
+- 工具与表单测试层局部弱类型继续收口
+- `chartHelper.test.ts` 局部弱类型收口
+- `number.ts` 数值工具输入边界收口
+- `mutation.ts` Immer draft 更新边界收口
+- `time.ts` Dayjs 单位兼容桥接类型收口
+- 请求工具与下载工具响应边界收口
+- API thunk 中“不消费响应体”调用的泛型收口
+- 通用错误处理与数组 helper 类型边界收口
+- 图表 helper 中 runtime date level 与样式值合并类型边界收口
+- 通用树 helper 与插入索引 helper 类型边界收口
+- 模型字段树分组 helper 类型边界收口
 
 ## 7. 下一阶段执行顺序
 
 按这个顺序推进，避免专题扩散：
 
-1. 完成当前时间过滤器边界专题并验证通过
-2. 时间体系剩余调用点继续收口
-3. 前端依赖收口与历史入口审计继续逐个推进
-4. 安装健康度与锁文件一致性持续检查
+1. 继续复扫生产工具函数中的低风险单点类型债，只处理不改变运行时语义的局部收口
+2. 优先从 `chartHelper.ts` / `internalChartHelper.ts` 中挑已有测试覆盖、可隔离的 helper 继续收口
+3. `useSaveAsViz`、schema/复制保存这类返回数据会进入业务拼装的链路单独评估，不混入低风险批次
+4. 时间体系剩余调用点继续收口
+5. 前端依赖收口与历史入口审计继续逐个推进
+6. 安装健康度与锁文件一致性持续检查
 
 ## 8. 每轮固定门禁
 
