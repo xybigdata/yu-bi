@@ -309,7 +309,7 @@
 - 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 的局部弱类型收口
 - 已完成：工具测试层真实 `as any` / 宽泛 `any` 复扫，当前只剩 `expect.any(Function)` 这类断言 matcher
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
-- 下一批候选：`utils/time.ts` 的日期单位类型收口、`utils/mutation.ts` 的泛型更新边界评估
+- 下一批候选：`utils/fetch.ts` 的响应数据边界评估、`utils/chartHelper.ts` 中可隔离 helper 的局部类型收口
 
 当前已落地范围：
 
@@ -368,12 +368,14 @@
 - `internalChartHelper.test.ts` 改用 `ChartDataViewFieldCategory.Field`、表驱动类型和集中 legacy config helper，收口迁移/合并测试中的字段类别与历史配置强转
 - `chartHelper.test.ts` 补充 style config、data field、legacy data config、runtime date level 测试 helper，收口 requirement、dataset、tooltip、drill、style value 与 runtime date level 配置用例中的局部弱类型
 - `number.ts` 的数值格式化入口改为 `unknown` 宽输入加显式数值转换 helper，保留非数值原样返回语义，减少生产工具函数里的宽泛 `any`
+- `mutation.ts` 的 Immer draft 更新桥接改为 `Draft<T>`，去掉泛型数组与递归更新链路中的局部 `as any`
+- `time.ts` 的 Dayjs 单位兼容桥接从 `any` 收窄到官方单位类型断言，保持 quarter 插件运行时语义不变
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/utils/__tests__/number.test.ts src/app/utils/__tests__/chartHelper.test.ts`
-- `rg -n "as any|const .*: any|any\\[\\]|any\\b" frontend/src/app/utils/__tests__ frontend/src/app/components/FormGenerator/__tests__ -g '*.ts' -g '*.tsx'`
+- `npm run test:ci -- src/app/utils/__tests__/time.test.ts src/app/utils/__tests__/number.test.ts src/app/utils/__tests__/chartHelper.test.ts src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx`
+- `rg -n "as any|const .*: any|any\\[\\]|any\\b" frontend/src/app/utils/mutation.ts frontend/src/app/utils/time.ts frontend/src/app/utils/number.ts frontend/src/app/utils/__tests__ frontend/src/app/components/FormGenerator/__tests__ -g '*.ts' -g '*.tsx'`
 
 ### 6.2 最近已完成
 
@@ -391,6 +393,8 @@
 - 工具与表单测试层局部弱类型继续收口
 - `chartHelper.test.ts` 局部弱类型收口
 - `number.ts` 数值工具输入边界收口
+- `mutation.ts` Immer draft 更新边界收口
+- `time.ts` Dayjs 单位兼容桥接类型收口
 
 ## 7. 下一阶段执行顺序
 
