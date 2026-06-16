@@ -220,7 +220,7 @@ const ChartDrillContextMenu: FC<{
             [
               ChartDataViewFieldCategory.Field,
               ChartDataViewFieldCategory.DateLevelComputedField,
-            ].includes(f.category),
+            ].includes(f.category as ChartDataViewFieldCategory),
         )
         ?.map((v, i) => {
           const config = v[RUNTIME_DATE_LEVEL_KEY] || v;

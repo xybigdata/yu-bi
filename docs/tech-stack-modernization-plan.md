@@ -313,6 +313,9 @@
 - 已完成：下载任务、模板导出、资源导入导出、看板更新等“不消费响应体”的请求泛型从 `any` / `{}` 收口到 `null`
 - 已完成：数据源 schema 同步 thunk 修正为真实返回 `null`，View schema 拉取改为复用 `DatabaseSchema` 显式 payload
 - 已完成：`utils/utils.ts` 的 Axios 错误响应体改为 `APIResponse<unknown>`，`fastDeleteArrayElement` 改为泛型数组 helper
+- 已完成：`chartHelper.ts` 中对象数组转换、runtime date level 临时字段和 computed fields 合并链路的局部类型收口
+- 已完成：`ChartDataRequestBuilder` 的 function columns 构造补齐显式返回类型，保留空字符串 snippet 的既有兼容语义
+- 已完成：`internalChartHelper.ts` 的样式值合并入口从宽泛 `any` 收口到 `unknown`，空目标 rows 兼容分支用局部类型承接
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 下一批候选：`utils/chartHelper.ts`、`utils/internalChartHelper.ts` 中可隔离、已有测试覆盖的 helper 局部类型收口
@@ -379,12 +382,15 @@
 - `request.ts` 的请求扩展点和 `requestWithHeader<T>` 响应头返回链路改为显式类型，减少请求工具层结构伪装与 `any` 中转
 - `fetch.ts` 的下载任务、分享链接、文件保存与名称校验入口补齐最小类型，保持 Blob 下载行为不变
 - `ChartWorkbenchPage`、`Board`、`BoardEditor`、`VizPage`、`ResourceMigrationPage`、`SourcePage`、`ViewPage` 中可确认响应体不消费或已有 DTO 的请求泛型完成局部收口
+- `chartHelper.ts` 的 `transformToObjectArray` 改为显式对象数组返回，runtime date level helper 通过重载表达 `ChartDataSectionField` / `ChartDataViewMeta` 两类真实输入
+- `ChartDataRequestBuilder` 继续收口 computed function column 的返回结构，避免请求构造链路继续依赖隐式 `any`
+- `internalChartHelper.ts` 的样式值合并比较入口改为 `unknown`，保持布尔、数值、字符串、数组、对象和空值兼容规则不变
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/utils/__tests__/fetch.test.ts src/utils/__tests__/utils.test.ts`
-- `rg -n "request2<any>|request2<any\\[\\]>|request2<\\{\\}>" frontend/src/app frontend/src/utils -g '*.ts' -g '*.tsx'`
+- `npm run test:ci -- src/app/utils/__tests__/chartHelper.test.ts src/app/utils/__tests__/internalChartHelper.test.ts src/app/models/__tests__/ChartDataRequestBuilder.test.ts`
+- `rg -n "getUpdatedChartStyleValue\\(tEle: any|const tEle: any|transformToObjectArray|getRuntimeDateLevelFields|getRuntimeComputedFields|const result: any\\[\\]|let objCol: any|rows: any" frontend/src/app/utils/chartHelper.ts frontend/src/app/utils/internalChartHelper.ts frontend/src/app/models/ChartDataRequestBuilder.ts`
 
 ### 6.2 最近已完成
 
@@ -407,6 +413,7 @@
 - 请求工具与下载工具响应边界收口
 - API thunk 中“不消费响应体”调用的泛型收口
 - 通用错误处理与数组 helper 类型边界收口
+- 图表 helper 中 runtime date level 与样式值合并类型边界收口
 
 ## 7. 下一阶段执行顺序
 

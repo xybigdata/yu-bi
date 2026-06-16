@@ -52,10 +52,7 @@ import {
   recommendTimeRangeConverter,
   splitRangerDateFilters,
 } from 'app/utils/time';
-import {
-  FilterSqlOperator,
-  RUNTIME_FILTER_KEY,
-} from 'globalConstants';
+import { FilterSqlOperator, RUNTIME_FILTER_KEY } from 'globalConstants';
 import {
   isEmptyArray,
   isEmptyString,
@@ -487,20 +484,27 @@ export class ChartDataRequestBuilder {
     };
   }
 
-  private buildFunctionColumns() {
+  private buildFunctionColumns(): Array<{ alias: string; snippet: string }> {
     const computedFields = getRuntimeDateLevelFields(
       this.dataView.computedFields,
-    );
+    ) as ChartDataViewMeta[] | undefined;
     const fieldsNameList = (this.chartDataConfigs || [])
-      .flatMap(config => getRuntimeDateLevelFields(config.rows) || [])
+      .flatMap(
+        config =>
+          (getRuntimeDateLevelFields(config.rows) as ChartDataSectionField[]) ||
+          [],
+      )
       .flatMap(row => row?.colName || []);
-    const currentUsedComputedFields = computedFields?.filter(v =>
-      fieldsNameList.includes(v.name),
+    const currentUsedComputedFields = computedFields?.filter(
+      v =>
+        Boolean(v.name) &&
+        v.expression !== undefined &&
+        fieldsNameList.includes(v.name),
     );
 
     return (currentUsedComputedFields || []).map(f => ({
-      alias: f.name!,
-      snippet: f.expression,
+      alias: f.name,
+      snippet: f.expression!,
     }));
   }
 

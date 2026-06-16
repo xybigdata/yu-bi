@@ -176,7 +176,7 @@ export const DataChartWidgetCore: React.FC<{}> = memo(() => {
 
   const handleDateLevelChange = useCallback(
     (type, options) => {
-      const rows = getRuntimeDateLevelFields(options.value?.rows);
+      const rows = getRuntimeDateLevelFields(options.value?.rows) || [];
       const dateLevelComputedFields = rows.filter(
         v => v.category === ChartDataViewFieldCategory.DateLevelComputedField,
       );

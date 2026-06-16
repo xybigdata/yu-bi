@@ -67,6 +67,8 @@ import {
 } from 'utils/object';
 import { getDrillableRows, round } from './chartHelper';
 
+type CompatibleChartStyleRows = NonNullable<ChartStyleConfig['rows']>;
+
 const parseViewModel = (model?: string): Record<string, any> | undefined => {
   if (!model) {
     return undefined;
@@ -471,7 +473,7 @@ function getMeta(key, column) {
   };
 }
 
-export function getUpdatedChartStyleValue(tEle: any, sEle: any) {
+export function getUpdatedChartStyleValue(tEle: unknown, sEle: unknown) {
   switch (typeof tEle) {
     /*case 'bigint':
       if (typeof sEle === 'bigint') return sEle;
@@ -517,7 +519,7 @@ export function mergeChartStyleConfigs(
     return target;
   }
   for (let index = 0; index < target?.length!; index++) {
-    const tEle: any = target?.[index];
+    const tEle = target?.[index];
     if (!tEle) {
       continue;
     }
@@ -566,7 +568,7 @@ export function mergeChartStyleConfigs(
       tEle['rows'] = mergeChartStyleConfigs(tEle.rows, sEle?.rows, options);
     } else if (sEle && !isEmptyArray(sEle?.rows)) {
       // Note: we merge all rows data when target rows is empty
-      tEle['rows'] = sEle?.rows;
+      tEle['rows'] = sEle?.rows as CompatibleChartStyleRows;
     }
   }
   return target;
