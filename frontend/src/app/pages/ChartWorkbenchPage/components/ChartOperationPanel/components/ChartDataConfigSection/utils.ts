@@ -16,9 +16,28 @@
  * limitations under the License.
  */
 
-import { ChartDataSectionType } from 'app/constants';
+import {
+  ChartDataSectionFieldActionType,
+  ChartDataSectionType,
+} from 'app/constants';
+import { ChartDataConfig } from 'app/types/ChartConfig';
 import { ChartDataConfigSectionProps } from 'app/types/ChartDataConfigSection';
 import produce from 'immer';
+
+type ChartDataConfigActions = NonNullable<ChartDataConfig['actions']>;
+type ChartDataSectionFieldAction =
+  (typeof ChartDataSectionFieldActionType)[keyof typeof ChartDataSectionFieldActionType];
+type ChartDataConfigFieldActions = Record<
+  string,
+  ChartDataSectionFieldAction[]
+>;
+
+const isFieldActionMap = (
+  actions: ChartDataConfigActions,
+): actions is ChartDataConfigFieldActions => {
+  return !Array.isArray(actions);
+};
+
 export function dataConfigSectionComparer(
   prevProps: ChartDataConfigSectionProps,
   nextProps: ChartDataConfigSectionProps,
@@ -34,29 +53,40 @@ export function dataConfigSectionComparer(
   return true;
 }
 
-export function handleDefaultConfig(defaultConfig, configType): any {
+export function handleDefaultConfig<T extends ChartDataConfig>(
+  defaultConfig: T,
+  configType?: ChartDataConfig['type'],
+): T {
   const nextConfig = produce(defaultConfig, draft => {
-    let _actions = {};
+    const actions = draft.actions;
 
-    draft.rows?.forEach((row, i) => {
-      draft.rows[i].aggregate = undefined;
+    if (!actions || !isFieldActionMap(actions)) {
+      return;
+    }
+
+    draft.rows?.forEach(row => {
+      row.aggregate = undefined;
     });
 
     if (configType === ChartDataSectionType.Aggregate) {
-      delete draft.actions.STRING;
+      delete actions.STRING;
     }
 
     if (configType === ChartDataSectionType.Group) {
-      delete draft.actions.NUMERIC;
+      delete actions.NUMERIC;
     }
 
-    for (let key in draft.actions) {
-      _actions[key] = draft.actions[key].filter(
-        v => v !== 'aggregate' && v !== 'aggregateLimit',
+    const nextActions = Object.entries(
+      actions,
+    ).reduce<ChartDataConfigFieldActions>((acc, [key, value]) => {
+      acc[key] = value.filter(
+        (fieldAction): fieldAction is ChartDataSectionFieldAction =>
+          fieldAction !== 'aggregate' && fieldAction !== 'aggregateLimit',
       );
-    }
+      return acc;
+    }, {});
 
-    draft.actions = _actions;
+    draft.actions = nextActions;
   });
   return nextConfig;
 }
