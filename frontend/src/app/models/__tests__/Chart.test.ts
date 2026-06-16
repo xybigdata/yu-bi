@@ -16,8 +16,21 @@
  * limitations under the License.
  */
 
+import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
 import Chart from '../Chart';
 import { isChartDataConfigMatchRequirement } from '../chartRequirement';
+
+const createGroupSection = (
+  overrides: Partial<ChartDataConfig> = {},
+): ChartDataConfig => ({
+  label: 'dimension',
+  key: 'dimension',
+  required: true,
+  type: 'group',
+  limit: 1,
+  rows: [],
+  ...overrides,
+});
 
 describe('Chart Tests', () => {
   test('should get correct chart model', () => {
@@ -74,7 +87,7 @@ describe('Chart Tests', () => {
   test('should init chart config', () => {
     const chartId = 'some chart id';
     const chartName = 'chart name';
-    const chartConfig = {};
+    const chartConfig = {} as ChartConfig;
     const chart = new Chart(chartId, chartName);
     chart.init(chartConfig);
     expect(chart.config).toEqual(chartConfig);
@@ -100,170 +113,90 @@ describe('Chart Tests', () => {
   test('should match chart config section limitation when section type and key exactly matched', () => {
     const chartId = 'some chart id';
     const chartName = 'chart name';
-    const chartConfig = {
-      datas: [
-        {
-          label: 'dimension',
-          key: 'dimension',
-          required: true,
-          type: 'group',
-          limit: 1,
-          rows: [{ id: 1 }],
-        },
-      ],
+    const chartConfig: ChartConfig = {
+      datas: [createGroupSection({ rows: [{ id: 1 } as never] })],
     };
-    let targetConfig = {
-      datas: [
-        {
-          label: 'dimension',
-          key: 'dimension',
-          required: true,
-          type: 'group',
-          limit: 1,
-          rows: [{ id: 1 }],
-        },
-      ],
+    const targetConfig: ChartConfig = {
+      datas: [createGroupSection({ rows: [{ id: 1 } as never] })],
     };
     const chart = new Chart(chartId, chartName);
     chart.init(chartConfig);
-    expect(chart.isMatchRequirement(targetConfig as any)).toBeTruthy();
+    expect(chart.isMatchRequirement(targetConfig)).toBeTruthy();
   });
 
   test('should not match chart config section limitation when limit is not in range', () => {
     const chartId = 'some chart id';
     const chartName = 'chart name';
-    const chartConfig = {
-      datas: [
-        {
-          label: 'dimension',
-          key: 'dimension',
-          required: true,
-          type: 'group',
-          limit: 2,
-          rows: [{ id: 1 }],
-        },
-      ],
+    const chartConfig: ChartConfig = {
+      datas: [createGroupSection({ limit: 2, rows: [{ id: 1 } as never] })],
     };
-    let targetConfig = {
-      datas: [
-        {
-          label: 'dimension',
-          key: 'dimension',
-          required: true,
-          type: 'group',
-          limit: 1,
-          rows: [{ id: 1 }],
-        },
-      ],
+    const targetConfig: ChartConfig = {
+      datas: [createGroupSection({ rows: [{ id: 1 } as never] })],
     };
     const chart = new Chart(chartId, chartName);
     chart.init(chartConfig);
-    expect(chart.isMatchRequirement(targetConfig as any)).toBeFalsy();
+    expect(chart.isMatchRequirement(targetConfig)).toBeFalsy();
   });
 
   test('should match chart config section limitation when multi key and type matched', () => {
     const chartId = 'some chart id';
     const chartName = 'chart name';
-    const chartConfig = {
-      datas: [
-        {
-          label: 'dimension',
-          key: 'dimension',
-          required: true,
-          type: 'group',
-          limit: 2,
-          rows: [{ id: 1 }],
-        },
-      ],
+    const chartConfig: ChartConfig = {
+      datas: [createGroupSection({ limit: 2, rows: [{ id: 1 } as never] })],
     };
-    let targetConfig = {
+    const targetConfig: ChartConfig = {
       datas: [
-        {
-          label: 'dimension',
+        createGroupSection({
           key: 'dimensionL',
-          required: true,
-          type: 'group',
-          limit: 1,
-          rows: [{ id: 1 }],
-        },
-        {
-          label: 'dimension',
+          rows: [{ id: 1 } as never],
+        }),
+        createGroupSection({
           key: 'dimensionR',
-          required: true,
-          type: 'group',
-          limit: 1,
-          rows: [{ id: 1 }],
-        },
+          rows: [{ id: 1 } as never],
+        }),
       ],
     };
     const chart = new Chart(chartId, chartName);
     chart.init(chartConfig);
-    expect(chart.isMatchRequirement(targetConfig as any)).toBeTruthy();
+    expect(chart.isMatchRequirement(targetConfig)).toBeTruthy();
   });
 
   test('should match chart config section limitation when exactly matched target config section key', () => {
     const chartId = 'some chart id';
     const chartName = 'chart name';
-    const chartConfig = {
+    const chartConfig: ChartConfig = {
       datas: [
-        {
-          label: 'dimension',
+        createGroupSection({
           key: 'dimensionL',
-          required: true,
-          type: 'group',
           limit: 2,
-          rows: [{ id: 1 }],
-        },
+          rows: [{ id: 1 } as never],
+        }),
       ],
     };
-    let targetConfig = {
+    const targetConfig: ChartConfig = {
       datas: [
-        {
-          label: 'dimension',
+        createGroupSection({
           key: 'dimensionL',
-          required: true,
-          type: 'group',
-          limit: 1,
-          rows: [{ id: 1 }, { id: 2 }],
-        },
-        {
-          label: 'dimension',
+          rows: [{ id: 1 } as never, { id: 2 } as never],
+        }),
+        createGroupSection({
           key: 'dimensionR',
-          required: true,
-          type: 'group',
-          limit: 1,
-          rows: [{ id: 1 }],
-        },
+          rows: [{ id: 1 } as never],
+        }),
       ],
     };
     const chart = new Chart(chartId, chartName);
     chart.init(chartConfig);
-    expect(chart.isMatchRequirement(targetConfig as any)).toBeTruthy();
+    expect(chart.isMatchRequirement(targetConfig)).toBeTruthy();
   });
 
   test('should match requirement with shared pure helper', () => {
-    const current = [
-      {
-        label: 'dimension',
-        key: 'dimension',
-        required: true,
-        type: 'group',
-        limit: 1,
-        rows: [{ id: 1 }],
-      },
+    const current: ChartDataConfig[] = [
+      createGroupSection({ rows: [{ id: 1 } as never] }),
     ];
-    const target = [
-      {
-        label: 'dimension',
-        key: 'dimension',
-        required: true,
-        type: 'group',
-        limit: 1,
-        rows: [{ id: 1 }],
-      },
+    const target: ChartDataConfig[] = [
+      createGroupSection({ rows: [{ id: 1 } as never] }),
     ];
-    expect(isChartDataConfigMatchRequirement(current as any, target as any)).toBe(
-      true,
-    );
+    expect(isChartDataConfigMatchRequirement(current, target)).toBe(true);
   });
 });

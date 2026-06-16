@@ -139,7 +139,7 @@ export interface IChart extends IChartLifecycle {
 
   getDependencies(): string[];
 
-  init(config: any);
+  init(config: ChartConfig);
   registerMouseEvents(events: Array<ChartMouseEvent>);
   isMatchRequirement(targetConfig?: ChartConfig): boolean;
 }

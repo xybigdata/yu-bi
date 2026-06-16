@@ -64,7 +64,7 @@ class Chart implements IChart, IChartLifecycle {
     this.state = 'init';
   }
 
-  public init(config: any) {
+  public init(config: ChartConfig) {
     this.config = config;
   }
 

@@ -18,6 +18,9 @@
 
 import { DrillMode } from 'app/models/ChartDrillOption';
 import { ChartDataSectionField, FilterCondition } from 'app/types/ChartConfig';
+
+export type ChartDrillFilterData = Record<string, unknown>;
+
 export interface IChartDrillOption {
   mode: DrillMode;
   isSelectedDrill: boolean;
@@ -33,7 +36,7 @@ export interface IChartDrillOption {
   }>;
   getCurrentFields(): ChartDataSectionField[] | undefined;
   getCurrentDrillLevel(): number;
-  drillDown(filterData?: { [key in string]: any }): void;
+  drillDown(filterData?: ChartDrillFilterData): void;
   expandDown(): void;
   drillUp(field?: ChartDataSectionField): void;
   expandUp(field?: ChartDataSectionField): void;

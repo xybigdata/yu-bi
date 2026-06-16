@@ -347,6 +347,8 @@
 - `ChartDraggableElement.tsx`、`ChartDraggableElementField.tsx`、`ChartDraggableElementHierarchy.tsx`、`ChartDraggableSourceContainer.tsx`、`ChartDraggableSourceGroupContainer.tsx` 的拖拽内容渲染、日期层级 children 与操作菜单回调改为显式类型，继续收口工作台拖拽与字段替换链路中的局部 `Function` / `any`
 - `ChartIFrameContainer.tsx`、`ChartIFrameLifecycleAdapter.tsx`、`ReactLifecycleAdapter.ts` 的 dataset / widget 配置 / 容器尺寸 / React root 渲染入口改为显式兼容类型，继续压缩 iframe 生命周期容器里的局部 `any`
 - `ChartIFrameResourceLoader.ts`、`ChartIFrameEventBroker.ts`、`ReactChart.ts`、`ChartDataConfigSectionReplaceMenu.tsx` 的文档对象、事件 broker 入参、React 图表挂载入口和字段替换配置改为显式兼容类型，继续收口 runtime helper 与工作台替换菜单中的局部 `any`
+- `ChartDataRequest.ts`、`ChartDrillOption.ts`、`Chart.ts` 与对应实现/测试的 `limit`、drill filter 数据结构和图表初始化入参改为显式兼容类型，继续收口请求构建与 drill 运行链路中的局部 `any`
+- `useI18NPrefix.ts` 与 `ChartLifecycleBroker.ts` 的运行时翻译函数签名改为显式 `I18NTranslate` 类型，继续收口 iframe 生命周期上下文中的局部 `any`
 
 当前验证计划：
 

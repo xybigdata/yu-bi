@@ -40,6 +40,7 @@ export type PendingChartDataRequestFilter = {
 };
 
 export type ChartDataRequest = {
+  limit?: number | [number, number];
   viewId: string;
   aggregators: Array<{ column: string[]; sqlOperator: string }>;
   expired?: number;
@@ -47,7 +48,6 @@ export type ChartDataRequest = {
   flush?: boolean;
   groups?: Array<{ column: string[] }>;
   functionColumns?: Array<{ alias: string; snippet: string }>;
-  limit?: any;
   nativeQuery?: boolean;
   orders: Array<{
     column: string[];
