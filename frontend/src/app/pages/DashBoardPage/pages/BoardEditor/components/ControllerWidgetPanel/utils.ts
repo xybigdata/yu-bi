@@ -41,11 +41,27 @@ import {
   RangeControlTypes,
 } from './constants';
 import { ControllerConfig, PickerType } from './types';
+import type { InputNumberProps } from 'antd';
 
 type ControllerFilterValueType =
   | DataViewFieldType
   | VariableValueTypes
   | undefined;
+
+type NumberValue = InputNumberProps['value'];
+
+export type RangeNumberValue = readonly [NumberValue?, NumberValue?];
+
+const toRangeNumber = (value: NumberValue | undefined) => {
+  if (typeof value === 'number') {
+    return value;
+  }
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsedValue = Number(value);
+    return Number.isNaN(parsedValue) ? undefined : parsedValue;
+  }
+  return undefined;
+};
 
 type FormattableDateValue = Exclude<DatartDateLike, string | Date> & {
   format: (template?: string) => string;
@@ -368,10 +384,8 @@ export const isRangeTypeController = (type: ControllerFacadeTypes) => {
   return RangeControlTypes.includes(type);
 };
 
-export const rangeNumberValidator = async (_, values: any[]) => {
-  if (!values?.[0] && !values?.[1]) {
-  }
-  function hasValue(value) {
+export const rangeNumberValidator = async (_, values?: RangeNumberValue) => {
+  function hasValue(value: NumberValue | undefined) {
     if (value === 0) {
       return true;
     }
@@ -388,7 +402,13 @@ export const rangeNumberValidator = async (_, values: any[]) => {
   if (startHasValue && !endHasValue) {
     return Promise.reject(new Error(i18next.t('viz.tips.noEndValue')));
   }
-  if (values?.[0] - values?.[1] > 0) {
+  const startValue = toRangeNumber(values?.[0]);
+  const endValue = toRangeNumber(values?.[1]);
+  if (
+    startValue !== undefined &&
+    endValue !== undefined &&
+    startValue > endValue
+  ) {
     return Promise.reject(new Error(i18next.t('viz.tips.endGTStartErr')));
   }
   return Promise.resolve(values);

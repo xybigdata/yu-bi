@@ -17,6 +17,11 @@
  */
 
 import { RectConfig } from 'app/pages/DashBoardPage/pages/Board/slice/types';
+import {
+  convertListToTree,
+  convertToTree,
+  handleRowDataForTree,
+} from '../../../../utils/widget';
 import { getParentRect } from '../utils';
 
 describe('getParentRect Test', () => {
@@ -44,5 +49,101 @@ describe('getParentRect Test', () => {
       height: 59,
       width: 59,
     } as RectConfig);
+  });
+});
+
+describe('widget tree utils', () => {
+  test('should convert row paths to flat tree nodes', () => {
+    expect(
+      handleRowDataForTree([
+        ['浙江', '杭州', '西湖'],
+        ['浙江', '宁波'],
+      ]),
+    ).toEqual([
+      { id: '浙江', parentId: null },
+      { id: '杭州', parentId: '浙江' },
+      { id: '西湖', parentId: '杭州' },
+      { id: '宁波', parentId: '浙江' },
+    ]);
+  });
+
+  test('should convert list nodes to tree nodes', () => {
+    expect(
+      convertListToTree([
+        { id: '浙江', parentId: null, label: '浙江省' },
+        { id: '杭州', parentId: '浙江' },
+        { id: '西湖', parentId: '杭州' },
+      ]),
+    ).toEqual([
+      {
+        id: '浙江',
+        parentId: null,
+        key: '浙江',
+        title: '浙江省',
+        children: [
+          {
+            id: '杭州',
+            parentId: '浙江',
+            key: '杭州',
+            title: '杭州',
+            children: [
+              {
+                id: '西湖',
+                parentId: '杭州',
+                key: '西湖',
+                title: '西湖',
+                isLeaf: true,
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  test('should convert source rows to tree by parent or path', () => {
+    expect(
+      convertToTree(
+        [
+          ['浙江', '浙江省', 'null'],
+          ['杭州', '杭州市', '浙江'],
+        ],
+        'byParent',
+      ),
+    ).toEqual([
+      {
+        id: '浙江',
+        parentId: 'null',
+        key: '浙江',
+        title: '浙江省',
+        children: [
+          {
+            id: '杭州',
+            parentId: '浙江',
+            key: '杭州',
+            title: '杭州市',
+            isLeaf: true,
+          },
+        ],
+      },
+    ]);
+
+    expect(convertToTree([['浙江', '杭州']], 'byPath')).toEqual([
+      {
+        id: '浙江',
+        parentId: null,
+        key: '浙江',
+        title: '浙江',
+        children: [
+          {
+            id: '杭州',
+            parentId: '浙江',
+            key: '杭州',
+            title: '杭州',
+            isLeaf: true,
+          },
+        ],
+      },
+    ]);
   });
 });

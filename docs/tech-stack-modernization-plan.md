@@ -323,6 +323,8 @@
 - 已完成：看板过滤器去重 helper 改为泛型最小结构，保留同列后者覆盖前者的既有语义
 - 已完成：看板表格分页/排序事件入口补齐分页值与排序值的独立窄化，`getDataOption.sorters` 与 `ChartDataRequest['orders']` 对齐
 - 已完成：看板联动点击过滤器值转换改为数组保护与字符串化，去掉局部 `(v as any)?.map` 中转
+- 已完成：控制器区间数值默认值校验改为显式区间值类型，补齐字符串数值转换和空值保护，并增加 validator 回归测试
+- 已完成：看板 widget 树选项转换 helper 补齐列表节点与树节点类型，去掉树构造链路里的 `any[]` / 宽泛中转，并增加路径转树测试
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 下一批候选：`utils/chartHelper.ts`、`utils/internalChartHelper.ts` 中可隔离、已有测试覆盖的 helper 局部类型收口
@@ -400,12 +402,14 @@
 - `DashBoardPage/actions/widgetAction.ts` 的表格分页/排序事件入口补齐局部事件值类型守卫，保持分页页码独立透传，排序仅在 `ASC/DESC` 合法时进入请求
 - `Board/slice/types.ts` 的 `getDataOption.sorters` 改为复用 `ChartDataRequest['orders']`，看板查看态、编辑态和图表请求 helper 不再需要 `as any[]` 强转
 - `DashBoardPage/actions/widgetAction.ts` 的联动点击过滤器转换补齐数组判断和字符串化，非数组输入按空值处理，避免未知值直接 `.map`
+- `ControllerWidgetPanel/utils.ts` 的 `rangeNumberValidator` 改为复用 `RangeNumberValue`，删除空分支，数值比较前显式处理 number/string 输入
+- `DashBoardPage/utils/widget.ts` 的 `handleRowDataForTree`、`convertListToTree` 补齐局部节点类型，保持原树节点字段结构不变
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/utils/__tests__/board.test.ts src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx src/app/utils/__tests__/ChartEventListenerHelper.test.ts`
-- `rg -n "addExtraSorters\\(.*as any|option\\?\\.sorters as any|cur\\.type as any|params\\?\\.value as any|values: \\(v as any\\)" frontend/src/app/pages/DashBoardPage frontend/src/app/models/ChartDataRequestBuilder.ts`
+- `npm run test:ci -- src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts`
+- `rg -n "rangeNumberValidator = async \\(_, values: any\\[]\\)|convertListToTree = \\([\\s\\S]*\\): any\\[]|treeNodes: any\\[]|childrenList: any|handleRowDataForTree = collection" frontend/src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/utils.ts frontend/src/app/pages/DashBoardPage/utils/widget.ts`
 
 ### 6.2 最近已完成
 
