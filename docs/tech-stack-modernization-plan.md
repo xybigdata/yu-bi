@@ -35,6 +35,13 @@
 - 只提交与当前专题直接相关的文件
 - 尽量按专题攒成一批再提交，避免高频提交带来重复回归成本
 
+### 2.4 目标核对节奏
+
+- 每轮开始先核对长期目标：`JDK 21`、`Node 24`、兼容优先、稳定版优先、`main` 不直接开发
+- 每批提交前核对短期目标：当前改动是否仍属于当前专题，是否低风险、可验证、可回退
+- 如果候选点开始牵涉共享协议、运行时行为或跨域依赖，先降级为评估项，不混入低风险批次
+- 每次阶段性提交或推送后，在本文档中保留对后续判断有用的执行记录
+
 ## 3. 当前基线
 
 ### 3.1 后端
@@ -429,6 +436,7 @@
 - `ControllerWidgetPanel/types.ts`、`TimeSetter.tsx`、`ChartDataConfigSection/utils.ts`、`DateLevelMenuItems.tsx` 的共享模型与工具函数边界继续收口，开始把低风险改造从 UI 透传扩展到 Workbench 公共配置层
 - `BoardEditor/slice/thunk.ts` 的保存看板请求 thunk 返回值改为显式 `null`，继续压缩 Workbench 编辑链路中“不消费响应体”调用的宽泛泛型
 - `DashBoardPage/utils/index.ts` 的 `getWidgetControlValues` 返回结构改为显式控制器值类型，继续压缩看板过滤器参数构造链路里的 `value: any`
+- `chartHelper.ts` 的数值单位格式化、未使用表头行、tooltip 配置拼接和最小最大值计算入口继续收口局部 `any[]` / 宽泛入参，保持格式化与 tooltip 输出语义不变
 
 当前验证计划：
 

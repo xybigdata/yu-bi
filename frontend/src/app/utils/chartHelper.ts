@@ -203,12 +203,16 @@ function decimalPlacesFormater(
 }
 
 function unitFormater(
-  value: any,
+  value: number | string | undefined,
   config?:
     | FormatFieldAction[FieldFormatType.Numeric]
     | FormatFieldAction[FieldFormatType.Currency],
 ) {
   if (isEmpty(config?.unitKey)) {
+    return value;
+  }
+
+  if (value === undefined) {
     return value;
   }
 
@@ -1134,11 +1138,11 @@ export function getUnusedHeaderRows(
     colName?: string;
   }>,
   originalRows: Array<TableColumnsList>,
-): TableColumnsList[] {
+): Array<{ colName?: string }> {
   const oldFlattenedColNames = originalRows
     .flatMap(row => flattenHeaderRowsWithoutGroupRow(row))
     .map(r => r.colName);
-  return (allRows || []).reduce<any[]>((acc, cur) => {
+  return (allRows || []).reduce<Array<{ colName?: string }>>((acc, cur) => {
     if (!oldFlattenedColNames.includes(cur.colName)) {
       acc.push(cur);
     }
@@ -1215,7 +1219,9 @@ export function getSeriesTooltips4Rectangular2(
   const aggConfigName = tooltipParam?.data?.name || tooltipParam?.seriesName;
   const row = tooltipParam?.data?.rowData || {};
 
-  const tooltips: string[] = ([] as any[])
+  const tooltipConfigs: ChartDataSectionField[] = (
+    [] as ChartDataSectionField[]
+  )
     .concat(groupConfigs || [])
     .concat(colorConfigs || [])
     .concat(
@@ -1223,10 +1229,10 @@ export function getSeriesTooltips4Rectangular2(
         [],
     )
     .concat(sizeConfigs || [])
-    .concat(infoConfigs || [])
-    .map(config =>
-      valueFormatter(config, row?.[chartDataSet.getFieldOriginKey(config)]),
-    );
+    .concat(infoConfigs || []);
+  const tooltips = tooltipConfigs.map(config =>
+    valueFormatter(config, row?.[chartDataSet.getFieldOriginKey(config)]),
+  );
   return tooltips.join('<br />');
 }
 
@@ -1245,15 +1251,17 @@ export function getSeriesTooltips4Polar2(
   sizeConfigs?: ChartDataSectionField[],
 ): string {
   const row = tooltipParam?.data?.rowData || {};
-  const tooltips: string[] = ([] as any[])
+  const tooltipConfigs: ChartDataSectionField[] = (
+    [] as ChartDataSectionField[]
+  )
     .concat(groupConfigs || [])
     .concat(colorConfigs || [])
     .concat(aggConfigs || [])
     .concat(sizeConfigs || [])
-    .concat(infoConfigs || [])
-    .map(config =>
-      valueFormatter(config, row?.[chartDataSet.getFieldOriginKey(config)]),
-    );
+    .concat(infoConfigs || []);
+  const tooltips = tooltipConfigs.map(config =>
+    valueFormatter(config, row?.[chartDataSet.getFieldOriginKey(config)]),
+  );
   return tooltips.join('<br />');
 }
 
@@ -1826,7 +1834,7 @@ export function getMinAndMaxNumber(
   const datas = configs
     .reduce(
       (acc, cur) => acc.concat(chartDataset.map(dc => Number(dc.getCell(cur)))),
-      [] as any[],
+      [] as number[],
     )
     .filter(isNumber) as number[];
   return [Math.min(0, ...datas), Math.max(0, ...datas)];
