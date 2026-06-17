@@ -304,10 +304,10 @@
 
 本批目标：
 
-- 继续清理生产代码中能用现有 DTO / APIResponse / Axios 类型表达的 `any`
-- 优先处理请求工具、下载工具、错误处理和“不消费响应体”的 API 调用
-- 保持接口路径、请求参数、错误提示和下载行为不变
-- 返回数据会进入业务拼装的链路先标记评估，不硬改
+- 继续复扫生产工具函数中已有测试覆盖、可隔离的局部弱类型
+- 优先处理 `chartHelper.ts` / `internalChartHelper.ts` 中不改变运行时语义的返回值、行数据和交互过滤器边界
+- 保持 tooltip 输出、轴标签溢出、图表选中样式和联动过滤器行为不变
+- 返回数据会进入保存、复制、迁移等业务拼装的链路先标记评估，不硬改
 
 当前累计清单：
 
@@ -339,6 +339,8 @@
 - 已完成：看板 widget 工具、图表选择弹窗、自定义选项表格、添加控制器菜单与图层树节点的局部类型边界收口，保留运行时行为不变
 - 已完成：Chart Workbench 样式配置面板、图表图标渲染、分类条件拖拽表格、排序拖拽项、筛选配置交互与控制器文本/数值 setter 的局部类型边界收口，保留交互与配置语义不变
 - 已完成：根目录 `.gitignore` 忽略 `.tmp/` 与 `logs/` 本地运行目录，避免后续误提交
+- 已完成：`chartHelper.ts` 的样式取值、tooltip 行数据、额外 series 行数据、轴标签溢出 option 访问和选中样式对象补齐局部显式类型，去掉对应 `any` / `@ts-ignore`
+- 已完成：`internalChartHelper.ts` 的跳转与联动过滤器返回值收口为显式字段值数组映射，保留调用方追加 URL 标记与联动过滤器语义不变
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 下一批候选：`utils/chartHelper.ts`、`utils/internalChartHelper.ts` 中可隔离、已有测试覆盖的 helper 局部类型收口
@@ -348,6 +350,8 @@
 - `VariablePage/utils.ts` 继续沉淀变量权限日期值序列化 helper
 - `VariablePage/index.tsx` 与 `ViewPage/Main/Properties/Variables.tsx` 改为复用统一 relation 序列化入口
 - `date.ts` 继续补齐范围时间格式化与“今天结束前禁用” helper
+- `chartHelper.ts` 继续收口 tooltip、axis label overflow 与 selected item style 相关 helper 的局部类型边界
+- `internalChartHelper.ts` 继续收口图表交互过滤器值映射的返回边界
 - `date.ts` 新增标准时间串 helper，继续承接 `TIME_FORMATTER` 的零散重复调用
 - `date.ts` 继续补齐标准时间串的可选格式化 helper，减少过滤器与当前时间默认值链路的直接模板耦合
 - `SchedulePage/utils.ts`、`ShareLinkModal.tsx`、`DashBoardPage/utils/*`、`ChartTimeSelector/utils.ts` 改为复用统一日期工具

@@ -94,6 +94,7 @@ export type ChartDragItem = {
   type?: ChartDataViewMeta['type'];
   children: ChartDragItem[];
 };
+export type InteractionFilterValueMap = Record<string, string[]>;
 
 const parseVariableParamValues = (
   defaultValue?: string,
@@ -887,7 +888,7 @@ export const getJumpFiltersByInteractionRule = (
   chartFilters: PendingChartDataRequestFilter[] = [],
   variableFilters: PendingChartDataRequestFilter[] = [],
   rule?: InteractionRule,
-): Record<string, string | any> => {
+): InteractionFilterValueMap => {
   return clickEventFilters
     .concat(chartFilters)
     .concat(variableFilters)
@@ -925,7 +926,7 @@ export const getJumpFiltersByInteractionRule = (
       }
     })
     .filter(Boolean)
-    .reduce((acc, cur) => {
+    .reduce<InteractionFilterValueMap>((acc, cur) => {
       if (cur?.column) {
         const currentValues = cur?.values?.map(v => v.value) || [];
         const column = cur.column;
@@ -988,14 +989,14 @@ export const getLinkFiltersByInteractionRule = (
   chartFilters: PendingChartDataRequestFilter[] = [],
   variableFilters: PendingChartDataRequestFilter[] = [],
   rule?: InteractionRule,
-): Record<string, string | any> => {
+): InteractionFilterValueMap => {
   const ruleFilters = filterFiltersByInteractionRule(
     rule,
     ...clickEventFilters,
     ...chartFilters,
     ...variableFilters,
   );
-  return ruleFilters.reduce((acc, cur) => {
+  return ruleFilters.reduce<InteractionFilterValueMap>((acc, cur) => {
     if (cur?.column) {
       const currentValues = cur?.values?.map(v => v.value) || [];
       const column = cur.column!;
