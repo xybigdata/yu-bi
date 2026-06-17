@@ -85,6 +85,10 @@ type DragItemMeta = Pick<
   name?: string;
   children?: DragItemMeta[];
 };
+type ChartInteractionRowData = Record<
+  string,
+  string | number | boolean | null | undefined
+>;
 
 export type ChartDragItem = {
   category?: ChartDataViewMeta['category'];
@@ -841,7 +845,7 @@ export const getChartDrillOption = (
 };
 
 export const buildClickEventBaseFilters = (
-  rowDatas?: Record<string, any>[],
+  rowDatas?: ChartInteractionRowData[],
   rule?: InteractionRule,
   drillOption?: IChartDrillOption,
   dataConfigs?: ChartDataConfig[],
@@ -862,12 +866,12 @@ export const buildClickEventBaseFilters = (
     .concat(colorConfigs)
     .concat(mixConfigs)
     .reduce<PendingChartDataRequestFilter[]>((acc, c) => {
-      const filterValues = rowDatas
+      const filterValues: PendingChartDataRequestFilter['values'] = rowDatas
         ?.map(rowData => {
           return rowData?.[c.colName];
         })
         ?.filter(value => !isEmpty(value))
-        ?.map(value => ({ value, valueType: c.type }));
+        ?.map(value => ({ value: String(value), valueType: c.type }));
 
       if (isEmptyArray(filterValues) || isEmpty(c.colName)) {
         return acc;

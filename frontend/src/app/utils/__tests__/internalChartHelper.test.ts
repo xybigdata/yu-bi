@@ -34,6 +34,7 @@ import {
 } from 'app/types/ChartConfig';
 import { ChartStyleConfigDTO } from 'app/types/ChartConfigDTO';
 import {
+  buildClickEventBaseFilters,
   diffHeaderRows,
   flattenHeaderRowsWithoutGroupRow,
   getColumnRenderOriginName,
@@ -1877,6 +1878,63 @@ describe('Internal Chart Helper ', () => {
             { value: 'beijing', valueType: 'STRING' },
             { value: 'shanghai', valueType: 'STRING' },
           ],
+        },
+      ]);
+    });
+  });
+
+  describe('click event base filters Test', () => {
+    test('should stringify click row values for request filters', () => {
+      expect(
+        buildClickEventBaseFilters(
+          [
+            {
+              city: 'beijing',
+              score: 12,
+              enabled: true,
+            },
+          ],
+          undefined,
+          undefined,
+          [
+            {
+              key: ChartDataSectionType.Group,
+              type: ChartDataSectionType.Group,
+              rows: [
+                {
+                  colName: 'city',
+                  type: DataViewFieldType.STRING,
+                } as ChartDataSectionField,
+                {
+                  colName: 'score',
+                  type: DataViewFieldType.NUMERIC,
+                } as ChartDataSectionField,
+                {
+                  colName: 'enabled',
+                  type: DataViewFieldType.STRING,
+                } as ChartDataSectionField,
+              ],
+            },
+          ],
+        ),
+      ).toEqual([
+        {
+          aggOperator: null,
+          sqlOperator: 'IN',
+          column: 'city',
+          values: [{ value: 'beijing', valueType: DataViewFieldType.STRING }],
+        },
+        {
+          aggOperator: null,
+          sqlOperator: 'IN',
+          column: 'score',
+          values: [{ value: '12', valueType: DataViewFieldType.NUMERIC }],
+        },
+        {
+          aggOperator: null,
+          sqlOperator: 'IN',
+          column: 'enabled',
+          values: [{ value: 'true', valueType: DataViewFieldType.STRING }],
         },
       ]);
     });
