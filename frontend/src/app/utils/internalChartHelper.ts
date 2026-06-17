@@ -71,6 +71,29 @@ import {
 import { getDrillableRows, round } from './chartHelper';
 
 type CompatibleChartStyleRows = NonNullable<ChartStyleConfig['rows']>;
+type ViewConfigFieldMap = {
+  cache?: boolean;
+  cacheExpires?: number;
+  concurrencyControl?: boolean;
+  concurrencyControlMode?: string;
+  expensiveQuery?: boolean;
+};
+type DragItemMeta = Pick<
+  ChartDataViewMeta,
+  'category' | 'dateFormat' | 'subType' | 'type'
+> & {
+  name?: string;
+  children?: DragItemMeta[];
+};
+
+export type ChartDragItem = {
+  category?: ChartDataViewMeta['category'];
+  colName?: string;
+  dateFormat?: ChartDataViewMeta['dateFormat'];
+  subType?: ChartDataViewMeta['subType'];
+  type?: ChartDataViewMeta['type'];
+  children: ChartDragItem[];
+};
 
 const parseVariableParamValues = (
   defaultValue?: string,
@@ -741,28 +764,25 @@ export function getAxisLengthByConfig(config: ChartCommonConfig) {
 
 export const transformToViewConfig = (
   viewConfig?: string | object,
-): {
-  cache?: boolean;
-  cacheExpires?: number;
-  concurrencyControl?: boolean;
-  concurrencyControlMode?: string;
-  expensiveQuery?: boolean;
-} => {
+): ViewConfigFieldMap => {
   const viewConfigMap = parseViewConfig(viewConfig);
-  const fields = [
-    'cache',
-    'cacheExpires',
-    'concurrencyControl',
-    'concurrencyControlMode',
-    'expensiveQuery',
-  ];
-  return fields.reduce((acc, cur) => {
-    acc[cur] = viewConfigMap?.[cur];
-    return acc;
-  }, {});
+  return {
+    cache: viewConfigMap?.cache as ViewConfigFieldMap['cache'],
+    cacheExpires:
+      viewConfigMap?.cacheExpires as ViewConfigFieldMap['cacheExpires'],
+    concurrencyControl:
+      viewConfigMap?.concurrencyControl as ViewConfigFieldMap['concurrencyControl'],
+    concurrencyControlMode:
+      viewConfigMap?.concurrencyControlMode as ViewConfigFieldMap['concurrencyControlMode'],
+    expensiveQuery:
+      viewConfigMap?.expensiveQuery as ViewConfigFieldMap['expensiveQuery'],
+  };
 };
 
-export const buildDragItem = (item, children: any[] = []) => {
+export const buildDragItem = (
+  item?: DragItemMeta,
+  children: DragItemMeta[] = [],
+): ChartDragItem => {
   return {
     colName: item?.name,
     type: item?.type,

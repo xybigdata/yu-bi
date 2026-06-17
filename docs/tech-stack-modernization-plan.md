@@ -437,6 +437,7 @@
 - `BoardEditor/slice/thunk.ts` 的保存看板请求 thunk 返回值改为显式 `null`，继续压缩 Workbench 编辑链路中“不消费响应体”调用的宽泛泛型
 - `DashBoardPage/utils/index.ts` 的 `getWidgetControlValues` 返回结构改为显式控制器值类型，继续压缩看板过滤器参数构造链路里的 `value: any`
 - `chartHelper.ts` 的数值单位格式化、未使用表头行、tooltip 配置拼接和最小最大值计算入口继续收口局部 `any[]` / 宽泛入参，保持格式化与 tooltip 输出语义不变
+- `internalChartHelper.ts` 的视图配置字段映射和拖拽 item 构造补齐显式局部类型，继续压缩 Workbench 拖拽源与 view config helper 中的宽泛输入边界
 
 当前验证计划：
 
