@@ -590,6 +590,11 @@
   - `diffMergeHierarchyModel` / `addPathToHierarchyStructureAndChangeName` 测试改为集中 legacy hierarchy helper，去掉断言点散落 `as any`
   - `DataModelTree.toModel` 返回值改为列名映射结构，测试不再需要强转读取节点
   - 图表预览时间筛选测试改用 `FilterConditionType` 与集中 legacy condition helper，保留旧异常值兼容测试
+- 普通表格与指标卡条件样式边界收口
+  - 条件样式匹配入口从 `any` / 过窄 `string | number` 改为 `unknown` 输入加局部可比较值类型，保留 null、空字符串和 undefined 判断语义
+  - 普通表格行记录改为 `Record<string, unknown>`，避免行条件样式继续以宽泛对象透传
+  - 普通表格 cell、可调整表头和列标题组件补齐 HTML / react-resizable 公开 props 类型，去掉局部 `any` 和 styled td 宽泛 props
+  - 仪表盘图 tooltip 数据和 data itemStyle 补齐局部显式结构，去掉 tooltip formatter 里的 `data: any` 与 itemStyle 宽泛类型
 
 ## 7. 下一阶段执行顺序
 
@@ -649,6 +654,7 @@
 
 当前低风险批次合并前门禁记录：
 
+- 通过：表格与指标卡条件样式边界批次轻量门禁，`npm run checkTs`
 - 通过：ViewPage 测试层边界批次定向测试，`npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Properties/DataModelTree/__tests__/utils.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts`
 - 通过：工具函数与表单边界批次定向测试，`npm run test:ci -- src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts`
 - 通过：工具函数与 Workbench 配置更新边界批次轻量门禁，`npm run checkTs`

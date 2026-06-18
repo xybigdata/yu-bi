@@ -20,13 +20,17 @@ import { ConditionalStyleFormValues } from 'app/components/FormGenerator/Customi
 import { OperatorTypes } from 'app/components/FormGenerator/Customize/ConditionalStyle/types';
 import { CSSProperties } from 'react';
 
+type ConditionalValue = string | number;
+type ConditionalValueRange = ConditionalValue | ConditionalValue[];
+
 const isMatchedTheCondition = (
-  value: string | number,
+  value: unknown,
   operatorType: OperatorTypes,
-  conditionValues: string | number | (string | number)[],
+  conditionValues: ConditionalValueRange,
 ) => {
   let matchTheCondition = false;
   const numericValue = typeof value === 'number' ? value : Number(value);
+  const textValue = String(value ?? '');
 
   switch (operatorType) {
     case OperatorTypes.Equal:
@@ -36,24 +40,18 @@ const isMatchedTheCondition = (
       matchTheCondition = value !== conditionValues;
       break;
     case OperatorTypes.Contain:
-      matchTheCondition = (value as string)?.includes(
-        conditionValues as string,
-      );
+      matchTheCondition = textValue.includes(String(conditionValues));
       break;
     case OperatorTypes.NotContain:
-      matchTheCondition = !(value as string)?.includes(
-        conditionValues as string,
-      );
+      matchTheCondition = !textValue.includes(String(conditionValues));
       break;
     case OperatorTypes.In:
-      matchTheCondition = (conditionValues as (string | number)[])?.includes(
-        value,
-      );
+      matchTheCondition =
+        Array.isArray(conditionValues) && conditionValues.includes(value as ConditionalValue);
       break;
     case OperatorTypes.NotIn:
-      matchTheCondition = !(conditionValues as (string | number)[])?.includes(
-        value,
-      );
+      matchTheCondition =
+        !Array.isArray(conditionValues) || !conditionValues.includes(value as ConditionalValue);
       break;
     case OperatorTypes.Between:
       const [min, max] = conditionValues as number[];
@@ -95,20 +93,22 @@ const isMatchedTheCondition = (
   return matchTheCondition;
 };
 
-const getTheSameRange = (list, type) =>
+const getTheSameRange = (
+  list: ConditionalStyleFormValues[],
+  type: string,
+) =>
   list?.filter(item => item?.range === type);
 
-const deleteUndefinedProps = props => {
-  return Object.keys(props).reduce((acc, cur) => {
-    if (props[cur] !== undefined || props[cur] !== null) {
-      acc[cur] = props[cur];
-    }
-    return acc;
-  }, {});
+const deleteUndefinedProps = (props: CSSProperties): CSSProperties => {
+  return Object.fromEntries(
+    Object.entries(props).filter(
+      ([, value]) => value !== undefined || value !== null,
+    ),
+  ) as CSSProperties;
 };
 
 export const getCustomBodyCellStyle = (
-  cellValue: any,
+  cellValue: unknown,
   conditionalStyle: ConditionalStyleFormValues[],
 ): CSSProperties => {
   const currentConfigs = getTheSameRange(conditionalStyle, 'cell');
@@ -133,7 +133,7 @@ export const getCustomBodyCellStyle = (
 };
 
 export const getCustomBodyRowStyle = (
-  rowRecord: { [k in string]: any },
+  rowRecord: Record<string, unknown>,
   conditionalStyle: ConditionalStyleFormValues[],
 ): CSSProperties => {
   const currentConfigs: ConditionalStyleFormValues[] = getTheSameRange(

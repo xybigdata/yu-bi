@@ -1,16 +1,24 @@
 import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Resizable } from 'react-resizable';
+import { ResizableProps } from 'react-resizable';
 import styled, { css } from 'styled-components';
 import { BLUE, LEVEL_1 } from 'styles/StyleConstants';
+
+type TableComponentsTdProps = React.TdHTMLAttributes<HTMLTableCellElement> & {
+  children?: ReactNode;
+  isLinkCell?: boolean;
+  isJumpCell?: boolean;
+  useColumnWidth?: boolean;
+};
 
 export const TableComponentsTd = ({
   children,
   useColumnWidth,
   ...rest
-}: any) => {
-  if (rest.className.includes('ellipsis') && useColumnWidth) {
+}: TableComponentsTdProps) => {
+  if (rest.className?.includes('ellipsis') && useColumnWidth) {
     return (
       <Tooltip placement="topLeft" title={children}>
         <Td {...rest}>{children}</Td>
@@ -20,7 +28,12 @@ export const TableComponentsTd = ({
   return <Td {...rest}>{children}</Td>;
 };
 
-export const ResizableTitle = props => {
+type ResizableTitleProps = React.ThHTMLAttributes<HTMLTableCellElement> & {
+  width?: number;
+  onResize?: ResizableProps['onResize'];
+};
+
+export const ResizableTitle = (props: ResizableTitleProps) => {
   const { onResize, width, ...restProps } = props;
 
   if (!width) {
@@ -45,7 +58,13 @@ export const ResizableTitle = props => {
   );
 };
 
-export const TableColumnTitle = props => {
+type TableColumnTitleProps = {
+  desc?: ReactNode;
+  title?: ReactNode;
+  uid?: string;
+};
+
+export const TableColumnTitle = (props: TableColumnTitleProps) => {
   const { desc, title, uid } = props;
   return (
     <TableColumnTitleStyle key={uid}>
@@ -83,7 +102,10 @@ const ResizableHandleStyle = styled.span`
   height: 100%;
   cursor: col-resize;
 `;
-const Td = styled.td<any>`
+const Td = styled.td<{
+  isLinkCell?: boolean;
+  isJumpCell?: boolean;
+}>`
   ${p =>
     p.isLinkCell
       ? css({
