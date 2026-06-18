@@ -27,6 +27,7 @@ import {
   MarkArea,
   MarkLine,
 } from 'app/types/ChartConfig';
+import { ChartRowData } from 'app/types/Chart';
 
 export type DoubleYChartXAxis = {
   axisPointer?: {
@@ -66,7 +67,7 @@ export type Series = {
   name: string;
   data: Array<
     {
-      rowData: { [key: string]: any };
+      rowData: ChartRowData;
       value: number | string;
       total?: number;
       format: FormatFieldAction | undefined;

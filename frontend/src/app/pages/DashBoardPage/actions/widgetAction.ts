@@ -91,6 +91,23 @@ type TableSortEventValue = TablePagingEventValue & {
 
 type LinkFilterValueMap = Record<string, unknown>;
 
+const toChartEventStringValue = (value: unknown): string => {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value);
+  }
+  if (value == null) {
+    return '';
+  }
+  try {
+    return JSON.stringify(value);
+  } catch (error) {
+    return '';
+  }
+};
+
 type WidgetLinkEventParam = {
   isUnSelectedAll: boolean;
   filters?: LinkFilterValueMap;
@@ -231,6 +248,7 @@ export const widgetClickJumpAction =
     }
 
     const rowDataValue = getValueByRowData(params.data, jumpFieldName);
+    const rowDataSearchValue = toChartEventStringValue(rowDataValue);
     console.warn(' jumpValue:', rowDataValue);
     console.warn('rowData', params.data?.rowData);
     console.warn(`rowData[${jumpFieldName}]:${rowDataValue} `);
@@ -255,7 +273,7 @@ export const widgetClickJumpAction =
       }
       if (typeof jumpConfig?.filter === 'object') {
         const searchParamsStr = urlSearchTransfer.toUrlString({
-          [jumpConfig?.filter?.filterId]: rowDataValue,
+          [jumpConfig?.filter?.filterId]: rowDataSearchValue,
         });
         navigate.push(
           `/organizations/${orgId}/vizs/${targetId}?${searchParamsStr}`,
@@ -439,8 +457,9 @@ export const widgetClickLinkageAction =
         let linkageFieldName: string =
           re?.config?.widgetToWidget?.triggerColumn || '';
         const linkValue = getValueByRowData(params.data, linkageFieldName);
+        const linkStringValue = toChartEventStringValue(linkValue);
 
-        if (!linkValue) {
+        if (!linkStringValue) {
           console.warn('linkageFieldName:', linkageFieldName);
           console.warn('rowData', params.data?.rowData);
           console.warn(`rowData[${linkageFieldName}]:${linkValue} `);
@@ -449,7 +468,7 @@ export const widgetClickLinkageAction =
 
         const filter: BoardLinkFilter = {
           triggerWidgetId: widget.id,
-          triggerValue: linkValue,
+          triggerValue: linkStringValue,
           triggerDataChartId: widget.datachartId,
           linkerWidgetId: re.targetId,
         };

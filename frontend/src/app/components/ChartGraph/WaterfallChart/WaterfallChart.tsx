@@ -31,6 +31,7 @@ import {
   XAxisColumns,
   YAxis,
 } from 'app/types/ChartConfig';
+import { ChartRowData } from 'app/types/Chart';
 import ChartDataSetDTO, { IChartDataSet } from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
@@ -71,7 +72,7 @@ class WaterfallChart extends Chart {
   private runtimeLoadToken = 0;
 
   protected rowDataList: {
-    rowData: { [x: string]: any };
+    rowData: ChartRowData;
   }[] = [];
 
   constructor(props?) {
