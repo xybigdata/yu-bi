@@ -16,13 +16,20 @@
  * limitations under the License.
  */
 
+import { DataViewFieldType } from 'app/constants';
 import { OperatorTypes } from '../ConditionalStyle/types';
+
 export interface ScorecardConditionalStyleFormValues {
   uid: string;
-  target: { name?: string; type?: any };
+  target: { name?: string; type?: DataViewFieldType };
   metricKey: string;
   operator: OperatorTypes;
-  value: string;
+  value: string | number | Array<string | number>;
   useMetricsValue?: boolean;
   color: { background: string; textColor: string };
 }
+
+export type ScorecardConditionalStyleContext = {
+  label?: string;
+  type?: DataViewFieldType;
+};

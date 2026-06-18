@@ -23,6 +23,7 @@ import { memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import {
   ConditionalOperatorTypes,
+  ConditionalStyleContext,
   ConditionalStyleFormValues,
   ConditionalStyleRange,
   OperatorTypes,
@@ -30,8 +31,8 @@ import {
 } from './types';
 
 interface AddProps {
-  context?: any;
-  translate?: (title: string, options?: any) => string;
+  context?: ConditionalStyleContext;
+  translate?: (title: string, disablePrefix?: boolean) => string;
   open: boolean;
   values: ConditionalStyleFormValues;
   onOk: (values: ConditionalStyleFormValues) => void;
@@ -44,8 +45,9 @@ export default function Add({
   open,
   onOk,
   onCancel,
-  context: { label, type },
+  context,
 }: AddProps) {
+  const { label = '', type } = context || {};
   const [colors] = useState([
     {
       name: 'background',
@@ -216,7 +218,7 @@ const ColorSelector = memo(
   }: {
     label: string;
     value?: string;
-    onChange?: (value: any) => void;
+    onChange?: (value: string) => void;
   }) => {
     return (
       <>
@@ -237,7 +239,7 @@ const InputNumberScope = memo(
     onChange,
   }: {
     value?: [number, number];
-    onChange?: (value: any) => void;
+    onChange?: (value?: number[]) => void;
   }) => {
     const [[min, max], setState] = useState<
       [number | undefined, number | undefined]
@@ -257,20 +259,22 @@ const InputNumberScope = memo(
       }
     }, [value]);
 
-    const inputNumberScopeChange = state => {
+    const inputNumberScopeChange = (
+      state: [number | undefined, number | undefined],
+    ) => {
       setState(state);
       const result = state.filter(num => typeof num === 'number');
       if (result.length === 2) {
-        onChange?.(state);
+        onChange?.(result);
       } else {
         onChange?.(undefined);
       }
     };
 
     const minChange = (value: number | null) =>
-      inputNumberScopeChange([value, max]);
+      inputNumberScopeChange([value ?? undefined, max]);
     const maxChange = (value: number | null) =>
-      inputNumberScopeChange([min, value]);
+      inputNumberScopeChange([min, value ?? undefined]);
 
     return (
       <Row gutter={24} align="middle" key={index}>

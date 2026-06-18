@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 import { InputNumber, Select } from 'antd';
+import type { RefSelectProps } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ITimeDefault } from 'app/pages/DashBoardPage/types/widgetTypes';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
@@ -69,12 +70,12 @@ const TIME_FORMATS = [
   'SSSS',
 ];
 export const TimerFormat: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
-  ({ ancestors, translate: t = title => title, data, onChange, ...rest }) => {
+  ({ ancestors, data, onChange }) => {
     const { value } = data;
 
     const gt = useI18NPrefix(`viz.board.setting`);
     const valRef = useRef<ITimeDefault>();
-    const selectRef = useRef<any>();
+    const selectRef = useRef<RefSelectProps>(null);
     useEffect(() => {
       valRef.current = value;
     }, [value]);
@@ -88,7 +89,7 @@ export const TimerFormat: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
     const changeF = val => {
       if (Array.isArray(val)) {
         if (val.length > 0) {
-          selectRef.current.blur();
+          selectRef.current?.blur();
           if (val.length > 1) {
             val.shift();
           }

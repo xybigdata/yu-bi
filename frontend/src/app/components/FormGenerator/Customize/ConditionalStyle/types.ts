@@ -20,12 +20,17 @@ import { DataViewFieldType } from 'app/constants';
 
 export interface ConditionalStyleFormValues {
   uid: string;
-  target: { name: string; type: any };
+  target: { name: string; type?: DataViewFieldType };
   range: ConditionalStyleRange;
   operator: OperatorTypes;
-  value: string;
+  value: string | number | Array<string | number>;
   color: { background: string; textColor: string };
 }
+
+export type ConditionalStyleContext = {
+  label: string;
+  type?: DataViewFieldType;
+};
 
 export enum ConditionalStyleRange {
   Cell = 'cell',
