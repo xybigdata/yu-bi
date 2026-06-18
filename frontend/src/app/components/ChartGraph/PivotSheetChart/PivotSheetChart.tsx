@@ -369,7 +369,7 @@ class PivotSheetChart extends ReactChart {
         });
         this.changeDrillConfig(rowSectionConfigRows, drillOption, true);
       },
-      onSelected: (cells: DataCell[]) => {
+      onSelected: () => {
         const state = this.chart?.interaction.getState();
         this.changeSelectedItems(state?.interactedCells || [], chartDataSet);
       },

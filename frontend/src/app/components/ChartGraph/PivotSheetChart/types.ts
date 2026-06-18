@@ -2,6 +2,7 @@ import type {
   Node,
   Palette,
   RowCellCollapsedParams,
+  CellSelectedHandler,
   S2DataConfig,
   S2Theme,
   SpreadSheet,
@@ -15,7 +16,7 @@ export interface AndvS2Config {
   palette?: Palette;
   onRowCellCollapseTreeRows?: (val: RowCellCollapsedParams) => void;
   onCollapseRowsAll?: (isCollapsed: boolean) => void;
-  onSelected?: (cells: any[]) => void;
+  onSelected?: CellSelectedHandler;
   onDataCellClick?: (data: TargetCellInfo) => void;
   getSpreadSheet?: (spreadsheet: SpreadSheet) => void;
 }

@@ -95,7 +95,7 @@ export interface WidgetToolkit {
 }
 
 export interface WidgetMeta {
-  icon: any;
+  icon: string;
   originalType: string;
   canWrapped: boolean; // 是否可以被包裹 被 widget container 包裹
   controllable: boolean; // 是否可以 被 controller 关联

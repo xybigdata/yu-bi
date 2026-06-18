@@ -25,6 +25,7 @@ import { BoardConfig } from 'app/pages/DashBoardPage/types/boardTypes';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
 import { Variable } from 'app/pages/MainPage/pages/VariablePage/slice/types';
 import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
+import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import {
   ChartDataRequest,
   ChartVariableParams,
@@ -386,7 +387,7 @@ export interface DataChartConfig {
   aggregation: boolean | undefined;
   chartConfig: ChartConfig;
   chartGraphId: string;
-  computedFields: any[];
+  computedFields: ChartDataViewMeta[];
   sampleData?: any; // for template
 }
 

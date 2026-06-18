@@ -238,6 +238,13 @@
   - Maven 模块坐标改为 `yubi` / `yu-bi-*`
   - 安装包、脚本名、Docker 打包输入改为 `yu-bi-server`
   - 保持 `datart.*` Java 包名、配置前缀与稳定内部标识不变
+- 前端图表与看板局部类型边界继续收口：
+  - 透视表 S2 语言设置改为显式 `LangType` 映射，去掉局部 `as any`
+  - 透视表 hover / selected 回调对齐 S2 包根公开类型，保持选中读取逻辑不变
+  - Dashboard widget action 的兼容导航与联动参数改为真实类型，避免继续用宽泛 `any`
+  - `DataChartConfig.computedFields` 与相关 reducer / provider 参数改为 `ChartDataViewMeta[]`
+  - `WidgetMeta.icon` 收口为字符串，匹配所有 widget 注册入口
+  - 基础柱状图 legend series 与基础表格列宽计算补齐局部结构类型，减少无约束 `any`
 - Maven 对外品牌元数据继续收口：
   - 根 POM 与各服务端模块补齐 `name`、`description` 等对外元数据，统一以 `yu-bi` 对外呈现
   - SCM 与许可证信息指向 `yu-bi` 新仓库

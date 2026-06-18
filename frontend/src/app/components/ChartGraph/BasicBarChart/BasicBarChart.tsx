@@ -756,7 +756,9 @@ class BasicBarChart extends Chart implements IChartLifecycle {
   }
 
   private getLegendStyle(styles, series): LegendStyle {
-    const seriesNames: string[] = (series || []).map((col: any) => col?.name);
+    const seriesNames: string[] = (series || []).map(
+      (col: { name?: string }) => col?.name || '',
+    );
     const [show, type, font, legendPos, selectAll, height] = getStyles(
       styles,
       ['legend'],

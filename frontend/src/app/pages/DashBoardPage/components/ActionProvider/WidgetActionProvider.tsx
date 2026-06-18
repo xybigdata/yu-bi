@@ -18,6 +18,7 @@
 
 import { ControllerFacadeTypes } from 'app/constants';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
+import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { ChartMouseEventParams } from 'app/types/Chart';
 import { ChartConfig } from 'app/types/ChartConfig';
 import debounce from 'lodash/debounce';
@@ -349,7 +350,7 @@ export interface WidgetActionContextProps {
   }: {
     dashboardId: string;
     datachartId: string;
-    computedFields: any;
+    computedFields: ChartDataViewMeta[];
     options: ChartConfig;
   }) => void;
 

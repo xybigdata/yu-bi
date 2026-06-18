@@ -27,6 +27,7 @@ import {
   ChartDataRequest,
   PendingChartDataRequestFilter,
 } from 'app/types/ChartDataRequest';
+import { CompatNavigate } from 'app/hooks/useCompatNavigate';
 import { tablePagingAndSortEventListener } from 'app/utils/ChartEventListenerHelper';
 import {
   filterFiltersByInteractionRule,
@@ -207,7 +208,7 @@ export const widgetClickJumpAction =
     renderMode: VizRenderMode;
     widget: Widget;
     params: ChartMouseEventParams;
-    navigate: { push: (target: any) => void };
+    navigate: Pick<CompatNavigate, 'push'>;
   }) =>
   (dispatch, getState) => {
     const { renderMode, widget, params, navigate } = obj;
@@ -507,7 +508,7 @@ export const widgetChartClickAction =
     renderMode: VizRenderMode;
     widget: Widget;
     params: ChartMouseEventParams;
-    navigate: { push: (target: any) => void };
+    navigate: Pick<CompatNavigate, 'push'>;
   }) =>
   dispatch => {
     const { boardId, editing, renderMode, widget, params } = obj;
@@ -520,7 +521,12 @@ export const widgetChartClickAction =
   };
 
 export const widgetLinkEventActionCreator =
-  (obj: { renderMode: string; widget: Widget; params: any }) => dispatch => {
+  (obj: {
+    renderMode: VizRenderMode;
+    widget: Widget;
+    params: WidgetLinkEventParam[];
+  }) =>
+  dispatch => {
     const { renderMode, widget, params } = obj;
     dispatch(widgetLinkEventAction(renderMode, widget, params));
   };

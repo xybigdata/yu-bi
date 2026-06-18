@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { setLang } from '@antv/s2';
+import { LangType, Meta, TargetCellInfo, setLang } from '@antv/s2';
 import { SheetComponent } from '@antv/s2-react';
 import '@antv/s2-react/dist/s2-react.min.css';
 import { getLang } from 'locales/i18n';
@@ -25,7 +25,11 @@ import styled from 'styled-components';
 import { FONT_SIZE_LABEL } from 'styles/StyleConstants';
 import { AndvS2Config } from './types';
 
-setLang(['zh_CN', 'en_US'].find(lang => lang.includes(getLang()!)) as any);
+const resolveS2Lang = (): LangType => {
+  return getLang() === 'zh' ? 'zh_CN' : 'en_US';
+};
+
+setLang(resolveS2Lang());
 
 const AntVS2Wrapper: FC<AndvS2Config> = memo(
   ({
@@ -43,7 +47,7 @@ const AntVS2Wrapper: FC<AndvS2Config> = memo(
       return <div></div>;
     }
 
-    const onDataCellHover = ({ event, viewMeta }) => {
+    const onDataCellHover = ({ event, viewMeta }: TargetCellInfo) => {
       viewMeta.spreadsheet.tooltip.show({
         position: {
           x: event.clientX,
@@ -77,7 +81,7 @@ const AntVS2Wrapper: FC<AndvS2Config> = memo(
 
 const TableDataCellTooltip: FC<{
   datas?: object;
-  meta?: Array<{ field: string; name: string; formatter }>;
+  meta?: Meta[];
 }> = ({ datas, meta }) => {
   if (!datas) {
     return null;
@@ -88,9 +92,9 @@ const TableDataCellTooltip: FC<{
       {(meta || [])
         .map(m => {
           const uniqKey = m?.field;
-          if (uniqKey in datas) {
+          if (typeof uniqKey === 'string' && uniqKey in datas) {
             return (
-              <li key={uniqKey}>{`${m?.name}: ${m?.formatter(
+              <li key={uniqKey}>{`${m?.name}: ${m?.formatter?.(
                 datas[uniqKey],
               )}`}</li>
             );
