@@ -28,8 +28,8 @@ import styled from 'styled-components';
 import { isEmpty } from 'utils/object';
 
 interface SortActionMenuItemsArgs {
-  direction;
-  onChange;
+  direction: SortActionType;
+  onChange: (direction: SortActionType) => void;
   t: (key: string) => string;
 }
 
@@ -56,7 +56,7 @@ const SortAction: FC<{
     needRefresh?: boolean,
   ) => void;
   mode?: 'menu';
-  options?;
+  options?: { backendSort?: boolean };
 }> = ({ config, dataset, mode, options, onConfigChange }) => {
   const actionNeedNewRequest = isEmpty(options?.backendSort)
     ? true
@@ -66,7 +66,7 @@ const SortAction: FC<{
     config?.sort?.type || SortActionType.None,
   );
 
-  const handleSortTypeChange = direction => {
+  const handleSortTypeChange = (direction: SortActionType) => {
     setDirection(direction);
 
     if (SortActionType.Customize !== direction) {
@@ -80,7 +80,7 @@ const SortAction: FC<{
     }
   };
 
-  const renderOptions = mode => {
+  const renderOptions = (mode?: 'menu') => {
     if (mode === 'menu') {
       return (
         <Menu

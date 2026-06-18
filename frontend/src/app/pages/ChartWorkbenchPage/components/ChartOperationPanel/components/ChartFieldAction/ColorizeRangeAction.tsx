@@ -43,7 +43,7 @@ const ColorizeRangeAction: FC<{
     end?: string;
   }>(config?.color!);
 
-  const handleColorRangeChange = (start?, end?) => {
+  const handleColorRangeChange = (start?: string, end?: string) => {
     const newConfig = updateBy(config, draft => {
       if (!start && !end) {
         delete draft.color;
@@ -55,7 +55,7 @@ const ColorizeRangeAction: FC<{
     onConfigChange?.(newConfig, actionNeedNewRequest);
   };
 
-  const handleEnableColorChecked = checked => {
+  const handleEnableColorChecked = (checked: boolean) => {
     if (Boolean(checked)) {
       handleColorRangeChange('#7567bd', '#7567bd');
     } else {

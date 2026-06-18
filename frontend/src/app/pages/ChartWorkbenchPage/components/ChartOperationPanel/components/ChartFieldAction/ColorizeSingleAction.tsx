@@ -55,7 +55,7 @@ const ColorizeSingleAction: FC<{
     onConfigChange?.(newConfig, actionNeedNewRequest);
   };
 
-  const handleEnableColorChecked = checked => {
+  const handleEnableColorChecked = (checked: boolean) => {
     if (Boolean(checked)) {
       handleColorChange('#7567bd');
     } else {

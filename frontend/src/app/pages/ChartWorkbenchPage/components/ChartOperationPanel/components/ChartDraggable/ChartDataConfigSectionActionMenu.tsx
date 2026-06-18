@@ -20,6 +20,8 @@ import { Menu, MenuProps } from 'antd';
 import {
   ChartDataSectionFieldActionType,
   ChartDataViewFieldCategory,
+  DataViewFieldType,
+  SortActionType,
 } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ChartDataSectionField } from 'app/types/ChartConfig';
@@ -27,18 +29,29 @@ import { ChartDataConfigSectionProps } from 'app/types/ChartDataConfigSection';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { updateBy } from 'app/utils/mutation';
 import { FC } from 'react';
+import { ValueOf } from 'types';
 import { buildAggregationMenuItems } from '../ChartFieldAction/AggregationAction';
 import { buildAggregationLimitMenuItems } from '../ChartFieldAction/AggregationLimitAction';
 import { buildDateLevelMenuItems } from '../ChartFieldAction/DateLevelAction/DateLevelMenuItems';
 import { buildSortActionMenuItems } from '../ChartFieldAction/SortAction/SortAction';
 import { updateDataConfigByField } from './utils';
 
+type ChartDataSectionFieldAction = ValueOf<
+  typeof ChartDataSectionFieldActionType
+>;
+
+type ChartDataSectionFieldActions =
+  | ChartDataSectionFieldAction[]
+  | Partial<Record<DataViewFieldType, ChartDataSectionFieldAction[]>>;
+
 const ChartDataConfigSectionActionMenu: FC<
   {
     uid: string;
-    type: string;
+    type: DataViewFieldType;
     metas?: ChartDataViewMeta[];
-    onOpenModal;
+    onOpenModal: (
+      uid: string,
+    ) => (actionType: ChartDataSectionFieldAction) => void;
     availableSourceFunctions?: string[];
   } & ChartDataConfigSectionProps
 > = ({
@@ -62,6 +75,10 @@ const ChartDataConfigSectionActionMenu: FC<
     ChartDataSectionFieldActionType.AggregateLimit,
     ChartDataSectionFieldActionType.DateLevel,
   ];
+  const dateLevelActionCategories: Array<ChartDataSectionField['category']> = [
+    ChartDataViewFieldCategory.Field as ChartDataSectionField['category'],
+    ChartDataViewFieldCategory.DateLevelComputedField as ChartDataSectionField['category'],
+  ];
 
   const handleFieldConfigChanged = (
     columnUid: string,
@@ -82,24 +99,36 @@ const ChartDataConfigSectionActionMenu: FC<
     onConfigChanged?.(ancestors, newConfig, needRefresh);
   };
 
-  const getModalActions = (actions, type, category) => {
+  const getModalActions = (
+    actions: ChartDataSectionFieldActions | undefined,
+    type: DataViewFieldType,
+    category: ChartDataSectionField['category'] | undefined,
+  ) => {
     return getActionsByTypeAndCategory(actions, type, category)?.filter(
       a => !subMenuAction.includes(a),
     );
   };
 
-  const getSubMenuActions = (actions, type, category) => {
+  const getSubMenuActions = (
+    actions: ChartDataSectionFieldActions | undefined,
+    type: DataViewFieldType,
+    category: ChartDataSectionField['category'] | undefined,
+  ) => {
     return getActionsByTypeAndCategory(actions, type, category)?.filter(a =>
       subMenuAction.includes(a),
     );
   };
 
-  const getActionsByTypeAndCategory = (actions, type, category) => {
-    let modalActions: string[] = [];
+  const getActionsByTypeAndCategory = (
+    actions: ChartDataSectionFieldActions | undefined,
+    type: DataViewFieldType,
+    category: ChartDataSectionField['category'] | undefined,
+  ) => {
+    let modalActions: ChartDataSectionFieldAction[] = [];
     if (Array.isArray(actions)) {
       modalActions = actions;
-    } else if (type in actions) {
-      modalActions = actions[type] as string[];
+    } else if (actions?.[type]) {
+      modalActions = actions[type] || [];
     }
 
     if (category === ChartDataViewFieldCategory.AggregateComputedField) {
@@ -113,11 +142,8 @@ const ChartDataConfigSectionActionMenu: FC<
     }
 
     if (
-      type === 'DATE' &&
-      ![
-        ChartDataViewFieldCategory.Field,
-        ChartDataViewFieldCategory.DateLevelComputedField,
-      ].includes(category)
+      type === DataViewFieldType.DATE &&
+      (!category || !dateLevelActionCategories.includes(category))
     ) {
       modalActions = modalActions.filter(
         action => ![ChartDataSectionFieldActionType.DateLevel].includes(action),
@@ -127,7 +153,10 @@ const ChartDataConfigSectionActionMenu: FC<
     return modalActions;
   };
 
-  const getSubMenuActionItems = (actionName, uid): MenuProps['items'] => {
+  const getSubMenuActionItems = (
+    actionName: ChartDataSectionFieldAction,
+    uid: string,
+  ): MenuProps['items'] => {
     const fieldConfig = config.rows?.find(c => c.uid === uid);
     if (!fieldConfig) {
       return;
@@ -135,7 +164,7 @@ const ChartDataConfigSectionActionMenu: FC<
     const options = config?.options?.[actionName];
     if (actionName === ChartDataSectionFieldActionType.Sortable) {
       return buildSortActionMenuItems({
-        direction: fieldConfig?.sort?.type,
+        direction: fieldConfig?.sort?.type || SortActionType.None,
         onChange: direction => {
           const nextConfig = updateBy(fieldConfig, draft => {
             draft.sort = { type: direction };

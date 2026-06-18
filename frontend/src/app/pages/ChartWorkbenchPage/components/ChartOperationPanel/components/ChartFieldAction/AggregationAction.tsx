@@ -19,6 +19,7 @@
 import { CheckOutlined } from '@ant-design/icons';
 import { Menu, MenuProps, Radio, Space } from 'antd';
 import {
+  AggregateFieldActionType,
   AggregateFieldSubAggregateType,
   ChartDataSectionFieldActionType,
 } from 'app/constants';
@@ -28,9 +29,9 @@ import { updateBy } from 'app/utils/mutation';
 import { FC, useState } from 'react';
 
 interface AggregationActionMenuItemsArgs {
-  actionType;
-  aggregate;
-  onChange;
+  actionType: typeof ChartDataSectionFieldActionType.Aggregate;
+  aggregate?: AggregateFieldActionType;
+  onChange: (selectedValue: AggregateFieldActionType) => void;
   t: (key: string) => string;
 }
 
@@ -60,7 +61,7 @@ const AggregationAction: FC<{
   const actionNeedNewRequest = true;
   const [aggregate, setAggregate] = useState(config?.aggregate);
 
-  const onChange = selectedValue => {
+  const onChange = (selectedValue: AggregateFieldActionType) => {
     const newConfig = updateBy(config, draft => {
       draft.aggregate = selectedValue;
     });
@@ -68,7 +69,7 @@ const AggregationAction: FC<{
     onConfigChange?.(newConfig, actionNeedNewRequest);
   };
 
-  const renderOptions = mode => {
+  const renderOptions = (mode?: 'menu') => {
     if (mode === 'menu') {
       return (
         <Menu

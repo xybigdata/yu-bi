@@ -18,9 +18,9 @@
 
 import { Upload } from 'antd';
 import type { UploadProps } from 'antd';
-import type { UploadRef } from 'antd/es/upload/Upload';
 import { uploadBoardImage } from 'app/pages/DashBoardPage/pages/BoardEditor/slice/thunk';
 import {
+  ElementRef,
   forwardRef,
   useCallback,
   useContext,
@@ -37,6 +37,8 @@ interface HiddenUploaderProps {
 export interface HiddenUploaderRef {
   onClick: () => void;
 }
+
+type UploadRef = ElementRef<typeof Upload>;
 
 export const HiddenUploader = forwardRef<
   HiddenUploaderRef | undefined,
