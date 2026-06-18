@@ -70,6 +70,30 @@ interface StructViewProps {
   allowEnableViz: boolean | undefined;
 }
 
+type StructViewTableChange =
+  | (Pick<StructViewQueryProps, 'table' | 'columns'> & { sourceId?: string })
+  | JoinTableProps
+  | { columns: string[] };
+
+const hasStructViewTable = (
+  table: StructViewTableChange,
+): table is Pick<StructViewQueryProps, 'table' | 'columns'> & {
+  sourceId?: string;
+} => {
+  return 'table' in table && Array.isArray(table.table);
+};
+
+const getErrorMessage = (errorInfo: unknown): string | undefined => {
+  if (
+    typeof errorInfo === 'object' &&
+    errorInfo !== null &&
+    'message' in errorInfo
+  ) {
+    return String(errorInfo.message);
+  }
+  return undefined;
+};
+
 export const StructView = memo(
   ({ allowManage, allowEnableViz }: StructViewProps) => {
     const { actions } = useViewSlice();
@@ -98,7 +122,11 @@ export const StructView = memo(
     const [form] = Form.useForm();
 
     const handleStructureChange = useCallback(
-      (table: any, type: 'MAIN' | 'JOINS', index?: number) => {
+      (
+        table: StructViewTableChange,
+        type: 'MAIN' | 'JOINS',
+        index?: number,
+      ) => {
         dispatch(
           actions.changeCurrentEditingView({
             script:
@@ -107,7 +135,7 @@ export const StructView = memo(
                     ...structure,
                     ...table,
                     joins:
-                      !table.table ||
+                      !hasStructViewTable(table) ||
                       isEqualObject(structure.table, table.table)
                         ? structure.joins
                         : [],
@@ -117,10 +145,10 @@ export const StructView = memo(
                   }),
           }),
         );
-        if (type === 'MAIN' && table.sourceId) {
+        if (type === 'MAIN' && 'sourceId' in table && table.sourceId) {
           dispatch(
             actions.changeCurrentEditingView({
-              sourceId: table.sourceId,
+              sourceId: String(table.sourceId),
             }),
           );
         }
@@ -152,7 +180,7 @@ export const StructView = memo(
     );
 
     const handleTableJoin = useCallback(
-      (table: any, type: 'MAIN' | 'JOINS', index: number) => {
+      (table: StructViewTableChange, type: 'MAIN' | 'JOINS', index: number) => {
         handleStructureChange(
           {
             ...structure.joins[index],
@@ -269,8 +297,9 @@ export const StructView = memo(
             script = structure;
           }
           dispatch(runSql({ id, isFragment: !!type, script }));
-        } catch (errorInfo: any) {
-          errorInfo.message && message.error(errorInfo.message);
+        } catch (errorInfo) {
+          const errorMessage = getErrorMessage(errorInfo);
+          errorMessage && message.error(errorMessage);
         }
       },
       [dispatch, id, structure, form],

@@ -31,7 +31,14 @@ import {
   selectOrgId,
 } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
-import { memo, useCallback, useContext, useEffect } from 'react';
+import {
+  Key,
+  ReactNode,
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+} from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import { getInsertedNodeIndex, stopPPG } from 'utils/utils';
@@ -50,6 +57,12 @@ import {
 
 interface RecycleProps {
   list?: TreeDataNode[];
+}
+
+interface ViewRecycleNode extends TreeDataNode {
+  key: Key;
+  title: ReactNode;
+  isFolder?: boolean;
 }
 
 export const Recycle = memo(({ list }: RecycleProps) => {
@@ -197,7 +210,7 @@ export const Recycle = memo(({ list }: RecycleProps) => {
     <Tree
       loading={loading}
       treeData={list}
-      titleRender={node => renderTreeTitle(node as any)}
+      titleRender={node => renderTreeTitle(node as ViewRecycleNode)}
       onSelect={treeSelect}
     />
   );

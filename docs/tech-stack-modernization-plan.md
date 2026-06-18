@@ -325,6 +325,9 @@
 - 已完成：Source 编辑态配置字符串解析补齐异常兜底，坏 JSON 或非对象配置按空配置回退，不再打断详情页回填
 - 已完成：SQL warning 提 issue 参数改为区分 GitHub / Gitee 的显式结构，去掉 issue 参数拼装里的局部 `any`
 - 已完成：View tab 右键菜单事件改为复用 antd 公开 `MenuProps['onClick']` 参数类型，去掉菜单事件入口的局部 `any`
+- 已完成：View 资源树图标、排序菜单和回收站标题渲染改为显式 Tree / Menu 类型边界，去掉相关局部 `any`
+- 已完成：StructView 数据源选择链路的树图标、表选择、列选择、弹层开关和回调数据补齐显式类型，减少结构视图配置链路的宽泛入参
+- 已完成：StructView 主表与 join 表变更入口补齐局部数据结构守卫，错误提示捕获改为 `unknown` + 最小消息读取
 - 已完成：迁移测试层局部弱类型收口
 - 已完成：工具测试层第一批局部弱类型收口
 - 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 的局部弱类型收口
