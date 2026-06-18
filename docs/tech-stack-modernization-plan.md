@@ -245,6 +245,12 @@
   - `DataChartConfig.computedFields` 与相关 reducer / provider 参数改为 `ChartDataViewMeta[]`
   - `WidgetMeta.icon` 收口为字符串，匹配所有 widget 注册入口
   - 基础柱状图 legend series 与基础表格列宽计算补齐局部结构类型，减少无约束 `any`
+- 前端交互配置表单局部类型边界继续收口：
+  - DrillThrough / CrossFiltering 面板的规则更新函数改为按规则字段类型约束，不再透传宽泛 `value: any`
+  - JumpToChart / JumpToDashboard / JumpToUrl 的编辑态规则与自定义关系数组补齐真实类型
+  - ViewDetail 自定义字段从 `any[]` 收口为 `string[]`
+  - `internalChartHelper` 读取自定义关系时补齐空数组兜底，保持未配置场景的既有空结果语义
+  - 本批不改 FormGenerator 全局 `ItemLayoutProps` 和配置 JSON 协议宽口
 - Maven 对外品牌元数据继续收口：
   - 根 POM 与各服务端模块补齐 `name`、`description` 等对外元数据，统一以 `yu-bi` 对外呈现
   - SCM 与许可证信息指向 `yu-bi` 新仓库

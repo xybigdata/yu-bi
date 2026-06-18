@@ -27,6 +27,8 @@ import { itemLayoutComparer } from '../../utils';
 import CrossFilteringRuleList from './CrossFilteringRuleList';
 import { CrossFilteringInteractionRule, CrossFilteringSetting } from './types';
 
+type CrossFilteringRuleKey = keyof CrossFilteringInteractionRule;
+
 const CrossFilteringPanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data, onChange, context }) => {
     const [event, setEvent] = useState<CrossFilteringSetting['event']>(
@@ -44,7 +46,11 @@ const CrossFilteringPanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       handleSettingChange(undefined, newRules);
     };
 
-    const handleUpdateRule = (id: string, prop: string, value: any) => {
+    const handleUpdateRule = <K extends CrossFilteringRuleKey>(
+      id: string,
+      prop: K,
+      value: CrossFilteringInteractionRule[K],
+    ) => {
       const updatorIndex = (rules || []).findIndex(r => r.id === id);
       if (updatorIndex > -1) {
         const newRules = updateBy(rules, draft => {

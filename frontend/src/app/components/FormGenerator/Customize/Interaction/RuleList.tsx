@@ -29,15 +29,30 @@ import {
 import JumpToChart from './JumpToChart';
 import JumpToDashboard from './JumpToDashboard';
 import JumpToUrl from './JumpToUrl';
-import { I18nTranslator, InteractionRule, VizType } from './types';
+import {
+  I18nTranslator,
+  InteractionRule,
+  JumpToChartRule,
+  JumpToDashboardRule,
+  JumpToUrlRule,
+  VizType,
+} from './types';
+
+type InteractionRuleKey = keyof InteractionRule;
+
+type InteractionRuleValue = InteractionRule[InteractionRuleKey];
 
 const RuleList: FC<
   {
     rules?: InteractionRule[];
     vizs?: VizType[];
     dataview?: ChartDataView;
-    onRuleChange: (id, prop, value) => void;
-    onDeleteRule: (id) => void;
+    onRuleChange: (
+      id: string,
+      prop: InteractionRuleKey,
+      value: InteractionRuleValue,
+    ) => void;
+    onDeleteRule: (id: string) => void;
   } & I18nTranslator
 > = ({ rules, vizs, dataview, onRuleChange, onDeleteRule, translate: t }) => {
   const tableColumnStyle = { width: '150px' };
@@ -127,21 +142,38 @@ const RuleList: FC<
         if (!record.category) {
           return <></>;
         }
+        const category = record.category;
+        const ruleValue = record[category];
         const props = {
           translate: t,
           vizs: vizs,
           dataview: dataview,
-          value: record?.[record.category] as any,
+          value: ruleValue,
           onValueChange: value =>
-            onRuleChange(record.id, record.category, value),
+            onRuleChange(record.id, category, value),
         };
-        switch (record.category) {
+        switch (category) {
           case InteractionCategory.JumpToChart:
-            return <JumpToChart {...props} />;
+            return (
+              <JumpToChart
+                {...props}
+                value={ruleValue as JumpToChartRule | undefined}
+              />
+            );
           case InteractionCategory.JumpToDashboard:
-            return <JumpToDashboard {...props} />;
+            return (
+              <JumpToDashboard
+                {...props}
+                value={ruleValue as JumpToDashboardRule | undefined}
+              />
+            );
           case InteractionCategory.JumpToUrl:
-            return <JumpToUrl {...props} />;
+            return (
+              <JumpToUrl
+                {...props}
+                value={ruleValue as JumpToUrlRule | undefined}
+              />
+            );
           default:
             return <></>;
         }

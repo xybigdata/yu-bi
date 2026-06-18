@@ -77,7 +77,7 @@ const ChartRelationList: FC<
     );
   };
 
-  const handleDeleteRelation = id => {
+  const handleDeleteRelation = (id?: string) => {
     if (id) {
       const newRelations = updateBy(relations, draft => {
         const index = draft!.findIndex(v => v.id === id);
@@ -89,7 +89,11 @@ const ChartRelationList: FC<
     }
   };
 
-  const handleRelationChange = (id, key, value) => {
+  const handleRelationChange = (
+    id: string | undefined,
+    key: 'source' | 'target',
+    value: string,
+  ) => {
     if (id) {
       const newRelations = updateBy(relations, draft => {
         const config = draft!.find(v => v.id === id);
@@ -99,7 +103,10 @@ const ChartRelationList: FC<
     }
   };
 
-  const handleRelationTypeChange = (id, value) => {
+  const handleRelationTypeChange = (
+    id: string | undefined,
+    value: InteractionRelationType,
+  ) => {
     if (id) {
       const newRelations = updateBy(relations, draft => {
         const index = draft!.findIndex(v => v.id === id);

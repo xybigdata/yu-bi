@@ -32,7 +32,11 @@ export type VizType = {
 };
 
 export type I18nTranslator = {
-  translate: (title: string, disablePrefix?: boolean, options?: any) => string;
+  translate: (
+    title: string,
+    disablePrefix?: boolean,
+    options?: Record<string, unknown>,
+  ) => string;
 };
 
 export type CustomizeRelation = {
@@ -43,20 +47,20 @@ export type CustomizeRelation = {
 };
 
 export type JumpToChartRule = {
-  relId: string;
-  relation: InteractionFieldRelation;
-  [InteractionFieldRelation.Customize]: CustomizeRelation[];
+  relId?: string;
+  relation?: InteractionFieldRelation;
+  [InteractionFieldRelation.Customize]?: CustomizeRelation[];
 };
 
 export type JumpToDashboardRule = {
-  relId: string;
-  [InteractionFieldRelation.Customize]: CustomizeRelation[];
+  relId?: string;
+  [InteractionFieldRelation.Customize]?: CustomizeRelation[];
 };
 
 export type JumpToUrlRule = {
-  relId: string;
-  url: string;
-  [InteractionFieldRelation.Customize]: CustomizeRelation[];
+  relId?: string;
+  url?: string;
+  [InteractionFieldRelation.Customize]?: CustomizeRelation[];
 };
 
 export type InteractionRule = {
@@ -90,5 +94,5 @@ export type CrossFilteringSetting = {
 export type ViewDetailSetting = {
   event: InteractionMouseEvent;
   mapper?: InteractionFieldMapper;
-  [InteractionFieldMapper.Customize]?: any[];
+  [InteractionFieldMapper.Customize]?: string[];
 };

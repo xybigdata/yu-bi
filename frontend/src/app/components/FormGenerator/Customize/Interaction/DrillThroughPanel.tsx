@@ -27,6 +27,8 @@ import { itemLayoutComparer } from '../../utils';
 import RuleList from './RuleList';
 import { DrillThroughSetting, InteractionRule } from './types';
 
+type InteractionRuleKey = keyof InteractionRule;
+
 const DrillThroughPanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data, onChange, context }) => {
     const [drillThroughRules, setDrillThroughRules] = useState<
@@ -47,7 +49,11 @@ const DrillThroughPanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       handleDrillThroughSettingChange(newRules);
     };
 
-    const handleUpdateRule = (id: string, prop: string, value: any) => {
+    const handleUpdateRule = <K extends InteractionRuleKey>(
+      id: string,
+      prop: K,
+      value: InteractionRule[K],
+    ) => {
       const updatorIndex = (drillThroughRules || []).findIndex(
         r => r.id === id,
       );
