@@ -224,6 +224,7 @@
   - `flexlayout-react` 实际使用面确认集中在图表工作台 `ChartOperationPanel`
   - `ChartOperationPanel` 补齐布局节点尺寸读取兜底，避免布局节点未就绪时直接取空
   - `ChartOperationPanel` 尺寸适配链继续补齐有限数值、非负整数与预留空间扣减保护，避免布局瞬态下向图表容器透传负值或异常尺寸
+  - `ChartOperationPanel` 布局工厂补齐组件类型守卫，未知 FlexLayout component 不再进入已知渲染分支
 - `react-grid-layout` 实际使用面确认集中在看板编辑态 `AutoBoardEditor` 与查看态 `AutoBoardCore`
   - 看板布局映射入口补齐 `pRect / mRect` 缺省值归一化，避免不完整布局数据直接传入 RGL
   - 布局归一化继续补齐非法值兜底与断点列数约束，避免异常宽高或负值直接进入 RGL
@@ -708,6 +709,8 @@
 
 当前低风险批次合并前门禁记录：
 
+- 通过：`flexlayout-react` 工作台布局工厂稳定化专项轻量门禁，`npm run checkTs`
+- 通过：`flexlayout-react` 工作台布局工厂稳定化专项定向测试，`npm run test:ci -- src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts`
 - 通过：`react-grid-layout` 布局归一化稳定化专项轻量门禁，`npm run checkTs`
 - 通过：`react-grid-layout` 布局归一化稳定化专项定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts`
 - 通过：`react-window` 虚拟表格稳定化专项轻量门禁，`npm run checkTs`
