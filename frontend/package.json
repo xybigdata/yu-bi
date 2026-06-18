@@ -30,6 +30,7 @@
     "lint:fix": "npm run eslint -- --fix src",
     "lint:css": "npx stylelint \"src/**/*.css\"",
     "lint:style": "npx stylelint \"src/**/*.{js,ts,jsx,tsx}\"",
+    "lint:style:staged": "npx stylelint",
     "prettify": "prettier --write src",
     "prepare": "cd .. && npx --prefix frontend husky frontend/.husky",
     "doc:types": "tsc --project tsconfig.dHelper.json"
@@ -49,7 +50,7 @@
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
       "npm run eslint -- --fix",
-      "npm run lint:style",
+      "npm run lint:style:staged --",
       "prettier --write"
     ],
     "*.{css,md,json}": [

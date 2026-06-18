@@ -551,7 +551,18 @@
 
 ### 8.2 验证规则
 
-当前 `frontend/.husky/pre-push` 已改为分层执行：
+当前门禁按三层执行，避免每个小改动都触发完整回归：
+
+1. 开发期：只跑与改动直接相关的轻量验证。
+2. 提交前：只检查本次暂存文件，避免全量样式扫描。
+3. 合并前：再跑完整门禁，保证 `main` 质量。
+
+当前 `frontend/.husky/pre-commit` 已改为 staged 范围：
+
+- TS / JS 文件：`eslint --fix`、`stylelint`、`prettier` 只作用于本次暂存文件
+- CSS / MD / JSON 文件：`prettier` 只作用于本次暂存文件
+
+当前 `frontend/.husky/pre-push` 已改为分支分层：
 
 - 推送 `main`：自动执行完整前端门禁
 - 推送专题分支：默认只执行轻量门禁 `npm run checkTs`
