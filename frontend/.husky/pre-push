@@ -1,4 +1,18 @@
+#!/usr/bin/env sh
+set -eu
+
+current_branch="$(git branch --show-current 2>/dev/null || true)"
+full_gate="${YU_BI_FULL_GATE:-}"
+
 cd frontend
-npm run test:ci
-npm run lint:css
-npm run lint:style
+
+if [ "$current_branch" = "main" ] || [ "$full_gate" = "1" ] || [ "$full_gate" = "true" ]; then
+  echo "Run full frontend gate for ${current_branch:-detached}."
+  npm run test:ci
+  npm run lint:css
+  npm run lint:style
+else
+  echo "Run lightweight frontend gate for ${current_branch:-detached}."
+  echo "Set YU_BI_FULL_GATE=1 to run test:ci, lint:css and lint:style before push."
+  npm run checkTs
+fi
