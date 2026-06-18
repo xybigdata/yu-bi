@@ -332,6 +332,7 @@
 - 已完成：View 运行 SQL thunk 的早退返回、变量默认值解析、STRUCT 请求列和 Monaco completion provider 回调补齐显式边界，去掉对应 `as any` 与裸 `JSON.parse`
 - 已完成：`useStateModal` 的缓存回调参数从 `any[]` 收口到 `unknown[]`，OK 回调改为不规定具体入参形态，保留各调用方现有参数兼容面
 - 已完成：`QueryResult.rows` 从 `any[][]` 收口为查询结果标量二维数组，和后端 `Dataframe.rows: List<List<Object>>` 的 JSON 标量返回边界对齐，并补齐预览数据源转换测试
+- 已完成：查询结果预览 `dataSource` 从 `object[]` 收口为 `QueryResultDataSourceRow[]`，View 预览表与数据源 schema 预览链路统一使用查询结果标量行，避免预览结果继续扩散宽泛对象边界
 - 已完成：迁移测试层局部弱类型收口
 - 已完成：工具测试层第一批局部弱类型收口
 - 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 的局部弱类型收口
@@ -577,6 +578,12 @@
 1. 开发期：只跑与改动直接相关的轻量验证。
 2. 提交前：只检查本次暂存文件，避免全量样式扫描。
 3. 合并前：再跑完整门禁，保证 `main` 质量。
+
+当前执行策略：
+
+- 专题分支日常开发不因每个小点触发完整门禁，优先执行 `npm run checkTs` 与相关定向测试
+- 同一专题累计到一批后再提交和推送，降低重复回归成本
+- 准备 merge 回 `main` 前必须补完整门禁，不能用轻量验证替代主线验收
 
 当前 `frontend/.husky/pre-commit` 已改为 staged 范围：
 

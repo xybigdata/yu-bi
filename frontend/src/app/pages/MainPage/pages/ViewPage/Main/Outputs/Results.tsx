@@ -46,8 +46,6 @@ import {
   ViewViewModel,
 } from '../../slice/types';
 
-const ROW_KEY = 'DATART_ROW_KEY';
-
 interface ResultsProps {
   height?: number;
   width?: number;
@@ -74,11 +72,6 @@ export const Results = memo(({ height = 0, width = 0 }: ResultsProps) => {
 
   const roles = useSelector(selectRoles);
   const t = useI18NPrefix('view');
-
-  const dataSource = useMemo(
-    () => previewResults.map(o => ({ ...o, [ROW_KEY]: uuidv4() })),
-    [previewResults],
-  );
 
   const modelChange = useCallback(
     (columnName: string, column: Omit<Column, 'name'>) =>
@@ -260,7 +253,7 @@ export const Results = memo(({ height = 0, width = 0 }: ResultsProps) => {
         width={width}
         model={model.columns || {}}
         hierarchy={model.hierarchy || {}}
-        dataSource={dataSource}
+        dataSource={previewResults}
         pagination={pagination}
         getExtraHeaderActions={getExtraHeaderActions}
         onSchemaTypeChange={modelChange}

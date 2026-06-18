@@ -28,7 +28,10 @@ import {
 } from 'antd';
 import type { FormRule } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { QueryResult } from 'app/pages/MainPage/pages/ViewPage/slice/types';
+import {
+  QueryResult,
+  QueryResultDataSourceRow,
+} from 'app/pages/MainPage/pages/ViewPage/slice/types';
 import { DataProviderAttribute } from 'app/pages/MainPage/slice/types';
 import { ReactElement } from 'react';
 import { ArrayConfig } from './ArrayConfig';
@@ -43,7 +46,7 @@ interface ConfigComponentProps {
   testLoading?: boolean;
   disabled?: boolean;
   allowManage?: boolean;
-  schemaDataSource?: object[];
+  schemaDataSource?: QueryResultDataSourceRow[];
   dataTables?: object[];
   subFormRowKey?: string;
   subFormRowKeyValidator?: (val: string) => boolean;

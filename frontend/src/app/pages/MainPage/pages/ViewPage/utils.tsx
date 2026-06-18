@@ -40,6 +40,7 @@ import {
   HierarchyModel,
   Model,
   QueryResult,
+  QueryResultDataSourceRow,
   StructViewQueryProps,
   StructViewRequestColumn,
   ViewType,
@@ -178,7 +179,7 @@ export function transformQueryResultToModelAndDataSource(
   viewType?: ViewType,
 ): {
   model: HierarchyModel;
-  dataSource: object[];
+  dataSource: QueryResultDataSourceRow[];
 } {
   const { rows = [], columns = [], reqColumns } = data || {};
   const newColumns = columns.reduce(
@@ -206,7 +207,7 @@ export function transformQueryResultToModelAndDataSource(
     {} as Record<string, QueryResultColumnModel>,
   );
   const dataSource = rows.map(arr =>
-    arr.reduce((obj, val, index) => {
+    arr.reduce<QueryResultDataSourceRow>((obj, val, index) => {
       const key = columns[index].name;
       return {
         ...obj,
@@ -236,7 +237,7 @@ export function getHierarchyColumn(
 
 export function getColumnWidthMap(
   model: { [key: string]: Omit<ColumnsProps, 'name'> },
-  dataSource: object[],
+  dataSource: QueryResultDataSourceRow[],
 ) {
   const HEADER_PADDING = SPACE_UNIT * (2 + 1);
   const CELL_PADDING = SPACE_UNIT * (2 + 2);
