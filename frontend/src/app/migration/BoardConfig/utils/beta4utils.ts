@@ -254,7 +254,7 @@ export const convertMediaWidgetToBeta4 = (widget: WidgetBeta3) => {
     newWidget = commonBeta4Convert(newWidget, widget);
     // getWidgetIframe;
     newWidget.config.content = {
-      richText: newWidget.config.content.richTextConfig,
+      richText: newWidget.config.content?.richTextConfig,
     };
     return newWidget;
   }

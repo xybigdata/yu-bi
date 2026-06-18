@@ -17,6 +17,8 @@
  */
 
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
+import { ChartConfig } from 'app/types/ChartConfig';
+import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { RC2 } from '../ChartConfig/migrateChartConfig';
 import { APP_VERSION_RC_2 } from '../constants';
 import MigrationEvent from '../MigrationEvent';
@@ -42,6 +44,14 @@ type WidgetChartConfigMigrationTarget = {
     id?: string;
     type?: string;
   }>;
+};
+
+type MigratedWidgetChartConfig = {
+  version?: string;
+  aggregation?: boolean;
+  chartConfig?: ChartConfig;
+  chartGraphId?: string;
+  computedFields?: ChartDataViewMeta[];
 };
 
 const parseLegacyWidgetChartConfig = (
@@ -72,12 +82,17 @@ const migrateWidgetChartConfig = (widgets: Widget[]): Widget[] => {
     new MigrationEventDispatcher<WidgetChartConfigMigrationTarget>(eventRc2);
   return widgets
     .map(widget => {
+      const dataChart = widget.config.content?.dataChart;
       const widgetChartConfig = parseLegacyWidgetChartConfig(
-        widget?.config?.content?.dataChart?.config,
+        dataChart?.config,
       );
-      if (widgetChartConfig) {
-        widget.config.content.dataChart.config =
-          dispatcherRc2.process(widgetChartConfig);
+      if (dataChart && widgetChartConfig) {
+        dataChart.config = {
+          ...dataChart.config,
+          ...((dispatcherRc2.process(
+            widgetChartConfig,
+          ) as MigratedWidgetChartConfig)),
+        };
       }
 
       return widget;

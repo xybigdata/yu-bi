@@ -398,9 +398,7 @@ export const editBoardStackSlice = createSlice({
         tabId: sourceWidget.config.clientId,
         childWidgetId: sourceWidget.id,
       };
-      delete state.widgetRecord[tabWidgetId].config.content.itemMap[
-        tabItem.tabId
-      ];
+      delete tabContent.itemMap[tabItem.tabId];
       state.widgetRecord[tabWidgetId].config.content = tabContent;
       state.widgetRecord[sourceId].parentId = tabWidgetId;
     },

@@ -335,7 +335,7 @@ describe('test migrateWidgets ', () => {
             computedFields: [{ id: '1', name: '' }],
           },
         },
-      },
+      } as unknown as Widget['config']['content'],
     });
     const result = RC0(widget);
     expect(result?.config?.content?.dataChart?.config?.version).toBe(
@@ -359,7 +359,7 @@ describe('test migrateWidgets ', () => {
         dataChart: {
           config: {},
         },
-      },
+      } as unknown as Widget['config']['content'],
     });
     const result1 = RC0(widget1);
 

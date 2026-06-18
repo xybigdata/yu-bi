@@ -341,6 +341,7 @@
 | `flexlayout-react` | 版本偏旧，仍在工作台布局主链 | 布局拖拽、面板状态、样式回归 |
 | `react-grid-layout` | 版本偏旧，仍在看板布局主链 | 拖拽缩放、响应式布局回归 |
 | 图表运行时类型边界 | ECharts / 表格 / 词云等运行时仍有局部宽口 | 图表渲染、事件回调、分页排序回归 |
+| Dashboard widget 内容协议 | `WidgetConf.content` 承载多类 widget 内容，历史创建入参与保存结构混用 | 图表、控制器、容器、富文本和迁移链路回归 |
 | Docker / 安装包闭环 | 基线已收口 | 安装包结构、静态资源、启动链验证 |
 
 ### 5.3 高风险：暂不直接动
@@ -358,17 +359,24 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`图表运行时类型边界稳定化`
+当前累计专题：`Dashboard widget 内容协议边界稳定化`
 
 本批目标：
 
-- 优先收口图表运行时里局部 `any` / 宽泛事件参数 / 表格列配置类型
-- 只处理可通过现有图表定向测试或小范围新增测试验证的边界
-- 保持图表配置协议、数据集结构、渲染语义和事件 payload 不变
-- 不重写图表实例生命周期，优先收口实例、事件和 option 的类型边界
+- 优先收口 `WidgetConf.content` / `WidgetCreateProps.content` 这类共享协议宽口
+- 区分 widget 创建入参和保存后的 widget 内容结构，避免继续用同一个 `any` 承接两种语义
+- 先建立兼容内容结构，不一次性拆完 chart / controller / media / container 的全量协议
+- 对迁移链路只做局部 legacy 类型桥接，保持历史数据兼容
 - 不调整内部稳定标识和业务配置结构
 
 当前累计清单：
+
+- 已完成：`WidgetConf.content` 从裸 `any` 收口到 `WidgetContent` 兼容结构，显式列出图表、控制器、媒体、容器和按钮内容字段
+- 已完成：`WidgetCreateProps.content` 改为 `unknown` 创建入参边界，由各 widget creator 在内部落到明确内容结构，避免创建入参与持久化内容继续混用同一类型
+- 已完成：DataChart widget 创建链路显式生成 `{ type: 'dataChart', dataChart }` 内容结构，控制器 widget 创建链路按 `ControllerWidgetContent` 承接
+- 已完成：`BoardBtnContent.type`、`DataChart.view`、`WidgetData.id` 与富文本 Delta JSON 内容边界补齐局部显式类型，去掉对应裸 `any`
+- 已完成：widget chart 配置迁移和 beta4 富文本迁移补齐 legacy 数据局部类型桥接，避免历史字符串配置、旧 computed field 和旧 richText 内容形态继续扩散到全局类型
+- 已完成：sampleData 写入 widgetDataMap 前增加对象形态守卫，避免 `unknown` 模板数据直接穿透到看板 widget 数据状态
 
 - 已完成：BasicTable 表格列、header/body cell props、summary 返回、分页排序事件和单元格点击事件补齐局部显式类型，保留 Ant Design 公开入口和现有渲染行为不变
 - 已完成：图表事件行数据统一收口到 `ChartRowData`，柱线饼散点漏斗词云轮廓地图瀑布等图表不再继续声明 `rowData: any`
@@ -513,7 +521,7 @@
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
 - 暂缓评估：FormGenerator 全局 `ItemLayoutProps`、交互规则面板的动态 `value` / `Customize` 映射仍是协议宽口，需单独评估交互配置结构后再收口
 - 暂缓评估：`ChartDataSetDTO.rows` 仍按历史 `string[][]` 表达图表运行时数据集，大量图表组件和 helper 以 `IChartDataSet<string>` 消费；后续如要对齐后端 `Dataframe.rows: List<List<Object>>`，需单独处理图表运行时的数据集泛型与字符串化边界
-- 暂缓评估：`WidgetConf.content` / `WidgetCreateProps.content` 是多类 widget 的共享内容协议宽口，直接改成 `unknown` 会牵涉图表、控制器、标签页、富文本和迁移链路，需要按 widget 类型分批拆分
+- 已进入第一阶段：`WidgetConf.content` / `WidgetCreateProps.content` 是多类 widget 的共享内容协议宽口，当前先拆分“创建入参 unknown”和“持久化内容兼容结构”，后续再按 chart / controller / media / container 分批收紧
 - 暂缓评估：Dashboard 工具测试中被跳过的历史大 fixture 仍有 `obj as any`，直接补全为完整 `Widget` 会引入大量非测试重点字段，后续如恢复这些测试应先抽通用 widget fixture helper
 - 下一批候选：前端低风险继续在当前长期分支累计，优先处理局部组件、工具函数和有测试覆盖的类型边界；暂不因单个小批次合入 `main`
 
@@ -815,6 +823,8 @@
 - 通过：运行时与类型边界累计批次合并前完整门禁，`npm run test:ci`，127 个测试文件通过，891 个测试通过，4 个跳过
 - 通过：运行时与类型边界累计批次合并前完整门禁，`npm run lint:css`
 - 通过：运行时与类型边界累计批次合并前完整门禁，`npm run lint:style`
+- 通过：Dashboard widget 内容协议边界专项轻量门禁，`npm run checkTs`
+- 通过：Dashboard widget 内容协议边界专项定向测试，`npm run test:ci -- src/app/migration/__tests__/migrateWidgetChartConfig.test.ts src/app/migration/__tests__/migrateWidgets.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts`，6 个测试文件通过，59 个测试通过，3 个跳过
 
 触发完整前端门禁的条件：
 

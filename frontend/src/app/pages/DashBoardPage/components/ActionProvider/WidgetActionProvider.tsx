@@ -264,7 +264,7 @@ export const WidgetActionProvider: FC<
               type: 'edit',
               widgetId: widget.id,
               controllerType: widget.config.content
-                .type as ControllerFacadeTypes,
+                ?.type as ControllerFacadeTypes,
             }),
           );
         },

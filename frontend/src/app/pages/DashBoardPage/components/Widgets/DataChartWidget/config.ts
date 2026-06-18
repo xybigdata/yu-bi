@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import { DataChart } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import {
   Widget,
   WidgetCreateProps,
@@ -102,8 +103,12 @@ export const dataChartCreator = (opt: WidgetCreateProps) => {
   widget.relations = opt.relations || [];
   widget.config.type = 'chart';
 
-  widget.config.content.dataChart = opt.content; // DataChart
-  widget.config.name = opt.name || opt.content?.name;
+  const dataChart = opt.content as DataChart | undefined;
+  widget.config.content = {
+    type: 'dataChart',
+    dataChart,
+  };
+  widget.config.name = opt.name || dataChart?.name || '';
   widget.config.customConfig.props = [
     { ...initTitleTpl() },
     { ...initLoopFetchTpl() },

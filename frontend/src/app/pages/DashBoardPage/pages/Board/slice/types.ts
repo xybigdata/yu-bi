@@ -184,7 +184,7 @@ export interface WidgetInfo {
   linkInfo?: WidgetLinkInfo;
 }
 export interface WidgetData {
-  id: string;
+  id?: string;
   columns?: ChartDatasetMeta[];
   name?: string;
   rows?: string[][];
@@ -252,13 +252,13 @@ export interface ChartWidgetContent {
   dataChart?: DataChart;
 }
 export interface BoardBtnContent {
-  type: any;
+  type?: 'query' | 'reset';
 }
 // 媒体组件配置
 export type MediaWidgetContent = {
   type: MediaWidgetType;
   richTextConfig?: {
-    content: DeltaStatic;
+    content: DeltaStatic | { ops?: unknown[] };
   };
   timerConfig?: {
     time: {
@@ -301,6 +301,26 @@ export interface ControllerWidgetContent {
   name: string;
   relatedViews: RelatedView[];
   config: ControllerConfig;
+}
+
+export interface WidgetContent {
+  type?:
+    | WidgetContentChartType
+    | MediaWidgetType
+    | ControllerFacadeTypes
+    | 'query'
+    | 'reset';
+  dataChart?: DataChart;
+  itemMap?: Record<string, ContainerItem>;
+  name?: string;
+  relatedViews?: RelatedView[];
+  config?: ControllerConfig;
+  richTextConfig?: MediaWidgetContent['richTextConfig'];
+  timerConfig?: MediaWidgetContent['timerConfig'];
+  imageConfig?: MediaWidgetContent['imageConfig'];
+  videoConfig?: MediaWidgetContent['videoConfig'];
+  iframeConfig?: MediaWidgetContent['iframeConfig'];
+  richText?: MediaWidgetContent['richTextConfig'];
 }
 
 export const WidgetTypes = [
@@ -374,15 +394,16 @@ export interface DataChart {
   publish?: boolean; //？
   type?: string; //?
   viewId: string;
-  view?: any;
+  view?: ChartDataView;
   status: number;
 }
 export interface DataChartConfig {
+  version?: string;
   aggregation: boolean | undefined;
   chartConfig: ChartConfig;
   chartGraphId: string;
   computedFields: ChartDataViewMeta[];
-  sampleData?: any; // for template
+  sampleData?: unknown; // for template
 }
 
 export type ColsType = typeof LAYOUT_COLS_MAP;

@@ -51,6 +51,7 @@ import {
   BoardState,
   RectConfig,
   VizRenderMode,
+  WidgetData,
 } from '../pages/Board/slice/types';
 import {
   editBoardStackActions,
@@ -87,6 +88,10 @@ type TablePagingEventValue = {
 type TableSortEventValue = TablePagingEventValue & {
   direction: SortActionType.ASC | SortActionType.DESC;
   aggOperator?: AggregateFieldActionType;
+};
+
+const isWidgetData = (data: unknown): data is WidgetData => {
+  return !!data && typeof data === 'object';
 };
 
 type LinkFilterValueMap = Record<string, unknown>;
@@ -608,7 +613,7 @@ export const setWidgetSampleDataAction =
     const curChart = dataChartMap[boardId]?.[datachartId];
     if (!curChart) return;
     if (curChart.viewId) return;
-    if (!curChart.config.sampleData) return;
+    if (!isWidgetData(curChart.config.sampleData)) return;
     if (boardEditing) {
       const dataset = editBoardState.widgetDataMap[wid];
       if (dataset?.id) return;

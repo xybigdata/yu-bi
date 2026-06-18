@@ -51,6 +51,10 @@ type LegacyFilterWidgetBeta3 = Omit<WidgetBeta3, 'config'> & {
 type MigratingWidget = Widget | WidgetBeta3;
 type ServerWidgetConfigTarget = WidgetBeta3['config'];
 type RelationConfigTarget = Relation['config'];
+type LegacyComputedField = {
+  id?: string;
+  name?: string;
+};
 
 const parseServerRelationConfig = (
   rawConfig: string,
@@ -185,23 +189,25 @@ export const RC0 = (widget?: Widget) => {
   if (!widget) {
     return undefined;
   }
-  if (
-    !versionCanDo(APP_VERSION_RC_0, widget?.config?.content?.dataChart?.config)
-  ) {
+  const dataChartConfig = widget.config.content?.dataChart?.config;
+  const configVersion =
+    typeof dataChartConfig === 'string' ? dataChartConfig : dataChartConfig?.version;
+  if (!versionCanDo(APP_VERSION_RC_0, configVersion)) {
     return widget;
   }
-  if (widget.config.content?.dataChart?.config?.computedFields) {
-    widget.config.content.dataChart.config.computedFields =
-      widget.config.content.dataChart.config.computedFields.map(v => {
+  if (dataChartConfig?.computedFields) {
+    dataChartConfig.computedFields = dataChartConfig.computedFields.map(
+      (v: LegacyComputedField) => {
         if (!v.name) {
           return {
             ...v,
-            name: v.id,
+            name: v.id || '',
           };
         }
         return v;
-      });
-    widget.config.content.dataChart.config.version = APP_VERSION_RC_0;
+      },
+    ) as typeof dataChartConfig.computedFields;
+    dataChartConfig.version = APP_VERSION_RC_0;
   }
   return widget;
 };
