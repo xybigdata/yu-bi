@@ -39,8 +39,10 @@ interface EditableCellProps {
 interface EditableRowProps {
   index: number;
 }
-export interface DragEditTableProps extends TableProps<any> {
-  onMoveRowEnd?: (row: TableProps<any>['dataSource']) => void;
+export interface DragEditTableProps extends TableProps<RelationFilterValue> {
+  onMoveRowEnd?: (
+    row: TableProps<RelationFilterValue>['dataSource'],
+  ) => void;
 }
 export const DragSortEditTable: React.FC<DragEditTableProps> = ({
   components,
@@ -76,7 +78,9 @@ export const EditableRow: React.FC<EditableRowProps> = ({
     </Form>
   );
 };
-export const EditableContext = createContext<FormInstance<any> | null>(null);
+export const EditableContext = createContext<FormInstance<
+  Partial<RelationFilterValue>
+> | null>(null);
 export const EditableCell: React.FC<EditableCellProps> = ({
   title,
   editable,
@@ -143,13 +147,18 @@ export const EditableCell: React.FC<EditableCellProps> = ({
   );
 };
 
+type DraggableBodyRowProps = React.HTMLAttributes<HTMLTableRowElement> & {
+  index: number;
+  moveRow: (dragIndex: number, hoverIndex: number) => void;
+};
+
 export const DraggableAndEditableBodyRow = ({
   index,
   moveRow,
   className,
   style,
   ...restProps
-}) => {
+}: DraggableBodyRowProps) => {
   const [form] = Form.useForm();
   const ref = useRef(null);
   const [{ isOver, dropClassName }, drop] = useDrop({

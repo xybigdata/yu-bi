@@ -316,6 +316,7 @@
 - 已完成：`ThemeProvider` 测试里的主题变量与 store state 断言去掉局部 `any`，改用 `DefaultTheme` 与 `RootState`
 - 已完成：`Split` 组件的 split.js 子节点收集改为显式 `HTMLElement[]` 过滤，内部 gutter 标记用局部 DOM 扩展类型承接，去掉 ref 和 gutter 判断里的宽泛强转
 - 已完成：Redux 动态 reducer 注入工厂参数改为 `unknown` 入口，继续由 `checkStore` 做运行时 shape 校验，非法 store 测试不再需要 `as any`
+- 已完成：`DragSortEditTable` 的表格 props、编辑表单上下文和拖拽行 props 改为基于 `RelationFilterValue` 的显式类型，保留现有可编辑拖拽行为不变
 - 已完成：`frontend/.husky/pre-commit` 改为 staged 范围检查，TS / JS 文件不再每次触发全量 `lint:style`
 - 已完成：`ChartDtoHelper.parseChartConfig` 只接受对象形态配置，非对象 JSON 按空配置处理，并避免非对象配置先进入图表配置迁移器
 - 已完成：`internalChartHelper.transformToHierarchyModel` 的 View model 解析只接受对象形态，非法 JSON 或非对象 JSON 按空模型处理，并补齐回归测试
