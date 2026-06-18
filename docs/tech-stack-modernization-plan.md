@@ -368,6 +368,8 @@
 - 已完成：普通表格与指标卡条件样式弹窗的 target、颜色回调、数值区间回调和指标选项输入补齐局部显式类型，保持保存后的条件样式结构与匹配语义不变
 - 已完成：`ListTemplatePanel` 的选项状态、当前选中项、模板行创建和子组件更新入口补齐局部类型，去掉面板内部 `any[]` / `as any`
 - 已完成：`UnControlledTableHeaderPanel` 的表格行选择入口改为复用 antd 公开 `TableRowSelection`，内部继续按字符串 uid 状态处理，保持选择与合并行为不变
+- 已完成：`ControllerList` 的看板详情返回、控制器名称解析和关系变更入口补齐局部类型，去掉控制器列表里的响应体 `any`
+- 已完成：`DataReferencePanel` 的动态字段组装函数补齐返回类型，指标字段列表按局部最小结构收口，保持参考线/参考区配置组装语义不变
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
 - 暂缓评估：FormGenerator 全局 `ItemLayoutProps`、交互规则面板的动态 `value` / `Customize` 映射仍是协议宽口，需单独评估交互配置结构后再收口
@@ -489,12 +491,14 @@
 - `BasicFontWeight`、`BasicFontStyle`、`BasicFontFamilySelector`、`BasicFontSizeSelector`、`BasicInputPercentage`、`BasicSlider`、`BasicSelector` 的 antd 控件透传继续改为显式控件属性，避免 FormGenerator 行元数据继续进入三方组件
 - `TimerFormat` 与条件样式 add 弹窗的局部 ref、context、颜色和区间值回调类型完成收口，减少 FormGenerator 自定义控件中的 `any` 边界
 - `ListTemplatePanel` 与 `UnControlledTableHeaderPanel` 的选项状态、模板行和表格选择入口继续补齐局部显式类型，减少自定义控件中的 `any` 边界
+- `ControllerList` 与 `DataReferencePanel` 的看板详情、关系变更和动态参考线配置组装入口继续补齐局部显式类型，减少自定义配置面板中的 `any` 边界
 
 当前验证计划：
 
 - `npm run checkTs`
 - `npm run test:ci -- src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/utils.test.tsx`
 - `npm run test:ci -- src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx`
+- `npm run test:ci -- src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx src/app/utils/__tests__/chartHelper.test.ts`
 
 ### 6.2 最近已完成
 
