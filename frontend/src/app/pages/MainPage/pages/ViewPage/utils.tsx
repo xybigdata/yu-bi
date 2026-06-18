@@ -93,6 +93,14 @@ const parseStructColumnPath = (
   }
 };
 
+const parseStructScriptColumns = (columns?: string): string[] | 'all' => {
+  const parsed = columns ? JSON.parse(columns) : undefined;
+  if (parsed === 'all' || Array.isArray(parsed)) {
+    return parsed;
+  }
+  throw new Error('Invalid struct view columns');
+};
+
 const normalizeColumnPermission = (
   permission: ColumnPermissionRaw,
 ): ColumnPermission => {
@@ -597,22 +605,27 @@ export function handleStringScriptToObject(
   }
   try {
     const scriptJSON = JSON.parse(script);
-    const { columns } = findAllColumnsOrIsCheckAll(scriptJSON, database);
+    const parsedColumns = parseStructScriptColumns(scriptJSON.columns);
+    const { columns } = findAllColumnsOrIsCheckAll(
+      { ...scriptJSON, columns: parsedColumns === 'all' ? [] : parsedColumns },
+      database,
+    );
 
     return {
       ...scriptJSON,
-      columns:
-        JSON.parse(scriptJSON.columns) === 'all'
-          ? columns
-          : JSON.parse(scriptJSON.columns),
+      columns: parsedColumns === 'all' ? columns : parsedColumns,
       joins: scriptJSON.joins.map(join => {
-        const { columns } = findAllColumnsOrIsCheckAll(join, database);
+        const parsedJoinColumns = parseStructScriptColumns(join.columns);
+        const { columns } = findAllColumnsOrIsCheckAll(
+          {
+            ...join,
+            columns: parsedJoinColumns === 'all' ? [] : parsedJoinColumns,
+          },
+          database,
+        );
         return {
           ...join,
-          columns:
-            JSON.parse(join.columns) === 'all'
-              ? columns
-              : JSON.parse(join.columns),
+          columns: parsedJoinColumns === 'all' ? columns : parsedJoinColumns,
         };
       }),
     };

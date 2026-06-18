@@ -318,6 +318,7 @@
 - 已完成：变量默认值与行权限值解析只接受数组形态，非法 JSON 或非数组 JSON 按空值处理，避免坏数据打断变量表单与权限页
 - 已完成：View 详情消费链的 `config` / `model` 解析只接受对象形态，列权限解析只接受数组形态，非对象或非数组 JSON 按空配置处理
 - 已完成：STRUCT 视图字段路径解析补齐安全入口，坏 JSON 字段名不再打断层级模型路径补齐
+- 已完成：STRUCT 视图脚本列配置解析收口到 `all` 或数组形态，避免重复裸 `JSON.parse` 和异常列配置扩散
 - 已完成：迁移测试层局部弱类型收口
 - 已完成：工具测试层第一批局部弱类型收口
 - 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 的局部弱类型收口

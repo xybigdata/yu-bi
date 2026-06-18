@@ -22,6 +22,7 @@ import {
   addPathToHierarchyStructureAndChangeName,
   dataModelColumnSorter,
   diffMergeHierarchyModel,
+  handleStringScriptToObject,
   transformModelToViewModel,
 } from '../utils';
 
@@ -622,5 +623,81 @@ describe('transformModelToViewModel test', () => {
         columnPermission: [],
       }),
     ]);
+  });
+});
+
+describe('handleStringScriptToObject test', () => {
+  const database = [
+    {
+      dbName: 'db1',
+      tables: [
+        {
+          tableName: 'orders',
+          primaryKeys: [],
+          columns: [
+            {
+              fmt: '',
+              foreignKeys: [],
+              name: 'id',
+              type: 'STRING',
+            },
+            {
+              fmt: '',
+              foreignKeys: [],
+              name: 'amount',
+              type: 'NUMBER',
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  test('should convert all columns marker to database columns', () => {
+    const script = JSON.stringify({
+      table: ['db1', 'orders'],
+      columns: JSON.stringify('all'),
+      joins: [],
+    });
+
+    expect(handleStringScriptToObject(script, database)).toEqual({
+      table: ['db1', 'orders'],
+      columns: ['id', 'amount'],
+      joins: [],
+    });
+  });
+
+  test('should keep explicit columns from script', () => {
+    const script = JSON.stringify({
+      table: ['db1', 'orders'],
+      columns: JSON.stringify(['id']),
+      joins: [
+        {
+          table: ['db1', 'orders'],
+          columns: JSON.stringify(['amount']),
+        },
+      ],
+    });
+
+    expect(handleStringScriptToObject(script, database)).toEqual({
+      table: ['db1', 'orders'],
+      columns: ['id'],
+      joins: [
+        {
+          table: ['db1', 'orders'],
+          columns: ['amount'],
+        },
+      ],
+    });
+  });
+
+  test('should fallback to original script when columns json is invalid shape', () => {
+    const script = JSON.stringify({
+      table: ['db1', 'orders'],
+      columns: JSON.stringify(true),
+      joins: [],
+    });
+
+    expect(handleStringScriptToObject(script, database)).toBe(script);
   });
 });
