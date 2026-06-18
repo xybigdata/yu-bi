@@ -23,11 +23,12 @@ import { UploadDragger } from 'app/pages/DashBoardPage/pages/BoardEditor/compone
 import { ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo, useEffect, useRef } from 'react';
 import styled from 'styled-components';
+import { getColorPickerPopoverOptions } from '../../Basic/colorPickerOptions';
 import { Group, WithColorPicker } from '../../Basic/components/Group';
 import { ItemLayoutProps } from '../../types';
 
 export const Background: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
-  ({ ancestors, translate: t = title => title, data, onChange, ...rest }) => {
+  ({ ancestors, data, onChange }) => {
     const { value, options } = data;
     const gt = useI18NPrefix(`viz.board.setting`);
     const valRef = useRef<BackgroundConfig>();
@@ -57,9 +58,8 @@ export const Background: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
           {gt('color')}
           <WithColorPicker>
             <ColorPickerPopover
-              {...rest}
-              {...options}
               defaultValue={data.value?.color}
+              {...getColorPickerPopoverOptions(options)}
               onSubmit={onColorChange}
             />
           </WithColorPicker>

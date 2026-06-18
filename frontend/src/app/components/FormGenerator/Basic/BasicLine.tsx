@@ -24,12 +24,13 @@ import { CHART_LINE_STYLES, CHART_LINE_WIDTH } from 'globalConstants';
 import { FC, memo } from 'react';
 import { ItemLayoutProps } from '../types';
 import { itemLayoutComparer } from '../utils';
+import { getColorPickerPopoverOptions } from './colorPickerOptions';
 import { BW } from './components/BasicWrapper';
 import { Group, WithColorPicker } from './components/Group';
 
 const BasicLine: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data, onChange }) => {
-    const { label, comType, options, ...rest } = data;
+    const { label, options } = data;
 
     const handlePickerSelect = value => {
       handleSettingChange('color')(value);
@@ -72,9 +73,8 @@ const BasicLine: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
             </Select>
           </Group>
           <ColorPickerPopover
-            {...rest}
-            {...options}
             defaultValue={data.value?.color}
+            {...getColorPickerPopoverOptions(options)}
             onSubmit={handlePickerSelect}
           />
         </WithColorPicker>

@@ -24,24 +24,27 @@ import styled from 'styled-components';
 import { ItemLayoutProps } from '../types';
 import { itemLayoutComparer } from '../utils';
 import { BW } from './components/BasicWrapper';
+import { omitFormGeneratorOptions } from './controlOptions';
 
 const BasicCheckbox: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data: row, onChange }) => {
     const { comType, options, ...rest } = row;
+    const { hideLabel, needRefresh } = options || {};
+    const checkboxOptions = omitFormGeneratorOptions(options);
 
     const handleCheckedChange = (e: CheckboxChangeEvent) => {
-      onChange?.(ancestors, e.target?.checked, options?.needRefresh);
+      onChange?.(ancestors, e.target?.checked, needRefresh);
     };
 
     return (
       <StyledVizBasicCheckbox
-        label={!options?.hideLabel ? t(row.label, true) : ''}
+        label={!hideLabel ? t(row.label, true) : ''}
         labelCol={{ span: 20 }}
         wrapperCol={{ span: 4 }}
       >
         <Checkbox
           {...rest}
-          {...options}
+          {...checkboxOptions}
           checked={row.value}
           onChange={handleCheckedChange}
         />

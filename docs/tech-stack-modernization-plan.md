@@ -300,14 +300,14 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`前端生产代码低风险类型边界收口（长期低风险分支持续推进）`
+当前累计专题：`前端 FormGenerator 控件透传兼容收口`
 
 本批目标：
 
-- 继续复扫生产工具函数中已有测试覆盖、可隔离的局部弱类型
-- 优先处理 `chartHelper.ts` / `internalChartHelper.ts` 中不改变运行时语义的返回值、行数据和交互过滤器边界
-- 保持 tooltip 输出、轴标签溢出、图表选中样式和联动过滤器行为不变
-- 返回数据会进入保存、复制、迁移等业务拼装的链路先标记评估，不硬改
+- 收口 FormGenerator 基础控件中把内部配置直接透传到 DOM / antd / Popover 的低风险问题
+- 消除 React 18 测试中暴露的未知 DOM 属性与 `key` spread 告警
+- 保留 `hideLabel`、`needRefresh`、`items`、`translateItemLabel` 等 FormGenerator 内部语义不变
+- 只处理控件 props 透传边界，不调整控件交互、布局和业务配置结构
 
 当前累计清单：
 
@@ -357,10 +357,14 @@
 - 已完成：`internalChartHelper.ts` 的 view config 解析入口补齐对象守卫，非对象 JSON 输入按空配置处理，并补齐回归测试
 - 已完成：`chartHelper.ts` 的轴标签 interval 判断和 meta 路径查找 helper 补齐显式入参与返回类型，保持旧筛选值兼容面不变
 - 已完成：`fetch.ts` 的计算字段校验、可用函数列表、下载、插件加载、分享任务与图表数据请求 helper 补齐参数和返回类型，保持请求结构不变
-- 正在推进：生产工具函数中确认低风险的单点类型债复扫
+- 正在推进：FormGenerator 控件配置透传兼容边界收口
+- 已完成：`frontend/.husky/pre-push` 分层门禁，专题分支默认只跑轻量 TypeScript 门禁，`main` 保持完整前端门禁
+- 已完成：`BasicCheckbox` 不再把 `hideLabel`、`needRefresh` 透传给 antd Checkbox，保留刷新回调语义不变
+- 已完成：`BasicFont`、`BasicColorSelector`、`BasicLine`、`Background`、`WidgetBorder` 的 `ColorPickerPopover` 透传改为白名单提取，避免 `key` 与父级配置对象继续进入 Popover 链路
+- 已完成：`BasicSwitch`、`BasicRadio`、`BasicInput`、`BasicInputNumber` 改为剥离 FormGenerator 内部 options 后再下传给 antd 控件，保留控件可识别配置透传
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
-- 下一批候选：`utils/chartHelper.ts`、`utils/internalChartHelper.ts` 中可隔离、已有测试覆盖的 helper 局部类型收口
+- 下一批候选：继续复扫 FormGenerator 中 `options` / `rest` 透传到三方组件的低风险单点，确认有明确控件语义后再收口
 
 当前已落地范围：
 
@@ -473,13 +477,13 @@
 - `DashBoardPage/utils/index.ts` 的 `getWidgetControlValues` 返回结构改为显式控制器值类型，继续压缩看板过滤器参数构造链路里的 `value: any`
 - `chartHelper.ts` 的数值单位格式化、未使用表头行、tooltip 配置拼接和最小最大值计算入口继续收口局部 `any[]` / 宽泛入参，保持格式化与 tooltip 输出语义不变
 - `internalChartHelper.ts` 的视图配置字段映射和拖拽 item 构造补齐显式局部类型，继续压缩 Workbench 拖拽源与 view config helper 中的宽泛输入边界
+- `BasicCheckbox`、`BasicSwitch`、`BasicRadio`、`BasicInput`、`BasicInputNumber` 剥离 FormGenerator 内部 options 后再透传给 antd 控件，避免内部字段继续进入 DOM / antd 链路
+- `BasicFont`、`BasicColorSelector`、`BasicLine`、`Background`、`WidgetBorder` 统一通过颜色选择器 options 白名单透传 ColorPicker 配置，避免 `key` spread 和父级 props 继续进入 Popover 链路
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/utils/__tests__/utils.test.ts src/app/utils/__tests__/chartHelper.test.ts src/app/utils/__tests__/internalChartHelper.test.ts`
-- `npm run test:ci -- src/redux/__tests__/reducer.test.ts src/redux/__tests__/configureStore.test.ts src/utils/@reduxjs/injectReducer/tests/reducerInjectors.test.ts src/utils/@reduxjs/injectReducer/tests/checkStore.test.ts`
-- `npm run test:ci -- src/app/utils/__tests__/internalChartHelper.test.ts`
+- `npm run test:ci -- src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/utils.test.tsx`
 
 ### 6.2 最近已完成
 

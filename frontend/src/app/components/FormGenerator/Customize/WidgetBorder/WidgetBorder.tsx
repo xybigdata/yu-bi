@@ -23,12 +23,13 @@ import { BorderConfig } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo, useEffect, useRef } from 'react';
 import styled from 'styled-components';
+import { getColorPickerPopoverOptions } from '../../Basic/colorPickerOptions';
 import { BW } from '../../Basic/components/BasicWrapper';
 import { Group, WithColorPicker } from '../../Basic/components/Group';
 import { ItemLayoutProps } from '../../types';
 
 export const WidgetBorder: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
-  ({ ancestors, translate: t = title => title, data, onChange, ...rest }) => {
+  ({ ancestors, data, onChange }) => {
     const { value, options } = data;
     const gt = useI18NPrefix(`viz.board.setting`);
     const tLine = useI18NPrefix(`viz.lineOptions`);
@@ -54,9 +55,8 @@ export const WidgetBorder: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
           <label className="label">{gt('color')}</label>
           <WithColorPicker>
             <ColorPickerPopover
-              {...rest}
-              {...options}
               defaultValue={data.value?.color}
+              {...getColorPickerPopoverOptions(options)}
               onSubmit={changeC}
             />
           </WithColorPicker>

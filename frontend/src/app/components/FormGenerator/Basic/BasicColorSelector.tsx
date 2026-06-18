@@ -22,6 +22,7 @@ import { FC, memo } from 'react';
 import styled from 'styled-components';
 import { ItemLayoutProps } from '../types';
 import { itemLayoutComparer } from '../utils';
+import { getColorPickerPopoverOptions } from './colorPickerOptions';
 import { BW } from './components/BasicWrapper';
 
 const COLORS = [
@@ -45,7 +46,7 @@ const COLORS = [
 ];
 const BasicColorSelector: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data: row, onChange }) => {
-    const { comType, options, ...rest } = row;
+    const { options } = row;
 
     const handlePickerSelect = value => {
       onChange?.(ancestors, value);
@@ -62,10 +63,9 @@ const BasicColorSelector: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
         wrapperCol={{ span: 4 }}
       >
         <ColorPickerPopover
-          {...rest}
-          {...options}
           colors={COLORS}
           defaultValue={getColor()}
+          {...getColorPickerPopoverOptions(options)}
           onSubmit={handlePickerSelect}
         ></ColorPickerPopover>
       </StyledVizBasicColorSelector>
