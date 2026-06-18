@@ -356,6 +356,7 @@
 - 已完成：`utils.ts` 的 className 合并与阻止冒泡 helper 补齐显式入参类型，保持 className 输出和事件行为不变
 - 已完成：`internalChartHelper.ts` 的 view config 解析入口补齐对象守卫，非对象 JSON 输入按空配置处理，并补齐回归测试
 - 已完成：`chartHelper.ts` 的轴标签 interval 判断和 meta 路径查找 helper 补齐显式入参与返回类型，保持旧筛选值兼容面不变
+- 已完成：`fetch.ts` 的计算字段校验、可用函数列表、下载、插件加载、分享任务与图表数据请求 helper 补齐参数和返回类型，保持请求结构不变
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
@@ -381,6 +382,7 @@
 - `utils.ts` 补齐 className 合并与事件阻止冒泡 helper 的入参边界
 - `internalChartHelper.ts` 补齐 view config 解析对象守卫
 - `chartHelper.ts` 补齐 interval 判断和 meta 路径查找 helper 类型边界
+- `fetch.ts` 补齐计算字段校验、可用函数列表、下载、插件加载、分享任务与图表数据请求 helper 类型边界
 - `date.ts` 新增标准时间串 helper，继续承接 `TIME_FORMATTER` 的零散重复调用
 - `date.ts` 继续补齐标准时间串的可选格式化 helper，减少过滤器与当前时间默认值链路的直接模板耦合
 - `SchedulePage/utils.ts`、`ShareLinkModal.tsx`、`DashBoardPage/utils/*`、`ChartTimeSelector/utils.ts` 改为复用统一日期工具

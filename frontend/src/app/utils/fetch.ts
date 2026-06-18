@@ -37,6 +37,12 @@ import { request2, requestWithHeader } from 'utils/request';
 import { convertToChartDto } from './ChartDtoHelper';
 import { getAllColumnInMeta } from './chartHelper';
 
+type ShareTaskParams = {
+  clientId?: string;
+  password?: string | null;
+  shareToken?: string;
+};
+
 export const getDistinctFields = async (
   viewId: string,
   columns: string[],
@@ -164,7 +170,10 @@ export const makeShareDownloadDataTask =
     resolve();
   };
 
-export async function checkComputedFieldAsync(sourceId, expression) {
+export async function checkComputedFieldAsync(
+  sourceId: string | undefined,
+  expression: string | undefined,
+): Promise<boolean> {
   const response = await request2<boolean>({
     method: 'POST',
     url: `data-provider/function/validate`,
@@ -179,7 +188,9 @@ export async function checkComputedFieldAsync(sourceId, expression) {
   return !!response;
 }
 
-export async function fetchAvailableSourceFunctionsAsync(sourceId) {
+export async function fetchAvailableSourceFunctionsAsync(
+  sourceId: string,
+): Promise<string[]> {
   const response = await request2<string[]>({
     method: 'POST',
     url: `data-provider/function/support/${sourceId}`,
@@ -188,9 +199,9 @@ export async function fetchAvailableSourceFunctionsAsync(sourceId) {
 }
 
 export async function fetchAvailableSourceFunctionsAsyncForShare(
-  sourceId,
-  executeToken,
-) {
+  sourceId: string,
+  executeToken: string,
+): Promise<string[]> {
   const response = await request2<string[]>({
     method: 'POST',
     url: `shares/function/support/${sourceId}`,
@@ -275,7 +286,7 @@ export const dealFileSave = (
   URL.revokeObjectURL(downloadUrl);
 };
 
-export async function downloadFile(id) {
+export async function downloadFile(id: string): Promise<void> {
   const [data, headers] = await requestWithHeader<BlobPart>({
     url: `download/files/${id}`,
     method: 'GET',
@@ -284,14 +295,14 @@ export async function downloadFile(id) {
   dealFileSave(data, headers);
 }
 
-export async function fetchPluginChart(path) {
-  const result = await request2(path, {
+export async function fetchPluginChart(path: string): Promise<string> {
+  const result = await request2<string>(path, {
     baseURL: BASE_RESOURCE_URL,
     headers: { Accept: 'application/javascript' },
   }).catch(error => {
     console.error(error);
   });
-  return result || '';
+  return result?.data || '';
 }
 
 export async function getChartPluginPaths() {
@@ -302,7 +313,10 @@ export async function getChartPluginPaths() {
   return response?.data || [];
 }
 
-export async function loadShareTask(params) {
+export async function loadShareTask(params: ShareTaskParams): Promise<{
+  isNeedStopPolling: boolean;
+  data: DownloadTask[];
+}> {
   const { data } = await request2<DownloadTask[]>({
     url: `/shares/download/task`,
     method: 'GET',
@@ -347,9 +361,9 @@ export async function fetchDataChart(id: string) {
 }
 
 export async function fetchChartDataSet(
-  requestParams,
+  requestParams: ChartDataRequest,
   authorizedToken?: ExecuteToken,
-) {
+): Promise<ChartDataSetDTO> {
   if (authorizedToken) {
     const { data } = await request2<ChartDataSetDTO>({
       method: 'POST',
