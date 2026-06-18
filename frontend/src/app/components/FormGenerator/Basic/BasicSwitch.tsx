@@ -24,10 +24,13 @@ import styled from 'styled-components';
 import { ItemLayoutProps } from '../types';
 import { itemLayoutComparer } from '../utils';
 import { BW } from './components/BasicWrapper';
+import { omitFormGeneratorOptions } from './controlOptions';
 
 const BasicSwitch: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data: row, onChange }) => {
-    const { comType, options, ...rest } = row;
+    const { options } = row;
+    const { hideLabel } = options || {};
+    const switchOptions = omitFormGeneratorOptions(options);
 
     const handleSwitchChange = value => {
       const newRow = updateByKey(row, 'value', value);
@@ -36,15 +39,15 @@ const BasicSwitch: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
 
     return (
       <StyledBasicSwitch
-        label={!options?.hideLabel ? t(row.label, true) : ''}
+        label={!hideLabel ? t(row.label, true) : ''}
         labelCol={{ span: 20 }}
         wrapperCol={{ span: 4 }}
       >
         <Switch
           size="small"
-          {...rest}
-          {...options}
+          {...switchOptions}
           checked={row.value}
+          disabled={row.disabled}
           onChange={handleSwitchChange}
         />
       </StyledBasicSwitch>

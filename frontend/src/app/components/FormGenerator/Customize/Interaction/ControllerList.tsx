@@ -21,6 +21,7 @@ import type { TableColumnsType as ColumnsType } from 'antd';
 import useMount from 'app/hooks/useMount';
 import { parseServerWidget } from 'app/migration/BoardConfig/migrateWidgets';
 import { handleDateLevelsName } from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/utils';
+import { ServerDashboard } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { fetchDashboardDetail } from 'app/utils/fetch';
 import { updateBy } from 'app/utils/mutation';
@@ -46,17 +47,17 @@ const ControllerList: FC<
   translate: t,
 }) => {
   const [controllerNames, setControllerNames] = useState<string[]>([]);
-  const getControllerNames = data => {
+  const getControllerNames = (data?: ServerDashboard): string[] => {
     return (data?.widgets || [])
       .map(w => parseServerWidget(w))
       .filter(w => w?.config?.type === 'controller')
       .map(w => w?.config?.name)
-      .filter(Boolean);
+      .filter((name): name is string => Boolean(name));
   };
 
   useMount(async () => {
     if (targetRelId) {
-      const data: any = await fetchDashboardDetail(targetRelId);
+      const data = (await fetchDashboardDetail(targetRelId)) as ServerDashboard;
       const names = getControllerNames(data);
       setControllerNames(names);
     }
@@ -68,7 +69,7 @@ const ControllerList: FC<
     );
   };
 
-  const handleDeleteRelation = id => {
+  const handleDeleteRelation = (id?: string) => {
     if (id) {
       const newRelations = updateBy(relations, draft => {
         const index = draft!.findIndex(v => v.id === id);
@@ -80,7 +81,11 @@ const ControllerList: FC<
     }
   };
 
-  const handleRelationChange = (id, key, value) => {
+  const handleRelationChange = (
+    id: string | undefined,
+    key: 'source' | 'target',
+    value: string,
+  ) => {
     if (id) {
       const newRelations = updateBy(relations, draft => {
         const config = draft!.find(v => v.id === id);
@@ -90,7 +95,10 @@ const ControllerList: FC<
     }
   };
 
-  const handleRelationTypeChange = (id, value) => {
+  const handleRelationTypeChange = (
+    id: string | undefined,
+    value: InteractionRelationType,
+  ) => {
     if (id) {
       const newRelations = updateBy(relations, draft => {
         const index = draft!.findIndex(v => v.id === id);

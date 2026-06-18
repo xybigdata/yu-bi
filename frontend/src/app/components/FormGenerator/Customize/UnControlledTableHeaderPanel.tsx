@@ -25,6 +25,7 @@ import {
   RedoOutlined,
 } from '@ant-design/icons';
 import { Button, Col, Input, Row, Space, Table } from 'antd';
+import type { TableRowSelection } from 'antd/es/table/interface';
 import { ChartDataSectionType } from 'app/constants';
 import { ChartDataConfig, ChartStyleConfig } from 'app/types/ChartConfig';
 import {
@@ -293,10 +294,10 @@ const UnControlledTableHeaderPanel: FC<ItemLayoutProps<ChartStyleConfig>> =
         },
       ];
 
-      const rowSelection = {
+      const rowSelection: TableRowSelection<TableColumnsList> = {
         selectedRowKeys: selectedRowUids,
-        onChange: (selectedRowKeys: any[]) => {
-          setSelectedRowUids(selectedRowKeys);
+        onChange: selectedRowKeys => {
+          setSelectedRowUids(selectedRowKeys.map(String));
         },
       };
 

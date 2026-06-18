@@ -54,20 +54,34 @@ export type SliderSetFormProps = {
 } & SliderSetProps;
 
 export const RangeSliderSetForm: React.FC<SliderSetFormProps> = memo(
-  ({ ...rest }) => {
+  ({ label, name, preserve, required, style, ...sliderProps }) => {
     return (
-      <Form.Item rules={[{ required: true }]}>
-        <SliderSet {...rest} />
+      <Form.Item
+        label={label}
+        name={name}
+        preserve={preserve}
+        required={required}
+        style={style}
+        rules={[{ required: true }]}
+      >
+        <SliderSet {...sliderProps} />
       </Form.Item>
     );
   },
 );
 
 export const SliderSetForm: React.FC<SliderSetFormProps> = memo(
-  ({ ...rest }) => {
+  ({ label, name, preserve, required, style, ...sliderProps }) => {
     return (
-      <Form.Item rules={[{ required: true }]} {...rest}>
-        <SliderSet {...rest} />
+      <Form.Item
+        label={label}
+        name={name}
+        preserve={preserve}
+        required={required}
+        style={style}
+        rules={[{ required: true }]}
+      >
+        <SliderSet {...sliderProps} />
       </Form.Item>
     );
   },

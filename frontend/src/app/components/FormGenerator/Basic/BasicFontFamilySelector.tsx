@@ -23,18 +23,21 @@ import { FC, memo } from 'react';
 import { ItemLayoutProps } from '../types';
 import { itemLayoutComparer } from '../utils';
 import { BW } from './components/BasicWrapper';
+import { omitFormGeneratorOptions } from './controlOptions';
 
 const BasicFontFamilySelector: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data: row, onChange }) => {
-    const { comType, options, ...rest } = row;
+    const { options } = row;
+    const selectOptions = omitFormGeneratorOptions(options);
 
     return (
       <BW label={!options?.hideLabel ? t(row.label, true) : ''}>
         <Select
           className="datart-ant-select"
           dropdownMatchSelectWidth
-          {...rest}
-          {...options}
+          {...selectOptions}
+          value={row.value}
+          disabled={row.disabled}
           placeholder={t('select')}
           onChange={value => onChange?.(ancestors, value)}
         >

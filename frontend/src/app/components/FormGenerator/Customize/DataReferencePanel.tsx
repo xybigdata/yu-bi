@@ -16,7 +16,11 @@
  * limitations under the License.
  */
 
-import { ChartStyleConfig } from 'app/types/ChartConfig';
+import {
+  ChartDataConfig,
+  ChartDataSectionField,
+  ChartStyleConfig,
+} from 'app/types/ChartConfig';
 import { mergeChartStyleConfigs } from 'app/utils/internalChartHelper';
 import { updateBy, updateByKey } from 'app/utils/mutation';
 import { FC, memo, useEffect } from 'react';
@@ -25,6 +29,10 @@ import { CloneValueDeep, mergeDefaultToValue } from 'utils/object';
 import { GroupLayout } from '../Layout';
 import { ItemLayoutProps } from '../types';
 import { itemLayoutComparer } from '../utils';
+
+type ReferenceMetricField = ChartDataSectionField & {
+  label?: string;
+};
 
 const referencePanelConfig = [
   {
@@ -104,10 +112,11 @@ const referencePanelConfig = [
               },
               options: {
                 getItems: cols => {
-                  const sections = (cols || []).filter(col =>
+                  const availableConfigs = (cols || []) as ChartDataConfig[];
+                  const sections = availableConfigs.filter(col =>
                     ['metrics'].includes(col.key),
                   );
-                  const columns = sections.reduce(
+                  const columns = sections.reduce<ReferenceMetricField[]>(
                     (acc, cur) => acc.concat(cur.rows || []),
                     [],
                   );
@@ -412,7 +421,9 @@ const DataReferencePanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       }
     }, [ancestors, data, onChange]);
 
-    const assemblyDynamicFunctions = (data: ChartStyleConfig) => {
+    const assemblyDynamicFunctions = (
+      data: ChartStyleConfig,
+    ): ChartStyleConfig => {
       return updateBy(data, draft => {
         draft.rows?.map(tab => {
           tab.rows = tab.rows?.map(panel => {

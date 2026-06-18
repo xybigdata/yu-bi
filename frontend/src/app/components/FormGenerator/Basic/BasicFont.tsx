@@ -31,12 +31,13 @@ import isUndefined from 'lodash/isUndefined';
 import { FC, memo } from 'react';
 import { ItemLayoutProps } from '../types';
 import { itemLayoutComparer } from '../utils';
+import { getColorPickerPopoverOptions } from './colorPickerOptions';
 import { BW } from './components/BasicWrapper';
 import { Group, WithColorPicker } from './components/Group';
 
 const BasicFont: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data, onChange }) => {
-    const { comType, options, ...rest } = data;
+    const { options } = data;
 
     const handlePickerSelect = value => {
       handleSettingChange('color')(value);
@@ -131,9 +132,8 @@ const BasicFont: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
           </Group>
           {(isUndefined(options?.showFontColor) || options?.showFontColor) && (
             <ColorPickerPopover
-              {...rest}
-              {...options}
               defaultValue={data.value?.color}
+              {...getColorPickerPopoverOptions(options)}
               onSubmit={handlePickerSelect}
             />
           )}

@@ -23,6 +23,7 @@ import { isEmpty, isFunc } from 'utils/object';
 import { ItemLayoutProps } from '../types';
 import { itemLayoutComparer } from '../utils';
 import { BW } from './components/BasicWrapper';
+import { omitFormGeneratorOptions } from './controlOptions';
 
 const BasicSelector: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({
@@ -32,8 +33,9 @@ const BasicSelector: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
     dataConfigs,
     onChange,
   }) => {
-    const { comType, options, ...rest } = row;
-    const { translateItemLabel, hideLabel, ...restOptions } = options || {};
+    const { options } = row;
+    const { translateItemLabel, hideLabel } = options || {};
+    const selectOptions = omitFormGeneratorOptions(options);
 
     const handleSelectorValueChange = value => {
       onChange?.(ancestors, value, options?.needRefresh);
@@ -65,9 +67,10 @@ const BasicSelector: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
         <Select
           className="datart-ant-select"
           dropdownMatchSelectWidth
-          {...rest}
-          {...restOptions}
-          defaultValue={rest.default}
+          {...selectOptions}
+          value={row.value}
+          disabled={row.disabled}
+          defaultValue={row.default}
           placeholder={t('select')}
           options={safeInvokeAction()?.map(o => {
             const label = isEmpty(o['label']) ? o : o.label;

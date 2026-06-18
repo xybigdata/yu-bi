@@ -20,6 +20,7 @@ import { DeleteOutlined } from '@ant-design/icons';
 import { Col, Divider, List, Row, Select, Typography } from 'antd';
 import {
   ChartStyleConfig,
+  ChartStyleSectionRow,
   ChartStyleSelectorItem,
 } from 'app/types/ChartConfig';
 import { updateBy, updateByAction } from 'app/utils/mutation';
@@ -31,6 +32,11 @@ import { ItemLayoutProps } from '../types';
 import { itemLayoutComparer } from '../utils';
 
 const { Text } = Typography;
+
+type ListTemplateItem = ChartStyleSelectorItem & {
+  key: React.Key;
+  label: React.ReactNode;
+};
 
 const ListTemplatePanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({
@@ -59,32 +65,42 @@ const ListTemplatePanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       }
       return results;
     });
-    const [selectedItems, setSelectedItems] = useState<any[]>(() => {
-      if (rowSettings?.length! > 0) {
-        const ItemsKeys = rowSettings?.map(r => r.key) || [];
-        return allItems.filter(item => ItemsKeys.includes(item.key));
-      }
-      return [];
-    });
+    const [selectedItems, setSelectedItems] = useState<ListTemplateItem[]>(
+      () => {
+        if (rowSettings?.length! > 0) {
+          const ItemsKeys = rowSettings?.map(r => r.key) || [];
+          return allItems.filter(
+            (item): item is ListTemplateItem =>
+              !isEmpty(item.key) && ItemsKeys.includes(item.key),
+          );
+        }
+        return [];
+      },
+    );
     const [unSelectedItems, setUnSelectedItems] = useState(() => {
       const selectedItemsKeys = selectedItems.map(item => item.key);
-      return allItems.filter(item => !selectedItemsKeys.includes(item.key));
+      return allItems.filter(
+        (item): item is ListTemplateItem =>
+          !isEmpty(item.key) && !selectedItemsKeys.includes(item.key),
+      );
     });
-    const [currentSelectedItem, setCurrentSelectedItem] = useState<any>(() => {
+    const [currentSelectedItem, setCurrentSelectedItem] = useState<
+      ListTemplateItem | undefined
+    >(() => {
       if (!!selectedItems.length) {
         return selectedItems[0];
       }
     });
 
-    const handleRowSettingChange = listItem => {
+    const handleRowSettingChange = (listItem: ListTemplateItem) => {
       setCurrentSelectedItem(listItem);
     };
 
-    const handleDeleteItem = item => {
+    const handleDeleteItem = (item?: ListTemplateItem) => {
       if (item) {
         setUnSelectedItems(unSelectedItems.concat([item]));
         setSelectedItems(selectedItems.filter(so => so.key !== item.key));
-        setCurrentSelectedItem(null);
+        setCurrentSelectedItem(undefined);
         const newMyData = updateBy(myDataRef.current, draft => {
           draft.rows = draft?.rows?.filter(r => r?.key !== item.key);
           return draft;
@@ -93,7 +109,7 @@ const ListTemplatePanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       }
     };
 
-    const handleColumnChange = key => {
+    const handleColumnChange = (key: React.Key) => {
       const item = unSelectedItems.find(so => so.key === key);
       if (item) {
         setUnSelectedItems(unSelectedItems.filter(so => so.key !== key));
@@ -110,7 +126,7 @@ const ListTemplatePanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       }
     };
 
-    const handleChildComponentUpdate = key => (ancestors, row) => {
+    const handleChildComponentUpdate = (key: React.Key) => (ancestors, row) => {
       const index = rowSettings.findIndex(r => r.key === key);
       const newMyData = updateByAction(myDataRef.current, {
         ancestors: [index].concat(ancestors),
@@ -119,18 +135,18 @@ const ListTemplatePanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       handleDataChange(newMyData);
     };
 
-    const handleDataChange = newData => {
-      myDataRef.current = newData as any;
-      setRowSettings([...newData.rows]);
+    const handleDataChange = (newData: ChartStyleConfig) => {
+      myDataRef.current = newData;
+      setRowSettings([...(newData.rows || [])]);
       onChange?.(ancestors, newData);
     };
 
-    const createNewRowByTemplate = key => {
+    const createNewRowByTemplate = (key: React.Key): ChartStyleSectionRow => {
       const template = CloneValueDeep(myDataRef.current?.template!);
-      return { ...template, key };
+      return { ...template, key: String(key) };
     };
 
-    const renderRowSettings = r => {
+    const renderRowSettings = (r: ChartStyleSectionRow) => {
       return (
         <GroupLayout
           ancestors={[]}

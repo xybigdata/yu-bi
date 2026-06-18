@@ -23,21 +23,24 @@ import { FC, memo } from 'react';
 import { ItemLayoutProps } from '../types';
 import { itemLayoutComparer } from '../utils';
 import { BW } from './components/BasicWrapper';
+import { omitFormGeneratorOptions } from './controlOptions';
 
 const BasicSlider: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data: row, onChange }) => {
-    const { comType, options, ...rest } = row;
+    const { options } = row;
+    const sliderOptions = omitFormGeneratorOptions(options);
 
     return (
       <BW label={t(row.label, true)}>
         <Slider
-          {...rest}
-          {...options}
+          {...sliderOptions}
+          value={row.value}
+          disabled={row.disabled}
           min={!isUndefined(options?.min) ? Number(options?.min) : 1}
           max={!isUndefined(options?.max) ? Number(options?.max) : 10}
           step={!isUndefined(options?.step) ? Number(options?.step) : 1}
           dots={isUndefined(options?.dots) ? true : options?.dots}
-          defaultValue={rest?.default}
+          defaultValue={row.default}
           onChange={value => onChange?.(ancestors, value)}
         />
       </BW>

@@ -23,10 +23,12 @@ import { FC, memo } from 'react';
 import { ItemLayoutProps } from '../types';
 import { itemLayoutComparer } from '../utils';
 import { BW } from './components/BasicWrapper';
+import { omitFormGeneratorOptions } from './controlOptions';
 
 const BasicInputNumber: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data, onChange }) => {
-    const { options, comType, ...rest } = data;
+    const { options } = data;
+    const inputNumberOptions = omitFormGeneratorOptions(options);
     const [formValue, debouncedUpdateValue] = useDebouncedFormValue(
       data?.value,
       {
@@ -41,9 +43,9 @@ const BasicInputNumber: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       <BW label={t(data?.label, true)}>
         <InputNumber
           className="datart-ant-input-number"
-          {...rest}
-          {...options}
+          {...inputNumberOptions}
           value={formValue}
+          disabled={data.disabled}
           onChange={debouncedUpdateValue}
           defaultValue={data?.default}
         />

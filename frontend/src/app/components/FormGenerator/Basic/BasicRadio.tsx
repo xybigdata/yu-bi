@@ -23,12 +23,14 @@ import styled from 'styled-components';
 import { ItemLayoutProps } from '../types';
 import { itemLayoutComparer } from '../utils';
 import { BW } from './components/BasicWrapper';
+import { omitFormGeneratorOptions } from './controlOptions';
 
 const BasicRadio: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data: row, onChange }) => {
-    const { value, comType, options, ...rest } = row;
+    const { value, options } = row;
     const items = options?.items || [];
     const needTranslate = !!options?.translateItemLabel;
+    const radioOptions = omitFormGeneratorOptions(options);
 
     const handleValueChange = e => {
       const newValue = e.target.value;
@@ -39,8 +41,8 @@ const BasicRadio: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       <StyledBasicRadio label={t(row.label, true)}>
         <Radio.Group
           name={`${row.label}-${ancestors?.toString()}`}
-          {...rest}
-          {...options}
+          {...radioOptions}
+          disabled={row.disabled}
           onChange={handleValueChange}
           value={value}
         >
