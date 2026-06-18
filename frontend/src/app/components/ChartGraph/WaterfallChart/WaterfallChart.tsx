@@ -31,6 +31,7 @@ import {
   XAxisColumns,
   YAxis,
 } from 'app/types/ChartConfig';
+import { ChartRowData } from 'app/types/Chart';
 import ChartDataSetDTO, { IChartDataSet } from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
@@ -47,7 +48,11 @@ import {
 import { precisionCalculation, toSafeNumber } from 'app/utils/number';
 import { CalculationType } from 'globalConstants';
 import { UniqArray } from 'utils/object';
-import { loadEChartsRuntime } from '../echartsRuntime';
+import {
+  EChartsInstance,
+  isEChartsClickEvent,
+  loadEChartsRuntime,
+} from '../echartsRuntime';
 import Config from './config';
 import {
   OrderConfig,
@@ -57,7 +62,7 @@ import {
 
 class WaterfallChart extends Chart {
   config = Config;
-  chart: any = null;
+  chart: EChartsInstance | null = null;
   selectionManager?: ChartSelectionManager;
   protected container: HTMLElement | null = null;
   private latestMountPayload?: {
@@ -71,7 +76,7 @@ class WaterfallChart extends Chart {
   private runtimeLoadToken = 0;
 
   protected rowDataList: {
-    rowData: { [x: string]: any };
+    rowData: ChartRowData;
   }[] = [];
 
   constructor(props?) {
@@ -168,7 +173,11 @@ class WaterfallChart extends Chart {
             latestMountPayload.context.window,
           );
           this.selectionManager.attachZRenderListeners(this.chart);
-          this.chart.on('click', ({ dataIndex, componentIndex, ...rest }) => {
+          this.chart.on('click', event => {
+            if (!isEChartsClickEvent(event)) {
+              return;
+            }
+            const { dataIndex, componentIndex, ...rest } = event;
             // NOTE: 1. 累计不响应事件； 2. 下部透明柱状图不响应事件
             if (this.rowDataList.length <= dataIndex || componentIndex === 0) {
               return;

@@ -18,6 +18,7 @@
 
 import { DownloadFileType } from 'app/constants';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
+import { GenerateShareLink } from 'app/components/VizOperationMenu/components/slice/type';
 import { generateShareLinkAsync } from 'app/utils/fetch';
 import { createContext, FC, PropsWithChildren, memo, useMemo } from 'react';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -29,20 +30,8 @@ import { toUpdateDashboard } from '../../pages/BoardEditor/slice/thunk';
 
 export interface BoardActionContextProps {
   // read
-  onGenerateShareLink?: ({
-    expiryDate,
-    authenticationMode,
-    roles,
-    users,
-    rowPermissionBy,
-  }: {
-    expiryDate: string;
-    authenticationMode: string;
-    roles: string[];
-    users: string[];
-    rowPermissionBy: string;
-  }) => any;
-  onBoardToDownLoad: (downloadType: DownloadFileType) => any;
+  onGenerateShareLink?: GenerateShareLink;
+  onBoardToDownLoad: (downloadType: DownloadFileType) => void;
   // edit
   updateBoard?: (callback?: () => void) => void;
 

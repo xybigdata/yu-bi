@@ -4,9 +4,10 @@ import {
   MarkArea,
   MarkLine,
 } from 'app/types/ChartConfig';
+import { ChartRowData } from 'app/types/Chart';
 export type Series = {
   data: Array<{
-    rowData: { [key: string]: any };
+    rowData: ChartRowData;
     value: number | string | undefined;
     name?: string | undefined;
     format: FormatFieldAction | undefined;

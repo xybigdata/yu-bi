@@ -34,13 +34,14 @@ import {
   getStyles,
   transformToDataSet,
 } from 'app/utils/chartHelper';
+import { EChartsInstance } from '../echartsRuntime';
 import Config from './config';
 import { loadWordCloudRuntime } from './runtime';
 import { WordCloudConfig, WordCloudLabelConfig } from './types';
 
 // NOTE: wordcloud chart is echarts extension, more detail please check https://github.com/ecomfe/echarts-wordcloud
 class WordCloudChart extends Chart {
-  chart: any = null;
+  chart: EChartsInstance | null = null;
   config = Config;
   dependency = [];
   selectionManager?: ChartSelectionManager;

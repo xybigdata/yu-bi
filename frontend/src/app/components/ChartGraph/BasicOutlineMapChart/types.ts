@@ -1,4 +1,6 @@
+import { ChartRowData } from 'app/types/Chart';
 import { BorderStyle, FontStyle, LabelStyle } from '../../../types/ChartConfig';
+import { EChartsOption } from '../echartsRuntime';
 
 export type GeoInfo = {
   map?: string;
@@ -55,7 +57,7 @@ export interface GeoSeries {
     disabled?: boolean;
   };
   data: Array<{
-    rowData: { [key: string]: any };
+    rowData: ChartRowData;
     name: string;
     value: string;
     visualMap?: boolean;
@@ -64,7 +66,7 @@ export interface GeoSeries {
 
 export type MetricAndSizeSeriesStyle = {
   data: Array<{
-    rowData: { [key: string]: any };
+    rowData: ChartRowData;
     name: string;
     value: Array<number[] | number | string>;
   }>;
@@ -80,11 +82,11 @@ export type MetricAndSizeSeriesStyle = {
   };
 } & LabelStyle;
 
-export interface MapOption {
+export interface MapOption extends EChartsOption {
   geo?: GeoInfo;
   visualMap?: GeoVisualMapStyle[];
   series?: Array<GeoSeries | MetricAndSizeSeriesStyle>;
-  tooltip?: { trigger: string; formatter: (params: any) => string };
+  tooltip?: { trigger: string; formatter: (params: unknown) => string };
   toolbox?: {
     orient: string;
     top: string;

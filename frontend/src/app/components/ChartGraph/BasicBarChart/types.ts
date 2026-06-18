@@ -23,6 +23,7 @@ import {
   MarkArea,
   MarkLine,
 } from 'app/types/ChartConfig';
+import { ChartRowData } from 'app/types/Chart';
 
 export type BarBorderStyle = {
   color?: string;
@@ -42,7 +43,7 @@ export type BarSeriesImpl = {
 export type Series = {
   name: string;
   data: Array<{
-    rowData: { [key: string]: any };
+    rowData: ChartRowData;
     name: string;
     value: number | string;
     total?: number;

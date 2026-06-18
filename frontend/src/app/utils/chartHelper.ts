@@ -1585,7 +1585,7 @@ export function setOptionsByAxisLabelOverflow(config: ChartCommonConfig) {
 }
 
 export const getAutoFunnelTopPosition = (config: {
-  chart: ECharts;
+  chart?: ECharts | null;
   height: number;
   sort: 'ascending' | 'descending' | 'none';
   legendPos: string;
@@ -1596,7 +1596,7 @@ export const getAutoFunnelTopPosition = (config: {
   // 升序
   if (sort === 'ascending') return 16;
 
-  const chartHeight = chart.getHeight();
+  const chartHeight = chart?.getHeight();
   if (!chartHeight) return 16;
   // 24 marginBottom
   return chartHeight - 24 - height;

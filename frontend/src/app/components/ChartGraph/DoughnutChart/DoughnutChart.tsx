@@ -19,8 +19,6 @@
 import BasicPieChart from '../BasicPieChart';
 
 class DoughnutChart extends BasicPieChart {
-  chart: any = null;
-
   protected isCircle = true;
   protected isRose = false;
 

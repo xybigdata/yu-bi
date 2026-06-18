@@ -20,6 +20,7 @@ import { MoreOutlined, SendOutlined } from '@ant-design/icons';
 import { Button, Dropdown } from 'antd';
 import { DetailPageHeader } from 'app/components/DetailPageHeader';
 import { ShareManageModal } from 'app/components/VizOperationMenu';
+import { ShareLinkCreateParams } from 'app/components/VizOperationMenu/components/slice/type';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useStatusTitle } from 'app/pages/DashBoardPage/hooks/useStatusTitle';
 import { generateShareLinkAsync } from 'app/utils/fetch';
@@ -66,13 +67,7 @@ export const StoryHeader: FC<StoryHeaderProps> = memo(
         roles,
         users,
         rowPermissionBy,
-      }: {
-        expiryDate: string;
-        authenticationMode: string;
-        roles: string[];
-        users: string[];
-        rowPermissionBy: string;
-      }) => {
+      }: ShareLinkCreateParams) => {
         const result = await generateShareLinkAsync({
           expiryDate,
           authenticationMode,

@@ -340,6 +340,7 @@
 | `react-window` | 接入面窄，但处在真实运行时链路 | 虚拟表格渲染与滚动行为回归 |
 | `flexlayout-react` | 版本偏旧，仍在工作台布局主链 | 布局拖拽、面板状态、样式回归 |
 | `react-grid-layout` | 版本偏旧，仍在看板布局主链 | 拖拽缩放、响应式布局回归 |
+| 图表运行时类型边界 | ECharts / 表格 / 词云等运行时仍有局部宽口 | 图表渲染、事件回调、分页排序回归 |
 | Docker / 安装包闭环 | 基线已收口 | 安装包结构、静态资源、启动链验证 |
 
 ### 5.3 高风险：暂不直接动
@@ -357,23 +358,33 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`富文本兼容层稳定化`
+当前累计专题：`图表运行时类型边界稳定化`
 
 本批目标：
 
-- 稳定 `react-quill 2` 兼容层上的编辑态、只读态和看板富文本链路
-- 优先处理可用纯 helper 或小范围组件测试验证的行为边界
-- 保持现有 Quill Delta、calcfield 插入结构和保存协议不变
-- 暂不替换富文本编辑器依赖，不做 UI 重写
+- 优先收口图表运行时里局部 `any` / 宽泛事件参数 / 表格列配置类型
+- 只处理可通过现有图表定向测试或小范围新增测试验证的边界
+- 保持图表配置协议、数据集结构、渲染语义和事件 payload 不变
+- 不重写图表实例生命周期，优先收口实例、事件和 option 的类型边界
 - 不调整内部稳定标识和业务配置结构
 
 当前累计清单：
 
+- 已完成：BasicTable 表格列、header/body cell props、summary 返回、分页排序事件和单元格点击事件补齐局部显式类型，保留 Ant Design 公开入口和现有渲染行为不变
+- 已完成：图表事件行数据统一收口到 `ChartRowData`，柱线饼散点漏斗词云轮廓地图瀑布等图表不再继续声明 `rowData: any`
+- 已完成：Dashboard 跳转与联动消费图表事件值时显式字符串化，避免未知行数据值继续穿透到 URL 参数和联动过滤器
+- 已完成：ECharts 运行时导出 `EChartsInstance` 公共实例类型，并在 BasicGauge 图表先行替换 `chart: any`，卸载时补齐非空保护
+- 已完成：柱状/条形、折线、面积、饼图/环图/玫瑰图、散点、漏斗、双 Y 轴、轮廓地图、词云、瀑布和雷达图的 ECharts 实例类型收口到 `EChartsInstance | null`
+- 已完成：图表目录中的 `chart: any = null` 已清零，继承图表删除重复实例字段，Scorecard 删除未使用的 ReactChart 占位字段
+- 已完成：ECharts `datazoom`、点击事件和地图 option 增加局部类型桥接；漏斗图 top 位置 helper 接受空图表实例并保留原兜底语义
+- 已完成：轮廓地图 `getOption()` 与 `registerMap()` 桥接改为显式 ECharts option / registerMap 参数类型，去掉地图运行时里的局部 `as any`
+- 已完成：BasicTable 缓存表格 options、上下文、resize 回调、排序事件和 `widgetSpecialConfig` 读取补齐局部类型，表格与地图本轮复扫无 `any` 残留
 - 已完成：富文本字段引用菜单 key 改为优先使用字段 `id`、无 `id` 时按名称加索引兜底，避免同名字段误选第一个
 - 已完成：富文本只读翻译 `calcfield` 时优先按 `id` 匹配、再按 `name` 兼容旧数据，避免同名字段展示为错误值
 - 已完成：富文本只读翻译遇到缺失引用字段时保留原 calcfield 节点，避免生成 `insert: undefined` 的无效 Delta
 - 已完成：富文本图片拖拽/粘贴模块插入图片时保留光标 `index: 0` 语义，避免错误回退到文档末尾
 - 已完成：富文本运行时卸载时销毁 `imageDrop` / `calcfield` 模块，清理 Quill 与 DOM 事件监听，避免编辑器反复挂载后残留监听
+- 已完成：富文本 CustomColor toolbar 翻译函数返回类型从 `any` 收口为 `string | undefined`，对齐 DOM `title` 属性真实需求
 - 已完成：`CalcField` 增加 `destroy()`，释放 `text-change`、`selection-change`、paste 监听并废弃未完成 source token
 - 已完成：`split.js`、`react-window`、`sql-formatter`、ECharts 默认主题、Reveal、Monaco 和插件路径预加载的失败重试边界稳定化，避免一次加载失败后长期缓存 rejected Promise
 - 已完成：`Split`、`MonacoEditor`、SQL 编辑器快捷键绑定、SQL 格式化、StoryBoard 编辑/播放/分享播放的运行时加载失败兜底，避免组件内部异步加载失败形成未处理 Promise
@@ -385,6 +396,7 @@
 - 已完成：前端源码复扫已无 `antd/es`、`antd/lib`、`rc-*/es`、`rc-*/lib` 这类历史深路径类型入口；Monaco 剩余 `esm` 路径仅保留在运行时懒加载与语言贡献加载入口
 - 已完成：看板与图表 MockData 面板的样例数据状态、编辑器回调和导出参数补齐 `ChartDataSetDTO` / 行数组 / 模板导出 payload 局部类型，去掉面板链路里的宽泛 `any` 与原地修改
 - 已完成：Workbench、图表预览、分享预览和看板 widget 数据请求的排序、分页、执行 token 参数补齐 `ChartDataRequest` / `ChartDatasetPageInfo` / `ExecuteToken` 类型边界，去掉请求构造链路里的局部 `as any` 与 `getState() as any`
+- 已完成：分享链接创建链路补齐 `ShareLinkCreateParams` / `ShareLinkCreateRequest` / `ShareLinkCreateResult` / `GenerateShareLink` 类型，图表、看板、故事板分享入口复用统一回调边界，去掉分享创建返回值里的宽泛 `any`
 - 已完成：Share/Viz 预览数据集 fulfilled payload 补齐 `ChartDataSetDTO` 边界，computed fields 更新 payload 对齐 `ChartDataViewMeta[]`，去掉分享预览 dataset 的局部 `as any`
 - 已完成：ChartOperationPanel 的配置更新回调复用 `ChartConfigPayloadType`，FlexLayout factory 节点和 DnD backend props 补齐公开类型
 - 已完成：散点 symbol size 工具函数与轮廓地图散点 series 的 value 参数对齐真实数组边界，避免继续保留未声明回调参数
@@ -627,7 +639,7 @@
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/StoryBoardPage/__tests__/utils.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts`
+- `npm run test:ci -- src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts`
 
 ### 6.2 最近已完成
 
@@ -737,6 +749,18 @@
 
 - 通过：图表运行时加载稳定化专项轻量门禁，`npm run checkTs`
 - 通过：图表运行时加载稳定化专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts`
+- 通过：BasicTable 图表运行时类型边界专项轻量门禁，`npm run checkTs`
+- 通过：BasicTable 图表运行时类型边界专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx`
+- 通过：图表行数据类型边界专项轻量门禁，`npm run checkTs`
+- 通过：图表行数据类型边界专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicBarChart/__tests__/BasicBarChart.test.jsx src/app/components/ChartGraph/BasicLineChart/__tests__/BasicLineChart.test.jsx src/app/components/ChartGraph/BasicFunnelChart/__tests__/BasicFunnelChart.test.jsx src/app/components/ChartGraph/BasicScatterChart/__tests__/BasicScatterChart.test.jsx src/app/components/ChartGraph/BasicPieChart/__tests__/BasicPieChart.test.jsx src/app/components/ChartGraph/BasicDoubleYChart/__tests__/BasicDoubleYChart.test.jsx src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx src/app/components/ChartGraph/WordCloudChart/__tests__/WordCloudChart.test.jsx src/app/components/ChartGraph/WaterfallChart/__tests__/WaterfallChart.test.jsx src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts`
+- 通过：BasicGauge ECharts 实例类型试点专项轻量门禁，`npm run checkTs`
+- 通过：BasicGauge ECharts 实例类型试点专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicGaugeChart/__tests__/BasicGaugeChart.test.jsx src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts`
+- 通过：ECharts 实例类型边界批量收口专项轻量门禁，`npm run checkTs`
+- 通过：ECharts 实例类型边界批量收口专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicBarChart/__tests__/BasicBarChart.test.jsx src/app/components/ChartGraph/BasicLineChart/__tests__/BasicLineChart.test.jsx src/app/components/ChartGraph/BasicPieChart/__tests__/BasicPieChart.test.jsx src/app/components/ChartGraph/PieChart/__tests__/PieChart.test.jsx src/app/components/ChartGraph/DoughnutChart/__tests__/DoughnutChart.test.jsx src/app/components/ChartGraph/RoseChart/__tests__/RoseChart.test.jsx src/app/components/ChartGraph/BasicScatterChart/__tests__/BasicScatterChart.test.jsx src/app/components/ChartGraph/BasicFunnelChart/__tests__/BasicFunnelChart.test.jsx src/app/components/ChartGraph/BasicDoubleYChart/__tests__/BasicDoubleYChart.test.jsx src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx src/app/components/ChartGraph/WordCloudChart/__tests__/WordCloudChart.test.jsx src/app/components/ChartGraph/WaterfallChart/__tests__/WaterfallChart.test.jsx src/app/components/ChartGraph/BasicRadarChart/__tests__/BasicRadarChart.test.jsx src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/utils/__tests__/overflowFuncs.test.ts`，15 个测试文件、33 个用例通过
+- 通过：图表表格与地图局部类型边界批次轻量门禁，`npm run checkTs`
+- 通过：图表表格与地图局部类型边界批次定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts`，3 个测试文件、4 个用例通过
+- 通过：分享链接创建链路类型边界批次轻量门禁，`npm run checkTs`
+- 记录：分享链接创建链路当前未发现专门单测，本批通过目标文件 `any` 复扫和 TypeScript 门禁验证类型收口，不声明完整分享行为回归
 - 通过：运行时懒加载边界稳定化专项轻量门禁，`npm run checkTs`
 - 通过：运行时懒加载边界稳定化专项定向测试，`npm run test:ci -- src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/sqlFormatterRuntime.test.ts src/app/utils/__tests__/echartsThemeRuntime.test.ts src/app/pages/StoryBoardPage/__tests__/revealRuntime.test.ts src/app/components/MonacoEditor/__tests__/runtime.test.ts src/app/services/__tests__/chartPluginService.test.ts`
 - 通过：运行时加载调用层稳定化专项轻量门禁，`npm run checkTs`
@@ -751,6 +775,8 @@
 - 通过：富文本缺失引用与图片插入边界专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/ImageDropModule.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
 - 通过：富文本运行时销毁边界专项轻量门禁，`npm run checkTs`
 - 通过：富文本运行时销毁边界专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/RichTextEditorRuntime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/ImageDropModule.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
+- 通过：富文本 toolbar 翻译函数类型边界批次轻量门禁，`npm run checkTs`
+- 通过：富文本 toolbar 翻译函数类型边界批次定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`，3 个测试文件、10 个用例通过
 - 通过：运行时数据解析稳定化专项轻量门禁，`npm run checkTs`
 - 通过：运行时数据解析稳定化专项定向测试，`npm run test:ci -- src/app/pages/StoryBoardPage/__tests__/utils.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts`
 - 通过：BoardEditor 运行时数据解析稳定化专项定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts`

@@ -1,3 +1,5 @@
+import { ChartRowData } from 'app/types/Chart';
+
 export interface WordCloudConfig {
   drawOutOfBound: boolean;
   shape: string;
@@ -24,7 +26,7 @@ export interface WordCloudLabelConfig {
   data?:
     | {
         name: string;
-        rowData: { [p: string]: any };
+        rowData: ChartRowData;
         textStyle: { opacity?: number } & Record<string, unknown>;
         value: string;
       }[]

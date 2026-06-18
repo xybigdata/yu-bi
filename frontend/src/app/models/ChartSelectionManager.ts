@@ -68,7 +68,7 @@ export class ChartSelectionManager {
     chart?.getZr().on('click', this.zRenderMouseEventHandler.bind(this));
   }
 
-  public removeZRenderListeners(chart: EChartsType) {
+  public removeZRenderListeners(chart?: EChartsType | null) {
     chart?.getZr().off('click', this.zRenderMouseEventHandler.bind(this));
   }
 

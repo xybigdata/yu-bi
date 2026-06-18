@@ -20,7 +20,6 @@ import BasicBarChart from '../BasicBarChart';
 import Config from './config';
 
 class ClusterColumnChart extends BasicBarChart {
-  chart: any = null;
   config = Config;
   isHorizonDisplay = false;
 

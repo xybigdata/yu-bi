@@ -4,6 +4,7 @@ import {
   GridStyle,
   LabelStyle,
 } from 'app/types/ChartConfig';
+import { ChartRowData } from 'app/types/Chart';
 
 export interface PieSeries {
   radius: string[] | string;
@@ -26,7 +27,7 @@ export type PieSeriesStyle = {
       name: string;
       value: Array<string | number | undefined>;
       itemStyle: Record<string, unknown> | undefined;
-      rowData: { [key: string]: any };
+      rowData: ChartRowData;
     } & ChartDataSectionField
   >;
 } & PieSeriesImpl;

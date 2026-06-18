@@ -1,9 +1,10 @@
 import { LabelStyle, MarkArea, MarkLine } from 'app/types/ChartConfig';
+import { ChartRowData } from 'app/types/Chart';
 
 export type ScatterMetricAndSizeSerie = {
   data: {
     name: string;
-    rowData: { [p: string]: any };
+    rowData: ChartRowData;
     value: Array<string | number | undefined>;
     itemStyle?: Record<string, unknown>;
   }[];

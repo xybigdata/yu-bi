@@ -51,6 +51,7 @@ import {
   tablePagingAndSortEventListener,
 } from 'app/utils/ChartEventListenerHelper';
 import { generateShareLinkAsync, makeDownloadDataTask } from 'app/utils/fetch';
+import { ShareLinkCreateParams } from 'app/components/VizOperationMenu/components/slice/type';
 import { getChartDrillOption } from 'app/utils/internalChartHelper';
 import {
   FC,
@@ -475,13 +476,7 @@ const ChartPreviewBoard: FC<{
       roles,
       users,
       rowPermissionBy,
-    }: {
-      expiryDate: string;
-      authenticationMode: string;
-      roles: string[];
-      users: string[];
-      rowPermissionBy: string;
-    }) => {
+    }: ShareLinkCreateParams) => {
       const result = await generateShareLinkAsync({
         expiryDate,
         authenticationMode,

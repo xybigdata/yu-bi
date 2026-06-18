@@ -16,16 +16,17 @@
  * limitations under the License.
  */
 
+import { ChartMouseEventParams } from 'app/types/Chart';
 import { ChartConfig } from 'app/types/ChartConfig';
 import ChartDataSetDTO from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import Chart from '../../../models/Chart';
-import { loadEChartsRuntime } from '../echartsRuntime';
+import { EChartsInstance, loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 
 class BasicRadarChart extends Chart {
   config = Config;
-  chart: any = null;
+  chart: EChartsInstance | null = null;
   protected container: HTMLElement | null = null;
   private latestMountPayload?: {
     options: BrokerOption;
@@ -163,7 +164,9 @@ class BasicRadarChart extends Chart {
         if (!this.chart) {
           this.chart = init(this.container, 'default');
           this.mouseEvents?.forEach(event => {
-            this.chart.on(event.name, event.callback);
+            this.chart?.on(event.name, params =>
+              event.callback(params as unknown as ChartMouseEventParams),
+            );
           });
         }
 

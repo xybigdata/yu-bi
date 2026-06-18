@@ -48,8 +48,10 @@ export interface ChartMouseEvent {
 export interface ChartsEventData extends Object {
   name: string;
   value: string;
-  rowData: { [propName: string]: any };
+  rowData: ChartRowData;
 }
+
+export type ChartRowData = Record<string, unknown>;
 
 // Note: `EventParams` type from echarts definition. But no interaction types are included.
 export interface ChartMouseEventParams {

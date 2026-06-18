@@ -45,14 +45,14 @@ import {
   toFormattedValue,
   transformToDataSet,
 } from 'app/utils/chartHelper';
-import { loadEChartsRuntime } from '../echartsRuntime';
+import { EChartsInstance, loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 import { ScatterMetricAndSizeSerie } from './types';
 
 class BasicScatterChart extends Chart {
   dependency = [];
   config = Config;
-  chart: any = null;
+  chart: EChartsInstance | null = null;
   selectionManager?: ChartSelectionManager;
   protected container: HTMLElement | null = null;
   private latestMountPayload?: {
@@ -133,7 +133,7 @@ class BasicScatterChart extends Chart {
   }
 
   onResize(options: BrokerOption, context: BrokerContext) {
-    this.chart?.resize(options, context);
+    this.chart?.resize({ width: context?.width, height: context?.height });
   }
 
   private loadRuntimeAndReplay() {

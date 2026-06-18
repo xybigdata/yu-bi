@@ -47,7 +47,7 @@ import {
   transformToDataSet,
 } from 'app/utils/chartHelper';
 import isEmpty from 'lodash/isEmpty';
-import { loadEChartsRuntime } from '../echartsRuntime';
+import { EChartsInstance, loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 import { Series, SeriesData } from './types';
 
@@ -58,7 +58,7 @@ const getNumericCellValue = (
 
 class BasicFunnelChart extends Chart {
   config = Config;
-  chart: any = null;
+  chart: EChartsInstance | null = null;
   selectionManager?: ChartSelectionManager;
   protected container: HTMLElement | null = null;
   private latestMountPayload?: {

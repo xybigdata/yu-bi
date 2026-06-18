@@ -28,6 +28,7 @@ import {
   ShareManageModal,
   useVizOperationMenuItems,
 } from 'app/components/VizOperationMenu';
+import { GenerateShareLink } from 'app/components/VizOperationMenu/components/slice/type';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { BoardType } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { TITLE_SUFFIX } from 'globalConstants';
@@ -45,19 +46,7 @@ const VizHeader: FC<{
   onRun?;
   onGotoEdit?;
   onPublish?: () => void;
-  onGenerateShareLink?: ({
-    expiryDate,
-    authenticationMode,
-    roles,
-    users,
-    rowPermissionBy,
-  }: {
-    expiryDate: string;
-    authenticationMode: string;
-    roles: string[];
-    users: string[];
-    rowPermissionBy: string;
-  }) => any;
+  onGenerateShareLink?: GenerateShareLink;
   onDownloadData?;
   onSaveAsVizs?;
   onReloadData?;

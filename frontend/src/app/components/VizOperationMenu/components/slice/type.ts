@@ -33,3 +33,29 @@ export interface ShareDetail {
   vizId: string;
   vizType: 'DATACHART' | 'DASHBOARD' | 'STORYBOARD';
 }
+
+export type ShareVizType = ShareDetail['vizType'];
+
+export type ShareLinkCreateParams = {
+  expiryDate: string;
+  authenticationMode: string;
+  roles: string[];
+  users: string[];
+  rowPermissionBy: string;
+};
+
+export type ShareLinkCreateRequest = ShareLinkCreateParams & {
+  vizId: string;
+  vizType: ShareVizType;
+};
+
+export type ShareLinkCreateResult = {
+  data?: unknown;
+  errCode?: number;
+  message?: string;
+  success?: boolean;
+} & Partial<ShareDetail>;
+
+export type GenerateShareLink = (
+  params: ShareLinkCreateParams,
+) => Promise<ShareLinkCreateResult | undefined>;

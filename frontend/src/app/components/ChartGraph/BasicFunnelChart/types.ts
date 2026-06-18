@@ -3,6 +3,7 @@ import {
   GridStyle,
   LabelStyle,
 } from 'app/types/ChartConfig';
+import { ChartRowData } from 'app/types/Chart';
 
 export type SeriesData = {
   itemStyle?: {
@@ -10,7 +11,7 @@ export type SeriesData = {
     opacity?: number | undefined;
   } & Record<string, unknown>;
   name: string;
-  rowData: { [key: string]: any };
+  rowData: ChartRowData;
   select: boolean;
   value: string[];
 } & ChartDataSectionField;

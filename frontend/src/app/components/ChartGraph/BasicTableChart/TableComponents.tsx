@@ -28,7 +28,10 @@ export const TableComponentsTd = ({
   return <Td {...rest}>{children}</Td>;
 };
 
-type ResizableTitleProps = React.ThHTMLAttributes<HTMLTableCellElement> & {
+type ResizableTitleProps = Omit<
+  React.ThHTMLAttributes<HTMLTableCellElement>,
+  'onResize'
+> & {
   width?: number;
   onResize?: ResizableProps['onResize'];
 };
