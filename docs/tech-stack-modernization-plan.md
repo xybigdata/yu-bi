@@ -351,6 +351,9 @@
 - 已完成：`object.ts` 的二元数组、空值判断、浅合并、集合复制、对象取值、字符串转换、函数/Promise/树模型判断等 helper 改为显式 `unknown` / 泛型边界，保留原判断语义不变
 - 已完成：`debugger.ts` 的性能测量入口改为泛型回调，保留同步和异步返回值语义不变
 - 已完成：`utils.ts` 的通用错误处理入口改为 `unknown` + 最小错误结构守卫，并补齐错误消息提取与 reject 回归测试
+- 已完成：Redux reducer 测试改为使用真实 `theme` 注入 key 与 `UnknownAction`，去掉测试里的宽泛 reducer 强转
+- 已完成：`checkStore.ts` 的 Redux 动态注入 store 校验入口改为 `unknown`，继续由运行时 shape 校验兜底
+- 已完成：`utils.ts` 的 className 合并与阻止冒泡 helper 补齐显式入参类型，保持 className 输出和事件行为不变
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
@@ -371,6 +374,9 @@
 - `object.ts` 补齐通用数组/空值/合并/复制/判断 helper 的低风险类型边界
 - `debugger.ts` 补齐性能测量工具的泛型返回值边界
 - `utils.ts` 补齐通用错误处理和 reject helper 的错误对象边界
+- `redux/__tests__/reducer.test.ts` 补齐 reducer 测试的真实注入 key 与 action 类型边界
+- `checkStore.ts` 补齐 Redux 动态注入 store 校验入口边界
+- `utils.ts` 补齐 className 合并与事件阻止冒泡 helper 的入参边界
 - `date.ts` 新增标准时间串 helper，继续承接 `TIME_FORMATTER` 的零散重复调用
 - `date.ts` 继续补齐标准时间串的可选格式化 helper，减少过滤器与当前时间默认值链路的直接模板耦合
 - `SchedulePage/utils.ts`、`ShareLinkModal.tsx`、`DashBoardPage/utils/*`、`ChartTimeSelector/utils.ts` 改为复用统一日期工具
@@ -466,6 +472,7 @@
 
 - `npm run checkTs`
 - `npm run test:ci -- src/utils/__tests__/utils.test.ts src/app/utils/__tests__/chartHelper.test.ts src/app/utils/__tests__/internalChartHelper.test.ts`
+- `npm run test:ci -- src/redux/__tests__/reducer.test.ts src/redux/__tests__/configureStore.test.ts src/utils/@reduxjs/injectReducer/tests/reducerInjectors.test.ts src/utils/@reduxjs/injectReducer/tests/checkStore.test.ts`
 
 ### 6.2 最近已完成
 

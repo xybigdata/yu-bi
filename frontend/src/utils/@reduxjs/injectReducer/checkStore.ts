@@ -6,7 +6,7 @@ import assertInvariant from 'utils/assertInvariant';
 /**
  * Validates the redux store is set up properly to work with this library.
  */
-export default function checkStore(store) {
+export default function checkStore(store: unknown) {
   const shape = {
     dispatch: isFunction,
     subscribe: isFunction,
@@ -16,7 +16,7 @@ export default function checkStore(store) {
     injectedReducers: isObject,
   };
   assertInvariant(
-    conformsTo(store, shape),
+    conformsTo(store as object, shape),
     '(redux-injectors...) checkStore: Expected a redux store that has been configured for use with redux-injectors.',
   );
 }

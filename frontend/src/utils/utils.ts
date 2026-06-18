@@ -4,7 +4,7 @@ import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { AxiosError, AxiosResponse } from 'axios';
 import classnames from 'classnames';
 import i18next from 'i18next';
-import { ReactElement } from 'react';
+import { ReactElement, SyntheticEvent } from 'react';
 import {
   FONT_FAMILY,
   FONT_SIZE_BODY,
@@ -152,10 +152,10 @@ export function rejectHandle(error: unknown, rejectWithValue: RejectWithValue) {
   }
 }
 
-export const mergeClassNames = (origin, added) =>
+export const mergeClassNames = (origin: string = '', added: string = '') =>
   classnames({ [origin]: !!origin, [added]: true });
 
-export function stopPPG(e) {
+export function stopPPG(e: SyntheticEvent) {
   e.stopPropagation();
 }
 
