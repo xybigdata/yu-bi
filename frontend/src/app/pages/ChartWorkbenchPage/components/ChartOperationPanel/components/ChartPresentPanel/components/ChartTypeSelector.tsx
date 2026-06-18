@@ -38,14 +38,14 @@ export enum ChartPresentType {
 }
 
 const ChartTypeSelector: FC<{
-  type;
+  type: ChartPresentType;
   translate: (title: string) => string;
-  onChange: (value) => void;
+  onChange: (value: ChartPresentType) => void;
   onCreateDownloadDataTask?: () => void;
 }> = memo(({ type, onChange, onCreateDownloadDataTask }) => {
   const t = useI18NPrefix(`viz.action.common`);
   const typeChange = useCallback(
-    type => () => {
+    (type: ChartPresentType) => () => {
       onChange(type);
     },
     [onChange],

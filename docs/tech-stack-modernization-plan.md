@@ -269,6 +269,12 @@
   - Scorecard 的 React 点击事件回调补齐真实事件类型
   - 漏斗图、散点图、词云图、基础饼图与轮廓地图的样式扩展字段从 `any` 收口为 `Record<string, unknown>`
   - 本批继续暂缓 ECharts 实例、tooltip params、地图注册入参、rowData 与图表公共协议宽口
+- 前端局部 UI 与适配层类型边界继续收口：
+  - 基础饼图 value 数组补齐真实值类型边界
+  - ColorPicker 弹层回调保持上层字符串颜色 API，底层取消信号不再向上扩散
+  - ChartTypeSelector 的类型切换回调收口到 `ChartPresentType`
+  - Split 适配层补齐拖拽尺寸与 gutter 回调参数类型，并补齐重建分支的 HTMLElement 兜底
+  - 本批不触碰 widget content、Dashboard view/sampleData、表格交互事件和第三方实例宽口
 - Maven 对外品牌元数据继续收口：
   - 根 POM 与各服务端模块补齐 `name`、`description` 等对外元数据，统一以 `yu-bi` 对外呈现
   - SCM 与许可证信息指向 `yu-bi` 新仓库

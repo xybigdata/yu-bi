@@ -8,8 +8,8 @@ interface ColorPickerPopoverProps {
   popoverProps?: PopoverProps;
   defaultValue?: string;
   size?: number;
-  onSubmit?: (color) => void;
-  onChange?: (color) => void;
+  onSubmit?: (color: string) => void;
+  onChange?: (color: string) => void;
   colorPickerClass?: string;
   colors?: string[];
 }
@@ -29,9 +29,11 @@ export const ColorPickerPopover: FC<ColorPickerPopoverProps> = ({
     setOpen(false);
   }, []);
   const onColorChange = useCallback(
-    color => {
-      onSubmit?.(color);
-      onChange?.(color);
+    (color?: string) => {
+      if (color) {
+        onSubmit?.(color);
+        onChange?.(color);
+      }
       onCancel();
     },
     [onSubmit, onCancel, onChange],

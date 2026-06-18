@@ -15,6 +15,13 @@ const getSplitChildren = (parent: HTMLDivElement): HTMLElement[] =>
       !(element as SplitGutterElement).__isSplitGutter,
   );
 
+const getPreviousSiblingElement = (element?: HTMLElement): HTMLElement => {
+  const previousSibling = element?.previousSibling;
+  return previousSibling instanceof HTMLElement
+    ? previousSibling
+    : document.createElement('div');
+};
+
 interface SplitWrapperProps {
   sizes?: number[];
   minSize?: number | number[];
@@ -26,12 +33,25 @@ interface SplitWrapperProps {
   dragInterval?: number;
   direction?: 'horizontal' | 'vertical';
   cursor?: string;
-  gutter?: (index, direction, pairElement?) => HTMLElement;
-  elementStyle?: (dimension, elementSize, gutterSize, index) => object;
-  gutterStyle?: (dimension, gutterSize, index) => object;
-  onDrag?: (sizes) => void;
-  onDragStart?: (sizes) => void;
-  onDragEnd?: (sizes) => void;
+  gutter?: (
+    index: number,
+    direction: 'horizontal' | 'vertical',
+    pairElement?: HTMLElement,
+  ) => HTMLElement;
+  elementStyle?: (
+    dimension: string,
+    elementSize: number,
+    gutterSize: number,
+    index: number,
+  ) => object;
+  gutterStyle?: (
+    dimension: string,
+    gutterSize: number,
+    index: number,
+  ) => object;
+  onDrag?: (sizes: number[]) => void;
+  onDragStart?: (sizes: number[]) => void;
+  onDragEnd?: (sizes: number[]) => void;
   collapsed?: number;
   children?: ReactElement[];
   className?: string;
@@ -51,7 +71,10 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
     this.mounted = true;
     const { children, gutter, ...options } = this.props;
 
-    const updatedGutter = (index, direction) => {
+    const updatedGutter = (
+      index: number,
+      direction: 'horizontal' | 'vertical',
+    ) => {
       let gutterElement: SplitGutterElement;
 
       if (gutter) {
@@ -121,7 +144,8 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
     // Destroy and re-create split if options changed
     if (needsRecreate) {
       this.split?.destroy(true, true);
-      options.gutter = (index, direction, pairB) => pairB.previousSibling;
+      options.gutter = (index, direction, pairB) =>
+        getPreviousSiblingElement(pairB);
       const Split = await loadSplit();
 
       if (!this.mounted || !this.parent) {
