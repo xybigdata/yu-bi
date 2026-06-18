@@ -14,6 +14,16 @@ import { APIResponse } from 'types';
 import { SaveFormModel } from '../app/pages/MainPage/pages/VizPage/SaveFormContext';
 import { removeToken } from './auth';
 
+type ErrorLike = {
+  message?: string;
+};
+
+type AxiosErrorLike = ErrorLike & {
+  response?: AxiosResponse<APIResponse<unknown>>;
+};
+
+type RejectWithValue = (value: unknown) => unknown;
+
 function getRandomByte(): number {
   return Math.floor(Math.random() * 256);
 }
@@ -62,64 +72,83 @@ export function universalUUID() {
   return uuidv4();
 }
 
-export function errorHandle(error) {
-  if (error?.response) {
+function asAxiosErrorLike(error: unknown): AxiosErrorLike | undefined {
+  if (typeof error !== 'object' || error === null) {
+    return undefined;
+  }
+
+  return error as AxiosErrorLike;
+}
+
+function getErrorLikeMessage(error: unknown): string | undefined {
+  return asAxiosErrorLike(error)?.message;
+}
+
+export function errorHandle<T>(error: T): T {
+  const errorLike = asAxiosErrorLike(error);
+
+  if (errorLike?.response) {
     // AxiosError
-    const { response } = error as AxiosError<APIResponse<unknown>>;
+    const { response } = errorLike;
     switch (response?.status) {
       case 401:
         message.error({ key: '401', content: String(i18next.t('global.401')) });
         removeToken();
         break;
       default:
-        message.error(response?.data.message || error.message);
+        message.error(response?.data.message || errorLike.message);
         break;
     }
-  } else if (error?.message) {
+  } else if (errorLike?.message) {
     // Error
-    message.error(error.message);
+    message.error(errorLike.message);
   } else {
-    message.error(error);
+    message.error(String(error));
   }
   return error;
 }
 
-export function getErrorMessage(error) {
+export function getErrorMessage(error: unknown) {
   if (typeof error === 'string') {
     return error;
   }
-  if (error?.response) {
-    const { response } = error as AxiosError<APIResponse<unknown>>;
+
+  const errorLike = asAxiosErrorLike(error);
+  if (errorLike?.response) {
+    const { response } = errorLike;
     switch (response?.status) {
       case 401:
         removeToken();
         return String(i18next.t('global.401'));
       default:
-        return response?.data.message || error.message;
+        return response?.data.message || errorLike.message;
     }
   }
-  return error?.message;
+  return getErrorLikeMessage(error);
 }
 
-export function reduxActionErrorHandler(errorAction) {
+export function reduxActionErrorHandler(errorAction: {
+  payload?: unknown;
+  error?: ErrorLike;
+}) {
   if (errorAction?.payload) {
-    message.error(errorAction?.payload);
+    message.error(String(errorAction.payload));
   } else if (errorAction?.error) {
     message.error(errorAction?.error.message);
   }
 }
 
-export function rejectHandle(error, rejectWithValue) {
-  if (error?.response?.status === 401) {
+export function rejectHandle(error: unknown, rejectWithValue: RejectWithValue) {
+  const errorLike = asAxiosErrorLike(error);
+
+  if (errorLike?.response?.status === 401) {
     removeToken();
   }
-  if ((error as AxiosError).response) {
-    return rejectWithValue(
-      ((error as AxiosError).response as AxiosResponse<APIResponse<unknown>>)
-        .data.message,
-    );
+
+  if (errorLike?.response) {
+    return rejectWithValue(errorLike.response.data.message);
   } else {
-    return rejectWithValue(error.message);
+    return rejectWithValue(errorLike?.message);
   }
 }
 

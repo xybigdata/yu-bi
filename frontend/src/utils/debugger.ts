@@ -31,7 +31,11 @@ export class Debugger {
     this._enableDebug = !!enable;
   }
 
-  public measure(info: string, fn: Function, forceEnable: boolean = true) {
+  public measure<TResult>(
+    info: string,
+    fn: () => TResult,
+    forceEnable: boolean = true,
+  ): TResult {
     if (!this._enableDebug || !forceEnable) {
       return fn();
     }

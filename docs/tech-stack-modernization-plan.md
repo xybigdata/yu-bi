@@ -349,6 +349,8 @@
 - 已完成：Redux 动态 reducer 注入器补齐 HOC props、key 和 action 类型边界，保留不同 slice reducer 动态注入的运行时兼容面
 - 已完成：`loadable.tsx` 改为通过重载保留懒加载组件 props 类型，默认导出和 selector 导出两类调用保持现有行为不变
 - 已完成：`object.ts` 的二元数组、空值判断、浅合并、集合复制、对象取值、字符串转换、函数/Promise/树模型判断等 helper 改为显式 `unknown` / 泛型边界，保留原判断语义不变
+- 已完成：`debugger.ts` 的性能测量入口改为泛型回调，保留同步和异步返回值语义不变
+- 已完成：`utils.ts` 的通用错误处理入口改为 `unknown` + 最小错误结构守卫，并补齐错误消息提取与 reject 回归测试
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
@@ -367,6 +369,8 @@
 - `injectReducer/index.tsx` 与 `reducerInjectors.ts` 补齐动态 reducer 注入器类型边界
 - `loadable.tsx` 补齐懒加载组件 props 推断边界
 - `object.ts` 补齐通用数组/空值/合并/复制/判断 helper 的低风险类型边界
+- `debugger.ts` 补齐性能测量工具的泛型返回值边界
+- `utils.ts` 补齐通用错误处理和 reject helper 的错误对象边界
 - `date.ts` 新增标准时间串 helper，继续承接 `TIME_FORMATTER` 的零散重复调用
 - `date.ts` 继续补齐标准时间串的可选格式化 helper，减少过滤器与当前时间默认值链路的直接模板耦合
 - `SchedulePage/utils.ts`、`ShareLinkModal.tsx`、`DashBoardPage/utils/*`、`ChartTimeSelector/utils.ts` 改为复用统一日期工具
@@ -461,7 +465,7 @@
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/utils/__tests__/utils.test.ts src/utils/__tests__/loadable.test.tsx src/redux/__tests__/configureStore.test.ts src/utils/@reduxjs/injectReducer/tests/reducerInjectors.test.ts src/utils/@reduxjs/injectReducer/tests/checkStore.test.ts`
+- `npm run test:ci -- src/utils/__tests__/utils.test.ts src/app/utils/__tests__/chartHelper.test.ts src/app/utils/__tests__/internalChartHelper.test.ts`
 
 ### 6.2 最近已完成
 
