@@ -24,26 +24,39 @@ import styled from 'styled-components';
 import { SPACE_TIMES } from 'styles/StyleConstants';
 import { getServerDomain, request2 } from 'utils/request';
 import ShareLinkModal from './ShareLinkModal';
-import { ShareDetail } from './slice/type';
+import { AuthenticationModeType, RowPermissionByType } from './slice/constants';
+import {
+  GenerateShareLink,
+  ShareDetail,
+  ShareLinkCreateParams,
+  ShareLinkCreateResult,
+  ShareVizType,
+} from './slice/type';
+
+const mergeShareDetail = (
+  paramsData: ShareLinkCreateParams & {
+    id?: string;
+  },
+  data: ShareLinkCreateResult,
+  vizType: ShareVizType,
+): ShareDetail => {
+  return {
+    ...paramsData,
+    ...data,
+    vizType,
+    authenticationMode: (data.authenticationMode ||
+      paramsData.authenticationMode) as AuthenticationModeType,
+    rowPermissionBy: (data.rowPermissionBy ||
+      paramsData.rowPermissionBy) as RowPermissionByType,
+  } as ShareDetail;
+};
 
 const ShareManageModal: FC<{
   vizId: string;
   orgId: string;
-  vizType: string;
+  vizType: ShareVizType;
   visibility: boolean;
-  onGenerateShareLink?: ({
-    expiryDate,
-    authenticationMode,
-    roles,
-    users,
-    rowPermissionBy,
-  }: {
-    expiryDate: string;
-    authenticationMode: string;
-    roles: string[];
-    users: string[];
-    rowPermissionBy: string;
-  }) => any;
+  onGenerateShareLink?: GenerateShareLink;
   onOk?;
   onCancel?;
 }> = memo(
@@ -72,9 +85,9 @@ const ShareManageModal: FC<{
     }, [vizId]);
 
     const upDateShareLink = useCallback(
-      async paramsData => {
+      async (paramsData: ShareLinkCreateParams & Partial<ShareDetail>) => {
         const { id } = paramsData;
-        const { data } = await request2({
+        const { data } = await request2<ShareLinkCreateResult>({
           url: `/shares/${id}`,
           method: 'PUT',
           data: paramsData,
@@ -84,7 +97,7 @@ const ShareManageModal: FC<{
           setListData(
             produce(listData, draft => {
               const Index = draft.findIndex(v => v.id === id);
-              draft[Index] = Object.assign(paramsData, data, { vizType });
+              draft[Index] = mergeShareDetail(paramsData, data, vizType);
             }),
           );
         }
@@ -93,15 +106,11 @@ const ShareManageModal: FC<{
     );
 
     const creatShareLinkFn = useCallback(
-      async paramsData => {
+      async (paramsData: ShareLinkCreateParams) => {
         const data = await onGenerateShareLink?.(paramsData);
         if (data) {
           setListData([
-            {
-              ...paramsData,
-              ...data,
-              vizType,
-            },
+            mergeShareDetail(paramsData, data, vizType),
             ...listData,
           ]);
         }

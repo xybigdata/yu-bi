@@ -396,6 +396,7 @@
 - 已完成：前端源码复扫已无 `antd/es`、`antd/lib`、`rc-*/es`、`rc-*/lib` 这类历史深路径类型入口；Monaco 剩余 `esm` 路径仅保留在运行时懒加载与语言贡献加载入口
 - 已完成：看板与图表 MockData 面板的样例数据状态、编辑器回调和导出参数补齐 `ChartDataSetDTO` / 行数组 / 模板导出 payload 局部类型，去掉面板链路里的宽泛 `any` 与原地修改
 - 已完成：Workbench、图表预览、分享预览和看板 widget 数据请求的排序、分页、执行 token 参数补齐 `ChartDataRequest` / `ChartDatasetPageInfo` / `ExecuteToken` 类型边界，去掉请求构造链路里的局部 `as any` 与 `getState() as any`
+- 已完成：分享链接创建链路补齐 `ShareLinkCreateParams` / `ShareLinkCreateRequest` / `ShareLinkCreateResult` / `GenerateShareLink` 类型，图表、看板、故事板分享入口复用统一回调边界，去掉分享创建返回值里的宽泛 `any`
 - 已完成：Share/Viz 预览数据集 fulfilled payload 补齐 `ChartDataSetDTO` 边界，computed fields 更新 payload 对齐 `ChartDataViewMeta[]`，去掉分享预览 dataset 的局部 `as any`
 - 已完成：ChartOperationPanel 的配置更新回调复用 `ChartConfigPayloadType`，FlexLayout factory 节点和 DnD backend props 补齐公开类型
 - 已完成：散点 symbol size 工具函数与轮廓地图散点 series 的 value 参数对齐真实数组边界，避免继续保留未声明回调参数
@@ -758,6 +759,8 @@
 - 通过：ECharts 实例类型边界批量收口专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicBarChart/__tests__/BasicBarChart.test.jsx src/app/components/ChartGraph/BasicLineChart/__tests__/BasicLineChart.test.jsx src/app/components/ChartGraph/BasicPieChart/__tests__/BasicPieChart.test.jsx src/app/components/ChartGraph/PieChart/__tests__/PieChart.test.jsx src/app/components/ChartGraph/DoughnutChart/__tests__/DoughnutChart.test.jsx src/app/components/ChartGraph/RoseChart/__tests__/RoseChart.test.jsx src/app/components/ChartGraph/BasicScatterChart/__tests__/BasicScatterChart.test.jsx src/app/components/ChartGraph/BasicFunnelChart/__tests__/BasicFunnelChart.test.jsx src/app/components/ChartGraph/BasicDoubleYChart/__tests__/BasicDoubleYChart.test.jsx src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx src/app/components/ChartGraph/WordCloudChart/__tests__/WordCloudChart.test.jsx src/app/components/ChartGraph/WaterfallChart/__tests__/WaterfallChart.test.jsx src/app/components/ChartGraph/BasicRadarChart/__tests__/BasicRadarChart.test.jsx src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/utils/__tests__/overflowFuncs.test.ts`，15 个测试文件、33 个用例通过
 - 通过：图表表格与地图局部类型边界批次轻量门禁，`npm run checkTs`
 - 通过：图表表格与地图局部类型边界批次定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts`，3 个测试文件、4 个用例通过
+- 通过：分享链接创建链路类型边界批次轻量门禁，`npm run checkTs`
+- 记录：分享链接创建链路当前未发现专门单测，本批通过目标文件 `any` 复扫和 TypeScript 门禁验证类型收口，不声明完整分享行为回归
 - 通过：运行时懒加载边界稳定化专项轻量门禁，`npm run checkTs`
 - 通过：运行时懒加载边界稳定化专项定向测试，`npm run test:ci -- src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/sqlFormatterRuntime.test.ts src/app/utils/__tests__/echartsThemeRuntime.test.ts src/app/pages/StoryBoardPage/__tests__/revealRuntime.test.ts src/app/components/MonacoEditor/__tests__/runtime.test.ts src/app/services/__tests__/chartPluginService.test.ts`
 - 通过：运行时加载调用层稳定化专项轻量门禁，`npm run checkTs`

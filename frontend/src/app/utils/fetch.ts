@@ -17,6 +17,10 @@
  */
 import { message } from 'antd';
 import type { AxiosResponse } from 'axios';
+import type {
+  ShareLinkCreateRequest,
+  ShareLinkCreateResult,
+} from 'app/components/VizOperationMenu/components/slice/type';
 import { DownloadFileType } from 'app/constants';
 import {
   DownloadTask,
@@ -220,13 +224,8 @@ export async function generateShareLinkAsync({
   roles,
   users,
   rowPermissionBy,
-}) {
-  const response = await request2<{
-    data: unknown;
-    errCode: number;
-    message: string;
-    success: boolean;
-  }>({
+}: ShareLinkCreateRequest): Promise<ShareLinkCreateResult> {
+  const response = await request2<ShareLinkCreateResult>({
     method: 'POST',
     url: `shares`,
     data: {
