@@ -139,6 +139,8 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
       if (!cancelled) {
         setGrid(() => module.VariableSizeGrid);
       }
+    }).catch(error => {
+      console.error('Load virtual table runtime failed', error);
     });
 
     return () => {
@@ -206,7 +208,7 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
           columnWidth={index => {
             const width = Number(mergedColumns[index]?.width || 0);
             return totalHeight > scroll.y && index === mergedColumns.length - 1
-              ? width - scrollbarSize - 16
+              ? Math.max(0, width - scrollbarSize - 16)
               : width;
           }}
           height={scroll.y}

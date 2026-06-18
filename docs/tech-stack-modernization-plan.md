@@ -41,9 +41,9 @@
 
 - 每轮开始先核对长期目标：`JDK 21`、`Node 24`、兼容优先、稳定版优先、`main` 不直接开发
 - 每批提交前核对短期目标：当前改动是否仍属于当前专题，是否低风险、可验证、可回退
-- 如果候选点开始牵涉共享协议、运行时行为或跨域依赖，先降级为评估项，不混入低风险批次
+- 如果候选点开始牵涉共享协议、运行时行为或跨域依赖，拆成中高风险专项推进，并补足定向测试或完整门禁证据
 - 每次阶段性提交或推送后，在本文档中保留对后续判断有用的执行记录
-- 前端低风险日常推进使用轻量门禁：优先 `npm run checkTs`，必要时补相关单测；只有准备阶段性合入 `main` 前才执行完整前端门禁 `npm run test:ci`、`npm run lint:css`、`npm run lint:style`
+- 前端低风险日常推进使用轻量门禁：优先 `npm run checkTs`，必要时补相关单测；中风险运行时链路必须补定向测试或更强门禁；只有准备阶段性合入 `main` 前才执行完整前端门禁 `npm run test:ci`、`npm run lint:css`、`npm run lint:style`
 
 ## 3. 当前基线
 
@@ -219,6 +219,7 @@
   - 实际使用面确认仅剩 `VirtualTable -> SchemaTable`
   - 虚拟表格 reset 时机修正为依赖变化即时触发
   - 列宽分摊逻辑补齐除零保护
+  - 虚拟表格运行时加载失败补齐显式兜底，列宽扣减滚动条时补齐非负保护，并补充 `VirtualTable` 定向测试
 - `flexlayout-react` / `react-grid-layout` 使用面盘点与布局映射收口：
   - `flexlayout-react` 实际使用面确认集中在图表工作台 `ChartOperationPanel`
   - `ChartOperationPanel` 补齐布局节点尺寸读取兜底，避免布局节点未就绪时直接取空
@@ -336,7 +337,7 @@
 
 ## 6. 当前进行中专题
 
-当前工作区只推进低风险、小范围、可回归的专题，不进入结构性替换。
+当前工作区按“可验证、可回退、兼容优先”推进；低风险继续累计，中风险拆专项稳定化，高风险只在边界清晰且有验证证据时进入。
 
 ### 6.1 正在推进
 
@@ -706,6 +707,8 @@
 
 当前低风险批次合并前门禁记录：
 
+- 通过：`react-window` 虚拟表格稳定化专项轻量门禁，`npm run checkTs`
+- 通过：`react-window` 虚拟表格稳定化专项定向测试，`npm run test:ci -- src/app/components/__tests__/VirtualTable.test.tsx`
 - 通过：ChartEventListenerHelper 回调类型边界批次轻量门禁，`npm run checkTs`
 - 通过：ChartEventListenerHelper 回调类型边界批次定向测试，`npm run test:ci -- src/app/utils/__tests__/ChartEventListenerHelper.test.ts`
 - 通过：字段 Action 菜单类型边界批次轻量门禁，`npm run checkTs`
