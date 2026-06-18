@@ -29,9 +29,10 @@ import { SPACE_TIMES, SPACE_XS } from 'styles/StyleConstants';
 import { selectMemberListLoading, selectMembers } from '../../slice/selectors';
 import { getMembers } from '../../slice/thunks';
 
-interface MemberFormProps extends ModalProps {
+interface MemberFormProps extends Omit<ModalProps, 'onCancel'> {
   initialValues: User[];
   onChange: (members: User[]) => void;
+  onCancel?: () => void;
 }
 
 export const MemberForm = memo(
@@ -59,7 +60,7 @@ export const MemberForm = memo(
 
     const save = useCallback(() => {
       onChange(targetKeys.map(id => members.find(m => m.id === id)!));
-      onCancel && onCancel(null as any);
+      onCancel?.();
     }, [targetKeys, members, onCancel, onChange]);
 
     const handleTargetKeysChange: TransferProps<User>['onChange'] =
@@ -90,7 +91,7 @@ export const MemberForm = memo(
       <ModalForm
         {...modalProps}
         onSave={save}
-        onCancel={onCancel}
+        onCancel={() => onCancel?.()}
         ref={formRef}
       >
         <TransferWrapper>

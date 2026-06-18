@@ -10,13 +10,21 @@ import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectIsOrgOwner } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
-import { memo, useCallback, useContext, useEffect } from 'react';
+import { Key, ReactNode, memo, useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import { getInsertedNodeIndex, stopPPG } from 'utils/utils';
 import { SaveFormContext } from '../SaveFormContext';
 import { selectVizs } from '../slice/selectors';
 import { deleteViz, removeTab, unarchiveViz } from '../slice/thunks';
+import { VizType } from '../slice/types';
+
+interface VizRecycleNode extends TreeDataNode {
+  key: Key;
+  title?: ReactNode;
+  id: string;
+  vizType: VizType;
+}
 
 interface RecycleProps {
   type: 'viz' | 'storyboard';
@@ -118,7 +126,7 @@ export const Recycle = memo(
     );
 
     const renderTreeTitle = useCallback(
-      ({ key, title, vizType }) => {
+      ({ key, title, vizType }: VizRecycleNode) => {
         const items: MenuProps['items'] = [
           {
             key: 'reset',
@@ -174,7 +182,7 @@ export const Recycle = memo(
       <Tree
         loading={listLoading}
         treeData={list}
-        titleRender={node => renderTreeTitle(node as any)}
+        titleRender={node => renderTreeTitle(node as VizRecycleNode)}
         onSelect={treeSelect}
       />
     );

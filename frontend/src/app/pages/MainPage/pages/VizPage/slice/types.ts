@@ -127,6 +127,10 @@ export interface AddVizParams {
     description?: string;
     parentId?: string | null;
     orgId: string;
+    config?: string;
+    viewId?: string;
+    avatar?: string | null;
+    subType?: string;
     file?: FormData;
   };
   type: VizType;
@@ -217,6 +221,10 @@ export interface SaveAsDashboardParams {
     index: number | null;
     config: string;
     parentId?: string | null;
+    orgId?: string;
+    permissions?: unknown;
+    subType?: string;
+    boardType?: string;
   };
   dashboardId?: string;
 }

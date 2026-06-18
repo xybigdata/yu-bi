@@ -5,9 +5,43 @@ import {
   toDatartDayjsRange,
 } from 'app/utils/date';
 import { PermissionLevels, ResourceTypes } from '../PermissionPage/constants';
-import { JobTypes, TimeModes, VizTypes } from './constants';
-import { AddScheduleParams, Schedule, VizContentsItem } from './slice/types';
+import { FileTypes, JobTypes, TimeModes, VizTypes } from './constants';
+import {
+  AddScheduleParams,
+  JobConfig,
+  Schedule,
+  VizContentsItem,
+} from './slice/types';
 import { FormValues } from './types';
+
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const parseScheduleConfig = (config?: string | null): JobConfig => {
+  if (!config) {
+    return {};
+  }
+  try {
+    const parsed = JSON.parse(config);
+    if (!isPlainObject(parsed)) {
+      return {};
+    }
+    const scheduleConfig = parsed as JobConfig;
+    return {
+      ...scheduleConfig,
+      vizContents: Array.isArray(scheduleConfig.vizContents)
+        ? scheduleConfig.vizContents
+        : [],
+    };
+  } catch {
+    return {};
+  }
+};
+
+const parseAttachmentTypes = (attachments?: string[]): FileTypes[] =>
+  (attachments || []).filter((attachment): attachment is FileTypes =>
+    Object.values(FileTypes).includes(attachment as FileTypes),
+  );
 
 const computePeriodUnit = (cronExpression: string) => {
   const partitions = cronExpression.split(' ');
@@ -130,8 +164,8 @@ export const toEchoFormValues = ({
   parentId,
   index,
 }: Schedule): FormValues => {
-  const configObj: any = config ? JSON.parse(config || '{}') : {},
-    vizContents: VizContentsItem[] = configObj?.vizContents || [],
+  const configObj = parseScheduleConfig(config),
+    vizContents = configObj.vizContents || [],
     folderContent = vizContents.filter(v => v?.vizType !== VizTypes.StoryBoard),
     demoContent = vizContents.filter(v => v?.vizType === VizTypes.StoryBoard),
     setCronExpressionManually = !!configObj?.setCronExpressionManually;
@@ -156,7 +190,7 @@ export const toEchoFormValues = ({
     to: configObj?.to || '',
     cc: configObj?.cc || '',
     bcc: configObj?.bcc || '',
-    type: configObj?.attachments || [],
+    type: parseAttachmentTypes(configObj?.attachments),
     webHookUrl: configObj?.webHookUrl || '',
     demoContent,
     folderContent,

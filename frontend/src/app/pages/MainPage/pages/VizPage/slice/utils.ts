@@ -1,12 +1,27 @@
 import { ChartDataSectionType, ControllerFacadeTypes } from 'app/constants';
-import { ChartConfig } from 'app/types/ChartConfig';
+import { ChartConfig, RelationFilterValue } from 'app/types/ChartConfig';
 import { PendingChartDataRequestFilter } from 'app/types/ChartDataRequest';
 import { RUNTIME_FILTER_KEY } from 'globalConstants';
 import { isEmptyArray } from 'utils/object';
 import { FilterSearchParams } from './types';
 
+const isRelationFilterValue = (value: unknown): value is RelationFilterValue =>
+  typeof value === 'object' &&
+  value !== null &&
+  'key' in value &&
+  'label' in value;
+
+const toRelationFilterValues = (
+  value: unknown,
+): RelationFilterValue[] | undefined => {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+  return value.every(isRelationFilterValue) ? value : undefined;
+};
+
 const valueTransder = {
-  list: (value?: string | string[]) => {
+  list: (value?: string | string[]): RelationFilterValue[] => {
     if (Array.isArray(value)) {
       return value.map(v => ({ key: v, label: v, isSelected: true }));
     } else {
@@ -20,9 +35,12 @@ const valueTransder = {
       return value;
     }
   },
-  dropdownList: (valueOptions, value) => {
+  dropdownList: (
+    valueOptions: RelationFilterValue[] | undefined,
+    value?: string | string[],
+  ): RelationFilterValue[] | undefined => {
     const _value = value?.[0];
-    if (valueOptions?.length > 0 && _value) {
+    if (valueOptions && valueOptions.length > 0 && _value) {
       return valueOptions.map(v => {
         if (_value === v.label && v) {
           v.isSelected = true;
@@ -70,13 +88,13 @@ export const transferChartConfig = (
             switch (facade) {
               case ControllerFacadeTypes.DropdownList:
                 const _value0 = valueTransder.dropdownList(
-                  v.filter.condition.value,
+                  toRelationFilterValues(v.filter.condition.value),
                   value,
-                ) as any[];
+                );
                 v.filter.condition.value = _value0;
                 break;
               case ControllerFacadeTypes.MultiDropdownList:
-                const _value = valueTransder.list(value) as any[];
+                const _value = valueTransder.list(value);
                 v.filter.condition.value = _value;
                 break;
               case ControllerFacadeTypes.RadioGroup:

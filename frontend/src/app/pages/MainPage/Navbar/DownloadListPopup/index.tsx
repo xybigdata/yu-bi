@@ -29,7 +29,7 @@ interface DownloadListPopupProps {
   tooltipProps?: TooltipProps;
   polling: boolean;
   renderDom?: ReactElement;
-  onLoadTasks: OnLoadTasksType<any>;
+  onLoadTasks: OnLoadTasksType;
   setPolling: (polling: boolean) => void;
   onDownloadFile: (task: DownloadTask) => void;
 }

@@ -1,5 +1,5 @@
 import { CloseOutlined } from '@ant-design/icons';
-import { Dropdown } from 'antd';
+import { Dropdown, MenuProps } from 'antd';
 import { EmptyFiller, TabPane, Tabs } from 'app/components';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -152,7 +152,7 @@ export function Main({ sliderVisible }: { sliderVisible: boolean }) {
     [dispatch, navigate, orgId, tabs],
   );
 
-  const handleClickMenu = (e: any, id: string) => {
+  const handleClickMenu = (e: Parameters<NonNullable<MenuProps['onClick']>>[0], id: string) => {
     e.domEvent.stopPropagation();
     if (e.key === 'CLOSE_ALL') {
       dispatch(
