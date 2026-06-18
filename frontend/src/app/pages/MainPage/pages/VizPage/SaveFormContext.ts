@@ -3,6 +3,8 @@ import { createContext, useCallback, useState } from 'react';
 import { BoardType } from '../../../DashBoardPage/pages/Board/slice/types';
 import { VizType } from './slice/types';
 
+export type TemplateUploadValue = File | FormData;
+
 export interface SaveFormModel {
   id?: string;
   name: string;
@@ -11,7 +13,7 @@ export interface SaveFormModel {
   description?: string;
   parentId?: string | null;
   viewId?: string;
-  file?: FormData; //template
+  file?: TemplateUploadValue; //template
   subType?: string; //board
   avatar?: string; //datachart
 }

@@ -17,6 +17,8 @@
  */
 
 import { Upload } from 'antd';
+import type { UploadProps } from 'antd';
+import type { UploadRef } from 'antd/es/upload/Upload';
 import { uploadBoardImage } from 'app/pages/DashBoardPage/pages/BoardEditor/slice/thunk';
 import {
   forwardRef,
@@ -32,15 +34,26 @@ interface HiddenUploaderProps {
   onChange: (url: string) => void;
 }
 
-export const HiddenUploader = forwardRef(
+export interface HiddenUploaderRef {
+  onClick: () => void;
+}
+
+export const HiddenUploader = forwardRef<
+  HiddenUploaderRef | undefined,
+  HiddenUploaderProps
+>(
   ({ onChange }: HiddenUploaderProps, ref) => {
     const dispatch = useAppDispatch();
-    const uploadRef = useRef<any>();
+    const uploadRef = useRef<UploadRef>(null);
     const { boardId } = useContext(BoardContext);
 
-    useImperativeHandle(ref, () => uploadRef.current?.upload.uploader);
+    useImperativeHandle(ref, () => ({
+      onClick: () => {
+        uploadRef.current?.nativeElement?.click();
+      },
+    }));
 
-    const beforeUpload = useCallback(
+    const beforeUpload: UploadProps['beforeUpload'] = useCallback(
       async info => {
         const formData = new FormData();
         formData.append('file', info);

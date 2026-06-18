@@ -60,8 +60,9 @@ export function useAddViz({ showSaveForm }) {
     }
     if (relType === 'TEMPLATE') {
       let formData = new FormData();
-      //@ts-ignore
-      formData.append('file', dataValues?.file);
+      if (dataValues.file instanceof File) {
+        formData.append('file', dataValues.file);
+      }
       dataValues.file = formData;
     }
     return dataValues;

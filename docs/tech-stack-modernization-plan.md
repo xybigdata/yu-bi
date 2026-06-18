@@ -43,6 +43,7 @@
 - 每批提交前核对短期目标：当前改动是否仍属于当前专题，是否低风险、可验证、可回退
 - 如果候选点开始牵涉共享协议、运行时行为或跨域依赖，先降级为评估项，不混入低风险批次
 - 每次阶段性提交或推送后，在本文档中保留对后续判断有用的执行记录
+- 前端低风险日常推进使用轻量门禁：优先 `npm run checkTs`，必要时补相关单测；只有准备阶段性合入 `main` 前才执行完整前端门禁 `npm run test:ci`、`npm run lint:css`、`npm run lint:style`
 
 ## 3. 当前基线
 
@@ -417,10 +418,11 @@
 - 已完成：控制器默认值滑块 setter 的 Form.Item props 与 Slider props 拆分透传，避免 `maxValue / minValue / step / showMarks` 这类控件配置继续进入 Form.Item
 - 已完成：控制器文本默认值 setter 去掉未使用的 `value` 解构，保持 Form 注入行为不变
 - 已完成：`useSaveAsViz` 的复制保存链路补齐最小详情 DTO 与保存 payload 类型，去掉局部 `request2<any>` / `requestData: any`
+- 已完成：看板图片上传、故事板分享、保存模板、标签页和故事板选择等组件局部类型边界收口，去掉局部 `@ts-ignore` 与上传私有 ref 依赖
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
 - 暂缓评估：FormGenerator 全局 `ItemLayoutProps`、交互规则面板的动态 `value` / `Customize` 映射仍是协议宽口，需单独评估交互配置结构后再收口
 - 暂缓评估：`ChartDataSetDTO.rows` 仍按历史 `string[][]` 表达图表运行时数据集，大量图表组件和 helper 以 `IChartDataSet<string>` 消费；后续如要对齐后端 `Dataframe.rows: List<List<Object>>`，需单独处理图表运行时的数据集泛型与字符串化边界
-- 下一批候选：当前低风险 UI/FormGenerator 批次已累计较多提交，建议先执行阶段性完整门禁并准备 merge 回 `main`，再开下一条专题分支继续处理交互协议宽口或其它低风险项
+- 下一批候选：前端低风险继续在当前长期分支累计，优先处理局部组件、工具函数和有测试覆盖的类型边界；暂不因单个小批次合入 `main`
 
 当前已落地范围：
 
@@ -659,6 +661,7 @@
 - 通过：工具函数与表单边界批次定向测试，`npm run test:ci -- src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts`
 - 通过：工具函数与 Workbench 配置更新边界批次轻量门禁，`npm run checkTs`
 - 通过：主页面局部类型边界批次轻量门禁，`npm run checkTs`
+- 通过：组件局部类型边界批次轻量门禁，`npm run checkTs`
 - 通过：通用 UI 与工具类型边界专题合并前完整门禁，`npm run test:ci` 109 个测试文件通过，840 个测试通过，4 个跳过
 - 通过：通用 UI 与工具类型边界专题合并前完整门禁，`npm run lint:css`
 - 通过：通用 UI 与工具类型边界专题合并前完整门禁，`npm run lint:style`
