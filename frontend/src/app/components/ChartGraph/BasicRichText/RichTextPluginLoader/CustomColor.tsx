@@ -130,7 +130,7 @@ export class QuillPalette {
       key: string,
       disablePrefix?: boolean | undefined,
       options?: Record<string, unknown>,
-    ) => any;
+    ) => string | undefined;
   }) => (
     <ToolbarStyle id={id}>
       <span className="ql-formats">

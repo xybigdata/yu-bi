@@ -384,6 +384,7 @@
 - 已完成：富文本只读翻译遇到缺失引用字段时保留原 calcfield 节点，避免生成 `insert: undefined` 的无效 Delta
 - 已完成：富文本图片拖拽/粘贴模块插入图片时保留光标 `index: 0` 语义，避免错误回退到文档末尾
 - 已完成：富文本运行时卸载时销毁 `imageDrop` / `calcfield` 模块，清理 Quill 与 DOM 事件监听，避免编辑器反复挂载后残留监听
+- 已完成：富文本 CustomColor toolbar 翻译函数返回类型从 `any` 收口为 `string | undefined`，对齐 DOM `title` 属性真实需求
 - 已完成：`CalcField` 增加 `destroy()`，释放 `text-change`、`selection-change`、paste 监听并废弃未完成 source token
 - 已完成：`split.js`、`react-window`、`sql-formatter`、ECharts 默认主题、Reveal、Monaco 和插件路径预加载的失败重试边界稳定化，避免一次加载失败后长期缓存 rejected Promise
 - 已完成：`Split`、`MonacoEditor`、SQL 编辑器快捷键绑定、SQL 格式化、StoryBoard 编辑/播放/分享播放的运行时加载失败兜底，避免组件内部异步加载失败形成未处理 Promise
@@ -771,6 +772,8 @@
 - 通过：富文本缺失引用与图片插入边界专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/ImageDropModule.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
 - 通过：富文本运行时销毁边界专项轻量门禁，`npm run checkTs`
 - 通过：富文本运行时销毁边界专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/RichTextEditorRuntime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/ImageDropModule.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
+- 通过：富文本 toolbar 翻译函数类型边界批次轻量门禁，`npm run checkTs`
+- 通过：富文本 toolbar 翻译函数类型边界批次定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`，3 个测试文件、10 个用例通过
 - 通过：运行时数据解析稳定化专项轻量门禁，`npm run checkTs`
 - 通过：运行时数据解析稳定化专项定向测试，`npm run test:ci -- src/app/pages/StoryBoardPage/__tests__/utils.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts`
 - 通过：BoardEditor 运行时数据解析稳定化专项定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts`
