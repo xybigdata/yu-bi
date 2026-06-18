@@ -20,13 +20,34 @@ import { getChartPluginPaths } from 'app/utils/fetch';
 import { Debugger } from 'utils/debugger';
 
 let loadPromise: Promise<string[] | void> | null = null;
+let chartPluginPathsLoader: () => Promise<string[] | void> = () =>
+  Debugger.instance.measure('Plugin Charts | ', async () => {
+    const paths = await getChartPluginPaths();
+    return paths || [];
+  });
 
 export async function preloadChartPlugins() {
   if (!loadPromise) {
-    loadPromise = Debugger.instance.measure('Plugin Charts | ', async () => {
-      const paths = await getChartPluginPaths();
-      return paths || [];
+    loadPromise = chartPluginPathsLoader().catch(error => {
+      loadPromise = null;
+      throw error;
     });
   }
   return loadPromise;
+}
+
+export function __setChartPluginPathsLoaderForTest(
+  loader: () => Promise<string[] | void>,
+) {
+  chartPluginPathsLoader = loader;
+  loadPromise = null;
+}
+
+export function __resetChartPluginPathsLoaderForTest() {
+  chartPluginPathsLoader = () =>
+    Debugger.instance.measure('Plugin Charts | ', async () => {
+      const paths = await getChartPluginPaths();
+      return paths || [];
+    });
+  loadPromise = null;
 }

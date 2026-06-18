@@ -265,6 +265,9 @@
 - 前端图表运行时加载链路继续稳定化：
   - `loadEChartsRuntime` 与 `loadWordCloudRuntime` 失败后清空缓存 Promise，避免一次动态加载失败后永久无法重试
   - 补齐 ECharts 与词云运行时 loader 的 Promise 复用和失败重试定向测试
+- 前端运行时懒加载链路继续稳定化：
+  - `split.js`、`react-window`、`sql-formatter`、ECharts 默认主题、Reveal、Monaco 与插件路径预加载失败后清空缓存 Promise，避免一次加载失败后永久卡住
+  - 补齐各 loader 的 Promise 复用和失败重试定向测试
 - 前端历史弱类型注释清理：
   - 删除看板 widget 工具、控制器核心、容器内容类型和查询/重置按钮配置里的失效注释代码
   - 清理注释中的历史 `as any` / `any[]` 噪音，降低后续低风险扫描误判
@@ -349,18 +352,19 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`前端局部类型边界收口`
+当前累计专题：`前端运行时懒加载边界稳定化`
 
 本批目标：
 
-- 优先处理图表组件内部缓存、局部事件回调、样式透传对象等低风险类型边界
-- 同步处理调用链清楚的局部 UI 组件、工具函数和第三方适配层类型边界
-- 只收口“声明比真实用法更宽”的局部类型，不改图表 option 输出结构
-- 继续暂缓 ECharts 实例、tooltip params、地图注册入参、rowData 与图表公共协议宽口
-- 不调整公共协议、内部稳定标识和业务配置结构
+- 处理真实运行时链路里动态 import 缓存 rejected Promise 的问题
+- 保持现有懒加载路径、组件行为和第三方依赖版本不变
+- 对每个 loader 补 Promise 复用与失败后重试测试
+- 暂不混入组件级错误展示、依赖替换或公共协议调整
+- 不调整内部稳定标识和业务配置结构
 
 当前累计清单：
 
+- 已完成：`split.js`、`react-window`、`sql-formatter`、ECharts 默认主题、Reveal、Monaco 和插件路径预加载的失败重试边界稳定化，避免一次加载失败后长期缓存 rejected Promise
 - 已完成：`ChartSelectModal` 去掉 `rc-tree/lib/interface` 的 `Key` 深路径导入，改用 React 公开 `Key` 类型
 - 已完成：`UnControlledTableHeaderPanel` 去掉 `antd/es/table/interface` 的 `TableRowSelection` 深路径导入，改为从 `TableProps<T>['rowSelection']` 反推公开类型
 - 已完成：`HiddenUploader` 去掉 `antd/es/upload/Upload` 的 `UploadRef` 深路径导入，改为从包根 `Upload` 公开组件反推 ref 类型
@@ -717,6 +721,8 @@
 
 - 通过：图表运行时加载稳定化专项轻量门禁，`npm run checkTs`
 - 通过：图表运行时加载稳定化专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts`
+- 通过：运行时懒加载边界稳定化专项轻量门禁，`npm run checkTs`
+- 通过：运行时懒加载边界稳定化专项定向测试，`npm run test:ci -- src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/sqlFormatterRuntime.test.ts src/app/utils/__tests__/echartsThemeRuntime.test.ts src/app/pages/StoryBoardPage/__tests__/revealRuntime.test.ts src/app/components/MonacoEditor/__tests__/runtime.test.ts src/app/services/__tests__/chartPluginService.test.ts`
 - 通过：富文本运行时加载稳定化专项轻量门禁，`npm run checkTs`
 - 通过：富文本运行时加载稳定化专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
 - 通过：`flexlayout-react` 工作台布局工厂稳定化专项轻量门禁，`npm run checkTs`
