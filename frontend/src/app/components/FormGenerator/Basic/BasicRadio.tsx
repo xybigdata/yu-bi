@@ -27,7 +27,7 @@ import { omitFormGeneratorOptions } from './controlOptions';
 
 const BasicRadio: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data: row, onChange }) => {
-    const { value, comType, options, ...rest } = row;
+    const { value, options } = row;
     const items = options?.items || [];
     const needTranslate = !!options?.translateItemLabel;
     const radioOptions = omitFormGeneratorOptions(options);
@@ -41,8 +41,8 @@ const BasicRadio: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       <StyledBasicRadio label={t(row.label, true)}>
         <Radio.Group
           name={`${row.label}-${ancestors?.toString()}`}
-          {...rest}
           {...radioOptions}
+          disabled={row.disabled}
           onChange={handleValueChange}
           value={value}
         >

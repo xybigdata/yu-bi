@@ -28,7 +28,7 @@ import { omitFormGeneratorOptions } from './controlOptions';
 
 const BasicCheckbox: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data: row, onChange }) => {
-    const { comType, options, ...rest } = row;
+    const { options } = row;
     const { hideLabel, needRefresh } = options || {};
     const checkboxOptions = omitFormGeneratorOptions(options);
 
@@ -43,9 +43,9 @@ const BasicCheckbox: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
         wrapperCol={{ span: 4 }}
       >
         <Checkbox
-          {...rest}
           {...checkboxOptions}
           checked={row.value}
+          disabled={row.disabled}
           onChange={handleCheckedChange}
         />
       </StyledVizBasicCheckbox>

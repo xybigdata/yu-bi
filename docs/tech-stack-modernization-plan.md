@@ -362,9 +362,11 @@
 - 已完成：`BasicCheckbox` 不再把 `hideLabel`、`needRefresh` 透传给 antd Checkbox，保留刷新回调语义不变
 - 已完成：`BasicFont`、`BasicColorSelector`、`BasicLine`、`Background`、`WidgetBorder` 的 `ColorPickerPopover` 透传改为白名单提取，避免 `key` 与父级配置对象继续进入 Popover 链路
 - 已完成：`BasicSwitch`、`BasicRadio`、`BasicInput`、`BasicInputNumber` 改为剥离 FormGenerator 内部 options 后再下传给 antd 控件，保留控件可识别配置透传
+- 已完成：`BasicFontWeight`、`BasicFontStyle`、`BasicFontFamilySelector`、`BasicFontSizeSelector`、`BasicInputPercentage`、`BasicSlider`、`BasicSelector` 继续显式化 antd 控件 props，避免行级 `key / label / default / options` 元数据继续随 `rest` 下传
+- 已完成：`BasicCheckbox`、`BasicSwitch`、`BasicRadio`、`BasicInput`、`BasicInputNumber` 的行级 `rest` 下传继续收口为显式 `value / checked / disabled / defaultValue` 等真实控件属性
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
-- 下一批候选：继续复扫 FormGenerator 中 `options` / `rest` 透传到三方组件的低风险单点，确认有明确控件语义后再收口
+- 下一批候选：继续复扫 FormGenerator 自定义控件中未使用的父级参数和可显式化的局部回调类型，确认不影响交互后再收口
 
 当前已落地范围：
 
@@ -479,6 +481,7 @@
 - `internalChartHelper.ts` 的视图配置字段映射和拖拽 item 构造补齐显式局部类型，继续压缩 Workbench 拖拽源与 view config helper 中的宽泛输入边界
 - `BasicCheckbox`、`BasicSwitch`、`BasicRadio`、`BasicInput`、`BasicInputNumber` 剥离 FormGenerator 内部 options 后再透传给 antd 控件，避免内部字段继续进入 DOM / antd 链路
 - `BasicFont`、`BasicColorSelector`、`BasicLine`、`Background`、`WidgetBorder` 统一通过颜色选择器 options 白名单透传 ColorPicker 配置，避免 `key` spread 和父级 props 继续进入 Popover 链路
+- `BasicFontWeight`、`BasicFontStyle`、`BasicFontFamilySelector`、`BasicFontSizeSelector`、`BasicInputPercentage`、`BasicSlider`、`BasicSelector` 的 antd 控件透传继续改为显式控件属性，避免 FormGenerator 行元数据继续进入三方组件
 
 当前验证计划：
 

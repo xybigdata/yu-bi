@@ -28,7 +28,7 @@ import { omitFormGeneratorOptions } from './controlOptions';
 
 const BasicSwitch: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data: row, onChange }) => {
-    const { comType, options, ...rest } = row;
+    const { options } = row;
     const { hideLabel } = options || {};
     const switchOptions = omitFormGeneratorOptions(options);
 
@@ -45,9 +45,9 @@ const BasicSwitch: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       >
         <Switch
           size="small"
-          {...rest}
           {...switchOptions}
           checked={row.value}
+          disabled={row.disabled}
           onChange={handleSwitchChange}
         />
       </StyledBasicSwitch>

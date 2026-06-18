@@ -27,7 +27,7 @@ import { omitFormGeneratorOptions } from './controlOptions';
 
 const BasicInput: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, translate: t = title => title, data, onChange }) => {
-    const { options, comType, ...rest } = data;
+    const { options } = data;
     const inputOptions = omitFormGeneratorOptions(options);
     const [formValue, debouncedUpdateValue] = useDebouncedFormValue(
       data?.value,
@@ -50,9 +50,9 @@ const BasicInput: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       <BW label={t(data?.label, true)}>
         <Input
           className="datart-ant-input"
-          {...rest}
           {...inputOptions}
           value={formValue}
+          disabled={data.disabled}
           onChange={inputOnChange}
           defaultValue={data?.default}
           // disabled
