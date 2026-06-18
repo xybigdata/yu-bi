@@ -370,10 +370,12 @@
 - 已完成：`UnControlledTableHeaderPanel` 的表格行选择入口改为复用 antd 公开 `TableRowSelection`，内部继续按字符串 uid 状态处理，保持选择与合并行为不变
 - 已完成：`ControllerList` 的看板详情返回、控制器名称解析和关系变更入口补齐局部类型，去掉控制器列表里的响应体 `any`
 - 已完成：`DataReferencePanel` 的动态字段组装函数补齐返回类型，指标字段列表按局部最小结构收口，保持参考线/参考区配置组装语义不变
+- 已完成：控制器默认值滑块 setter 的 Form.Item props 与 Slider props 拆分透传，避免 `maxValue / minValue / step / showMarks` 这类控件配置继续进入 Form.Item
+- 已完成：控制器文本默认值 setter 去掉未使用的 `value` 解构，保持 Form 注入行为不变
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
 - 暂缓评估：FormGenerator 全局 `ItemLayoutProps`、交互规则面板的动态 `value` / `Customize` 映射仍是协议宽口，需单独评估交互配置结构后再收口
-- 下一批候选：继续复扫 FormGenerator 自定义控件中未使用的父级参数和可显式化的局部回调类型，确认不影响交互后再收口
+- 下一批候选：当前低风险 UI/FormGenerator 批次已累计较多提交，建议先执行阶段性完整门禁并准备 merge 回 `main`，再开下一条专题分支继续处理交互协议宽口或其它低风险项
 
 当前已落地范围：
 
@@ -492,6 +494,7 @@
 - `TimerFormat` 与条件样式 add 弹窗的局部 ref、context、颜色和区间值回调类型完成收口，减少 FormGenerator 自定义控件中的 `any` 边界
 - `ListTemplatePanel` 与 `UnControlledTableHeaderPanel` 的选项状态、模板行和表格选择入口继续补齐局部显式类型，减少自定义控件中的 `any` 边界
 - `ControllerList` 与 `DataReferencePanel` 的看板详情、关系变更和动态参考线配置组装入口继续补齐局部显式类型，减少自定义配置面板中的 `any` 边界
+- 控制器默认值滑块与文本 setter 继续收口 Form.Item / 控件 props 边界，减少配置项误传
 
 当前验证计划：
 
@@ -499,6 +502,7 @@
 - `npm run test:ci -- src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/utils.test.tsx`
 - `npm run test:ci -- src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx`
 - `npm run test:ci -- src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx src/app/utils/__tests__/chartHelper.test.ts`
+- `npm run test:ci -- src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx`
 
 ### 6.2 最近已完成
 

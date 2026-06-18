@@ -24,12 +24,10 @@ export interface TextSetFormProps {
   required?: boolean;
   preserve?: boolean;
 }
-export const TextSetForm: React.FC<TextSetFormProps> = memo(
-  ({ value, ...rest }) => {
-    return (
-      <Form.Item {...rest}>
-        <Input />
-      </Form.Item>
-    );
-  },
-);
+export const TextSetForm: React.FC<TextSetFormProps> = memo(props => {
+  return (
+    <Form.Item {...props}>
+      <Input />
+    </Form.Item>
+  );
+});
