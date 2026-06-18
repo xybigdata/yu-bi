@@ -184,6 +184,17 @@ class CalcField {
     });
   }
 
+  destroy() {
+    if (this.existingSourceExecutionToken) {
+      this.existingSourceExecutionToken.abandoned = true;
+      this.existingSourceExecutionToken = null;
+    }
+
+    this.quill.off('text-change', this.onTextChange);
+    this.quill.off('selection-change', this.onSelectionChange);
+    this.quill.container.removeEventListener('paste', this.handlePaste);
+  }
+
   insertItem(data: CalcFieldData | null, programmaticInsert?: boolean) {
     if (data === null || this.cursorPos === null) {
       return;

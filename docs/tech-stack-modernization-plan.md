@@ -373,6 +373,8 @@
 - 已完成：富文本只读翻译 `calcfield` 时优先按 `id` 匹配、再按 `name` 兼容旧数据，避免同名字段展示为错误值
 - 已完成：富文本只读翻译遇到缺失引用字段时保留原 calcfield 节点，避免生成 `insert: undefined` 的无效 Delta
 - 已完成：富文本图片拖拽/粘贴模块插入图片时保留光标 `index: 0` 语义，避免错误回退到文档末尾
+- 已完成：富文本运行时卸载时销毁 `imageDrop` / `calcfield` 模块，清理 Quill 与 DOM 事件监听，避免编辑器反复挂载后残留监听
+- 已完成：`CalcField` 增加 `destroy()`，释放 `text-change`、`selection-change`、paste 监听并废弃未完成 source token
 - 已完成：`split.js`、`react-window`、`sql-formatter`、ECharts 默认主题、Reveal、Monaco 和插件路径预加载的失败重试边界稳定化，避免一次加载失败后长期缓存 rejected Promise
 - 已完成：`Split`、`MonacoEditor`、SQL 编辑器快捷键绑定、SQL 格式化、StoryBoard 编辑/播放/分享播放的运行时加载失败兜底，避免组件内部异步加载失败形成未处理 Promise
 - 已完成：View 属性侧 `Resource` / `Variables` 的 SQL completion provider 注册链路统一走 `registerSqlCompletionProvider`，Monaco 加载失败时不再形成未处理 Promise
@@ -620,7 +622,7 @@
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/ImageDropModule.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
+- `npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/RichTextEditorRuntime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/ImageDropModule.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
 
 ### 6.2 最近已完成
 
@@ -742,6 +744,8 @@
 - 通过：富文本字段引用稳定化专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
 - 通过：富文本缺失引用与图片插入边界专项轻量门禁，`npm run checkTs`
 - 通过：富文本缺失引用与图片插入边界专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/ImageDropModule.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
+- 通过：富文本运行时销毁边界专项轻量门禁，`npm run checkTs`
+- 通过：富文本运行时销毁边界专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/RichTextEditorRuntime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/ImageDropModule.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
 - 通过：`flexlayout-react` 工作台布局工厂稳定化专项轻量门禁，`npm run checkTs`
 - 通过：`flexlayout-react` 工作台布局工厂稳定化专项定向测试，`npm run test:ci -- src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts`
 - 通过：`react-grid-layout` 布局归一化稳定化专项轻量门禁，`npm run checkTs`

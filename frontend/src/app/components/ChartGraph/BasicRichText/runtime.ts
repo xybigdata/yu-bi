@@ -12,7 +12,8 @@ type RichTextEditorRuntimeModule = {
 
 let richTextEditorRuntimePromise: Promise<RichTextEditorRuntimeModule> | null =
   null;
-let richTextEditorRuntimeLoader = () => import('./RichTextEditorRuntime');
+let richTextEditorRuntimeLoader: () => Promise<RichTextEditorRuntimeModule> =
+  () => import('./RichTextEditorRuntime');
 
 export function loadRichTextEditorRuntime() {
   if (!richTextEditorRuntimePromise) {

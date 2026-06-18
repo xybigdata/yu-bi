@@ -16,6 +16,11 @@ export class ImageDropModule {
     this.quill.root.addEventListener('paste', this.handlePaste, false);
   }
 
+  destroy() {
+    this.quill.root.removeEventListener('drop', this.handleDrop, false);
+    this.quill.root.removeEventListener('paste', this.handlePaste, false);
+  }
+
   handleDrop(evt: DragEvent) {
     evt.preventDefault();
     if (evt.dataTransfer?.files?.length) {

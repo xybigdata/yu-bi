@@ -38,14 +38,22 @@ export type {
 };
 
 export interface CalcFieldModuleApi {
+  destroy?: () => void;
   insertItem: (
     data: Record<string, unknown> | null,
     programmaticInsert?: boolean,
   ) => void;
 }
 
+export interface DestroyableQuillModule {
+  destroy?: () => void;
+}
+
 export type QuillWithCalcFieldModule = QuillInstance & {
-  getModule: (name: 'calcfield') => CalcFieldModuleApi;
+  getModule: {
+    (name: 'calcfield'): CalcFieldModuleApi;
+    (name: string): DestroyableQuillModule | undefined;
+  };
 };
 
 export interface QuillKeyboardBindingTarget {

@@ -1,4 +1,10 @@
-import { ForwardedRef, forwardRef, useImperativeHandle, useRef } from 'react';
+import {
+  ForwardedRef,
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from 'react';
 import './RichTextBootstrap';
 import type {
   RichTextEditorHandle,
@@ -11,6 +17,14 @@ import ReactQuill, {
   TextChangeHandler,
   EditorChangeHandler,
 } from './quillCompat';
+
+const destroyableRuntimeModules = ['imageDrop', 'calcfield'];
+
+export function destroyRichTextModules(editor: QuillWithCalcFieldModule) {
+  destroyableRuntimeModules.forEach(moduleName => {
+    editor.getModule(moduleName)?.destroy?.();
+  });
+}
 
 function RichTextEditorRuntimeImpl(
   props: RichTextEditorProps,
@@ -25,6 +39,16 @@ function RichTextEditorRuntimeImpl(
 
     return editorRef.current.getEditor() as QuillWithCalcFieldModule;
   };
+
+  useEffect(() => {
+    return () => {
+      if (!editorRef.current) {
+        return;
+      }
+
+      destroyRichTextModules(getEditorInstance());
+    };
+  }, []);
 
   useImperativeHandle(
     ref,

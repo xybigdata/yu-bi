@@ -6,6 +6,7 @@ const createQuill = (selection: { index: number; length: number } | null) =>
   ({
     root: {
       addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
     },
     getLength: vi.fn(() => 12),
     getSelection: vi.fn(() => selection),
@@ -13,6 +14,24 @@ const createQuill = (selection: { index: number; length: number } | null) =>
   }) as unknown as QuillInstance;
 
 describe('ImageDropModule', () => {
+  test('should unbind root event listeners on destroy', () => {
+    const quill = createQuill(null);
+    const module = new ImageDropModule(quill);
+
+    module.destroy();
+
+    expect(quill.root.removeEventListener).toHaveBeenCalledWith(
+      'drop',
+      expect.any(Function),
+      false,
+    );
+    expect(quill.root.removeEventListener).toHaveBeenCalledWith(
+      'paste',
+      expect.any(Function),
+      false,
+    );
+  });
+
   test('should insert image at cursor index 0', () => {
     const quill = createQuill({ index: 0, length: 0 });
     const module = new ImageDropModule(quill);
