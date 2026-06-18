@@ -422,6 +422,7 @@
 - 已完成：故事板编辑态历史 state、故事板权限、VirtualTable 滚动体回调和视频/分组 widget 测试 fixture 的局部类型边界收口，去掉对应局部 `any` / `as any`
 - 已完成：Dashboard 工具函数请求参数复用现有 `getDataOption` 类型，移动端间距配置类型对齐运行时缺省语义，去掉相关测试局部 `as any`
 - 已完成：数据源配置模板的 `defaultValue` 与 `options` 从宽泛 `any` 收口为 JSON 兼容值和明确 option 联合类型，配置表单按 `dbType` / 字符串选项做局部类型守卫
+- 已完成：看板查询/重置按钮点击事件补齐 React 鼠标事件类型，`DataChart.status` 收口为数值状态，DataChartWidget meta 入参图标类型收口为字符串
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
 - 暂缓评估：FormGenerator 全局 `ItemLayoutProps`、交互规则面板的动态 `value` / `Customize` 映射仍是协议宽口，需单独评估交互配置结构后再收口
 - 暂缓评估：`ChartDataSetDTO.rows` 仍按历史 `string[][]` 表达图表运行时数据集，大量图表组件和 helper 以 `IChartDataSet<string>` 消费；后续如要对齐后端 `Dataframe.rows: List<List<Object>>`，需单独处理图表运行时的数据集泛型与字符串化边界
@@ -672,6 +673,8 @@
 - 通过：Dashboard 工具函数参数边界批次轻量门禁，`npm run checkTs`
 - 通过：Dashboard 工具函数参数边界批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/utils/__tests__/board.test.ts`
 - 通过：数据源配置模板类型边界批次轻量门禁，`npm run checkTs`
+- 通过：看板按钮与 DataChart 局部类型边界批次轻量门禁，`npm run checkTs`
+- 通过：看板按钮与 DataChart 局部类型边界批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx`
 - 通过：通用 UI 与工具类型边界专题合并前完整门禁，`npm run test:ci` 109 个测试文件通过，840 个测试通过，4 个跳过
 - 通过：通用 UI 与工具类型边界专题合并前完整门禁，`npm run lint:css`
 - 通过：通用 UI 与工具类型边界专题合并前完整门禁，`npm run lint:style`

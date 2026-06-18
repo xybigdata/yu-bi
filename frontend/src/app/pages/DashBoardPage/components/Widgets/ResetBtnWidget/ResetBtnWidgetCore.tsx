@@ -17,7 +17,7 @@
  */
 
 import { darken, getLuminance, lighten } from 'polished';
-import React, { useContext } from 'react';
+import React, { MouseEvent, useContext } from 'react';
 import styled from 'styled-components';
 import { WidgetActionContext } from '../../ActionProvider/WidgetActionProvider';
 import {
@@ -30,7 +30,7 @@ export const ResetBtnWidgetCore: React.FC<{}> = () => {
   const widget = useContext(WidgetContext);
   const { onWidgetsReset } = useContext(WidgetActionContext);
 
-  const onQuery = e => {
+  const onQuery = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     onWidgetsReset();
   };

@@ -38,7 +38,7 @@ import {
 } from '../../WidgetManager/utils/init';
 
 export const getMeta = (opt: {
-  icon: any;
+  icon: string;
   widgetTypeId: string;
 
   zh: {

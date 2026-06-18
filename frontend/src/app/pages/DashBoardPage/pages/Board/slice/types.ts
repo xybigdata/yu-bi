@@ -380,7 +380,7 @@ export interface DataChart {
   type?: string; //?
   viewId: string;
   view?: any;
-  status: any;
+  status: number;
 }
 export interface DataChartConfig {
   aggregation: boolean | undefined;

@@ -17,7 +17,7 @@
  */
 
 import { darken, getLuminance, lighten } from 'polished';
-import { memo, useContext } from 'react';
+import { MouseEvent, memo, useContext } from 'react';
 import styled from 'styled-components';
 import { WidgetActionContext } from '../../ActionProvider/WidgetActionProvider';
 import {
@@ -31,7 +31,7 @@ export const QueryBtnWidgetCore: React.FC<{}> = memo(() => {
 
   const { onWidgetsQuery } = useContext(WidgetActionContext);
 
-  const onQuery = e => {
+  const onQuery = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     onWidgetsQuery();
   };
