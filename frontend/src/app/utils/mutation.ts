@@ -16,12 +16,28 @@
  * limitations under the License.
  */
 
-import { ChartStyleConfig } from 'app/types/ChartConfig';
+import {
+  ChartConfigBase,
+  ChartDataConfig,
+  ChartDataSectionField,
+  ChartI18NSectionConfig,
+  ChartStyleConfig,
+  ChartStyleSectionRow,
+} from 'app/types/ChartConfig';
 import produce, { Draft } from 'immer';
+
+type ChartConfigNode =
+  | ChartConfigBase
+  | ChartDataConfig
+  | ChartDataSectionField
+  | ChartStyleConfig
+  | ChartStyleSectionRow
+  | ChartI18NSectionConfig;
+type RowContainer = { rows?: unknown[] };
 
 export interface Action<T> {
   ancestors: number[];
-  value: T;
+  value?: T;
 }
 
 export function updateBy<T>(base: T, updater: (draft: Draft<T>) => void) {
@@ -52,9 +68,9 @@ export function updateByKey<T1, T2>(
   });
 }
 
-export function updateCollectionByAction<T extends ChartStyleConfig>(
+export function updateCollectionByAction<T, TValue extends ChartConfigNode = T & ChartConfigNode>(
   base: T[],
-  action: Action<T>,
+  action: Action<TValue>,
 ) {
   const value = action.value;
   const keys = (action?.ancestors && [...action.ancestors]) || [];
@@ -62,7 +78,7 @@ export function updateCollectionByAction<T extends ChartStyleConfig>(
     const index = keys.shift() as number;
     if (index !== undefined) {
       if (keys.length > 0) {
-        recursiveUpdateImpl(draft[index], keys, value as Draft<T>);
+        recursiveUpdateImpl(draft[index], keys, value);
 
         return;
       }
@@ -72,36 +88,42 @@ export function updateCollectionByAction<T extends ChartStyleConfig>(
   return nextState;
 }
 
-export function updateByAction<T extends ChartStyleConfig>(
+export function updateByAction<T extends RowContainer, TValue extends ChartConfigNode = T & ChartConfigNode>(
   base: T,
-  action: Action<T>,
+  action: Action<TValue>,
 ) {
   const value = action.value;
   const keys = (action?.ancestors && [...action.ancestors]) || [];
 
   const nextState = produce(base, draft => {
-    recursiveUpdateImpl(draft, keys, value as Draft<T>);
+    recursiveUpdateImpl(draft, keys, value);
   });
   return nextState;
 }
 
-export function recursiveUpdateImpl<T extends ChartStyleConfig>(
-  draft: Draft<T>,
+const hasRows = (value: unknown): value is { rows: unknown[] } =>
+  typeof value === 'object' &&
+  value !== null &&
+  Array.isArray((value as RowContainer).rows);
+
+export function recursiveUpdateImpl(
+  draft: unknown,
   keys: number[],
-  value: Draft<T>,
+  value: unknown,
 ) {
   if (!keys || keys.length === 0) {
     draft = value;
     return;
   }
-  if (draft.rows) {
+  if (hasRows(draft)) {
+    const rows = draft.rows;
     if (keys.length === 1) {
       const index = keys[0];
-      draft.rows[index] = value;
+      rows[index] = value;
       return;
     } else if (keys.length > 1) {
       const index = keys.shift() as number;
-      recursiveUpdateImpl(draft.rows[index], keys, value);
+      recursiveUpdateImpl(rows[index], keys, value);
       return;
     }
   }

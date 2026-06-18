@@ -22,6 +22,7 @@ import {
   DatePicker,
   Input,
   InputNumber,
+  InputNumberProps,
   Select,
   Space,
   Tag,
@@ -29,7 +30,7 @@ import {
 import { DateFormat } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { formatDatartDate, toDatartDayjs } from 'app/utils/date';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { ChangeEvent, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { SPACE, SPACE_TIMES } from 'styles/StyleConstants';
 import { VariableValueTypes } from './constants';
@@ -42,7 +43,7 @@ interface DefaultValueProps {
   value?: null | VariableDefaultValueItem[];
   dateFormat?: DateFormat;
   hasDateFormat?: boolean;
-  onChangeDateFormat?: (value) => void;
+  onChangeDateFormat?: (value: DateFormat) => void;
   onChange?: (value: VariableDefaultValueItem[]) => void;
 }
 
@@ -57,7 +58,9 @@ export const DefaultValue = memo(
     onChange,
     onChangeDateFormat,
   }: DefaultValueProps) => {
-    const [inputValue, setInputValue] = useState<any>(void 0);
+    const [inputValue, setInputValue] = useState<
+      VariableDefaultValueItem | undefined
+    >(void 0);
     const t = useI18NPrefix('variable');
     const resolvedDateFormat = dateFormat || DateFormat.DateTime;
     const showDateTime = resolvedDateFormat === DateFormat.DateTime;
@@ -66,55 +69,69 @@ export const DefaultValue = memo(
       setInputValue(void 0);
     }, [type]);
 
-    const saveRegular = useCallback(
-      (selectedValue?) => {
-        let validValue;
-        switch (type) {
-          case VariableValueTypes.String:
-            if (inputValue && (inputValue as string).trim()) {
-              validValue = inputValue;
-            }
-            break;
-          case VariableValueTypes.Number:
-            if (inputValue !== null && !Number.isNaN(inputValue)) {
-              validValue = inputValue;
-            }
-            break;
-          case VariableValueTypes.Date:
-            validValue = selectedValue;
-            break;
-        }
-
+    const saveValue = useCallback(
+      (validValue?: VariableDefaultValueItem) => {
         if (validValue !== void 0) {
           onChange && onChange(value ? value.concat(validValue) : [validValue]);
           setInputValue(void 0);
         }
       },
-      [value, type, inputValue, onChange],
+      [value, onChange],
+    );
+
+    const saveCurrentInput = useCallback(() => {
+      let validValue: VariableDefaultValueItem | undefined;
+      switch (type) {
+        case VariableValueTypes.String:
+          if (typeof inputValue === 'string' && inputValue.trim()) {
+            validValue = inputValue;
+          }
+          break;
+        case VariableValueTypes.Number:
+          if (typeof inputValue === 'number' && !Number.isNaN(inputValue)) {
+            validValue = inputValue;
+          }
+          break;
+      }
+      saveValue(validValue);
+    }, [type, inputValue, saveValue]);
+
+    const saveRegular = useCallback(
+      () => {
+        saveCurrentInput();
+      },
+      [saveCurrentInput],
+    );
+
+    const saveSelectedValue = useCallback(
+      (selectedValue?: VariableDefaultValueItem | null) => {
+        if (selectedValue) {
+          saveValue(selectedValue);
+        }
+      },
+      [saveValue],
     );
 
     const saveExpression = useCallback(
-      e => {
+      (e: ChangeEvent<HTMLTextAreaElement>) => {
         onChange && onChange([e.target.value]);
       },
       [onChange],
     );
 
-    const inputChange = useCallback(e => {
+    const inputChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
       setInputValue(e.target.value);
     }, []);
 
-    const inputNumberChange = useCallback(val => {
-      setInputValue(val);
+    const inputNumberChange: InputNumberProps['onChange'] = useCallback(val => {
+      setInputValue(typeof val === 'number' ? val : void 0);
     }, []);
 
     const datePickerConfirm = useCallback(
-      val => {
-        if (val) {
-          saveRegular(val);
-        }
+      (val: VariableDefaultValueItem | null) => {
+        saveSelectedValue(val);
       },
-      [saveRegular],
+      [saveSelectedValue],
     );
 
     const tagClose = useCallback(
@@ -132,7 +149,7 @@ export const DefaultValue = memo(
         conditionalInputComponent = (
           <InputNumber
             placeholder={t('enterToAdd')}
-            value={inputValue}
+            value={typeof inputValue === 'number' ? inputValue : void 0}
             className="input"
             disabled={!!disabled}
             onChange={inputNumberChange}
@@ -157,7 +174,7 @@ export const DefaultValue = memo(
         conditionalInputComponent = (
           <Input
             placeholder={t('enterToAdd')}
-            value={inputValue}
+            value={typeof inputValue === 'string' ? inputValue : void 0}
             className="input"
             disabled={!!disabled}
             onChange={inputChange}

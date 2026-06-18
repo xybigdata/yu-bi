@@ -416,7 +416,7 @@
 - 已完成：`DataReferencePanel` 的动态字段组装函数补齐返回类型，指标字段列表按局部最小结构收口，保持参考线/参考区配置组装语义不变
 - 已完成：控制器默认值滑块 setter 的 Form.Item props 与 Slider props 拆分透传，避免 `maxValue / minValue / step / showMarks` 这类控件配置继续进入 Form.Item
 - 已完成：控制器文本默认值 setter 去掉未使用的 `value` 解构，保持 Form 注入行为不变
-- 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
+- 已完成：`useSaveAsViz` 的复制保存链路补齐最小详情 DTO 与保存 payload 类型，去掉局部 `request2<any>` / `requestData: any`
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
 - 暂缓评估：FormGenerator 全局 `ItemLayoutProps`、交互规则面板的动态 `value` / `Customize` 映射仍是协议宽口，需单独评估交互配置结构后再收口
 - 暂缓评估：`ChartDataSetDTO.rows` 仍按历史 `string[][]` 表达图表运行时数据集，大量图表组件和 helper 以 `IChartDataSet<string>` 消费；后续如要对齐后端 `Dataframe.rows: List<List<Object>>`，需单独处理图表运行时的数据集泛型与字符串化边界
@@ -579,6 +579,13 @@
   - Viz 页签菜单事件改用 Ant Design 公开事件类型
   - Viz 新增、另存、表单初始值与保存请求 payload 类型边界收口，保留现有保存流程不变
   - Viz 运行态树筛选、下拉筛选值转换与下载任务回调泛型继续去掉局部宽泛 `any`
+- 工具函数与 Workbench 配置更新边界收口
+  - `curry` 参数缓存从 `any[]` 收口为 `unknown[]`
+  - `ChartConfigPayloadType.value` 改为图表配置节点联合类型，避免 Workbench 配置更新继续透传宽泛 `any`
+  - `updateCollectionByAction` / `updateByAction` 从只支持样式配置泛化为支持数据、样式、i18n 与子行配置节点，匹配当前真实调用面
+- 资源迁移与变量默认值表单边界收口
+  - 资源导入 `FileUpload` 改用 Ant Design 上传回调类型，去掉 `value` / `onChange` 的宽泛 `any`
+  - 变量默认值输入状态按字符串、数字、日期默认值联合类型收口，文本、数字和日期控件按各自真实值边界传递
 
 ## 7. 下一阶段执行顺序
 
@@ -638,6 +645,8 @@
 
 当前低风险批次合并前门禁记录：
 
+- 通过：工具函数与表单边界批次定向测试，`npm run test:ci -- src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts`
+- 通过：工具函数与 Workbench 配置更新边界批次轻量门禁，`npm run checkTs`
 - 通过：主页面局部类型边界批次轻量门禁，`npm run checkTs`
 - 通过：通用 UI 与工具类型边界专题合并前完整门禁，`npm run test:ci` 109 个测试文件通过，840 个测试通过，4 个跳过
 - 通过：通用 UI 与工具类型边界专题合并前完整门禁，`npm run lint:css`

@@ -16,20 +16,20 @@
  * limitations under the License.
  */
 import { UploadOutlined } from '@ant-design/icons';
-import { Button, Upload } from 'antd';
+import { Button, Upload, UploadFile, UploadProps } from 'antd';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
 
 export const FileUpload: FC<{
   suffix: string;
-  value?: any;
-  onChange?: any;
+  value?: UploadFile;
+  onChange?: (file: Parameters<NonNullable<UploadProps['beforeUpload']>>[0]) => void;
   uploadText?: string;
 }> = memo(({ suffix, value, onChange, uploadText }) => {
-  const [fileName, setFileName] = useState();
-  const fileChange = data => {
-    setFileName(data.name);
-    onChange(data);
+  const [fileName, setFileName] = useState<string | undefined>(value?.name);
+  const fileChange: UploadProps['beforeUpload'] = file => {
+    setFileName(file.name);
+    onChange?.(file);
     return false;
   };
   return (
