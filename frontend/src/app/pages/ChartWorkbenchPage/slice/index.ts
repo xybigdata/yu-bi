@@ -204,7 +204,7 @@ const workbenchSlice = createSlice({
       })
       .addCase(fetchDataSetAction.fulfilled, (state, { payload }) => {
         state.selectedItems = [];
-        state.dataset = payload as any;
+        state.dataset = payload;
         state.datasetLoading = false;
       })
       .addCase(fetchChartAction.fulfilled, (state, { payload }) => {
@@ -248,10 +248,10 @@ const workbenchSlice = createSlice({
 
     builder.addCase(
       fetchDataSetAction.rejected,
-      (state, { payload }: { payload: any }) => {
+      (state, { payload }) => {
         state.datasetLoading = false;
         if (state.dataset) {
-          state.dataset.script = (payload?.data?.script as string) || '';
+          state.dataset.script = payload?.data?.script || '';
         }
       },
     );

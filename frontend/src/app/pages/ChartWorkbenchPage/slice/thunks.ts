@@ -22,7 +22,10 @@ import { migrateView } from 'app/migration/ViewConfig/migrationViewConfig';
 import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
 import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
 import { ChartDataRequest } from 'app/types/ChartDataRequest';
-import type { ChartDatasetPageInfo } from 'app/types/ChartDataSet';
+import type {
+  ChartDataSetDTO,
+  ChartDatasetPageInfo,
+} from 'app/types/ChartDataSet';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { ChartDTO } from 'app/types/ChartDTO';
 import { View } from 'app/types/View';
@@ -40,6 +43,11 @@ import { ChartConfigPayloadType } from './types';
 import type { RootState } from 'types';
 
 type RequestSorter = NonNullable<ChartDataRequest['orders']>[number];
+type WorkbenchDatasetRejectPayload = {
+  data?: {
+    script?: string;
+  };
+};
 
 export const initWorkbenchAction = createAsyncThunk(
   'workbench/initWorkbenchAction',
@@ -75,7 +83,11 @@ export const initWorkbenchAction = createAsyncThunk(
   },
 );
 
-export const fetchDataSetAction = createAsyncThunk(
+export const fetchDataSetAction = createAsyncThunk<
+  ChartDataSetDTO,
+  ChartDataRequest,
+  { rejectValue: WorkbenchDatasetRejectPayload }
+>(
   'workbench/fetchDataSetAction',
   async (arg: ChartDataRequest, thunkAPI) => {
     let errorData: AxiosResponse | undefined;
@@ -93,7 +105,9 @@ export const fetchDataSetAction = createAsyncThunk(
       },
     );
     if (errorData) {
-      return thunkAPI.rejectWithValue(errorData?.data);
+      return thunkAPI.rejectWithValue(
+        errorData.data as WorkbenchDatasetRejectPayload,
+      );
     } else {
       return filterSqlOperatorName(arg, response.data);
     }
@@ -193,9 +207,8 @@ export const refreshDatasetAction = createAsyncThunk(
 );
 
 export const fetchChartAction = createAsyncThunk<
-  ChartDTO,
-  { chartId?: string; backendChart?: ChartDTO },
-  any
+  ChartDTO | undefined,
+  { chartId?: string; backendChart?: ChartDTO }
 >('workbench/fetchChartAction', async arg => {
   if (arg?.chartId) {
     const response = await request2<
@@ -206,7 +219,7 @@ export const fetchChartAction = createAsyncThunk<
     });
     return convertToChartDto(response?.data);
   }
-  return arg.backendChart as any;
+  return arg.backendChart;
 });
 
 export const updateChartAction = createAsyncThunk(
