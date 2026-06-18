@@ -362,6 +362,7 @@
 - 已完成：ChartOperationPanel 的配置更新回调复用 `ChartConfigPayloadType`，FlexLayout factory 节点和 DnD backend props 补齐公开类型
 - 已完成：散点 symbol size 工具函数与轮廓地图散点 series 的 value 参数对齐真实数组边界，避免继续保留未声明回调参数
 - 已完成：保存到看板链路的 `dashboardId / dashboardType` 回调补齐 `BoardType` 边界，`SaveToDashboard` 的 Tree 选择事件改为 antd 公开事件类型加本地节点守卫，保持路由 state 与保存行为不变
+- 已完成：`ChartEventListenerHelper` 的分页排序、钻取、富文本上下文和选中事件回调补齐显式 payload 类型；表格排序列对齐请求层 `string[]` 边界，选中事件默认回传空数组，保持事件触发条件不变
 - 已完成：Workbench 数据集 thunk 与 reducer 补齐 `ChartDataSetDTO` 和 reject payload 最小结构，去掉 dataset fulfilled / rejected 链路里的局部 `as any`；配置 payload 的动态 `value` 仍按协议宽口暂缓
 - 已完成：BasicRichText MarkdownModule 的 Delta op 与 Quill line 补齐最小局部类型，RichTextPluginLoader 的 calcfield/tag/custom color 数据入口去掉局部 `any`，保持 Quill DOM 数据写读行为不变
 - 已完成：BasicFunnelChart 的数据行与指标排序比较改为局部数值读取 helper，去掉 `getCell(...) as any` 的数值比较中转，保持原 Number 转换语义不变
@@ -702,6 +703,8 @@
 
 当前低风险批次合并前门禁记录：
 
+- 通过：ChartEventListenerHelper 回调类型边界批次轻量门禁，`npm run checkTs`
+- 通过：ChartEventListenerHelper 回调类型边界批次定向测试，`npm run test:ci -- src/app/utils/__tests__/ChartEventListenerHelper.test.ts`
 - 通过：表格与指标卡条件样式边界批次轻量门禁，`npm run checkTs`
 - 通过：ViewPage 测试层边界批次定向测试，`npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Properties/DataModelTree/__tests__/utils.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts`
 - 通过：工具函数与表单边界批次定向测试，`npm run test:ci -- src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts`
