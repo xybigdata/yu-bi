@@ -610,6 +610,9 @@
 
 当前低风险批次合并前门禁记录：
 
+- 通过：查询结果边界专题合并前完整门禁，`npm run test:ci` 109 个测试文件通过，840 个测试通过，4 个跳过
+- 通过：查询结果边界专题合并前完整门禁，`npm run lint:css`
+- 通过：查询结果边界专题合并前完整门禁，`npm run lint:style`
 - 通过：`npm run test:ci`，109 个测试文件通过，838 个测试通过，4 个跳过
 - 通过：`npm run lint:css`
 - 通过：`npm run lint:style`
