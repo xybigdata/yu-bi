@@ -228,6 +228,7 @@
   - 看板布局映射入口补齐 `pRect / mRect` 缺省值归一化，避免不完整布局数据直接传入 RGL
   - 布局归一化继续补齐非法值兜底与断点列数约束，避免异常宽高或负值直接进入 RGL
   - 布局归一化继续补齐整数化与 `x + width` 越界保护，避免浮点布局值或超界坐标直接进入 RGL
+  - 布局归一化补齐 `Infinity` 与非法列数兜底，避免异常布局值穿透到 RGL
   - `package.json` 依赖声明已与当前锁文件和真实运行版本同步到 `flexlayout-react 0.5.21`、`react-grid-layout 1.3.4`
 - 前端锁文件根元数据继续收口：
   - `package-lock.json` 根依赖声明重新与 `package.json` 对齐
@@ -707,6 +708,8 @@
 
 当前低风险批次合并前门禁记录：
 
+- 通过：`react-grid-layout` 布局归一化稳定化专项轻量门禁，`npm run checkTs`
+- 通过：`react-grid-layout` 布局归一化稳定化专项定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts`
 - 通过：`react-window` 虚拟表格稳定化专项轻量门禁，`npm run checkTs`
 - 通过：`react-window` 虚拟表格稳定化专项定向测试，`npm run test:ci -- src/app/components/__tests__/VirtualTable.test.tsx`
 - 通过：ChartEventListenerHelper 回调类型边界批次轻量门禁，`npm run checkTs`

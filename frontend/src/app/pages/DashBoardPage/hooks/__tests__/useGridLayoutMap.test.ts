@@ -81,4 +81,23 @@ describe('getNormalizedRect', () => {
       height: 5,
     });
   });
+
+  test('should fallback infinite rect values and invalid cols', () => {
+    expect(
+      getNormalizedRect(
+        {
+          x: Number.POSITIVE_INFINITY,
+          y: Number.NEGATIVE_INFINITY,
+          width: Number.POSITIVE_INFINITY,
+          height: Number.NEGATIVE_INFINITY,
+        },
+        0,
+      ),
+    ).toEqual({
+      x: 0,
+      y: 0,
+      width: 6,
+      height: 6,
+    });
+  });
 });
