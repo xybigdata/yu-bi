@@ -27,7 +27,7 @@ import {
   useState,
 } from 'react';
 import styled from 'styled-components';
-import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import type * as Monaco from 'monaco-editor';
 import { loadMonaco } from './runtime';
 
 type MonacoModule = typeof Monaco;

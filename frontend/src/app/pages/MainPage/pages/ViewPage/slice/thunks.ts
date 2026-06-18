@@ -22,7 +22,7 @@ import { MONACO_COMPLETION_ITEM_KIND_KEYWORD } from 'app/components/MonacoEditor
 import { migrateView } from 'app/migration/ViewConfig/migrationViewConfig';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import i18n from 'i18next';
-import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import type * as Monaco from 'monaco-editor';
 import { RootState } from 'types';
 import { request2 } from 'utils/request';
 import { errorHandle, getErrorMessage, rejectHandle } from 'utils/utils';

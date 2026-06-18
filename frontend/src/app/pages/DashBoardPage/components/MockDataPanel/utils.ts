@@ -18,21 +18,32 @@
 import { ORIGINAL_TYPE_MAP } from '../../constants';
 import { Dashboard, DataChart } from '../../pages/Board/slice/types';
 import { Widget } from '../../types/widgetTypes';
+import type { MockDataMap } from './MockDataTab';
+
+type BoardTemplateState = {
+  board: Dashboard;
+  widgetMap: Record<string, Widget>;
+  dataChartMap: Record<string, Record<string, DataChart>>;
+};
+
+type ExportDashboard = Partial<Omit<Dashboard, 'config'>> & {
+  config: string;
+};
+
+type ExportWidget = Partial<Omit<Widget, 'config'>> & {
+  config: string;
+};
 
 export const getBoardTplData = (
-  dataMap: Record<string, { id: string; name: string; data }>,
-  boardTplData: {
-    board: Dashboard;
-    widgetMap: Record<string, Widget>;
-    dataChartMap: Record<string, Record<string, DataChart>>;
-  },
+  dataMap: MockDataMap,
+  boardTplData: BoardTemplateState,
 ) => {
   const { board, widgetMap, dataChartMap } = boardTplData;
   const dashboard = {
     ...board,
     queryVariables: [],
-    config: JSON.stringify(board.config) as any,
-  } as Partial<Dashboard>;
+    config: JSON.stringify(board.config),
+  } as ExportDashboard;
 
   const widgets = Object.values(widgetMap).map(w => {
     const newWidgetConf = {
@@ -58,8 +69,8 @@ export const getBoardTplData = (
       ...w,
       viewIds: [],
       datachartId: '',
-      config: JSON.stringify(newWidgetConf) as any,
-    };
+      config: JSON.stringify(newWidgetConf),
+    } as ExportWidget;
     return newWidget;
   });
   return {

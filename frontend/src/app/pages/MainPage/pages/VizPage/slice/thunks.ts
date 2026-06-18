@@ -27,6 +27,7 @@ import {
   ChartVariableParams,
   PendingChartDataRequestFilter,
 } from 'app/types/ChartDataRequest';
+import type { ChartDataSetDTO } from 'app/types/ChartDataSet';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { ChartDTO } from 'app/types/ChartDTO';
 import { convertToChartDto } from 'app/utils/ChartDtoHelper';
@@ -318,7 +319,14 @@ export const fetchVizChartAction = createAsyncThunk(
 );
 export const exportChartTpl = createAsyncThunk(
   'viz/exportChartTpl',
-  async (arg: { chartId; dataset; callBack }, thunkAPI) => {
+  async (
+    arg: {
+      chartId: string;
+      dataset?: ChartDataSetDTO;
+      callBack: () => void;
+    },
+    thunkAPI,
+  ) => {
     const vizState = (thunkAPI.getState() as RootState)?.viz as VizState;
     const { chartId, dataset, callBack } = arg;
     const dataChart = vizState.chartPreviews.find(

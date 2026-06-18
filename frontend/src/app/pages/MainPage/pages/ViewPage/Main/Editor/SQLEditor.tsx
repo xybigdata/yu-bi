@@ -38,7 +38,7 @@ import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { FONT_SIZE_BASE } from 'styles/StyleConstants';
 import { selectThemeKey } from 'styles/theme/slice/selectors';
-import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import type * as Monaco from 'monaco-editor';
 import { RootState } from 'types';
 import { getInsertedNodeIndex } from 'utils/utils';
 import { ViewStatus, ViewViewModelStages } from '../../constants';

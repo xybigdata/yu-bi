@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import type * as Monaco from 'monaco-editor';
 
 type MonacoModule = typeof Monaco;
 

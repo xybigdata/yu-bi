@@ -52,6 +52,10 @@ import {
   WidgetData,
 } from './types';
 
+type BoardTemplateExportWidget = Partial<Omit<Widget, 'config'>> & {
+  config: string;
+};
+
 /**
  * @param ''
  * @description '先拿本地缓存，没有缓存再去服务端拉数据'
@@ -113,8 +117,8 @@ export const fetchBoardDetail = createAsyncThunk<
 export const exportBoardTpl = createAsyncThunk<
   null,
   {
-    dashboard: Partial<Dashboard>;
-    widgets: Partial<Widget>[];
+    dashboard: Partial<ServerDashboard>;
+    widgets: BoardTemplateExportWidget[];
     callBack: () => void;
   }
 >('board/exportBoardTpl', async (params, { dispatch, rejectWithValue }) => {

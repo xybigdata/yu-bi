@@ -18,6 +18,8 @@
 - 工作目录：`/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi`
 - `main` 只允许 merge，不直接开发
 - 低风险改造阶段改为在单一长期分支持续推进，累计到足够批量后再 merge 回 `main`
+- 前端低风险改造优先复用当前累计分支，不因单个小专题频繁创建新分支
+- `main` 推送需要完整门禁，只有累计到值得回归的批量后才执行完整门禁、`--no-ff` 合并并推送主线
 - 高风险或跨域专题仍单独建分支，不在文档中写死分支名
 - 默认自动 `git add`、`git commit --no-verify`
 
@@ -271,7 +273,7 @@
 | 前端交互/弹窗类型收口 | 仍有局部 `Function`、宽泛回调与最小视图结构未声明 | 继续按调用链小批量收口 |
 | 时间体系剩余调用点 | 已有统一工具入口，仍有零散调用 | 继续小批量收口 |
 | 前端依赖收口 | 仍有少量历史依赖可继续审计 | 按证据逐个清理 |
-| Ant Design 历史入口 | 只剩局部残留 | 按调用点逐步消化 |
+| 前端公开类型入口 | Ant Design / rc 历史类型入口已清零，Monaco 静态类型导入已切到包根入口 | 后续防止回退到组件内部目录或运行时深路径类型入口 |
 | 安装健康度维护 | 当前已稳定，但需防止锁文件回退 | 持续关注 Node 24 安装表现 |
 
 ### 5.2 中风险：做专项稳定化，不做重写
@@ -300,17 +302,23 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`前端通用 UI 与工具类型边界收口`
+当前累计专题：`前端公开类型入口收口`
 
 本批目标：
 
-- 继续收口通用 UI 小组件、样式工具与测试层的局部宽类型
-- 优先处理不改变运行时语义、已有测试或可用 TypeScript 覆盖的单点
-- 遇到会影响图表运行时协议、交互配置结构或懒加载 props 推断的点，先降级为评估项
+- 清理前端源码里对 Ant Design / rc / Monaco 组件内部目录的静态类型导入
+- 优先使用 React 类型、Ant Design / Monaco 包根公开类型，或从公开组件 props 反推类型
+- 只处理类型入口，不调整组件运行时行为和业务协议
+- Monaco 运行时懒加载与语言贡献路径先保持现状，不混入本批类型入口收口
 - 不调整公共协议、内部稳定标识和业务配置结构
 
 当前累计清单：
 
+- 已完成：`ChartSelectModal` 去掉 `rc-tree/lib/interface` 的 `Key` 深路径导入，改用 React 公开 `Key` 类型
+- 已完成：`UnControlledTableHeaderPanel` 去掉 `antd/es/table/interface` 的 `TableRowSelection` 深路径导入，改为从 `TableProps<T>['rowSelection']` 反推公开类型
+- 已完成：Monaco 编辑器封装、SQL 编辑器、MockData 编辑器和 View 编辑上下文的静态类型导入从 `monaco-editor/esm/vs/editor/editor.api` 切到 `monaco-editor` 包根入口
+- 已完成：前端源码复扫已无 `antd/es`、`antd/lib`、`rc-*/es`、`rc-*/lib` 这类历史深路径类型入口；Monaco 剩余 `esm` 路径仅保留在运行时懒加载与语言贡献加载入口
+- 已完成：看板与图表 MockData 面板的样例数据状态、编辑器回调和导出参数补齐 `ChartDataSetDTO` / 行数组 / 模板导出 payload 局部类型，去掉面板链路里的宽泛 `any` 与原地修改
 - 已完成：`media.ts` 的 styled-components 媒体查询 helper 补齐显式模板桥类型，去掉模板生成链路里的直接 `any`，并用 media 单测确认 CSS 输出不变
 - 已完成：`Avatar`、`ListTitle` 与 `AddButton` 的局部 UI 回调和状态类型收口，复用 antd 公开 props 与菜单点击参数类型，保留按钮点击无参和菜单点击带参两种调用方式
 - 已完成：`ThemeProvider` 测试里的主题变量与 store state 断言去掉局部 `any`，改用 `DefaultTheme` 与 `RootState`

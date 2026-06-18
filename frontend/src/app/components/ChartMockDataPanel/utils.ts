@@ -16,12 +16,17 @@
  * limitations under the License.
  */
 import { VizState } from 'app/pages/MainPage/pages/VizPage/slice/types';
+import type { ChartDataSetDTO } from 'app/types/ChartDataSet';
 
-export const getDataChartData = (chartId: string) => (dispatch, getState) => {
-  const appState = getState() as { viz: VizState };
-  const chartPreviews = appState.viz.chartPreviews;
+export const getDataChartData =
+  (chartId: string) =>
+  (dispatch, getState): ChartDataSetDTO | undefined => {
+    const appState = getState() as { viz: VizState };
+    const chartPreviews = appState.viz.chartPreviews;
 
-  const dataChart = chartPreviews.find(item => item.backendChartId === chartId);
+    const dataChart = chartPreviews.find(
+      item => item.backendChartId === chartId,
+    );
 
-  return dataChart?.dataset;
-};
+    return dataChart?.dataset;
+  };
