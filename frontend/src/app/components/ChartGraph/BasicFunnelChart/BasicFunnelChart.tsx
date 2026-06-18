@@ -51,6 +51,11 @@ import { loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 import { Series, SeriesData } from './types';
 
+const getNumericCellValue = (
+  row: IChartDataSetRow<string> | undefined,
+  field: ChartDataSectionField | undefined,
+) => Number(field ? row?.getCell(field) : undefined);
+
 class BasicFunnelChart extends Chart {
   config = Config;
   chart: any = null;
@@ -221,14 +226,14 @@ class BasicFunnelChart extends Chart {
       ? chartDataSet
       : chartDataSet?.sort(
           (a, b) =>
-            (b?.getCell(aggregateConfigs[0]) as any) -
-            (a?.getCell(aggregateConfigs[0]) as any),
+            getNumericCellValue(b, aggregateConfigs[0]) -
+            getNumericCellValue(a, aggregateConfigs[0]),
         );
     const aggregateList = !groupConfigs.length
       ? aggregateConfigs?.sort(
           (a, b) =>
-            (chartDataSet?.[0]?.getCell(b) as any) -
-            (chartDataSet?.[0]?.getCell(a) as any),
+            getNumericCellValue(chartDataSet?.[0], b) -
+            getNumericCellValue(chartDataSet?.[0], a),
         )
       : aggregateConfigs;
 
