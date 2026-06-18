@@ -1346,16 +1346,17 @@ export function getScatterSymbolSizeFn(
   max: number,
   min: number,
   cycleRatio?: number,
-): (val) => number {
+): (val: Array<number | string | undefined>) => number {
   min = Math.min(0, min);
   const scaleRatio = cycleRatio || 1;
   const defaultScatterPointPixelSize = 10;
   const distance = max - min === 0 ? 100 : max - min;
 
   return function (val) {
+    const value = Number(val?.[valueIndex]);
     return Math.max(
       3,
-      ((val?.[valueIndex] - min) / distance) *
+      ((value - min) / distance) *
         scaleRatio *
         defaultScatterPointPixelSize *
         2,

@@ -72,7 +72,7 @@ export type MetricAndSizeSeriesStyle = {
   zlevel: number;
   coordinateSystem: string;
   symbol: string;
-  symbolSize: (value: number) => number;
+  symbolSize: (value: Array<number | string | undefined>) => number;
   emphasis: {
     label: {
       show: boolean;

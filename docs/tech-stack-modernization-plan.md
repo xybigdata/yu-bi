@@ -340,11 +340,12 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`前端图表局部类型边界收口`
+当前累计专题：`前端局部类型边界收口`
 
 本批目标：
 
 - 优先处理图表组件内部缓存、局部事件回调、样式透传对象等低风险类型边界
+- 同步处理调用链清楚的局部 UI 组件、工具函数和第三方适配层类型边界
 - 只收口“声明比真实用法更宽”的局部类型，不改图表 option 输出结构
 - 继续暂缓 ECharts 实例、tooltip params、地图注册入参、rowData 与图表公共协议宽口
 - 不调整公共协议、内部稳定标识和业务配置结构
@@ -358,6 +359,8 @@
 - 已完成：看板与图表 MockData 面板的样例数据状态、编辑器回调和导出参数补齐 `ChartDataSetDTO` / 行数组 / 模板导出 payload 局部类型，去掉面板链路里的宽泛 `any` 与原地修改
 - 已完成：Workbench、图表预览、分享预览和看板 widget 数据请求的排序、分页、执行 token 参数补齐 `ChartDataRequest` / `ChartDatasetPageInfo` / `ExecuteToken` 类型边界，去掉请求构造链路里的局部 `as any` 与 `getState() as any`
 - 已完成：Share/Viz 预览数据集 fulfilled payload 补齐 `ChartDataSetDTO` 边界，computed fields 更新 payload 对齐 `ChartDataViewMeta[]`，去掉分享预览 dataset 的局部 `as any`
+- 已完成：ChartOperationPanel 的配置更新回调复用 `ChartConfigPayloadType`，FlexLayout factory 节点和 DnD backend props 补齐公开类型
+- 已完成：散点 symbol size 工具函数与轮廓地图散点 series 的 value 参数对齐真实数组边界，避免继续保留未声明回调参数
 - 已完成：Workbench 数据集 thunk 与 reducer 补齐 `ChartDataSetDTO` 和 reject payload 最小结构，去掉 dataset fulfilled / rejected 链路里的局部 `as any`；配置 payload 的动态 `value` 仍按协议宽口暂缓
 - 已完成：BasicRichText MarkdownModule 的 Delta op 与 Quill line 补齐最小局部类型，RichTextPluginLoader 的 calcfield/tag/custom color 数据入口去掉局部 `any`，保持 Quill DOM 数据写读行为不变
 - 已完成：BasicFunnelChart 的数据行与指标排序比较改为局部数值读取 helper，去掉 `getCell(...) as any` 的数值比较中转，保持原 Number 转换语义不变
