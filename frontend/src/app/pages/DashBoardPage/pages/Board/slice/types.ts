@@ -71,7 +71,7 @@ export interface Dashboard {
   thumbnail: string;
   index?: number;
   config: BoardConfig;
-  permissions?: any;
+  permissions?: unknown;
   queryVariables: Variable[];
 }
 export interface SaveDashboard extends Omit<Dashboard, 'config'> {
@@ -180,7 +180,7 @@ export interface WidgetInfo {
   selected: boolean;
   pageInfo: Partial<PageInfo>;
   errInfo: Record<WidgetErrorType, string>;
-  parameters?: any;
+  parameters?: unknown;
   linkInfo?: WidgetLinkInfo;
 }
 export interface WidgetData {
