@@ -20,7 +20,7 @@ import { Form, FormInstance, Modal, ModalFuncProps } from 'antd';
 import { ReactNode, useRef } from 'react';
 import { isPromise } from 'utils/object';
 
-export type StateModalCacheOnChange = (...args: any[]) => void;
+export type StateModalCacheOnChange = (...args: unknown[]) => void;
 
 export interface IStateModalContentProps {
   onChange: StateModalCacheOnChange;
@@ -40,7 +40,7 @@ const defaultBodyStyle: React.CSSProperties = {
   overflowX: 'auto',
 };
 
-type StateModalOnOk = (...args: any[]) => unknown;
+type StateModalOnOk = (...args: never[]) => unknown;
 type StateModalOnCancel = (close?: (() => void) | null) => void;
 type StateModalContent =
   | ReactNode
