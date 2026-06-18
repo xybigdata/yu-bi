@@ -599,6 +599,12 @@
 - 必要时 `npm run build:all`
 - 必要时 `npm run test:ci -- --silent`
 
+当前低风险批次合并前门禁记录：
+
+- 通过：`npm run test:ci`，109 个测试文件通过，838 个测试通过，4 个跳过
+- 通过：`npm run lint:css`
+- 通过：`npm run lint:style`
+
 触发完整前端门禁的条件：
 
 - 依赖、构建配置、路由入口、运行时加载、共享模型、迁移链路发生变化
