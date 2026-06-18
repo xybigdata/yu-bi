@@ -460,6 +460,52 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
       },
     });
   });
+
+  test('test view type is STRUCT view - fallback invalid root name json', () => {
+    const hierarchy: any = {
+      'dad.num': {
+        name: '{invalid-json}',
+      },
+    };
+
+    let result;
+    expect(() => {
+      result = addPathToHierarchyStructureAndChangeName(hierarchy, 'STRUCT');
+    }).not.toThrow();
+    expect(result).toEqual({
+      'dad.num': {
+        name: 'dad.num',
+        path: undefined,
+      },
+    });
+  });
+
+  test('test view type is STRUCT view - fallback invalid child name json', () => {
+    const hierarchy: any = {
+      file: {
+        name: 'file1',
+        children: [
+          {
+            name: '{invalid-json}',
+          },
+        ],
+      },
+    };
+
+    expect(
+      addPathToHierarchyStructureAndChangeName(hierarchy, 'STRUCT'),
+    ).toEqual({
+      file: {
+        name: 'file1',
+        children: [
+          {
+            name: undefined,
+            path: undefined,
+          },
+        ],
+      },
+    });
+  });
 });
 
 describe('transformModelToViewModel test', () => {

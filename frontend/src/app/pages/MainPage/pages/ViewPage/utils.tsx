@@ -76,6 +76,23 @@ const parseColumnPermission = (permission: string): string[] | undefined => {
   }
 };
 
+const parseStructColumnPath = (
+  name?: string | string[],
+): string[] | undefined => {
+  if (Array.isArray(name)) {
+    return name;
+  }
+  if (!name) {
+    return undefined;
+  }
+  try {
+    const parsed = JSON.parse(name);
+    return Array.isArray(parsed) ? parsed : undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
+
 const normalizeColumnPermission = (
   permission: ColumnPermissionRaw,
 ): ColumnPermission => {
@@ -481,12 +498,12 @@ export function addPathToHierarchyStructureAndChangeName(
           acc[name].children![i]['path'] = Array.isArray(children.name)
             ? children.name
             : viewType === 'STRUCT'
-              ? children.name && JSON.parse(children.name)
+              ? parseStructColumnPath(children.name)
               : [children.name];
 
           acc[name].children![i]['name'] =
             viewType === 'STRUCT'
-              ? children.name && JSON.parse(children.name).join('.')
+              ? parseStructColumnPath(children.name)?.join('.')
               : children.name;
         }
       });
@@ -494,7 +511,7 @@ export function addPathToHierarchyStructureAndChangeName(
       acc[name]['path'] = Array.isArray(acc[name]['name'])
         ? acc[name]['name']
         : viewType === 'STRUCT'
-          ? acc[name]['name'] && JSON.parse(acc[name]['name'])
+          ? parseStructColumnPath(acc[name]['name'])
           : [name];
 
       acc[name]['name'] = name;
