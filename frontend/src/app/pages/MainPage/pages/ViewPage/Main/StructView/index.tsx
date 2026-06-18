@@ -198,7 +198,7 @@ export const StructView = memo(
 
     const handleTableJoinColumns = useCallback(
       (
-        columnName: [string],
+        columnName: string[],
         type: 'left' | 'right',
         joinIndex: number,
         joinConditionIndex: number,
