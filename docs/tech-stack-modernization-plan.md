@@ -262,6 +262,9 @@
   - 散点图 metric / size series 的混合值数组补齐真实 `string | number | undefined` 边界，去掉局部 `as any`
   - 轮廓地图 option 的 `series` 改为地图 series 与散点 series 联合类型，去掉 series 拼接处的局部 `as any`
   - 本批不迁移 ECharts 实例、地图注册入参、tooltip params 和 rowData 宽口
+- 前端图表运行时加载链路继续稳定化：
+  - `loadEChartsRuntime` 与 `loadWordCloudRuntime` 失败后清空缓存 Promise，避免一次动态加载失败后永久无法重试
+  - 补齐 ECharts 与词云运行时 loader 的 Promise 复用和失败重试定向测试
 - 前端历史弱类型注释清理：
   - 删除看板 widget 工具、控制器核心、容器内容类型和查询/重置按钮配置里的失效注释代码
   - 清理注释中的历史 `as any` / `any[]` 噪音，降低后续低风险扫描误判
@@ -712,6 +715,8 @@
 
 当前低风险批次合并前门禁记录：
 
+- 通过：图表运行时加载稳定化专项轻量门禁，`npm run checkTs`
+- 通过：图表运行时加载稳定化专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts`
 - 通过：富文本运行时加载稳定化专项轻量门禁，`npm run checkTs`
 - 通过：富文本运行时加载稳定化专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
 - 通过：`flexlayout-react` 工作台布局工厂稳定化专项轻量门禁，`npm run checkTs`
