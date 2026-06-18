@@ -68,7 +68,9 @@ export function cond(...predicates) {
   };
 }
 
-export function isPairArray(arr?: any[]) {
+export function isPairArray<T>(arr?: T[]): arr is [T, T];
+export function isPairArray(arr?: unknown): arr is [unknown, unknown];
+export function isPairArray(arr?: unknown) {
   return Array.isArray(arr) && arr?.length === 2;
 }
 
@@ -82,7 +84,7 @@ export function isNumericEqual(a?: number | string, b?: number | string) {
 
 export function isInPairArrayRange(
   count: number | string,
-  pairArray: number[],
+  pairArray: number[] | [number, number],
 ) {
   if (!isPairArray(pairArray)) {
     return false;
@@ -126,11 +128,11 @@ export function PatchUpdateCollection<T2>(
   return target;
 }
 
-export function shadowCopyCollection(collection) {
+export function shadowCopyCollection<T>(collection?: T[]): T[] {
   return [...(collection || [])];
 }
 
-export function ArrayToObject(arr) {
+export function ArrayToObject<T extends object>(arr?: T[]): Partial<T> {
   if (!arr) return {};
 
   return arr?.reduce((acc, cur) => {
@@ -138,7 +140,7 @@ export function ArrayToObject(arr) {
   }, {});
 }
 
-export function ObjectToArray(o) {
+export function ObjectToArray<T extends object>(o?: T | null): Array<T[keyof T]> {
   if (!o) return [];
 
   return Object.values(o);
@@ -152,19 +154,19 @@ export function UniqWith<T>(arr: T[], compareFn: (a: T, b: T) => boolean) {
   return uniqWith(arr, compareFn);
 }
 
-export function Omit(object, keys: string[]) {
+export function Omit(object: object | null | undefined, keys: string[]) {
   return omit(object, keys);
 }
 
-export function ToCamelCase(str) {
+export function ToCamelCase(str?: string) {
   return camelCase(str);
 }
 
-export function ToLowerCase(str) {
+export function ToLowerCase(str?: string) {
   return lowerCase(str);
 }
 
-export function AssignDeep<T>(target: T, ...source: any[]) {
+export function AssignDeep<T extends object>(target: T, ...source: object[]): T {
   return Object.assign({}, target, ...source);
 }
 
@@ -183,27 +185,29 @@ export function isUndefined(o): boolean {
   return o === undefined;
 }
 
-export function isEmpty(o?: null | any): boolean {
+export function isEmpty(o?: unknown): boolean {
   return o === null || isUndefined(o);
 }
 
-export function isEmptyString(o?: null | any): boolean {
+export function isEmptyString(o?: unknown): boolean {
   return isEmpty(o) || o === '';
 }
 
-export function isFunc(f) {
+export function isFunc(f: unknown): f is (...args: unknown[]) => unknown {
   return isFunction(f);
 }
 
-export function meanValue(value) {
+export function meanValue(value?: number[]) {
   return mean(value);
 }
 
-export function isConfigRow(value) {
+export function isConfigRow(
+  value: unknown,
+): value is ChartStyleConfig {
   return isObject(value) && 'comType' in value;
 }
 
-export function pickValues(o, values: string[]) {
+export function pickValues<T extends object>(o: T, values: string[]) {
   return pick(o, values);
 }
 
@@ -254,14 +258,14 @@ export function resetValue(config: ChartStyleConfig): ChartStyleConfig {
   return config;
 }
 
-export function isTreeModel(data) {
+export function isTreeModel(data: unknown) {
   if (!Array.isArray(data)) {
     return false;
   }
   return data.some(d => d?.children?.length > 0);
 }
 
-export function isEmptyArray(value?) {
+export function isEmptyArray(value?: unknown) {
   if (isEmpty(value)) {
     return true;
   }
@@ -269,17 +273,17 @@ export function isEmptyArray(value?) {
   return Array.isArray(value) && !value?.length;
 }
 
-export function isPromise(obj?) {
+export function isPromise(obj?: unknown): obj is Promise<unknown> {
   if (isEmpty(obj)) {
     return false;
   }
 
   return (
     (typeof obj === 'object' || typeof obj === 'function') &&
-    typeof obj.then === 'function'
+    typeof (obj as Promise<unknown>).then === 'function'
   );
 }
 
-export function isEqualObject(obj, cObj) {
+export function isEqualObject(obj: unknown, cObj: unknown) {
   return isEqual(obj, cObj);
 }

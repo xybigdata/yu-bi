@@ -1,15 +1,14 @@
-import { Reducer } from '@reduxjs/toolkit';
+import { AnyAction, Reducer } from '@reduxjs/toolkit';
 import { useAppStore } from 'app/hooks/useRedux';
 import hoistNonReactStatics from 'hoist-non-react-statics';
 import React from 'react';
 import { ReactReduxContext } from 'react-redux';
 import type { AppStore } from 'redux/configureStore';
-import { RootState } from 'types';
 import getInjectors from './reducerInjectors';
 
 interface InjectReducerParams {
-  key: keyof RootState;
-  reducer: Reducer<any, any>;
+  key: string;
+  reducer: Reducer<any, AnyAction>;
 }
 
 /**
@@ -33,9 +32,9 @@ interface InjectReducerParams {
  * @public
  */
 const injectReducer =
-  ({ key, reducer }) =>
-  WrappedComponent => {
-    class ReducerInjector extends React.Component {
+  ({ key, reducer }: InjectReducerParams) =>
+  <Props extends object>(WrappedComponent: React.ComponentType<Props>) => {
+    class ReducerInjector extends React.Component<Props> {
       static WrappedComponent = WrappedComponent;
 
       static contextType = ReactReduxContext;
@@ -44,7 +43,7 @@ const injectReducer =
         WrappedComponent.displayName || WrappedComponent.name || 'Component'
       })`;
 
-      constructor(props, context) {
+      constructor(props: Props, context) {
         super(props, context);
 
         getInjectors(context.store as AppStore).injectReducer(key, reducer);
@@ -77,7 +76,10 @@ export default injectReducer;
  *
  * @public
  */
-export const useInjectReducer = ({ key, reducer }: InjectReducerParams) => {
+export const useInjectReducer = ({
+  key,
+  reducer,
+}: InjectReducerParams) => {
   const store = useAppStore();
 
   const isInjected = React.useRef(false);
