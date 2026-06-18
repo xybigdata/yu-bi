@@ -89,6 +89,7 @@ type ChartInteractionRowData = Record<
   string,
   string | number | boolean | null | undefined
 >;
+type ViewConfigRecord = Record<string, unknown>;
 
 export type ChartDragItem = {
   category?: ChartDataViewMeta['category'];
@@ -99,6 +100,10 @@ export type ChartDragItem = {
   children: ChartDragItem[];
 };
 export type InteractionFilterValueMap = Record<string, string[]>;
+
+function isRecord(value: unknown): value is ViewConfigRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
 const parseVariableParamValues = (
   defaultValue?: string,
@@ -130,18 +135,19 @@ const parseViewModel = (model?: string): Record<string, any> | undefined => {
 
 const parseViewConfig = (
   viewConfig?: string | object,
-): Record<string, any> | undefined => {
+): ViewConfigRecord | undefined => {
   if (!viewConfig) {
     return undefined;
   }
   if (typeof viewConfig === 'string') {
     try {
-      return JSON.parse(viewConfig) as Record<string, any>;
+      const parsed = JSON.parse(viewConfig);
+      return isRecord(parsed) ? parsed : undefined;
     } catch (error) {
       return undefined;
     }
   }
-  return viewConfig as Record<string, any>;
+  return isRecord(viewConfig) ? viewConfig : undefined;
 };
 
 export const transformToHierarchyModel = (model?: string) => {

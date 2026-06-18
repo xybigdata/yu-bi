@@ -1474,7 +1474,9 @@ export function isMatchRequirement(
 }
 
 // 获取是否展示刻度
-export const getIntervalShow = (interval): boolean =>
+export const getIntervalShow = (
+  interval?: number | string | null,
+): boolean =>
   interval !== 'auto' && interval !== null;
 
 // 判断overflow 条件是否已生效
@@ -1865,7 +1867,10 @@ export function getMinAndMaxNumber(
   return [Math.min(0, ...datas), Math.max(0, ...datas)];
 }
 
-export function findPathByNameInMeta(meta, colName) {
+export function findPathByNameInMeta(
+  meta: ChartDataViewMeta[] | undefined,
+  colName: unknown,
+): ChartDataViewMeta | undefined {
   return getAllColumnInMeta(meta)?.find(v => v.name === colName);
 }
 

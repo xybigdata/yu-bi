@@ -1796,6 +1796,17 @@ describe('Internal Chart Helper ', () => {
         expensiveQuery: undefined,
       });
     });
+
+    test('should ignore non-object json config', () => {
+      const viewConfig = transformToViewConfig('true');
+      expect(viewConfig).toEqual({
+        cache: undefined,
+        cacheExpires: undefined,
+        concurrencyControl: undefined,
+        concurrencyControlMode: undefined,
+        expensiveQuery: undefined,
+      });
+    });
   });
 
   describe('variable interaction params Test', () => {
