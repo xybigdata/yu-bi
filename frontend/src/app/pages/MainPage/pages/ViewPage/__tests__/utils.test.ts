@@ -20,6 +20,7 @@ import { DataViewFieldType } from 'app/constants';
 import { Column, ColumnRole } from '../slice/types';
 import {
   addPathToHierarchyStructureAndChangeName,
+  buildAntdTreeNodeModel,
   buildRequestColumns,
   dataModelColumnSorter,
   diffMergeHierarchyModel,
@@ -804,5 +805,17 @@ describe('buildRequestColumns test', () => {
         column: ['db1', 'customers', 'name'],
       },
     ]);
+  });
+});
+
+describe('buildAntdTreeNodeModel test', () => {
+  test('should build tree node with stable key and full value path', () => {
+    expect(buildAntdTreeNodeModel(['db1'], 'orders')).toEqual({
+      key: `db1${String.fromCharCode(0)}orders`,
+      title: 'orders',
+      value: ['db1', 'orders'],
+      children: undefined,
+      isLeaf: undefined,
+    });
   });
 });

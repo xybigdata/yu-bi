@@ -539,7 +539,12 @@ export function addPathToHierarchyStructureAndChangeName(
   return _hierarchy;
 }
 
-export function buildAntdTreeNodeModel<T extends TreeDataNode & { value: any }>(
+export type AntdValueTreeNode = TreeDataNode & {
+  value: string[];
+  children?: AntdValueTreeNode[];
+};
+
+export function buildAntdTreeNodeModel<T extends AntdValueTreeNode>(
   ancestors: string[] = [],
   nodeName: string,
   children?: T[],
@@ -553,7 +558,7 @@ export function buildAntdTreeNodeModel<T extends TreeDataNode & { value: any }>(
     value: fullNames,
     children,
     isLeaf,
-  } as any;
+  } as T;
 }
 
 export function buildRequestColumns(

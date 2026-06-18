@@ -321,6 +321,10 @@
 - 已完成：STRUCT 视图脚本列配置解析收口到 `all` 或数组形态，避免重复裸 `JSON.parse` 和异常列配置扩散
 - 已完成：STRUCT 视图请求列构造补齐显式 `alias / column` 类型，去掉请求列链路里的宽泛数组中转
 - 已完成：查询结果转模型入口补齐 STRUCT 列路径映射类型，去掉字段名中转里的局部 `any`
+- 已完成：View tree 节点构造补齐显式 `value: string[]` 节点类型，去掉节点构造返回里的局部 `as any`
+- 已完成：Source 编辑态配置字符串解析补齐异常兜底，坏 JSON 或非对象配置按空配置回退，不再打断详情页回填
+- 已完成：SQL warning 提 issue 参数改为区分 GitHub / Gitee 的显式结构，去掉 issue 参数拼装里的局部 `any`
+- 已完成：View tab 右键菜单事件改为复用 antd 公开 `MenuProps['onClick']` 参数类型，去掉菜单事件入口的局部 `any`
 - 已完成：迁移测试层局部弱类型收口
 - 已完成：工具测试层第一批局部弱类型收口
 - 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 的局部弱类型收口
