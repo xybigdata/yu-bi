@@ -22,14 +22,22 @@ import { RectConfig } from '../pages/Board/slice/types';
 import { Widget } from '../types/widgetTypes';
 
 const toNonNegativeNumber = (value: unknown, fallback: number) => {
-  if (typeof value !== 'number' || Number.isNaN(value) || value < 0) {
+  if (
+    typeof value !== 'number' ||
+    !Number.isFinite(value) ||
+    value < 0
+  ) {
     return fallback;
   }
   return value;
 };
 
 const toPositiveNumber = (value: unknown, fallback: number) => {
-  if (typeof value !== 'number' || Number.isNaN(value) || value <= 0) {
+  if (
+    typeof value !== 'number' ||
+    !Number.isFinite(value) ||
+    value <= 0
+  ) {
     return fallback;
   }
   return value;
@@ -37,24 +45,28 @@ const toPositiveNumber = (value: unknown, fallback: number) => {
 
 const toLayoutUnit = (value: number) => Math.floor(value);
 
+const toPositiveLayoutCols = (cols: number) =>
+  Math.max(toLayoutUnit(toPositiveNumber(cols, LAYOUT_COLS_MAP.lg)), 1);
+
 const getNormalizedRect = (
   rect?: Partial<RectConfig>,
   cols: number = LAYOUT_COLS_MAP.lg,
 ) => {
+  const normalizedCols = toPositiveLayoutCols(cols);
   const width = Math.min(
-    toLayoutUnit(toPositiveNumber(rect?.width, cols / 2)),
-    cols,
+    toLayoutUnit(toPositiveNumber(rect?.width, normalizedCols / 2)),
+    normalizedCols,
   );
   const x = Math.min(
     toLayoutUnit(toNonNegativeNumber(rect?.x, 0)),
-    Math.max(cols - width, 0),
+    Math.max(normalizedCols - width, 0),
   );
 
   return {
     x,
     y: toLayoutUnit(toNonNegativeNumber(rect?.y, 0)),
     width,
-    height: toLayoutUnit(toPositiveNumber(rect?.height, cols / 2)),
+    height: toLayoutUnit(toPositiveNumber(rect?.height, normalizedCols / 2)),
   };
 };
 

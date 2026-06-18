@@ -1,4 +1,5 @@
 import { FontStyle } from '../../../types/ChartConfig';
+import { MouseEvent } from 'react';
 
 interface FontConfig {
   color: string;
@@ -29,7 +30,7 @@ export interface ScorecardConfig {
   };
   background: string;
   event: {
-    [eventName: string]: (value: any) => void;
+    [eventName: string]: (event: MouseEvent<HTMLElement>) => void;
   }[];
 }
 

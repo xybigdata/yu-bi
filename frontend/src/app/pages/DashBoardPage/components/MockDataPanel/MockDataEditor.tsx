@@ -16,17 +16,23 @@
  * limitations under the License.
  */
 // import JSONFormatter from 'json-formatter-js';
-// import {languages} from 'monaco-editor/esm/vs/language/json/fillers/monaco-editor-core.js';
 import MonacoEditor from 'app/components/MonacoEditor';
 import { ensureMonacoJavascriptLanguage } from 'app/components/MonacoEditor/runtime';
 import debounce from 'lodash/debounce';
 import { FC, memo, useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import type * as Monaco from 'monaco-editor';
 import { FONT_SIZE_BASE } from 'styles/StyleConstants';
 import { selectThemeKey } from 'styles/theme/slice/selectors';
-export const MockDataEditor: FC<{ originalData: object; onDataChange: any }> =
+import type { ChartDataSetDTO } from 'app/types/ChartDataSet';
+
+export type MockDataRows = NonNullable<ChartDataSetDTO['rows']>;
+
+export const MockDataEditor: FC<{
+  originalData?: MockDataRows;
+  onDataChange: (value: MockDataRows) => void;
+}> =
   memo(({ originalData, onDataChange }) => {
     const theme = useSelector(selectThemeKey);
     //   const formatter = new JSONFormatter(jsonVal);
@@ -48,10 +54,12 @@ export const MockDataEditor: FC<{ originalData: object; onDataChange: any }> =
       [],
     );
     const debouncedEditorChange = useMemo(() => {
-      const editorChange = val => {
+      const editorChange = (val: string) => {
         try {
           let nextVal = JSON.parse(val);
-          onDataChange(nextVal);
+          if (Array.isArray(nextVal)) {
+            onDataChange(nextVal as MockDataRows);
+          }
         } catch (error) {
           console.warn('error on', error);
         }

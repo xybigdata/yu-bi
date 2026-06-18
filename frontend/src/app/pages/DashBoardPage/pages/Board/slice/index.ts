@@ -17,6 +17,7 @@
  */
 import { PayloadAction } from '@reduxjs/toolkit';
 import { ChartDataSectionType } from 'app/constants';
+import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import {
   adjustGroupWidgets,
   findChildIds,
@@ -408,7 +409,7 @@ const boardSlice = createSlice({
       }: PayloadAction<{
         dashboardId: string;
         datachartId: string;
-        computedFields: any;
+        computedFields: ChartDataViewMeta[];
       }>,
     ) {
       const dataChart = state.dataChartMap[dashboardId][datachartId];

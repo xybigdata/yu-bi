@@ -19,7 +19,9 @@
 import { IChart } from 'app/types/Chart';
 import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
 import DndProviderCompat from 'app/components/DndProviderCompat';
-import FlexLayout, { Model } from 'flexlayout-react';
+import { ChartConfigPayloadType } from 'app/pages/ChartWorkbenchPage/slice/types';
+import type { BackendFactory } from 'dnd-core';
+import FlexLayout, { Model, TabNode } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css';
 import { FC, memo, useContext, useState } from 'react';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -27,7 +29,10 @@ import styled from 'styled-components';
 import ChartDatasetContext from '../../contexts/ChartDatasetContext';
 import ChartDataViewContext from '../../contexts/ChartDataViewContext';
 import layoutConfig, { LayoutComponentType } from './ChartOperationPanelLayout';
-import { getLayoutNodeRectSize } from './layoutRuntime';
+import {
+  getLayoutNodeRectSize,
+  normalizeLayoutComponentType,
+} from './layoutRuntime';
 import ChartConfigPanel from './components/ChartConfigPanel/ChartConfigPanel';
 import ChartDataViewPanel from './components/ChartDataViewPanel';
 import ChartPresentWrapper from './components/ChartPresentWrapper';
@@ -38,7 +43,7 @@ const ChartOperationPanel: FC<{
   defaultViewId?: string;
   allowQuery: boolean;
   onChartChange: (chart: IChart) => void;
-  onChartConfigChange: (type, payload) => void;
+  onChartConfigChange: (type: string, payload: ChartConfigPayloadType) => void;
   onDataViewChange?: (clear?: boolean) => void;
   onCreateDownloadDataTask?: () => void;
   selectedItems?: SelectedItem[];
@@ -60,8 +65,8 @@ const ChartOperationPanel: FC<{
       Model.fromJson(layoutConfig),
     );
 
-    const layoutFactory = node => {
-      const component = node.getComponent();
+    const layoutFactory = (node: TabNode) => {
+      const component = normalizeLayoutComponentType(node.getComponent());
       const presentRect = getLayoutNodeRectSize(layout, 'present-wrapper');
 
       if (component === LayoutComponentType.VIEW) {
@@ -119,4 +124,6 @@ const ChartOperationPanel: FC<{
 
 export default ChartOperationPanel;
 
-const StyledChartOperationPanel = styled(DndProviderCompat)<{ backend }>``;
+const StyledChartOperationPanel = styled(DndProviderCompat)<{
+  backend: BackendFactory;
+}>``;

@@ -28,6 +28,11 @@ import {
 } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import { handleServerStoryAction } from 'app/pages/StoryBoardPage/slice/actions';
 import { ServerStoryBoard } from 'app/pages/StoryBoardPage/slice/types';
+import type { ChartDataRequest } from 'app/types/ChartDataRequest';
+import type {
+  ChartDataSetDTO,
+  ChartDatasetPageInfo,
+} from 'app/types/ChartDataSet';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { convertToChartDto } from 'app/utils/ChartDtoHelper';
 import { fetchAvailableSourceFunctionsAsyncForShare } from 'app/utils/fetch';
@@ -36,6 +41,8 @@ import persistence from 'utils/persistence';
 import { request2 } from 'utils/request';
 import { shareActions } from '.';
 import { ShareVizInfo } from './types';
+
+type RequestSorter = NonNullable<ChartDataRequest['orders']>[number];
 
 export const fetchShareVizInfo = createAsyncThunk(
   'share/fetchShareVizInfo',
@@ -145,18 +152,18 @@ export const fetchShareVizInfo = createAsyncThunk(
   },
 );
 
-export const fetchShareDataSetByPreviewChartAction = createAsyncThunk(
+export const fetchShareDataSetByPreviewChartAction = createAsyncThunk<
+  ChartDataSetDTO | undefined,
+  {
+    preview: ChartPreview;
+    pageInfo?: ChartDatasetPageInfo;
+    sorter?: RequestSorter;
+    drillOption?: IChartDrillOption;
+    filterSearchParams?: FilterSearchParams;
+  }
+>(
   'share/fetchDataSetByPreviewChartAction',
-  async (
-    args: {
-      preview: ChartPreview;
-      pageInfo?: any;
-      sorter?: { column: string; operator: string; aggOperator?: string };
-      drillOption?: IChartDrillOption;
-      filterSearchParams?: FilterSearchParams;
-    },
-    thunkAPI,
-  ) => {
+  async (args, thunkAPI) => {
     const state = thunkAPI.getState() as RootState;
     const shareState = state.share;
     if (!args.preview?.backendChart?.view.id) {
@@ -178,11 +185,11 @@ export const fetchShareDataSetByPreviewChartAction = createAsyncThunk(
       args.preview?.backendChart?.config?.aggregation,
     );
     const executeParam = builder
-      .addExtraSorters(args?.sorter ? [args?.sorter as any] : [])
+      .addExtraSorters(args?.sorter ? [args.sorter] : [])
       .addDrillOption(args?.drillOption)
       .build();
 
-    const response = await request2({
+    const response = await request2<ChartDataSetDTO>({
       method: 'POST',
       url: `shares/execute`,
       params: {

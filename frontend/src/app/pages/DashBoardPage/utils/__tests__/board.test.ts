@@ -49,7 +49,7 @@ describe('test getBoardMarginPadding', () => {
       mMargin: undefined,
       mPadding: undefined,
     };
-    expect(getBoardMarginPadding(config as any, 'sm')).toEqual({
+    expect(getBoardMarginPadding(config as BoardConfigValue, 'sm')).toEqual({
       curMargin: [MIN_MARGIN, MIN_MARGIN],
       curPadding: [MIN_PADDING, MIN_PADDING],
     });

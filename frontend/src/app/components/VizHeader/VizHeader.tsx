@@ -29,6 +29,7 @@ import {
   useVizOperationMenuItems,
 } from 'app/components/VizOperationMenu';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { BoardType } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { TITLE_SUFFIX } from 'globalConstants';
 import { FC, memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -60,7 +61,7 @@ const VizHeader: FC<{
   onDownloadData?;
   onSaveAsVizs?;
   onReloadData?;
-  onAddToDashBoard?;
+  onAddToDashBoard?: (dashboardId: string, dashboardType?: BoardType) => void;
   onRecycleViz?;
   allowDownload?: boolean;
   allowShare?: boolean;
@@ -102,7 +103,7 @@ const VizHeader: FC<{
     }, []);
 
     const handleModalOk = useCallback(
-      (dashboardId: string, dashboardType: string) => {
+      (dashboardId: string, dashboardType?: BoardType) => {
         setIsModalVisible(false);
         onAddToDashBoard?.(dashboardId, dashboardType);
       },

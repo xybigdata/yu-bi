@@ -60,6 +60,26 @@ import { StoryBoardState } from '../slice/types';
 import { StoryToolBar } from './StoryToolBar';
 
 const { Content } = Layout;
+
+interface AddDashboardHistoryState {
+  addDashboardId?: string;
+  transaction?: unknown;
+}
+
+const getAddDashboardHistoryState = (
+  state: unknown,
+): AddDashboardHistoryState | undefined => {
+  if (!state || typeof state !== 'object') {
+    return;
+  }
+  const { addDashboardId, transaction } = state as Record<string, unknown>;
+  return {
+    addDashboardId:
+      typeof addDashboardId === 'string' ? addDashboardId : undefined,
+    transaction,
+  };
+};
+
 export const StoryEditor: React.FC<{}> = memo(() => {
   useBoardSlice();
   useEditBoardSlice();
@@ -71,7 +91,7 @@ export const StoryEditor: React.FC<{}> = memo(() => {
   }, [dispatch, storyId]);
   const t = useI18NPrefix(`viz.board.setting`);
   const navigate = useCompatNavigate();
-  const histState = navigate.location.state as any;
+  const histState = getAddDashboardHistoryState(navigate.location.state);
   const domId = useMemo(() => uuidv4(), []);
   const revealRef = useRef<RevealApi | null>(null);
 
@@ -174,37 +194,41 @@ export const StoryEditor: React.FC<{}> = memo(() => {
   useEffect(() => {
     let cancelled = false;
     if (sortedPages.length > 0) {
-      void loadRevealRuntime().then(({ Reveal, RevealZoom }) => {
-        if (cancelled) {
-          return;
-        }
-        revealRef.current = new Reveal(document.getElementById(domId)!, {
-          hash: false,
-          history: false,
-          controls: false,
-          controlsLayout: 'bottom-right',
-          slideNumber: 'c/t',
-          controlsTutorial: false,
-          progress: false,
-          loop: true,
-          width: '100%',
-          height: '100%',
-          margin: 0,
-          minScale: 1,
-          maxScale: 1,
-          autoSlide: false,
-          transition: 'convex',
-          // backgroundTransition: 'fade',
-          transitionSpeed: 'slow',
-          viewDistance: 100,
-          plugins: [RevealZoom],
-          keyboard: {
-            70: () => {},
-          },
+      void loadRevealRuntime()
+        .then(({ Reveal, RevealZoom }) => {
+          if (cancelled) {
+            return;
+          }
+          revealRef.current = new Reveal(document.getElementById(domId)!, {
+            hash: false,
+            history: false,
+            controls: false,
+            controlsLayout: 'bottom-right',
+            slideNumber: 'c/t',
+            controlsTutorial: false,
+            progress: false,
+            loop: true,
+            width: '100%',
+            height: '100%',
+            margin: 0,
+            minScale: 1,
+            maxScale: 1,
+            autoSlide: false,
+            transition: 'convex',
+            // backgroundTransition: 'fade',
+            transitionSpeed: 'slow',
+            viewDistance: 100,
+            plugins: [RevealZoom],
+            keyboard: {
+              70: () => {},
+            },
+          });
+          revealRef.current?.initialize();
+          revealRef.current?.addEventListener('slidechanged', changePage);
+        })
+        .catch(error => {
+          console.error('Load story editor runtime failed', error);
         });
-        revealRef.current?.initialize();
-        revealRef.current?.addEventListener('slidechanged', changePage);
-      });
 
       return () => {
         cancelled = true;
@@ -227,7 +251,7 @@ export const StoryEditor: React.FC<{}> = memo(() => {
   }, [currentPageIndex, dispatch, sortedPages]);
 
   const addPages = useCallback(async () => {
-    if (histState && histState.addDashboardId) {
+    if (histState?.addDashboardId) {
       await dispatch(
         addStoryPages({ storyId, relIds: [histState.addDashboardId] }),
       );

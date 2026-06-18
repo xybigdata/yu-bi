@@ -24,9 +24,11 @@ import {
 } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { mainActions } from 'app/pages/MainPage/slice';
 import {
+  ChartDataRequest,
   ChartVariableParams,
   PendingChartDataRequestFilter,
 } from 'app/types/ChartDataRequest';
+import type { ChartDataSetDTO, ChartDatasetPageInfo } from 'app/types/ChartDataSet';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { ChartDTO } from 'app/types/ChartDTO';
 import { convertToChartDto } from 'app/utils/ChartDtoHelper';
@@ -53,6 +55,8 @@ import {
   UnarchiveVizParams,
   VizState,
 } from './types';
+
+type RequestSorter = NonNullable<ChartDataRequest['orders']>[number];
 
 export const getFolders = createAsyncThunk<Folder[], string>(
   'viz/getFolders',
@@ -318,7 +322,14 @@ export const fetchVizChartAction = createAsyncThunk(
 );
 export const exportChartTpl = createAsyncThunk(
   'viz/exportChartTpl',
-  async (arg: { chartId; dataset; callBack }, thunkAPI) => {
+  async (
+    arg: {
+      chartId: string;
+      dataset?: ChartDataSetDTO;
+      callBack: () => void;
+    },
+    thunkAPI,
+  ) => {
     const vizState = (thunkAPI.getState() as RootState)?.viz as VizState;
     const { chartId, dataset, callBack } = arg;
     const dataChart = vizState.chartPreviews.find(
@@ -345,8 +356,8 @@ export const fetchDataSetByPreviewChartAction = createAsyncThunk(
   async (
     arg: {
       backendChartId: string;
-      pageInfo?;
-      sorter?: { column: string; operator: string; aggOperator?: string };
+      pageInfo?: ChartDatasetPageInfo;
+      sorter?: RequestSorter;
       drillOption?: IChartDrillOption;
       jumpVariableParams?: ChartVariableParams;
     },
@@ -379,7 +390,7 @@ export const fetchDataSetByPreviewChartAction = createAsyncThunk(
     );
 
     const data = builder
-      .addExtraSorters(arg?.sorter ? [arg?.sorter as any] : [])
+      .addExtraSorters(arg?.sorter ? [arg.sorter] : [])
       .addDrillOption(arg?.drillOption)
       .addVariableParams(arg?.jumpVariableParams)
       .build();

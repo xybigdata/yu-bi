@@ -38,6 +38,8 @@ import { Formats } from './RichTextPluginLoader/RichTextConfig';
 import {
   createRichTextColorHandlers,
   createRichTextModules,
+  findRichTextFieldByKey,
+  getRichTextFieldKey,
   getRichTextContainerId,
   translateRichTextCalcFields,
   useRichTextMarkdownModule,
@@ -207,9 +209,9 @@ const ChartRichTextAdapter: FC<{
 
     const fieldItems = useMemo<MenuProps['items']>(() => {
       return dataList?.length
-        ? dataList.map(fieldName => ({
-            key: fieldName.name,
-            label: fieldName.name,
+        ? dataList.map((field, index) => ({
+            key: getRichTextFieldKey(field, index),
+            label: field.name,
           }))
         : [
             {
@@ -223,7 +225,7 @@ const ChartRichTextAdapter: FC<{
     const handleFieldMenuClick = useCallback<NonNullable<MenuProps['onClick']>>(
       ({ key, domEvent }) => {
         domEvent.preventDefault();
-        const field = dataList?.find(item => item.name === key);
+        const field = findRichTextFieldByKey(dataList, String(key));
         field && selectField(field)();
       },
       [dataList, selectField],

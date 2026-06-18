@@ -71,7 +71,7 @@ class PivotSheetChart extends ReactChart {
   isISOContainer = 'piovt-sheet';
   config = Config;
   chart: null | SpreadSheet = null;
-  private updateOptions: any = {};
+  private updateOptions: AndvS2Config = { options: {} };
   private lastRowsConfig: ChartDataSectionField[] = [];
   private hierarchyCollapse: boolean = true;
   private drillLevel: number = 0;
@@ -369,7 +369,7 @@ class PivotSheetChart extends ReactChart {
         });
         this.changeDrillConfig(rowSectionConfigRows, drillOption, true);
       },
-      onSelected: (cells: DataCell[]) => {
+      onSelected: () => {
         const state = this.chart?.interaction.getState();
         this.changeSelectedItems(state?.interactedCells || [], chartDataSet);
       },

@@ -17,12 +17,16 @@
  */
 import { Button } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { MockDataEditor } from 'app/pages/DashBoardPage/components/MockDataPanel/MockDataEditor';
+import {
+  MockDataEditor,
+  MockDataRows,
+} from 'app/pages/DashBoardPage/components/MockDataPanel/MockDataEditor';
 import { exportChartTpl } from 'app/pages/MainPage/pages/VizPage/slice/thunks';
 import { FC, memo, useEffect, useState } from 'react';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { LEVEL_100 } from 'styles/StyleConstants';
+import type { ChartDataSetDTO } from 'app/types/ChartDataSet';
 import { getDataChartData } from './utils';
 
 export interface MockDataPanelProps {
@@ -33,7 +37,7 @@ export const ChartMockDataPanel: FC<MockDataPanelProps> = memo(
   ({ chartId, onClose }) => {
     const dispatch = useAppDispatch();
     const t = useI18NPrefix('global.button');
-    const [dataset, setDataset] = useState<any>();
+    const [dataset, setDataset] = useState<ChartDataSetDTO>();
     useEffect(() => {
       const dataset = dispatch(getDataChartData(chartId));
       setDataset(dataset);
@@ -45,7 +49,7 @@ export const ChartMockDataPanel: FC<MockDataPanelProps> = memo(
       );
     };
 
-    const onDataChange = val => {
+    const onDataChange = (val: MockDataRows) => {
       const newDataset = { ...dataset };
       newDataset.rows = val;
       setDataset(newDataset);

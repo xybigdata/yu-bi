@@ -17,7 +17,12 @@
  */
 
 import { DataViewFieldType } from 'app/constants';
-import { Column, ColumnRole } from '../slice/types';
+import {
+  Column,
+  ColumnRole,
+  ColumnsModel,
+  HierarchyModel,
+} from '../slice/types';
 import {
   addPathToHierarchyStructureAndChangeName,
   buildAntdTreeNodeModel,
@@ -31,6 +36,23 @@ import {
 
 const createStructResultColumnName = (alias: string): string =>
   [alias] as unknown as string;
+
+type LegacyHierarchyNode = {
+  name?: string | string[];
+  type?: string;
+  path?: string[];
+  children?: LegacyHierarchyNode[];
+};
+
+type LegacyHierarchy = Record<string, LegacyHierarchyNode> | null;
+
+const legacyHierarchy = (hierarchy: LegacyHierarchy): ColumnsModel =>
+  hierarchy as unknown as ColumnsModel;
+
+const legacyHierarchyModel = (model: {
+  columns: Record<string, LegacyHierarchyNode>;
+  hierarchy: LegacyHierarchy;
+}): HierarchyModel => model as unknown as HierarchyModel;
 
 describe('dataModelColumnSorter test', () => {
   test('should sort by alphabet with the STRING column type', () => {
@@ -254,7 +276,9 @@ describe('diffMergeHierarchyModel test', () => {
       },
       hierarchy: {},
     };
-    expect(diffMergeHierarchyModel(model as any, 'SQL')).toMatchObject({
+    expect(
+      diffMergeHierarchyModel(legacyHierarchyModel(model), 'SQL'),
+    ).toMatchObject({
       columns: {
         id: { name: 'id', type: 'STRING' },
         age: { name: 'age', type: 'NUMBER' },
@@ -277,7 +301,9 @@ describe('diffMergeHierarchyModel test', () => {
         age: { name: 'age', type: 'NUMBER' },
       },
     };
-    expect(diffMergeHierarchyModel(model as any, 'SQL')).toMatchObject({
+    expect(
+      diffMergeHierarchyModel(legacyHierarchyModel(model), 'SQL'),
+    ).toMatchObject({
       columns: model.columns,
       hierarchy: {
         id: { name: 'id', type: 'STRING' },
@@ -298,7 +324,9 @@ describe('diffMergeHierarchyModel test', () => {
         address: { name: 'address', type: 'STRING' },
       },
     };
-    expect(diffMergeHierarchyModel(model as any, 'SQL')).toMatchObject({
+    expect(
+      diffMergeHierarchyModel(legacyHierarchyModel(model), 'SQL'),
+    ).toMatchObject({
       columns: model.columns,
       hierarchy: {
         id: { name: 'id', type: 'STRING' },
@@ -323,7 +351,9 @@ describe('diffMergeHierarchyModel test', () => {
         },
       },
     };
-    expect(diffMergeHierarchyModel(model as any, 'SQL')).toMatchObject({
+    expect(
+      diffMergeHierarchyModel(legacyHierarchyModel(model), 'SQL'),
+    ).toMatchObject({
       columns: model.columns,
       hierarchy: {
         dealers: {
@@ -351,7 +381,9 @@ describe('diffMergeHierarchyModel test', () => {
         },
       },
     };
-    expect(diffMergeHierarchyModel(model as any, 'SQL')).toMatchObject({
+    expect(
+      diffMergeHierarchyModel(legacyHierarchyModel(model), 'SQL'),
+    ).toMatchObject({
       columns: model.columns,
       hierarchy: {},
     });
@@ -376,7 +408,9 @@ describe('diffMergeHierarchyModel test', () => {
         },
       },
     };
-    expect(diffMergeHierarchyModel(model as any, 'SQL')).toMatchObject({
+    expect(
+      diffMergeHierarchyModel(legacyHierarchyModel(model), 'SQL'),
+    ).toMatchObject({
       columns: model.columns,
       hierarchy: {
         age: { name: 'age', type: 'NUMBER' },
@@ -392,18 +426,24 @@ describe('diffMergeHierarchyModel test', () => {
 
 describe('addPathToHierarchyStructureAndChangeName test', () => {
   test('test if hierarchy is empty', () => {
-    const hierarchy: any = null;
-    const result = addPathToHierarchyStructureAndChangeName(hierarchy, 'SQL');
+    const hierarchy: LegacyHierarchy = null;
+    const result = addPathToHierarchyStructureAndChangeName(
+      legacyHierarchy(hierarchy),
+      'SQL',
+    );
     expect(result).toEqual(null);
   });
 
   test('test view type is SQL and have name', () => {
-    const hierarchy: any = {
+    const hierarchy: LegacyHierarchy = {
       QD_id: {
         name: 'QD_id',
       },
     };
-    const result = addPathToHierarchyStructureAndChangeName(hierarchy, 'SQL');
+    const result = addPathToHierarchyStructureAndChangeName(
+      legacyHierarchy(hierarchy),
+      'SQL',
+    );
     expect(result).toEqual({
       QD_id: {
         name: 'QD_id',
@@ -413,10 +453,13 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
   });
 
   test('test view type is SQL and dont name', () => {
-    const hierarchy: any = {
+    const hierarchy: LegacyHierarchy = {
       QD_id: {},
     };
-    const result = addPathToHierarchyStructureAndChangeName(hierarchy, 'SQL');
+    const result = addPathToHierarchyStructureAndChangeName(
+      legacyHierarchy(hierarchy),
+      'SQL',
+    );
     expect(result).toEqual({
       QD_id: {
         name: 'QD_id',
@@ -426,13 +469,16 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
   });
 
   test('test view type is SQL and have path', () => {
-    const hierarchy: any = {
+    const hierarchy: LegacyHierarchy = {
       QD_id: {
         name: 'QD_id',
         path: ['QD_id'],
       },
     };
-    const result = addPathToHierarchyStructureAndChangeName(hierarchy, 'SQL');
+    const result = addPathToHierarchyStructureAndChangeName(
+      legacyHierarchy(hierarchy),
+      'SQL',
+    );
     expect(result).toEqual({
       QD_id: {
         name: 'QD_id',
@@ -442,13 +488,16 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
   });
 
   test('test view type is SQL and path in undefined', () => {
-    const hierarchy: any = {
+    const hierarchy: LegacyHierarchy = {
       QD_id: {
         name: 'QD_id',
         path: undefined,
       },
     };
-    const result = addPathToHierarchyStructureAndChangeName(hierarchy, 'SQL');
+    const result = addPathToHierarchyStructureAndChangeName(
+      legacyHierarchy(hierarchy),
+      'SQL',
+    );
     expect(result).toEqual({
       QD_id: {
         name: 'QD_id',
@@ -458,12 +507,15 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
   });
 
   test('test view type is SQL and name is array', () => {
-    const hierarchy: any = {
+    const hierarchy: LegacyHierarchy = {
       QD_id: {
         name: ['QD_id'],
       },
     };
-    const result = addPathToHierarchyStructureAndChangeName(hierarchy, 'SQL');
+    const result = addPathToHierarchyStructureAndChangeName(
+      legacyHierarchy(hierarchy),
+      'SQL',
+    );
     expect(result).toEqual({
       QD_id: {
         name: 'QD_id',
@@ -473,7 +525,7 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
   });
 
   test('test view type is SQL have children', () => {
-    const hierarchy: any = {
+    const hierarchy: LegacyHierarchy = {
       文件夹1: {
         name: '文件夹1',
         children: [
@@ -483,7 +535,10 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
         ],
       },
     };
-    const result = addPathToHierarchyStructureAndChangeName(hierarchy, 'SQL');
+    const result = addPathToHierarchyStructureAndChangeName(
+      legacyHierarchy(hierarchy),
+      'SQL',
+    );
     expect(result).toEqual({
       文件夹1: {
         name: '文件夹1',
@@ -498,7 +553,7 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
   });
 
   test('test view type is SQL have children name is Array', () => {
-    const hierarchy: any = {
+    const hierarchy: LegacyHierarchy = {
       文件夹1: {
         name: '文件夹1',
         children: [
@@ -508,7 +563,10 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
         ],
       },
     };
-    const result = addPathToHierarchyStructureAndChangeName(hierarchy, 'SQL');
+    const result = addPathToHierarchyStructureAndChangeName(
+      legacyHierarchy(hierarchy),
+      'SQL',
+    );
     expect(result).toEqual({
       文件夹1: {
         name: '文件夹1',
@@ -523,14 +581,14 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
   });
 
   test('test view type is STRUCT view - name is string array', () => {
-    const hierarchy: any = {
+    const hierarchy: LegacyHierarchy = {
       'dad.num': {
         name: '["dad","num"]',
       },
     };
 
     const result = addPathToHierarchyStructureAndChangeName(
-      hierarchy,
+      legacyHierarchy(hierarchy),
       'STRUCT',
     );
     expect(result).toEqual({
@@ -542,14 +600,14 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
   });
 
   test('test view type is STRUCT view - name is array', () => {
-    const hierarchy: any = {
+    const hierarchy: LegacyHierarchy = {
       'dad.num': {
         name: ['dad', 'num'],
       },
     };
 
     const result = addPathToHierarchyStructureAndChangeName(
-      hierarchy,
+      legacyHierarchy(hierarchy),
       'STRUCT',
     );
     expect(result).toEqual({
@@ -561,12 +619,12 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
   });
 
   test('test view type is STRUCT view is not have name', () => {
-    const hierarchy: any = {
+    const hierarchy: LegacyHierarchy = {
       'dad.num': {},
     };
 
     const result = addPathToHierarchyStructureAndChangeName(
-      hierarchy,
+      legacyHierarchy(hierarchy),
       'STRUCT',
     );
     expect(result).toEqual({
@@ -578,7 +636,7 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
   });
 
   test('test view type is STRUCT view - have children', () => {
-    const hierarchy: any = {
+    const hierarchy: LegacyHierarchy = {
       file: {
         name: 'file1',
         children: [
@@ -590,7 +648,7 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
     };
 
     const result = addPathToHierarchyStructureAndChangeName(
-      hierarchy,
+      legacyHierarchy(hierarchy),
       'STRUCT',
     );
     expect(result).toEqual({
@@ -607,7 +665,7 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
   });
 
   test('test view type is STRUCT view - fallback invalid root name json', () => {
-    const hierarchy: any = {
+    const hierarchy: LegacyHierarchy = {
       'dad.num': {
         name: '{invalid-json}',
       },
@@ -615,7 +673,10 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
 
     let result;
     expect(() => {
-      result = addPathToHierarchyStructureAndChangeName(hierarchy, 'STRUCT');
+      result = addPathToHierarchyStructureAndChangeName(
+        legacyHierarchy(hierarchy),
+        'STRUCT',
+      );
     }).not.toThrow();
     expect(result).toEqual({
       'dad.num': {
@@ -626,7 +687,7 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
   });
 
   test('test view type is STRUCT view - fallback invalid child name json', () => {
-    const hierarchy: any = {
+    const hierarchy: LegacyHierarchy = {
       file: {
         name: 'file1',
         children: [
@@ -638,7 +699,10 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
     };
 
     expect(
-      addPathToHierarchyStructureAndChangeName(hierarchy, 'STRUCT'),
+      addPathToHierarchyStructureAndChangeName(
+        legacyHierarchy(hierarchy),
+        'STRUCT',
+      ),
     ).toEqual({
       file: {
         name: 'file1',

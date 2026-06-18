@@ -1,4 +1,10 @@
-import { rangeNumberValidator } from '../utils';
+import { describe, expect, test } from 'vitest';
+import { ControllerFacadeTypes, TimeFilterValueCategory } from 'app/constants';
+import {
+  getTimeControllerConfig,
+  preformatControlConfig,
+  rangeNumberValidator,
+} from '../utils';
 
 describe('ControllerWidgetPanel utils', () => {
   describe('rangeNumberValidator', () => {
@@ -32,5 +38,38 @@ describe('ControllerWidgetPanel utils', () => {
         0, 0,
       ]);
     });
+  });
+
+  test('should preformat date controller config without mutating source config', () => {
+    const config = getTimeControllerConfig();
+    config.controllerDate!.startTime.exactValue = '2026-06-18 10:20:30';
+
+    const formatted = preformatControlConfig(
+      config,
+      ControllerFacadeTypes.Time,
+    );
+
+    expect(config.controllerDate!.startTime.exactValue).toBe(
+      '2026-06-18 10:20:30',
+    );
+    expect(formatted).not.toBe(config);
+    expect(formatted.controllerDate!.startTime).not.toBe(
+      config.controllerDate!.startTime,
+    );
+    expect(
+      formatted.controllerDate!.startTime.exactValue &&
+        typeof formatted.controllerDate!.startTime.exactValue === 'object' &&
+        'format' in formatted.controllerDate!.startTime.exactValue,
+    ).toBe(true);
+  });
+
+  test('should keep non-date controller config reference unchanged', () => {
+    const config = getTimeControllerConfig();
+    config.controllerDate!.startTime.relativeOrExact =
+      TimeFilterValueCategory.Relative;
+
+    expect(preformatControlConfig(config, ControllerFacadeTypes.RadioGroup)).toBe(
+      config,
+    );
   });
 });

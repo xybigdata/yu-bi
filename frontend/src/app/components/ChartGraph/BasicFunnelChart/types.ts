@@ -8,8 +8,7 @@ export type SeriesData = {
   itemStyle?: {
     color?: string | undefined;
     opacity?: number | undefined;
-    [key: string]: any;
-  };
+  } & Record<string, unknown>;
   name: string;
   rowData: { [key: string]: any };
   select: boolean;

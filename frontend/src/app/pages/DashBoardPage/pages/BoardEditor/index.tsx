@@ -19,7 +19,6 @@ import ChartEditor from 'app/components/ChartEditor';
 import DndProviderCompat from 'app/components/DndProviderCompat';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { BOARD_SELF_CHART_PREFIX } from 'globalConstants';
-import ChartDataView from 'app/types/ChartDataView';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
@@ -52,16 +51,10 @@ import {
   selectEditBoardLoading,
 } from './slice/selectors';
 import { addChartWidget, fetchEditBoardDetail } from './slice/thunk';
-
-type BoardEditorLocationState = {
-  widgetInfo?: string;
-};
-
-type BoardEditorWidgetInfo = {
-  dashboardType: Parameters<typeof addChartWidget>[0]['boardType'];
-  dataChart: DataChart;
-  dataview: ChartDataView;
-};
+import {
+  BoardEditorLocationState,
+  parseBoardEditorWidgetInfo,
+} from './utils';
 
 export const BoardEditor: React.FC<{
   boardId: string;
@@ -137,9 +130,7 @@ export const BoardEditor: React.FC<{
         console.error(
           'if you see the error on board editor, please contact to administrator',
         );
-        const widgetInfo = JSON.parse(
-          histState.widgetInfo,
-        ) as BoardEditorWidgetInfo;
+        const widgetInfo = parseBoardEditorWidgetInfo(histState.widgetInfo);
         if (widgetInfo) {
           let subType: 'widgetChart' | 'dataChart' = 'dataChart';
           if (!widgetInfo.dataChart.id) {

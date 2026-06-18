@@ -25,6 +25,7 @@ import { BoardConfig } from 'app/pages/DashBoardPage/types/boardTypes';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
 import { Variable } from 'app/pages/MainPage/pages/VariablePage/slice/types';
 import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
+import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import {
   ChartDataRequest,
   ChartVariableParams,
@@ -284,12 +285,6 @@ export type MediaWidgetContent = {
   };
 };
 // 容器组件配置
-// export type ContainerWidgetContent = {
-//   type: ContainerWidgetType;
-//   itemMap: Record<string, ContainerItem>;
-//   tabConfig?: any;
-//   carouselConfig?: any;
-// };
 export type TabWidgetContent = {
   itemMap: Record<string, ContainerItem>;
 };
@@ -380,13 +375,13 @@ export interface DataChart {
   type?: string; //?
   viewId: string;
   view?: any;
-  status: any;
+  status: number;
 }
 export interface DataChartConfig {
   aggregation: boolean | undefined;
   chartConfig: ChartConfig;
   chartGraphId: string;
-  computedFields: any[];
+  computedFields: ChartDataViewMeta[];
   sampleData?: any; // for template
 }
 

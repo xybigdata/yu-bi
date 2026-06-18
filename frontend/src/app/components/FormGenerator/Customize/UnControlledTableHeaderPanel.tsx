@@ -25,7 +25,7 @@ import {
   RedoOutlined,
 } from '@ant-design/icons';
 import { Button, Col, Input, Row, Space, Table } from 'antd';
-import type { TableRowSelection } from 'antd/es/table/interface';
+import type { TableProps } from 'antd';
 import { ChartDataSectionType } from 'app/constants';
 import { ChartDataConfig, ChartStyleConfig } from 'app/types/ChartConfig';
 import {
@@ -41,6 +41,10 @@ import { ItemLayoutProps } from '../types';
 import { itemLayoutComparer } from '../utils';
 
 const { Search } = Input;
+
+type TableRowSelection<T extends object> = NonNullable<
+  TableProps<T>['rowSelection']
+>;
 
 const getFlattenHeaders = (dataConfigs: ChartDataConfig[] = []) => {
   const newDataConfigs = CloneValueDeep(dataConfigs);

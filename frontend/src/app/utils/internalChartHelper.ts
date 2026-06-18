@@ -941,9 +941,9 @@ export const getJumpFiltersByInteractionRule = (
       if (jumpRule?.['relation'] === InteractionFieldRelation.Auto) {
         return f;
       } else {
-        const customizeRelations: CustomizeRelation[] = jumpRule?.[
-          InteractionFieldRelation.Customize
-        ]?.filter(r => r.type === InteractionRelationType.Field);
+        const customizeRelations: CustomizeRelation[] = (
+          jumpRule?.[InteractionFieldRelation.Customize] || []
+        ).filter(r => r.type === InteractionRelationType.Field);
         if (isEmptyArray(customizeRelations)) {
           return null;
         }
@@ -1068,9 +1068,9 @@ export const getJumpOperationFiltersByInteractionRule = (
       if (jumpRule?.['relation'] === InteractionFieldRelation.Auto) {
         return acc.concat(f);
       } else {
-        const customizeRelations: CustomizeRelation[] = jumpRule?.[
-          InteractionFieldRelation.Customize
-        ]?.filter(r => r.type === InteractionRelationType.Field);
+        const customizeRelations: CustomizeRelation[] = (
+          jumpRule?.[InteractionFieldRelation.Customize] || []
+        ).filter(r => r.type === InteractionRelationType.Field);
         if (isEmptyArray(customizeRelations)) {
           return acc;
         }

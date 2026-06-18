@@ -21,7 +21,12 @@ import ChartDataView from 'app/types/ChartDataView';
 import { getAllColumnInMeta } from 'app/utils/chartHelper';
 import { FC, memo, useCallback, useState } from 'react';
 import { InteractionFieldRelation } from '../../constants';
-import { I18nTranslator, JumpToUrlRule, VizType } from './types';
+import {
+  CustomizeRelation,
+  I18nTranslator,
+  JumpToUrlRule,
+  VizType,
+} from './types';
 import UrlParamList from './UrlParamList';
 
 const JumpToUrl: FC<
@@ -29,16 +34,16 @@ const JumpToUrl: FC<
     vizs?: VizType[];
     dataview?: ChartDataView;
     value?: JumpToUrlRule;
-    onValueChange: (value) => void;
+    onValueChange: (value: JumpToUrlRule) => void;
   } & I18nTranslator
 > = memo(({ vizs, dataview, value, onValueChange, translate: t }) => {
-  const [relations, setRelations] = useState(
+  const [relations, setRelations] = useState<CustomizeRelation[]>(
     value?.[InteractionFieldRelation.Customize] || [],
   );
   const [url, setUrl] = useState(value?.url);
 
-  const handleUpdateRelations = relations => {
-    const newRelations = [...relations];
+  const handleUpdateRelations = (relations?: CustomizeRelation[]) => {
+    const newRelations = [...(relations || [])];
     setRelations(newRelations);
     onValueChange({
       ...value,
@@ -47,7 +52,7 @@ const JumpToUrl: FC<
   };
 
   const handleUpdateUrl = useCallback(
-    url => {
+    (url: string) => {
       setUrl(url);
       onValueChange({
         ...value,

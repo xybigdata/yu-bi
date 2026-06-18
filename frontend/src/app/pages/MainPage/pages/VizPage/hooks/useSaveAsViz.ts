@@ -22,12 +22,29 @@ import { CommonFormTypes } from 'globalConstants';
 import { useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
+import { APIResponse } from 'types';
 import { request2 } from 'utils/request';
 import { getInsertedNodeIndex } from 'utils/utils';
 import { SaveFormContext, SaveFormModel } from '../SaveFormContext';
 import { selectVizs } from '../slice/selectors';
 import { addViz, saveAsDashboard } from '../slice/thunks';
-import { VizType } from '../slice/types';
+import { AddVizParams, SaveAsDashboardParams, VizType } from '../slice/types';
+
+type VizDetail = SaveFormModel & {
+  id: string;
+  config: string;
+  orgId: string;
+  permissions?: unknown;
+};
+
+const emptyVizDetailResponse: APIResponse<VizDetail> = {
+  success: false,
+  errCode: 0,
+  message: '',
+  exception: '',
+  data: {} as VizDetail,
+  warnings: [],
+};
 
 export function useSaveAsViz() {
   const { showSaveForm } = useContext(SaveFormContext);
@@ -37,7 +54,7 @@ export function useSaveAsViz() {
 
   const getVizDetail = useCallback(
     async (backendChartId: string, type: string) => {
-      const { data } = await request2<any>(
+      const { data } = await request2<VizDetail>(
         {
           method: 'GET',
           url: `viz/${type.toLowerCase()}s/${backendChartId}`,
@@ -45,7 +62,7 @@ export function useSaveAsViz() {
         undefined,
         {
           onRejected(error) {
-            return {} as any;
+            return emptyVizDetailResponse;
           },
         },
       );
@@ -74,10 +91,9 @@ export function useSaveAsViz() {
         },
         onSave: async (values: SaveFormModel, onClose) => {
           let index = getInsertedNodeIndex(values, vizsData);
-          let requestData: any = [];
 
           if (type === 'DATACHART') {
-            requestData = Object.assign({}, vizData, {
+            const requestData: AddVizParams['viz'] = Object.assign({}, vizData, {
               ...values,
               parentId: values.parentId || null,
               index,
@@ -92,7 +108,7 @@ export function useSaveAsViz() {
             );
             onClose?.();
           } else {
-            requestData = {
+            const requestData: SaveAsDashboardParams['viz'] = {
               config: vizData.config,
               id: vizData.id,
               index,

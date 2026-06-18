@@ -73,7 +73,7 @@ export const StoryHeader: FC<StoryHeaderProps> = memo(
         users: string[];
         rowPermissionBy: string;
       }) => {
-        const result: any = await generateShareLinkAsync({
+        const result = await generateShareLinkAsync({
           expiryDate,
           authenticationMode,
           roles,

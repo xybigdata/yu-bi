@@ -31,7 +31,7 @@ export interface addVizParams {
   vizType: VizType;
   type: CommonFormTypes;
   open: boolean;
-  initialValues: any;
+  initialValues?: Partial<SaveFormModel>;
   callback?: (folder?: Folder) => void;
   onAfterClose?: () => void;
 }
@@ -43,7 +43,7 @@ export interface addVizParams {
 
 export function useAddViz({ showSaveForm }) {
   const vizsData = useSelector(selectVizs);
-  const dispatch: (any) => Promise<any> = useAppDispatch();
+  const dispatch = useAppDispatch();
   const orgId = useSelector(selectOrgId);
 
   const updateValue = useCallback((relType: VizType, values: SaveFormModel) => {
@@ -60,8 +60,9 @@ export function useAddViz({ showSaveForm }) {
     }
     if (relType === 'TEMPLATE') {
       let formData = new FormData();
-      //@ts-ignore
-      formData.append('file', dataValues?.file);
+      if (dataValues.file instanceof File) {
+        formData.append('file', dataValues.file);
+      }
       dataValues.file = formData;
     }
     return dataValues;
@@ -92,12 +93,12 @@ export function useAddViz({ showSaveForm }) {
                 name: values?.name,
                 orgId: orgId,
                 index: index,
-                avatar: vizType === 'DATACHART' ? initialValues.avatar : null,
+                avatar: vizType === 'DATACHART' ? initialValues?.avatar : null,
               },
               type: vizType,
             }),
           );
-          if (!vizData.error) {
+          if (addViz.fulfilled.match(vizData)) {
             callback?.(vizData.payload);
             onClose();
           }

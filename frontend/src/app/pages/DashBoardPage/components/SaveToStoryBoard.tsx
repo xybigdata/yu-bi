@@ -36,7 +36,7 @@ import { getPath } from 'utils/utils';
 
 interface SaveToStoryBoardTypes {
   isModalVisible: boolean;
-  handleOk: (id) => void;
+  handleOk: (id: string) => void;
   handleCancel: () => void;
   title: string;
   orgId: string;
@@ -49,9 +49,9 @@ const SaveToStoryBoard: FC<SaveToStoryBoardTypes> = memo(
     const permissionMap = useSelector(selectPermissionMap);
 
     const filterStoryData = useCallback(
-      vizData => {
-        let dashboardIds: any = [];
-        let dashboardData = vizData?.filter(v => {
+      (vizData: Storyboard[]) => {
+        let dashboardIds: string[] = [];
+        let dashboardData = vizData.filter(v => {
           const path = getPath(
             vizData as Array<{ id: string; parentId: string }>,
             { id: v.id, parentId: v.parentId },
@@ -69,7 +69,7 @@ const SaveToStoryBoard: FC<SaveToStoryBoardTypes> = memo(
           return AllowManage;
         });
 
-        const FileData = vizData?.filter(v => {
+        const FileData = vizData.filter(v => {
           return dashboardIds.indexOf(v.id) !== -1;
         });
 
@@ -78,12 +78,12 @@ const SaveToStoryBoard: FC<SaveToStoryBoardTypes> = memo(
       [isOwner, permissionMap],
     );
 
-    const selectStoryBoard = useCallback(storyData => {
+    const selectStoryBoard = useCallback((storyData: Storyboard) => {
       setSelectId(storyData.id);
     }, []);
 
     const saveToStoryFn = useCallback(
-      async selectId => {
+      async (selectId: string) => {
         handleOk(selectId);
       },
       [handleOk],

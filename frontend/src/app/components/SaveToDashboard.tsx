@@ -16,12 +16,23 @@
  * limitations under the License.
  */
 
-import { Button, Input, message, Modal, Space } from 'antd';
+import {
+  Button,
+  Input,
+  message,
+  Modal,
+  Space,
+  TreeProps as AntTreeProps,
+} from 'antd';
+import type { TreeDataNode as DataNode } from 'antd';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useGetVizIcon from 'app/hooks/useGetVizIcon';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { parseBoardConfig } from 'app/migration/BoardConfig/migrateBoardConfig';
-import { ServerDashboard } from 'app/pages/DashBoardPage/pages/Board/slice/types';
+import {
+  BoardType,
+  ServerDashboard,
+} from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { getCascadeAccess } from 'app/pages/MainPage/Access';
 import {
   PermissionLevels,
@@ -39,6 +50,7 @@ import {
 import { CommonFormTypes } from 'globalConstants';
 import {
   FC,
+  Key,
   memo,
   useCallback,
   useContext,
@@ -57,10 +69,21 @@ interface SaveToDashboardTypes {
   title: string;
   orgId: string;
   backendChartId?: string;
-  handleOk: (id, type) => void;
+  handleOk: (id: string, type?: BoardType) => void;
   handleCancel: () => void;
   handleOpen: () => void;
 }
+
+type SaveToDashboardSelectInfo = Parameters<
+  NonNullable<AntTreeProps<DataNode>['onSelect']>
+>[1];
+type SaveToDashboardTreeNode = SaveToDashboardSelectInfo['node'] &
+  Pick<Folder, 'relId' | 'relType'>;
+
+const isSaveToDashboardTreeNode = (
+  node: SaveToDashboardSelectInfo['node'],
+): node is SaveToDashboardTreeNode =>
+  typeof (node as Partial<SaveToDashboardTreeNode>).relId === 'string';
 
 const SaveToDashboard: FC<SaveToDashboardTypes> = memo(
   ({
@@ -82,12 +105,17 @@ const SaveToDashboard: FC<SaveToDashboardTypes> = memo(
     const { showSaveForm } = useContext(SaveFormContext);
     const addVizFn = useAddViz({ showSaveForm });
 
-    const selectDashboard = useCallback((dashboardData, event) => {
-      setSelectId(event.node.relId);
-    }, []);
+    const selectDashboard = useCallback(
+      (_: Key[], event: SaveToDashboardSelectInfo) => {
+        if (isSaveToDashboardTreeNode(event.node)) {
+          setSelectId(event.node.relId);
+        }
+      },
+      [],
+    );
 
     const saveToDashboard = useCallback(
-      async selectId => {
+      async (selectId: string) => {
         const { data } = await request2<ServerDashboard>(
           `/viz/dashboards/${selectId}`,
         );

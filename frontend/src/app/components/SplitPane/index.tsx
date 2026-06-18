@@ -1,4 +1,10 @@
-import { Children, Component, CSSProperties, ReactNode } from 'react';
+import {
+  Children,
+  Component,
+  CSSProperties,
+  MouseEvent as ReactMouseEvent,
+  ReactNode,
+} from 'react';
 import styled from 'styled-components';
 import { Pane } from './Pane';
 import { Resizer, RESIZER_DEFAULT_CLASSNAME } from './Resizer';
@@ -33,17 +39,26 @@ interface SplitPaneProps {
 interface SplitPaneStates {
   active: boolean;
   position?: number;
-  draggedSize?: number;
+  draggedSize?: string | number;
   resized: boolean;
-  pane1Size: string | number;
-  pane2Size: string | number;
+  pane1Size?: string | number;
+  pane2Size?: string | number;
   instanceProps: {
     size?: string | number;
   };
 }
 
+type SplitPaneSizeState = Pick<SplitPaneStates, 'pane1Size' | 'pane2Size'>;
+type SplitPaneStatePatch = Partial<SplitPaneStates>;
+
+type SplitPaneTouchLikeEvent = {
+  touches: {
+    [index: number]: Pick<Touch, 'clientX' | 'clientY'>;
+  };
+};
+
 export class SplitPane extends Component<SplitPaneProps, SplitPaneStates> {
-  constructor(props) {
+  constructor(props: SplitPaneProps) {
     super(props);
 
     this.onMouseDown = this.onMouseDown.bind(this);
@@ -80,6 +95,10 @@ export class SplitPane extends Component<SplitPaneProps, SplitPaneStates> {
   private pane1: HTMLDivElement | null = null;
   private pane2: HTMLDivElement | null = null;
 
+  private applyStatePatch(update: SplitPaneStatePatch) {
+    this.setState(update as Pick<SplitPaneStates, keyof SplitPaneStates>);
+  }
+
   static defaultProps = {
     allowResize: true,
     minSize: 50,
@@ -94,10 +113,13 @@ export class SplitPane extends Component<SplitPaneProps, SplitPaneStates> {
     document.addEventListener('mouseup', this.onMouseUp);
     document.addEventListener('mousemove', this.onMouseMove);
     document.addEventListener('touchmove', this.onTouchMove);
-    this.setState<any>(SplitPane.getSizeUpdate(this.props, this.state));
+    this.applyStatePatch(SplitPane.getSizeUpdate(this.props, this.state));
   }
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+  static getDerivedStateFromProps(
+    nextProps: SplitPaneProps,
+    prevState: SplitPaneStates,
+  ) {
     return SplitPane.getSizeUpdate(nextProps, prevState);
   }
 
@@ -107,14 +129,14 @@ export class SplitPane extends Component<SplitPaneProps, SplitPaneStates> {
     document.removeEventListener('touchmove', this.onTouchMove);
   }
 
-  onMouseDown(event) {
+  onMouseDown(event: ReactMouseEvent<HTMLSpanElement>) {
     const eventWithTouches = Object.assign({}, event, {
       touches: [{ clientX: event.clientX, clientY: event.clientY }],
     });
     this.onTouchStart(eventWithTouches);
   }
 
-  onTouchStart(event) {
+  onTouchStart(event: SplitPaneTouchLikeEvent) {
     const { allowResize, onDragStarted, split } = this.props;
     if (allowResize) {
       unFocus(document, window);
@@ -133,14 +155,14 @@ export class SplitPane extends Component<SplitPaneProps, SplitPaneStates> {
     }
   }
 
-  onMouseMove(event) {
+  onMouseMove(event: MouseEvent) {
     const eventWithTouches = Object.assign({}, event, {
       touches: [{ clientX: event.clientX, clientY: event.clientY }],
     });
     this.onTouchMove(eventWithTouches);
   }
 
-  onTouchMove(event) {
+  onTouchMove(event: SplitPaneTouchLikeEvent) {
     const { allowResize, maxSize, minSize, onChange, split, step } = this.props;
     const { active, position } = this.state;
 
@@ -205,9 +227,13 @@ export class SplitPane extends Component<SplitPaneProps, SplitPaneStates> {
 
           if (onChange) onChange(newSize);
 
-          this.setState<any>({
+          const paneSizeState: SplitPaneSizeState = {
+            pane1Size: isPrimaryFirst ? newSize : this.state.pane1Size,
+            pane2Size: isPrimaryFirst ? this.state.pane2Size : newSize,
+          };
+          this.setState({
             draggedSize: newSize,
-            [isPrimaryFirst ? 'pane1Size' : 'pane2Size']: newSize,
+            ...paneSizeState,
           });
         }
       }
@@ -226,7 +252,10 @@ export class SplitPane extends Component<SplitPaneProps, SplitPaneStates> {
   }
 
   // we have to check values since gDSFP is called on every render and more in StrictMode
-  static getSizeUpdate(props, state) {
+  static getSizeUpdate(
+    props: SplitPaneProps,
+    state: SplitPaneStates,
+  ): Partial<SplitPaneStates> {
     const newState: Partial<SplitPaneStates> = {};
     const { instanceProps } = state;
 
@@ -245,7 +274,7 @@ export class SplitPane extends Component<SplitPaneProps, SplitPaneStates> {
           );
 
     if (props.size !== undefined) {
-      newState.draggedSize = newSize;
+      newState.draggedSize = props.size;
     }
 
     const isPanel1Primary = props.primary === 'first';
@@ -429,9 +458,9 @@ function unFocus(document, window) {
 }
 
 function getDefaultSize(
-  defaultSize: string | number,
-  minSize: string | number,
-  maxSize: string | number,
+  defaultSize?: string | number,
+  minSize?: string | number,
+  maxSize?: string | number,
   draggedSize?: string | number | null,
 ) {
   if (typeof draggedSize === 'number') {

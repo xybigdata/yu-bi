@@ -3,6 +3,7 @@ import { ChartDataSectionType } from 'app/constants';
 import { migrateChartConfig } from 'app/migration';
 import ChartManager from 'app/models/ChartManager';
 import { SelectedItem } from 'app/types/ChartConfig';
+import type { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { mergeToChartConfig } from 'app/utils/ChartDtoHelper';
 import { useInjectReducer } from 'utils/@reduxjs/injectReducer';
 import { CloneValueDeep } from 'utils/object';
@@ -133,7 +134,7 @@ const slice = createSlice({
       state,
       action: PayloadAction<{
         backendChartId: string;
-        computedFields: any;
+        computedFields: ChartDataViewMeta[];
       }>,
     ) {
       const chartPreview = state.chartPreviews.find(

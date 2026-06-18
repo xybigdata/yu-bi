@@ -323,7 +323,7 @@ describe('should getDataChartRequestParams', () => {
     const res = getDataChartRequestParams({
       dataChart: dataChart as unknown as DataChart,
       view: view as unknown as ChartDataView,
-      option: opt as any,
+      option: opt,
     });
     expect(res.viewId).toBe(dataChart.viewId);
     expect(res.filters).toEqual([]);
@@ -434,7 +434,7 @@ describe('should getDataChartRequestParams', () => {
     const res = getDataChartRequestParams({
       dataChart: dataChart as DataChart,
       view: view as unknown as ChartDataView,
-      option: opt as any,
+      option: opt,
     });
     expect(res.viewId).toBe(dataChart.viewId);
     expect(res.filters).toEqual(targetFilter);

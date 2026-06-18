@@ -21,6 +21,7 @@ import ChartDatasetContext from 'app/pages/ChartWorkbenchPage/contexts/ChartData
 import ChartDataViewContext from 'app/pages/ChartWorkbenchPage/contexts/ChartDataViewContext';
 import TimeConfigContext from 'app/pages/ChartWorkbenchPage/contexts/TimeConfigContext';
 import { ChartConfigPayloadType } from 'app/pages/ChartWorkbenchPage/slice/types';
+import { BoardType } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { IChart } from 'app/types/Chart';
 import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
 import ChartDataSetDTO from 'app/types/ChartDataSet';
@@ -51,7 +52,10 @@ const ChartWorkbench: FC<{
     orgId?: string;
     container?: string;
     onSaveChart?: () => void;
-    onSaveChartToDashBoard?: (dashboardId, dashboardType) => void;
+    onSaveChartToDashBoard?: (
+      dashboardId: string,
+      dashboardType?: BoardType,
+    ) => void;
     onGoBack?: () => void;
     onChangeAggregation?: () => void;
   };

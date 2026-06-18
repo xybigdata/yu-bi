@@ -20,8 +20,13 @@ import { Quill } from '../quillCompat';
 const Embed = Quill.import('blots/embed');
 
 type CalcFieldEvent = Event & {
-  value?: Record<string, any>;
+  value?: CalcFieldData;
   event?: MouseEvent;
+};
+
+type CalcFieldData = Record<string, unknown> & {
+  denotationChar?: string;
+  text?: string;
 };
 
 class CalcFieldBlot extends Embed {
@@ -29,7 +34,7 @@ class CalcFieldBlot extends Embed {
   static tagName = 'span';
   static className = 'calcfield';
 
-  static create(data) {
+  static create(data: CalcFieldData): HTMLElement {
     const node = super.create();
     node.addEventListener(
       'click',
@@ -47,13 +52,13 @@ class CalcFieldBlot extends Embed {
     );
     const denotationChar = document.createElement('span');
     denotationChar.className = 'ql-calcfield-denotation-char';
-    denotationChar.textContent = data.denotationChar;
+    denotationChar.textContent = data.denotationChar ?? '';
     node.appendChild(denotationChar);
     node.appendChild(document.createTextNode(data.text || ''));
     return CalcFieldBlot.setDataValues(node, data);
   }
 
-  static setDataValues(element, data) {
+  static setDataValues(element: HTMLElement, data: CalcFieldData) {
     const domNode = element;
     Object.keys(data).forEach(key => {
       domNode.dataset[key] = String(data[key] ?? '');
@@ -61,7 +66,7 @@ class CalcFieldBlot extends Embed {
     return domNode;
   }
 
-  static value(domNode) {
+  static value(domNode: HTMLElement): DOMStringMap {
     return domNode.dataset;
   }
 }

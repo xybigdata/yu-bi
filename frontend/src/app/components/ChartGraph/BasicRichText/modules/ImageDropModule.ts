@@ -16,6 +16,11 @@ export class ImageDropModule {
     this.quill.root.addEventListener('paste', this.handlePaste, false);
   }
 
+  destroy() {
+    this.quill.root.removeEventListener('drop', this.handleDrop, false);
+    this.quill.root.removeEventListener('paste', this.handlePaste, false);
+  }
+
   handleDrop(evt: DragEvent) {
     evt.preventDefault();
     if (evt.dataTransfer?.files?.length) {
@@ -47,8 +52,8 @@ export class ImageDropModule {
   }
 
   insert(dataUrl: string) {
-    const index =
-      (this.quill.getSelection() || {}).index || this.quill.getLength();
+    const selection = this.quill.getSelection();
+    const index = selection?.index ?? this.quill.getLength();
     this.quill.insertEmbed(index, 'image', dataUrl, 'user');
   }
 

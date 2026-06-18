@@ -38,7 +38,7 @@ import {
   getWidgetTitle,
 } from '../../WidgetManager/utils/utils';
 import { WidgetInfoContext } from '../../WidgetProvider/WidgetInfoProvider';
-import { HiddenUploader } from './HiddenUploader';
+import { HiddenUploader, HiddenUploaderRef } from './HiddenUploader';
 import { ImageWidgetCore } from './ImageWidgetCore';
 import { Picture } from './Picture';
 
@@ -55,7 +55,7 @@ export const ImageWidget: React.FC<{ hideTitle: boolean }> = memo(
     );
     const showBackground =
       !background.image && background.color === 'transparent';
-    const uploaderRef = useRef<any>();
+    const uploaderRef = useRef<HiddenUploaderRef>();
 
     useEffect(() => {
       if (widgetInfo.editing) {

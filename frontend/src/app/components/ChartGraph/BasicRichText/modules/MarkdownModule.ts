@@ -29,13 +29,29 @@ type MarkdownActionContext = {
 };
 
 type MarkdownLineContext = {
-  line: any;
+  line: QuillLine;
   lineIndex: number;
   lineOffset: number;
   quill: QuillInstance;
   selection: RangeStatic;
   text: string;
 };
+
+type QuillLine = {
+  domNode?: {
+    textContent?: string | null;
+  };
+};
+
+type DeltaOperation = {
+  insert?: unknown;
+  retain?: number;
+  delete?: number;
+};
+
+function getDeltaOps(delta: DeltaStatic): DeltaOperation[] {
+  return Array.isArray(delta.ops) ? (delta.ops as DeltaOperation[]) : [];
+}
 
 const defaultPatterns = {
   header: /^(#){1,6}\s/g,
@@ -109,13 +125,14 @@ export class MarkdownModule {
   ) {
     if (source !== 'user') return;
 
-    const insertOp = delta.ops?.find(op =>
+    const ops = getDeltaOps(delta);
+    const insertOp = ops.find(op =>
       Object.prototype.hasOwnProperty.call(op, 'insert'),
     );
     const insertText =
       typeof insertOp?.insert === 'string' ? insertOp.insert : undefined;
 
-    const retain = (delta.ops?.[0] as any)?.retain || 0;
+    const retain = ops[0]?.retain || 0;
 
     if (insertText && insertText.length > 1) {
       setTimeout(() => {
@@ -133,10 +150,10 @@ export class MarkdownModule {
       }, 0);
     }
 
-    const deleteOp = delta.ops?.find(op =>
+    const deleteOp = ops.find(op =>
       Object.prototype.hasOwnProperty.call(op, 'delete'),
     );
-    if (deleteOp && (deleteOp as any).delete === 1) {
+    if (deleteOp?.delete === 1) {
       setTimeout(() => {
         this.releaseEmptyBlockFormats();
       }, 0);

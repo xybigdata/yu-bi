@@ -16,14 +16,13 @@
  * limitations under the License.
  */
 import { Input, Modal, TreeProps } from 'antd';
-import type { Key } from 'rc-tree/lib/interface';
 import { Tree } from 'app/components';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useGetVizIcon from 'app/hooks/useGetVizIcon';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { selectWidgetInfoDatachartId } from 'app/pages/DashBoardPage/pages/BoardEditor/slice/selectors';
 import { Folder } from 'app/pages/MainPage/pages/VizPage/slice/types';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Key, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { ListTreeNode, listToTree } from 'utils/utils';

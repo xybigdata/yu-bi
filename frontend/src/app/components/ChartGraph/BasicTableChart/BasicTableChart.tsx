@@ -64,6 +64,13 @@ import {
   TableStyleOptions,
 } from './types';
 
+type DataColumnWidth = {
+  columnWidthValue?: number;
+  getUseColumnWidth?: boolean;
+};
+
+type DataColumnWidthMap = Record<string, DataColumnWidth>;
+
 class BasicTableChart extends ReactChart {
   useIFrame = false;
   isISOContainer = 'react-table';
@@ -73,7 +80,7 @@ class BasicTableChart extends ReactChart {
   protected rowNumberUniqKey = `@datart@rowNumberKey`;
 
   private utilCanvas;
-  private dataColumnWidths = {};
+  private dataColumnWidths: DataColumnWidthMap = {};
   private tablePadding = 16;
   private tableCellBorder = 1;
   private cachedAntTableOptions: any = {};
@@ -205,7 +212,7 @@ class BasicTableChart extends ReactChart {
       context,
       settingConfigs,
     );
-    this.totalWidth = Object.values<any>(this.dataColumnWidths).reduce(
+    this.totalWidth = Object.values(this.dataColumnWidths).reduce(
       (a, b) => a + (b.columnWidthValue || 0),
       0,
     );
@@ -289,7 +296,7 @@ class BasicTableChart extends ReactChart {
       context,
       settingConfigs,
     );
-    this.totalWidth = Object.values<any>(this.dataColumnWidths).reduce(
+    this.totalWidth = Object.values(this.dataColumnWidths).reduce(
       (a, b) => a + (b.columnWidthValue || 0),
       0,
     );
@@ -563,7 +570,7 @@ class BasicTableChart extends ReactChart {
           : 0,
       },
     });
-    return maxContentByFields.reduce((acc, cur: any) => {
+    return maxContentByFields.reduce<DataColumnWidthMap>((acc, cur) => {
       return Object.assign({}, acc, { ...cur });
     }, {});
   }
@@ -855,9 +862,9 @@ class BasicTableChart extends ReactChart {
       const columnConfig = this.dataColumnWidths?.[chartDataSet.getFieldKey(c)];
       const colMaxWidth =
         !this.exceedMaxContent &&
-        Object.values<{ getUseColumnWidth: undefined | boolean }>(
-          this.dataColumnWidths,
-        ).some(item => item.getUseColumnWidth)
+        Object.values(this.dataColumnWidths).some(
+          item => item.getUseColumnWidth,
+        )
           ? columnConfig?.getUseColumnWidth
             ? columnConfig?.columnWidthValue
             : ''

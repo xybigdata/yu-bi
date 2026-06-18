@@ -35,7 +35,11 @@ import { getToken } from 'utils/auth';
 
 const FormItem = Form.Item;
 
-export function Profile({ open, onCancel }: ModalProps) {
+type ProfileProps = Omit<ModalProps, 'onCancel'> & {
+  onCancel?: () => void;
+};
+
+export function Profile({ open, onCancel }: ProfileProps) {
   const [avatarLoading, setAvatarLoading] = useState(false);
   const dispatch = useAppDispatch();
   const loggedInUser = useSelector(selectLoggedInUser);
@@ -93,7 +97,7 @@ export function Profile({ open, onCancel }: ModalProps) {
           },
           resolve: () => {
             message.success(tg('operation.updateSuccess'));
-            onCancel && onCancel(null as any);
+            onCancel?.();
           },
         }),
       );
@@ -106,7 +110,7 @@ export function Profile({ open, onCancel }: ModalProps) {
       title={t('title')}
       footer={false}
       open={open}
-      onCancel={onCancel}
+      onCancel={() => onCancel?.()}
       afterClose={reset}
     >
       <AvatarUpload>

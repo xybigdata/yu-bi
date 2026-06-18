@@ -113,7 +113,7 @@ describe('DataModelTree Util Tests', () => {
           ],
         },
       ];
-      const model = toModel(columns) as any;
+      const model = toModel(columns);
 
       expect(model.name.name).toEqual('name');
       expect(model.name.role).toEqual('role');

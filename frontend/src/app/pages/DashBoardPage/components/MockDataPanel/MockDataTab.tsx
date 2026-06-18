@@ -18,19 +18,30 @@
 import { Tabs } from 'antd';
 import { FC, memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { MockDataEditor } from './MockDataEditor';
+import { MockDataEditor, MockDataRows } from './MockDataEditor';
+import type { WidgetData } from '../../pages/Board/slice/types';
 const { TabPane } = Tabs;
 export interface MockDataPanelProps {
   onClose: () => void;
 }
 
+export type MockDataMap = Record<
+  string,
+  { id: string; name: string; data: WidgetData }
+>;
+
+export type MockDataChange = {
+  id: string;
+  val: MockDataRows;
+};
+
 export const MockDataTab: FC<{
-  dataMap: Record<string, { id: string; name: string; data }>;
-  onChangeDataMap: (val) => void;
+  dataMap: MockDataMap;
+  onChangeDataMap: (val: MockDataChange) => void;
 }> = memo(({ dataMap, onChangeDataMap }) => {
   const dataList = Object.values(dataMap || {});
   const [wId, setWid] = useState<string>();
-  const [curDataVal, setCurDataVal] = useState<any>();
+  const [curDataVal, setCurDataVal] = useState<MockDataRows>();
   useEffect(() => {
     const dataList = Object.values(dataMap || {});
     if (dataList && dataList[0]) {
@@ -48,7 +59,10 @@ export const MockDataTab: FC<{
       setCurDataVal(dataVal);
     }
   }, [dataMap, wId]);
-  const onDataChange = strVal => {
+  const onDataChange = (strVal: MockDataRows) => {
+    if (!wId) {
+      return;
+    }
     onChangeDataMap({
       id: wId,
       val: strVal,

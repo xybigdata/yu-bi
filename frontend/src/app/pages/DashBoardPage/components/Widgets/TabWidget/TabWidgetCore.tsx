@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import type { TabsProps } from 'antd';
 import { Tabs } from 'antd';
 import { TabWidgetContent } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { memo, useCallback, useContext, useEffect, useState } from 'react';
@@ -65,7 +66,7 @@ export const TabWidgetCore: React.FC<{}> = memo(() => {
     }
   }, [activeKey, editing, onEditSelectWidget, tabsCons]);
 
-  const onTabClick = useCallback((activeKey: any, event) => {
+  const onTabClick: TabsProps['onTabClick'] = useCallback(activeKey => {
     SetActiveKey(activeKey);
   }, []);
 
@@ -90,9 +91,11 @@ export const TabWidgetCore: React.FC<{}> = memo(() => {
   }, [dispatch, tabsCons, widget.id]);
 
   const tabRemove = useCallback(
-    targetKey => {
+    (targetKey: React.MouseEvent | React.KeyboardEvent | string) => {
       const tabId =
-        tabsCons.find(tab => String(tab.index) === targetKey)?.tabId || '';
+        typeof targetKey === 'string'
+          ? tabsCons.find(tab => String(tab.index) === targetKey)?.tabId || ''
+          : '';
       dispatch(
         editBoardStackActions.tabsWidgetRemoveTab({
           parentId: widget.id,
@@ -108,7 +111,7 @@ export const TabWidgetCore: React.FC<{}> = memo(() => {
     [dispatch, widget.id, boardType, tabsCons],
   );
 
-  const tabEdit = useCallback(
+  const tabEdit: TabsProps['onEdit'] = useCallback(
     (targetKey, action: 'add' | 'remove') => {
       action === 'add' ? tabAdd() : tabRemove(targetKey);
     },

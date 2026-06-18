@@ -38,7 +38,7 @@ import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { FONT_SIZE_BASE } from 'styles/StyleConstants';
 import { selectThemeKey } from 'styles/theme/slice/selectors';
-import type * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
+import type * as Monaco from 'monaco-editor';
 import { RootState } from 'types';
 import { getInsertedNodeIndex } from 'utils/utils';
 import { ViewStatus, ViewViewModelStages } from '../../constants';
@@ -210,19 +210,23 @@ export const SQLEditor = memo(() => {
     if (!editorInstance) {
       return;
     }
-    void loadMonaco().then(monaco => {
-      if (cancelled || !editorInstance) {
-        return;
-      }
-      editorInstance.addCommand(
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-        run,
-      );
-      editorInstance.addCommand(
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
-        callSave,
-      );
-    });
+    void loadMonaco()
+      .then(monaco => {
+        if (cancelled || !editorInstance) {
+          return;
+        }
+        editorInstance.addCommand(
+          monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+          run,
+        );
+        editorInstance.addCommand(
+          monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+          callSave,
+        );
+      })
+      .catch(error => {
+        console.error('Load monaco shortcut runtime failed', error);
+      });
     return () => {
       cancelled = true;
     };

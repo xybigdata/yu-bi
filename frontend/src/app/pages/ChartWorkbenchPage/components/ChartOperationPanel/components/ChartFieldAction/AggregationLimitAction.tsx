@@ -18,6 +18,7 @@
 
 import { Menu, MenuProps, Radio, Space } from 'antd';
 import {
+  AggregateFieldActionType,
   AggregateFieldSubAggregateType,
   ChartDataSectionFieldActionType,
 } from 'app/constants';
@@ -27,8 +28,8 @@ import { updateBy } from 'app/utils/mutation';
 import { FC, useState } from 'react';
 
 interface AggregationLimitActionMenuItemsArgs {
-  actionType;
-  onChange;
+  actionType: typeof ChartDataSectionFieldActionType.AggregateLimit;
+  onChange: (selectedValue: AggregateFieldActionType) => void;
   t: (key: string) => string;
 }
 
@@ -56,14 +57,14 @@ const AggregationLimitAction: FC<{
   const t = useI18NPrefix(`viz.common.enum.aggregateTypes`);
   const [aggregate, setAggregate] = useState(config?.aggregate);
 
-  const onChange = selectedValue => {
+  const onChange = (selectedValue: AggregateFieldActionType) => {
     const newConfig = updateBy(config, draft => {
       draft.aggregate = selectedValue;
     });
     setAggregate(selectedValue);
     onConfigChange?.(newConfig, actionNeedNewRequest);
   };
-  const renderOptions = mode => {
+  const renderOptions = (mode?: 'menu') => {
     if (mode === 'menu') {
       return (
         <Menu

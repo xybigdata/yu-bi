@@ -59,6 +59,18 @@ import { loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 import { BarBorderStyle, BarSeriesImpl, Series } from './types';
 
+type DataZoomSetConfig = {
+  usePercentage: boolean;
+  start: number;
+  end: number;
+  startValue: number;
+  endValue: number;
+};
+
+type DataZoomShowConfig =
+  | Pick<DataZoomSetConfig, 'start' | 'end'>
+  | Pick<DataZoomSetConfig, 'startValue' | 'endValue'>;
+
 class BasicBarChart extends Chart implements IChartLifecycle {
   config = Config;
   chart: any = null;
@@ -78,8 +90,8 @@ class BasicBarChart extends Chart implements IChartLifecycle {
   protected isStackMode = false;
   protected isPercentageYAxis = false;
   protected dataZoomConfig: {
-    setConfig: any;
-    showConfig: any;
+    setConfig: DataZoomSetConfig | null;
+    showConfig: DataZoomShowConfig | null;
   } = {
     setConfig: null,
     showConfig: null,
@@ -352,7 +364,9 @@ class BasicBarChart extends Chart implements IChartLifecycle {
       ],
     );
 
-    const _getDataZoomStartAndEnd = setConfig => {
+    const _getDataZoomStartAndEnd = (
+      setConfig: DataZoomSetConfig,
+    ): DataZoomShowConfig => {
       if (
         JSON.stringify(this.dataZoomConfig.setConfig) !==
           JSON.stringify(setConfig) ||
@@ -756,7 +770,9 @@ class BasicBarChart extends Chart implements IChartLifecycle {
   }
 
   private getLegendStyle(styles, series): LegendStyle {
-    const seriesNames: string[] = (series || []).map((col: any) => col?.name);
+    const seriesNames: string[] = (series || []).map(
+      (col: { name?: string }) => col?.name || '',
+    );
     const [show, type, font, legendPos, selectAll, height] = getStyles(
       styles,
       ['legend'],

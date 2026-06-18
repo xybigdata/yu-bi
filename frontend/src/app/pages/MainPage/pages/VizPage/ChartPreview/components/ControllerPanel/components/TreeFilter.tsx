@@ -16,13 +16,19 @@
  * limitations under the License.
  */
 
-import { Tree } from 'antd';
-import { FC, memo, useState } from 'react';
+import { Tree, TreeDataNode } from 'antd';
+import { FC, Key, memo, useState } from 'react';
+import { RelationFilterValue } from 'app/types/ChartConfig';
 import { PresentControllerFilterProps } from '.';
+
+type TreeFilterNode = RelationFilterValue & TreeDataNode;
 
 const TreeFilter: FC<PresentControllerFilterProps> = memo(
   ({ condition, onConditionChange }) => {
-    const getSelectedKeysFromTreeModel = (list, collector: string[]) => {
+    const getSelectedKeysFromTreeModel = (
+      list: TreeFilterNode[] | undefined,
+      collector: Key[],
+    ) => {
       list?.forEach(l => {
         if (l.isSelected) {
           collector.push(l.key);
@@ -34,7 +40,7 @@ const TreeFilter: FC<PresentControllerFilterProps> = memo(
     };
     const [treeData] = useState(() => {
       if (Array.isArray(condition?.value)) {
-        return condition?.value;
+        return condition?.value as TreeFilterNode[];
       }
       return [];
     });
@@ -42,24 +48,28 @@ const TreeFilter: FC<PresentControllerFilterProps> = memo(
       if (!treeData) {
         return [];
       }
-      const selectedKeys = [];
+      const selectedKeys: Key[] = [];
       getSelectedKeysFromTreeModel(treeData, selectedKeys);
       return selectedKeys;
     });
 
-    const handleTreeNodeChange = keys => {
-      setSelectedKeys(keys);
-      setTreeCheckableState(treeData, keys);
+    const handleTreeNodeChange = (keys: Key[] | { checked: Key[] }) => {
+      const checkedKeys = Array.isArray(keys) ? keys : keys.checked;
+      setSelectedKeys(checkedKeys);
+      setTreeCheckableState(treeData, checkedKeys);
       if (condition) {
         condition.value = treeData;
         onConditionChange && onConditionChange(condition);
       }
     };
 
-    const isChecked = (selectedKeys, eventKey) =>
-      selectedKeys.indexOf(eventKey) !== -1;
+    const isChecked = (selectedKeys: Key[] | undefined, eventKey: Key) =>
+      selectedKeys?.includes(eventKey) || false;
 
-    const setTreeCheckableState = (treeList?, keys?: string[]) => {
+    const setTreeCheckableState = (
+      treeList?: TreeFilterNode[],
+      keys?: Key[],
+    ): TreeFilterNode[] => {
       return (treeList || []).map(c => {
         c.isSelected = isChecked(keys, c.key);
         c.children = setTreeCheckableState(c.children, keys);
@@ -72,7 +82,7 @@ const TreeFilter: FC<PresentControllerFilterProps> = memo(
         multiple
         checkable
         autoExpandParent
-        treeData={treeData as any}
+        treeData={treeData}
         checkedKeys={selectedKeys}
         onSelect={handleTreeNodeChange}
         onCheck={handleTreeNodeChange}

@@ -12,7 +12,7 @@ export type GeoInfo = {
   itemStyle?: {
     areaColor: string;
   } & BorderStyle;
-  regions?: { name?: string; itemStyle?: { [x: string]: any } }[];
+  regions?: { name?: string; itemStyle?: Record<string, unknown> }[];
   zoom?: number;
   center?: number[] | undefined;
 } & LabelStyle;
@@ -72,7 +72,7 @@ export type MetricAndSizeSeriesStyle = {
   zlevel: number;
   coordinateSystem: string;
   symbol: string;
-  symbolSize: (value: number) => number;
+  symbolSize: (value: Array<number | string | undefined>) => number;
   emphasis: {
     label: {
       show: boolean;
@@ -83,7 +83,7 @@ export type MetricAndSizeSeriesStyle = {
 export interface MapOption {
   geo?: GeoInfo;
   visualMap?: GeoVisualMapStyle[];
-  series?: GeoSeries[];
+  series?: Array<GeoSeries | MetricAndSizeSeriesStyle>;
   tooltip?: { trigger: string; formatter: (params: any) => string };
   toolbox?: {
     orient: string;
@@ -93,7 +93,7 @@ export interface MapOption {
         onclick: () => void;
         show: boolean;
         icon: string;
-        title: any;
+        title?: string;
       };
     };
     left: string;

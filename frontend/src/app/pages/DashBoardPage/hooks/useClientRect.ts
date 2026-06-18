@@ -43,12 +43,10 @@ function useClientRect<T extends HTMLElement>(
     }
     resize();
     if (typeof ResizeObserver === 'function') {
-      let resizeObserver = new ResizeObserver(resize);
+      const resizeObserver = new ResizeObserver(resize);
       resizeObserver.observe(ref.current);
       return () => {
         resizeObserver.disconnect();
-        //@ts-ignore
-        resizeObserver = null;
       };
     } else {
       window.addEventListener('resize', resize);

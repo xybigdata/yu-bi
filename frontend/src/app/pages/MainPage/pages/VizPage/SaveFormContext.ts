@@ -3,6 +3,8 @@ import { createContext, useCallback, useState } from 'react';
 import { BoardType } from '../../../DashBoardPage/pages/Board/slice/types';
 import { VizType } from './slice/types';
 
+export type TemplateUploadValue = File | FormData;
+
 export interface SaveFormModel {
   id?: string;
   name: string;
@@ -10,17 +12,20 @@ export interface SaveFormModel {
   config?: string;
   description?: string;
   parentId?: string | null;
-  file?: FormData; //template
+  viewId?: string;
+  file?: TemplateUploadValue; //template
   subType?: string; //board
   avatar?: string; //datachart
 }
+
+type SaveFormInitialValues = Partial<SaveFormModel>;
 
 interface SaveFormState {
   vizType: VizType;
   type: CommonFormTypes;
   open: boolean;
   isSaveAs?: boolean;
-  initialValues?: SaveFormModel;
+  initialValues?: SaveFormInitialValues;
   onSave: (values: SaveFormModel, onClose: () => void) => void;
   onAfterClose?: () => void;
 }
@@ -45,7 +50,7 @@ export const useSaveFormContext = (): SaveFormContextValue => {
   const [type, setType] = useState(CommonFormTypes.Add);
   const [open, setOpen] = useState(false);
   const [initialValues, setInitialValues] = useState<
-    undefined | SaveFormModel
+    undefined | SaveFormInitialValues
   >();
   const [onSave, setOnSave] = useState(() => () => {});
   const [onAfterClose, setOnAfterClose] = useState(() => () => {});

@@ -27,7 +27,7 @@ import {
   getWidgetChartDatasAction,
 } from '../../pages/Board/slice/asyncActions';
 import { exportBoardTpl } from '../../pages/Board/slice/thunk';
-import { MockDataTab } from './MockDataTab';
+import { MockDataChange, MockDataMap, MockDataTab } from './MockDataTab';
 import { getBoardTplData } from './utils';
 
 export interface MockDataPanelProps {
@@ -37,29 +37,32 @@ export const MockDataPanel: FC<MockDataPanelProps> = memo(({ onClose }) => {
   const { boardId } = useContext(BoardContext);
   const dispatch = useAppDispatch();
   const t = useI18NPrefix('global.button');
-  const [dataMap, setDataMap] = useState<any>();
+  const [dataMap, setDataMap] = useState<MockDataMap>();
   useEffect(() => {
     const dataMap = dispatch(getWidgetChartDatasAction(boardId));
-    setDataMap(dataMap);
+    setDataMap(dataMap as MockDataMap);
   }, [boardId, dispatch]);
 
   const onExport = async () => {
     const boardState = dispatch(getBoardStateAction(boardId));
-    const data = getBoardTplData(dataMap, boardState as any);
+    const data = getBoardTplData(dataMap || {}, boardState);
     dispatch(exportBoardTpl({ ...data, callBack: onClose }));
   };
-  const onChangeDataMap = opt => {
+  const onChangeDataMap = (opt: MockDataChange) => {
+    if (!dataMap?.[opt.id]) {
+      return;
+    }
     const newItem = {
       ...dataMap[opt.id],
       data: { ...dataMap[opt.id].data, rows: opt.val },
     };
-    const newData = Object.assign(dataMap, { [opt.id]: newItem });
+    const newData = { ...dataMap, [opt.id]: newItem };
     setDataMap(newData);
   };
   return (
     <StyledWrapper className="mockDataPanel">
       <div className="content">
-        {Object.values(dataMap || {}).length ? (
+        {dataMap && Object.values(dataMap).length ? (
           <MockDataTab dataMap={dataMap} onChangeDataMap={onChangeDataMap} />
         ) : (
           <div className="empty-data" style={{ flex: 1 }}>

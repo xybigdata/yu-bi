@@ -42,8 +42,8 @@ function SingleColorSelection({ color, onChange }: colorSelectionPropTypes) {
   const t = useI18NPrefix('components.colorPicker');
 
   //更多颜色里的回调函数
-  const moreCallBackFn = value => {
-    if (value) {
+  const moreCallBackFn = (value: string | boolean) => {
+    if (typeof value === 'string' && value) {
       setSelectColor(value);
       onChange?.(value);
     }

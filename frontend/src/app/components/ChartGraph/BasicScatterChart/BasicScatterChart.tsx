@@ -361,14 +361,17 @@ class BasicScatterChart extends Chart {
       const sizeValue = sizeConfigs?.length
         ? row.getCell(sizeConfigs?.[0]) || min
         : defaultSizeValue;
+      const value: Array<string | number | undefined> = [
+        ...aggregateConfigs.map(row.getCell, row),
+        ...infoConfigs.map(row.getCell, row),
+        sizeValue,
+        colorSeriesName,
+      ];
       return {
         ...getExtraSeriesRowData(row),
         ...getSelectedItemStyles(comIndex, dcIndex, selectedItems || []),
         name: groupConfigs?.map(row.getCell, row).join('-'),
-        value: aggregateConfigs
-          .map(row.getCell, row)
-          .concat(infoConfigs?.map(row.getCell, row))
-          .concat([sizeValue, colorSeriesName] as any),
+        value,
       };
     });
 

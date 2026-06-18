@@ -3,6 +3,7 @@ import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
 import ChartDataSetDTO from 'app/types/ChartDataSet';
 import { ChartDTO } from 'app/types/ChartDTO';
 import { ReactElement } from 'react';
+import type { TemplateUploadValue } from '../SaveFormContext';
 
 export type VizType = [
   'DATACHART',
@@ -127,7 +128,11 @@ export interface AddVizParams {
     description?: string;
     parentId?: string | null;
     orgId: string;
-    file?: FormData;
+    config?: string;
+    viewId?: string;
+    avatar?: string | null;
+    subType?: string;
+    file?: TemplateUploadValue;
   };
   type: VizType;
 }
@@ -217,6 +222,10 @@ export interface SaveAsDashboardParams {
     index: number | null;
     config: string;
     parentId?: string | null;
+    orgId?: string;
+    permissions?: unknown;
+    subType?: string;
+    boardType?: string;
   };
   dashboardId?: string;
 }

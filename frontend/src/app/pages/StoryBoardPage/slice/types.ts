@@ -26,7 +26,7 @@ export interface StoryBoard {
   id: string;
   name: string;
   thumbnail: string; //缩略图
-  permission: any;
+  permission: number | null;
   status: number;
   config: StoryConfig;
 }

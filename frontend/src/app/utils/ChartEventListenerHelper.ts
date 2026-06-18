@@ -16,25 +16,64 @@
  * limitations under the License.
  */
 
-import { ChartInteractionEvent } from 'app/constants';
+import { AggregateFieldActionType, ChartInteractionEvent, SortActionType } from 'app/constants';
 import { ChartConfigReducerActionType } from 'app/pages/ChartWorkbenchPage/slice/constant';
 import { ChartMouseEventParams } from 'app/types/Chart';
+import {
+  ChartConfig,
+  ChartStyleSectionRow,
+  SelectedItem,
+} from 'app/types/ChartConfig';
+import { ChartDatasetPageInfo } from 'app/types/ChartDataSet';
+import { ChartDataRequest } from 'app/types/ChartDataRequest';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
+
+type RequestSorter = NonNullable<ChartDataRequest['orders']>[number];
+
+type TablePagingAndSortParams = {
+  sorter?: RequestSorter;
+  pageInfo: ChartDatasetPageInfo;
+};
+
+type ChartEventListenerCallback<T> = (newParams: T) => void;
+
+type RichTextContextParams = {
+  type: string;
+  payload: {
+    ancestors: number[];
+    value: ChartStyleSectionRow;
+  };
+  needRefresh: false;
+  updateDrillOption: (config?: ChartConfig) => IChartDrillOption | undefined;
+};
+
+const toSortActionType = (direction: unknown): SortActionType | undefined => {
+  return direction === SortActionType.ASC || direction === SortActionType.DESC
+    ? direction
+    : undefined;
+};
 
 export const tablePagingAndSortEventListener = (
   param?: ChartMouseEventParams,
-  callback?: (newParams) => void,
+  callback?: ChartEventListenerCallback<TablePagingAndSortParams>,
 ) => {
   if (
     param?.chartType === 'table' &&
     param?.interactionType === ChartInteractionEvent.PagingOrSort
   ) {
+    const column = param.seriesName ? [param.seriesName] : undefined;
+    const operator = toSortActionType(param.value?.direction);
     callback?.({
-      sorter: {
-        column: param?.seriesName,
-        operator: param?.value?.direction,
-        aggOperator: param?.value?.aggOperator,
-      },
+      sorter:
+        column && operator
+          ? {
+              column,
+              operator,
+              aggOperator: param.value?.aggOperator as
+                | AggregateFieldActionType
+                | undefined,
+            }
+          : undefined,
       pageInfo: {
         pageNo: param?.value?.pageNo,
       },
@@ -45,7 +84,7 @@ export const tablePagingAndSortEventListener = (
 export const drillDownEventListener = (
   drillOption?: IChartDrillOption,
   param?: ChartMouseEventParams,
-  callback?: (newParams) => void,
+  callback?: ChartEventListenerCallback<IChartDrillOption>,
 ) => {
   if (drillOption?.isSelectedDrill && !drillOption?.isBottomLevel) {
     drillOption?.drillDown(param?.data?.rowData);
@@ -55,7 +94,7 @@ export const drillDownEventListener = (
 
 export const pivotTableDrillEventListener = (
   param?: ChartMouseEventParams,
-  callback?: (newParams) => void,
+  callback?: ChartEventListenerCallback<IChartDrillOption>,
 ) => {
   if (
     param?.chartType === 'pivotSheet' &&
@@ -66,9 +105,9 @@ export const pivotTableDrillEventListener = (
 };
 
 export const richTextContextEventListener = (
-  row: Record<string, unknown>,
+  row: ChartStyleSectionRow,
   param?: ChartMouseEventParams,
-  callback?: (newParams) => void,
+  callback?: ChartEventListenerCallback<RichTextContextParams>,
 ) => {
   if (
     param?.chartType === 'rich-text' &&
@@ -93,12 +132,12 @@ export const richTextContextEventListener = (
 
 export const chartSelectionEventListener = (
   param?: ChartMouseEventParams,
-  callback?: (newParams) => void,
+  callback?: ChartEventListenerCallback<SelectedItem[]>,
 ) => {
   if (
     param?.interactionType === ChartInteractionEvent.Select ||
     param?.interactionType === ChartInteractionEvent.UnSelect
   ) {
-    callback?.(param?.selectedItems);
+    callback?.(param?.selectedItems || []);
   }
 };

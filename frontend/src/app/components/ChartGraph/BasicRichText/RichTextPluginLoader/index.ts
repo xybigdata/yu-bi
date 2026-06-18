@@ -41,7 +41,7 @@ const Keys = {
   DOWN: 40,
 } as const;
 
-type CalcFieldData = Record<string, any>;
+type CalcFieldData = Record<string, unknown>;
 const defaultDataAttributes = [
   'id',
   'value',
@@ -182,6 +182,17 @@ class CalcField {
         key: selectKey,
       });
     });
+  }
+
+  destroy() {
+    if (this.existingSourceExecutionToken) {
+      this.existingSourceExecutionToken.abandoned = true;
+      this.existingSourceExecutionToken = null;
+    }
+
+    this.quill.off('text-change', this.onTextChange);
+    this.quill.off('selection-change', this.onSelectionChange);
+    this.quill.container.removeEventListener('paste', this.handlePaste);
   }
 
   insertItem(data: CalcFieldData | null, programmaticInsert?: boolean) {

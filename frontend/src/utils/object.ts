@@ -36,7 +36,7 @@ export function pipe<T1, T2>(...fns: PipeFunction<T1, T2>[]) {
 }
 
 export function curry(fn) {
-  let _args: any[] = [];
+  let _args: unknown[] = [];
   const collector = (...args) => {
     _args = _args.concat(args || []);
     if (_args.length < fn.length) {

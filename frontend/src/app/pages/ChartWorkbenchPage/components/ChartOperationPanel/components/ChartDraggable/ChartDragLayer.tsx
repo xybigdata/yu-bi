@@ -17,7 +17,8 @@
  */
 
 import { useDragLayer } from 'react-dnd';
-import type { XYCoord } from 'dnd-core';
+import type { Identifier, XYCoord } from 'dnd-core';
+import { ChartDataSectionField } from 'app/types/ChartConfig';
 import styled from 'styled-components';
 import { LEVEL_100 } from 'styles/StyleConstants';
 import ChartDragPreview from './ChartDragPreview';
@@ -52,7 +53,10 @@ function CardDragLayer() {
     return null;
   }
 
-  const renderItem = (type, item) => {
+  const renderItem = (
+    type: Identifier | null,
+    item: ChartDataSectionField[],
+  ) => {
     switch (type) {
       case 'dataset_column':
         return (

@@ -36,6 +36,7 @@ import { useWorkbenchSlice } from 'app/pages/ChartWorkbenchPage/slice';
 import { selectAvailableSourceFunctions } from 'app/pages/ChartWorkbenchPage/slice/selectors';
 import { fetchAvailableSourceFunctionsForChart } from 'app/pages/ChartWorkbenchPage/slice/thunks';
 import { ChartConfigPayloadType } from 'app/pages/ChartWorkbenchPage/slice/types';
+import { BoardType } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { useMainSlice } from 'app/pages/MainPage/slice';
 import { ChartMouseEventParams, IChart } from 'app/types/Chart';
 import {
@@ -577,7 +578,7 @@ const ChartPreviewBoard: FC<{
     }, [dispatch, backendChartId]);
 
     const handleAddToDashBoard = useCallback(
-      (dashboardId, dashboardType) => {
+      (dashboardId: string, dashboardType?: BoardType) => {
         const currentChartPreview = previewCharts.find(
           c => c.backendChartId === backendChartId,
         );

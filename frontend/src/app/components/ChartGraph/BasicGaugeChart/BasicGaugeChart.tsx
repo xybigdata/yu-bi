@@ -196,7 +196,7 @@ class BasicGaugeChart extends Chart {
   private getTooltip(
     style: ChartStyleConfig[],
     aggConfigs: ChartDataSectionField[],
-  ): { formatter: ({ data }: { data: any }) => string } {
+  ): { formatter: ({ data }: { data: DataConfig }) => string } {
     const [prefix, suffix] = getStyles(style, ['gauge'], ['prefix', 'suffix']);
     return {
       formatter: ({ data }) => {

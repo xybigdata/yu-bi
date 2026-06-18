@@ -14,6 +14,7 @@ export type RichTextColorState = Pick<
   'background' | 'color'
 >;
 export type RichTextFieldReference = {
+  id?: string;
   name: string;
   value: string;
 };
@@ -33,6 +34,7 @@ export type RichTextModules = {
 type RichTextEditorRef = RefObject<RichTextEditorHandle | null>;
 type CalcFieldInsert = {
   calcfield?: {
+    id?: string;
     name?: string;
   };
 };
@@ -100,15 +102,33 @@ export const translateRichTextCalcFields = (
       return item;
     }
 
-    const field = fields.find(current => current.name === calcfield.name);
+    const field = fields.find(current =>
+      calcfield.id
+        ? current.id === calcfield.id
+        : current.name === calcfield.name,
+    );
+    if (!field) {
+      return item;
+    }
+
     return {
       ...item,
-      insert: field?.value,
+      insert: field.value,
     };
   });
 
   return ops?.length ? { ...value, ops } : '';
 };
+
+export const getRichTextFieldKey = (
+  field: RichTextFieldReference,
+  index: number,
+) => field.id || `${field.name}-${index}`;
+
+export const findRichTextFieldByKey = (
+  fields: RichTextFieldReference[],
+  key: string,
+) => fields.find((field, index) => getRichTextFieldKey(field, index) === key);
 
 export const useRichTextMarkdownModule = ({
   editorRef,

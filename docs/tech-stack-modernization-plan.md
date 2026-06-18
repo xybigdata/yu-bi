@@ -18,6 +18,8 @@
 - 工作目录：`/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi`
 - `main` 只允许 merge，不直接开发
 - 低风险改造阶段改为在单一长期分支持续推进，累计到足够批量后再 merge 回 `main`
+- 前端低风险改造优先复用当前累计分支，不因单个小专题频繁创建新分支
+- `main` 推送需要完整门禁，只有累计到值得回归的批量后才执行完整门禁、`--no-ff` 合并并推送主线
 - 高风险或跨域专题仍单独建分支，不在文档中写死分支名
 - 默认自动 `git add`、`git commit --no-verify`
 
@@ -39,8 +41,9 @@
 
 - 每轮开始先核对长期目标：`JDK 21`、`Node 24`、兼容优先、稳定版优先、`main` 不直接开发
 - 每批提交前核对短期目标：当前改动是否仍属于当前专题，是否低风险、可验证、可回退
-- 如果候选点开始牵涉共享协议、运行时行为或跨域依赖，先降级为评估项，不混入低风险批次
+- 如果候选点开始牵涉共享协议、运行时行为或跨域依赖，拆成中高风险专项推进，并补足定向测试或完整门禁证据
 - 每次阶段性提交或推送后，在本文档中保留对后续判断有用的执行记录
+- 前端低风险日常推进使用轻量门禁：优先 `npm run checkTs`，必要时补相关单测；中风险运行时链路必须补定向测试或更强门禁；只有准备阶段性合入 `main` 前才执行完整前端门禁 `npm run test:ci`、`npm run lint:css`、`npm run lint:style`
 
 ## 3. 当前基线
 
@@ -156,6 +159,9 @@
   - `ChartRichTextAdapter` 的模块配置与字段引用值按真实结构声明
   - calcfield 引用字段读取改为显式对象形态收口，减少 `Record<string, any>`
   - 插入引用字段后的异步回写改为显式微任务调度，避免继续依赖 `setImmediate`
+- 富文本运行时加载链路继续稳定化：
+  - `RichTextEditor` 运行时懒加载失败时补齐显式错误记录
+  - `loadRichTextEditorRuntime` 失败后清空缓存 Promise，避免一次加载失败后永久无法重试
 - 时间体系多批次收口：
   - 时间选择器回填链路
   - 展示与表单日期回填链路
@@ -216,14 +222,17 @@
   - 实际使用面确认仅剩 `VirtualTable -> SchemaTable`
   - 虚拟表格 reset 时机修正为依赖变化即时触发
   - 列宽分摊逻辑补齐除零保护
+  - 虚拟表格运行时加载失败补齐显式兜底，列宽扣减滚动条时补齐非负保护，并补充 `VirtualTable` 定向测试
 - `flexlayout-react` / `react-grid-layout` 使用面盘点与布局映射收口：
   - `flexlayout-react` 实际使用面确认集中在图表工作台 `ChartOperationPanel`
   - `ChartOperationPanel` 补齐布局节点尺寸读取兜底，避免布局节点未就绪时直接取空
   - `ChartOperationPanel` 尺寸适配链继续补齐有限数值、非负整数与预留空间扣减保护，避免布局瞬态下向图表容器透传负值或异常尺寸
+  - `ChartOperationPanel` 布局工厂补齐组件类型守卫，未知 FlexLayout component 不再进入已知渲染分支
 - `react-grid-layout` 实际使用面确认集中在看板编辑态 `AutoBoardEditor` 与查看态 `AutoBoardCore`
   - 看板布局映射入口补齐 `pRect / mRect` 缺省值归一化，避免不完整布局数据直接传入 RGL
   - 布局归一化继续补齐非法值兜底与断点列数约束，避免异常宽高或负值直接进入 RGL
   - 布局归一化继续补齐整数化与 `x + width` 越界保护，避免浮点布局值或超界坐标直接进入 RGL
+  - 布局归一化补齐 `Infinity` 与非法列数兜底，避免异常布局值穿透到 RGL
   - `package.json` 依赖声明已与当前锁文件和真实运行版本同步到 `flexlayout-react 0.5.21`、`react-grid-layout 1.3.4`
 - 前端锁文件根元数据继续收口：
   - `package-lock.json` 根依赖声明重新与 `package.json` 对齐
@@ -235,6 +244,54 @@
   - Maven 模块坐标改为 `yubi` / `yu-bi-*`
   - 安装包、脚本名、Docker 打包输入改为 `yu-bi-server`
   - 保持 `datart.*` Java 包名、配置前缀与稳定内部标识不变
+- 前端图表与看板局部类型边界继续收口：
+  - 透视表 S2 语言设置改为显式 `LangType` 映射，去掉局部 `as any`
+  - 透视表 hover / selected 回调对齐 S2 包根公开类型，保持选中读取逻辑不变
+  - Dashboard widget action 的兼容导航与联动参数改为真实类型，避免继续用宽泛 `any`
+  - `DataChartConfig.computedFields` 与相关 reducer / provider 参数改为 `ChartDataViewMeta[]`
+  - `WidgetMeta.icon` 收口为字符串，匹配所有 widget 注册入口
+  - 基础柱状图 legend series 与基础表格列宽计算补齐局部结构类型，减少无约束 `any`
+- 前端交互配置表单局部类型边界继续收口：
+  - DrillThrough / CrossFiltering 面板的规则更新函数改为按规则字段类型约束，不再透传宽泛 `value: any`
+  - JumpToChart / JumpToDashboard / JumpToUrl 的编辑态规则与自定义关系数组补齐真实类型
+  - ViewDetail 自定义字段从 `any[]` 收口为 `string[]`
+  - `internalChartHelper` 读取自定义关系时补齐空数组兜底，保持未配置场景的既有空结果语义
+  - 本批不改 FormGenerator 全局 `ItemLayoutProps` 和配置 JSON 协议宽口
+- 前端图表 option 局部类型边界继续收口：
+  - 透视表缓存的 `updateOptions` 改为复用已有 `AndvS2Config`
+  - 散点图 metric / size series 的混合值数组补齐真实 `string | number | undefined` 边界，去掉局部 `as any`
+  - 轮廓地图 option 的 `series` 改为地图 series 与散点 series 联合类型，去掉 series 拼接处的局部 `as any`
+  - 本批不迁移 ECharts 实例、地图注册入参、tooltip params 和 rowData 宽口
+- 前端图表运行时加载链路继续稳定化：
+  - `loadEChartsRuntime` 与 `loadWordCloudRuntime` 失败后清空缓存 Promise，避免一次动态加载失败后永久无法重试
+  - 补齐 ECharts 与词云运行时 loader 的 Promise 复用和失败重试定向测试
+- 前端运行时懒加载链路继续稳定化：
+  - `split.js`、`react-window`、`sql-formatter`、ECharts 默认主题、Reveal、Monaco 与插件路径预加载失败后清空缓存 Promise，避免一次加载失败后永久卡住
+  - 补齐各 loader 的 Promise 复用和失败重试定向测试
+- 前端运行时加载调用层继续稳定化：
+  - `Split`、`MonacoEditor`、SQL 格式化、StoryBoard 编辑/播放/分享播放的运行时加载失败补齐显式错误记录，避免未处理 Promise 打断页面
+  - View 属性侧 `Resource` / `Variables` 的 Monaco completion provider 注册链路收口到统一 helper，加载失败时显式记录并保持 provider 未注册状态
+  - 保持失败后当前占位或未初始化状态，不改变成功加载路径和用户配置协议
+  - 补齐 `Split`、`MonacoEditor` 与 completion provider 注册链路的失败兜底测试
+- 前端历史弱类型注释清理：
+  - 删除看板 widget 工具、控制器核心、容器内容类型和查询/重置按钮配置里的失效注释代码
+  - 清理注释中的历史 `as any` / `any[]` 噪音，降低后续低风险扫描误判
+  - 本批不改变运行时代码，不改 widget content 协议宽口
+- 前端翻译函数局部类型继续收口：
+  - FormGenerator 的 `translate` 参数复用统一 `I18NTranslateOptions`
+  - Waterfall 图表内部翻译参数复用统一 `I18NTranslate`，并补齐可选翻译函数缺省回退
+  - `ChartFilterCondition.value` 经 `checkTs` 验证仍属于运行时宽口，继续暂缓不纳入低风险批次
+- 前端图表局部类型边界继续收口：
+  - 折线图与柱状图 `dataZoom` 局部缓存补齐显式配置类型
+  - Scorecard 的 React 点击事件回调补齐真实事件类型
+  - 漏斗图、散点图、词云图、基础饼图与轮廓地图的样式扩展字段从 `any` 收口为 `Record<string, unknown>`
+  - 本批继续暂缓 ECharts 实例、tooltip params、地图注册入参、rowData 与图表公共协议宽口
+- 前端局部 UI 与适配层类型边界继续收口：
+  - 基础饼图 value 数组补齐真实值类型边界
+  - ColorPicker 弹层回调保持上层字符串颜色 API，底层取消信号不再向上扩散
+  - ChartTypeSelector 的类型切换回调收口到 `ChartPresentType`
+  - Split 适配层补齐拖拽尺寸与 gutter 回调参数类型，并补齐重建分支的 HTMLElement 兜底
+  - 本批不触碰 widget content、Dashboard view/sampleData、表格交互事件和第三方实例宽口
 - Maven 对外品牌元数据继续收口：
   - 根 POM 与各服务端模块补齐 `name`、`description` 等对外元数据，统一以 `yu-bi` 对外呈现
   - SCM 与许可证信息指向 `yu-bi` 新仓库
@@ -271,7 +328,7 @@
 | 前端交互/弹窗类型收口 | 仍有局部 `Function`、宽泛回调与最小视图结构未声明 | 继续按调用链小批量收口 |
 | 时间体系剩余调用点 | 已有统一工具入口，仍有零散调用 | 继续小批量收口 |
 | 前端依赖收口 | 仍有少量历史依赖可继续审计 | 按证据逐个清理 |
-| Ant Design 历史入口 | 只剩局部残留 | 按调用点逐步消化 |
+| 前端公开类型入口 | Ant Design / rc 历史类型入口已清零，Monaco 静态类型导入已切到包根入口 | 后续防止回退到组件内部目录或运行时深路径类型入口 |
 | 安装健康度维护 | 当前已稳定，但需防止锁文件回退 | 持续关注 Node 24 安装表现 |
 
 ### 5.2 中风险：做专项稳定化，不做重写
@@ -296,25 +353,53 @@
 
 ## 6. 当前进行中专题
 
-当前工作区只推进低风险、小范围、可回归的专题，不进入结构性替换。
+当前工作区按“可验证、可回退、兼容优先”推进；低风险继续累计，中风险拆专项稳定化，高风险只在边界清晰且有验证证据时进入。
 
 ### 6.1 正在推进
 
-当前累计专题：`前端通用 UI 与工具类型边界收口`
+当前累计专题：`富文本兼容层稳定化`
 
 本批目标：
 
-- 继续收口通用 UI 小组件、样式工具与测试层的局部宽类型
-- 优先处理不改变运行时语义、已有测试或可用 TypeScript 覆盖的单点
-- 遇到会影响图表运行时协议、交互配置结构或懒加载 props 推断的点，先降级为评估项
-- 不调整公共协议、内部稳定标识和业务配置结构
+- 稳定 `react-quill 2` 兼容层上的编辑态、只读态和看板富文本链路
+- 优先处理可用纯 helper 或小范围组件测试验证的行为边界
+- 保持现有 Quill Delta、calcfield 插入结构和保存协议不变
+- 暂不替换富文本编辑器依赖，不做 UI 重写
+- 不调整内部稳定标识和业务配置结构
 
 当前累计清单：
 
+- 已完成：富文本字段引用菜单 key 改为优先使用字段 `id`、无 `id` 时按名称加索引兜底，避免同名字段误选第一个
+- 已完成：富文本只读翻译 `calcfield` 时优先按 `id` 匹配、再按 `name` 兼容旧数据，避免同名字段展示为错误值
+- 已完成：富文本只读翻译遇到缺失引用字段时保留原 calcfield 节点，避免生成 `insert: undefined` 的无效 Delta
+- 已完成：富文本图片拖拽/粘贴模块插入图片时保留光标 `index: 0` 语义，避免错误回退到文档末尾
+- 已完成：富文本运行时卸载时销毁 `imageDrop` / `calcfield` 模块，清理 Quill 与 DOM 事件监听，避免编辑器反复挂载后残留监听
+- 已完成：`CalcField` 增加 `destroy()`，释放 `text-change`、`selection-change`、paste 监听并废弃未完成 source token
+- 已完成：`split.js`、`react-window`、`sql-formatter`、ECharts 默认主题、Reveal、Monaco 和插件路径预加载的失败重试边界稳定化，避免一次加载失败后长期缓存 rejected Promise
+- 已完成：`Split`、`MonacoEditor`、SQL 编辑器快捷键绑定、SQL 格式化、StoryBoard 编辑/播放/分享播放的运行时加载失败兜底，避免组件内部异步加载失败形成未处理 Promise
+- 已完成：View 属性侧 `Resource` / `Variables` 的 SQL completion provider 注册链路统一走 `registerSqlCompletionProvider`，Monaco 加载失败时不再形成未处理 Promise
+- 已完成：`ChartSelectModal` 去掉 `rc-tree/lib/interface` 的 `Key` 深路径导入，改用 React 公开 `Key` 类型
+- 已完成：`UnControlledTableHeaderPanel` 去掉 `antd/es/table/interface` 的 `TableRowSelection` 深路径导入，改为从 `TableProps<T>['rowSelection']` 反推公开类型
+- 已完成：`HiddenUploader` 去掉 `antd/es/upload/Upload` 的 `UploadRef` 深路径导入，改为从包根 `Upload` 公开组件反推 ref 类型
+- 已完成：Monaco 编辑器封装、SQL 编辑器、MockData 编辑器和 View 编辑上下文的静态类型导入从 `monaco-editor/esm/vs/editor/editor.api` 切到 `monaco-editor` 包根入口
+- 已完成：前端源码复扫已无 `antd/es`、`antd/lib`、`rc-*/es`、`rc-*/lib` 这类历史深路径类型入口；Monaco 剩余 `esm` 路径仅保留在运行时懒加载与语言贡献加载入口
+- 已完成：看板与图表 MockData 面板的样例数据状态、编辑器回调和导出参数补齐 `ChartDataSetDTO` / 行数组 / 模板导出 payload 局部类型，去掉面板链路里的宽泛 `any` 与原地修改
+- 已完成：Workbench、图表预览、分享预览和看板 widget 数据请求的排序、分页、执行 token 参数补齐 `ChartDataRequest` / `ChartDatasetPageInfo` / `ExecuteToken` 类型边界，去掉请求构造链路里的局部 `as any` 与 `getState() as any`
+- 已完成：Share/Viz 预览数据集 fulfilled payload 补齐 `ChartDataSetDTO` 边界，computed fields 更新 payload 对齐 `ChartDataViewMeta[]`，去掉分享预览 dataset 的局部 `as any`
+- 已完成：ChartOperationPanel 的配置更新回调复用 `ChartConfigPayloadType`，FlexLayout factory 节点和 DnD backend props 补齐公开类型
+- 已完成：散点 symbol size 工具函数与轮廓地图散点 series 的 value 参数对齐真实数组边界，避免继续保留未声明回调参数
+- 已完成：保存到看板链路的 `dashboardId / dashboardType` 回调补齐 `BoardType` 边界，`SaveToDashboard` 的 Tree 选择事件改为 antd 公开事件类型加本地节点守卫，保持路由 state 与保存行为不变
+- 已完成：`ChartEventListenerHelper` 的分页排序、钻取、富文本上下文和选中事件回调补齐显式 payload 类型；表格排序列对齐请求层 `string[]` 边界，选中事件默认回传空数组，保持事件触发条件不变
+- 已完成：字段 Action 菜单链路补齐 action、字段类型、排序方向、聚合值和颜色开关回调的局部类型边界，保留菜单过滤、排序默认值、颜色启停和配置更新语义不变
+- 已完成：交互跳转 Hook、拖拽预览、搜索列表、聚合开关、通用 ModalForm 与 Gauge formatter 补齐局部参数边界；无效跳转规则显式跳过，避免 undefined 目标继续进入跳转链路
+- 已完成：Workbench 数据集 thunk 与 reducer 补齐 `ChartDataSetDTO` 和 reject payload 最小结构，去掉 dataset fulfilled / rejected 链路里的局部 `as any`；配置 payload 的动态 `value` 仍按协议宽口暂缓
+- 已完成：BasicRichText MarkdownModule 的 Delta op 与 Quill line 补齐最小局部类型，RichTextPluginLoader 的 calcfield/tag/custom color 数据入口去掉局部 `any`，保持 Quill DOM 数据写读行为不变
+- 已完成：BasicFunnelChart 的数据行与指标排序比较改为局部数值读取 helper，去掉 `getCell(...) as any` 的数值比较中转，保持原 Number 转换语义不变
 - 已完成：`media.ts` 的 styled-components 媒体查询 helper 补齐显式模板桥类型，去掉模板生成链路里的直接 `any`，并用 media 单测确认 CSS 输出不变
 - 已完成：`Avatar`、`ListTitle` 与 `AddButton` 的局部 UI 回调和状态类型收口，复用 antd 公开 props 与菜单点击参数类型，保留按钮点击无参和菜单点击带参两种调用方式
 - 已完成：`ThemeProvider` 测试里的主题变量与 store state 断言去掉局部 `any`，改用 `DefaultTheme` 与 `RootState`
 - 已完成：`Split` 组件的 split.js 子节点收集改为显式 `HTMLElement[]` 过滤，内部 gutter 标记用局部 DOM 扩展类型承接，去掉 ref 和 gutter 判断里的宽泛强转
+- 已完成：`SplitPane` 的尺寸 state patch、鼠标转触摸事件和默认尺寸计算补齐局部显式类型，去掉 `setState<any>`，保留 pane size 允许字符串、数字或空值的既有语义
 - 已完成：Redux 动态 reducer 注入工厂参数改为 `unknown` 入口，继续由 `checkStore` 做运行时 shape 校验，非法 store 测试不再需要 `as any`
 - 已完成：`DragSortEditTable` 的表格 props、编辑表单上下文和拖拽行 props 改为基于 `RelationFilterValue` 的显式类型，保留现有可编辑拖拽行为不变
 - 已完成：`BasicSelector` 的动态选项结果收口为局部显式选项类型，保留标量选项与 `label/value` 对象选项两种兼容形态
@@ -387,6 +472,11 @@
 - 已完成：`internalChartHelper.ts` 的 view config 解析入口补齐对象守卫，非对象 JSON 输入按空配置处理，并补齐回归测试
 - 已完成：`chartHelper.ts` 的轴标签 interval 判断和 meta 路径查找 helper 补齐显式入参与返回类型，保持旧筛选值兼容面不变
 - 已完成：`fetch.ts` 的计算字段校验、可用函数列表、下载、插件加载、分享任务与图表数据请求 helper 补齐参数和返回类型，保持请求结构不变
+- 已完成：StoryBoard 页面服务端 config 解析改为复用迁移入口，坏 JSON 回退到初始配置，避免故事页配置异常打断页面
+- 已完成：Dashboard 联动字段路径解析收口到 `parseLinkedFieldPath`，跳转、联动取值与请求过滤器组装遇到坏字段路径时显式跳过
+- 已完成：控制器日期配置展示前深拷贝从 JSON 序列化替换为 `CloneValueDeep`，保留不修改原配置的语义并减少序列化副作用
+- 已完成：BoardEditor 历史 state 中 `widgetInfo` 解析补齐安全入口，坏 JSON 或非对象输入不再打断看板编辑页初始化
+- 已完成：BoardEditor 布局调整 reducer 的深拷贝从 JSON 序列化替换为 `CloneValueDeep`，保持 layout 写入语义不变
 - 正在推进：FormGenerator 控件配置透传兼容边界收口
 - 已完成：`frontend/.husky/pre-push` 分层门禁，专题分支默认只跑轻量 TypeScript 门禁，`main` 保持完整前端门禁
 - 已完成：`BasicCheckbox` 不再把 `hideLabel`、`needRefresh` 透传给 antd Checkbox，保留刷新回调语义不变
@@ -402,11 +492,18 @@
 - 已完成：`DataReferencePanel` 的动态字段组装函数补齐返回类型，指标字段列表按局部最小结构收口，保持参考线/参考区配置组装语义不变
 - 已完成：控制器默认值滑块 setter 的 Form.Item props 与 Slider props 拆分透传，避免 `maxValue / minValue / step / showMarks` 这类控件配置继续进入 Form.Item
 - 已完成：控制器文本默认值 setter 去掉未使用的 `value` 解构，保持 Form 注入行为不变
-- 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
+- 已完成：`useSaveAsViz` 的复制保存链路补齐最小详情 DTO 与保存 payload 类型，去掉局部 `request2<any>` / `requestData: any`
+- 已完成：看板图片上传、故事板分享、保存模板、标签页和故事板选择等组件局部类型边界收口，去掉局部 `@ts-ignore` 与上传私有 ref 依赖
+- 已完成：故事板编辑态历史 state、故事板权限、VirtualTable 滚动体回调和视频/分组 widget 测试 fixture 的局部类型边界收口，去掉对应局部 `any` / `as any`
+- 已完成：Dashboard 工具函数请求参数复用现有 `getDataOption` 类型，移动端间距配置类型对齐运行时缺省语义，去掉相关测试局部 `as any`
+- 已完成：数据源配置模板的 `defaultValue` 与 `options` 从宽泛 `any` 收口为 JSON 兼容值和明确 option 联合类型，配置表单按 `dbType` / 字符串选项做局部类型守卫
+- 已完成：看板查询/重置按钮点击事件补齐 React 鼠标事件类型，`DataChart.status` 收口为数值状态，DataChartWidget meta 入参图标类型收口为字符串
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
 - 暂缓评估：FormGenerator 全局 `ItemLayoutProps`、交互规则面板的动态 `value` / `Customize` 映射仍是协议宽口，需单独评估交互配置结构后再收口
 - 暂缓评估：`ChartDataSetDTO.rows` 仍按历史 `string[][]` 表达图表运行时数据集，大量图表组件和 helper 以 `IChartDataSet<string>` 消费；后续如要对齐后端 `Dataframe.rows: List<List<Object>>`，需单独处理图表运行时的数据集泛型与字符串化边界
-- 下一批候选：当前低风险 UI/FormGenerator 批次已累计较多提交，建议先执行阶段性完整门禁并准备 merge 回 `main`，再开下一条专题分支继续处理交互协议宽口或其它低风险项
+- 暂缓评估：`WidgetConf.content` / `WidgetCreateProps.content` 是多类 widget 的共享内容协议宽口，直接改成 `unknown` 会牵涉图表、控制器、标签页、富文本和迁移链路，需要按 widget 类型分批拆分
+- 暂缓评估：Dashboard 工具测试中被跳过的历史大 fixture 仍有 `obj as any`，直接补全为完整 `Widget` 会引入大量非测试重点字段，后续如恢复这些测试应先抽通用 widget fixture helper
+- 下一批候选：前端低风险继续在当前长期分支累计，优先处理局部组件、工具函数和有测试覆盖的类型边界；暂不因单个小批次合入 `main`
 
 当前已落地范围：
 
@@ -530,9 +627,7 @@
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/utils/__tests__/chartDtoHelper.test.ts src/app/utils/__tests__/internalChartHelper.test.ts src/app/hooks/__tests__/useGetSourceDbTypeIcon.test.tsx`
-- `npm run test:ci -- src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts`
-- `npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts`
+- `npm run test:ci -- src/app/pages/StoryBoardPage/__tests__/utils.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts`
 
 ### 6.2 最近已完成
 
@@ -558,6 +653,29 @@
 - 图表 helper 中 runtime date level 与样式值合并类型边界收口
 - 通用树 helper 与插入索引 helper 类型边界收口
 - 模型字段树分组 helper 类型边界收口
+- 主页面局部类型边界收口
+  - `Profile` 与 `MemberForm` 的关闭回调去掉 `null as any`，按真实无参关闭语义传递
+  - Schedule 配置解析补齐 `JobConfig` 安全入口，附件类型按 `FileTypes` 过滤
+  - Schedule / Viz 回收站树标题节点补齐局部显式类型，去掉 `node as any`
+  - Viz 页签菜单事件改用 Ant Design 公开事件类型
+  - Viz 新增、另存、表单初始值与保存请求 payload 类型边界收口，保留现有保存流程不变
+  - Viz 运行态树筛选、下拉筛选值转换与下载任务回调泛型继续去掉局部宽泛 `any`
+- 工具函数与 Workbench 配置更新边界收口
+  - `curry` 参数缓存从 `any[]` 收口为 `unknown[]`
+  - `ChartConfigPayloadType.value` 改为图表配置节点联合类型，避免 Workbench 配置更新继续透传宽泛 `any`
+  - `updateCollectionByAction` / `updateByAction` 从只支持样式配置泛化为支持数据、样式、i18n 与子行配置节点，匹配当前真实调用面
+- 资源迁移与变量默认值表单边界收口
+  - 资源导入 `FileUpload` 改用 Ant Design 上传回调类型，去掉 `value` / `onChange` 的宽泛 `any`
+  - 变量默认值输入状态按字符串、数字、日期默认值联合类型收口，文本、数字和日期控件按各自真实值边界传递
+- ViewPage 测试层 legacy 输入边界收口
+  - `diffMergeHierarchyModel` / `addPathToHierarchyStructureAndChangeName` 测试改为集中 legacy hierarchy helper，去掉断言点散落 `as any`
+  - `DataModelTree.toModel` 返回值改为列名映射结构，测试不再需要强转读取节点
+  - 图表预览时间筛选测试改用 `FilterConditionType` 与集中 legacy condition helper，保留旧异常值兼容测试
+- 普通表格与指标卡条件样式边界收口
+  - 条件样式匹配入口从 `any` / 过窄 `string | number` 改为 `unknown` 输入加局部可比较值类型，保留 null、空字符串和 undefined 判断语义
+  - 普通表格行记录改为 `Record<string, unknown>`，避免行条件样式继续以宽泛对象透传
+  - 普通表格 cell、可调整表头和列标题组件补齐 HTML / react-resizable 公开 props 类型，去掉局部 `any` 和 styled td 宽泛 props
+  - 仪表盘图 tooltip 数据和 data itemStyle 补齐局部显式结构，去掉 tooltip formatter 里的 `data: any` 与 itemStyle 宽泛类型
 
 ## 7. 下一阶段执行顺序
 
@@ -565,7 +683,7 @@
 
 1. 继续复扫生产工具函数中的低风险单点类型债，只处理不改变运行时语义的局部收口
 2. 优先从 `chartHelper.ts` / `internalChartHelper.ts` 中挑已有测试覆盖、可隔离的 helper 继续收口
-3. `useSaveAsViz`、schema/复制保存这类返回数据会进入业务拼装的链路单独评估，不混入低风险批次
+3. schema/复制保存这类返回数据会进入业务拼装的链路继续单独评估，不混入普通低风险批次
 4. 时间体系剩余调用点继续收口
 5. 前端依赖收口与历史入口审计继续逐个推进
 6. 安装健康度与锁文件一致性持续检查
@@ -617,6 +735,48 @@
 
 当前低风险批次合并前门禁记录：
 
+- 通过：图表运行时加载稳定化专项轻量门禁，`npm run checkTs`
+- 通过：图表运行时加载稳定化专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts`
+- 通过：运行时懒加载边界稳定化专项轻量门禁，`npm run checkTs`
+- 通过：运行时懒加载边界稳定化专项定向测试，`npm run test:ci -- src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/sqlFormatterRuntime.test.ts src/app/utils/__tests__/echartsThemeRuntime.test.ts src/app/pages/StoryBoardPage/__tests__/revealRuntime.test.ts src/app/components/MonacoEditor/__tests__/runtime.test.ts src/app/services/__tests__/chartPluginService.test.ts`
+- 通过：运行时加载调用层稳定化专项轻量门禁，`npm run checkTs`
+- 通过：运行时加载调用层稳定化专项定向测试，`npm run test:ci -- src/app/components/__tests__/Split.test.tsx src/app/components/MonacoEditor/__tests__/index.test.tsx src/app/components/MonacoEditor/__tests__/runtime.test.ts src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/VirtualTable.test.tsx src/app/pages/StoryBoardPage/__tests__/revealRuntime.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/sqlFormatterRuntime.test.ts`
+- 通过：Monaco completion provider 注册链路稳定化专项轻量门禁，`npm run checkTs`
+- 通过：Monaco completion provider 注册链路稳定化专项定向测试，`npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/completionRuntime.test.ts src/app/components/MonacoEditor/__tests__/runtime.test.ts`
+- 通过：富文本运行时加载稳定化专项轻量门禁，`npm run checkTs`
+- 通过：富文本运行时加载稳定化专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
+- 通过：富文本字段引用稳定化专项轻量门禁，`npm run checkTs`
+- 通过：富文本字段引用稳定化专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
+- 通过：富文本缺失引用与图片插入边界专项轻量门禁，`npm run checkTs`
+- 通过：富文本缺失引用与图片插入边界专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/ImageDropModule.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
+- 通过：富文本运行时销毁边界专项轻量门禁，`npm run checkTs`
+- 通过：富文本运行时销毁边界专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/RichTextEditorRuntime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/ImageDropModule.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
+- 通过：运行时数据解析稳定化专项轻量门禁，`npm run checkTs`
+- 通过：运行时数据解析稳定化专项定向测试，`npm run test:ci -- src/app/pages/StoryBoardPage/__tests__/utils.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts`
+- 通过：BoardEditor 运行时数据解析稳定化专项定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts`
+- 通过：`flexlayout-react` 工作台布局工厂稳定化专项轻量门禁，`npm run checkTs`
+- 通过：`flexlayout-react` 工作台布局工厂稳定化专项定向测试，`npm run test:ci -- src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts`
+- 通过：`react-grid-layout` 布局归一化稳定化专项轻量门禁，`npm run checkTs`
+- 通过：`react-grid-layout` 布局归一化稳定化专项定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts`
+- 通过：`react-window` 虚拟表格稳定化专项轻量门禁，`npm run checkTs`
+- 通过：`react-window` 虚拟表格稳定化专项定向测试，`npm run test:ci -- src/app/components/__tests__/VirtualTable.test.tsx`
+- 通过：ChartEventListenerHelper 回调类型边界批次轻量门禁，`npm run checkTs`
+- 通过：ChartEventListenerHelper 回调类型边界批次定向测试，`npm run test:ci -- src/app/utils/__tests__/ChartEventListenerHelper.test.ts`
+- 通过：字段 Action 菜单类型边界批次轻量门禁，`npm run checkTs`
+- 通过：交互跳转与小组件参数边界批次轻量门禁，`npm run checkTs`
+- 通过：表格与指标卡条件样式边界批次轻量门禁，`npm run checkTs`
+- 通过：ViewPage 测试层边界批次定向测试，`npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Properties/DataModelTree/__tests__/utils.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts`
+- 通过：工具函数与表单边界批次定向测试，`npm run test:ci -- src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts`
+- 通过：工具函数与 Workbench 配置更新边界批次轻量门禁，`npm run checkTs`
+- 通过：主页面局部类型边界批次轻量门禁，`npm run checkTs`
+- 通过：组件局部类型边界批次轻量门禁，`npm run checkTs`
+- 通过：故事板与虚拟表格局部类型边界批次轻量门禁，`npm run checkTs`
+- 通过：widget 测试 fixture 类型边界批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/components/Widgets/VideoWidget/__tests__/VideoWidgetCore.test.tsx src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts`
+- 通过：Dashboard 工具函数参数边界批次轻量门禁，`npm run checkTs`
+- 通过：Dashboard 工具函数参数边界批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/utils/__tests__/board.test.ts`
+- 通过：数据源配置模板类型边界批次轻量门禁，`npm run checkTs`
+- 通过：看板按钮与 DataChart 局部类型边界批次轻量门禁，`npm run checkTs`
+- 通过：看板按钮与 DataChart 局部类型边界批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx`
 - 通过：通用 UI 与工具类型边界专题合并前完整门禁，`npm run test:ci` 109 个测试文件通过，840 个测试通过，4 个跳过
 - 通过：通用 UI 与工具类型边界专题合并前完整门禁，`npm run lint:css`
 - 通过：通用 UI 与工具类型边界专题合并前完整门禁，`npm run lint:style`
@@ -626,6 +786,9 @@
 - 通过：`npm run test:ci`，109 个测试文件通过，838 个测试通过，4 个跳过
 - 通过：`npm run lint:css`
 - 通过：`npm run lint:style`
+- 通过：运行时与类型边界累计批次合并前完整门禁，`npm run test:ci`，127 个测试文件通过，891 个测试通过，4 个跳过
+- 通过：运行时与类型边界累计批次合并前完整门禁，`npm run lint:css`
+- 通过：运行时与类型边界累计批次合并前完整门禁，`npm run lint:style`
 
 触发完整前端门禁的条件：
 

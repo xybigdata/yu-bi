@@ -21,6 +21,7 @@ import SaveToDashboard from 'app/components/SaveToDashboard';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import useMount from 'app/hooks/useMount';
 import { useWorkbenchSlice } from 'app/pages/ChartWorkbenchPage/slice';
+import { BoardType } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { DownloadListPopup } from 'app/pages/MainPage/Navbar/DownloadListPopup';
 import { loadTasks } from 'app/pages/MainPage/Navbar/service';
 import { selectHasVizFetched } from 'app/pages/MainPage/pages/VizPage/slice/selectors';
@@ -49,7 +50,10 @@ const ChartHeaderPanel: FC<{
   container?: string;
   onSaveChart?: () => void;
   onGoBack?: () => void;
-  onSaveChartToDashBoard?: (dashboardId, dashboardType) => void;
+  onSaveChartToDashBoard?: (
+    dashboardId: string,
+    dashboardType?: BoardType,
+  ) => void;
 }> = memo(
   ({
     chartName,
@@ -68,7 +72,7 @@ const ChartHeaderPanel: FC<{
     const { actions } = useWorkbenchSlice();
 
     const handleModalOk = useCallback(
-      (dashboardId: string, dashboardType: string) => {
+      (dashboardId: string, dashboardType?: BoardType) => {
         onSaveChartToDashBoard?.(dashboardId, dashboardType);
         setIsModalVisible(true);
       },

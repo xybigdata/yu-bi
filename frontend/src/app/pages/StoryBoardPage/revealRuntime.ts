@@ -21,21 +21,44 @@ import type { RevealPlugin } from 'reveal.js';
 import 'reveal.js/reveal.css';
 
 type RevealModule = typeof Reveal;
-
-let revealPromise: Promise<{
+export type RevealRuntimeModule = {
   Reveal: RevealModule;
   RevealZoom: RevealPlugin;
-}> | null = null;
+};
+
+let revealPromise: Promise<RevealRuntimeModule> | null = null;
+let revealRuntimeLoader: () => Promise<RevealRuntimeModule> = () =>
+  Promise.all([import('reveal.js'), import('reveal.js/plugin/zoom')]).then(
+    ([revealModule, zoomModule]) => ({
+      Reveal: revealModule.default,
+      RevealZoom: zoomModule.default(),
+    }),
+  );
 
 export function loadRevealRuntime() {
   if (!revealPromise) {
-    revealPromise = Promise.all([
-      import('reveal.js'),
-      import('reveal.js/plugin/zoom'),
-    ]).then(([revealModule, zoomModule]) => ({
-      Reveal: revealModule.default,
-      RevealZoom: zoomModule.default(),
-    }));
+    revealPromise = revealRuntimeLoader().catch(error => {
+      revealPromise = null;
+      throw error;
+    });
   }
   return revealPromise;
+}
+
+export function __setRevealRuntimeLoaderForTest(
+  loader: () => Promise<RevealRuntimeModule>,
+) {
+  revealRuntimeLoader = loader;
+  revealPromise = null;
+}
+
+export function __resetRevealRuntimeLoaderForTest() {
+  revealRuntimeLoader = () =>
+    Promise.all([import('reveal.js'), import('reveal.js/plugin/zoom')]).then(
+      ([revealModule, zoomModule]) => ({
+        Reveal: revealModule.default,
+        RevealZoom: zoomModule.default(),
+      }),
+    );
+  revealPromise = null;
 }

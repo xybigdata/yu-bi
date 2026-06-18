@@ -21,9 +21,11 @@ import debounce from 'lodash/debounce';
 import { FC, memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
+type ChartSearchableListItem = { value: string; label: string };
+
 const ChartSearchableList: FC<{
-  source: Array<{ value: string; label: string }>;
-  onItemSelected: (itemKey) => void;
+  source: ChartSearchableListItem[];
+  onItemSelected: (itemKey: string) => void;
 }> = memo(({ source, onItemSelected }) => {
   const [listItems, setListItems] = useState(source);
 
@@ -31,7 +33,7 @@ const ChartSearchableList: FC<{
     setListItems(source);
   }, [source]);
 
-  const handleListItemClick = itemKey => {
+  const handleListItemClick = (itemKey: string) => {
     onItemSelected(itemKey);
   };
 

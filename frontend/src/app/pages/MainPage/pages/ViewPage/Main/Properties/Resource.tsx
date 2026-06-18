@@ -35,7 +35,6 @@ import {
   TreeDataNode,
   TreeProps,
 } from 'antd';
-import { loadMonaco } from 'app/components/MonacoEditor/runtime';
 import { Tree } from 'app/components';
 import { DataViewFieldType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -62,9 +61,9 @@ import {
   selectDatabaseSchemaLoading,
   selectSourceDatabaseSchemas,
 } from '../../slice/selectors';
-import { getEditorProvideCompletionItems } from '../../slice/thunks';
 import { DatabaseSchema } from '../../slice/types';
 import { buildAntdTreeNodeModel } from '../../utils';
+import { registerSqlCompletionProvider } from '../Editor/completionRuntime';
 import Container from './Container';
 
 type ExtractTreeIconProps<T> = T extends (props: infer P) => unknown
@@ -145,25 +144,12 @@ export const Resource = memo(() => {
   useEffect(() => {
     let cancelled = false;
     if (databaseTreeModel && editorCompletionItemProviderRef) {
-      editorCompletionItemProviderRef.current?.dispose();
-      void loadMonaco().then(monaco => {
-        if (cancelled) {
-          return;
-        }
-        dispatch(
-          getEditorProvideCompletionItems({
-            sourceId,
-            resolve: getItem => {
-              if (cancelled) {
-                return;
-              }
-              editorCompletionItemProviderRef.current =
-                monaco.languages.registerCompletionItemProvider('sql', {
-                  provideCompletionItems: getItem,
-                });
-            },
-          }),
-        );
+      registerSqlCompletionProvider({
+        dispatch,
+        providerRef: editorCompletionItemProviderRef,
+        sourceId,
+        isCancelled: () => cancelled,
+        errorMessage: 'Load resource completion runtime failed',
       });
     }
     return () => {

@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+import { LayoutComponentType } from './ChartOperationPanelLayout';
+
 type LayoutRect = {
   width?: number;
   height?: number;
@@ -57,4 +59,12 @@ export const getStableContainerSize = (
   const normalizedReservedSize = normalizeLayoutSize(reservedSize);
 
   return Math.max(normalizedContainerSize - normalizedReservedSize, 0);
+};
+
+export const normalizeLayoutComponentType = (component: unknown) => {
+  return Object.values(LayoutComponentType).includes(
+    component as LayoutComponentType,
+  )
+    ? (component as LayoutComponentType)
+    : undefined;
 };

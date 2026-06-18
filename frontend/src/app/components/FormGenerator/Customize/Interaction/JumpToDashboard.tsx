@@ -22,22 +22,27 @@ import { getAllColumnInMeta } from 'app/utils/chartHelper';
 import { FC, memo, useState } from 'react';
 import { InteractionFieldRelation } from '../../constants';
 import ControllerList from './ControllerList';
-import { I18nTranslator, JumpToDashboardRule, VizType } from './types';
+import {
+  CustomizeRelation,
+  I18nTranslator,
+  JumpToDashboardRule,
+  VizType,
+} from './types';
 
 const JumpToDashboard: FC<
   {
     vizs?: VizType[];
     dataview?: ChartDataView;
     value?: JumpToDashboardRule;
-    onValueChange: (value) => void;
+    onValueChange: (value: JumpToDashboardRule) => void;
   } & I18nTranslator
 > = memo(({ vizs, dataview, value, onValueChange, translate: t }) => {
-  const [relations, setRelations] = useState(
+  const [relations, setRelations] = useState<CustomizeRelation[]>(
     value?.[InteractionFieldRelation.Customize] || [],
   );
 
-  const handleUpdateRelations = relations => {
-    const newRelations = [...relations];
+  const handleUpdateRelations = (relations?: CustomizeRelation[]) => {
+    const newRelations = [...(relations || [])];
     setRelations(newRelations);
     onValueChange({
       ...value,
@@ -54,7 +59,9 @@ const JumpToDashboard: FC<
         popupMatchSelectWidth={false}
         value={value?.relId}
         placeholder={t('drillThrough.rule.reference.title')}
-        onChange={relId => onValueChange({ ...value, ...{ relId } })}
+        onChange={relId =>
+          onValueChange({ ...value, ...{ relId } } as JumpToDashboardRule)
+        }
       >
         {vizs
           ?.filter(v => v.relType === 'DASHBOARD')

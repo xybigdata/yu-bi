@@ -1,4 +1,5 @@
 import { ChartDataConfig } from 'app/types/ChartConfig';
+import { I18NTranslateOptions } from 'app/hooks/useI18NPrefix';
 import { ReactNode } from 'react';
 import { FormGroupLayoutMode } from './constants';
 
@@ -6,7 +7,11 @@ export interface ItemLayoutProps<T> {
   children?: ReactNode;
   ancestors: number[];
   data: T;
-  translate?: (title: string, disablePrefix?: boolean, options?: any) => string;
+  translate?: (
+    title: string,
+    disablePrefix?: boolean,
+    options?: I18NTranslateOptions,
+  ) => string;
   onChange?: (
     ancestors: number[],
     value: T | any,

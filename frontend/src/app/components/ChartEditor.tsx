@@ -18,7 +18,11 @@
 
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { Modal } from 'antd';
-import { DownloadFileType, RUNTIME_DATE_LEVEL_KEY } from 'app/constants';
+import {
+  ChartStyleSectionComponentType,
+  DownloadFileType,
+  RUNTIME_DATE_LEVEL_KEY,
+} from 'app/constants';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import useMount from 'app/hooks/useMount';
@@ -27,6 +31,7 @@ import ChartManager from 'app/models/ChartManager';
 import { useWorkbenchSlice } from 'app/pages/ChartWorkbenchPage/slice';
 import { ChartConfigReducerActionType } from 'app/pages/ChartWorkbenchPage/slice/constant';
 import { ChartConfigPayloadType } from 'app/pages/ChartWorkbenchPage/slice/types';
+import { BoardType } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import {
   aggregationSelector,
   backendChartSelector,
@@ -51,6 +56,7 @@ import {
   useSaveFormContext,
 } from 'app/pages/MainPage/pages/VizPage/SaveFormContext';
 import { ChartMouseEventParams, IChart } from 'app/types/Chart';
+import { ChartStyleSectionRow } from 'app/types/ChartConfig';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { ChartDTO } from 'app/types/ChartDTO';
 import {
@@ -87,6 +93,12 @@ import {
 } from '../pages/DashBoardPage/pages/Board/slice/types';
 
 const { confirm } = Modal;
+
+const emptyRichTextContextRow: ChartStyleSectionRow = {
+  key: 'richTextContext',
+  label: 'richTextContext',
+  comType: ChartStyleSectionComponentType.INPUT,
+};
 
 export interface ChartEditorBaseProps {
   dataChartId: string;
@@ -244,7 +256,7 @@ export const ChartEditor: FC<ChartEditorProps> = ({
               dispatch(refreshDatasetAction(p));
             });
             richTextContextEventListener(
-              chart?.config?.styles?.[1]?.rows?.[0] || {},
+              chart?.config?.styles?.[1]?.rows?.[0] || emptyRichTextContextRow,
               param,
               p => {
                 dispatch(updateChartConfigAndRefreshDatasetAction(p));
@@ -540,7 +552,7 @@ export const ChartEditor: FC<ChartEditorProps> = ({
   ]);
 
   const saveChartToDashBoard = useCallback(
-    (dashboardId, dashboardType) => {
+    (dashboardId: string, dashboardType?: BoardType) => {
       const dataChart = buildDataChart();
       try {
         navigate.push({

@@ -43,6 +43,8 @@ import {
 } from './thunks';
 import { ChartConfigPayloadType, WorkbenchState } from './types';
 
+type ChartConfigUpdateValue = NonNullable<ChartConfigPayloadType['value']>;
+
 export const initState: WorkbenchState = {
   lang: 'zh',
   dateFormat: 'LLL',
@@ -88,6 +90,7 @@ const workbenchSlice = createSlice({
           payload: ChartConfigPayloadType;
         },
       ) => {
+        const updateValue = action.payload.value as ChartConfigUpdateValue;
         switch (action.type) {
           case ChartConfigReducerActionType.INIT:
             return action.payload.init || {};
@@ -96,7 +99,7 @@ const workbenchSlice = createSlice({
               ...state,
               styles: updateCollectionByAction(state.styles || [], {
                 ancestors: action.payload.ancestors!,
-                value: action.payload.value,
+                value: updateValue,
               }),
             };
           case ChartConfigReducerActionType.DATA:
@@ -104,7 +107,7 @@ const workbenchSlice = createSlice({
               ...state,
               datas: updateCollectionByAction(state.datas || [], {
                 ancestors: action.payload.ancestors!,
-                value: action.payload.value,
+                value: updateValue,
               }),
             };
           case ChartConfigReducerActionType.SETTING:
@@ -112,7 +115,7 @@ const workbenchSlice = createSlice({
               ...state,
               settings: updateCollectionByAction(state.settings || [], {
                 ancestors: action.payload.ancestors!,
-                value: action.payload.value,
+                value: updateValue,
               }),
             };
           case ChartConfigReducerActionType.INTERACTION:
@@ -120,7 +123,7 @@ const workbenchSlice = createSlice({
               ...state,
               interactions: updateCollectionByAction(state.interactions || [], {
                 ancestors: action.payload.ancestors!,
-                value: action.payload.value,
+                value: updateValue,
               }),
             };
           case ChartConfigReducerActionType.I18N:
@@ -128,7 +131,7 @@ const workbenchSlice = createSlice({
               ...state,
               i18ns: updateCollectionByAction(state.i18ns || [], {
                 ancestors: action.payload.ancestors!,
-                value: action.payload.value,
+                value: updateValue,
               }),
             };
           default:
@@ -204,7 +207,7 @@ const workbenchSlice = createSlice({
       })
       .addCase(fetchDataSetAction.fulfilled, (state, { payload }) => {
         state.selectedItems = [];
-        state.dataset = payload as any;
+        state.dataset = payload;
         state.datasetLoading = false;
       })
       .addCase(fetchChartAction.fulfilled, (state, { payload }) => {
@@ -248,10 +251,10 @@ const workbenchSlice = createSlice({
 
     builder.addCase(
       fetchDataSetAction.rejected,
-      (state, { payload }: { payload: any }) => {
+      (state, { payload }) => {
         state.datasetLoading = false;
         if (state.dataset) {
-          state.dataset.script = (payload?.data?.script as string) || '';
+          state.dataset.script = payload?.data?.script || '';
         }
       },
     );

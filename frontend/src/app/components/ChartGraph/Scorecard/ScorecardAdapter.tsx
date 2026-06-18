@@ -16,13 +16,13 @@
  * limitations under the License.
  */
 
-import { FC, memo } from 'react';
+import { FC, MouseEvent, memo } from 'react';
 import styled from 'styled-components';
 import { AggregateBoxProp, ScorecardBoxProp, ScorecardConfig } from './types';
 
 const ScorecardAdapter: FC<ScorecardConfig> = memo(
   ({ dataConfig, nameConfig, padding, data, background, event }) => {
-    const ssp = e => {
+    const ssp = (e: MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
     };
     return (

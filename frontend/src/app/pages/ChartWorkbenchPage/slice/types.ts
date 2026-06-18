@@ -16,7 +16,14 @@
  * limitations under the License.
  */
 
-import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
+import {
+  ChartConfig,
+  ChartDataConfig,
+  ChartI18NSectionConfig,
+  ChartStyleConfig,
+  ChartStyleSectionRow,
+  SelectedItem,
+} from 'app/types/ChartConfig';
 import ChartDataSetDTO from 'app/types/ChartDataSet';
 import ChartDataView from 'app/types/ChartDataView';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
@@ -25,7 +32,11 @@ import { ChartDTO } from 'app/types/ChartDTO';
 export type ChartConfigPayloadType = {
   init?: ChartConfig;
   ancestors?: number[];
-  value?: any;
+  value?:
+    | ChartDataConfig
+    | ChartStyleConfig
+    | ChartStyleSectionRow
+    | ChartI18NSectionConfig;
   needRefresh?: boolean;
 };
 

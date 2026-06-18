@@ -130,15 +130,6 @@ export const widgetToolkit: WidgetToolkit = {
   },
   edit() {},
   save() {},
-  // lock() {},
-  // unlock() {},
-  // copy() {},
-  // paste() {},
-  // delete() {},
-  // changeTitle() {},
-  // getMeta() {},
-  // getWidgetName() {},
-  // //
 };
 
 const queryBtnProto: WidgetProto = {

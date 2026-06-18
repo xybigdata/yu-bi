@@ -26,6 +26,7 @@ import {
 import { transferChartConfig } from 'app/pages/MainPage/pages/VizPage/slice/utils';
 import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
 import { PendingChartDataRequestFilter } from 'app/types/ChartDataRequest';
+import type { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { ChartDTO } from 'app/types/ChartDTO';
 import { mergeToChartConfig } from 'app/utils/ChartDtoHelper';
 import { FilterSqlOperator } from 'globalConstants';
@@ -184,7 +185,7 @@ export const slice = createSlice({
       state,
       action: PayloadAction<{
         backendChartId: string;
-        computedFields: any;
+        computedFields: ChartDataViewMeta[];
       }>,
     ) {
       if (state.chartPreview && state.chartPreview?.backendChart?.config) {
@@ -227,7 +228,7 @@ export const slice = createSlice({
           state.chartPreview = {
             ...state.chartPreview,
             isLoadingData: false,
-            dataset: payload as any,
+            dataset: payload,
           };
           state.selectedItems = [];
           state.headlessBrowserRenderSign = true;

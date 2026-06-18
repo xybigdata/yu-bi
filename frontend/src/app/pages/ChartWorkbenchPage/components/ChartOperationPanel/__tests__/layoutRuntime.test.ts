@@ -2,7 +2,9 @@ import { describe, expect, test } from 'vitest';
 import {
   getLayoutNodeRectSize,
   getStableContainerSize,
+  normalizeLayoutComponentType,
 } from '../layoutRuntime';
+import { LayoutComponentType } from '../ChartOperationPanelLayout';
 
 describe('getLayoutNodeRectSize', () => {
   test('should fallback to zero when layout node is missing', () => {
@@ -87,5 +89,18 @@ describe('getStableContainerSize', () => {
     expect(getStableContainerSize(Number.NaN, 24)).toBe(0);
     expect(getStableContainerSize(100.9, 20.4)).toBe(80);
     expect(getStableContainerSize(Infinity, 10)).toBe(0);
+  });
+});
+
+describe('normalizeLayoutComponentType', () => {
+  test('should keep known layout component type', () => {
+    expect(
+      normalizeLayoutComponentType(LayoutComponentType.PRESENT),
+    ).toBe(LayoutComponentType.PRESENT);
+  });
+
+  test('should reject unknown layout component type', () => {
+    expect(normalizeLayoutComponentType('unknown-component')).toBeUndefined();
+    expect(normalizeLayoutComponentType(undefined)).toBeUndefined();
   });
 });

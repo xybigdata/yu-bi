@@ -74,48 +74,6 @@ export type FilterTreeNode = TreeListNode & {
   isLeaf?: boolean;
 };
 
-// export const createInitWidgetConfig = (opt: {
-//   type: WidgetType;
-//   content: WidgetContent;
-//   boardType: BoardType;
-//   index?: number;
-//   name?: string;
-//   autoUpdate?: boolean;
-//   frequency?: number;
-// }): WidgetConf => {
-//   return {
-//     version: '',
-//     type: opt.type,
-//     index: opt.index || 0,
-//     name: opt.name || '',
-//     linkageConfig: {
-//       open: false,
-//       chartGroupColumns: [],
-//     },
-//     autoUpdate: opt.autoUpdate || false,
-//     lock: false,
-//     frequency: opt.frequency || 60, // 60秒
-//     rect: createWidgetRect(opt.boardType, opt.type),
-//     background:
-//       opt.boardType === 'auto'
-//         ? opt.type === 'query'
-//           ? QueryButtonWidgetBackgroundDefault
-//           : AutoBoardWidgetBackgroundDefault
-//         : BackgroundDefault,
-//     border: ['query', 'reset'].includes(opt.type)
-//       ? ButtonBorderDefault
-//       : BorderDefault,
-//     content: opt.content,
-//     nameConfig: {
-//       show: true,
-//       textAlign: 'left',
-//       ...FontDefault,
-//       color: opt.type === 'query' ? WHITE : G90,
-//     } as any,
-//     padding: createWidgetPadding(opt.type),
-//   };
-// };
-
 export const createWidgetInfo = (id: string): WidgetInfo => {
   const widgetInfo: WidgetInfo = {
     id: id,
@@ -548,6 +506,22 @@ export const getLinkedColumn = (
   );
 };
 
+export const parseLinkedFieldPath = (fieldName: string): string[] => {
+  if (!fieldName) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(fieldName);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter((field): field is string => typeof field === 'string');
+  } catch (error) {
+    return [];
+  }
+};
+
 // TODO chart widget
 export const getWidgetMap = (
   widgets: Widget[],
@@ -747,7 +721,10 @@ export const getValueByRowData = (
   fieldName: string,
 ) => {
   // TODO: Not used for now, you can delete it
-  let toCaseField = JSON.parse(fieldName).join('.');
+  const toCaseField = parseLinkedFieldPath(fieldName).join('.');
+  if (!toCaseField) {
+    return undefined;
+  }
 
   return data?.rowData[toCaseField];
 };

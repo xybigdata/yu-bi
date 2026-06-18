@@ -30,10 +30,17 @@ export interface GaugePointerStyle {
   };
 }
 
+export interface GaugeItemStyle {
+  color?: string | Array<number | string[]>;
+  borderType?: string;
+  borderWidth?: number;
+  borderColor?: string;
+}
+
 export type GaugeDetailStyle = {
   show: boolean;
   offsetCenter: number[];
-  formatter: (value) => string;
+  formatter: (value?: string | number) => string;
 } & FontStyle;
 
 export interface GaugeAxisStyle {
@@ -68,7 +75,7 @@ export interface GaugeStyle {
 export interface DataConfig {
   name: string;
   value: string | number;
-  itemStyle: any;
+  itemStyle: GaugeItemStyle;
 }
 
 export type SeriesConfig = {

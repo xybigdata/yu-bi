@@ -60,6 +60,18 @@ import { loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 import { Series } from './types';
 
+type DataZoomSetConfig = {
+  usePercentage: boolean;
+  start: number;
+  end: number;
+  startValue: number;
+  endValue: number;
+};
+
+type DataZoomShowConfig =
+  | Pick<DataZoomSetConfig, 'start' | 'end'>
+  | Pick<DataZoomSetConfig, 'startValue' | 'endValue'>;
+
 class BasicLineChart extends Chart {
   config = Config;
   chart: any = null;
@@ -78,8 +90,8 @@ class BasicLineChart extends Chart {
   protected isArea = false;
   protected isStack = false;
   protected dataZoomConfig: {
-    setConfig: any;
-    showConfig: any;
+    setConfig: DataZoomSetConfig | null;
+    showConfig: DataZoomShowConfig | null;
   } = {
     setConfig: null,
     showConfig: null,
@@ -325,7 +337,9 @@ class BasicLineChart extends Chart {
       ],
     );
 
-    const _getDataZoomStartAndEnd = setConfig => {
+    const _getDataZoomStartAndEnd = (
+      setConfig: DataZoomSetConfig,
+    ): DataZoomShowConfig => {
       if (
         JSON.stringify(this.dataZoomConfig.setConfig) !==
           JSON.stringify(setConfig) ||

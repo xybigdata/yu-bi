@@ -16,10 +16,14 @@
  * limitations under the License.
  */
 
-import { ChartInteractionEvent } from 'app/constants';
+import {
+  ChartInteractionEvent,
+  ChartStyleSectionComponentType,
+} from 'app/constants';
 import { ChartDrillOption } from 'app/models/ChartDrillOption';
 import { ChartConfigReducerActionType } from 'app/pages/ChartWorkbenchPage/slice/constant';
 import { ChartMouseEventParams } from 'app/types/Chart';
+import { ChartStyleSectionRow } from 'app/types/ChartConfig';
 import { vi } from 'vitest';
 import {
   chartSelectionEventListener,
@@ -37,6 +41,12 @@ const createDrillEventParam = (): ChartMouseEventParams => ({
   },
 });
 
+const createStyleRow = (): ChartStyleSectionRow => ({
+  key: 'style-row',
+  label: 'style-row',
+  comType: ChartStyleSectionComponentType.INPUT,
+});
+
 describe('ChartEventListenerHelper Tests', () => {
   test('should invoke tablePagingAndSortEventListener callback', () => {
     const mockCallback = vi.fn();
@@ -45,7 +55,7 @@ describe('ChartEventListenerHelper Tests', () => {
       interactionType: ChartInteractionEvent.PagingOrSort,
       seriesName: 'series-name',
       value: {
-        direction: 'asc',
+        direction: 'ASC',
         aggOperator: 'SUM',
         pageNo: 100,
       },
@@ -54,8 +64,8 @@ describe('ChartEventListenerHelper Tests', () => {
     expect(mockCallback.mock.calls.length).toBe(1);
     expect(mockCallback.mock.calls[0][0]).toEqual({
       sorter: {
-        column: 'series-name',
-        operator: 'asc',
+        column: ['series-name'],
+        operator: 'ASC',
         aggOperator: 'SUM',
       },
       pageInfo: {
@@ -71,7 +81,7 @@ describe('ChartEventListenerHelper Tests', () => {
       interactionType: ChartInteractionEvent.PagingOrSort,
       seriesName: 'series-name',
       value: {
-        direction: 'asc',
+        direction: 'ASC',
         aggOperator: 'SUM',
         pageNo: 100,
       },
@@ -134,7 +144,7 @@ describe('ChartEventListenerHelper Tests', () => {
 
   test('should invoke richTextContextEventListener callback', () => {
     const mockCallback = vi.fn();
-    const row = { id: 1 };
+    const row = createStyleRow();
     const param = {
       chartType: 'rich-text',
       interactionType: ChartInteractionEvent.ChangeContext,
@@ -158,7 +168,7 @@ describe('ChartEventListenerHelper Tests', () => {
 
   test('should not invoke richTextContextEventListener callback when not rich text', () => {
     const mockCallback = vi.fn();
-    const row = { id: 1 };
+    const row = createStyleRow();
     const param = {
       chartType: 'chart',
       interactionType: ChartInteractionEvent.ChangeContext,
@@ -170,7 +180,7 @@ describe('ChartEventListenerHelper Tests', () => {
 
   test('should not invoke richTextContextEventListener callback when change context event', () => {
     const mockCallback = vi.fn();
-    const row = { id: 1 };
+    const row = createStyleRow();
     const param = {
       chartType: 'rich-text',
       interactionType: ChartInteractionEvent.Select,

@@ -19,13 +19,16 @@
 import { isEmptyArray } from 'utils/object';
 import { Column, ColumnRole } from '../../../slice/types';
 
-export const toModel = (columns: Column[], ...additionalColumns): object => {
+export const toModel = (
+  columns: Column[],
+  ...additionalColumns: Column[]
+): Record<string, Column> => {
   return columns
     .concat(...additionalColumns)
     .filter(
       col => col?.role !== ColumnRole.Hierarchy || !isEmptyArray(col?.children),
     )
-    .reduce((acc, cur, newIndex) => {
+    .reduce<Record<string, Column>>((acc, cur, newIndex) => {
       if (cur?.role === ColumnRole.Hierarchy && !isEmptyArray(cur?.children)) {
         const orderedChildren = cur.children?.map((child, newIndex) => {
           return {

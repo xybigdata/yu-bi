@@ -33,8 +33,8 @@ export interface BoardConfigValue {
   allowOverlap: boolean;
   margin: [number, number];
   padding: [number, number];
-  mMargin: [number, number];
-  mPadding: [number, number];
+  mMargin?: [number, number];
+  mPadding?: [number, number];
 }
 export const BoardConfigContext = createContext<BoardConfig>({} as BoardConfig);
 export const BoardConfigValContext = createContext<BoardConfigValue>(
