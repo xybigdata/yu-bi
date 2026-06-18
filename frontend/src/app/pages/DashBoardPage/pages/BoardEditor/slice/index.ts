@@ -19,6 +19,7 @@ import { Layout } from 'react-grid-layout';
 import undoable, { includeAction } from 'redux-undo';
 import { useInjectReducer } from 'utils/@reduxjs/injectReducer';
 import { createSlice } from 'utils/@reduxjs/toolkit';
+import { CloneValueDeep } from 'utils/object';
 import { WidgetControllerPanelParams } from './../../Board/slice/types';
 import { editBoardStackSlice } from './childSlice/stackSlice';
 import {
@@ -61,7 +62,7 @@ const editDashBoardInfoSlice = createSlice({
     },
 
     adjustDashLayouts(state, action: PayloadAction<Layout[]>) {
-      state.layouts = JSON.parse(JSON.stringify(action.payload));
+      state.layouts = CloneValueDeep(action.payload);
     },
     changeShowBlockMask(state, action: PayloadAction<boolean>) {
       state.showBlockMask = action.payload;

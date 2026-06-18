@@ -475,6 +475,8 @@
 - 已完成：StoryBoard 页面服务端 config 解析改为复用迁移入口，坏 JSON 回退到初始配置，避免故事页配置异常打断页面
 - 已完成：Dashboard 联动字段路径解析收口到 `parseLinkedFieldPath`，跳转、联动取值与请求过滤器组装遇到坏字段路径时显式跳过
 - 已完成：控制器日期配置展示前深拷贝从 JSON 序列化替换为 `CloneValueDeep`，保留不修改原配置的语义并减少序列化副作用
+- 已完成：BoardEditor 历史 state 中 `widgetInfo` 解析补齐安全入口，坏 JSON 或非对象输入不再打断看板编辑页初始化
+- 已完成：BoardEditor 布局调整 reducer 的深拷贝从 JSON 序列化替换为 `CloneValueDeep`，保持 layout 写入语义不变
 - 正在推进：FormGenerator 控件配置透传兼容边界收口
 - 已完成：`frontend/.husky/pre-push` 分层门禁，专题分支默认只跑轻量 TypeScript 门禁，`main` 保持完整前端门禁
 - 已完成：`BasicCheckbox` 不再把 `hideLabel`、`needRefresh` 透传给 antd Checkbox，保留刷新回调语义不变
@@ -625,7 +627,7 @@
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/StoryBoardPage/__tests__/utils.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts`
+- `npm run test:ci -- src/app/pages/StoryBoardPage/__tests__/utils.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts`
 
 ### 6.2 最近已完成
 
@@ -751,6 +753,7 @@
 - 通过：富文本运行时销毁边界专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/RichTextEditorRuntime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/ImageDropModule.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
 - 通过：运行时数据解析稳定化专项轻量门禁，`npm run checkTs`
 - 通过：运行时数据解析稳定化专项定向测试，`npm run test:ci -- src/app/pages/StoryBoardPage/__tests__/utils.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts`
+- 通过：BoardEditor 运行时数据解析稳定化专项定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts`
 - 通过：`flexlayout-react` 工作台布局工厂稳定化专项轻量门禁，`npm run checkTs`
 - 通过：`flexlayout-react` 工作台布局工厂稳定化专项定向测试，`npm run test:ci -- src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts`
 - 通过：`react-grid-layout` 布局归一化稳定化专项轻量门禁，`npm run checkTs`
