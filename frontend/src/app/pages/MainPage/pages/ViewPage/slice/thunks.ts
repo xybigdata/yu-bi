@@ -55,6 +55,7 @@ import {
   SaveFolderParams,
   SaveViewParams,
   StructViewQueryProps,
+  StructViewRequestColumn,
   UnarchiveViewParams,
   UpdateViewBaseParams,
   DatabaseSchema,
@@ -208,7 +209,7 @@ export const runSql = createAsyncThunk<
     );
   }
 
-  let reqColumns = '';
+  let reqColumns: '' | StructViewRequestColumn[] = '';
 
   if (type === 'STRUCT') {
     reqColumns = buildRequestColumns(structure!);

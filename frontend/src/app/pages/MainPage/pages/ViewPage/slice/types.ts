@@ -112,8 +112,14 @@ export interface QueryResult {
   pageInfo: PageInfo;
   script?: string;
   warnings?: string[] | null;
-  reqColumns?: { column: []; alias: string }[];
+  reqColumns?: StructViewRequestColumn[];
 }
+
+export type StructViewRequestColumn = {
+  alias: string;
+  column: string[];
+};
+
 export interface PageInfo {
   pageNo: number;
   pageSize: number;

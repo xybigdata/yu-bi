@@ -41,6 +41,7 @@ import {
   Model,
   QueryResult,
   StructViewQueryProps,
+  StructViewRequestColumn,
   ViewType,
   ViewViewModel,
 } from './slice/types';
@@ -547,9 +548,11 @@ export function buildAntdTreeNodeModel<T extends TreeDataNode & { value: any }>(
   } as any;
 }
 
-export function buildRequestColumns(tableJSON: StructViewQueryProps) {
-  const columns: any = [];
-  tableJSON.columns.forEach((v, i) => {
+export function buildRequestColumns(
+  tableJSON: StructViewQueryProps,
+): StructViewRequestColumn[] {
+  const columns: StructViewRequestColumn[] = [];
+  tableJSON.columns.forEach(v => {
     const table = tableJSON.table || [];
     columns.push({
       alias: [...table, v].join('.'),

@@ -20,6 +20,7 @@ import { DataViewFieldType } from 'app/constants';
 import { Column, ColumnRole } from '../slice/types';
 import {
   addPathToHierarchyStructureAndChangeName,
+  buildRequestColumns,
   dataModelColumnSorter,
   diffMergeHierarchyModel,
   handleStringScriptToObject,
@@ -699,5 +700,35 @@ describe('handleStringScriptToObject test', () => {
     });
 
     expect(handleStringScriptToObject(script, database)).toBe(script);
+  });
+});
+
+describe('buildRequestColumns test', () => {
+  test('should build request columns from main table and joins', () => {
+    expect(
+      buildRequestColumns({
+        table: ['db1', 'orders'],
+        columns: ['id', 'amount'],
+        joins: [
+          {
+            table: ['db1', 'customers'],
+            columns: ['name'],
+          },
+        ],
+      }),
+    ).toEqual([
+      {
+        alias: 'db1.orders.id',
+        column: ['db1', 'orders', 'id'],
+      },
+      {
+        alias: 'db1.orders.amount',
+        column: ['db1', 'orders', 'amount'],
+      },
+      {
+        alias: 'db1.customers.name',
+        column: ['db1', 'customers', 'name'],
+      },
+    ]);
   });
 });
