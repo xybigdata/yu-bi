@@ -212,6 +212,37 @@ describe('transformQueryResultToModelAndDataSource test', () => {
       },
     ]);
   });
+
+  test('should keep column model when query result has no rows', () => {
+    const result = transformQueryResultToModelAndDataSource(
+      {
+        columns: [
+          {
+            name: 'id',
+            type: DataViewFieldType.NUMERIC,
+          },
+        ],
+        rows: [],
+        pageInfo: {
+          pageNo: 1,
+          pageSize: 10,
+          total: 0,
+        },
+      },
+      {},
+      'SQL',
+    );
+
+    expect(result.model.columns).toEqual({
+      id: {
+        category: 'UNCATEGORIZED',
+        name: 'id',
+        primaryKey: undefined,
+        type: DataViewFieldType.NUMERIC,
+      },
+    });
+    expect(result.dataSource).toEqual([]);
+  });
 });
 
 describe('diffMergeHierarchyModel test', () => {

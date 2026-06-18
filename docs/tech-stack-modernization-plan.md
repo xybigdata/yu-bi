@@ -333,6 +333,7 @@
 - 已完成：`useStateModal` 的缓存回调参数从 `any[]` 收口到 `unknown[]`，OK 回调改为不规定具体入参形态，保留各调用方现有参数兼容面
 - 已完成：`QueryResult.rows` 从 `any[][]` 收口为查询结果标量二维数组，和后端 `Dataframe.rows: List<List<Object>>` 的 JSON 标量返回边界对齐，并补齐预览数据源转换测试
 - 已完成：查询结果预览 `dataSource` 从 `object[]` 收口为 `QueryResultDataSourceRow[]`，View 预览表与数据源 schema 预览链路统一使用查询结果标量行，避免预览结果继续扩散宽泛对象边界
+- 已完成：查询结果消费入口补齐 `isQueryResult` 结构守卫，View SQL 执行与数据源 schema 预览只在 `columns / rows` 结构合法时进入转换链路，并补齐空结果集仍保留列模型的回归测试
 - 已完成：迁移测试层局部弱类型收口
 - 已完成：工具测试层第一批局部弱类型收口
 - 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 的局部弱类型收口

@@ -47,6 +47,9 @@ import {
   ViewViewModel,
 } from './slice/types';
 
+export const isQueryResult = (data: QueryResult | null): data is QueryResult =>
+  !!data && Array.isArray(data.columns) && Array.isArray(data.rows);
+
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 };
@@ -181,7 +184,7 @@ export function transformQueryResultToModelAndDataSource(
   model: HierarchyModel;
   dataSource: QueryResultDataSourceRow[];
 } {
-  const { rows = [], columns = [], reqColumns } = data || {};
+  const { rows, columns, reqColumns } = data;
   const newColumns = columns.reduce(
     (obj, { name, type, primaryKey }) => {
       const hierarchyColumn = getHierarchyColumn(
