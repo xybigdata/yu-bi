@@ -47,8 +47,8 @@ export class ImageDropModule {
   }
 
   insert(dataUrl: string) {
-    const index =
-      (this.quill.getSelection() || {}).index || this.quill.getLength();
+    const selection = this.quill.getSelection();
+    const index = selection?.index ?? this.quill.getLength();
     this.quill.insertEmbed(index, 'image', dataUrl, 'user');
   }
 

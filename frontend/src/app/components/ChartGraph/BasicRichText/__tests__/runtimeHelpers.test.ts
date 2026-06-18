@@ -63,6 +63,21 @@ describe('runtimeHelpers', () => {
     });
   });
 
+  test('should keep calcfield insert when referenced field is missing', () => {
+    const calcfield = { calcfield: { id: 'missing-field', name: '订单数' } };
+
+    expect(
+      translateRichTextCalcFields(
+        {
+          ops: [{ insert: calcfield }],
+        } as DeltaStatic,
+        [],
+      ),
+    ).toEqual({
+      ops: [{ insert: calcfield }],
+    });
+  });
+
   test('should build stable field keys and find duplicate field names by key', () => {
     const fields = [
       { id: 'field-1', name: '订单数', value: '128' },

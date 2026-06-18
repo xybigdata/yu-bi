@@ -107,9 +107,13 @@ export const translateRichTextCalcFields = (
         ? current.id === calcfield.id
         : current.name === calcfield.name,
     );
+    if (!field) {
+      return item;
+    }
+
     return {
       ...item,
-      insert: field?.value,
+      insert: field.value,
     };
   });
 
