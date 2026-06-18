@@ -377,6 +377,8 @@
 - 已完成：柱状/条形、折线、面积、饼图/环图/玫瑰图、散点、漏斗、双 Y 轴、轮廓地图、词云、瀑布和雷达图的 ECharts 实例类型收口到 `EChartsInstance | null`
 - 已完成：图表目录中的 `chart: any = null` 已清零，继承图表删除重复实例字段，Scorecard 删除未使用的 ReactChart 占位字段
 - 已完成：ECharts `datazoom`、点击事件和地图 option 增加局部类型桥接；漏斗图 top 位置 helper 接受空图表实例并保留原兜底语义
+- 已完成：轮廓地图 `getOption()` 与 `registerMap()` 桥接改为显式 ECharts option / registerMap 参数类型，去掉地图运行时里的局部 `as any`
+- 已完成：BasicTable 缓存表格 options、上下文、resize 回调、排序事件和 `widgetSpecialConfig` 读取补齐局部类型，表格与地图本轮复扫无 `any` 残留
 - 已完成：富文本字段引用菜单 key 改为优先使用字段 `id`、无 `id` 时按名称加索引兜底，避免同名字段误选第一个
 - 已完成：富文本只读翻译 `calcfield` 时优先按 `id` 匹配、再按 `name` 兼容旧数据，避免同名字段展示为错误值
 - 已完成：富文本只读翻译遇到缺失引用字段时保留原 calcfield 节点，避免生成 `insert: undefined` 的无效 Delta
@@ -635,7 +637,7 @@
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/components/ChartGraph/BasicBarChart/__tests__/BasicBarChart.test.jsx src/app/components/ChartGraph/BasicLineChart/__tests__/BasicLineChart.test.jsx src/app/components/ChartGraph/BasicPieChart/__tests__/BasicPieChart.test.jsx src/app/components/ChartGraph/PieChart/__tests__/PieChart.test.jsx src/app/components/ChartGraph/DoughnutChart/__tests__/DoughnutChart.test.jsx src/app/components/ChartGraph/RoseChart/__tests__/RoseChart.test.jsx src/app/components/ChartGraph/BasicScatterChart/__tests__/BasicScatterChart.test.jsx src/app/components/ChartGraph/BasicFunnelChart/__tests__/BasicFunnelChart.test.jsx src/app/components/ChartGraph/BasicDoubleYChart/__tests__/BasicDoubleYChart.test.jsx src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx src/app/components/ChartGraph/WordCloudChart/__tests__/WordCloudChart.test.jsx src/app/components/ChartGraph/WaterfallChart/__tests__/WaterfallChart.test.jsx src/app/components/ChartGraph/BasicRadarChart/__tests__/BasicRadarChart.test.jsx src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/utils/__tests__/overflowFuncs.test.ts`
+- `npm run test:ci -- src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts`
 
 ### 6.2 最近已完成
 
@@ -753,6 +755,8 @@
 - 通过：BasicGauge ECharts 实例类型试点专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicGaugeChart/__tests__/BasicGaugeChart.test.jsx src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts`
 - 通过：ECharts 实例类型边界批量收口专项轻量门禁，`npm run checkTs`
 - 通过：ECharts 实例类型边界批量收口专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicBarChart/__tests__/BasicBarChart.test.jsx src/app/components/ChartGraph/BasicLineChart/__tests__/BasicLineChart.test.jsx src/app/components/ChartGraph/BasicPieChart/__tests__/BasicPieChart.test.jsx src/app/components/ChartGraph/PieChart/__tests__/PieChart.test.jsx src/app/components/ChartGraph/DoughnutChart/__tests__/DoughnutChart.test.jsx src/app/components/ChartGraph/RoseChart/__tests__/RoseChart.test.jsx src/app/components/ChartGraph/BasicScatterChart/__tests__/BasicScatterChart.test.jsx src/app/components/ChartGraph/BasicFunnelChart/__tests__/BasicFunnelChart.test.jsx src/app/components/ChartGraph/BasicDoubleYChart/__tests__/BasicDoubleYChart.test.jsx src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx src/app/components/ChartGraph/WordCloudChart/__tests__/WordCloudChart.test.jsx src/app/components/ChartGraph/WaterfallChart/__tests__/WaterfallChart.test.jsx src/app/components/ChartGraph/BasicRadarChart/__tests__/BasicRadarChart.test.jsx src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/utils/__tests__/overflowFuncs.test.ts`，15 个测试文件、33 个用例通过
+- 通过：图表表格与地图局部类型边界批次轻量门禁，`npm run checkTs`
+- 通过：图表表格与地图局部类型边界批次定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts`，3 个测试文件、4 个用例通过
 - 通过：运行时懒加载边界稳定化专项轻量门禁，`npm run checkTs`
 - 通过：运行时懒加载边界稳定化专项定向测试，`npm run test:ci -- src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/sqlFormatterRuntime.test.ts src/app/utils/__tests__/echartsThemeRuntime.test.ts src/app/pages/StoryBoardPage/__tests__/revealRuntime.test.ts src/app/components/MonacoEditor/__tests__/runtime.test.ts src/app/services/__tests__/chartPluginService.test.ts`
 - 通过：运行时加载调用层稳定化专项轻量门禁，`npm run checkTs`

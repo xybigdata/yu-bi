@@ -1,13 +1,18 @@
 import { TableProps } from 'antd';
 import { AggregateFieldActionType } from 'app/constants';
 import { ChartDataSectionField, FontStyle } from 'app/types/ChartConfig';
+import { BrokerOption } from 'app/types/ChartLifecycleBroker';
 import { IChartDataSetRow } from 'app/types/ChartDataSet';
 import { CSSProperties, ReactNode } from 'react';
 import { ResizableProps } from 'react-resizable';
 
-export type BasicTableDataValue = string | number | null | undefined;
+export type BasicTableDataValue = unknown;
 export type BasicTableRowData = Record<string, BasicTableDataValue>;
 export type BasicTableDataSetRow = IChartDataSetRow<string>;
+export type BasicTableWidgetSpecialConfig = BrokerOption['widgetSpecialConfig'] & {
+  linkFields?: string[];
+  jumpField?: string;
+};
 export type BasicTableColumnRecord = BasicTableRowData & {
   uid?: string;
   dataIndex?: number;
@@ -25,6 +30,17 @@ type BasicTableColumns = NonNullable<TableProps<BasicTableDataSetRow>['columns']
 type BasicTableColumnRender = NonNullable<
   BasicTableColumns[number]['render']
 >;
+export type BasicTableSorter = Parameters<
+  NonNullable<TableProps<BasicTableDataSetRow>['onChange']>
+>[2];
+export type BasicTableSingleSorter = Exclude<
+  BasicTableSorter,
+  BasicTableSorter[]
+>;
+export type BasicTableSortState = {
+  column?: Pick<TableColumnsList, 'aggregate' | 'colName'>;
+  order?: 'ascend' | 'descend';
+};
 export type BasicTableHeaderCellProps = {
   uid?: string;
   style?: CSSProperties;
@@ -132,3 +148,19 @@ export type TableCellEvents = Pick<
   React.HTMLAttributes<HTMLTableCellElement>,
   'onClick'
 >;
+
+export type BasicTableOptions = TableStyleOptions & {
+  rowKey: string;
+  pagination: PageOptions;
+  dataSource: IChartDataSetRow<string>[];
+  columns: TableColumnsList[];
+  summaryFn?: (value: unknown) => BasicTableSummary;
+  onRow: (
+    record: BasicTableDataSetRow,
+    index?: number,
+  ) => { index?: number; rowData?: BasicTableRowData };
+  components: TableComponentConfig;
+  onChange: NonNullable<TableProps<BasicTableDataSetRow>['onChange']>;
+  rowClassName: NonNullable<TableProps<BasicTableDataSetRow>['rowClassName']>;
+  tableStyleConfig: TableStyle;
+};

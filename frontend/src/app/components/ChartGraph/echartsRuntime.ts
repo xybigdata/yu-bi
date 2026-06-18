@@ -4,6 +4,9 @@ import type { EChartsCoreOption, EChartsType } from 'echarts';
 type EChartsRuntime = typeof ECharts;
 export type EChartsInstance = EChartsType;
 export type EChartsOption = EChartsCoreOption;
+export type EChartsRegisterMapInput = Parameters<
+  EChartsRuntime['registerMap']
+>[1];
 
 export type EChartsDataZoomEvent = {
   start?: number;

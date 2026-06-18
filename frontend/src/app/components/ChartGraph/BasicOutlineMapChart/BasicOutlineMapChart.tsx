@@ -39,7 +39,12 @@ import {
   transformToDataSet,
 } from 'app/utils/chartHelper';
 import { CloneValueDeep } from 'utils/object';
-import { EChartsInstance, loadEChartsRuntime } from '../echartsRuntime';
+import {
+  EChartsInstance,
+  EChartsOption,
+  EChartsRegisterMapInput,
+  loadEChartsRuntime,
+} from '../echartsRuntime';
 import Config from './config';
 import {
   GeoInfo,
@@ -58,6 +63,9 @@ type GeoMapData = {
       center?: number[];
     };
   }>;
+};
+type GeoOptionState = {
+  geo?: Array<Pick<GeoInfo, 'center' | 'zoom'>>;
 };
 
 const geoMapLoaders: Record<
@@ -133,7 +141,9 @@ class BasicOutlineMapChart extends Chart {
   }
 
   getOptionsConfig(geoConfig: GeoInfo, chart?: EChartsInstance | null) {
-    const newOption: any = CloneValueDeep(chart?.getOption());
+    const newOption = CloneValueDeep(
+      chart?.getOption() as EChartsOption | undefined,
+    ) as GeoOptionState | undefined;
     geoConfig.center = newOption?.geo?.[0].center;
     geoConfig.zoom = newOption?.geo?.[0].zoom;
   }
@@ -234,7 +244,7 @@ class BasicOutlineMapChart extends Chart {
 
         // NOTE: source from: http://datav.aliyun.com/tools/atlas/index.html#&lat=31.39115752282472&lng=103.7548828125&zoom=4
         if (!registeredGeoMaps.has(level)) {
-          registerMap(level, geoMap as any);
+          registerMap(level, geoMap as EChartsRegisterMapInput);
           registeredGeoMaps.add(level);
         }
 

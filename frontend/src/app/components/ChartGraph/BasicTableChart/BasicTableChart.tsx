@@ -40,6 +40,7 @@ import {
 import { precisionCalculation } from 'app/utils/number';
 import { CalculationType, DATARTSEPERATOR } from 'globalConstants';
 import { darken, getLuminance, lighten } from 'polished';
+import { SyntheticEvent } from 'react';
 import { Debugger } from 'utils/debugger';
 import { CloneValueDeep, isEmptyArray, Omit } from 'utils/object';
 import { ConditionalStyleFormValues } from '../../FormGenerator/Customize/ConditionalStyle';
@@ -55,6 +56,11 @@ import {
   TableComponentsTd,
 } from './TableComponents';
 import {
+  BasicTableOptions,
+  BasicTableSortState,
+  BasicTableSingleSorter,
+  BasicTableSorter,
+  BasicTableWidgetSpecialConfig,
   PageOptions,
   TableCellEvents,
   TableColumnsList,
@@ -91,9 +97,9 @@ class BasicTableChart extends ReactChart {
   private dataColumnWidths: DataColumnWidthMap = {};
   private tablePadding = 16;
   private tableCellBorder = 1;
-  private cachedAntTableOptions: any = {};
+  private cachedAntTableOptions?: BasicTableOptions;
   private cachedDatartConfig: ChartConfig = {};
-  private cacheContext: any = null;
+  private cacheContext: BrokerContext | null = null;
   private showSummaryRow = false;
   private totalWidth = 0;
   private exceedMaxContent = false;
@@ -150,8 +156,10 @@ class BasicTableChart extends ReactChart {
           options.config,
           options.widgetSpecialConfig,
         );
-        // this.cachedAntTableOptions = Omit(tableOptions, ['dataSource']);
-        this.cachedAntTableOptions = Omit(tableOptions, []);
+        if ('columns' in tableOptions) {
+          // this.cachedAntTableOptions = Omit(tableOptions, ['dataSource']);
+          this.cachedAntTableOptions = { ...tableOptions };
+        }
         this.cachedDatartConfig = options.config!;
         this.cacheContext = context;
         this.adapter?.updated(tableOptions, context);
@@ -161,7 +169,7 @@ class BasicTableChart extends ReactChart {
   }
 
   public onUnMount(options: BrokerOption, context: BrokerContext) {
-    this.cachedAntTableOptions = {};
+    this.cachedAntTableOptions = undefined;
     this.cachedDatartConfig = {};
     this.cacheContext = null;
     this.selectionManager?.removeWindowListeners(context.window);
@@ -172,8 +180,11 @@ class BasicTableChart extends ReactChart {
       options.config!,
       options.dataset!,
       context,
-      options.widgetSpecialConfig as any,
+      options.widgetSpecialConfig,
     );
+    if (!this.cachedAntTableOptions || !this.cacheContext) {
+      return;
+    }
     const tableOptions = Object.assign(
       this.cachedAntTableOptions,
       {
@@ -192,8 +203,8 @@ class BasicTableChart extends ReactChart {
     context: BrokerContext,
     dataset?: ChartDataSetDTO,
     config?: ChartConfig,
-    widgetSpecialConfig?: any,
-  ) {
+    widgetSpecialConfig?: BasicTableWidgetSpecialConfig,
+  ): BasicTableOptions | { locale: { emptyText: string } } {
     if (!dataset || !config) {
       return { locale: { emptyText: '  ' } };
     }
@@ -249,23 +260,26 @@ class BasicTableChart extends ReactChart {
         context,
       ),
       onRow: (_, index) => {
-        const row = chartDataSet?.[index];
-        const rowData = row?.convertToCaseSensitiveObject();
+        const row = index === undefined ? undefined : chartDataSet?.[index];
+        const rowData = row?.convertToCaseSensitiveObject() as
+          | BasicTableRowData
+          | undefined;
         return { index, rowData };
       },
       components: this.getTableComponents(
         styleConfigs,
-        widgetSpecialConfig,
         mixedSectionConfigRows,
+        widgetSpecialConfig,
       ),
       ...this.getAntdTableStyleOptions(styleConfigs, settingConfigs, context),
       onChange: (pagination, filters, sorter, extra) => {
         if (extra?.action === 'sort' || extra?.action === 'paginate') {
+          const currentSorter = this.getSingleSorter(sorter);
           this.invokePagingRelatedEvents(
-            sorter?.column?.colName,
-            sorter?.order,
-            pagination?.current,
-            sorter?.column?.aggregate,
+            currentSorter?.column?.colName || '',
+            currentSorter?.order,
+            pagination?.current || 1,
+            currentSorter?.column?.aggregate,
           );
         }
       },
@@ -281,8 +295,8 @@ class BasicTableChart extends ReactChart {
   private getDataColumnWidths(
     config: ChartConfig,
     dataset: ChartDataSetDTO,
-    context,
-    widgetSpecialConfig: { env: string | undefined; [x: string]: any },
+    context: BrokerContext,
+    widgetSpecialConfig?: BasicTableWidgetSpecialConfig,
   ): TableColumnsList[] {
     const dataConfigs = config.datas || [];
     const styleConfigs = config.styles || [];
@@ -308,7 +322,7 @@ class BasicTableChart extends ReactChart {
       (a, b) => a + (b.columnWidthValue || 0),
       0,
     );
-    this.exceedMaxContent = this.totalWidth >= context.width;
+    this.exceedMaxContent = this.totalWidth >= (context.width || 0);
     return this.getColumns(
       mixedSectionConfigRows,
       styleConfigs,
@@ -585,11 +599,16 @@ class BasicTableChart extends ReactChart {
 
   protected getTableComponents(
     styleConfigs: ChartStyleConfig[],
-    widgetSpecialConfig: { env: string | undefined; [x: string]: any },
     mixedSectionConfigRows: ChartDataSectionField[],
+    widgetSpecialConfig?: BasicTableWidgetSpecialConfig,
   ): TableComponentConfig {
-    const linkFields = widgetSpecialConfig?.linkFields;
-    const jumpField = widgetSpecialConfig?.jumpField;
+    const linkFields = Array.isArray(widgetSpecialConfig?.linkFields)
+      ? widgetSpecialConfig.linkFields
+      : [];
+    const jumpField =
+      typeof widgetSpecialConfig?.jumpField === 'string'
+        ? widgetSpecialConfig.jumpField
+        : undefined;
 
     const [tableHeaders] = getStyles(
       styleConfigs,
@@ -776,7 +795,14 @@ class BasicTableChart extends ReactChart {
     });
   }
 
-  private updateTableColumns(e, { size }, index) {
+  private updateTableColumns(
+    e: SyntheticEvent,
+    { size }: { size: { width: number } },
+    index: number,
+  ) {
+    if (!this.cachedAntTableOptions || !this.cacheContext) {
+      return;
+    }
     const { columns } = this.cachedAntTableOptions;
     const nextColumns = [...columns];
     this.setColumnWidthByColumnIndex(nextColumns, index, size.width);
@@ -784,6 +810,19 @@ class BasicTableChart extends ReactChart {
       columns: nextColumns,
     });
     this.adapter?.updated(tableOptions, this.cacheContext);
+  }
+
+  private getSingleSorter(sorter: BasicTableSorter): BasicTableSortState {
+    const currentSorter: BasicTableSingleSorter = Array.isArray(sorter)
+      ? sorter[0] || {}
+      : sorter;
+    const column = currentSorter.column as
+      | BasicTableSortState['column']
+      | undefined;
+    return {
+      column,
+      order: currentSorter.order || undefined,
+    };
   }
 
   protected getColumns(
