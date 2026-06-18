@@ -420,10 +420,12 @@
 - 已完成：`useSaveAsViz` 的复制保存链路补齐最小详情 DTO 与保存 payload 类型，去掉局部 `request2<any>` / `requestData: any`
 - 已完成：看板图片上传、故事板分享、保存模板、标签页和故事板选择等组件局部类型边界收口，去掉局部 `@ts-ignore` 与上传私有 ref 依赖
 - 已完成：故事板编辑态历史 state、故事板权限、VirtualTable 滚动体回调和视频/分组 widget 测试 fixture 的局部类型边界收口，去掉对应局部 `any` / `as any`
+- 已完成：Dashboard 工具函数请求参数复用现有 `getDataOption` 类型，移动端间距配置类型对齐运行时缺省语义，去掉相关测试局部 `as any`
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
 - 暂缓评估：FormGenerator 全局 `ItemLayoutProps`、交互规则面板的动态 `value` / `Customize` 映射仍是协议宽口，需单独评估交互配置结构后再收口
 - 暂缓评估：`ChartDataSetDTO.rows` 仍按历史 `string[][]` 表达图表运行时数据集，大量图表组件和 helper 以 `IChartDataSet<string>` 消费；后续如要对齐后端 `Dataframe.rows: List<List<Object>>`，需单独处理图表运行时的数据集泛型与字符串化边界
 - 暂缓评估：`WidgetConf.content` / `WidgetCreateProps.content` 是多类 widget 的共享内容协议宽口，直接改成 `unknown` 会牵涉图表、控制器、标签页、富文本和迁移链路，需要按 widget 类型分批拆分
+- 暂缓评估：Dashboard 工具测试中被跳过的历史大 fixture 仍有 `obj as any`，直接补全为完整 `Widget` 会引入大量非测试重点字段，后续如恢复这些测试应先抽通用 widget fixture helper
 - 下一批候选：前端低风险继续在当前长期分支累计，优先处理局部组件、工具函数和有测试覆盖的类型边界；暂不因单个小批次合入 `main`
 
 当前已落地范围：
@@ -666,6 +668,8 @@
 - 通过：组件局部类型边界批次轻量门禁，`npm run checkTs`
 - 通过：故事板与虚拟表格局部类型边界批次轻量门禁，`npm run checkTs`
 - 通过：widget 测试 fixture 类型边界批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/components/Widgets/VideoWidget/__tests__/VideoWidgetCore.test.tsx src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts`
+- 通过：Dashboard 工具函数参数边界批次轻量门禁，`npm run checkTs`
+- 通过：Dashboard 工具函数参数边界批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/utils/__tests__/board.test.ts`
 - 通过：通用 UI 与工具类型边界专题合并前完整门禁，`npm run test:ci` 109 个测试文件通过，840 个测试通过，4 个跳过
 - 通过：通用 UI 与工具类型边界专题合并前完整门禁，`npm run lint:css`
 - 通过：通用 UI 与工具类型边界专题合并前完整门禁，`npm run lint:style`

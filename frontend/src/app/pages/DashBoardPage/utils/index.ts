@@ -122,7 +122,7 @@ export const getDataChartRequestParams = (obj: {
   view: ChartDataView;
   drillOption?: ChartDrillOption;
   tempFilters?: PendingChartDataRequestFilter[];
-  option;
+  option?: getDataOption;
 }) => {
   const { dataChart, view, option, drillOption, tempFilters } = obj;
   const migratedChartConfig = migrateChartConfig(
