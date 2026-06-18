@@ -22,6 +22,7 @@ import { migrateView } from 'app/migration/ViewConfig/migrationViewConfig';
 import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
 import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
 import { ChartDataRequest } from 'app/types/ChartDataRequest';
+import type { ChartDatasetPageInfo } from 'app/types/ChartDataSet';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { ChartDTO } from 'app/types/ChartDTO';
 import { View } from 'app/types/View';
@@ -36,6 +37,9 @@ import { request2 } from 'utils/request';
 import { rejectHandle } from 'utils/utils';
 import workbenchSlice, { initState } from '.';
 import { ChartConfigPayloadType } from './types';
+import type { RootState } from 'types';
+
+type RequestSorter = NonNullable<ChartDataRequest['orders']>[number];
 
 export const initWorkbenchAction = createAsyncThunk(
   'workbench/initWorkbenchAction',
@@ -140,8 +144,8 @@ export const updateChartConfigAndRefreshDatasetAction = createAsyncThunk(
       await thunkAPI.dispatch(
         workbenchSlice.actions.updateShadowChartConfig(null),
       );
-      const state = thunkAPI.getState() as any;
-      const workbenchState = state.workbench as typeof initState;
+      const state = thunkAPI.getState() as RootState;
+      const workbenchState = state.workbench || initState;
       const chartConfig = workbenchState.chartConfig;
       const drillOpt = arg.updateDrillOption?.(chartConfig);
       if (arg.needRefresh) {
@@ -159,13 +163,13 @@ export const refreshDatasetAction = createAsyncThunk(
     arg: {
       dataOption?: ChartDataConfig[];
       drillOption?: IChartDrillOption;
-      pageInfo?;
-      sorter?: { column: string; operator: string; aggOperator?: string };
+      pageInfo?: ChartDatasetPageInfo;
+      sorter?: RequestSorter;
     },
     thunkAPI,
   ) => {
-    const state = thunkAPI.getState() as any;
-    const workbenchState = state.workbench as typeof initState;
+    const state = thunkAPI.getState() as RootState;
+    const workbenchState = state.workbench || initState;
 
     if (!workbenchState.currentDataView?.id) {
       return;
@@ -181,7 +185,7 @@ export const refreshDatasetAction = createAsyncThunk(
       workbenchState.aggregation,
     );
     const requestParams = builder
-      .addExtraSorters(arg?.sorter ? [arg?.sorter as any] : [])
+      .addExtraSorters(arg?.sorter ? [arg.sorter] : [])
       .addDrillOption(arg?.drillOption)
       .build();
     return thunkAPI.dispatch(fetchDataSetAction(requestParams));
@@ -211,8 +215,8 @@ export const updateChartAction = createAsyncThunk(
     arg: { name; viewId; graphId; chartId; index; parentId; aggregation },
     thunkAPI,
   ) => {
-    const state = thunkAPI.getState() as any;
-    const workbenchState = state.workbench as typeof initState;
+    const state = thunkAPI.getState() as RootState;
+    const workbenchState = state.workbench || initState;
     const computedFields = filterCurrentUsedComputedFields(
       workbenchState.chartConfig,
       workbenchState.currentDataView?.computedFields?.filter(

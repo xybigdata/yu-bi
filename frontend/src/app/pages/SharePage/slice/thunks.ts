@@ -28,6 +28,8 @@ import {
 } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import { handleServerStoryAction } from 'app/pages/StoryBoardPage/slice/actions';
 import { ServerStoryBoard } from 'app/pages/StoryBoardPage/slice/types';
+import type { ChartDataRequest } from 'app/types/ChartDataRequest';
+import type { ChartDatasetPageInfo } from 'app/types/ChartDataSet';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { convertToChartDto } from 'app/utils/ChartDtoHelper';
 import { fetchAvailableSourceFunctionsAsyncForShare } from 'app/utils/fetch';
@@ -36,6 +38,8 @@ import persistence from 'utils/persistence';
 import { request2 } from 'utils/request';
 import { shareActions } from '.';
 import { ShareVizInfo } from './types';
+
+type RequestSorter = NonNullable<ChartDataRequest['orders']>[number];
 
 export const fetchShareVizInfo = createAsyncThunk(
   'share/fetchShareVizInfo',
@@ -150,8 +154,8 @@ export const fetchShareDataSetByPreviewChartAction = createAsyncThunk(
   async (
     args: {
       preview: ChartPreview;
-      pageInfo?: any;
-      sorter?: { column: string; operator: string; aggOperator?: string };
+      pageInfo?: ChartDatasetPageInfo;
+      sorter?: RequestSorter;
       drillOption?: IChartDrillOption;
       filterSearchParams?: FilterSearchParams;
     },
@@ -178,7 +182,7 @@ export const fetchShareDataSetByPreviewChartAction = createAsyncThunk(
       args.preview?.backendChart?.config?.aggregation,
     );
     const executeParam = builder
-      .addExtraSorters(args?.sorter ? [args?.sorter as any] : [])
+      .addExtraSorters(args?.sorter ? [args.sorter] : [])
       .addDrillOption(args?.drillOption)
       .build();
 

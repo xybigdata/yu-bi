@@ -234,7 +234,7 @@ export const syncBoardWidgetChartDataAsync = createAsyncThunk<
     tempFilters?: PendingChartDataRequestFilter[];
     variableParams?: ChartVariableParams;
   } & {
-    executeToken?: any;
+    executeToken?: ExecuteToken;
   },
   { state: RootState }
 >(
