@@ -175,6 +175,43 @@ describe('transformQueryResultToModelAndDataSource test', () => {
     });
     expect(result.dataSource).toEqual([{ 'db1.orders.id': '1' }]);
   });
+
+  test('should keep scalar row values from query result', () => {
+    const result = transformQueryResultToModelAndDataSource(
+      {
+        columns: [
+          {
+            name: 'id',
+            type: DataViewFieldType.NUMERIC,
+          },
+          {
+            name: 'enabled',
+            type: DataViewFieldType.STRING,
+          },
+          {
+            name: 'empty',
+            type: DataViewFieldType.STRING,
+          },
+        ],
+        rows: [[1, false, null]],
+        pageInfo: {
+          pageNo: 1,
+          pageSize: 10,
+          total: 1,
+        },
+      },
+      {},
+      'SQL',
+    );
+
+    expect(result.dataSource).toEqual([
+      {
+        id: 1,
+        enabled: false,
+        empty: null,
+      },
+    ]);
+  });
 });
 
 describe('diffMergeHierarchyModel test', () => {

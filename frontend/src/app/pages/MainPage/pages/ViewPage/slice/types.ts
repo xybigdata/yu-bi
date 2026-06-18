@@ -108,12 +108,16 @@ export interface ViewViewModel<T = object> extends Pick<
 
 export interface QueryResult {
   columns: Schema[];
-  rows: any[][];
+  rows: QueryResultRow[];
   pageInfo: PageInfo;
   script?: string;
   warnings?: string[] | null;
   reqColumns?: StructViewRequestColumn[];
 }
+
+export type QueryResultCellValue = string | number | boolean | null | undefined;
+
+export type QueryResultRow = QueryResultCellValue[];
 
 export type StructViewRequestColumn = {
   alias: string;

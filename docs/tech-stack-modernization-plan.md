@@ -331,6 +331,7 @@
 - 已完成：StructView join 条件列选择链路补齐列路径、左右条件、树节点和 TreeSelect 兼容桥类型，去掉 `SelectJoinColumns` 内部局部 `any`
 - 已完成：View 运行 SQL thunk 的早退返回、变量默认值解析、STRUCT 请求列和 Monaco completion provider 回调补齐显式边界，去掉对应 `as any` 与裸 `JSON.parse`
 - 已完成：`useStateModal` 的缓存回调参数从 `any[]` 收口到 `unknown[]`，OK 回调改为不规定具体入参形态，保留各调用方现有参数兼容面
+- 已完成：`QueryResult.rows` 从 `any[][]` 收口为查询结果标量二维数组，和后端 `Dataframe.rows: List<List<Object>>` 的 JSON 标量返回边界对齐，并补齐预览数据源转换测试
 - 已完成：迁移测试层局部弱类型收口
 - 已完成：工具测试层第一批局部弱类型收口
 - 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 的局部弱类型收口
@@ -395,7 +396,7 @@
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
 - 暂缓评估：FormGenerator 全局 `ItemLayoutProps`、交互规则面板的动态 `value` / `Customize` 映射仍是协议宽口，需单独评估交互配置结构后再收口
-- 暂缓评估：`QueryResult.rows` 仍是查询结果公共二维行协议，直接从 `any[][]` 收口会影响 SQL / STRUCT 查询结果、预览、结果表和图表数据转换链路，需要单独评估行值联合类型与后端返回协议
+- 暂缓评估：`ChartDataSetDTO.rows` 仍按历史 `string[][]` 表达图表运行时数据集，大量图表组件和 helper 以 `IChartDataSet<string>` 消费；后续如要对齐后端 `Dataframe.rows: List<List<Object>>`，需单独处理图表运行时的数据集泛型与字符串化边界
 - 下一批候选：当前低风险 UI/FormGenerator 批次已累计较多提交，建议先执行阶段性完整门禁并准备 merge 回 `main`，再开下一条专题分支继续处理交互协议宽口或其它低风险项
 
 当前已落地范围：
