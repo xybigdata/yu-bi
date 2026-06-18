@@ -1783,6 +1783,11 @@ describe('Internal Chart Helper ', () => {
       const model = transformToHierarchyModel('{invalid-json}');
       expect(model).toEqual({});
     });
+
+    test('should get empty object when model is non-object json', () => {
+      const model = transformToHierarchyModel('true');
+      expect(model).toEqual({});
+    });
   });
 
   describe('transformToViewConfig Test', () => {

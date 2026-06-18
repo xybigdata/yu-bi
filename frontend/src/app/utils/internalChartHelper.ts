@@ -90,6 +90,20 @@ type ChartInteractionRowData = Record<
   string | number | boolean | null | undefined
 >;
 type ViewConfigRecord = Record<string, unknown>;
+type ViewModelField = {
+  category?: ChartDataViewMeta['subType'];
+  children?: ViewModelField[];
+  name?: string;
+  path?: string[];
+  [key: string]: unknown;
+};
+type ViewModelFieldMap = Record<string, ViewModelField>;
+type ViewModelRecord = {
+  columns?: ViewModelFieldMap;
+  computedFields?: ChartDataViewMeta[];
+  hierarchy?: ViewModelFieldMap;
+  [key: string]: unknown;
+};
 
 export type ChartDragItem = {
   category?: ChartDataViewMeta['category'];
@@ -122,12 +136,13 @@ const parseVariableParamValues = (
   }
 };
 
-const parseViewModel = (model?: string): Record<string, any> | undefined => {
+const parseViewModel = (model?: string): ViewModelRecord | undefined => {
   if (!model) {
     return undefined;
   }
   try {
-    return JSON.parse(model) as Record<string, any>;
+    const parsed = JSON.parse(model);
+    return isRecord(parsed) ? parsed : undefined;
   } catch (error) {
     return undefined;
   }
@@ -475,22 +490,27 @@ export function transformMeta(model?: string) {
   if (!jsonObj) {
     return undefined;
   }
-  const HierarchyModel = 'hierarchy' in jsonObj ? jsonObj.hierarchy : jsonObj;
-  return Object.keys(HierarchyModel || {}).flatMap(colKey => {
-    const column = HierarchyModel[colKey];
+  const hierarchyModel = jsonObj.hierarchy || (jsonObj as ViewModelFieldMap);
+  const metas: ChartDataViewMeta[] = [];
+  Object.keys(hierarchyModel || {}).forEach(colKey => {
+    const column = hierarchyModel[colKey] || {};
     if (!isEmptyArray(column?.children)) {
-      return column.children.map(c => ({
-        ...c,
-        path: c.path,
-        category: ChartDataViewFieldCategory.Field,
-      }));
+      metas.push(
+        ...((column.children || []).map(c => ({
+          ...c,
+          path: c.path,
+          category: ChartDataViewFieldCategory.Field,
+        })) as ChartDataViewMeta[]),
+      );
+      return;
     }
-    return {
+    metas.push({
       ...column,
-      path: column.path || colKey,
+      path: (column.path || colKey) as ChartDataViewMeta['path'],
       category: ChartDataViewFieldCategory.Field,
-    };
+    } as ChartDataViewMeta);
   });
+  return metas;
 }
 
 export function transformHierarchyMeta(model?: string): ChartDataViewMeta[] {
@@ -501,7 +521,7 @@ export function transformHierarchyMeta(model?: string): ChartDataViewMeta[] {
   if (!modelObj) {
     return [];
   }
-  const hierarchyMeta = !Object.keys(modelObj?.hierarchy || {}).length
+  const hierarchyMeta = !Object.keys(modelObj.hierarchy || {}).length
     ? modelObj.columns
     : modelObj.hierarchy;
 
@@ -510,15 +530,18 @@ export function transformHierarchyMeta(model?: string): ChartDataViewMeta[] {
   });
 }
 
-function getMeta(key, column) {
+function getMeta(key: string, column?: ViewModelField): ChartDataViewMeta {
   let children;
   let isHierarchy = false;
   if (!isEmptyArray(column?.children)) {
     isHierarchy = true;
-    children = column?.children.map(child => getMeta(child?.name, child));
+    children = (column?.children || []).map(child =>
+      getMeta(child?.name || '', child),
+    );
   }
   return {
     ...column,
+    name: column?.name || key,
     subType: column?.category,
     category: isHierarchy
       ? ChartDataViewFieldCategory.Hierarchy

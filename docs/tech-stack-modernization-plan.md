@@ -300,17 +300,21 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`前端 FormGenerator 控件透传兼容收口`
+当前累计专题：`前端配置解析与生产工具函数边界收口`
 
 本批目标：
 
-- 收口 FormGenerator 基础控件中把内部配置直接透传到 DOM / antd / Popover 的低风险问题
-- 消除 React 18 测试中暴露的未知 DOM 属性与 `key` spread 告警
-- 保留 `hideLabel`、`needRefresh`、`items`、`translateItemLabel` 等 FormGenerator 内部语义不变
-- 只处理控件 props 透传边界，不调整控件交互、布局和业务配置结构
+- 收口图表配置、View model 与数据源配置这类 JSON 字符串解析边界
+- 对非法 JSON、合法但非对象 JSON 统一走空配置兜底，避免异常值扩散到运行时链路
+- 保留历史正常对象配置、图表配置迁移和 view computed fields 合并语义不变
+- 只处理解析入口和最小类型边界，不调整公共协议、内部稳定标识和业务配置结构
 
 当前累计清单：
 
+- 已完成：`frontend/.husky/pre-commit` 改为 staged 范围检查，TS / JS 文件不再每次触发全量 `lint:style`
+- 已完成：`ChartDtoHelper.parseChartConfig` 只接受对象形态配置，非对象 JSON 按空配置处理，并避免非对象配置先进入图表配置迁移器
+- 已完成：`internalChartHelper.transformToHierarchyModel` 的 View model 解析只接受对象形态，非法 JSON 或非对象 JSON 按空模型处理，并补齐回归测试
+- 已完成：`useGetSourceDbTypeIcon` 的 JDBC 数据源配置解析补齐异常兜底，坏 JSON 或非对象 JSON 回退到默认图标，不再打断 Source 树图标渲染
 - 已完成：迁移测试层局部弱类型收口
 - 已完成：工具测试层第一批局部弱类型收口
 - 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 的局部弱类型收口
@@ -499,10 +503,7 @@
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/utils.test.tsx`
-- `npm run test:ci -- src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx`
-- `npm run test:ci -- src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx src/app/utils/__tests__/chartHelper.test.ts`
-- `npm run test:ci -- src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx`
+- `npm run test:ci -- src/app/utils/__tests__/chartDtoHelper.test.ts src/app/utils/__tests__/internalChartHelper.test.ts src/app/hooks/__tests__/useGetSourceDbTypeIcon.test.tsx`
 
 ### 6.2 最近已完成
 
