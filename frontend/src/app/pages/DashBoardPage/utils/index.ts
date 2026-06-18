@@ -69,7 +69,7 @@ import {
 import { Widget } from '../types/widgetTypes';
 import { DateControllerTypes } from './../pages/BoardEditor/components/ControllerWidgetPanel/constants';
 import { PickerType } from './../pages/BoardEditor/components/ControllerWidgetPanel/types';
-import { getLinkedColumn } from './widget';
+import { getLinkedColumn, parseLinkedFieldPath } from './widget';
 
 export const dateFormatObj = {
   week: 'YYYY-WW',
@@ -481,10 +481,14 @@ export const getChartWidgetRequestParams = (obj: {
       const { triggerValue, triggerWidgetId } = link;
       const triggerWidget = widgetMap[triggerWidgetId];
       const linkColumn = getLinkedColumn(link.linkerWidgetId, triggerWidget);
+      const linkedColumnPath = parseLinkedFieldPath(linkColumn);
+      if (!linkedColumnPath.length) {
+        return;
+      }
 
       const filter: ChartDataRequestFilter = {
         aggOperator: null,
-        column: JSON.parse(linkColumn),
+        column: linkedColumnPath,
         sqlOperator: FilterSqlOperator.In,
         values: [{ value: triggerValue, valueType: DataViewFieldType.STRING }],
       };

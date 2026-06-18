@@ -506,6 +506,22 @@ export const getLinkedColumn = (
   );
 };
 
+export const parseLinkedFieldPath = (fieldName: string): string[] => {
+  if (!fieldName) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(fieldName);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter((field): field is string => typeof field === 'string');
+  } catch (error) {
+    return [];
+  }
+};
+
 // TODO chart widget
 export const getWidgetMap = (
   widgets: Widget[],
@@ -705,7 +721,10 @@ export const getValueByRowData = (
   fieldName: string,
 ) => {
   // TODO: Not used for now, you can delete it
-  let toCaseField = JSON.parse(fieldName).join('.');
+  const toCaseField = parseLinkedFieldPath(fieldName).join('.');
+  if (!toCaseField) {
+    return undefined;
+  }
 
   return data?.rowData[toCaseField];
 };

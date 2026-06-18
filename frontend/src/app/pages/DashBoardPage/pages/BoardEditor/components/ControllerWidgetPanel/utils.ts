@@ -35,6 +35,7 @@ import {
 } from 'app/utils/date';
 import { FilterSqlOperator, TIME_FORMATTER } from 'globalConstants';
 import i18next from 'i18next';
+import { CloneValueDeep } from 'utils/object';
 import {
   DateControllerTypes,
   NumericalControllerTypes,
@@ -124,7 +125,7 @@ export const preformatControlConfig = (
 ) => {
   let config = preConfig;
   if (DateControllerTypes.includes(controllerType)) {
-    config = formatControlDateToDayjs(JSON.parse(JSON.stringify(config)));
+    config = formatControlDateToDayjs(CloneValueDeep(config));
   }
   return config;
 };

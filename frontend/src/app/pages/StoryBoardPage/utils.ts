@@ -42,9 +42,17 @@ export const getInitStoryConfig = (): StoryConfig => {
     },
   };
 };
-export const getStoryPageMapForm = (pages: StoryPageOfServer[]) => {
+
+type StoryPageMapForm = Omit<StoryPageOfServer, 'config'> & {
+  config: string | StoryPageConfig;
+};
+
+export const getStoryPageMapForm = (pages: StoryPageMapForm[]) => {
   pages.forEach(page => {
-    page.config = JSON.parse(page.config);
+    page.config =
+      typeof page.config === 'string'
+        ? migrateStoryPageConfig(page.config)
+        : page.config;
   });
 };
 
