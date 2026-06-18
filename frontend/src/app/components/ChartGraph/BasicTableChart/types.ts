@@ -1,5 +1,56 @@
+import { TableProps } from 'antd';
 import { AggregateFieldActionType } from 'app/constants';
 import { ChartDataSectionField, FontStyle } from 'app/types/ChartConfig';
+import { IChartDataSetRow } from 'app/types/ChartDataSet';
+import { CSSProperties, ReactNode } from 'react';
+import { ResizableProps } from 'react-resizable';
+
+export type BasicTableDataValue = string | number | null | undefined;
+export type BasicTableRowData = Record<string, BasicTableDataValue>;
+export type BasicTableDataSetRow = IChartDataSetRow<string>;
+export type BasicTableColumnRecord = BasicTableRowData & {
+  uid?: string;
+  dataIndex?: number;
+  colName?: string;
+  render?: TableColumnsList['render'];
+  sorter?: TableColumnsList['sorter'];
+  showSorterTooltip?: TableColumnsList['showSorterTooltip'];
+  onHeaderCell?: TableColumnsList['onHeaderCell'];
+  onCell?: TableColumnsList['onCell'];
+};
+export type BasicTableSummary = {
+  summarys: Array<string | null | undefined>;
+};
+type BasicTableColumns = NonNullable<TableProps<BasicTableDataSetRow>['columns']>;
+type BasicTableColumnRender = NonNullable<
+  BasicTableColumns[number]['render']
+>;
+export type BasicTableHeaderCellProps = {
+  uid?: string;
+  style?: CSSProperties;
+  title?: ReactNode;
+  onResize?: ResizableProps['onResize'];
+  [key: string]: unknown;
+};
+export type BasicTableBodyCellProps = {
+  uid?: string;
+  style?: CSSProperties;
+  cellValue?: unknown;
+  dataIndex?: string;
+  sensitiveFieldName?: string;
+  rowData?: BasicTableRowData;
+  rowIndex?: number;
+  [key: string]: unknown;
+};
+export type BasicTableBodyRowProps = {
+  style?: CSSProperties;
+  rowData?: BasicTableRowData;
+  [key: string]: unknown;
+};
+export type BasicTableBodyWrapperProps = {
+  style?: CSSProperties;
+  [key: string]: unknown;
+};
 
 export interface TableStyle {
   odd: { backgroundColor: string; color: string };
@@ -24,13 +75,16 @@ export interface TableColumnsList {
   ellipsis?: {
     showTitle: boolean;
   };
-  onHeaderCell?: (record) => {
-    [x: string]: any;
+  onHeaderCell?: (record: BasicTableColumnRecord) => {
+    [key: string]: unknown;
     uid?: string | undefined;
-    onResize?: (e, node) => void;
+    onResize?: ResizableProps['onResize'];
   };
-  onCell?: (record, rowIndex) => any;
-  render?: (value, row, rowIndex) => any;
+  onCell?: (
+    record: BasicTableDataSetRow,
+    rowIndex?: number,
+  ) => Record<string, unknown> | undefined;
+  render?: BasicTableColumnRender;
 }
 
 export type TableHeaderConfig = {
@@ -47,11 +101,11 @@ export type TableHeaderConfig = {
 } & ChartDataSectionField;
 
 export interface TableComponentConfig {
-  header: { cell: (props) => JSX.Element };
+  header: { cell: (props: BasicTableHeaderCellProps) => JSX.Element };
   body: {
-    cell: (props) => JSX.Element;
-    row: (props) => JSX.Element;
-    wrapper: (props) => JSX.Element;
+    cell: (props: BasicTableBodyCellProps) => JSX.Element;
+    row: (props: BasicTableBodyRowProps) => JSX.Element;
+    wrapper: (props: BasicTableBodyWrapperProps) => JSX.Element;
   };
 }
 
@@ -71,11 +125,10 @@ export interface TableStyleOptions {
     y: string | number;
   };
   bordered: boolean;
-  size: string;
+  size: NonNullable<TableProps<BasicTableDataSetRow>['size']>;
 }
 
-export type TableCellEvents =
-  | {
-      [key: string]: (e) => any;
-    }
-  | undefined;
+export type TableCellEvents = Pick<
+  React.HTMLAttributes<HTMLTableCellElement>,
+  'onClick'
+>;

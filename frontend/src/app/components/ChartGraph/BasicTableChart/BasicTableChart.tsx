@@ -59,6 +59,9 @@ import {
   TableCellEvents,
   TableColumnsList,
   TableComponentConfig,
+  BasicTableDataValue,
+  BasicTableRowData,
+  BasicTableSummary,
   TableHeaderConfig,
   TableStyle,
   TableStyleOptions,
@@ -70,6 +73,11 @@ type DataColumnWidth = {
 };
 
 type DataColumnWidthMap = Record<string, DataColumnWidth>;
+type ColumnRowSpanState = {
+  rowSpan: number;
+  nextRowSpan: number;
+};
+type TableSortOrder = 'ascend' | 'descend' | undefined;
 
 class BasicTableChart extends ReactChart {
   useIFrame = false;
@@ -349,7 +357,7 @@ class BasicTableChart extends ReactChart {
     tableColumns: TableColumnsList[],
     aggregateConfigs: ChartDataSectionField[],
     context: BrokerContext,
-  ): ((value) => { summarys: Array<string | null> }) | undefined {
+  ): ((value: unknown) => BasicTableSummary) | undefined {
     const [aggregateFields] = getStyles(
       settingConfigs,
       ['summary'],
@@ -383,7 +391,7 @@ class BasicTableChart extends ReactChart {
     );
 
     // TODO(Stephen): @tianlei please check the warning message on this `summarys`
-    return (_): { summarys: any } => {
+    return (): BasicTableSummary => {
       return {
         summarys: flatHeaderColumns
           .map(c => c.key)
@@ -392,7 +400,7 @@ class BasicTableChart extends ReactChart {
               c => chartDataSet.getFieldKey(c) === k,
             );
             if (currentSummaryField) {
-              const total = chartDataSet?.map((dc: any) =>
+              const total = chartDataSet?.map(dc =>
                 dc.getCell(currentSummaryField),
               );
               return (
@@ -523,10 +531,10 @@ class BasicTableChart extends ReactChart {
         const currentSummaryField = aggregateConfigs.find(
           ac => ac.uid === c.uid,
         );
-        const total = chartDataSet?.map((dc: any) =>
-          dc.getCell(currentSummaryField),
-        );
-        const summaryText = total.reduce((acc, cur) => acc + cur, 0);
+        const total = currentSummaryField
+          ? chartDataSet?.map(dc => dc.getCell(currentSummaryField))
+          : [];
+        const summaryText = total.reduce((acc, cur) => acc + Number(cur), 0);
         const summaryWidth = this.getTextWidth(
           context,
           toFormattedValue(summaryText, c.format),
@@ -659,7 +667,9 @@ class BasicTableChart extends ReactChart {
       body: {
         cell: props => {
           const { style, key, rowData, sensitiveFieldName, ...rest } = props;
-          const uid = props.uid;
+          const uid = props.uid || '';
+          const dataIndex = props.dataIndex || '';
+          const cellRowIndex = props.rowIndex || 0;
           const [conditionalStyle] = getStyles(
             getAllColumnListInfo,
             [uid, 'conditionalStyle'],
@@ -675,7 +685,7 @@ class BasicTableChart extends ReactChart {
             conditionalStyle,
           );
           const useColumnWidth =
-            this.dataColumnWidths?.[props.dataIndex]?.getUseColumnWidth;
+            this.dataColumnWidths?.[dataIndex]?.getUseColumnWidth;
           const _getBodyTextAlignStyle = alignValue => {
             if (alignValue && alignValue !== 'default') {
               return alignValue;
@@ -694,12 +704,12 @@ class BasicTableChart extends ReactChart {
           let highlightStyle = {};
           if (
             this.selectionManager?.selectedItems.find(
-              v => v.index === sensitiveFieldName + ',' + rest.rowIndex,
+              v => v.index === sensitiveFieldName + ',' + cellRowIndex,
             )
           ) {
             const backgroundColor = conditionalCellStyle?.backgroundColor
               ? conditionalCellStyle.backgroundColor
-              : rest.rowIndex % 2 === 0
+              : cellRowIndex % 2 === 0
                 ? oddBgColor
                 : evenBgColor;
             highlightStyle = {
@@ -720,7 +730,9 @@ class BasicTableChart extends ReactChart {
                 },
                 highlightStyle,
               )}
-              isLinkCell={linkFields?.includes(sensitiveFieldName)}
+              isLinkCell={
+                !!sensitiveFieldName && linkFields?.includes(sensitiveFieldName)
+              }
               isJumpCell={jumpField === sensitiveFieldName}
               useColumnWidth={useColumnWidth}
             />
@@ -729,7 +741,10 @@ class BasicTableChart extends ReactChart {
         row: props => {
           const { style, rowData, ...rest } = props;
           // NOTE: rowData is case sensitive row keys object
-          const rowStyle = getCustomBodyRowStyle(rowData, allConditionalStyle);
+          const rowStyle = getCustomBodyRowStyle(
+            rowData || {},
+            allConditionalStyle,
+          );
           return <tr {...rest} style={Object.assign(style || {}, rowStyle)} />;
         },
         wrapper: props => {
@@ -837,7 +852,7 @@ class BasicTableChart extends ReactChart {
         ? chartDataSet
             ?.map(dc => dc.getCell(c))
             .reverse()
-            .reduce((acc, cur, index, array) => {
+            .reduce<ColumnRowSpanState[]>((acc, cur, index, array) => {
               if (array[index + 1] === cur) {
                 let prevRowSpan = 0;
                 if (acc.length === index && index > 0) {
@@ -855,7 +870,7 @@ class BasicTableChart extends ReactChart {
                   { rowSpan: prevRowSpan + 1, nextRowSpan: 0 },
                 ]);
               }
-            }, [] as any[])
+            }, [])
             .map(x => x.rowSpan)
             .reverse()
         : [];
@@ -905,7 +920,8 @@ class BasicTableChart extends ReactChart {
           };
         },
         onCell: (record, rowIndex) => {
-          const row = chartDataSet[rowIndex];
+          const currentRowIndex = rowIndex || 0;
+          const row = chartDataSet[currentRowIndex];
           const cellValue = row.getCell(c);
           const seriesName = chartDataSet.getFieldOriginKey(c);
           const { rowData } = getExtraSeriesRowData(row);
@@ -915,12 +931,12 @@ class BasicTableChart extends ReactChart {
             dataIndex: row.getFieldKey(c),
             sensitiveFieldName: chartDataSet.getFieldOriginKey(c),
             rowData,
-            rowIndex,
+            rowIndex: currentRowIndex,
             ...this.registerTableCellEvents(
               colName,
               seriesName,
               cellValue,
-              rowIndex,
+              currentRowIndex,
               rowData,
               c.aggregate,
             ),
@@ -1179,7 +1195,7 @@ class BasicTableChart extends ReactChart {
 
   private invokePagingRelatedEvents(
     seriesName: string,
-    value: any,
+    value: TableSortOrder,
     pageNo: number,
     aggOperator?: string,
   ) {
@@ -1205,9 +1221,9 @@ class BasicTableChart extends ReactChart {
   private registerTableCellEvents(
     name: string,
     seriesName: string,
-    value: any,
+    value: BasicTableDataValue,
     dataIndex: number,
-    rowData: any,
+    rowData: BasicTableRowData,
     aggOperator?: string,
   ): TableCellEvents {
     const eventParams = {

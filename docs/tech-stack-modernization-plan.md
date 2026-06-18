@@ -340,6 +340,7 @@
 | `react-window` | 接入面窄，但处在真实运行时链路 | 虚拟表格渲染与滚动行为回归 |
 | `flexlayout-react` | 版本偏旧，仍在工作台布局主链 | 布局拖拽、面板状态、样式回归 |
 | `react-grid-layout` | 版本偏旧，仍在看板布局主链 | 拖拽缩放、响应式布局回归 |
+| 图表运行时类型边界 | ECharts / 表格 / 词云等运行时仍有局部宽口 | 图表渲染、事件回调、分页排序回归 |
 | Docker / 安装包闭环 | 基线已收口 | 安装包结构、静态资源、启动链验证 |
 
 ### 5.3 高风险：暂不直接动
@@ -357,18 +358,19 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`富文本兼容层稳定化`
+当前累计专题：`图表运行时类型边界稳定化`
 
 本批目标：
 
-- 稳定 `react-quill 2` 兼容层上的编辑态、只读态和看板富文本链路
-- 优先处理可用纯 helper 或小范围组件测试验证的行为边界
-- 保持现有 Quill Delta、calcfield 插入结构和保存协议不变
-- 暂不替换富文本编辑器依赖，不做 UI 重写
+- 优先收口图表运行时里局部 `any` / 宽泛事件参数 / 表格列配置类型
+- 只处理可通过现有图表定向测试或小范围新增测试验证的边界
+- 保持图表配置协议、数据集结构、渲染语义和事件 payload 不变
+- 暂不重写图表实例生命周期，不一次性替换所有 ECharts 实例类型
 - 不调整内部稳定标识和业务配置结构
 
 当前累计清单：
 
+- 已完成：BasicTable 表格列、header/body cell props、summary 返回、分页排序事件和单元格点击事件补齐局部显式类型，保留 Ant Design 公开入口和现有渲染行为不变
 - 已完成：富文本字段引用菜单 key 改为优先使用字段 `id`、无 `id` 时按名称加索引兜底，避免同名字段误选第一个
 - 已完成：富文本只读翻译 `calcfield` 时优先按 `id` 匹配、再按 `name` 兼容旧数据，避免同名字段展示为错误值
 - 已完成：富文本只读翻译遇到缺失引用字段时保留原 calcfield 节点，避免生成 `insert: undefined` 的无效 Delta
@@ -627,7 +629,7 @@
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/StoryBoardPage/__tests__/utils.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts`
+- `npm run test:ci -- src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx`
 
 ### 6.2 最近已完成
 
@@ -737,6 +739,8 @@
 
 - 通过：图表运行时加载稳定化专项轻量门禁，`npm run checkTs`
 - 通过：图表运行时加载稳定化专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts`
+- 通过：BasicTable 图表运行时类型边界专项轻量门禁，`npm run checkTs`
+- 通过：BasicTable 图表运行时类型边界专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx`
 - 通过：运行时懒加载边界稳定化专项轻量门禁，`npm run checkTs`
 - 通过：运行时懒加载边界稳定化专项定向测试，`npm run test:ci -- src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/sqlFormatterRuntime.test.ts src/app/utils/__tests__/echartsThemeRuntime.test.ts src/app/pages/StoryBoardPage/__tests__/revealRuntime.test.ts src/app/components/MonacoEditor/__tests__/runtime.test.ts src/app/services/__tests__/chartPluginService.test.ts`
 - 通过：运行时加载调用层稳定化专项轻量门禁，`npm run checkTs`
