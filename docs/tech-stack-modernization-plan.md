@@ -357,18 +357,20 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`前端运行时懒加载边界稳定化`
+当前累计专题：`富文本兼容层稳定化`
 
 本批目标：
 
-- 处理真实运行时链路里动态 import 缓存 rejected Promise 的问题
-- 保持现有懒加载路径、组件行为和第三方依赖版本不变
-- 对每个 loader 补 Promise 复用与失败后重试测试
-- 暂不混入组件级错误展示、依赖替换或公共协议调整
+- 稳定 `react-quill 2` 兼容层上的编辑态、只读态和看板富文本链路
+- 优先处理可用纯 helper 或小范围组件测试验证的行为边界
+- 保持现有 Quill Delta、calcfield 插入结构和保存协议不变
+- 暂不替换富文本编辑器依赖，不做 UI 重写
 - 不调整内部稳定标识和业务配置结构
 
 当前累计清单：
 
+- 已完成：富文本字段引用菜单 key 改为优先使用字段 `id`、无 `id` 时按名称加索引兜底，避免同名字段误选第一个
+- 已完成：富文本只读翻译 `calcfield` 时优先按 `id` 匹配、再按 `name` 兼容旧数据，避免同名字段展示为错误值
 - 已完成：`split.js`、`react-window`、`sql-formatter`、ECharts 默认主题、Reveal、Monaco 和插件路径预加载的失败重试边界稳定化，避免一次加载失败后长期缓存 rejected Promise
 - 已完成：`Split`、`MonacoEditor`、SQL 编辑器快捷键绑定、SQL 格式化、StoryBoard 编辑/播放/分享播放的运行时加载失败兜底，避免组件内部异步加载失败形成未处理 Promise
 - 已完成：View 属性侧 `Resource` / `Variables` 的 SQL completion provider 注册链路统一走 `registerSqlCompletionProvider`，Monaco 加载失败时不再形成未处理 Promise
@@ -616,7 +618,7 @@
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/completionRuntime.test.ts src/app/components/MonacoEditor/__tests__/runtime.test.ts`
+- `npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
 
 ### 6.2 最近已完成
 
@@ -734,6 +736,8 @@
 - 通过：Monaco completion provider 注册链路稳定化专项定向测试，`npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/completionRuntime.test.ts src/app/components/MonacoEditor/__tests__/runtime.test.ts`
 - 通过：富文本运行时加载稳定化专项轻量门禁，`npm run checkTs`
 - 通过：富文本运行时加载稳定化专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
+- 通过：富文本字段引用稳定化专项轻量门禁，`npm run checkTs`
+- 通过：富文本字段引用稳定化专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
 - 通过：`flexlayout-react` 工作台布局工厂稳定化专项轻量门禁，`npm run checkTs`
 - 通过：`flexlayout-react` 工作台布局工厂稳定化专项定向测试，`npm run test:ci -- src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts`
 - 通过：`react-grid-layout` 布局归一化稳定化专项轻量门禁，`npm run checkTs`
