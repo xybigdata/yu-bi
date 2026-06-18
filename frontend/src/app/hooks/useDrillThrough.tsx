@@ -18,6 +18,15 @@
 
 import { useCompatNavigate } from './useCompatNavigate';
 
+type DrillThroughVizType = 'DATACHART' | 'DASHBOARD';
+
+export type DrillThroughDialogContent = {
+  orgId: string;
+  vizId: string;
+  vizType: DrillThroughVizType;
+  params?: string;
+};
+
 const defaultBodyStyle: React.CSSProperties = {
   height: 600,
   maxHeight: 1000,
@@ -35,7 +44,7 @@ const useDrillThrough = () => {
     return url;
   };
 
-  const appendUrlParams = (url, params) => {
+  const appendUrlParams = (url: string, params?: string) => {
     let urlParams = '';
     if (/\?.*/.test(url)) {
       urlParams = `&${params}`;
@@ -45,16 +54,21 @@ const useDrillThrough = () => {
     return `${urlSchemeCheck(url)}${urlParams}`;
   };
 
-  const openNewTab = (orgId, relId, params?: string) => {
+  const openNewTab = (orgId: string, relId: string, params?: string) => {
     navigate.push(`/organizations/${orgId}/vizs/${relId}?${params}`);
   };
 
-  const openBrowserTab = (orgId, relId, params?: string) => {
+  const openBrowserTab = (orgId: string, relId: string, params?: string) => {
     const url = `/organizations/${orgId}/vizs/${relId}?${params}`;
     window.open(url, url);
   };
 
-  const getDialogContent = (orgId, relId, vizType, params?: string) => {
+  const getDialogContent = (
+    orgId: string,
+    relId: string,
+    vizType: DrillThroughVizType,
+    params?: string,
+  ): DrillThroughDialogContent => {
     return {
       orgId,
       vizId: relId,
@@ -63,16 +77,16 @@ const useDrillThrough = () => {
     };
   };
 
-  const redirectByUrl = (url, params?: string) => {
+  const redirectByUrl = (url: string, params?: string) => {
     window.location.href = appendUrlParams(url, params);
   };
 
-  const openNewByUrl = (url, params?: string) => {
+  const openNewByUrl = (url: string, params?: string) => {
     const finalUrl = appendUrlParams(url, params);
     window.open(finalUrl, finalUrl);
   };
 
-  const getDialogContentByUrl = (url, params?: string) => {
+  const getDialogContentByUrl = (url: string, params?: string) => {
     const finalUrl = appendUrlParams(url, params);
     return {
       width: '80%',

@@ -17,11 +17,12 @@
  */
 
 import React from 'react';
+import { ChartDataSectionField } from 'app/types/ChartConfig';
 import styled from 'styled-components';
 import { WHITE } from 'styles/StyleConstants';
 import ChartDraggableSourceContainer from './ChartDraggableSourceContainer';
 
-const DragPreview = ({ dataItem }) => {
+const DragPreview = ({ dataItem }: { dataItem: ChartDataSectionField[] }) => {
   return (
     <div>
       {dataItem?.slice(0, 3).map((v, i) => (

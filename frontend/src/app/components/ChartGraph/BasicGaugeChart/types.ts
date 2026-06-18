@@ -40,7 +40,7 @@ export interface GaugeItemStyle {
 export type GaugeDetailStyle = {
   show: boolean;
   offsetCenter: number[];
-  formatter: (value) => string;
+  formatter: (value?: string | number) => string;
 } & FontStyle;
 
 export interface GaugeAxisStyle {

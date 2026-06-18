@@ -3,10 +3,12 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { CommonFormTypes } from 'globalConstants';
 import { forwardRef, ReactNode, useCallback, useImperativeHandle } from 'react';
 
+type FormOnFinishValues = Parameters<NonNullable<FormProps['onFinish']>>[0];
+
 export interface ModalFormProps extends Omit<ModalProps, 'visible'> {
   type?: CommonFormTypes;
   formProps?: FormProps;
-  onSave: (values) => void;
+  onSave: (values: FormOnFinishValues) => void;
   children?: ReactNode;
 }
 

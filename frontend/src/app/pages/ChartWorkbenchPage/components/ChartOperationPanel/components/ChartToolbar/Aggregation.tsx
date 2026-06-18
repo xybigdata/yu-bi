@@ -32,7 +32,7 @@ const AggregationOperationMenu: FC<{
   const { actions } = useWorkbenchSlice();
   const dispatch = useAppDispatch();
 
-  const onChange = value => {
+  const onChange = (value: boolean) => {
     Modal.confirm({
       icon: <></>,
       content: t('aggregationSwitchTip'),

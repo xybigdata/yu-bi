@@ -257,6 +257,9 @@ const useChartInteractions = (props: {
             );
             const relId = rule?.[rule.category!]?.relId;
             if (rule.category === InteractionCategory.JumpToChart) {
+              if (!orgId || !relId) {
+                return;
+              }
               const urlFilters = getJumpOperationFiltersByInteractionRule(
                 clickFilters,
                 sourceChartFilters,
@@ -286,6 +289,9 @@ const useChartInteractions = (props: {
                 props?.openJumpVizDialogModal?.(modalContent);
               }
             } else if (rule.category === InteractionCategory.JumpToDashboard) {
+              if (!orgId || !relId) {
+                return;
+              }
               const variableFilters = variableToFilter(
                 getVariablesByInteractionRule(queryVariables, rule),
               );
@@ -327,6 +333,9 @@ const useChartInteractions = (props: {
               const urlFiltersStr: string =
                 urlSearchTransfer.toUrlString(urlFilters);
               const url = rule?.[rule.category!]?.url;
+              if (!url) {
+                return;
+              }
               if (rule?.action === InteractionAction.Redirect) {
                 redirectByUrl(url, urlFiltersStr);
               }
