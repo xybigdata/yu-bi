@@ -6,7 +6,7 @@ import styled from 'styled-components';
 export function Avatar(props: AvatarProps) {
   let style: CSSProperties = {};
   let { src, size, ...rest } = props;
-  const [safeSrc, setSafeSrc] = useState<any>(src);
+  const [safeSrc, setSafeSrc] = useState<AvatarProps['src']>(src);
 
   if (typeof size === 'number') {
     style.fontSize = `${size * 0.375}px`;

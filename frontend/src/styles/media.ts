@@ -5,6 +5,7 @@
 import {
   css,
   CSSObject,
+  CSSProperties,
   DefaultTheme,
   Interpolation,
   RuleSet,
@@ -26,10 +27,13 @@ export const sizes = {
 // Iterate through the sizes and create a media template
 export const media = (Object.keys(sizes) as Array<keyof typeof sizes>).reduce(
   (acc, label) => {
-    acc[label] = (first: any, ...interpolations: any[]) =>
-      css(
-        [`@media (min-width: ${sizes[label]}px) {`, '}'] as any,
-        css(first, ...interpolations),
+    acc[label] = (first, ...interpolations) =>
+      wrapMediaCss(
+        [
+          `@media (min-width: ${sizes[label]}px) {`,
+          '}',
+        ] as unknown as StylesTemplateStringsArray,
+        typedCss(first, ...interpolations),
       );
 
     return acc;
@@ -47,6 +51,21 @@ type MediaFunction = <P extends object>(
     | CSSObject
     | StyleFunction<P & { theme: DefaultTheme }>,
   ...interpolations: Array<Interpolation<P & { theme: DefaultTheme }>>
+) => RuleSet<P & { theme: DefaultTheme }>;
+
+type StylesTemplateStringsArray = TemplateStringsArray & CSSProperties;
+
+const typedCss = css as <P extends object>(
+  first:
+    | TemplateStringsArray
+    | CSSObject
+    | StyleFunction<P & { theme: DefaultTheme }>,
+  ...interpolations: Array<Interpolation<P & { theme: DefaultTheme }>>
+) => RuleSet<P & { theme: DefaultTheme }>;
+
+const wrapMediaCss = css as <P extends object>(
+  first: StylesTemplateStringsArray,
+  interpolation: RuleSet<P & { theme: DefaultTheme }>,
 ) => RuleSet<P & { theme: DefaultTheme }>;
 
 /* Example

@@ -1,13 +1,18 @@
 import { PlusOutlined } from '@ant-design/icons';
-import { Dropdown, Tooltip } from 'antd';
+import { Dropdown, MenuProps, Tooltip } from 'antd';
 import React, { ReactElement } from 'react';
 import { ToolbarButton } from '../ToolbarButton';
+
+type MenuClickInfo = Parameters<NonNullable<MenuProps['onClick']>>[0];
+type AddButtonCallback =
+  | (() => void | false)
+  | ((menuClickHandler: MenuClickInfo) => void | false);
 
 interface AddButtonProps {
   dataSource: {
     items: Array<{ key: string; text: string }>;
     icon?: ReactElement;
-    callback: (menuClickHandler?: any) => void | false;
+    callback: AddButtonCallback;
   };
 }
 
@@ -19,7 +24,7 @@ export function AddButton({
       <ToolbarButton
         size="small"
         icon={icon || <PlusOutlined />}
-        onClick={() => callback()}
+        onClick={() => (callback as () => void | false)()}
       />
     </Tooltip>
   ) : (
@@ -27,7 +32,7 @@ export function AddButton({
       trigger={['click']}
       menu={{
         items: items.map(({ key, text }) => ({ key, label: text })),
-        onClick: callback,
+        onClick: callback as MenuProps['onClick'],
       }}
     >
       <ToolbarButton size="small" icon={icon || <PlusOutlined />} />

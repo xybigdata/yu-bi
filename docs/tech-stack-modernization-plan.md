@@ -300,17 +300,20 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`前端配置解析与生产工具函数边界收口`
+当前累计专题：`前端通用 UI 与工具类型边界收口`
 
 本批目标：
 
-- 收口图表配置、View model 与数据源配置这类 JSON 字符串解析边界
-- 对非法 JSON、合法但非对象 JSON 统一走空配置兜底，避免异常值扩散到运行时链路
-- 保留历史正常对象配置、图表配置迁移和 view computed fields 合并语义不变
-- 只处理解析入口和最小类型边界，不调整公共协议、内部稳定标识和业务配置结构
+- 继续收口通用 UI 小组件、样式工具与测试层的局部宽类型
+- 优先处理不改变运行时语义、已有测试或可用 TypeScript 覆盖的单点
+- 遇到会影响图表运行时协议、交互配置结构或懒加载 props 推断的点，先降级为评估项
+- 不调整公共协议、内部稳定标识和业务配置结构
 
 当前累计清单：
 
+- 已完成：`media.ts` 的 styled-components 媒体查询 helper 补齐显式模板桥类型，去掉模板生成链路里的直接 `any`，并用 media 单测确认 CSS 输出不变
+- 已完成：`Avatar`、`ListTitle` 与 `AddButton` 的局部 UI 回调和状态类型收口，复用 antd 公开 props 与菜单点击参数类型，保留按钮点击无参和菜单点击带参两种调用方式
+- 已完成：`ThemeProvider` 测试里的主题变量与 store state 断言去掉局部 `any`，改用 `DefaultTheme` 与 `RootState`
 - 已完成：`frontend/.husky/pre-commit` 改为 staged 范围检查，TS / JS 文件不再每次触发全量 `lint:style`
 - 已完成：`ChartDtoHelper.parseChartConfig` 只接受对象形态配置，非对象 JSON 按空配置处理，并避免非对象配置先进入图表配置迁移器
 - 已完成：`internalChartHelper.transformToHierarchyModel` 的 View model 解析只接受对象形态，非法 JSON 或非对象 JSON 按空模型处理，并补齐回归测试
