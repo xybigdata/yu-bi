@@ -60,6 +60,26 @@ import { StoryBoardState } from '../slice/types';
 import { StoryToolBar } from './StoryToolBar';
 
 const { Content } = Layout;
+
+interface AddDashboardHistoryState {
+  addDashboardId?: string;
+  transaction?: unknown;
+}
+
+const getAddDashboardHistoryState = (
+  state: unknown,
+): AddDashboardHistoryState | undefined => {
+  if (!state || typeof state !== 'object') {
+    return;
+  }
+  const { addDashboardId, transaction } = state as Record<string, unknown>;
+  return {
+    addDashboardId:
+      typeof addDashboardId === 'string' ? addDashboardId : undefined,
+    transaction,
+  };
+};
+
 export const StoryEditor: React.FC<{}> = memo(() => {
   useBoardSlice();
   useEditBoardSlice();
@@ -71,7 +91,7 @@ export const StoryEditor: React.FC<{}> = memo(() => {
   }, [dispatch, storyId]);
   const t = useI18NPrefix(`viz.board.setting`);
   const navigate = useCompatNavigate();
-  const histState = navigate.location.state as any;
+  const histState = getAddDashboardHistoryState(navigate.location.state);
   const domId = useMemo(() => uuidv4(), []);
   const revealRef = useRef<RevealApi | null>(null);
 
@@ -227,7 +247,7 @@ export const StoryEditor: React.FC<{}> = memo(() => {
   }, [currentPageIndex, dispatch, sortedPages]);
 
   const addPages = useCallback(async () => {
-    if (histState && histState.addDashboardId) {
+    if (histState?.addDashboardId) {
       await dispatch(
         addStoryPages({ storyId, relIds: [histState.addDashboardId] }),
       );

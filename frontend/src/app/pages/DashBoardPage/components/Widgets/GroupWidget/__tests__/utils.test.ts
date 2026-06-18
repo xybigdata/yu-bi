@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-import { RectConfig } from 'app/pages/DashBoardPage/pages/Board/slice/types';
+import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
+import { widgetTpl } from '../../../WidgetManager/utils/init';
 import {
   convertListToTree,
   convertToTree,
@@ -26,21 +27,21 @@ import { getParentRect } from '../utils';
 
 describe('getParentRect Test', () => {
   test('should get a rect by args', () => {
-    const widgetMap = {
-      a1: {
-        id: 'a1',
-        config: { rect: { x: 1, y: 1, width: 11, height: 11 } as RectConfig },
-      },
-      b2: {
-        id: 'b2',
-        config: { rect: { x: 5, y: 5, width: 55, height: 55 } as RectConfig },
-      },
+    const widgetA = widgetTpl();
+    widgetA.id = 'a1';
+    widgetA.config.rect = { x: 1, y: 1, width: 11, height: 11 };
+    const widgetB = widgetTpl();
+    widgetB.id = 'b2';
+    widgetB.config.rect = { x: 5, y: 5, width: 55, height: 55 };
+    const widgetMap: Record<string, Widget> = {
+      a1: widgetA,
+      b2: widgetB,
     };
     const ids = ['a1', 'b2'];
 
     const res = getParentRect({
       childIds: ids,
-      widgetMap: widgetMap as any,
+      widgetMap,
       preRect: { x: 0, y: 0, width: 5, height: 6 },
     });
     expect(res).toEqual({
@@ -48,7 +49,7 @@ describe('getParentRect Test', () => {
       y: 1,
       height: 59,
       width: 59,
-    } as RectConfig);
+    });
   });
 });
 

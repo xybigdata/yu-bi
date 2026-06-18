@@ -21,7 +21,6 @@ import classNames from 'classnames';
 import { TABLE_DATA_INDEX } from 'globalConstants';
 import React, {
   CSSProperties,
-  MutableRefObject,
   memo,
   useCallback,
   useEffect,
@@ -47,10 +46,16 @@ type VirtualTableColumn = NonNullable<TableProps<VirtualTableRecord>['columns']>
 
 type DataIndex<RecordType> = TableColumnType<RecordType>['dataIndex'];
 
-type CustomizeScrollBody<RecordType> = Extract<
-  NonNullable<NonNullable<TableProps<RecordType>['components']>['body']>,
-  (data: readonly RecordType[], info: any) => React.ReactNode
->;
+interface VirtualScrollBodyInfo {
+  scrollbarSize: number;
+  ref: React.Ref<VirtualScrollBodyRef>;
+  onScroll: (info: { currentTarget?: HTMLElement; scrollLeft?: number }) => void;
+}
+
+type CustomizeScrollBody<RecordType> = (
+  data: readonly RecordType[],
+  info: VirtualScrollBodyInfo,
+) => React.ReactNode;
 
 type ScrollConfig = Parameters<RcTableReference['scrollTo']>[0];
 
@@ -63,6 +68,10 @@ type InternalVirtualTableColumn = VirtualTableColumn & {
 type VirtualScrollBodyRef = {
   scrollLeft: number;
   scrollTo?: (scrollConfig: ScrollConfig) => void;
+};
+
+type WritableRef<T> = {
+  current: T | null;
 };
 
 type WidthColumn = {
@@ -176,8 +185,7 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
       if (typeof ref === 'function') {
         ref(connectObject);
       } else if (ref) {
-        (ref as MutableRefObject<VirtualScrollBodyRef | null>).current =
-          connectObject;
+        (ref as WritableRef<VirtualScrollBodyRef>).current = connectObject;
       }
       const totalHeight = rawData.length * 39;
 

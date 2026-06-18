@@ -8,26 +8,13 @@ vi.mock('../../../WidgetProvider/WidgetProvider', () => ({
 
 import { WidgetContext } from '../../../WidgetProvider/WidgetProvider';
 import { VideoWidgetCore } from '../VideoWidgetCore';
+import { videoWidgetToolKit } from '../videoConfig';
 
 describe('VideoWidgetCore', () => {
   it('应使用原生 video 渲染视频源', () => {
-    const widget = {
-      config: {
-        customConfig: {
-          props: [
-            {
-              key: 'videoGroup',
-              rows: [
-                {
-                  key: 'src',
-                  value: 'https://example.com/demo.mp4',
-                },
-              ],
-            },
-          ],
-        },
-      },
-    } as any;
+    const widget = videoWidgetToolKit.create({});
+    widget.config.customConfig.props![0].rows![0].value =
+      'https://example.com/demo.mp4';
 
     const { container } = render(
       <WidgetContext.Provider value={widget}>
