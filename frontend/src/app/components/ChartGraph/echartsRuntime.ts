@@ -1,6 +1,8 @@
 import type * as ECharts from 'echarts';
+import type { EChartsType } from 'echarts';
 
 type EChartsRuntime = typeof ECharts;
+export type EChartsInstance = EChartsType;
 
 let echartsRuntimePromise: Promise<EChartsRuntime> | null = null;
 let echartsRuntimeLoader: () => Promise<EChartsRuntime> = () =>

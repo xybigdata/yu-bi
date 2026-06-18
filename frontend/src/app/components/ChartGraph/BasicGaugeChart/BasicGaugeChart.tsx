@@ -33,7 +33,7 @@ import {
 } from 'app/utils/chartHelper';
 import Chart from '../../../models/Chart';
 import { ChartSelectionManager } from '../../../models/ChartSelectionManager';
-import { loadEChartsRuntime } from '../echartsRuntime';
+import { EChartsInstance, loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 import {
   DataConfig,
@@ -49,7 +49,7 @@ import {
 
 class BasicGaugeChart extends Chart {
   config = Config;
-  chart: any = null;
+  chart: EChartsInstance | null = null;
   selectionManager?: ChartSelectionManager;
   protected container: HTMLElement | null = null;
   private latestMountPayload?: {
@@ -117,7 +117,9 @@ class BasicGaugeChart extends Chart {
     this.latestMountPayload = undefined;
     this.latestRenderPayload = undefined;
     this.container = null;
-    this.selectionManager?.removeZRenderListeners(this.chart);
+    if (this.chart) {
+      this.selectionManager?.removeZRenderListeners(this.chart);
+    }
     this.chart?.dispose();
     this.chart = null;
     this.selectionManager = undefined;
