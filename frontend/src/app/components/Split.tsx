@@ -1,6 +1,20 @@
 import React, { ReactElement } from 'react';
 import { loadSplit } from './splitRuntime';
 
+type SplitGutterElement = HTMLElement & {
+  __isSplitGutter?: boolean;
+};
+
+const isHTMLElement = (element: Element): element is HTMLElement =>
+  element instanceof HTMLElement;
+
+const getSplitChildren = (parent: HTMLDivElement): HTMLElement[] =>
+  Array.from(parent.children).filter(
+    (element): element is HTMLElement =>
+      isHTMLElement(element) &&
+      !(element as SplitGutterElement).__isSplitGutter,
+  );
+
 interface SplitWrapperProps {
   sizes?: number[];
   minSize?: number | number[];
@@ -30,7 +44,7 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
     getSizes: () => number[];
     collapse: (index: number) => void;
   };
-  private parent: { children: HTMLElement[] } | null = null;
+  private parent: HTMLDivElement | null = null;
   private mounted = false;
 
   async componentDidMount() {
@@ -38,7 +52,7 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
     const { children, gutter, ...options } = this.props;
 
     const updatedGutter = (index, direction) => {
-      let gutterElement;
+      let gutterElement: SplitGutterElement;
 
       if (gutter) {
         gutterElement = gutter(index, direction);
@@ -57,7 +71,7 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
       return;
     }
 
-    this.split = Split(this.parent.children, {
+    this.split = Split(getSplitChildren(this.parent), {
       ...options,
       gutter: updatedGutter,
     });
@@ -115,9 +129,7 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
       }
 
       this.split = Split(
-        Array.from(this.parent.children).filter(
-          element => !(element as any).__isSplitGutter,
-        ),
+        getSplitChildren(this.parent),
         { ...options, minSize, sizes: sizes || this.split?.getSizes() },
       );
     } else if (sizes) {
@@ -176,7 +188,7 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
     return (
       <div
         ref={parent => {
-          this.parent = parent as any;
+          this.parent = parent;
         }}
         {...rest}
       >

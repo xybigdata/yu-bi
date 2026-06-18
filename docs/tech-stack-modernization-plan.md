@@ -314,6 +314,8 @@
 - 已完成：`media.ts` 的 styled-components 媒体查询 helper 补齐显式模板桥类型，去掉模板生成链路里的直接 `any`，并用 media 单测确认 CSS 输出不变
 - 已完成：`Avatar`、`ListTitle` 与 `AddButton` 的局部 UI 回调和状态类型收口，复用 antd 公开 props 与菜单点击参数类型，保留按钮点击无参和菜单点击带参两种调用方式
 - 已完成：`ThemeProvider` 测试里的主题变量与 store state 断言去掉局部 `any`，改用 `DefaultTheme` 与 `RootState`
+- 已完成：`Split` 组件的 split.js 子节点收集改为显式 `HTMLElement[]` 过滤，内部 gutter 标记用局部 DOM 扩展类型承接，去掉 ref 和 gutter 判断里的宽泛强转
+- 已完成：Redux 动态 reducer 注入工厂参数改为 `unknown` 入口，继续由 `checkStore` 做运行时 shape 校验，非法 store 测试不再需要 `as any`
 - 已完成：`frontend/.husky/pre-commit` 改为 staged 范围检查，TS / JS 文件不再每次触发全量 `lint:style`
 - 已完成：`ChartDtoHelper.parseChartConfig` 只接受对象形态配置，非对象 JSON 按空配置处理，并避免非对象配置先进入图表配置迁移器
 - 已完成：`internalChartHelper.transformToHierarchyModel` 的 View model 解析只接受对象形态，非法 JSON 或非对象 JSON 按空模型处理，并补齐回归测试

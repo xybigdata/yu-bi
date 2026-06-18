@@ -65,7 +65,7 @@ describe('reducer injectors', () => {
     });
 
     it('should check a store if the second argument is falsy', () => {
-      const inject = injectReducerFactory({} as any);
+      const inject = injectReducerFactory({});
 
       expect(() => inject('test', reducer)).toThrow();
     });
