@@ -366,8 +366,11 @@
 - 已完成：`BasicCheckbox`、`BasicSwitch`、`BasicRadio`、`BasicInput`、`BasicInputNumber` 的行级 `rest` 下传继续收口为显式 `value / checked / disabled / defaultValue` 等真实控件属性
 - 已完成：`TimerFormat` 去掉未使用父级参数，Select ref 改为 antd 公开类型，避免继续保留局部 `any` ref
 - 已完成：普通表格与指标卡条件样式弹窗的 target、颜色回调、数值区间回调和指标选项输入补齐局部显式类型，保持保存后的条件样式结构与匹配语义不变
+- 已完成：`ListTemplatePanel` 的选项状态、当前选中项、模板行创建和子组件更新入口补齐局部类型，去掉面板内部 `any[]` / `as any`
+- 已完成：`UnControlledTableHeaderPanel` 的表格行选择入口改为复用 antd 公开 `TableRowSelection`，内部继续按字符串 uid 状态处理，保持选择与合并行为不变
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
+- 暂缓评估：FormGenerator 全局 `ItemLayoutProps`、交互规则面板的动态 `value` / `Customize` 映射仍是协议宽口，需单独评估交互配置结构后再收口
 - 下一批候选：继续复扫 FormGenerator 自定义控件中未使用的父级参数和可显式化的局部回调类型，确认不影响交互后再收口
 
 当前已落地范围：
@@ -485,6 +488,7 @@
 - `BasicFont`、`BasicColorSelector`、`BasicLine`、`Background`、`WidgetBorder` 统一通过颜色选择器 options 白名单透传 ColorPicker 配置，避免 `key` spread 和父级 props 继续进入 Popover 链路
 - `BasicFontWeight`、`BasicFontStyle`、`BasicFontFamilySelector`、`BasicFontSizeSelector`、`BasicInputPercentage`、`BasicSlider`、`BasicSelector` 的 antd 控件透传继续改为显式控件属性，避免 FormGenerator 行元数据继续进入三方组件
 - `TimerFormat` 与条件样式 add 弹窗的局部 ref、context、颜色和区间值回调类型完成收口，减少 FormGenerator 自定义控件中的 `any` 边界
+- `ListTemplatePanel` 与 `UnControlledTableHeaderPanel` 的选项状态、模板行和表格选择入口继续补齐局部显式类型，减少自定义控件中的 `any` 边界
 
 当前验证计划：
 
