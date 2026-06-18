@@ -102,6 +102,13 @@ const parseStructScriptColumns = (columns?: string): string[] | 'all' => {
   throw new Error('Invalid struct view columns');
 };
 
+type QueryResultColumnModel = {
+  category?: ColumnCategories;
+  name: string | string[];
+  primaryKey?: boolean;
+  type: DataViewFieldType;
+};
+
 const normalizeColumnPermission = (
   permission: ColumnPermissionRaw,
 ): ColumnPermission => {
@@ -174,29 +181,30 @@ export function transformQueryResultToModelAndDataSource(
   dataSource: object[];
 } {
   const { rows = [], columns = [], reqColumns } = data || {};
-  const newColumns = columns.reduce((obj, { name, type, primaryKey }) => {
-    const hierarchyColumn = getHierarchyColumn(
-      name,
-      lastModel?.hierarchy || {},
-    );
+  const newColumns = columns.reduce(
+    (obj, { name, type, primaryKey }) => {
+      const hierarchyColumn = getHierarchyColumn(
+        name,
+        lastModel?.hierarchy || {},
+      );
 
-    let _name: any = [];
-    if (viewType === 'STRUCT') {
-      _name = reqColumns?.find(column => column.alias === name[0])?.column;
-    } else {
-      _name = name;
-    }
+      const columnName =
+        viewType === 'STRUCT'
+          ? reqColumns?.find(column => column.alias === name[0])?.column || []
+          : name;
 
-    return {
-      ...obj,
-      [name]: {
-        name: _name,
-        type: hierarchyColumn?.type || type,
-        primaryKey,
-        category: hierarchyColumn?.category || ColumnCategories.UnCategorized, // FIXME: model 重构时一起改
-      },
-    };
-  }, {});
+      return {
+        ...obj,
+        [name]: {
+          name: columnName,
+          type: hierarchyColumn?.type || type,
+          primaryKey,
+          category: hierarchyColumn?.category || ColumnCategories.UnCategorized, // FIXME: model 重构时一起改
+        },
+      };
+    },
+    {} as Record<string, QueryResultColumnModel>,
+  );
   const dataSource = rows.map(arr =>
     arr.reduce((obj, val, index) => {
       const key = columns[index].name;
@@ -207,7 +215,7 @@ export function transformQueryResultToModelAndDataSource(
     }, {}),
   );
   return {
-    model: { ...lastModel, columns: newColumns },
+    model: { ...lastModel, columns: newColumns as ColumnsModel },
     dataSource,
   };
 }

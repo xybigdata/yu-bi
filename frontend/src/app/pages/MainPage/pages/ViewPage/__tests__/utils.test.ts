@@ -24,8 +24,12 @@ import {
   dataModelColumnSorter,
   diffMergeHierarchyModel,
   handleStringScriptToObject,
+  transformQueryResultToModelAndDataSource,
   transformModelToViewModel,
 } from '../utils';
+
+const createStructResultColumnName = (alias: string): string =>
+  [alias] as unknown as string;
 
 describe('dataModelColumnSorter test', () => {
   test('should sort by alphabet with the STRING column type', () => {
@@ -99,6 +103,76 @@ describe('dataModelColumnSorter test', () => {
     expect(columns.sort(dataModelColumnSorter)[2].name).toEqual('a');
     expect(columns.sort(dataModelColumnSorter)[3].name).toEqual('c');
     expect(columns.sort(dataModelColumnSorter)[4].name).toEqual('b');
+  });
+});
+
+describe('transformQueryResultToModelAndDataSource test', () => {
+  test('should keep sql column name as string', () => {
+    const result = transformQueryResultToModelAndDataSource(
+      {
+        columns: [
+          {
+            name: 'id',
+            type: DataViewFieldType.STRING,
+          },
+        ],
+        rows: [['1']],
+        pageInfo: {
+          pageNo: 1,
+          pageSize: 10,
+          total: 1,
+        },
+      },
+      {},
+      'SQL',
+    );
+
+    expect(result.model.columns).toEqual({
+      id: {
+        category: 'UNCATEGORIZED',
+        name: 'id',
+        primaryKey: undefined,
+        type: DataViewFieldType.STRING,
+      },
+    });
+    expect(result.dataSource).toEqual([{ id: '1' }]);
+  });
+
+  test('should map struct column alias to full column path', () => {
+    const result = transformQueryResultToModelAndDataSource(
+      {
+        columns: [
+          {
+            name: createStructResultColumnName('db1.orders.id'),
+            type: DataViewFieldType.STRING,
+          },
+        ],
+        rows: [['1']],
+        pageInfo: {
+          pageNo: 1,
+          pageSize: 10,
+          total: 1,
+        },
+        reqColumns: [
+          {
+            alias: 'db1.orders.id',
+            column: ['db1', 'orders', 'id'],
+          },
+        ],
+      },
+      {},
+      'STRUCT',
+    );
+
+    expect(result.model.columns).toEqual({
+      'db1.orders.id': {
+        category: 'UNCATEGORIZED',
+        name: ['db1', 'orders', 'id'],
+        primaryKey: undefined,
+        type: DataViewFieldType.STRING,
+      },
+    });
+    expect(result.dataSource).toEqual([{ 'db1.orders.id': '1' }]);
   });
 });
 
