@@ -92,6 +92,11 @@ describe('parseVariableRelationValue', () => {
     expect(parseVariableRelationValue(null)).toBeUndefined();
     expect(parseVariableRelationValue('')).toBeUndefined();
   });
+
+  test('should ignore invalid or non-array relation raw value', () => {
+    expect(parseVariableRelationValue('{invalid-json}')).toBeUndefined();
+    expect(parseVariableRelationValue('true')).toBeUndefined();
+  });
 });
 
 describe('parseVariableDefaultValue', () => {
@@ -103,5 +108,10 @@ describe('parseVariableDefaultValue', () => {
     expect(parseVariableDefaultValue(undefined)).toEqual([]);
     expect(parseVariableDefaultValue(null)).toEqual([]);
     expect(parseVariableDefaultValue('')).toEqual([]);
+  });
+
+  test('should ignore invalid or non-array default value', () => {
+    expect(parseVariableDefaultValue('{invalid-json}')).toEqual([]);
+    expect(parseVariableDefaultValue('true')).toEqual([]);
   });
 });

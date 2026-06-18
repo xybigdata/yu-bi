@@ -315,6 +315,8 @@
 - 已完成：`ChartDtoHelper.parseChartConfig` 只接受对象形态配置，非对象 JSON 按空配置处理，并避免非对象配置先进入图表配置迁移器
 - 已完成：`internalChartHelper.transformToHierarchyModel` 的 View model 解析只接受对象形态，非法 JSON 或非对象 JSON 按空模型处理，并补齐回归测试
 - 已完成：`useGetSourceDbTypeIcon` 的 JDBC 数据源配置解析补齐异常兜底，坏 JSON 或非对象 JSON 回退到默认图标，不再打断 Source 树图标渲染
+- 已完成：变量默认值与行权限值解析只接受数组形态，非法 JSON 或非数组 JSON 按空值处理，避免坏数据打断变量表单与权限页
+- 已完成：View 详情消费链的 `config` / `model` 解析只接受对象形态，列权限解析只接受数组形态，非对象或非数组 JSON 按空配置处理
 - 已完成：迁移测试层局部弱类型收口
 - 已完成：工具测试层第一批局部弱类型收口
 - 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 的局部弱类型收口
@@ -504,6 +506,7 @@
 
 - `npm run checkTs`
 - `npm run test:ci -- src/app/utils/__tests__/chartDtoHelper.test.ts src/app/utils/__tests__/internalChartHelper.test.ts src/app/hooks/__tests__/useGetSourceDbTypeIcon.test.tsx`
+- `npm run test:ci -- src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts`
 
 ### 6.2 最近已完成
 

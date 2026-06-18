@@ -45,9 +45,14 @@ import {
   ViewViewModel,
 } from './slice/types';
 
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+};
+
 const parseViewConfig = (config: string): object | undefined => {
   try {
-    return JSON.parse(config) as object;
+    const parsed = JSON.parse(config);
+    return isRecord(parsed) ? parsed : undefined;
   } catch (error) {
     return undefined;
   }
@@ -55,17 +60,17 @@ const parseViewConfig = (config: string): object | undefined => {
 
 const parseViewModel = (model: string): HierarchyModel | undefined => {
   try {
-    return JSON.parse(model) as HierarchyModel;
+    const parsed = JSON.parse(model);
+    return isRecord(parsed) ? (parsed as HierarchyModel) : undefined;
   } catch (error) {
     return undefined;
   }
 };
 
-const parseColumnPermission = (
-  permission: string,
-): string[] | undefined => {
+const parseColumnPermission = (permission: string): string[] | undefined => {
   try {
-    return JSON.parse(permission) as string[];
+    const parsed = JSON.parse(permission);
+    return Array.isArray(parsed) ? parsed : undefined;
   } catch (error) {
     return undefined;
   }
