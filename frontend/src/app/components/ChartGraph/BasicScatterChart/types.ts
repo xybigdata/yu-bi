@@ -5,9 +5,7 @@ export type ScatterMetricAndSizeSerie = {
     name: string;
     rowData: { [p: string]: any };
     value: Array<string | number | undefined>;
-    itemStyle?: {
-      [x: string]: any;
-    };
+    itemStyle?: Record<string, unknown>;
   }[];
   symbolSize: (val) => number;
   name: string;

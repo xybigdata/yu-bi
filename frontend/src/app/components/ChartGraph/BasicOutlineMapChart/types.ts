@@ -12,7 +12,7 @@ export type GeoInfo = {
   itemStyle?: {
     areaColor: string;
   } & BorderStyle;
-  regions?: { name?: string; itemStyle?: { [x: string]: any } }[];
+  regions?: { name?: string; itemStyle?: Record<string, unknown> }[];
   zoom?: number;
   center?: number[] | undefined;
 } & LabelStyle;
@@ -93,7 +93,7 @@ export interface MapOption {
         onclick: () => void;
         show: boolean;
         icon: string;
-        title: any;
+        title?: string;
       };
     };
     left: string;

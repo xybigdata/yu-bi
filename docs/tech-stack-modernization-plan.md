@@ -264,6 +264,11 @@
   - FormGenerator 的 `translate` 参数复用统一 `I18NTranslateOptions`
   - Waterfall 图表内部翻译参数复用统一 `I18NTranslate`，并补齐可选翻译函数缺省回退
   - `ChartFilterCondition.value` 经 `checkTs` 验证仍属于运行时宽口，继续暂缓不纳入低风险批次
+- 前端图表局部类型边界继续收口：
+  - 折线图与柱状图 `dataZoom` 局部缓存补齐显式配置类型
+  - Scorecard 的 React 点击事件回调补齐真实事件类型
+  - 漏斗图、散点图、词云图、基础饼图与轮廓地图的样式扩展字段从 `any` 收口为 `Record<string, unknown>`
+  - 本批继续暂缓 ECharts 实例、tooltip params、地图注册入参、rowData 与图表公共协议宽口
 - Maven 对外品牌元数据继续收口：
   - 根 POM 与各服务端模块补齐 `name`、`description` 等对外元数据，统一以 `yu-bi` 对外呈现
   - SCM 与许可证信息指向 `yu-bi` 新仓库
@@ -329,14 +334,13 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`前端公开类型入口收口`
+当前累计专题：`前端图表局部类型边界收口`
 
 本批目标：
 
-- 清理前端源码里对 Ant Design / rc / Monaco 组件内部目录的静态类型导入
-- 优先使用 React 类型、Ant Design / Monaco 包根公开类型，或从公开组件 props 反推类型
-- 只处理类型入口，不调整组件运行时行为和业务协议
-- Monaco 运行时懒加载与语言贡献路径先保持现状，不混入本批类型入口收口
+- 优先处理图表组件内部缓存、局部事件回调、样式透传对象等低风险类型边界
+- 只收口“声明比真实用法更宽”的局部类型，不改图表 option 输出结构
+- 继续暂缓 ECharts 实例、tooltip params、地图注册入参、rowData 与图表公共协议宽口
 - 不调整公共协议、内部稳定标识和业务配置结构
 
 当前累计清单：

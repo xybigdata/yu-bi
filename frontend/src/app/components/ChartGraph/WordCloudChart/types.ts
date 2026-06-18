@@ -25,7 +25,7 @@ export interface WordCloudLabelConfig {
     | {
         name: string;
         rowData: { [p: string]: any };
-        textStyle: { opacity?: number; [p: string]: any };
+        textStyle: { opacity?: number } & Record<string, unknown>;
         value: string;
       }[]
     | undefined;
