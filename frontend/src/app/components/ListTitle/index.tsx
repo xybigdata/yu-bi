@@ -20,6 +20,11 @@ import { MenuWrapper, Popup } from '../Popup';
 import { ToolbarButton } from '../ToolbarButton';
 import { AddButton } from './AddButton';
 
+type MenuClickInfo = Parameters<NonNullable<MenuProps['onClick']>>[0];
+type AddButtonCallback =
+  | (() => void | false)
+  | ((menuClickHandler: MenuClickInfo) => void | false);
+
 export interface ListTitleProps {
   key?: string;
   title?: string;
@@ -30,7 +35,7 @@ export interface ListTitleProps {
   add?: {
     items: Array<{ key: string; text: string }>;
     icon?: ReactElement;
-    callback: (menuClickHandler?: any) => void | false;
+    callback: AddButtonCallback;
   };
   more?: {
     items: Array<{
@@ -45,7 +50,7 @@ export interface ListTitleProps {
       onNext?: () => void,
     ) => void;
   };
-  onSearch?: (e) => void;
+  onSearch?: React.ChangeEventHandler<HTMLInputElement>;
   onPrevious?: () => void;
   onNext?: () => void;
 }
@@ -69,7 +74,7 @@ export function ListTitle({
   }, [searchbarVisible]);
 
   const moreMenuClick = useCallback(
-    ({ key }) => {
+    ({ key }: MenuClickInfo) => {
       more?.callback(key, onPrevious, onNext);
     },
     [more, onPrevious, onNext],

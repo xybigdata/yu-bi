@@ -3,7 +3,8 @@ import { render } from '@testing-library/react';
 import * as React from 'react';
 import { Provider } from 'react-redux';
 import { configureAppStore } from 'redux/configureStore';
-import { useTheme } from 'styled-components';
+import { DefaultTheme, useTheme } from 'styled-components';
+import { RootState } from 'types';
 import { selectTheme } from '../slice/selectors';
 import { ThemeProvider } from '../ThemeProvider';
 
@@ -31,13 +32,13 @@ describe('<ThemeProvider />', () => {
   });
 
   it('should render selected theme', () => {
-    let theme: any;
+    let theme: DefaultTheme | undefined;
     const children = () => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       theme = useTheme();
       return <h1>a</h1>;
     };
     renderThemeProvider(store, children);
-    expect(theme).toBe(selectTheme(store.getState() as any));
+    expect(theme).toBe(selectTheme(store.getState() as RootState));
   });
 });

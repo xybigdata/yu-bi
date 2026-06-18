@@ -25,6 +25,19 @@ import { itemLayoutComparer } from '../utils';
 import { BW } from './components/BasicWrapper';
 import { omitFormGeneratorOptions } from './controlOptions';
 
+type SelectorOptionValue = string | number | boolean;
+type SelectorOption =
+  | SelectorOptionValue
+  | {
+      label?: SelectorOptionValue;
+      value?: SelectorOptionValue;
+    };
+
+const isSelectorOptionObject = (
+  option: SelectorOption,
+): option is Exclude<SelectorOption, SelectorOptionValue> =>
+  typeof option === 'object' && option !== null;
+
 const BasicSelector: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({
     ancestors,
@@ -47,7 +60,7 @@ const BasicSelector: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
     );
 
     const safeInvokeAction = () => {
-      let results: any[] = [];
+      let results: SelectorOption[] = [];
       try {
         results = isFunc(row?.options?.getItems)
           ? row?.options?.getItems?.call(
@@ -73,10 +86,12 @@ const BasicSelector: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
           defaultValue={row.default}
           placeholder={t('select')}
           options={safeInvokeAction()?.map(o => {
-            const label = isEmpty(o['label']) ? o : o.label;
-            const value = isEmpty(o['value']) ? o : o.value;
+            const label =
+              isSelectorOptionObject(o) && !isEmpty(o.label) ? o.label : o;
+            const value =
+              isSelectorOptionObject(o) && !isEmpty(o.value) ? o.value : o;
             return {
-              label: !!translateItemLabel ? t(label, true) : label,
+              label: !!translateItemLabel ? t(`${label}`, true) : label,
               value,
             };
           })}

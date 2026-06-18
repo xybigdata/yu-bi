@@ -14,8 +14,11 @@ interface ReducerInjectStore {
   replaceReducer: (nextReducer: Reducer) => void;
 }
 
+const asReducerInjectStore = (store: unknown): ReducerInjectStore =>
+  store as ReducerInjectStore;
+
 export function injectReducerFactory(
-  store: ReducerInjectStore,
+  store: unknown,
   isValid?: boolean,
 ) {
   return function injectReducer(
@@ -23,6 +26,7 @@ export function injectReducerFactory(
     reducer: InjectedReducer,
   ) {
     if (!isValid) checkStore(store);
+    const checkedStore = asReducerInjectStore(store);
 
     assertInvariant(
       isString(key) && !isEmpty(key) && isFunction(reducer),
@@ -31,14 +35,16 @@ export function injectReducerFactory(
 
     // Check `store.injectedReducers[key] === reducer` for hot reloading when a key is the same but a reducer is different
     if (
-      Reflect.has(store.injectedReducers, key) &&
-      store.injectedReducers[key] === reducer
+      Reflect.has(checkedStore.injectedReducers, key) &&
+      checkedStore.injectedReducers[key] === reducer
     )
       return;
 
-    store.injectedReducers[key] =
+    checkedStore.injectedReducers[key] =
       reducer as InjectedReducersType[keyof InjectedReducersType];
-    store.replaceReducer(store.createReducer(store.injectedReducers));
+    checkedStore.replaceReducer(
+      checkedStore.createReducer(checkedStore.injectedReducers),
+    );
   };
 }
 
