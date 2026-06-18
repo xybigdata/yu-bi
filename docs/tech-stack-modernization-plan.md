@@ -10,6 +10,7 @@
 - 前端工程链稳定兼容 `Node 24`
 - 前端 CI 与本地开发基线统一使用 `Node 24.x`
 - 改造按专题拆分，做到可验证、可回退、可持续推进
+- 改造范围覆盖低风险、中风险和可控高风险项；中高风险不回避，但必须先收窄边界并补足验证证据
 
 ## 2. 固定边界
 
@@ -17,10 +18,10 @@
 
 - 工作目录：`/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi`
 - `main` 只允许 merge，不直接开发
-- 低风险改造阶段改为在单一长期分支持续推进，累计到足够批量后再 merge 回 `main`
-- 前端低风险改造优先复用当前累计分支，不因单个小专题频繁创建新分支
+- 同一改造专题优先在单一长期分支持续推进，累计到足够批量后再 merge 回 `main`
+- 前端兼容性改造优先复用当前累计分支，不因单个小点频繁创建新分支
 - `main` 推送需要完整门禁，只有累计到值得回归的批量后才执行完整门禁、`--no-ff` 合并并推送主线
-- 高风险或跨域专题仍单独建分支，不在文档中写死分支名
+- 高风险或跨域专题仍单独建分支；如果可以拆成兼容小步并有验证覆盖，也可以同步纳入当前现代化改造节奏
 - 默认自动 `git add`、`git commit --no-verify`
 
 ### 2.2 不直接触碰的高风险标识
@@ -40,8 +41,8 @@
 ### 2.4 目标核对节奏
 
 - 每轮开始先核对长期目标：`JDK 21`、`Node 24`、兼容优先、稳定版优先、`main` 不直接开发
-- 每批提交前核对短期目标：当前改动是否仍属于当前专题，是否低风险、可验证、可回退
-- 如果候选点开始牵涉共享协议、运行时行为或跨域依赖，拆成中高风险专项推进，并补足定向测试或完整门禁证据
+- 每批提交前核对短期目标：当前改动是否仍属于当前专题，风险边界是否清晰，是否可验证、可回退
+- 如果候选点开始牵涉共享协议、运行时行为或跨域依赖，拆成中高风险专项推进；可兼容拆分且验证充分时，可以与当前批次同步推进
 - 每次阶段性提交或推送后，在本文档中保留对后续判断有用的执行记录
 - 前端低风险日常推进使用轻量门禁：优先 `npm run checkTs`，必要时补相关单测；中风险运行时链路必须补定向测试或更强门禁；只有准备阶段性合入 `main` 前才执行完整前端门禁 `npm run test:ci`、`npm run lint:css`、`npm run lint:style`
 
@@ -320,7 +321,7 @@
 
 ## 5. 风险分层
 
-### 5.1 低风险：优先持续推进
+### 5.1 低风险：持续推进
 
 | 专题 | 当前判断 | 策略 |
 | --- | --- | --- |
@@ -331,7 +332,7 @@
 | 前端公开类型入口 | Ant Design / rc 历史类型入口已清零，Monaco 静态类型导入已切到包根入口 | 后续防止回退到组件内部目录或运行时深路径类型入口 |
 | 安装健康度维护 | 当前已稳定，但需防止锁文件回退 | 持续关注 Node 24 安装表现 |
 
-### 5.2 中风险：做专项稳定化，不做重写
+### 5.2 中风险：同步纳入专题，做专项稳定化
 
 | 专题 | 当前判断 | 主要风险 |
 | --- | --- | --- |
@@ -341,34 +342,61 @@
 | `flexlayout-react` | 版本偏旧，仍在工作台布局主链 | 布局拖拽、面板状态、样式回归 |
 | `react-grid-layout` | 版本偏旧，仍在看板布局主链 | 拖拽缩放、响应式布局回归 |
 | 图表运行时类型边界 | ECharts / 表格 / 词云等运行时仍有局部宽口 | 图表渲染、事件回调、分页排序回归 |
+| Dashboard widget 内容协议 | `WidgetConf.content` 承载多类 widget 内容，历史创建入参与保存结构混用 | 图表、控制器、容器、富文本和迁移链路回归 |
 | Docker / 安装包闭环 | 基线已收口 | 安装包结构、静态资源、启动链验证 |
 
-### 5.3 高风险：暂不直接动
+执行策略：
+
+- 中风险不是暂缓项；优先选择可兼容拆分、能定向验证、能快速回退的子链路同步改造
+- 不做大范围重写，不一次性替换共享协议；先用运行时守卫、兼容解析、局部类型桥接和测试覆盖稳定边界
+- 合并前必须具备定向测试或完整门禁证据，不能只靠静态类型通过
+
+### 5.3 高风险：只推进可控子问题
 
 | 专题 | 当前判断 | 原因 |
 | --- | --- | --- |
-| Shiro 迁移 | 暂不进入实质迁移 | 认证授权影响面大 |
-| Calcite 升级或替换 | 暂不进入实质替换 | SQL 解析链耦合深 |
-| 数据源 / 脚本深层架构调整 | 暂不直接动 | provider、脚本、方言耦合深 |
+| Shiro 迁移 | 暂不整体迁移，可先做依赖健康度和兼容验证 | 认证授权影响面大 |
+| Calcite 升级或替换 | 暂不整体替换，可先做版本约束、SQL 解析用例和边界审计 | SQL 解析链耦合深 |
+| 数据源 / 脚本深层架构调整 | 暂不整体重构，可先收口配置解析、异常兜底和测试覆盖 | provider、脚本、方言耦合深 |
 | 内部命名与稳定标识重构 | 明确禁止 | 影响面不可控 |
+
+执行策略：
+
+- 高风险项不再简单排除，但只处理能独立验证的子问题
+- 禁止在没有回归证据时做认证、SQL 解析、数据源协议、脚本运行时和内部稳定标识的大跨度替换
+- 任何可能影响数据兼容或运行时协议的改动，先补测试或构造最小验证场景，再提交
 
 ## 6. 当前进行中专题
 
-当前工作区按“可验证、可回退、兼容优先”推进；低风险继续累计，中风险拆专项稳定化，高风险只在边界清晰且有验证证据时进入。
+当前工作区按“可验证、可回退、兼容优先”推进；低风险持续累计，中风险同步拆专项稳定化，高风险只推进边界清晰且有验证证据的子问题。
 
 ### 6.1 正在推进
 
-当前累计专题：`图表运行时类型边界稳定化`
+当前累计专题：`Dashboard widget 内容协议边界稳定化`
 
 本批目标：
 
-- 优先收口图表运行时里局部 `any` / 宽泛事件参数 / 表格列配置类型
-- 只处理可通过现有图表定向测试或小范围新增测试验证的边界
-- 保持图表配置协议、数据集结构、渲染语义和事件 payload 不变
-- 不重写图表实例生命周期，优先收口实例、事件和 option 的类型边界
+- 优先收口 `WidgetConf.content` / `WidgetCreateProps.content` 这类共享协议宽口
+- 区分 widget 创建入参和保存后的 widget 内容结构，避免继续用同一个 `any` 承接两种语义
+- 先建立兼容内容结构，不一次性拆完 chart / controller / media / container 的全量协议
+- 对迁移链路只做局部 legacy 类型桥接，保持历史数据兼容
 - 不调整内部稳定标识和业务配置结构
 
 当前累计清单：
+
+- 已完成：`WidgetConf.content` 从裸 `any` 收口到 `WidgetContent` 兼容结构，显式列出图表、控制器、媒体、容器和按钮内容字段
+- 已完成：`WidgetCreateProps.content` 改为 `unknown` 创建入参边界，由各 widget creator 在内部落到明确内容结构，避免创建入参与持久化内容继续混用同一类型
+- 已完成：DataChart widget 创建链路显式生成 `{ type: 'dataChart', dataChart }` 内容结构，控制器 widget 创建链路按 `ControllerWidgetContent` 承接
+- 已完成：`BoardBtnContent.type`、`DataChart.view`、`WidgetData.id` 与富文本 Delta JSON 内容边界补齐局部显式类型，去掉对应裸 `any`
+- 已完成：widget chart 配置迁移和 beta4 富文本迁移补齐 legacy 数据局部类型桥接，避免历史字符串配置、旧 computed field 和旧 richText 内容形态继续扩散到全局类型
+- 已完成：sampleData 写入 widgetDataMap 前增加对象形态守卫，避免 `unknown` 模板数据直接穿透到看板 widget 数据状态
+- 已完成：新增 `isChartWidgetContent` / `isControllerWidgetContent` / `isTabWidgetContent` 内容类型守卫，替换 Dashboard 工具函数、BoardEditor action 和 Tab reducer 里的多处 `config.content as ...` 强转
+- 已完成：控制器可见性、控制器筛选参数、owned chart 包装、tab 子项映射和 widget 复制链路改为先验证内容结构再消费，异常历史内容按原有跳过/兜底路径处理
+- 已完成：Controller option 获取 thunk、ControllerWidgetCore、ControllerWidgetPanel、TabWidgetCore 与 LayerPanel 的内容消费点改为复用内容类型守卫，缺失或异常内容走空渲染、空列表或跳过请求的兜底路径
+- 已完成：DataChart / Controller widget creator 的 `unknown` 创建入参改为先做最小结构守卫再落到持久化内容；beta0 迁移保留 legacy controller content 局部桥接，避免影响旧数据转换
+- 已完成：Dashboard `permissions` 与 WidgetInfo `parameters` 从裸 `any` 收口为 `unknown`，当前 Dashboard 范围复扫仅剩 legacy 迁移局部类型桥接
+- 已完成：Dashboard 工具测试中的 legacy 大 fixture 强转集中收口为 `asLegacyWidgetFiltersAndParamsArgs` / `asLegacyBoardChartRequestsArgs`，测试层不再散落 `obj as any`
+- 已完成：beta0 迁移中的 legacy controller content 改为局部类型守卫，当前 Dashboard 专题范围复扫已无 `as any`、`config.content as`、`permissions?: any`、`parameters?: any` 等目标残留
 
 - 已完成：BasicTable 表格列、header/body cell props、summary 返回、分页排序事件和单元格点击事件补齐局部显式类型，保留 Ant Design 公开入口和现有渲染行为不变
 - 已完成：图表事件行数据统一收口到 `ChartRowData`，柱线饼散点漏斗词云轮廓地图瀑布等图表不再继续声明 `rowData: any`
@@ -513,7 +541,7 @@
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
 - 暂缓评估：FormGenerator 全局 `ItemLayoutProps`、交互规则面板的动态 `value` / `Customize` 映射仍是协议宽口，需单独评估交互配置结构后再收口
 - 暂缓评估：`ChartDataSetDTO.rows` 仍按历史 `string[][]` 表达图表运行时数据集，大量图表组件和 helper 以 `IChartDataSet<string>` 消费；后续如要对齐后端 `Dataframe.rows: List<List<Object>>`，需单独处理图表运行时的数据集泛型与字符串化边界
-- 暂缓评估：`WidgetConf.content` / `WidgetCreateProps.content` 是多类 widget 的共享内容协议宽口，直接改成 `unknown` 会牵涉图表、控制器、标签页、富文本和迁移链路，需要按 widget 类型分批拆分
+- 已进入第一阶段：`WidgetConf.content` / `WidgetCreateProps.content` 是多类 widget 的共享内容协议宽口，当前先拆分“创建入参 unknown”和“持久化内容兼容结构”，后续再按 chart / controller / media / container 分批收紧
 - 暂缓评估：Dashboard 工具测试中被跳过的历史大 fixture 仍有 `obj as any`，直接补全为完整 `Widget` 会引入大量非测试重点字段，后续如恢复这些测试应先抽通用 widget fixture helper
 - 下一批候选：前端低风险继续在当前长期分支累计，优先处理局部组件、工具函数和有测试覆盖的类型边界；暂不因单个小批次合入 `main`
 
@@ -815,6 +843,21 @@
 - 通过：运行时与类型边界累计批次合并前完整门禁，`npm run test:ci`，127 个测试文件通过，891 个测试通过，4 个跳过
 - 通过：运行时与类型边界累计批次合并前完整门禁，`npm run lint:css`
 - 通过：运行时与类型边界累计批次合并前完整门禁，`npm run lint:style`
+- 通过：Dashboard widget 内容协议边界专项轻量门禁，`npm run checkTs`
+- 通过：Dashboard widget 内容协议边界专项定向测试，`npm run test:ci -- src/app/migration/__tests__/migrateWidgetChartConfig.test.ts src/app/migration/__tests__/migrateWidgets.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts`，6 个测试文件通过，59 个测试通过，3 个跳过
+- 通过：Dashboard widget 内容类型守卫批次轻量门禁，`npm run checkTs`
+- 通过：Dashboard widget 内容类型守卫批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts`，5 个测试文件通过，37 个测试通过，3 个跳过
+- 通过：Dashboard Controller / Tab 内容消费点批次轻量门禁，`npm run checkTs`
+- 通过：Dashboard Controller / Tab 内容消费点批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts src/app/migration/__tests__/migrateWidgets.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts`，7 个测试文件通过，59 个测试通过，3 个跳过
+- 通过：Dashboard 状态弱类型边界批次轻量门禁，`npm run checkTs`
+- 通过：Dashboard 状态弱类型边界批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts`，4 个测试文件通过，33 个测试通过，3 个跳过
+- 通过：Dashboard 工具测试 legacy fixture 边界批次轻量门禁，`npm run checkTs`
+- 通过：Dashboard 工具测试 legacy fixture 边界批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx`，1 个测试文件通过，24 个测试通过，3 个跳过
+- 通过：Dashboard beta0 legacy 迁移边界收尾轻量门禁，`npm run checkTs`
+- 通过：Dashboard beta0 legacy 迁移边界收尾定向测试，`npm run test:ci -- src/app/migration/__tests__/migrateWidgets.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts`，5 个测试文件通过，47 个测试通过，3 个跳过
+- 通过：Dashboard widget 内容协议专题合并前完整门禁，`npm run test:ci`，127 个测试文件通过，891 个测试通过，4 个跳过
+- 通过：Dashboard widget 内容协议专题合并前完整门禁，`npm run lint:css`
+- 通过：Dashboard widget 内容协议专题合并前完整门禁，`npm run lint:style`
 
 触发完整前端门禁的条件：
 

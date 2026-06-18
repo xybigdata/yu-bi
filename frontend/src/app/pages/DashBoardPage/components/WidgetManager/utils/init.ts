@@ -489,7 +489,7 @@ export const widgetTpl = (): Widget => {
 
       // visible: true,
       lock: false,
-      content: {} as any,
+      content: {},
       //
       rect: initFreeWidgetRect(),
       pRect: initAutoWidgetRect(),

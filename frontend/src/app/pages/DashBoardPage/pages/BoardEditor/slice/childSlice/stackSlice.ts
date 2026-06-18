@@ -29,9 +29,9 @@ import {
   ContainerItem,
   Dashboard,
   DeviceType,
+  isTabWidgetContent,
   MediaWidgetContent,
   RectConfig,
-  TabWidgetContent,
 } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { Widget, WidgetConf } from 'app/pages/DashBoardPage/types/widgetTypes';
 import { Variable } from 'app/pages/MainPage/pages/VariablePage/slice/types';
@@ -389,8 +389,10 @@ export const editBoardStackSlice = createSlice({
       }>,
     ) {
       const { tabWidgetId, tabItem, sourceId } = action.payload;
-      const tabContent = state.widgetRecord[tabWidgetId].config
-        .content as TabWidgetContent;
+      const tabContent = state.widgetRecord[tabWidgetId].config.content;
+      if (!isTabWidgetContent(tabContent)) {
+        return;
+      }
       const sourceWidget = state.widgetRecord[sourceId];
       tabContent.itemMap[sourceWidget.config.clientId] = {
         ...tabItem,
@@ -398,9 +400,7 @@ export const editBoardStackSlice = createSlice({
         tabId: sourceWidget.config.clientId,
         childWidgetId: sourceWidget.id,
       };
-      delete state.widgetRecord[tabWidgetId].config.content.itemMap[
-        tabItem.tabId
-      ];
+      delete tabContent.itemMap[tabItem.tabId];
       state.widgetRecord[tabWidgetId].config.content = tabContent;
       state.widgetRecord[sourceId].parentId = tabWidgetId;
     },
@@ -414,8 +414,10 @@ export const editBoardStackSlice = createSlice({
     ) {
       const { parentId, tabItem } = action.payload;
 
-      const tabContent = state.widgetRecord[parentId].config
-        .content as TabWidgetContent;
+      const tabContent = state.widgetRecord[parentId].config.content;
+      if (!isTabWidgetContent(tabContent)) {
+        return;
+      }
 
       tabContent.itemMap[tabItem.tabId] = tabItem;
     },
@@ -429,7 +431,10 @@ export const editBoardStackSlice = createSlice({
     ) {
       const { parentId, sourceTabId } = action.payload;
       const tabWidget = state.widgetRecord[parentId];
-      const tabContent = tabWidget.config.content as TabWidgetContent;
+      const tabContent = tabWidget.config.content;
+      if (!isTabWidgetContent(tabContent)) {
+        return;
+      }
 
       const tabItem = tabContent.itemMap[sourceTabId];
 
@@ -462,9 +467,11 @@ export const editBoardStackSlice = createSlice({
         );
 
         if (currentParent.config.originalType === ORIGINAL_TYPE_MAP.tab) {
-          const currentParentItemMap = (
-            currentParent.config.content as TabWidgetContent
-          ).itemMap;
+          const currentParentContent = currentParent.config.content;
+          if (!isTabWidgetContent(currentParentContent)) {
+            return;
+          }
+          const currentParentItemMap = currentParentContent.itemMap;
           const draggedItem = Object.values(currentParentItemMap).find(
             ({ childWidgetId }) => childWidgetId === id,
           );
@@ -474,8 +481,12 @@ export const editBoardStackSlice = createSlice({
         }
       }
 
+      const newParentContent = newParent?.config.content;
       if (inTabs) {
-        (newParent.config.content as TabWidgetContent).itemMap = {};
+        if (!isTabWidgetContent(newParentContent)) {
+          return;
+        }
+        newParentContent.itemMap = {};
       } else {
         if (newParent) {
           newParent.config.children = [...children];
@@ -488,9 +499,10 @@ export const editBoardStackSlice = createSlice({
         childWidget.parentId = newParentId;
 
         if (inTabs) {
-          (newParent.config.content as TabWidgetContent).itemMap[
-            childWidget.config.clientId
-          ] = {
+          if (!isTabWidgetContent(newParentContent)) {
+            return;
+          }
+          newParentContent.itemMap[childWidget.config.clientId] = {
             index: childWidget.config.index,
             name: childWidget.config.name,
             tabId: childWidget.config.clientId,

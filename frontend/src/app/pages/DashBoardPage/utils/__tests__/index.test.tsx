@@ -27,11 +27,13 @@ import {
   DataChart,
   RelatedView,
 } from 'app/pages/DashBoardPage/pages/Board/slice/types';
+import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
 import {
   ControllerConfig,
   ControllerDate,
 } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import { ChartDataConfig } from 'app/types/ChartConfig';
+import { ChartVariableParams } from 'app/types/ChartDataRequest';
 import ChartDataView from 'app/types/ChartDataView';
 import { FilterSqlOperator } from 'globalConstants';
 import {
@@ -53,6 +55,28 @@ import { BOARD_FILE_IMG_PREFIX } from '../../constants';
 
 const oldBoardId = 'xxxBoardIdXxx555';
 const boardId = 'xxxBoardIdXxx666';
+
+type WidgetFiltersAndParamsArgs = {
+  chartWidget: Widget;
+  widgetMap: Record<string, Widget>;
+  params: ChartVariableParams | undefined;
+  view?: ChartDataView;
+};
+
+type BoardChartRequestsArgs = {
+  widgetMap: Record<string, Widget>;
+  viewMap: Record<string, ChartDataView>;
+  dashboardDataChartMap: Record<string, DataChart>;
+};
+
+const asLegacyWidgetFiltersAndParamsArgs = (
+  value: unknown,
+): WidgetFiltersAndParamsArgs => value as WidgetFiltersAndParamsArgs;
+
+const asLegacyBoardChartRequestsArgs = (
+  value: unknown,
+): BoardChartRequestsArgs => value as BoardChartRequestsArgs;
+
 describe('dashboard.utils.index', () => {
   it(' should convertImageUrl get url', () => {
     const str1 = '';
@@ -799,7 +823,11 @@ describe('getTheWidgetFiltersAndParams', () => {
         area1: ['山东'],
       },
     };
-    expect(getTheWidgetFiltersAndParams(obj as any)).toEqual(res);
+    expect(
+      getTheWidgetFiltersAndParams(
+        asLegacyWidgetFiltersAndParamsArgs(obj),
+      ),
+    ).toEqual(res);
   });
 
   it.skip('should no Params ', () => {
@@ -933,7 +961,11 @@ describe('getTheWidgetFiltersAndParams', () => {
       ],
       variableParams: {},
     };
-    expect(getTheWidgetFiltersAndParams(obj as any)).toEqual(res);
+    expect(
+      getTheWidgetFiltersAndParams(
+        asLegacyWidgetFiltersAndParamsArgs(obj),
+      ),
+    ).toEqual(res);
   });
 });
 describe('getWidgetControlValues', () => {
@@ -1867,6 +1899,8 @@ describe('getBoardChartRequests', () => {
         vizType: 'widget',
       },
     ];
-    expect(getBoardChartRequests(obj as any)).toEqual(res);
+    expect(getBoardChartRequests(asLegacyBoardChartRequestsArgs(obj))).toEqual(
+      res,
+    );
   });
 });

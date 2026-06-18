@@ -101,7 +101,7 @@ export const WidgetChartProvider: FC<
   const availableSourceFunctions =
     availableSourceFunctionsMap[viewMap[dataChart?.viewId]?.sourceId];
   const supportTrigger = SupportTriggerChartIds.includes(
-    dataChart?.config?.chartGraphId,
+    dataChart?.config?.chartGraphId || '',
   );
   const chartDataView = viewMap[dataChart?.viewId];
 

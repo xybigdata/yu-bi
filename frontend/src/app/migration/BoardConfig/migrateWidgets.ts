@@ -21,7 +21,6 @@ import { initInteractionTpl } from 'app/pages/DashBoardPage/components/WidgetMan
 import { ORIGINAL_TYPE_MAP } from 'app/pages/DashBoardPage/constants';
 import {
   BoardType,
-  ControllerWidgetContent,
   Relation,
   ServerRelation,
   ServerWidget,
@@ -51,6 +50,25 @@ type LegacyFilterWidgetBeta3 = Omit<WidgetBeta3, 'config'> & {
 type MigratingWidget = Widget | WidgetBeta3;
 type ServerWidgetConfigTarget = WidgetBeta3['config'];
 type RelationConfigTarget = Relation['config'];
+type LegacyComputedField = {
+  id?: string;
+  name?: string;
+};
+type LegacyControllerWidgetContent = {
+  config?: {
+    assistViewFields?: string | string[];
+  };
+};
+
+const isLegacyControllerWidgetContent = (
+  content: unknown,
+): content is LegacyControllerWidgetContent => {
+  if (!content || typeof content !== 'object') {
+    return false;
+  }
+  const candidate = content as LegacyControllerWidgetContent;
+  return !candidate.config || typeof candidate.config === 'object';
+};
 
 const parseServerRelationConfig = (
   rawConfig: string,
@@ -116,11 +134,13 @@ export const beta0 = (widget?: WidgetBeta3 | LegacyFilterWidgetBeta3) => {
 
   // 3.处理 assistViewFields 旧数据 assistViewFields 是 string beta0 使用数组存储的
   if (widget.config.type === 'controller') {
-    const content = widget.config.content as ControllerWidgetContent;
-    if (typeof content?.config?.assistViewFields === 'string') {
-      content.config.assistViewFields = (
-        content.config.assistViewFields as string
-      ).split(VALUE_SPLITTER);
+    const content = widget.config.content;
+    if (
+      isLegacyControllerWidgetContent(content) &&
+      typeof content.config?.assistViewFields === 'string'
+    ) {
+      content.config.assistViewFields =
+        content.config.assistViewFields.split(VALUE_SPLITTER);
     }
   }
   widget.config.version = APP_VERSION_BETA_0;
@@ -185,23 +205,25 @@ export const RC0 = (widget?: Widget) => {
   if (!widget) {
     return undefined;
   }
-  if (
-    !versionCanDo(APP_VERSION_RC_0, widget?.config?.content?.dataChart?.config)
-  ) {
+  const dataChartConfig = widget.config.content?.dataChart?.config;
+  const configVersion =
+    typeof dataChartConfig === 'string' ? dataChartConfig : dataChartConfig?.version;
+  if (!versionCanDo(APP_VERSION_RC_0, configVersion)) {
     return widget;
   }
-  if (widget.config.content?.dataChart?.config?.computedFields) {
-    widget.config.content.dataChart.config.computedFields =
-      widget.config.content.dataChart.config.computedFields.map(v => {
+  if (dataChartConfig?.computedFields) {
+    dataChartConfig.computedFields = dataChartConfig.computedFields.map(
+      (v: LegacyComputedField) => {
         if (!v.name) {
           return {
             ...v,
-            name: v.id,
+            name: v.id || '',
           };
         }
         return v;
-      });
-    widget.config.content.dataChart.config.version = APP_VERSION_RC_0;
+      },
+    ) as typeof dataChartConfig.computedFields;
+    dataChartConfig.version = APP_VERSION_RC_0;
   }
   return widget;
 };

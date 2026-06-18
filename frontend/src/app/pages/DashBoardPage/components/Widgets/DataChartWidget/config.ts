@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+import { DataChart } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import {
   Widget,
   WidgetCreateProps,
@@ -94,6 +95,14 @@ export const getMeta = (opt: {
   return meta;
 };
 
+const isDataChart = (content: unknown): content is DataChart => {
+  if (!content || typeof content !== 'object') {
+    return false;
+  }
+  const dataChart = content as Partial<DataChart>;
+  return !!dataChart.id && !!dataChart.name && !!dataChart.config;
+};
+
 export const dataChartCreator = (opt: WidgetCreateProps) => {
   const widget = widgetTpl();
   widget.parentId = opt.parentId || '';
@@ -102,8 +111,12 @@ export const dataChartCreator = (opt: WidgetCreateProps) => {
   widget.relations = opt.relations || [];
   widget.config.type = 'chart';
 
-  widget.config.content.dataChart = opt.content; // DataChart
-  widget.config.name = opt.name || opt.content?.name;
+  const dataChart = isDataChart(opt.content) ? opt.content : undefined;
+  widget.config.content = {
+    type: 'dataChart',
+    dataChart,
+  };
+  widget.config.name = opt.name || dataChart?.name || '';
   widget.config.customConfig.props = [
     { ...initTitleTpl() },
     { ...initLoopFetchTpl() },

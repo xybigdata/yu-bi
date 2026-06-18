@@ -11,6 +11,7 @@ import {
   RectConfig,
   Relation,
   VizRenderMode,
+  WidgetContent,
   WidgetType,
 } from '../pages/Board/slice/types';
 
@@ -47,7 +48,7 @@ export interface WidgetConf {
 
   // visible: boolean; // 是否可见 TODO: 后续考虑
   customConfig: CustomConfig;
-  content?: any;
+  content?: WidgetContent;
   rect: RectConfig; // rect of freeBoard
   mRect?: RectConfig; // mobile rect of autoBoard
   pRect: RectConfig; // pc rect of autoBoard
@@ -63,7 +64,7 @@ export interface WidgetCreateProps {
   boardType?: BoardType;
   datachartId?: string;
   relations?: Relation[];
-  content?: any;
+  content?: unknown;
   viewIds?: string[];
   parentId?: string;
   children?: string[];

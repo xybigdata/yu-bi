@@ -48,6 +48,9 @@ import {
   ChartWidgetContent,
   ControllerWidgetContent,
   DataChart,
+  isChartWidgetContent,
+  isControllerWidgetContent,
+  isTabWidgetContent,
   Relation,
   ServerRelation,
   ServerWidget,
@@ -303,7 +306,9 @@ export const convertWrapChartWidget = (params: {
     const dataChart = dashboardDataChartMap[widget.datachartId];
     const newWidget = produce(widget, draft => {
       draft.datachartId = '';
-      (draft.config.content as ChartWidgetContent).dataChart = dataChart;
+      if (isChartWidgetContent(draft.config.content)) {
+        draft.config.content.dataChart = dataChart;
+      }
     });
     return newWidget;
   });
@@ -334,7 +339,10 @@ export const getOtherStringControlWidgets = (
     if (ele.config.type !== 'controller') {
       return false;
     }
-    const content = ele.config.content as ControllerWidgetContent;
+    const content = ele.config.content;
+    if (!isControllerWidgetContent(content)) {
+      return false;
+    }
     return StrControlTypes.includes(content.type);
   });
   if (!widgetId) {
@@ -372,7 +380,10 @@ export const getNoHiddenControllers = (widgets: Widget[]) => {
     if (w.config.type !== 'controller') {
       return true;
     }
-    const content = w.config.content as ControllerWidgetContent;
+    const content = w.config.content;
+    if (!isControllerWidgetContent(content)) {
+      return false;
+    }
     const visibility = content.config.visibility;
     if (visibility.visibilityType === 'show') {
       return true;
@@ -394,8 +405,11 @@ export const getNoHiddenControllers = (widgets: Widget[]) => {
         if (!dependWidget) {
           return false;
         }
-        const content = dependWidget.config.content as ControllerWidgetContent;
-        const dependWidgetValue = content.config.controllerValues?.[0];
+        const dependContent = dependWidget.config.content;
+        if (!isControllerWidgetContent(dependContent)) {
+          return false;
+        }
+        const dependWidgetValue = dependContent.config.controllerValues?.[0];
         if (relation === FilterSqlOperator.Equal) {
           return targetValue === dependWidgetValue;
         }
@@ -576,7 +590,10 @@ export const getWidgetMap = (
   widgetList
     .filter(w => w.config.type === 'controller')
     .forEach(widget => {
-      const content = widget.config.content as ControllerWidgetContent;
+      const content = widget.config.content;
+      if (!isControllerWidgetContent(content)) {
+        return;
+      }
       // 根据 url参数修改filter 默认值
       if (filterSearchParams) {
         const paramsKey = Object.keys(filterSearchParams);
@@ -636,7 +653,10 @@ export const getWidgetMap = (
   widgetList
     .filter(w => w.config.originalType === ORIGINAL_TYPE_MAP.ownedChart)
     .forEach(widget => {
-      let dataChart = (widget.config.content as ChartWidgetContent).dataChart;
+      if (!isChartWidgetContent(widget.config.content)) {
+        return;
+      }
+      let dataChart = widget.config.content.dataChart;
       if (dataChart) {
         wrappedDataCharts.push(dataChart!);
         widget.datachartId = dataChart.id;
@@ -656,8 +676,8 @@ export const getWidgetMap = (
       if (parentWidget.config.originalType !== ORIGINAL_TYPE_MAP.tab) {
         return;
       }
-      const tabContent = parentWidget.config.content as TabWidgetContent;
-      if (!tabContent.itemMap) {
+      const tabContent = parentWidget.config.content;
+      if (!isTabWidgetContent(tabContent)) {
         widget.parentId = '';
         return;
       }
@@ -752,7 +772,10 @@ export function cloneWidgets(args: {
     });
     // tab
     if (newWidget.config.type === 'container') {
-      const content = newWidget.config.content as TabWidgetContent;
+      const content = newWidget.config.content;
+      if (!isTabWidgetContent(content)) {
+        return;
+      }
       const itemList = Object.values(content.itemMap);
       const newItemMap = itemList.reduce(
         (acc, cur) => {

@@ -18,7 +18,7 @@
 
 import { ORIGINAL_TYPE_MAP } from 'app/pages/DashBoardPage/constants';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
-import { TabWidgetContent } from '../../../Board/slice/types';
+import { isTabWidgetContent } from '../../../Board/slice/types';
 import { LayerNode } from './LayerTreeItem';
 
 export const widgetMapToTree = (args: {
@@ -42,8 +42,8 @@ export const widgetMapToTree = (args: {
     widgetMap[parentId].config.originalType === ORIGINAL_TYPE_MAP.tab
   ) {
     // tab
-    const itemMap = (widgetMap[parentId].config.content as TabWidgetContent)
-      .itemMap;
+    const tabContent = widgetMap[parentId].config.content;
+    const itemMap = isTabWidgetContent(tabContent) ? tabContent.itemMap : {};
     const items = Object.values(itemMap).sort((b, a) => a.index - b.index);
 
     sortedWidgets = items
@@ -101,7 +101,8 @@ export function getDropInfo(
   let siblings: string[] = [];
 
   if (inTabs) {
-    const itemMap = (parent.config.content as TabWidgetContent).itemMap;
+    const tabContent = parent.config.content;
+    const itemMap = isTabWidgetContent(tabContent) ? tabContent.itemMap : {};
     siblings = Object.values(itemMap || {})
       .filter(i => i.childWidgetId && i.childWidgetId !== id)
       .sort((a, b) => b.index - a.index)
