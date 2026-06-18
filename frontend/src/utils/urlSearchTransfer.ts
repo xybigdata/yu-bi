@@ -16,17 +16,21 @@
  * limitations under the License.
  */
 
+type UrlSearchParamValue = string | number | boolean | string[];
+type UrlSearchParamsRecord = Record<string, UrlSearchParamValue>;
+type ParsedUrlSearchParams = Record<string, string[]>;
+
 export const urlSearchTransfer = {
-  toParams: (url: string) => {
+  toParams: (url: string): ParsedUrlSearchParams => {
     const params = new URLSearchParams(url);
-    const obj: any = {};
+    const obj: ParsedUrlSearchParams = {};
     const keysEntries = params.keys();
     for (const key of keysEntries) {
       obj[key] = params.getAll(key);
     }
     return obj;
   },
-  toUrlString: (obj: Object): string => {
+  toUrlString: (obj: UrlSearchParamsRecord): string => {
     const keys = Object.keys(obj);
     const params = new URLSearchParams();
     keys.forEach(k => {
@@ -36,7 +40,7 @@ export const urlSearchTransfer = {
           params.append(k, v);
         });
       } else {
-        params.append(k, value);
+        params.append(k, String(value));
       }
     });
     return params.toString();

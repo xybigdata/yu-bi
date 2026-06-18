@@ -35,6 +35,13 @@
 - 只提交与当前专题直接相关的文件
 - 尽量按专题攒成一批再提交，避免高频提交带来重复回归成本
 
+### 2.4 目标核对节奏
+
+- 每轮开始先核对长期目标：`JDK 21`、`Node 24`、兼容优先、稳定版优先、`main` 不直接开发
+- 每批提交前核对短期目标：当前改动是否仍属于当前专题，是否低风险、可验证、可回退
+- 如果候选点开始牵涉共享协议、运行时行为或跨域依赖，先降级为评估项，不混入低风险批次
+- 每次阶段性提交或推送后，在本文档中保留对后续判断有用的执行记录
+
 ## 3. 当前基线
 
 ### 3.1 后端
@@ -297,10 +304,10 @@
 
 本批目标：
 
-- 继续清理生产代码中能用现有 DTO / APIResponse / Axios 类型表达的 `any`
-- 优先处理请求工具、下载工具、错误处理和“不消费响应体”的 API 调用
-- 保持接口路径、请求参数、错误提示和下载行为不变
-- 返回数据会进入业务拼装的链路先标记评估，不硬改
+- 继续复扫生产工具函数中已有测试覆盖、可隔离的局部弱类型
+- 优先处理 `chartHelper.ts` / `internalChartHelper.ts` 中不改变运行时语义的返回值、行数据和交互过滤器边界
+- 保持 tooltip 输出、轴标签溢出、图表选中样式和联动过滤器行为不变
+- 返回数据会进入保存、复制、迁移等业务拼装的链路先标记评估，不硬改
 
 当前累计清单：
 
@@ -332,8 +339,27 @@
 - 已完成：看板 widget 工具、图表选择弹窗、自定义选项表格、添加控制器菜单与图层树节点的局部类型边界收口，保留运行时行为不变
 - 已完成：Chart Workbench 样式配置面板、图表图标渲染、分类条件拖拽表格、排序拖拽项、筛选配置交互与控制器文本/数值 setter 的局部类型边界收口，保留交互与配置语义不变
 - 已完成：根目录 `.gitignore` 忽略 `.tmp/` 与 `logs/` 本地运行目录，避免后续误提交
+- 已完成：`chartHelper.ts` 的样式取值、tooltip 行数据、额外 series 行数据、轴标签溢出 option 访问和选中样式对象补齐局部显式类型，去掉对应 `any` / `@ts-ignore`
+- 已完成：`internalChartHelper.ts` 的跳转与联动过滤器返回值收口为显式字段值数组映射，保留调用方追加 URL 标记与联动过滤器语义不变
+- 已完成：`urlSearchTransfer.ts` 的 URL 参数解析与序列化补齐显式参数值类型，并新增单测锁住重复参数、数组参数和标量参数行为
+- 已完成：`internalChartHelper.ts` 的点击行数据输入收口为最小交互行数据类型，过滤器 values 显式字符串化后进入 `PendingChartDataRequestFilter`，并补齐点击过滤器回归测试
+- 已完成：`useStateModal.tsx` 的内部缓存状态从 `any[]` 收口为 `unknown[]`，保留公开回调参数兼容面不变
+- 已完成：`useGetVizIcon.tsx` 的可视化图标参数与渲染组件 props 补齐显式局部类型，去掉未使用的宽泛索引签名
+- 已完成：`rejectedErrorHandlerMiddleware.ts` 的 rejected action 消息读取补齐 `unknown` 入口与局部类型守卫，去掉错误处理链路里的 `any`
+- 已完成：Redux 动态 reducer 注入器补齐 HOC props、key 和 action 类型边界，保留不同 slice reducer 动态注入的运行时兼容面
+- 已完成：`loadable.tsx` 改为通过重载保留懒加载组件 props 类型，默认导出和 selector 导出两类调用保持现有行为不变
+- 已完成：`object.ts` 的二元数组、空值判断、浅合并、集合复制、对象取值、字符串转换、函数/Promise/树模型判断等 helper 改为显式 `unknown` / 泛型边界，保留原判断语义不变
+- 已完成：`debugger.ts` 的性能测量入口改为泛型回调，保留同步和异步返回值语义不变
+- 已完成：`utils.ts` 的通用错误处理入口改为 `unknown` + 最小错误结构守卫，并补齐错误消息提取与 reject 回归测试
+- 已完成：Redux reducer 测试改为使用真实 `theme` 注入 key 与 `UnknownAction`，去掉测试里的宽泛 reducer 强转
+- 已完成：`checkStore.ts` 的 Redux 动态注入 store 校验入口改为 `unknown`，继续由运行时 shape 校验兜底
+- 已完成：`utils.ts` 的 className 合并与阻止冒泡 helper 补齐显式入参类型，保持 className 输出和事件行为不变
+- 已完成：`internalChartHelper.ts` 的 view config 解析入口补齐对象守卫，非对象 JSON 输入按空配置处理，并补齐回归测试
+- 已完成：`chartHelper.ts` 的轴标签 interval 判断和 meta 路径查找 helper 补齐显式入参与返回类型，保持旧筛选值兼容面不变
+- 已完成：`fetch.ts` 的计算字段校验、可用函数列表、下载、插件加载、分享任务与图表数据请求 helper 补齐参数和返回类型，保持请求结构不变
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
+- 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
 - 下一批候选：`utils/chartHelper.ts`、`utils/internalChartHelper.ts` 中可隔离、已有测试覆盖的 helper 局部类型收口
 
 当前已落地范围：
@@ -341,6 +367,22 @@
 - `VariablePage/utils.ts` 继续沉淀变量权限日期值序列化 helper
 - `VariablePage/index.tsx` 与 `ViewPage/Main/Properties/Variables.tsx` 改为复用统一 relation 序列化入口
 - `date.ts` 继续补齐范围时间格式化与“今天结束前禁用” helper
+- `chartHelper.ts` 继续收口 tooltip、axis label overflow 与 selected item style 相关 helper 的局部类型边界
+- `internalChartHelper.ts` 继续收口图表交互过滤器值映射的返回边界
+- `urlSearchTransfer.ts` 补齐 URL 参数工具的显式类型与回归测试
+- `useStateModal.tsx` 与 `useGetVizIcon.tsx` 补齐内部 hook 局部类型边界
+- `rejectedErrorHandlerMiddleware.ts` 补齐 Redux rejected action 错误消息读取边界
+- `injectReducer/index.tsx` 与 `reducerInjectors.ts` 补齐动态 reducer 注入器类型边界
+- `loadable.tsx` 补齐懒加载组件 props 推断边界
+- `object.ts` 补齐通用数组/空值/合并/复制/判断 helper 的低风险类型边界
+- `debugger.ts` 补齐性能测量工具的泛型返回值边界
+- `utils.ts` 补齐通用错误处理和 reject helper 的错误对象边界
+- `redux/__tests__/reducer.test.ts` 补齐 reducer 测试的真实注入 key 与 action 类型边界
+- `checkStore.ts` 补齐 Redux 动态注入 store 校验入口边界
+- `utils.ts` 补齐 className 合并与事件阻止冒泡 helper 的入参边界
+- `internalChartHelper.ts` 补齐 view config 解析对象守卫
+- `chartHelper.ts` 补齐 interval 判断和 meta 路径查找 helper 类型边界
+- `fetch.ts` 补齐计算字段校验、可用函数列表、下载、插件加载、分享任务与图表数据请求 helper 类型边界
 - `date.ts` 新增标准时间串 helper，继续承接 `TIME_FORMATTER` 的零散重复调用
 - `date.ts` 继续补齐标准时间串的可选格式化 helper，减少过滤器与当前时间默认值链路的直接模板耦合
 - `SchedulePage/utils.ts`、`ShareLinkModal.tsx`、`DashBoardPage/utils/*`、`ChartTimeSelector/utils.ts` 改为复用统一日期工具
@@ -426,12 +468,18 @@
 - `TextSetter/index.tsx` 与 `BasicSet/NumberSet.tsx` 的表单 props / 数值回调改为复用 antd 公开类型，减少控制器与看板配置链路里的宽泛 `FormItemProps<any>`、`onChange: any`
 - `WidgetConfigPanel.tsx`、`ImageUpload.tsx`、`AggregationColorizeAction.tsx`、`ChartComputedFieldSettingPanel.tsx` 的 context / 上传回调 / 颜色事件 / 树选择值改为显式兼容类型，继续压缩 Workbench 与看板配置链路中的局部 `any`
 - `.gitignore` 增加 `.tmp/`、`logs/`，减少低风险改造过程中本地运行产物干扰
+- `ControllerWidgetPanel/types.ts`、`TimeSetter.tsx`、`ChartDataConfigSection/utils.ts`、`DateLevelMenuItems.tsx` 的共享模型与工具函数边界继续收口，开始把低风险改造从 UI 透传扩展到 Workbench 公共配置层
+- `BoardEditor/slice/thunk.ts` 的保存看板请求 thunk 返回值改为显式 `null`，继续压缩 Workbench 编辑链路中“不消费响应体”调用的宽泛泛型
+- `DashBoardPage/utils/index.ts` 的 `getWidgetControlValues` 返回结构改为显式控制器值类型，继续压缩看板过滤器参数构造链路里的 `value: any`
+- `chartHelper.ts` 的数值单位格式化、未使用表头行、tooltip 配置拼接和最小最大值计算入口继续收口局部 `any[]` / 宽泛入参，保持格式化与 tooltip 输出语义不变
+- `internalChartHelper.ts` 的视图配置字段映射和拖拽 item 构造补齐显式局部类型，继续压缩 Workbench 拖拽源与 view config helper 中的宽泛输入边界
 
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/__tests__/utils.test.ts`
-- `rg -n "CollapseItemsCompatProps|collapseProps as any|tabPosition=\\{position as any\\}" frontend/src/app/pages/DashBoardPage -g "*.tsx"`
+- `npm run test:ci -- src/utils/__tests__/utils.test.ts src/app/utils/__tests__/chartHelper.test.ts src/app/utils/__tests__/internalChartHelper.test.ts`
+- `npm run test:ci -- src/redux/__tests__/reducer.test.ts src/redux/__tests__/configureStore.test.ts src/utils/@reduxjs/injectReducer/tests/reducerInjectors.test.ts src/utils/@reduxjs/injectReducer/tests/checkStore.test.ts`
+- `npm run test:ci -- src/app/utils/__tests__/internalChartHelper.test.ts`
 
 ### 6.2 最近已完成
 
@@ -469,21 +517,34 @@
 5. 前端依赖收口与历史入口审计继续逐个推进
 6. 安装健康度与锁文件一致性持续检查
 
-## 8. 每轮固定门禁
+## 8. 分层门禁
 
 ### 8.1 范围规则
 
 - 一个提交只处理一个专题
 - 低风险与高风险不混提
 - 当前专题之外的改动不顺手带上
+- 同一低风险专题尽量累计到一批再提交和推送，避免每个小点都触发完整回归
 
 ### 8.2 验证规则
 
-前端专题至少执行：
+前端低风险小步改造开发中默认执行：
 
 - `npm run checkTs`
-- `npm run build:all`
-- `npm run test:ci -- --silent`
+- 与改动文件直接相关的定向测试，例如 `npm run test:ci -- <test files>`
+
+前端阶段性批次提交或推送前再执行：
+
+- `npm run checkTs`
+- 必要时 `npm run build:all`
+- 必要时 `npm run test:ci -- --silent`
+
+触发完整前端门禁的条件：
+
+- 依赖、构建配置、路由入口、运行时加载、共享模型、迁移链路发生变化
+- 一个批次准备推送远端或准备 merge 回 `main`
+- 定向测试不足以覆盖改动影响面
+- 之前同专题已累计多次小步修改，需要阶段性回归
 
 后端专题至少执行：
 
@@ -501,3 +562,4 @@
 - 默认直接在当前专题分支提交
 - 不直接改 `main`
 - 同一专题尽量攒成更完整的一批再提交，避免高频触发整套回归
+- 小步改造可先只做定向验证，阶段性提交或推送时再补完整门禁

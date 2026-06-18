@@ -21,16 +21,31 @@ import { message } from 'antd';
 
 const rejectedErrorHandlerMiddleware = createListenerMiddleware();
 
+const getMessage = (value: unknown): string | undefined => {
+  if (!value || typeof value !== 'object') {
+    return undefined;
+  }
+  const record = value as { message?: unknown };
+  return typeof record.message === 'string' ? record.message : undefined;
+};
+
+const getRejectedErrorMessage = (action: unknown): string | undefined => {
+  if (!action || typeof action !== 'object') {
+    return undefined;
+  }
+  const record = action as { payload?: unknown; error?: unknown };
+  return getMessage(record.payload) || getMessage(record.error);
+};
+
 rejectedErrorHandlerMiddleware.startListening({
   predicate: isRejected,
-  effect: async (action: any, listenerApi) => {
+  effect: async (action, listenerApi) => {
     listenerApi.cancelActiveListeners();
     await listenerApi.delay(100);
 
-    if (action?.payload?.message) {
-      message.error(action?.payload?.message);
-    } else if (action?.error) {
-      message.error((action as any)?.error?.message);
+    const errorMessage = getRejectedErrorMessage(action);
+    if (errorMessage) {
+      message.error(errorMessage);
     }
     console.error(`Redux Rejection Error | `, action);
   },

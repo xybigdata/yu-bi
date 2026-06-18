@@ -165,7 +165,7 @@ export const fetchEditBoardDetail = createAsyncThunk<
  * @description '更新保存 board'
  */
 export const toUpdateDashboard = createAsyncThunk<
-  any,
+  null,
   { boardId: string; callback?: () => void },
   { state: RootState }
 >(
@@ -204,6 +204,7 @@ export const toUpdateDashboard = createAsyncThunk<
       data: updateData,
     });
     callback?.();
+    return null;
   },
 );
 /**

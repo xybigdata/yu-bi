@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Form, FormInstance, Select } from 'antd';
+import { Form, FormInstance, FormItemProps, Select } from 'antd';
 import type { SelectProps } from 'antd';
 import { ControllerFacadeTypes, TimeFilterValueCategory } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -36,6 +36,7 @@ import {
 import {
   ControllerConfig,
   ControllerDateType,
+  PickerType,
   PickerTypeOptions,
   RelativeDate,
 } from '../../../types';
@@ -46,6 +47,7 @@ export const TimeSetter: React.FC<{
   form: FormInstance<ControllerWidgetContent> | undefined;
   controllerType: ControllerFacadeTypes;
 }> = ({ controllerType, form }) => {
+  type NamePath = NonNullable<FormItemProps['name']>;
   const tc = useI18NPrefix(`viz.control`);
   const tvt = useI18NPrefix(`viz.tips`);
   const filterDataT = useI18NPrefix('viz.common.filter.date');
@@ -159,7 +161,13 @@ export const TimeSetter: React.FC<{
     [form, getControllerConfig],
   );
   const renderROE = useCallback(
-    (name, onChange: (value: SelectProps['value']) => void) => {
+    (
+      name: NamePath,
+      onChange: (
+        value: TimeFilterValueCategory,
+        option: Parameters<NonNullable<SelectProps['onChange']>>[1],
+      ) => void,
+    ) => {
       return (
         <Form.Item
           name={name}
@@ -187,19 +195,26 @@ export const TimeSetter: React.FC<{
     },
     [filterDataT],
   );
-  const renderExact = useCallback((name, getPickerType: () => any) => {
-    return (
-      <Form.Item
-        noStyle
-        name={name}
-        shouldUpdate
-        validateTrigger={['onChange', 'onBlur']}
-        // rules={[{ required: false, validator: RangeTimeValidator }]}
-      >
-        <SingleTimeSet pickerType={getPickerType()!} />
-      </Form.Item>
-    );
-  }, []);
+  const renderExact = useCallback(
+    (name: NamePath, getPickerType: () => PickerType | undefined) => {
+      const pickerType = getPickerType();
+      if (!pickerType) {
+        return null;
+      }
+      return (
+        <Form.Item
+          noStyle
+          name={name}
+          shouldUpdate
+          validateTrigger={['onChange', 'onBlur']}
+          // rules={[{ required: false, validator: RangeTimeValidator }]}
+        >
+          <SingleTimeSet pickerType={pickerType} />
+        </Form.Item>
+      );
+    },
+    [],
+  );
 
   return (
     <Form.Item noStyle shouldUpdate>

@@ -63,6 +63,7 @@ import {
 } from '../pages/Board/slice/types';
 import {
   ControllerConfig,
+  ControllerValue,
   ControllerDate,
 } from '../pages/BoardEditor/components/ControllerWidgetPanel/types';
 import { Widget } from '../types/widgetTypes';
@@ -282,10 +283,11 @@ export const getWidgetControlValues = (opt: {
 }):
   | false
   | {
-      value: any;
-      valueType: string;
+      value: string | ControllerValue;
+      valueType: DataViewFieldType | 'DATE';
     }[] => {
   const { type, relatedViewItem, config } = opt;
+  type WidgetControlValueType = DataViewFieldType | 'DATE';
   const valueType = relatedViewItem.fieldValueType;
 
   if (DateControllerTypes.includes(type)) {
@@ -303,7 +305,7 @@ export const getWidgetControlValues = (opt: {
       .map(ele => {
         const item = {
           value: ele,
-          valueType: valueType || 'DATE',
+          valueType: (valueType || 'DATE') as WidgetControlValueType,
         };
         return item;
       });
@@ -326,7 +328,7 @@ export const getWidgetControlValues = (opt: {
       .map(ele => {
         const item = {
           value: typeof ele === 'string' ? ele.trim() : ele,
-          valueType: valueType || 'STRING',
+          valueType: (valueType || 'STRING') as WidgetControlValueType,
         };
         return item;
       });

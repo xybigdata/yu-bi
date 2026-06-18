@@ -1,8 +1,10 @@
 import {
   filterListOrTree,
   getInsertedNodeIndex,
+  getErrorMessage,
   listToTree,
   modelListFormsTreeByTableName,
+  rejectHandle,
   universalUUID,
   uuidv4,
 } from 'utils/utils';
@@ -236,5 +238,39 @@ describe('utils tree helpers', () => {
       expect.objectContaining({ name: 'customers', index: 0 }),
       expect.objectContaining({ name: 'orders', index: 1 }),
     ]);
+  });
+});
+
+describe('utils error helpers', () => {
+  it('should read error messages from strings, Error objects and axios responses', () => {
+    expect(getErrorMessage('plain error')).toBe('plain error');
+    expect(getErrorMessage(new Error('native error'))).toBe('native error');
+    expect(
+      getErrorMessage({
+        message: 'fallback message',
+        response: {
+          status: 500,
+          data: { message: 'server message' },
+        },
+      }),
+    ).toBe('server message');
+  });
+
+  it('should pass axios response messages to rejectWithValue', () => {
+    const rejectWithValue = vi.fn(value => value);
+
+    expect(
+      rejectHandle(
+        {
+          message: 'fallback message',
+          response: {
+            status: 500,
+            data: { message: 'server message' },
+          },
+        },
+        rejectWithValue,
+      ),
+    ).toBe('server message');
+    expect(rejectWithValue).toHaveBeenCalledWith('server message');
   });
 });

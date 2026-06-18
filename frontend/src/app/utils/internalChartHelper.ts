@@ -71,6 +71,39 @@ import {
 import { getDrillableRows, round } from './chartHelper';
 
 type CompatibleChartStyleRows = NonNullable<ChartStyleConfig['rows']>;
+type ViewConfigFieldMap = {
+  cache?: boolean;
+  cacheExpires?: number;
+  concurrencyControl?: boolean;
+  concurrencyControlMode?: string;
+  expensiveQuery?: boolean;
+};
+type DragItemMeta = Pick<
+  ChartDataViewMeta,
+  'category' | 'dateFormat' | 'subType' | 'type'
+> & {
+  name?: string;
+  children?: DragItemMeta[];
+};
+type ChartInteractionRowData = Record<
+  string,
+  string | number | boolean | null | undefined
+>;
+type ViewConfigRecord = Record<string, unknown>;
+
+export type ChartDragItem = {
+  category?: ChartDataViewMeta['category'];
+  colName?: string;
+  dateFormat?: ChartDataViewMeta['dateFormat'];
+  subType?: ChartDataViewMeta['subType'];
+  type?: ChartDataViewMeta['type'];
+  children: ChartDragItem[];
+};
+export type InteractionFilterValueMap = Record<string, string[]>;
+
+function isRecord(value: unknown): value is ViewConfigRecord {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
 
 const parseVariableParamValues = (
   defaultValue?: string,
@@ -102,18 +135,19 @@ const parseViewModel = (model?: string): Record<string, any> | undefined => {
 
 const parseViewConfig = (
   viewConfig?: string | object,
-): Record<string, any> | undefined => {
+): ViewConfigRecord | undefined => {
   if (!viewConfig) {
     return undefined;
   }
   if (typeof viewConfig === 'string') {
     try {
-      return JSON.parse(viewConfig) as Record<string, any>;
+      const parsed = JSON.parse(viewConfig);
+      return isRecord(parsed) ? parsed : undefined;
     } catch (error) {
       return undefined;
     }
   }
-  return viewConfig as Record<string, any>;
+  return isRecord(viewConfig) ? viewConfig : undefined;
 };
 
 export const transformToHierarchyModel = (model?: string) => {
@@ -741,28 +775,25 @@ export function getAxisLengthByConfig(config: ChartCommonConfig) {
 
 export const transformToViewConfig = (
   viewConfig?: string | object,
-): {
-  cache?: boolean;
-  cacheExpires?: number;
-  concurrencyControl?: boolean;
-  concurrencyControlMode?: string;
-  expensiveQuery?: boolean;
-} => {
+): ViewConfigFieldMap => {
   const viewConfigMap = parseViewConfig(viewConfig);
-  const fields = [
-    'cache',
-    'cacheExpires',
-    'concurrencyControl',
-    'concurrencyControlMode',
-    'expensiveQuery',
-  ];
-  return fields.reduce((acc, cur) => {
-    acc[cur] = viewConfigMap?.[cur];
-    return acc;
-  }, {});
+  return {
+    cache: viewConfigMap?.cache as ViewConfigFieldMap['cache'],
+    cacheExpires:
+      viewConfigMap?.cacheExpires as ViewConfigFieldMap['cacheExpires'],
+    concurrencyControl:
+      viewConfigMap?.concurrencyControl as ViewConfigFieldMap['concurrencyControl'],
+    concurrencyControlMode:
+      viewConfigMap?.concurrencyControlMode as ViewConfigFieldMap['concurrencyControlMode'],
+    expensiveQuery:
+      viewConfigMap?.expensiveQuery as ViewConfigFieldMap['expensiveQuery'],
+  };
 };
 
-export const buildDragItem = (item, children: any[] = []) => {
+export const buildDragItem = (
+  item?: DragItemMeta,
+  children: DragItemMeta[] = [],
+): ChartDragItem => {
   return {
     colName: item?.name,
     type: item?.type,
@@ -820,7 +851,7 @@ export const getChartDrillOption = (
 };
 
 export const buildClickEventBaseFilters = (
-  rowDatas?: Record<string, any>[],
+  rowDatas?: ChartInteractionRowData[],
   rule?: InteractionRule,
   drillOption?: IChartDrillOption,
   dataConfigs?: ChartDataConfig[],
@@ -841,12 +872,12 @@ export const buildClickEventBaseFilters = (
     .concat(colorConfigs)
     .concat(mixConfigs)
     .reduce<PendingChartDataRequestFilter[]>((acc, c) => {
-      const filterValues = rowDatas
+      const filterValues: PendingChartDataRequestFilter['values'] = rowDatas
         ?.map(rowData => {
           return rowData?.[c.colName];
         })
         ?.filter(value => !isEmpty(value))
-        ?.map(value => ({ value, valueType: c.type }));
+        ?.map(value => ({ value: String(value), valueType: c.type }));
 
       if (isEmptyArray(filterValues) || isEmpty(c.colName)) {
         return acc;
@@ -867,7 +898,7 @@ export const getJumpFiltersByInteractionRule = (
   chartFilters: PendingChartDataRequestFilter[] = [],
   variableFilters: PendingChartDataRequestFilter[] = [],
   rule?: InteractionRule,
-): Record<string, string | any> => {
+): InteractionFilterValueMap => {
   return clickEventFilters
     .concat(chartFilters)
     .concat(variableFilters)
@@ -905,7 +936,7 @@ export const getJumpFiltersByInteractionRule = (
       }
     })
     .filter(Boolean)
-    .reduce((acc, cur) => {
+    .reduce<InteractionFilterValueMap>((acc, cur) => {
       if (cur?.column) {
         const currentValues = cur?.values?.map(v => v.value) || [];
         const column = cur.column;
@@ -968,14 +999,14 @@ export const getLinkFiltersByInteractionRule = (
   chartFilters: PendingChartDataRequestFilter[] = [],
   variableFilters: PendingChartDataRequestFilter[] = [],
   rule?: InteractionRule,
-): Record<string, string | any> => {
+): InteractionFilterValueMap => {
   const ruleFilters = filterFiltersByInteractionRule(
     rule,
     ...clickEventFilters,
     ...chartFilters,
     ...variableFilters,
   );
-  return ruleFilters.reduce((acc, cur) => {
+  return ruleFilters.reduce<InteractionFilterValueMap>((acc, cur) => {
     if (cur?.column) {
       const currentValues = cur?.values?.map(v => v.value) || [];
       const column = cur.column!;

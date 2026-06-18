@@ -21,20 +21,36 @@ import {
   ChartDataViewFieldCategory,
   RUNTIME_DATE_LEVEL_KEY,
 } from 'app/constants';
-import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import useI18NPrefix, { I18NTranslate } from 'app/hooks/useI18NPrefix';
 import { FieldTemplate } from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartDataViewPanel/components/utils';
+import { ChartDataSectionField } from 'app/types/ChartConfig';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { getAllColumnInMeta } from 'app/utils/chartHelper';
 import { updateBy } from 'app/utils/mutation';
 import { DATE_LEVEL_DELIMITER } from 'globalConstants';
 import React, { memo, useCallback } from 'react';
 import { DATE_LEVELS } from '../../../../../slice/constant';
+
 interface DateLevelMenuItemsProps {
   availableSourceFunctions?: string[];
-  config;
+  config: ChartDataSectionField;
   metas?: ChartDataViewMeta[];
-  onChange;
+  onChange: (
+    config: ChartDataSectionField,
+    needRefresh?: boolean,
+    replacedConfig?: ChartDataSectionField,
+  ) => void;
 }
+
+type DateLevelSelectedConfig = Pick<
+  ChartDataSectionField,
+  'category' | 'colName'
+> &
+  Partial<Pick<ChartDataSectionField, 'expression'>>;
+
+type RuntimeDateLevelChartDataSectionField = ChartDataSectionField & {
+  [RUNTIME_DATE_LEVEL_KEY]?: ChartDataSectionField | null;
+};
 
 export const buildDateLevelMenuItems = ({
   availableSourceFunctions,
@@ -43,13 +59,14 @@ export const buildDateLevelMenuItems = ({
   onChange,
   t,
 }: DateLevelMenuItemsProps & {
-  t: (key: string) => any;
+  t: I18NTranslate;
 }): MenuProps['items'] => {
-  const handleChangeFn = selectedConfig => {
+  const handleChangeFn = (selectedConfig: DateLevelSelectedConfig) => {
+    const runtimeConfig = config as RuntimeDateLevelChartDataSectionField;
     if (config.category === ChartDataViewFieldCategory.DateLevelComputedField) {
       if (selectedConfig.category === ChartDataViewFieldCategory.Field) {
         return onChange(
-          updateBy(config, draft => {
+          updateBy(runtimeConfig, draft => {
             delete draft.expression;
             delete draft.field;
             draft.category = selectedConfig.category;
@@ -59,19 +76,20 @@ export const buildDateLevelMenuItems = ({
         );
       }
 
-      return onChange({
-        ...config,
-        colName: selectedConfig.colName,
-        expression: selectedConfig.expression,
-        [RUNTIME_DATE_LEVEL_KEY]: null,
-      });
+      return onChange(
+        updateBy(runtimeConfig, draft => {
+          draft.colName = selectedConfig.colName;
+          draft.expression = selectedConfig.expression;
+          draft[RUNTIME_DATE_LEVEL_KEY] = null;
+        }),
+      );
     } else {
       if (
         selectedConfig.category ===
         ChartDataViewFieldCategory.DateLevelComputedField
       ) {
         return onChange(
-          updateBy(config, draft => {
+          updateBy(runtimeConfig, draft => {
             draft.expression = selectedConfig.expression;
             draft.field = config.colName;
             draft.category = ChartDataViewFieldCategory.DateLevelComputedField;

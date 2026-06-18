@@ -30,7 +30,7 @@ export interface ControlOption {
 export interface VisibilityCondition {
   dependentControllerId: string;
   relation: FilterSqlOperator.Equal | FilterSqlOperator.NotEqual; //等于或这不等于
-  value: any; // any type
+  value: string;
 }
 
 export interface ControllerConfig {

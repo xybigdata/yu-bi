@@ -82,6 +82,28 @@ import { TableColumnsList } from '../components/ChartGraph/BasicTableChart/types
 type RuntimeDateLevelSource<T> = T & {
   [RUNTIME_DATE_LEVEL_KEY]?: T | null;
 };
+type ChartRowDataValue = string | number | null | undefined;
+type ChartRowData = Record<string, ChartRowDataValue>;
+type AxisOptionsWithLabel = {
+  axisLabel?: Pick<AxisLabel, 'interval' | 'overflow' | 'show'>;
+};
+type AxisOptionsByName = {
+  xAxis?: AxisOptionsWithLabel[];
+  yAxis?: AxisOptionsWithLabel[];
+};
+type ComponentModelProvider = {
+  getComponent: (componentType: string) => unknown;
+};
+type ComponentView = {
+  group?: {
+    getBoundingRect?: () => { width: number };
+  };
+};
+type ChartAxisModelAccess = {
+  getModel: () => ComponentModelProvider | undefined;
+  getViewOfComponentModel: (model: unknown) => ComponentView | undefined;
+};
+type SelectedItemStyle = Record<string, unknown> & { opacity?: number };
 import {
   flattenHeaderRowsWithoutGroupRow,
   getAxisLengthByConfig,
@@ -112,7 +134,7 @@ import { isNumber } from './number';
  * @return {*}
  */
 export function toFormattedValue(
-  value?: number | string,
+  value?: number | string | null,
   format?: FormatFieldAction,
 ) {
   if (value === null || value === undefined) {
@@ -203,12 +225,16 @@ function decimalPlacesFormater(
 }
 
 function unitFormater(
-  value: any,
+  value: number | string | undefined,
   config?:
     | FormatFieldAction[FieldFormatType.Numeric]
     | FormatFieldAction[FieldFormatType.Currency],
 ) {
   if (isEmpty(config?.unitKey)) {
+    return value;
+  }
+
+  if (value === undefined) {
     return value;
   }
 
@@ -345,7 +371,7 @@ export function getDefaultThemeColor(): string[] {
 export function getStyleValue(
   styleConfigs: ChartStyleConfig[],
   paths: string[],
-): any {
+): unknown {
   return getValue(styleConfigs, paths);
 }
 
@@ -1134,11 +1160,11 @@ export function getUnusedHeaderRows(
     colName?: string;
   }>,
   originalRows: Array<TableColumnsList>,
-): TableColumnsList[] {
+): Array<{ colName?: string }> {
   const oldFlattenedColNames = originalRows
     .flatMap(row => flattenHeaderRowsWithoutGroupRow(row))
     .map(r => r.colName);
-  return (allRows || []).reduce<any[]>((acc, cur) => {
+  return (allRows || []).reduce<Array<{ colName?: string }>>((acc, cur) => {
     if (!oldFlattenedColNames.includes(cur.colName)) {
       acc.push(cur);
     }
@@ -1200,7 +1226,7 @@ export function getSeriesTooltips4Rectangular2(
     seriesName?: string;
     data: {
       name: string;
-      rowData: { [key: string]: any };
+      rowData: ChartRowData;
     };
   },
   groupConfigs: ChartDataSectionField[],
@@ -1215,7 +1241,9 @@ export function getSeriesTooltips4Rectangular2(
   const aggConfigName = tooltipParam?.data?.name || tooltipParam?.seriesName;
   const row = tooltipParam?.data?.rowData || {};
 
-  const tooltips: string[] = ([] as any[])
+  const tooltipConfigs: ChartDataSectionField[] = (
+    [] as ChartDataSectionField[]
+  )
     .concat(groupConfigs || [])
     .concat(colorConfigs || [])
     .concat(
@@ -1223,10 +1251,10 @@ export function getSeriesTooltips4Rectangular2(
         [],
     )
     .concat(sizeConfigs || [])
-    .concat(infoConfigs || [])
-    .map(config =>
-      valueFormatter(config, row?.[chartDataSet.getFieldOriginKey(config)]),
-    );
+    .concat(infoConfigs || []);
+  const tooltips = tooltipConfigs.map(config =>
+    valueFormatter(config, row?.[chartDataSet.getFieldOriginKey(config)]),
+  );
   return tooltips.join('<br />');
 }
 
@@ -1235,7 +1263,7 @@ export function getSeriesTooltips4Polar2(
   tooltipParam: {
     data: {
       name: string;
-      rowData: { [key: string]: any };
+      rowData: ChartRowData;
     };
   },
   groupConfigs: ChartDataSectionField[],
@@ -1245,15 +1273,17 @@ export function getSeriesTooltips4Polar2(
   sizeConfigs?: ChartDataSectionField[],
 ): string {
   const row = tooltipParam?.data?.rowData || {};
-  const tooltips: string[] = ([] as any[])
+  const tooltipConfigs: ChartDataSectionField[] = (
+    [] as ChartDataSectionField[]
+  )
     .concat(groupConfigs || [])
     .concat(colorConfigs || [])
     .concat(aggConfigs || [])
     .concat(sizeConfigs || [])
-    .concat(infoConfigs || [])
-    .map(config =>
-      valueFormatter(config, row?.[chartDataSet.getFieldOriginKey(config)]),
-    );
+    .concat(infoConfigs || []);
+  const tooltips = tooltipConfigs.map(config =>
+    valueFormatter(config, row?.[chartDataSet.getFieldOriginKey(config)]),
+  );
   return tooltips.join('<br />');
 }
 
@@ -1303,7 +1333,7 @@ export function getSeriesTooltips4Rectangular(
  */
 export function valueFormatter(
   config?: ChartDataSectionField,
-  value?: number,
+  value?: number | string | null,
 ): string {
   return `${getColumnRenderName(config)}: ${toFormattedValue(
     value,
@@ -1344,16 +1374,16 @@ export function getGridStyle(styles: ChartStyleConfig[]): GridStyle {
 
 // TODO(Stephen): to be used chart DataSetRow model for all charts
 export function getExtraSeriesRowData(
-  data: IChartDataSetRow<string> | { [key: string]: any },
-): { rowData: { [key: string]: any } } {
+  data: IChartDataSetRow<string> | ChartRowData,
+): { rowData: ChartRowData } {
   if (data instanceof ChartDataSetRow) {
     return {
       // NOTE: row data should be case sensitive except for data chart
-      rowData: data?.convertToCaseSensitiveObject(),
+      rowData: data?.convertToCaseSensitiveObject() as ChartRowData,
     };
   }
   return {
-    rowData: data,
+    rowData: data as ChartRowData,
   };
 }
 
@@ -1444,7 +1474,9 @@ export function isMatchRequirement(
 }
 
 // 获取是否展示刻度
-export const getIntervalShow = (interval): boolean =>
+export const getIntervalShow = (
+  interval?: number | string | null,
+): boolean =>
   interval !== 'auto' && interval !== null;
 
 // 判断overflow 条件是否已生效
@@ -1455,7 +1487,8 @@ export function hadAxisLabelOverflowConfig(
   if (!options) return false;
   const axisName = !horizon ? 'xAxis' : 'yAxis';
 
-  const axisLabelOpts = (options as unknown as any)[axisName]?.[0]?.axisLabel;
+  const axisLabelOpts = (options as AxisOptionsByName)[axisName]?.[0]
+    ?.axisLabel;
   if (!axisLabelOpts) return false;
 
   const { overflow, interval, show } = axisLabelOpts;
@@ -1507,8 +1540,9 @@ export function setOptionsByAxisLabelOverflow(config: ChartCommonConfig) {
   }
 
   // 获取x/y轴在model上的信息
-  // @ts-ignore
-  const axisModel = chart.getModel()?.getComponent(axisName);
+  const axisModel = (chart as unknown as ChartAxisModelAccess)
+    .getModel()
+    ?.getComponent(axisName);
 
   // 处理 每个刻度宽度
   const setWidth = width => {
@@ -1531,10 +1565,11 @@ export function setOptionsByAxisLabelOverflow(config: ChartCommonConfig) {
     handlerWhenChartUnFinished();
     return commonOpts;
   }
-  // @ts-ignore
-  const axisView = chart.getViewOfComponentModel(axisModel);
+  const axisView = (
+    chart as unknown as ChartAxisModelAccess
+  ).getViewOfComponentModel(axisModel);
 
-  const axisRect = axisView?.group?.getBoundingRect();
+  const axisRect = axisView?.group?.getBoundingRect?.();
 
   if (!axisRect) {
     handlerWhenChartUnFinished();
@@ -1732,15 +1767,15 @@ export const setRuntimeDateLevelFieldsInChartConfig = (config: ChartConfig) => {
  * @param {string | number} comIndex
  * @param {string | number} dcIndex
  * @param {SelectedItem[]} selectionList
- * @param {[x: string]: any} [itemStyle = {}]
- * @return {itemStyle: [x: string]: any} itemStyle
+ * @param {Record<string, unknown>} [itemStyle = {}]
+ * @return {itemStyle: Record<string, unknown>} itemStyle
  */
 export const getSelectedItemStyles = (
   comIndex: string | number,
   dcIndex: string | number,
   selectionList: SelectedItem[],
-  itemStyle: { [x: string]: any } = {},
-): { itemStyle: { opacity?: number; [x: string]: any } } => {
+  itemStyle: SelectedItemStyle = {},
+): { itemStyle: SelectedItemStyle } => {
   if (selectionList.length) {
     const selectionConfig = selectionList.find(
       v => v.index === comIndex + ',' + dcIndex,
@@ -1826,13 +1861,16 @@ export function getMinAndMaxNumber(
   const datas = configs
     .reduce(
       (acc, cur) => acc.concat(chartDataset.map(dc => Number(dc.getCell(cur)))),
-      [] as any[],
+      [] as number[],
     )
     .filter(isNumber) as number[];
   return [Math.min(0, ...datas), Math.max(0, ...datas)];
 }
 
-export function findPathByNameInMeta(meta, colName) {
+export function findPathByNameInMeta(
+  meta: ChartDataViewMeta[] | undefined,
+  colName: unknown,
+): ChartDataViewMeta | undefined {
   return getAllColumnInMeta(meta)?.find(v => v.name === colName);
 }
 
