@@ -41,7 +41,7 @@ const Keys = {
   DOWN: 40,
 } as const;
 
-type CalcFieldData = Record<string, any>;
+type CalcFieldData = Record<string, unknown>;
 const defaultDataAttributes = [
   'id',
   'value',
