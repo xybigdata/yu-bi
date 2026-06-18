@@ -786,6 +786,9 @@
 - 通过：`npm run test:ci`，109 个测试文件通过，838 个测试通过，4 个跳过
 - 通过：`npm run lint:css`
 - 通过：`npm run lint:style`
+- 通过：运行时与类型边界累计批次合并前完整门禁，`npm run test:ci`，127 个测试文件通过，891 个测试通过，4 个跳过
+- 通过：运行时与类型边界累计批次合并前完整门禁，`npm run lint:css`
+- 通过：运行时与类型边界累计批次合并前完整门禁，`npm run lint:style`
 
 触发完整前端门禁的条件：
 
