@@ -22,6 +22,7 @@ import { useInjectReducer } from 'utils/@reduxjs/injectReducer';
 import { ViewViewModelStages } from '../constants';
 import {
   diffMergeHierarchyModel,
+  isQueryResult,
   transformQueryResultToModelAndDataSource,
 } from '../utils';
 import {
@@ -254,7 +255,7 @@ const slice = createSlice({
         v => v.id === action.meta.arg.id,
       );
 
-      if (currentEditingView && action.payload && action.payload.rows) {
+      if (currentEditingView && isQueryResult(action.payload)) {
         const { model, dataSource } = transformQueryResultToModelAndDataSource(
           action.payload,
           currentEditingView.model,

@@ -30,6 +30,7 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
   Model,
   QueryResult,
+  QueryResultDataSourceRow,
   Schema,
 } from 'app/pages/MainPage/pages/ViewPage/slice/types';
 import { DataProviderAttribute } from 'app/pages/MainPage/slice/types';
@@ -71,7 +72,9 @@ export function ArrayConfig({
 }: ArrayConfigProps) {
   const [formVisible, setFormVisible] = useState(false);
   const [editingRowKey, setEditingRowKey] = useState('');
-  const [schemaDataSource, setSchemaDataSource] = useState<object[]>([]);
+  const [schemaDataSource, setSchemaDataSource] = useState<
+    QueryResultDataSourceRow[]
+  >([]);
   const formRef = useRef<FormInstance<SourceFormModel>>();
   const t = useI18NPrefix('source');
   const tg = useI18NPrefix('global');

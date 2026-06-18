@@ -79,7 +79,13 @@ export interface ViewSimpleViewModel extends ViewSimple {
   deleteLoading: boolean;
 }
 
-export interface ViewViewModel<T = object> extends Pick<
+export type QueryResultCellValue = string | number | boolean | null | undefined;
+
+export type QueryResultRow = QueryResultCellValue[];
+
+export type QueryResultDataSourceRow = Record<string, QueryResultCellValue>;
+
+export interface ViewViewModel<T = QueryResultDataSourceRow> extends Pick<
   View,
   'name' | 'script' | 'type'
 > {
@@ -108,7 +114,7 @@ export interface ViewViewModel<T = object> extends Pick<
 
 export interface QueryResult {
   columns: Schema[];
-  rows: any[][];
+  rows: QueryResultRow[];
   pageInfo: PageInfo;
   script?: string;
   warnings?: string[] | null;

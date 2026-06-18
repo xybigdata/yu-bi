@@ -18,12 +18,15 @@
 
 import { Empty } from 'antd';
 import { SchemaTable } from 'app/pages/MainPage/pages/ViewPage/components/SchemaTable';
-import { Schema } from 'app/pages/MainPage/pages/ViewPage/slice/types';
+import {
+  QueryResultDataSourceRow,
+  Schema,
+} from 'app/pages/MainPage/pages/ViewPage/slice/types';
 import { useCallback } from 'react';
 import styled from 'styled-components';
 interface SchemaProps {
   value?: Schema[];
-  dataSource?: object[];
+  dataSource?: QueryResultDataSourceRow[];
   onChange?: (val?: Schema[]) => void;
 }
 

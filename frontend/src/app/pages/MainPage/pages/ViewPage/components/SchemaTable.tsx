@@ -35,18 +35,32 @@ import {
   WARNING,
 } from 'styles/StyleConstants';
 import { uuidv4 } from 'utils/utils';
-import { Column, ColumnsModel, Model } from '../slice/types';
+import {
+  Column,
+  ColumnsModel,
+  Model,
+  QueryResultDataSourceRow,
+} from '../slice/types';
 import { getColumnWidthMap, getHierarchyColumn } from '../utils';
 import SetFieldType from './SetFieldType';
 
 const ROW_KEY = 'DATART_ROW_KEY';
 
-interface SchemaTableProps extends TableProps<object> {
+type SchemaTableRow = QueryResultDataSourceRow & {
+  [ROW_KEY]: string;
+  [TABLE_DATA_INDEX]: number;
+};
+
+interface SchemaTableProps
+  extends Omit<
+    TableProps<object>,
+    'columns' | 'dataSource' | 'rowKey'
+  > {
   height: number;
   width: number;
   model: ColumnsModel;
   hierarchy: Model;
-  dataSource?: object[];
+  dataSource?: QueryResultDataSourceRow[];
   hasCategory?: boolean;
   hasFormat?: boolean;
   getExtraHeaderActions?: (

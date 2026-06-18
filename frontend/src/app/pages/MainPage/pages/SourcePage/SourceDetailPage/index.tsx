@@ -65,6 +65,7 @@ import {
 import { getDataProviderConfigTemplate } from '../../../slice/thunks';
 import { UNPERSISTED_ID_PREFIX } from '../../ViewPage/constants';
 import { QueryResult } from '../../ViewPage/slice/types';
+import { isQueryResult } from '../../ViewPage/utils';
 import { SaveFormContext } from '../SaveFormContext';
 import { useSourceSlice } from '../slice';
 import {
@@ -258,7 +259,9 @@ export function SourceDetailPage() {
             sourceId: editingSource?.id,
           },
         });
-        callback(data);
+        if (isQueryResult(data)) {
+          callback(data);
+        }
       } catch (error) {
         errorHandle(error);
       }
