@@ -194,37 +194,41 @@ export const StoryEditor: React.FC<{}> = memo(() => {
   useEffect(() => {
     let cancelled = false;
     if (sortedPages.length > 0) {
-      void loadRevealRuntime().then(({ Reveal, RevealZoom }) => {
-        if (cancelled) {
-          return;
-        }
-        revealRef.current = new Reveal(document.getElementById(domId)!, {
-          hash: false,
-          history: false,
-          controls: false,
-          controlsLayout: 'bottom-right',
-          slideNumber: 'c/t',
-          controlsTutorial: false,
-          progress: false,
-          loop: true,
-          width: '100%',
-          height: '100%',
-          margin: 0,
-          minScale: 1,
-          maxScale: 1,
-          autoSlide: false,
-          transition: 'convex',
-          // backgroundTransition: 'fade',
-          transitionSpeed: 'slow',
-          viewDistance: 100,
-          plugins: [RevealZoom],
-          keyboard: {
-            70: () => {},
-          },
+      void loadRevealRuntime()
+        .then(({ Reveal, RevealZoom }) => {
+          if (cancelled) {
+            return;
+          }
+          revealRef.current = new Reveal(document.getElementById(domId)!, {
+            hash: false,
+            history: false,
+            controls: false,
+            controlsLayout: 'bottom-right',
+            slideNumber: 'c/t',
+            controlsTutorial: false,
+            progress: false,
+            loop: true,
+            width: '100%',
+            height: '100%',
+            margin: 0,
+            minScale: 1,
+            maxScale: 1,
+            autoSlide: false,
+            transition: 'convex',
+            // backgroundTransition: 'fade',
+            transitionSpeed: 'slow',
+            viewDistance: 100,
+            plugins: [RevealZoom],
+            keyboard: {
+              70: () => {},
+            },
+          });
+          revealRef.current?.initialize();
+          revealRef.current?.addEventListener('slidechanged', changePage);
+        })
+        .catch(error => {
+          console.error('Load story editor runtime failed', error);
         });
-        revealRef.current?.initialize();
-        revealRef.current?.addEventListener('slidechanged', changePage);
-      });
 
       return () => {
         cancelled = true;

@@ -66,6 +66,9 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
   };
   private parent: HTMLDivElement | null = null;
   private mounted = false;
+  private logRuntimeError(error: unknown) {
+    console.error('Load split runtime failed', error);
+  }
 
   async componentDidMount() {
     this.mounted = true;
@@ -88,7 +91,13 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
       return gutterElement;
     };
 
-    const Split = await loadSplit();
+    let Split;
+    try {
+      Split = await loadSplit();
+    } catch (error) {
+      this.logRuntimeError(error);
+      return;
+    }
 
     if (!this.mounted || !this.parent) {
       return;
@@ -146,7 +155,13 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
       this.split?.destroy(true, true);
       options.gutter = (index, direction, pairB) =>
         getPreviousSiblingElement(pairB);
-      const Split = await loadSplit();
+      let Split;
+      try {
+        Split = await loadSplit();
+      } catch (error) {
+        this.logRuntimeError(error);
+        return;
+      }
 
       if (!this.mounted || !this.parent) {
         return;

@@ -106,39 +106,43 @@ export const StoryPlayerForShare: React.FC<{
   useEffect(() => {
     let cancelled = false;
     if (sortedPages.length > 0) {
-      void loadRevealRuntime().then(({ Reveal, RevealZoom }) => {
-        if (cancelled) {
-          return;
-        }
-        revealRef.current = new Reveal(document.getElementById(domId)!, {
-          hash: false,
-          history: false,
-          controls: true,
-          controlsLayout: 'bottom-right',
-          slideNumber: 'c/t',
-          controlsTutorial: false,
-          progress: false,
-          loop: true,
-          width: '100%',
-          height: '100%',
-          margin: 0,
-          minScale: 1,
-          maxScale: 1,
-          autoSlide: autoSlide,
-          transition: 'convex',
-          // backgroundTransition: 'fade',
-          transitionSpeed: 'slow',
-          viewDistance: 100,
-          plugins: [RevealZoom],
-          keyboard: {
-            27: () => {
-              // disabled esc
-            }, // do something custom when ESC is pressed
-          },
+      void loadRevealRuntime()
+        .then(({ Reveal, RevealZoom }) => {
+          if (cancelled) {
+            return;
+          }
+          revealRef.current = new Reveal(document.getElementById(domId)!, {
+            hash: false,
+            history: false,
+            controls: true,
+            controlsLayout: 'bottom-right',
+            slideNumber: 'c/t',
+            controlsTutorial: false,
+            progress: false,
+            loop: true,
+            width: '100%',
+            height: '100%',
+            margin: 0,
+            minScale: 1,
+            maxScale: 1,
+            autoSlide: autoSlide,
+            transition: 'convex',
+            // backgroundTransition: 'fade',
+            transitionSpeed: 'slow',
+            viewDistance: 100,
+            plugins: [RevealZoom],
+            keyboard: {
+              27: () => {
+                // disabled esc
+              }, // do something custom when ESC is pressed
+            },
+          });
+          revealRef.current?.initialize();
+          revealRef.current?.addEventListener('slidechanged', changePage);
+        })
+        .catch(error => {
+          console.error('Load share story player runtime failed', error);
         });
-        revealRef.current?.initialize();
-        revealRef.current?.addEventListener('slidechanged', changePage);
-      });
 
       return () => {
         cancelled = true;

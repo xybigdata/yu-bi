@@ -126,16 +126,20 @@ export const Toolbar = memo(
     const isArchived = status === ViewStatus.Archived;
 
     const formatSQL = useCallback(async () => {
-      const { format } = await loadSqlFormatter();
+      try {
+        const { format } = await loadSqlFormatter();
 
-      dispatch(
-        actions.changeCurrentEditingView({
-          script: format(script, {
-            denseOperators: true,
-            logicalOperatorNewline: 'before',
+        dispatch(
+          actions.changeCurrentEditingView({
+            script: format(script, {
+              denseOperators: true,
+              logicalOperatorNewline: 'before',
+            }),
           }),
-        }),
-      );
+        );
+      } catch (error) {
+        console.error('Load SQL formatter failed', error);
+      }
     }, [dispatch, actions, script]);
 
     const showEdit = useCallback(() => {

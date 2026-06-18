@@ -210,19 +210,23 @@ export const SQLEditor = memo(() => {
     if (!editorInstance) {
       return;
     }
-    void loadMonaco().then(monaco => {
-      if (cancelled || !editorInstance) {
-        return;
-      }
-      editorInstance.addCommand(
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-        run,
-      );
-      editorInstance.addCommand(
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
-        callSave,
-      );
-    });
+    void loadMonaco()
+      .then(monaco => {
+        if (cancelled || !editorInstance) {
+          return;
+        }
+        editorInstance.addCommand(
+          monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+          run,
+        );
+        editorInstance.addCommand(
+          monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+          callSave,
+        );
+      })
+      .catch(error => {
+        console.error('Load monaco shortcut runtime failed', error);
+      });
     return () => {
       cancelled = true;
     };

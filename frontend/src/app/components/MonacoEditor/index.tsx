@@ -217,7 +217,9 @@ function MonacoEditorComponent(
       }
     };
 
-    void mountEditor();
+    void mountEditor().catch(error => {
+      console.error('Load monaco editor runtime failed', error);
+    });
 
     return () => {
       cancelled = true;
