@@ -9,17 +9,21 @@ import { useCallback } from 'react';
 import styled from 'styled-components';
 import { FONT_SIZE_TITLE } from 'styles/StyleConstants';
 
+type VizIconOption = {
+  relType?: string;
+  avatar?: string;
+  subType?: string | null;
+};
+type IconRenderProps = {
+  iconStr: string;
+};
+
 function useGetVizIcon() {
   const chartManager = ChartManager.instance();
   const chartIcons = chartManager.getAllChartIcons();
 
   return useCallback(
-    (option: {
-      relType?: string;
-      avatar?: string;
-      subType?: string | null;
-      [key: string]: any;
-    }) => {
+    (option: VizIconOption) => {
       const { relType, avatar, subType } = option;
       switch (relType) {
         case 'DASHBOARD':
@@ -54,7 +58,7 @@ export const renderIcon = (iconStr: string) => {
   return <SVGFontIconRender iconStr={iconStr} />;
 };
 
-const SVGFontIconRender = ({ iconStr }) => {
+const SVGFontIconRender = ({ iconStr }: IconRenderProps) => {
   return (
     <StyledSVGFontIcon
       className={`iconfont icon-${!iconStr ? 'chart' : iconStr}`}
@@ -62,7 +66,7 @@ const SVGFontIconRender = ({ iconStr }) => {
   );
 };
 
-const SVGImageRender = ({ iconStr }) => {
+const SVGImageRender = ({ iconStr }: IconRenderProps) => {
   const encodedStr = window.encodeURIComponent(iconStr);
   return (
     <StyledInlineSVGIcon
@@ -73,7 +77,7 @@ const SVGImageRender = ({ iconStr }) => {
   );
 };
 
-const Base64ImageRender = ({ iconStr }) => {
+const Base64ImageRender = ({ iconStr }: IconRenderProps) => {
   return (
     <StyledBase64Icon
       alt="svg icon"

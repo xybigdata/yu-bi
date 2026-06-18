@@ -67,7 +67,7 @@ function useStateModal({ initState }: { initState?: unknown }) {
   const [modal, contextHolder] = Modal.useModal();
   const okCallbackRef = useRef<StateModalOnOk>();
   const cancelCallbackRef = useRef<StateModalOnCancel>();
-  const stateRef = useRef<any[]>(initState ? [initState] : []);
+  const stateRef = useRef<unknown[]>(initState ? [initState] : []);
 
   const handleSaveCacheValue: StateModalCacheOnChange = (...args) => {
     stateRef.current = args || [];
@@ -80,7 +80,7 @@ function useStateModal({ initState }: { initState?: unknown }) {
         try {
           const okCBResult = okCallbackRef.current?.call(
             Object.create(null),
-            ...stateRef.current,
+            ...(stateRef.current as Parameters<StateModalOnOk>),
           );
           if (isPromise(okCBResult)) return okCBResult;
         } catch (e) {

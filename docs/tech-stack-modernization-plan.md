@@ -343,8 +343,12 @@
 - 已完成：`internalChartHelper.ts` 的跳转与联动过滤器返回值收口为显式字段值数组映射，保留调用方追加 URL 标记与联动过滤器语义不变
 - 已完成：`urlSearchTransfer.ts` 的 URL 参数解析与序列化补齐显式参数值类型，并新增单测锁住重复参数、数组参数和标量参数行为
 - 已完成：`internalChartHelper.ts` 的点击行数据输入收口为最小交互行数据类型，过滤器 values 显式字符串化后进入 `PendingChartDataRequestFilter`，并补齐点击过滤器回归测试
+- 已完成：`useStateModal.tsx` 的内部缓存状态从 `any[]` 收口为 `unknown[]`，保留公开回调参数兼容面不变
+- 已完成：`useGetVizIcon.tsx` 的可视化图标参数与渲染组件 props 补齐显式局部类型，去掉未使用的宽泛索引签名
+- 已完成：`rejectedErrorHandlerMiddleware.ts` 的 rejected action 消息读取补齐 `unknown` 入口与局部类型守卫，去掉错误处理链路里的 `any`
 - 正在推进：生产工具函数中确认低风险的单点类型债复扫
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
+- 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
 - 下一批候选：`utils/chartHelper.ts`、`utils/internalChartHelper.ts` 中可隔离、已有测试覆盖的 helper 局部类型收口
 
 当前已落地范围：
@@ -355,6 +359,8 @@
 - `chartHelper.ts` 继续收口 tooltip、axis label overflow 与 selected item style 相关 helper 的局部类型边界
 - `internalChartHelper.ts` 继续收口图表交互过滤器值映射的返回边界
 - `urlSearchTransfer.ts` 补齐 URL 参数工具的显式类型与回归测试
+- `useStateModal.tsx` 与 `useGetVizIcon.tsx` 补齐内部 hook 局部类型边界
+- `rejectedErrorHandlerMiddleware.ts` 补齐 Redux rejected action 错误消息读取边界
 - `date.ts` 新增标准时间串 helper，继续承接 `TIME_FORMATTER` 的零散重复调用
 - `date.ts` 继续补齐标准时间串的可选格式化 helper，减少过滤器与当前时间默认值链路的直接模板耦合
 - `SchedulePage/utils.ts`、`ShareLinkModal.tsx`、`DashBoardPage/utils/*`、`ChartTimeSelector/utils.ts` 改为复用统一日期工具
@@ -488,21 +494,34 @@
 5. 前端依赖收口与历史入口审计继续逐个推进
 6. 安装健康度与锁文件一致性持续检查
 
-## 8. 每轮固定门禁
+## 8. 分层门禁
 
 ### 8.1 范围规则
 
 - 一个提交只处理一个专题
 - 低风险与高风险不混提
 - 当前专题之外的改动不顺手带上
+- 同一低风险专题尽量累计到一批再提交和推送，避免每个小点都触发完整回归
 
 ### 8.2 验证规则
 
-前端专题至少执行：
+前端低风险小步改造开发中默认执行：
 
 - `npm run checkTs`
-- `npm run build:all`
-- `npm run test:ci -- --silent`
+- 与改动文件直接相关的定向测试，例如 `npm run test:ci -- <test files>`
+
+前端阶段性批次提交或推送前再执行：
+
+- `npm run checkTs`
+- 必要时 `npm run build:all`
+- 必要时 `npm run test:ci -- --silent`
+
+触发完整前端门禁的条件：
+
+- 依赖、构建配置、路由入口、运行时加载、共享模型、迁移链路发生变化
+- 一个批次准备推送远端或准备 merge 回 `main`
+- 定向测试不足以覆盖改动影响面
+- 之前同专题已累计多次小步修改，需要阶段性回归
 
 后端专题至少执行：
 
@@ -520,3 +539,4 @@
 - 默认直接在当前专题分支提交
 - 不直接改 `main`
 - 同一专题尽量攒成更完整的一批再提交，避免高频触发整套回归
+- 小步改造可先只做定向验证，阶段性提交或推送时再补完整门禁
