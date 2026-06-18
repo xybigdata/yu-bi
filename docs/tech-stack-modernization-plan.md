@@ -159,6 +159,9 @@
   - `ChartRichTextAdapter` 的模块配置与字段引用值按真实结构声明
   - calcfield 引用字段读取改为显式对象形态收口，减少 `Record<string, any>`
   - 插入引用字段后的异步回写改为显式微任务调度，避免继续依赖 `setImmediate`
+- 富文本运行时加载链路继续稳定化：
+  - `RichTextEditor` 运行时懒加载失败时补齐显式错误记录
+  - `loadRichTextEditorRuntime` 失败后清空缓存 Promise，避免一次加载失败后永久无法重试
 - 时间体系多批次收口：
   - 时间选择器回填链路
   - 展示与表单日期回填链路
@@ -709,6 +712,8 @@
 
 当前低风险批次合并前门禁记录：
 
+- 通过：富文本运行时加载稳定化专项轻量门禁，`npm run checkTs`
+- 通过：富文本运行时加载稳定化专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
 - 通过：`flexlayout-react` 工作台布局工厂稳定化专项轻量门禁，`npm run checkTs`
 - 通过：`flexlayout-react` 工作台布局工厂稳定化专项定向测试，`npm run test:ci -- src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts`
 - 通过：`react-grid-layout` 布局归一化稳定化专项轻量门禁，`npm run checkTs`

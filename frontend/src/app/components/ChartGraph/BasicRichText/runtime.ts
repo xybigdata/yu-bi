@@ -12,11 +12,29 @@ type RichTextEditorRuntimeModule = {
 
 let richTextEditorRuntimePromise: Promise<RichTextEditorRuntimeModule> | null =
   null;
+let richTextEditorRuntimeLoader = () => import('./RichTextEditorRuntime');
 
 export function loadRichTextEditorRuntime() {
   if (!richTextEditorRuntimePromise) {
-    richTextEditorRuntimePromise = import('./RichTextEditorRuntime');
+    richTextEditorRuntimePromise = richTextEditorRuntimeLoader().catch(
+      error => {
+        richTextEditorRuntimePromise = null;
+        throw error;
+      },
+    );
   }
 
   return richTextEditorRuntimePromise;
+}
+
+export function __setRichTextEditorRuntimeLoaderForTest(
+  loader: () => Promise<RichTextEditorRuntimeModule>,
+) {
+  richTextEditorRuntimeLoader = loader;
+  richTextEditorRuntimePromise = null;
+}
+
+export function __resetRichTextEditorRuntimeLoaderForTest() {
+  richTextEditorRuntimeLoader = () => import('./RichTextEditorRuntime');
+  richTextEditorRuntimePromise = null;
 }

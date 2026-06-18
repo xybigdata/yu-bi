@@ -96,6 +96,8 @@ function RichTextEditorImpl(
       if (!cancelled) {
         setRuntimeEditor(() => module.default);
       }
+    }).catch(error => {
+      console.error('Load rich text editor runtime failed', error);
     });
 
     return () => {
