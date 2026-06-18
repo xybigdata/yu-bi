@@ -586,6 +586,10 @@
 - 资源迁移与变量默认值表单边界收口
   - 资源导入 `FileUpload` 改用 Ant Design 上传回调类型，去掉 `value` / `onChange` 的宽泛 `any`
   - 变量默认值输入状态按字符串、数字、日期默认值联合类型收口，文本、数字和日期控件按各自真实值边界传递
+- ViewPage 测试层 legacy 输入边界收口
+  - `diffMergeHierarchyModel` / `addPathToHierarchyStructureAndChangeName` 测试改为集中 legacy hierarchy helper，去掉断言点散落 `as any`
+  - `DataModelTree.toModel` 返回值改为列名映射结构，测试不再需要强转读取节点
+  - 图表预览时间筛选测试改用 `FilterConditionType` 与集中 legacy condition helper，保留旧异常值兼容测试
 
 ## 7. 下一阶段执行顺序
 
@@ -645,6 +649,7 @@
 
 当前低风险批次合并前门禁记录：
 
+- 通过：ViewPage 测试层边界批次定向测试，`npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Properties/DataModelTree/__tests__/utils.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts`
 - 通过：工具函数与表单边界批次定向测试，`npm run test:ci -- src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts`
 - 通过：工具函数与 Workbench 配置更新边界批次轻量门禁，`npm run checkTs`
 - 通过：主页面局部类型边界批次轻量门禁，`npm run checkTs`
