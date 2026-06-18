@@ -383,6 +383,7 @@
 - 已完成：DataChart / Controller widget creator 的 `unknown` 创建入参改为先做最小结构守卫再落到持久化内容；beta0 迁移保留 legacy controller content 局部桥接，避免影响旧数据转换
 - 已完成：Dashboard `permissions` 与 WidgetInfo `parameters` 从裸 `any` 收口为 `unknown`，当前 Dashboard 范围复扫仅剩 legacy 迁移局部类型桥接
 - 已完成：Dashboard 工具测试中的 legacy 大 fixture 强转集中收口为 `asLegacyWidgetFiltersAndParamsArgs` / `asLegacyBoardChartRequestsArgs`，测试层不再散落 `obj as any`
+- 已完成：beta0 迁移中的 legacy controller content 改为局部类型守卫，当前 Dashboard 专题范围复扫已无 `as any`、`config.content as`、`permissions?: any`、`parameters?: any` 等目标残留
 
 - 已完成：BasicTable 表格列、header/body cell props、summary 返回、分页排序事件和单元格点击事件补齐局部显式类型，保留 Ant Design 公开入口和现有渲染行为不变
 - 已完成：图表事件行数据统一收口到 `ChartRowData`，柱线饼散点漏斗词云轮廓地图瀑布等图表不再继续声明 `rowData: any`
@@ -839,6 +840,8 @@
 - 通过：Dashboard 状态弱类型边界批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts`，4 个测试文件通过，33 个测试通过，3 个跳过
 - 通过：Dashboard 工具测试 legacy fixture 边界批次轻量门禁，`npm run checkTs`
 - 通过：Dashboard 工具测试 legacy fixture 边界批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx`，1 个测试文件通过，24 个测试通过，3 个跳过
+- 通过：Dashboard beta0 legacy 迁移边界收尾轻量门禁，`npm run checkTs`
+- 通过：Dashboard beta0 legacy 迁移边界收尾定向测试，`npm run test:ci -- src/app/migration/__tests__/migrateWidgets.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts`，5 个测试文件通过，47 个测试通过，3 个跳过
 
 触发完整前端门禁的条件：
 

@@ -60,6 +60,16 @@ type LegacyControllerWidgetContent = {
   };
 };
 
+const isLegacyControllerWidgetContent = (
+  content: unknown,
+): content is LegacyControllerWidgetContent => {
+  if (!content || typeof content !== 'object') {
+    return false;
+  }
+  const candidate = content as LegacyControllerWidgetContent;
+  return !candidate.config || typeof candidate.config === 'object';
+};
+
 const parseServerRelationConfig = (
   rawConfig: string,
 ): RelationConfigTarget | undefined => {
@@ -124,8 +134,11 @@ export const beta0 = (widget?: WidgetBeta3 | LegacyFilterWidgetBeta3) => {
 
   // 3.处理 assistViewFields 旧数据 assistViewFields 是 string beta0 使用数组存储的
   if (widget.config.type === 'controller') {
-    const content = widget.config.content as LegacyControllerWidgetContent;
-    if (typeof content?.config?.assistViewFields === 'string') {
+    const content = widget.config.content;
+    if (
+      isLegacyControllerWidgetContent(content) &&
+      typeof content.config?.assistViewFields === 'string'
+    ) {
       content.config.assistViewFields =
         content.config.assistViewFields.split(VALUE_SPLITTER);
     }
