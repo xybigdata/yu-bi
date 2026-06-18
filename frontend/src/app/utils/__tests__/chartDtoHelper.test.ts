@@ -112,6 +112,17 @@ describe('chartDtoHelper Test', () => {
     });
   });
 
+  test('should keep empty config object when chart config is non-object json', () => {
+    const data = {
+      config: 'true',
+      view: {
+        model: JSON.stringify({ name: 2 }),
+      },
+    };
+    const dto = convertToChartDto(data);
+    expect(dto.config).toEqual({ computedFields: [] });
+  });
+
   test('should convert to chart dto for computedFields', () => {
     const data = {
       config: JSON.stringify({ id: 1 }),

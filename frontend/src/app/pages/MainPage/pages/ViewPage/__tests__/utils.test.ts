@@ -20,10 +20,17 @@ import { DataViewFieldType } from 'app/constants';
 import { Column, ColumnRole } from '../slice/types';
 import {
   addPathToHierarchyStructureAndChangeName,
+  buildAntdTreeNodeModel,
+  buildRequestColumns,
   dataModelColumnSorter,
   diffMergeHierarchyModel,
+  handleStringScriptToObject,
+  transformQueryResultToModelAndDataSource,
   transformModelToViewModel,
 } from '../utils';
+
+const createStructResultColumnName = (alias: string): string =>
+  [alias] as unknown as string;
 
 describe('dataModelColumnSorter test', () => {
   test('should sort by alphabet with the STRING column type', () => {
@@ -97,6 +104,76 @@ describe('dataModelColumnSorter test', () => {
     expect(columns.sort(dataModelColumnSorter)[2].name).toEqual('a');
     expect(columns.sort(dataModelColumnSorter)[3].name).toEqual('c');
     expect(columns.sort(dataModelColumnSorter)[4].name).toEqual('b');
+  });
+});
+
+describe('transformQueryResultToModelAndDataSource test', () => {
+  test('should keep sql column name as string', () => {
+    const result = transformQueryResultToModelAndDataSource(
+      {
+        columns: [
+          {
+            name: 'id',
+            type: DataViewFieldType.STRING,
+          },
+        ],
+        rows: [['1']],
+        pageInfo: {
+          pageNo: 1,
+          pageSize: 10,
+          total: 1,
+        },
+      },
+      {},
+      'SQL',
+    );
+
+    expect(result.model.columns).toEqual({
+      id: {
+        category: 'UNCATEGORIZED',
+        name: 'id',
+        primaryKey: undefined,
+        type: DataViewFieldType.STRING,
+      },
+    });
+    expect(result.dataSource).toEqual([{ id: '1' }]);
+  });
+
+  test('should map struct column alias to full column path', () => {
+    const result = transformQueryResultToModelAndDataSource(
+      {
+        columns: [
+          {
+            name: createStructResultColumnName('db1.orders.id'),
+            type: DataViewFieldType.STRING,
+          },
+        ],
+        rows: [['1']],
+        pageInfo: {
+          pageNo: 1,
+          pageSize: 10,
+          total: 1,
+        },
+        reqColumns: [
+          {
+            alias: 'db1.orders.id',
+            column: ['db1', 'orders', 'id'],
+          },
+        ],
+      },
+      {},
+      'STRUCT',
+    );
+
+    expect(result.model.columns).toEqual({
+      'db1.orders.id': {
+        category: 'UNCATEGORIZED',
+        name: ['db1', 'orders', 'id'],
+        primaryKey: undefined,
+        type: DataViewFieldType.STRING,
+      },
+    });
+    expect(result.dataSource).toEqual([{ 'db1.orders.id': '1' }]);
   });
 });
 
@@ -460,6 +537,52 @@ describe('addPathToHierarchyStructureAndChangeName test', () => {
       },
     });
   });
+
+  test('test view type is STRUCT view - fallback invalid root name json', () => {
+    const hierarchy: any = {
+      'dad.num': {
+        name: '{invalid-json}',
+      },
+    };
+
+    let result;
+    expect(() => {
+      result = addPathToHierarchyStructureAndChangeName(hierarchy, 'STRUCT');
+    }).not.toThrow();
+    expect(result).toEqual({
+      'dad.num': {
+        name: 'dad.num',
+        path: undefined,
+      },
+    });
+  });
+
+  test('test view type is STRUCT view - fallback invalid child name json', () => {
+    const hierarchy: any = {
+      file: {
+        name: 'file1',
+        children: [
+          {
+            name: '{invalid-json}',
+          },
+        ],
+      },
+    };
+
+    expect(
+      addPathToHierarchyStructureAndChangeName(hierarchy, 'STRUCT'),
+    ).toEqual({
+      file: {
+        name: 'file1',
+        children: [
+          {
+            name: undefined,
+            path: undefined,
+          },
+        ],
+      },
+    });
+  });
 });
 
 describe('transformModelToViewModel test', () => {
@@ -474,6 +597,28 @@ describe('transformModelToViewModel test', () => {
         type: 'SQL',
         config: '{invalid-json}',
         model: '{invalid-json}',
+        variables: [],
+        relVariableSubjects: [],
+        relSubjectColumns: [],
+      },
+      null,
+    );
+
+    expect(result.config).toEqual({});
+    expect(result.model).toEqual({});
+  });
+
+  test('should fallback when config or model is non-object json', () => {
+    const result = transformModelToViewModel(
+      {
+        id: 'view-1',
+        name: 'view-1',
+        parentId: null,
+        index: 1,
+        script: 'select 1',
+        type: 'SQL',
+        config: 'true',
+        model: '123',
         variables: [],
         relVariableSubjects: [],
         relSubjectColumns: [],
@@ -521,5 +666,156 @@ describe('transformModelToViewModel test', () => {
         columnPermission: [],
       }),
     ]);
+  });
+
+  test('should fallback non-array column permission to empty array', () => {
+    const result = transformModelToViewModel(
+      {
+        id: 'view-2',
+        name: 'view-2',
+        parentId: null,
+        index: 1,
+        script: 'select 1',
+        type: 'SQL',
+        config: '{}',
+        model: '{}',
+        variables: [],
+        relVariableSubjects: [],
+        relSubjectColumns: [
+          {
+            id: 'permission-1',
+            viewId: 'view-2',
+            subjectId: 'subject-1',
+            subjectType: 'USER',
+            columnPermission: 'true',
+          },
+        ],
+      },
+      null,
+    );
+
+    expect(result.columnPermissions).toEqual([
+      expect.objectContaining({
+        columnPermission: [],
+      }),
+    ]);
+  });
+});
+
+describe('handleStringScriptToObject test', () => {
+  const database = [
+    {
+      dbName: 'db1',
+      tables: [
+        {
+          tableName: 'orders',
+          primaryKeys: [],
+          columns: [
+            {
+              fmt: '',
+              foreignKeys: [],
+              name: 'id',
+              type: 'STRING',
+            },
+            {
+              fmt: '',
+              foreignKeys: [],
+              name: 'amount',
+              type: 'NUMBER',
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  test('should convert all columns marker to database columns', () => {
+    const script = JSON.stringify({
+      table: ['db1', 'orders'],
+      columns: JSON.stringify('all'),
+      joins: [],
+    });
+
+    expect(handleStringScriptToObject(script, database)).toEqual({
+      table: ['db1', 'orders'],
+      columns: ['id', 'amount'],
+      joins: [],
+    });
+  });
+
+  test('should keep explicit columns from script', () => {
+    const script = JSON.stringify({
+      table: ['db1', 'orders'],
+      columns: JSON.stringify(['id']),
+      joins: [
+        {
+          table: ['db1', 'orders'],
+          columns: JSON.stringify(['amount']),
+        },
+      ],
+    });
+
+    expect(handleStringScriptToObject(script, database)).toEqual({
+      table: ['db1', 'orders'],
+      columns: ['id'],
+      joins: [
+        {
+          table: ['db1', 'orders'],
+          columns: ['amount'],
+        },
+      ],
+    });
+  });
+
+  test('should fallback to original script when columns json is invalid shape', () => {
+    const script = JSON.stringify({
+      table: ['db1', 'orders'],
+      columns: JSON.stringify(true),
+      joins: [],
+    });
+
+    expect(handleStringScriptToObject(script, database)).toBe(script);
+  });
+});
+
+describe('buildRequestColumns test', () => {
+  test('should build request columns from main table and joins', () => {
+    expect(
+      buildRequestColumns({
+        table: ['db1', 'orders'],
+        columns: ['id', 'amount'],
+        joins: [
+          {
+            table: ['db1', 'customers'],
+            columns: ['name'],
+          },
+        ],
+      }),
+    ).toEqual([
+      {
+        alias: 'db1.orders.id',
+        column: ['db1', 'orders', 'id'],
+      },
+      {
+        alias: 'db1.orders.amount',
+        column: ['db1', 'orders', 'amount'],
+      },
+      {
+        alias: 'db1.customers.name',
+        column: ['db1', 'customers', 'name'],
+      },
+    ]);
+  });
+});
+
+describe('buildAntdTreeNodeModel test', () => {
+  test('should build tree node with stable key and full value path', () => {
+    expect(buildAntdTreeNodeModel(['db1'], 'orders')).toEqual({
+      key: `db1${String.fromCharCode(0)}orders`,
+      title: 'orders',
+      value: ['db1', 'orders'],
+      children: undefined,
+      isLeaf: undefined,
+    });
   });
 });

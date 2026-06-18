@@ -29,12 +29,12 @@ import {
   Col,
   Dropdown,
   Input,
+  MenuProps,
   Row,
   Space,
   TreeDataNode,
   TreeProps,
 } from 'antd';
-import type { ReactNode } from 'react';
 import { loadMonaco } from 'app/components/MonacoEditor/runtime';
 import { Tree } from 'app/components';
 import { DataViewFieldType } from 'app/constants';
@@ -67,9 +67,12 @@ import { DatabaseSchema } from '../../slice/types';
 import { buildAntdTreeNodeModel } from '../../utils';
 import Container from './Container';
 
-type ResourceTreeIconProps = Parameters<
-  Extract<TreeProps<TreeDataNode>['icon'], (props: any) => ReactNode>
->[0];
+type ExtractTreeIconProps<T> = T extends (props: infer P) => unknown
+  ? P
+  : never;
+type ResourceTreeIconProps = ExtractTreeIconProps<
+  NonNullable<TreeProps<TreeDataNode>['icon']>
+>;
 
 type ResourceTreeIconNode = ResourceTreeIconProps & {
   value?: string[];
@@ -192,23 +195,28 @@ export const Resource = memo(() => {
     }
   }, []);
 
-  const sortListOrTree = useCallback((list, sortType, sortKey) => {
-    return updateBy(list, draft => {
-      draft.sort((a, b) => {
-        let aname = a[sortKey],
-          bname = b[sortKey];
-        return String(aname).localeCompare(String(bname));
+  const sortListOrTree = useCallback(
+    (list: TreeDataNode[], sortType: string, sortKey: keyof TreeDataNode) => {
+      void sortType;
+
+      return updateBy(list, draft => {
+        draft.sort((a, b) => {
+          let aname = a[sortKey],
+            bname = b[sortKey];
+          return String(aname).localeCompare(String(bname));
+        });
+        draft.forEach(item => {
+          if (item.children) {
+            item.children = sortListOrTree(item.children, sortType, sortKey);
+          }
+        });
       });
-      draft.forEach(item => {
-        if (item.children) {
-          item.children = sortListOrTree(item.children, sortType, sortKey);
-        }
-      });
-    });
-  }, []);
+    },
+    [],
+  );
 
   const handleMenuClick = useCallback(
-    ({ key }) => {
+    ({ key }: Parameters<NonNullable<MenuProps['onClick']>>[0]) => {
       if (key === 'byNameSort') {
         setDatabaseTreeModel(sortListOrTree(databaseTreeModel, key, 'title'));
       } else {

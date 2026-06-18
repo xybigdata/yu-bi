@@ -24,6 +24,7 @@ import {
 import {
   Button,
   Checkbox,
+  CheckboxOptionType,
   Divider,
   Empty,
   Input,
@@ -40,7 +41,15 @@ import { useSearchAndExpand } from 'app/hooks/useSearchAndExpand';
 import classnames from 'classnames';
 import { DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
 import { darken, getLuminance, lighten } from 'polished';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  ChangeEvent,
+  Key,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
@@ -74,11 +83,17 @@ type SelectedTableSchema = {
   sourceId?: string;
 };
 
-type TreeIconNode = Parameters<
-  Extract<TreeProps['icon'], (...args: any[]) => unknown>
->[0];
+type ExtractTreeIconProps<T> = T extends (props: infer P) => unknown
+  ? P
+  : never;
+type TreeIconNode = ExtractTreeIconProps<NonNullable<TreeProps['icon']>>;
 
 type TreeSelectInfo = Parameters<NonNullable<TreeProps['onSelect']>>[1];
+type StructTableChangeType = 'MAIN' | 'JOINS';
+type StructTableChange =
+  | Pick<StructViewQueryProps, 'table' | 'columns'>
+  | Pick<JoinTableProps, 'table' | 'columns'>
+  | { columns: string[] };
 
 const getNodeValue = (node: SelectDataSourceTreeNode): string[] => {
   return Array.isArray(node.value) ? (node.value as string[]) : [];
@@ -107,7 +122,7 @@ interface SelectDataSourceProps {
   sourceId?: string;
   joinTable?: JoinTableProps;
   allowManage: boolean;
-  onChange?: (data: any, type) => void;
+  onChange?: (data: StructTableChange, type: StructTableChangeType) => void;
 }
 
 const SelectDataSource = memo(
@@ -156,7 +171,7 @@ const SelectDataSource = memo(
     ]);
 
     const handleCurrentSources = useCallback(
-      ({ key }) => {
+      ({ key }: { key: Key }) => {
         const selectSources = sources?.find(source => source.id === key);
         if (!selectSources) {
           return;
@@ -179,7 +194,7 @@ const SelectDataSource = memo(
     }, [sources]);
 
     const filterSources = useCallback(
-      e => {
+      (e: ChangeEvent<HTMLInputElement>) => {
         const searchValue = e.target.value;
         if (searchValue) {
           setSources(sources.filter(v => v.name.includes(searchValue)));
@@ -241,21 +256,25 @@ const SelectDataSource = memo(
       );
 
     const handleColumnCheck = useCallback(
-      list => {
+      (list: string[]) => {
         setSelectedTableSchema({
           ...(selectedTableSchema || { table: [], columns: [] }),
           columns: list,
         });
-        onChange?.({ columns: list }, type);
+        if (type) {
+          onChange?.({ columns: list }, type);
+        }
       },
       [onChange, selectedTableSchema, type],
     );
 
     const handleCheckAllColumns = useCallback(
-      (checked, allColumn) => {
+      (checked: boolean, allColumn: string[]) => {
         const checkedList = checked ? allColumn : [];
 
-        onChange?.({ columns: checkedList }, type);
+        if (type) {
+          onChange?.({ columns: checkedList }, type);
+        }
         setSelectedTableSchema({
           ...(selectedTableSchema || { table: [], columns: [] }),
           columns: checkedList,
@@ -265,7 +284,7 @@ const SelectDataSource = memo(
     );
 
     const handleTableSelect = useCallback(
-      (_, info: TreeSelectInfo) => {
+      (_: Key[], info: TreeSelectInfo) => {
         const currentNode = info.node as unknown as SelectDataSourceTreeNode;
         if (hasNodeChildren(currentNode)) {
           return;
@@ -285,13 +304,15 @@ const SelectDataSource = memo(
           delete tableSchema.sourceId;
         }
         setSelectedTableSchema(tableSchema);
-        onChange?.(tableSchema, type);
+        if (type) {
+          onChange?.(tableSchema, type);
+        }
         setOpen(false);
       },
       [type, onChange, allDatabaseSchemas, currentSources],
     );
 
-    const handleOpenChange = useCallback(nextOpen => {
+    const handleOpenChange = useCallback((nextOpen: boolean) => {
       setOpen(nextOpen);
     }, []);
 
@@ -446,8 +467,12 @@ const SelectDataSource = memo(
                 <SmallDivider />
                 <ColumnList
                   value={selectedTableSchema?.columns}
-                  onChange={allowManage ? handleColumnCheck : undefined}
-                  options={currentTableAllColumns}
+                  onChange={
+                    allowManage
+                      ? list => handleColumnCheck(list as string[])
+                      : undefined
+                  }
+                  options={currentTableAllColumns as CheckboxOptionType[]}
                 />
               </PopoverBody>
             }

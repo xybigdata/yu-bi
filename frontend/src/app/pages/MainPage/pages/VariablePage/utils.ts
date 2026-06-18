@@ -8,6 +8,17 @@ import type {
 import type { VariableFormModel } from './types';
 import { formatDatartDate } from 'app/utils/date';
 
+const parseVariableValueArray = (
+  value: string,
+): VariableDefaultValueItem[] | undefined => {
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
+
 export const serializeVariableDefaultValue = (
   values: VariableFormModel,
 ): VariableFormModel['defaultValue'] => {
@@ -38,7 +49,7 @@ export const parseVariableRelationValue = (
     return undefined;
   }
 
-  return JSON.parse(value) as VariableDefaultValueItem[];
+  return parseVariableValueArray(value);
 };
 
 export const parseVariableDefaultValue = (
@@ -48,5 +59,5 @@ export const parseVariableDefaultValue = (
     return [];
   }
 
-  return JSON.parse(value) as VariableDefaultValueItem[];
+  return parseVariableValueArray(value) || [];
 };

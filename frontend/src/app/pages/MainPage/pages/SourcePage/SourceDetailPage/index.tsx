@@ -88,8 +88,12 @@ import { allowManageSource } from '../utils';
 import { ConfigComponent } from './ConfigComponent';
 
 const parseSourceConfig = (config: string): SourceFormModel['config'] => {
-  const parsedConfig = JSON.parse(config);
-  return parsedConfig && typeof parsedConfig === 'object' ? parsedConfig : {};
+  try {
+    const parsedConfig = JSON.parse(config);
+    return parsedConfig && typeof parsedConfig === 'object' ? parsedConfig : {};
+  } catch (error) {
+    return {};
+  }
 };
 
 export function SourceDetailPage() {
@@ -164,16 +168,11 @@ export function SourceDetailPage() {
   useEffect(() => {
     if (editingSource) {
       const { name, type, config } = editingSource;
-      try {
-        setProviderType(type);
-        setLastUpdateTime(editingSource?.schemaUpdateDate);
-        form.setFieldsValue({ name, type, config: parseSourceConfig(config) });
-      } catch (error) {
-        message.error(tg('operation.parseError'));
-        throw error;
-      }
+      setProviderType(type);
+      setLastUpdateTime(editingSource?.schemaUpdateDate);
+      form.setFieldsValue({ name, type, config: parseSourceConfig(config) });
     }
-  }, [form, editingSource, tg]);
+  }, [form, editingSource]);
 
   useEffect(() => {
     if (

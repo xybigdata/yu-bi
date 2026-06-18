@@ -30,6 +30,7 @@ import { viewActions } from '.';
 import { View } from '../../../../../types/View';
 import { selectVariables } from '../../VariablePage/slice/selectors';
 import { Variable } from '../../VariablePage/slice/types';
+import { parseVariableDefaultValue } from '../../VariablePage/utils';
 import { ViewViewModelStages } from '../constants';
 import {
   buildRequestColumns,
@@ -55,6 +56,7 @@ import {
   SaveFolderParams,
   SaveViewParams,
   StructViewQueryProps,
+  StructViewRequestColumn,
   UnarchiveViewParams,
   UpdateViewBaseParams,
   DatabaseSchema,
@@ -63,6 +65,16 @@ import {
   ViewSimple,
   ViewViewModel,
 } from './types';
+
+type CompletionItemProvider = Monaco.languages.CompletionItemProvider;
+type CompletionItemProviderFactory =
+  CompletionItemProvider['provideCompletionItems'];
+type StructRequestColumnsPayload = '' | StructViewRequestColumn[];
+
+const parseRequestVariableValues = (defaultValue?: string | null) => {
+  const values = parseVariableDefaultValue(defaultValue);
+  return values.length ? values : null;
+};
 
 export const getViews = createAsyncThunk<ViewSimple[], string>(
   'view/getViews',
@@ -186,7 +198,7 @@ export const runSql = createAsyncThunk<
         error: getErrorMessage(Error(i18n.t('view.selectSource'))),
       }),
     );
-    return {} as any;
+    return null;
   }
 
   if (type === 'SQL' && !(sql as string).trim()) {
@@ -196,7 +208,7 @@ export const runSql = createAsyncThunk<
         error: getErrorMessage(Error(i18n.t('view.sqlRequired'))),
       }),
     );
-    return {} as any;
+    return null;
   }
 
   if (type === 'SQL') {
@@ -208,10 +220,12 @@ export const runSql = createAsyncThunk<
     );
   }
 
-  let reqColumns = '';
+  let reqColumns: StructViewRequestColumn[] | undefined;
+  let requestColumns: StructRequestColumnsPayload = '';
 
   if (type === 'STRUCT') {
     reqColumns = buildRequestColumns(structure!);
+    requestColumns = reqColumns;
   }
 
   const response = await request2<QueryResult>(
@@ -223,13 +237,13 @@ export const runSql = createAsyncThunk<
         sourceId,
         size,
         scriptType: type,
-        columns: reqColumns,
+        columns: requestColumns,
         variables: variables.map(
           ({ name, type, valueType, defaultValue, expression }) => ({
             name,
             type,
             valueType,
-            values: defaultValue ? JSON.parse(defaultValue) : null,
+            values: parseRequestVariableValues(defaultValue),
             expression,
           }),
         ),
@@ -250,7 +264,7 @@ export const runSql = createAsyncThunk<
   return {
     ...response?.data,
     warnings: response?.warnings,
-    reqColumns: reqColumns,
+    reqColumns,
   };
 });
 
@@ -421,7 +435,10 @@ export const deleteView = createAsyncThunk<
 
 export const getEditorProvideCompletionItems = createAsyncThunk<
   null,
-  { sourceId?: string; resolve: (getItems: any) => void },
+  {
+    sourceId?: string;
+    resolve: (getItems: CompletionItemProviderFactory) => void;
+  },
   { state: RootState }
 >(
   'view/getEditorProvideCompletionItems',
@@ -458,7 +475,7 @@ export const getEditorProvideCompletionItems = createAsyncThunk<
         variableKeywords.add(name);
       });
 
-    const getItems = (model, position) => {
+    const getItems: CompletionItemProviderFactory = (model, position) => {
       const word = model.getWordUntilPosition(position);
       const range = {
         startLineNumber: position.lineNumber,

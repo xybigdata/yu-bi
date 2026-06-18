@@ -34,6 +34,19 @@ import { selectCurrentEditingViewAttr } from '../../slice/selectors';
 import { Error } from './Error';
 import { Results } from './Results';
 
+type IssueHost = 'github' | 'gitee';
+type SqlWarningIssueParams =
+  | {
+      type: 'github';
+      title: string;
+      body: string;
+    }
+  | {
+      type: 'gitee';
+      title: string;
+      description: string;
+    };
+
 export const Outputs = memo(() => {
   const { actions } = useViewSlice();
   const dispatch = useAppDispatch();
@@ -64,18 +77,23 @@ export const Outputs = memo(() => {
   }, [dispatch, actions]);
 
   const submitIssue = useCallback(
-    type => {
-      let params: any = {
-        type: type,
-        title: 'Sql parse bug',
-      };
+    (type: IssueHost) => {
+      const content = `version: ${systemInfo?.version}\n` + warnings.join('');
+      let params: SqlWarningIssueParams;
       if (type === 'github') {
-        params.body = `version: ${systemInfo?.version}\n` + warnings.join('');
+        params = {
+          type,
+          title: 'Sql parse bug',
+          body: content,
+        };
       } else {
-        params.description =
-          `version: ${systemInfo?.version}\n` + warnings.join('');
+        params = {
+          type,
+          title: 'Sql parse bug',
+          description: content,
+        };
       }
-      let url = newIssueUrl(params);
+      const url = newIssueUrl(params);
       window.open(url);
     },
     [warnings, systemInfo],

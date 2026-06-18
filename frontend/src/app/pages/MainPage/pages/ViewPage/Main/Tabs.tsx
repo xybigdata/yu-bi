@@ -21,7 +21,7 @@ import {
   InfoCircleOutlined,
   LoadingOutlined,
 } from '@ant-design/icons';
-import { Button, Dropdown, Space } from 'antd';
+import { Button, Dropdown, MenuProps, Space } from 'antd';
 import { Confirm, TabPane, Tabs as TabsComponent } from 'app/components';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -122,7 +122,10 @@ export const Tabs = memo(() => {
     dispatch(runSql({ id, isFragment: !!fragment }));
   }, [dispatch, id, editorInstance]);
 
-  const handleClickMenu = (e: any, id: string) => {
+  const handleClickMenu = (
+    e: Parameters<NonNullable<MenuProps['onClick']>>[0],
+    id: string,
+  ) => {
     e.domEvent.stopPropagation();
     if (e.key === 'CLOSE_OTHER') {
       dispatch(closeOtherEditingViews({ id, resolve: redirect }));

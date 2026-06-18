@@ -41,13 +41,19 @@ import {
   Model,
   QueryResult,
   StructViewQueryProps,
+  StructViewRequestColumn,
   ViewType,
   ViewViewModel,
 } from './slice/types';
 
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+};
+
 const parseViewConfig = (config: string): object | undefined => {
   try {
-    return JSON.parse(config) as object;
+    const parsed = JSON.parse(config);
+    return isRecord(parsed) ? parsed : undefined;
   } catch (error) {
     return undefined;
   }
@@ -55,20 +61,52 @@ const parseViewConfig = (config: string): object | undefined => {
 
 const parseViewModel = (model: string): HierarchyModel | undefined => {
   try {
-    return JSON.parse(model) as HierarchyModel;
+    const parsed = JSON.parse(model);
+    return isRecord(parsed) ? (parsed as HierarchyModel) : undefined;
   } catch (error) {
     return undefined;
   }
 };
 
-const parseColumnPermission = (
-  permission: string,
-): string[] | undefined => {
+const parseColumnPermission = (permission: string): string[] | undefined => {
   try {
-    return JSON.parse(permission) as string[];
+    const parsed = JSON.parse(permission);
+    return Array.isArray(parsed) ? parsed : undefined;
   } catch (error) {
     return undefined;
   }
+};
+
+const parseStructColumnPath = (
+  name?: string | string[],
+): string[] | undefined => {
+  if (Array.isArray(name)) {
+    return name;
+  }
+  if (!name) {
+    return undefined;
+  }
+  try {
+    const parsed = JSON.parse(name);
+    return Array.isArray(parsed) ? parsed : undefined;
+  } catch (error) {
+    return undefined;
+  }
+};
+
+const parseStructScriptColumns = (columns?: string): string[] | 'all' => {
+  const parsed = columns ? JSON.parse(columns) : undefined;
+  if (parsed === 'all' || Array.isArray(parsed)) {
+    return parsed;
+  }
+  throw new Error('Invalid struct view columns');
+};
+
+type QueryResultColumnModel = {
+  category?: ColumnCategories;
+  name: string | string[];
+  primaryKey?: boolean;
+  type: DataViewFieldType;
 };
 
 const normalizeColumnPermission = (
@@ -143,29 +181,30 @@ export function transformQueryResultToModelAndDataSource(
   dataSource: object[];
 } {
   const { rows = [], columns = [], reqColumns } = data || {};
-  const newColumns = columns.reduce((obj, { name, type, primaryKey }) => {
-    const hierarchyColumn = getHierarchyColumn(
-      name,
-      lastModel?.hierarchy || {},
-    );
+  const newColumns = columns.reduce(
+    (obj, { name, type, primaryKey }) => {
+      const hierarchyColumn = getHierarchyColumn(
+        name,
+        lastModel?.hierarchy || {},
+      );
 
-    let _name: any = [];
-    if (viewType === 'STRUCT') {
-      _name = reqColumns?.find(column => column.alias === name[0])?.column;
-    } else {
-      _name = name;
-    }
+      const columnName =
+        viewType === 'STRUCT'
+          ? reqColumns?.find(column => column.alias === name[0])?.column || []
+          : name;
 
-    return {
-      ...obj,
-      [name]: {
-        name: _name,
-        type: hierarchyColumn?.type || type,
-        primaryKey,
-        category: hierarchyColumn?.category || ColumnCategories.UnCategorized, // FIXME: model 重构时一起改
-      },
-    };
-  }, {});
+      return {
+        ...obj,
+        [name]: {
+          name: columnName,
+          type: hierarchyColumn?.type || type,
+          primaryKey,
+          category: hierarchyColumn?.category || ColumnCategories.UnCategorized, // FIXME: model 重构时一起改
+        },
+      };
+    },
+    {} as Record<string, QueryResultColumnModel>,
+  );
   const dataSource = rows.map(arr =>
     arr.reduce((obj, val, index) => {
       const key = columns[index].name;
@@ -176,7 +215,7 @@ export function transformQueryResultToModelAndDataSource(
     }, {}),
   );
   return {
-    model: { ...lastModel, columns: newColumns },
+    model: { ...lastModel, columns: newColumns as ColumnsModel },
     dataSource,
   };
 }
@@ -476,12 +515,12 @@ export function addPathToHierarchyStructureAndChangeName(
           acc[name].children![i]['path'] = Array.isArray(children.name)
             ? children.name
             : viewType === 'STRUCT'
-              ? children.name && JSON.parse(children.name)
+              ? parseStructColumnPath(children.name)
               : [children.name];
 
           acc[name].children![i]['name'] =
             viewType === 'STRUCT'
-              ? children.name && JSON.parse(children.name).join('.')
+              ? parseStructColumnPath(children.name)?.join('.')
               : children.name;
         }
       });
@@ -489,7 +528,7 @@ export function addPathToHierarchyStructureAndChangeName(
       acc[name]['path'] = Array.isArray(acc[name]['name'])
         ? acc[name]['name']
         : viewType === 'STRUCT'
-          ? acc[name]['name'] && JSON.parse(acc[name]['name'])
+          ? parseStructColumnPath(acc[name]['name'])
           : [name];
 
       acc[name]['name'] = name;
@@ -500,7 +539,12 @@ export function addPathToHierarchyStructureAndChangeName(
   return _hierarchy;
 }
 
-export function buildAntdTreeNodeModel<T extends TreeDataNode & { value: any }>(
+export type AntdValueTreeNode = TreeDataNode & {
+  value: string[];
+  children?: AntdValueTreeNode[];
+};
+
+export function buildAntdTreeNodeModel<T extends AntdValueTreeNode>(
   ancestors: string[] = [],
   nodeName: string,
   children?: T[],
@@ -514,12 +558,14 @@ export function buildAntdTreeNodeModel<T extends TreeDataNode & { value: any }>(
     value: fullNames,
     children,
     isLeaf,
-  } as any;
+  } as T;
 }
 
-export function buildRequestColumns(tableJSON: StructViewQueryProps) {
-  const columns: any = [];
-  tableJSON.columns.forEach((v, i) => {
+export function buildRequestColumns(
+  tableJSON: StructViewQueryProps,
+): StructViewRequestColumn[] {
+  const columns: StructViewRequestColumn[] = [];
+  tableJSON.columns.forEach(v => {
     const table = tableJSON.table || [];
     columns.push({
       alias: [...table, v].join('.'),
@@ -575,22 +621,27 @@ export function handleStringScriptToObject(
   }
   try {
     const scriptJSON = JSON.parse(script);
-    const { columns } = findAllColumnsOrIsCheckAll(scriptJSON, database);
+    const parsedColumns = parseStructScriptColumns(scriptJSON.columns);
+    const { columns } = findAllColumnsOrIsCheckAll(
+      { ...scriptJSON, columns: parsedColumns === 'all' ? [] : parsedColumns },
+      database,
+    );
 
     return {
       ...scriptJSON,
-      columns:
-        JSON.parse(scriptJSON.columns) === 'all'
-          ? columns
-          : JSON.parse(scriptJSON.columns),
+      columns: parsedColumns === 'all' ? columns : parsedColumns,
       joins: scriptJSON.joins.map(join => {
-        const { columns } = findAllColumnsOrIsCheckAll(join, database);
+        const parsedJoinColumns = parseStructScriptColumns(join.columns);
+        const { columns } = findAllColumnsOrIsCheckAll(
+          {
+            ...join,
+            columns: parsedJoinColumns === 'all' ? [] : parsedJoinColumns,
+          },
+          database,
+        );
         return {
           ...join,
-          columns:
-            JSON.parse(join.columns) === 'all'
-              ? columns
-              : JSON.parse(join.columns),
+          columns: parsedJoinColumns === 'all' ? columns : parsedJoinColumns,
         };
       }),
     };

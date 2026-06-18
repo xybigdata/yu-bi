@@ -300,17 +300,37 @@
 
 ### 6.1 正在推进
 
-当前累计专题：`前端 FormGenerator 控件透传兼容收口`
+当前累计专题：`前端配置解析与生产工具函数边界收口`
 
 本批目标：
 
-- 收口 FormGenerator 基础控件中把内部配置直接透传到 DOM / antd / Popover 的低风险问题
-- 消除 React 18 测试中暴露的未知 DOM 属性与 `key` spread 告警
-- 保留 `hideLabel`、`needRefresh`、`items`、`translateItemLabel` 等 FormGenerator 内部语义不变
-- 只处理控件 props 透传边界，不调整控件交互、布局和业务配置结构
+- 收口图表配置、View model 与数据源配置这类 JSON 字符串解析边界
+- 对非法 JSON、合法但非对象 JSON 统一走空配置兜底，避免异常值扩散到运行时链路
+- 保留历史正常对象配置、图表配置迁移和 view computed fields 合并语义不变
+- 只处理解析入口和最小类型边界，不调整公共协议、内部稳定标识和业务配置结构
 
 当前累计清单：
 
+- 已完成：`frontend/.husky/pre-commit` 改为 staged 范围检查，TS / JS 文件不再每次触发全量 `lint:style`
+- 已完成：`ChartDtoHelper.parseChartConfig` 只接受对象形态配置，非对象 JSON 按空配置处理，并避免非对象配置先进入图表配置迁移器
+- 已完成：`internalChartHelper.transformToHierarchyModel` 的 View model 解析只接受对象形态，非法 JSON 或非对象 JSON 按空模型处理，并补齐回归测试
+- 已完成：`useGetSourceDbTypeIcon` 的 JDBC 数据源配置解析补齐异常兜底，坏 JSON 或非对象 JSON 回退到默认图标，不再打断 Source 树图标渲染
+- 已完成：变量默认值与行权限值解析只接受数组形态，非法 JSON 或非数组 JSON 按空值处理，避免坏数据打断变量表单与权限页
+- 已完成：View 详情消费链的 `config` / `model` 解析只接受对象形态，列权限解析只接受数组形态，非对象或非数组 JSON 按空配置处理
+- 已完成：STRUCT 视图字段路径解析补齐安全入口，坏 JSON 字段名不再打断层级模型路径补齐
+- 已完成：STRUCT 视图脚本列配置解析收口到 `all` 或数组形态，避免重复裸 `JSON.parse` 和异常列配置扩散
+- 已完成：STRUCT 视图请求列构造补齐显式 `alias / column` 类型，去掉请求列链路里的宽泛数组中转
+- 已完成：查询结果转模型入口补齐 STRUCT 列路径映射类型，去掉字段名中转里的局部 `any`
+- 已完成：View tree 节点构造补齐显式 `value: string[]` 节点类型，去掉节点构造返回里的局部 `as any`
+- 已完成：Source 编辑态配置字符串解析补齐异常兜底，坏 JSON 或非对象配置按空配置回退，不再打断详情页回填
+- 已完成：SQL warning 提 issue 参数改为区分 GitHub / Gitee 的显式结构，去掉 issue 参数拼装里的局部 `any`
+- 已完成：View tab 右键菜单事件改为复用 antd 公开 `MenuProps['onClick']` 参数类型，去掉菜单事件入口的局部 `any`
+- 已完成：View 资源树图标、排序菜单和回收站标题渲染改为显式 Tree / Menu 类型边界，去掉相关局部 `any`
+- 已完成：StructView 数据源选择链路的树图标、表选择、列选择、弹层开关和回调数据补齐显式类型，减少结构视图配置链路的宽泛入参
+- 已完成：StructView 主表与 join 表变更入口补齐局部数据结构守卫，错误提示捕获改为 `unknown` + 最小消息读取
+- 已完成：StructView join 条件列选择链路补齐列路径、左右条件、树节点和 TreeSelect 兼容桥类型，去掉 `SelectJoinColumns` 内部局部 `any`
+- 已完成：View 运行 SQL thunk 的早退返回、变量默认值解析、STRUCT 请求列和 Monaco completion provider 回调补齐显式边界，去掉对应 `as any` 与裸 `JSON.parse`
+- 已完成：`useStateModal` 的缓存回调参数从 `any[]` 收口到 `unknown[]`，OK 回调改为不规定具体入参形态，保留各调用方现有参数兼容面
 - 已完成：迁移测试层局部弱类型收口
 - 已完成：工具测试层第一批局部弱类型收口
 - 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 的局部弱类型收口
@@ -375,6 +395,7 @@
 - 暂缓评估：`useSaveAsViz` 的复制保存链路仍保留 `request2<any>`，因为返回数据会按 `DATACHART / DASHBOARD` 进入不同业务拼装
 - 暂缓评估：`ChartFilterCondition` 的 `value` 运行时兼容面大于当前公共 `FilterCondition['value']` 类型，直接收口会牵涉多个筛选 UI 调用链，需要单独评估公共类型与运行时协议
 - 暂缓评估：FormGenerator 全局 `ItemLayoutProps`、交互规则面板的动态 `value` / `Customize` 映射仍是协议宽口，需单独评估交互配置结构后再收口
+- 暂缓评估：`QueryResult.rows` 仍是查询结果公共二维行协议，直接从 `any[][]` 收口会影响 SQL / STRUCT 查询结果、预览、结果表和图表数据转换链路，需要单独评估行值联合类型与后端返回协议
 - 下一批候选：当前低风险 UI/FormGenerator 批次已累计较多提交，建议先执行阶段性完整门禁并准备 merge 回 `main`，再开下一条专题分支继续处理交互协议宽口或其它低风险项
 
 当前已落地范围：
@@ -499,10 +520,9 @@
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/utils.test.tsx`
-- `npm run test:ci -- src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx`
-- `npm run test:ci -- src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx src/app/utils/__tests__/chartHelper.test.ts`
-- `npm run test:ci -- src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx`
+- `npm run test:ci -- src/app/utils/__tests__/chartDtoHelper.test.ts src/app/utils/__tests__/internalChartHelper.test.ts src/app/hooks/__tests__/useGetSourceDbTypeIcon.test.tsx`
+- `npm run test:ci -- src/app/pages/MainPage/pages/VariablePage/__tests__/utils.test.ts src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts`
+- `npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/__tests__/utils.test.ts`
 
 ### 6.2 最近已完成
 
@@ -551,7 +571,18 @@
 
 ### 8.2 验证规则
 
-当前 `frontend/.husky/pre-push` 已改为分层执行：
+当前门禁按三层执行，避免每个小改动都触发完整回归：
+
+1. 开发期：只跑与改动直接相关的轻量验证。
+2. 提交前：只检查本次暂存文件，避免全量样式扫描。
+3. 合并前：再跑完整门禁，保证 `main` 质量。
+
+当前 `frontend/.husky/pre-commit` 已改为 staged 范围：
+
+- TS / JS 文件：`eslint --fix`、`stylelint`、`prettier` 只作用于本次暂存文件
+- CSS / MD / JSON 文件：`prettier` 只作用于本次暂存文件
+
+当前 `frontend/.husky/pre-push` 已改为分支分层：
 
 - 推送 `main`：自动执行完整前端门禁
 - 推送专题分支：默认只执行轻量门禁 `npm run checkTs`
@@ -567,6 +598,12 @@
 - `npm run checkTs`
 - 必要时 `npm run build:all`
 - 必要时 `npm run test:ci -- --silent`
+
+当前低风险批次合并前门禁记录：
+
+- 通过：`npm run test:ci`，109 个测试文件通过，838 个测试通过，4 个跳过
+- 通过：`npm run lint:css`
+- 通过：`npm run lint:style`
 
 触发完整前端门禁的条件：
 

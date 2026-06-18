@@ -24,6 +24,7 @@ import {
   ChartStyleConfig,
 } from 'app/types/ChartConfig';
 import { ChartConfigDTO, ChartDetailConfigDTO } from 'app/types/ChartConfigDTO';
+import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { ChartDTO } from 'app/types/ChartDTO';
 import {
   createDateLevelComputedFieldForConfigComputedFields,
@@ -37,22 +38,44 @@ import {
 } from 'app/utils/internalChartHelper';
 import { Omit } from 'utils/object';
 
-const parseChartConfig = (config?: string) => {
+type ParsedChartConfig = ChartConfigDTO & {
+  aggregation: boolean | undefined;
+  chartConfig: ChartConfig;
+  chartGraphId: string;
+  computedFields: ChartDataViewMeta[];
+  sampleData?: unknown;
+  version?: string;
+};
+
+const isConfigRecord = (value: unknown): value is ParsedChartConfig => {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+};
+
+const parseChartConfig = (config?: string): ParsedChartConfig => {
   if (!config) {
-    return {};
+    return createEmptyChartConfig();
   }
   try {
-    return JSON.parse(config);
+    const parsed = JSON.parse(config);
+    return isConfigRecord(parsed) ? parsed : createEmptyChartConfig();
   } catch (error) {
-    return {};
+    return createEmptyChartConfig();
   }
+};
+
+const createEmptyChartConfig = (): ParsedChartConfig =>
+  ({}) as ParsedChartConfig;
+
+const normalizeChartConfigInput = (config?: string): string => {
+  const parsedConfig = parseChartConfig(config);
+  return Object.keys(parsedConfig).length ? JSON.stringify(parsedConfig) : '';
 };
 
 export function convertToChartDto(data): ChartDTO {
   if (data?.view) {
     data.view = migrateView(data.view);
   }
-  data.config = migrateChartConfig(data?.config);
+  data.config = migrateChartConfig(normalizeChartConfigInput(data?.config));
 
   const config = parseChartConfig(data?.config);
   const meta = transformHierarchyMeta(data?.view?.model);

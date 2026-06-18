@@ -5,29 +5,29 @@ import {
 } from '@ant-design/icons';
 import { Avatar } from 'app/components';
 import { useCallback } from 'react';
-import { errorHandle } from 'utils/utils';
 import { SourceSimpleViewModel } from '../pages/MainPage/pages/SourcePage/slice/types';
 import { renderIcon } from './useGetVizIcon';
 
-const parseSourceConfig = (config: string) => {
-  const parsedConfig = JSON.parse(config);
-  return parsedConfig && typeof parsedConfig === 'object' ? parsedConfig : {};
+type SourceConfigRecord = {
+  dbType?: string;
+};
+
+const parseSourceConfig = (config: string): SourceConfigRecord => {
+  try {
+    const parsedConfig = JSON.parse(config);
+    return parsedConfig && typeof parsedConfig === 'object'
+      ? (parsedConfig as SourceConfigRecord)
+      : {};
+  } catch (error) {
+    return {};
+  }
 };
 
 const getType = (type: string, config: string) => {
   if (type === 'JDBC') {
-    let desc = '';
-    try {
-      const { dbType } = parseSourceConfig(config) as { dbType?: string };
-      desc = dbType || '';
-    } catch (error) {
-      errorHandle(error);
-      throw error;
-    }
-    return desc;
-  } else {
-    return type;
+    return parseSourceConfig(config).dbType || '';
   }
+  return type;
 };
 
 function useGetSourceDbTypeIcon() {

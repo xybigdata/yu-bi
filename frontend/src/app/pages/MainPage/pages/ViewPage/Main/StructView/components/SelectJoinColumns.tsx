@@ -16,10 +16,10 @@
  * limitations under the License.
  */
 
-import { Form, TreeSelect } from 'antd';
+import { Form, TreeSelect, TreeSelectProps } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { DatabaseSchema } from 'app/pages/MainPage/pages/ViewPage/slice/types';
-import { memo, useCallback, useEffect, useMemo } from 'react';
+import { Key, memo, useCallback, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { SPACE_SM } from 'styles/StyleConstants';
@@ -34,8 +34,41 @@ interface SelectJoinColumnsProps {
   joinIndex: number;
   sourceId: string;
   allowManage: boolean;
-  onChange: (field, type, index) => void;
+  onChange: (
+    field: JoinColumnPath,
+    type: JoinConditionSide,
+    index: number,
+  ) => void;
 }
+
+type JoinConditionSide = 'left' | 'right';
+type JoinColumnPath = string[];
+type JoinColumnTreeNode = {
+  title: string;
+  key: Key | JoinColumnPath;
+  selectable?: boolean;
+  children?: JoinColumnTreeNode[];
+};
+
+const toJoinColumnPath = (value: unknown): JoinColumnPath => {
+  return Array.isArray(value) ? value : [];
+};
+
+const toTreeSelectData = (
+  treeData: JoinColumnTreeNode[],
+): TreeSelectProps['treeData'] => {
+  return treeData as unknown as TreeSelectProps['treeData'];
+};
+
+const buildColumnNodes = (
+  tableName: string[],
+  columns: string[],
+): JoinColumnTreeNode[] => {
+  return columns.map(column => ({
+    title: column,
+    key: [...tableName, column],
+  }));
+};
 
 const SelectJoinColumns = memo(
   ({
@@ -57,10 +90,8 @@ const SelectJoinColumns = memo(
     const handleLeftColumn = useCallback(() => {
       const tableName = structure.table;
       const mainColumn = getTableAllColumns(tableName, currentDatabaseSchemas);
-      const childrenData = mainColumn?.map((v, i) => {
-        return { title: v, key: [...tableName, v] };
-      });
-      const joinTable: any = [];
+      const childrenData = buildColumnNodes(tableName, mainColumn || []);
+      const joinTables: JoinColumnTreeNode[] = [];
 
       for (let i = 0; i < joinIndex; i++) {
         const tableName = structure.joins[i].table!;
@@ -68,10 +99,8 @@ const SelectJoinColumns = memo(
           tableName,
           currentDatabaseSchemas,
         );
-        const childrenData = joinColumn?.map((v, i) => {
-          return { title: v, key: [...tableName, v] };
-        });
-        joinTable.push({
+        const childrenData = buildColumnNodes(tableName, joinColumn || []);
+        joinTables.push({
           title: tableName.join('.'),
           key: tableName.join('.'),
           selectable: false,
@@ -86,25 +115,23 @@ const SelectJoinColumns = memo(
           selectable: false,
           children: childrenData,
         },
-        ...joinTable,
+        ...joinTables,
       ];
 
       return treeData;
     }, [joinIndex, structure, currentDatabaseSchemas]);
 
-    const handleRightColumn = useCallback((): any => {
+    const handleRightColumn = useCallback((): JoinColumnTreeNode[] => {
       const joinTableName = joinTable.table!;
       const joinColumn = getTableAllColumns(
         joinTableName,
         currentDatabaseSchemas,
       );
-      const childrenData = joinColumn?.map((v, i) => {
-        return { title: v, key: [...joinTableName, v] };
-      });
-      const treeData: any = [
+      const childrenData = buildColumnNodes(joinTableName, joinColumn || []);
+      const treeData: JoinColumnTreeNode[] = [
         {
           title: joinTableName.join('.'),
-          key: joinTableName,
+          key: joinTableName.join('.'),
           selectable: false,
           children: childrenData,
         },
@@ -121,7 +148,9 @@ const SelectJoinColumns = memo(
         <FormItem
           name={'left' + joinIndex + conditionsIndex}
           rules={[{ required: true, message: t('selectField') }]}
-          getValueFromEvent={e => (e ? e.slice(-1) : '')}
+          getValueFromEvent={(value?: Key | JoinColumnPath) =>
+            toJoinColumnPath(value).slice(-1)
+          }
         >
           <ColumnSelect
             dropdownMatchSelectWidth={false}
@@ -131,16 +160,18 @@ const SelectJoinColumns = memo(
             value={joinTable.conditions?.[conditionsIndex]?.left.slice(-1)}
             onChange={columnName => {
               allowManage &&
-                onChange(columnName || [], 'left', conditionsIndex);
+                onChange(toJoinColumnPath(columnName), 'left', conditionsIndex);
             }}
-            treeData={handleLeftColumn()}
+            treeData={toTreeSelectData(handleLeftColumn())}
           />
         </FormItem>
         <Equal>=</Equal>
         <FormItem
           name={'right' + joinIndex + conditionsIndex}
           rules={[{ required: true, message: t('selectField') }]}
-          getValueFromEvent={e => (e ? e.slice(-1) : '')}
+          getValueFromEvent={(value?: Key | JoinColumnPath) =>
+            toJoinColumnPath(value).slice(-1)
+          }
         >
           <ColumnSelect
             dropdownMatchSelectWidth={false}
@@ -150,9 +181,13 @@ const SelectJoinColumns = memo(
             value={joinTable.conditions?.[conditionsIndex]?.right.slice(-1)}
             onChange={columnName => {
               allowManage &&
-                onChange(columnName || [], 'right', conditionsIndex);
+                onChange(
+                  toJoinColumnPath(columnName),
+                  'right',
+                  conditionsIndex,
+                );
             }}
-            treeData={handleRightColumn()}
+            treeData={toTreeSelectData(handleRightColumn())}
           />
         </FormItem>
       </Line>
