@@ -361,6 +361,7 @@
 - 已完成：Share/Viz 预览数据集 fulfilled payload 补齐 `ChartDataSetDTO` 边界，computed fields 更新 payload 对齐 `ChartDataViewMeta[]`，去掉分享预览 dataset 的局部 `as any`
 - 已完成：ChartOperationPanel 的配置更新回调复用 `ChartConfigPayloadType`，FlexLayout factory 节点和 DnD backend props 补齐公开类型
 - 已完成：散点 symbol size 工具函数与轮廓地图散点 series 的 value 参数对齐真实数组边界，避免继续保留未声明回调参数
+- 已完成：保存到看板链路的 `dashboardId / dashboardType` 回调补齐 `BoardType` 边界，`SaveToDashboard` 的 Tree 选择事件改为 antd 公开事件类型加本地节点守卫，保持路由 state 与保存行为不变
 - 已完成：Workbench 数据集 thunk 与 reducer 补齐 `ChartDataSetDTO` 和 reject payload 最小结构，去掉 dataset fulfilled / rejected 链路里的局部 `as any`；配置 payload 的动态 `value` 仍按协议宽口暂缓
 - 已完成：BasicRichText MarkdownModule 的 Delta op 与 Quill line 补齐最小局部类型，RichTextPluginLoader 的 calcfield/tag/custom color 数据入口去掉局部 `any`，保持 Quill DOM 数据写读行为不变
 - 已完成：BasicFunnelChart 的数据行与指标排序比较改为局部数值读取 helper，去掉 `getCell(...) as any` 的数值比较中转，保持原 Number 转换语义不变

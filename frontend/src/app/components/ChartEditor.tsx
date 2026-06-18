@@ -27,6 +27,7 @@ import ChartManager from 'app/models/ChartManager';
 import { useWorkbenchSlice } from 'app/pages/ChartWorkbenchPage/slice';
 import { ChartConfigReducerActionType } from 'app/pages/ChartWorkbenchPage/slice/constant';
 import { ChartConfigPayloadType } from 'app/pages/ChartWorkbenchPage/slice/types';
+import { BoardType } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import {
   aggregationSelector,
   backendChartSelector,
@@ -540,7 +541,7 @@ export const ChartEditor: FC<ChartEditorProps> = ({
   ]);
 
   const saveChartToDashBoard = useCallback(
-    (dashboardId, dashboardType) => {
+    (dashboardId: string, dashboardType?: BoardType) => {
       const dataChart = buildDataChart();
       try {
         navigate.push({
