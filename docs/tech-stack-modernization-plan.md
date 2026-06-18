@@ -270,8 +270,9 @@
   - 补齐各 loader 的 Promise 复用和失败重试定向测试
 - 前端运行时加载调用层继续稳定化：
   - `Split`、`MonacoEditor`、SQL 格式化、StoryBoard 编辑/播放/分享播放的运行时加载失败补齐显式错误记录，避免未处理 Promise 打断页面
+  - View 属性侧 `Resource` / `Variables` 的 Monaco completion provider 注册链路收口到统一 helper，加载失败时显式记录并保持 provider 未注册状态
   - 保持失败后当前占位或未初始化状态，不改变成功加载路径和用户配置协议
-  - 补齐 `Split` 与 `MonacoEditor` 组件层失败兜底测试
+  - 补齐 `Split`、`MonacoEditor` 与 completion provider 注册链路的失败兜底测试
 - 前端历史弱类型注释清理：
   - 删除看板 widget 工具、控制器核心、容器内容类型和查询/重置按钮配置里的失效注释代码
   - 清理注释中的历史 `as any` / `any[]` 噪音，降低后续低风险扫描误判
@@ -370,6 +371,7 @@
 
 - 已完成：`split.js`、`react-window`、`sql-formatter`、ECharts 默认主题、Reveal、Monaco 和插件路径预加载的失败重试边界稳定化，避免一次加载失败后长期缓存 rejected Promise
 - 已完成：`Split`、`MonacoEditor`、SQL 编辑器快捷键绑定、SQL 格式化、StoryBoard 编辑/播放/分享播放的运行时加载失败兜底，避免组件内部异步加载失败形成未处理 Promise
+- 已完成：View 属性侧 `Resource` / `Variables` 的 SQL completion provider 注册链路统一走 `registerSqlCompletionProvider`，Monaco 加载失败时不再形成未处理 Promise
 - 已完成：`ChartSelectModal` 去掉 `rc-tree/lib/interface` 的 `Key` 深路径导入，改用 React 公开 `Key` 类型
 - 已完成：`UnControlledTableHeaderPanel` 去掉 `antd/es/table/interface` 的 `TableRowSelection` 深路径导入，改为从 `TableProps<T>['rowSelection']` 反推公开类型
 - 已完成：`HiddenUploader` 去掉 `antd/es/upload/Upload` 的 `UploadRef` 深路径导入，改为从包根 `Upload` 公开组件反推 ref 类型
@@ -614,7 +616,7 @@
 当前验证计划：
 
 - `npm run checkTs`
-- `npm run test:ci -- src/app/components/__tests__/Split.test.tsx src/app/components/MonacoEditor/__tests__/index.test.tsx src/app/components/MonacoEditor/__tests__/runtime.test.ts src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/VirtualTable.test.tsx src/app/pages/StoryBoardPage/__tests__/revealRuntime.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/sqlFormatterRuntime.test.ts`
+- `npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/completionRuntime.test.ts src/app/components/MonacoEditor/__tests__/runtime.test.ts`
 
 ### 6.2 最近已完成
 
@@ -728,6 +730,8 @@
 - 通过：运行时懒加载边界稳定化专项定向测试，`npm run test:ci -- src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/sqlFormatterRuntime.test.ts src/app/utils/__tests__/echartsThemeRuntime.test.ts src/app/pages/StoryBoardPage/__tests__/revealRuntime.test.ts src/app/components/MonacoEditor/__tests__/runtime.test.ts src/app/services/__tests__/chartPluginService.test.ts`
 - 通过：运行时加载调用层稳定化专项轻量门禁，`npm run checkTs`
 - 通过：运行时加载调用层稳定化专项定向测试，`npm run test:ci -- src/app/components/__tests__/Split.test.tsx src/app/components/MonacoEditor/__tests__/index.test.tsx src/app/components/MonacoEditor/__tests__/runtime.test.ts src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/VirtualTable.test.tsx src/app/pages/StoryBoardPage/__tests__/revealRuntime.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/sqlFormatterRuntime.test.ts`
+- 通过：Monaco completion provider 注册链路稳定化专项轻量门禁，`npm run checkTs`
+- 通过：Monaco completion provider 注册链路稳定化专项定向测试，`npm run test:ci -- src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/completionRuntime.test.ts src/app/components/MonacoEditor/__tests__/runtime.test.ts`
 - 通过：富文本运行时加载稳定化专项轻量门禁，`npm run checkTs`
 - 通过：富文本运行时加载稳定化专项定向测试，`npm run test:ci -- src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/readyState.test.ts`
 - 通过：`flexlayout-react` 工作台布局工厂稳定化专项轻量门禁，`npm run checkTs`

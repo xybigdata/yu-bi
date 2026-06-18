@@ -25,7 +25,6 @@ import {
   TeamOutlined,
 } from '@ant-design/icons';
 import { Button, List, Popconfirm } from 'antd';
-import { loadMonaco } from 'app/components/MonacoEditor/runtime';
 import { ListItem } from 'app/components';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -70,9 +69,9 @@ import { ViewViewModelStages } from '../../constants';
 import { EditorContext } from '../../EditorContext';
 import { useViewSlice } from '../../slice';
 import { selectCurrentEditingViewAttr } from '../../slice/selectors';
-import { getEditorProvideCompletionItems } from '../../slice/thunks';
 import { VariableHierarchy } from '../../slice/types';
 import { comparePermissionChange } from '../../utils';
+import { registerSqlCompletionProvider } from '../Editor/completionRuntime';
 import Container from './Container';
 
 export const Variables = memo(() => {
@@ -102,25 +101,12 @@ export const Variables = memo(() => {
   useEffect(() => {
     let cancelled = false;
     if (editorCompletionItemProviderRef) {
-      editorCompletionItemProviderRef.current?.dispose();
-      void loadMonaco().then(monaco => {
-        if (cancelled) {
-          return;
-        }
-        dispatch(
-          getEditorProvideCompletionItems({
-            sourceId,
-            resolve: getItem => {
-              if (cancelled) {
-                return;
-              }
-              editorCompletionItemProviderRef.current =
-                monaco.languages.registerCompletionItemProvider('sql', {
-                  provideCompletionItems: getItem,
-                });
-            },
-          }),
-        );
+      registerSqlCompletionProvider({
+        dispatch,
+        providerRef: editorCompletionItemProviderRef,
+        sourceId,
+        isCancelled: () => cancelled,
+        errorMessage: 'Load variable completion runtime failed',
       });
     }
     return () => {
