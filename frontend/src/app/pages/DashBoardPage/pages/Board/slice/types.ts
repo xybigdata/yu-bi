@@ -323,6 +323,30 @@ export interface WidgetContent {
   richText?: MediaWidgetContent['richTextConfig'];
 }
 
+export const isChartWidgetContent = (
+  content: WidgetContent | undefined,
+): content is ChartWidgetContent => {
+  return !!content && typeof content === 'object' && 'dataChart' in content;
+};
+
+export const isControllerWidgetContent = (
+  content: WidgetContent | undefined,
+): content is ControllerWidgetContent => {
+  return (
+    !!content &&
+    typeof content === 'object' &&
+    !!content.type &&
+    !!content.config &&
+    Array.isArray(content.relatedViews)
+  );
+};
+
+export const isTabWidgetContent = (
+  content: WidgetContent | undefined,
+): content is TabWidgetContent => {
+  return !!content && typeof content === 'object' && !!content.itemMap;
+};
+
 export const WidgetTypes = [
   'chart',
   'media',

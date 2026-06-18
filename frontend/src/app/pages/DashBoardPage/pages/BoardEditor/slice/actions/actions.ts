@@ -27,7 +27,7 @@ import {
   BoardState,
   Dashboard,
   DataChart,
-  TabWidgetContent,
+  isTabWidgetContent,
   VizRenderMode,
   WidgetOfCopy,
   WidgetType,
@@ -204,7 +204,10 @@ export const copyWidgetsAction = (wIds?: string[]) => (dispatch, getState) => {
       needCopyWidgetIds = needCopyWidgetIds.concat(widget.config.children);
     }
     if (widget.config.type === 'container') {
-      const content = widget.config.content as TabWidgetContent;
+      const content = widget.config.content;
+      if (!isTabWidgetContent(content)) {
+        return;
+      }
       const needCopyIds = Object.values(content.itemMap)
         .map(item => {
           if (item.childWidgetId) {

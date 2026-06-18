@@ -59,6 +59,7 @@ import {
   ControllerWidgetContent,
   DataChart,
   getDataOption,
+  isControllerWidgetContent,
   WidgetInfo,
 } from '../pages/Board/slice/types';
 import {
@@ -206,7 +207,8 @@ export function getTheWidgetFiltersAndParams<
     );
     if (!hasRelation) return;
 
-    const content = filterWidget.config.content as ControllerWidgetContent;
+    const content = filterWidget.config.content;
+    if (!isControllerWidgetContent(content)) return;
     const { relatedViews, config: controllerConfig, type } = content;
     const relatedViewItem = relatedViews
       .filter(view => view.fieldValue)
