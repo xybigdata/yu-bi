@@ -329,6 +329,7 @@
 - 已完成：StructView 数据源选择链路的树图标、表选择、列选择、弹层开关和回调数据补齐显式类型，减少结构视图配置链路的宽泛入参
 - 已完成：StructView 主表与 join 表变更入口补齐局部数据结构守卫，错误提示捕获改为 `unknown` + 最小消息读取
 - 已完成：StructView join 条件列选择链路补齐列路径、左右条件、树节点和 TreeSelect 兼容桥类型，去掉 `SelectJoinColumns` 内部局部 `any`
+- 已完成：View 运行 SQL thunk 的早退返回、变量默认值解析、STRUCT 请求列和 Monaco completion provider 回调补齐显式边界，去掉对应 `as any` 与裸 `JSON.parse`
 - 已完成：迁移测试层局部弱类型收口
 - 已完成：工具测试层第一批局部弱类型收口
 - 已完成：`overflowFuncs.test.ts`、`internalChartHelper.test.ts`、`FormGenerator` 测试与 `chartHelper.test.ts` 的局部弱类型收口
