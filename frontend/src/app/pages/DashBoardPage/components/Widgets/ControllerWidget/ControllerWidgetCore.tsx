@@ -18,7 +18,10 @@
 
 import { Form } from 'antd';
 import { ControllerFacadeTypes, TimeFilterValueCategory } from 'app/constants';
-import { ControllerWidgetContent } from 'app/pages/DashBoardPage/pages/Board/slice/types';
+import {
+  ControllerWidgetContent,
+  isControllerWidgetContent,
+} from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import {
   ControllerConfig,
   ControllerDate,
@@ -82,9 +85,10 @@ const normalizeControllerSubmitValue = (
   return isControllerValue(value) ? [value] : [];
 };
 
-export const ControllerWidgetCore: React.FC<{}> = memo(() => {
-  const widget = useContext(WidgetContext);
-  const content = widget.config.content as ControllerWidgetContent;
+const ControllerWidgetContentCore: React.FC<{
+  widget: Widget;
+  content: ControllerWidgetContent;
+}> = memo(({ widget, content }) => {
   const { onUpdateWidgetConfigByKey, onRefreshWidgetsByController } =
     useContext(WidgetActionContext);
   // TODO 由控制器自己控制 要不要触发查询
@@ -412,6 +416,18 @@ export const ControllerWidgetCore: React.FC<{}> = memo(() => {
     </Wrapper>
   );
 });
+
+export const ControllerWidgetCore: React.FC<{}> = memo(() => {
+  const widget = useContext(WidgetContext);
+  const content = widget.config.content;
+
+  if (!isControllerWidgetContent(content)) {
+    return null;
+  }
+
+  return <ControllerWidgetContentCore widget={widget} content={content} />;
+});
+
 const Wrapper = styled.div<{ formFrontColor: string }>`
   display: flex;
   flex: 1;

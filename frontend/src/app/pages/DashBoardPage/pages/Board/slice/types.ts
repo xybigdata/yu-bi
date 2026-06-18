@@ -324,27 +324,29 @@ export interface WidgetContent {
 }
 
 export const isChartWidgetContent = (
-  content: WidgetContent | undefined,
+  content: unknown,
 ): content is ChartWidgetContent => {
   return !!content && typeof content === 'object' && 'dataChart' in content;
 };
 
 export const isControllerWidgetContent = (
-  content: WidgetContent | undefined,
+  content: unknown,
 ): content is ControllerWidgetContent => {
+  const candidate = content as Partial<ControllerWidgetContent> | undefined;
   return (
-    !!content &&
-    typeof content === 'object' &&
-    !!content.type &&
-    !!content.config &&
-    Array.isArray(content.relatedViews)
+    !!candidate &&
+    typeof candidate === 'object' &&
+    !!candidate.type &&
+    !!candidate.config &&
+    Array.isArray(candidate.relatedViews)
   );
 };
 
 export const isTabWidgetContent = (
-  content: WidgetContent | undefined,
+  content: unknown,
 ): content is TabWidgetContent => {
-  return !!content && typeof content === 'object' && !!content.itemMap;
+  const candidate = content as Partial<TabWidgetContent> | undefined;
+  return !!candidate && typeof candidate === 'object' && !!candidate.itemMap;
 };
 
 export const WidgetTypes = [

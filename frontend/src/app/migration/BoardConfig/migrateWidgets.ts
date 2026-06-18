@@ -21,7 +21,6 @@ import { initInteractionTpl } from 'app/pages/DashBoardPage/components/WidgetMan
 import { ORIGINAL_TYPE_MAP } from 'app/pages/DashBoardPage/constants';
 import {
   BoardType,
-  ControllerWidgetContent,
   Relation,
   ServerRelation,
   ServerWidget,
@@ -54,6 +53,11 @@ type RelationConfigTarget = Relation['config'];
 type LegacyComputedField = {
   id?: string;
   name?: string;
+};
+type LegacyControllerWidgetContent = {
+  config?: {
+    assistViewFields?: string | string[];
+  };
 };
 
 const parseServerRelationConfig = (
@@ -120,11 +124,10 @@ export const beta0 = (widget?: WidgetBeta3 | LegacyFilterWidgetBeta3) => {
 
   // 3.处理 assistViewFields 旧数据 assistViewFields 是 string beta0 使用数组存储的
   if (widget.config.type === 'controller') {
-    const content = widget.config.content as ControllerWidgetContent;
+    const content = widget.config.content as LegacyControllerWidgetContent;
     if (typeof content?.config?.assistViewFields === 'string') {
-      content.config.assistViewFields = (
-        content.config.assistViewFields as string
-      ).split(VALUE_SPLITTER);
+      content.config.assistViewFields =
+        content.config.assistViewFields.split(VALUE_SPLITTER);
     }
   }
   widget.config.version = APP_VERSION_BETA_0;

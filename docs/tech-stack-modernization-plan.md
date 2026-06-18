@@ -379,6 +379,8 @@
 - 已完成：sampleData 写入 widgetDataMap 前增加对象形态守卫，避免 `unknown` 模板数据直接穿透到看板 widget 数据状态
 - 已完成：新增 `isChartWidgetContent` / `isControllerWidgetContent` / `isTabWidgetContent` 内容类型守卫，替换 Dashboard 工具函数、BoardEditor action 和 Tab reducer 里的多处 `config.content as ...` 强转
 - 已完成：控制器可见性、控制器筛选参数、owned chart 包装、tab 子项映射和 widget 复制链路改为先验证内容结构再消费，异常历史内容按原有跳过/兜底路径处理
+- 已完成：Controller option 获取 thunk、ControllerWidgetCore、ControllerWidgetPanel、TabWidgetCore 与 LayerPanel 的内容消费点改为复用内容类型守卫，缺失或异常内容走空渲染、空列表或跳过请求的兜底路径
+- 已完成：DataChart / Controller widget creator 的 `unknown` 创建入参改为先做最小结构守卫再落到持久化内容；beta0 迁移保留 legacy controller content 局部桥接，避免影响旧数据转换
 
 - 已完成：BasicTable 表格列、header/body cell props、summary 返回、分页排序事件和单元格点击事件补齐局部显式类型，保留 Ant Design 公开入口和现有渲染行为不变
 - 已完成：图表事件行数据统一收口到 `ChartRowData`，柱线饼散点漏斗词云轮廓地图瀑布等图表不再继续声明 `rowData: any`
@@ -829,6 +831,8 @@
 - 通过：Dashboard widget 内容协议边界专项定向测试，`npm run test:ci -- src/app/migration/__tests__/migrateWidgetChartConfig.test.ts src/app/migration/__tests__/migrateWidgets.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts`，6 个测试文件通过，59 个测试通过，3 个跳过
 - 通过：Dashboard widget 内容类型守卫批次轻量门禁，`npm run checkTs`
 - 通过：Dashboard widget 内容类型守卫批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts`，5 个测试文件通过，37 个测试通过，3 个跳过
+- 通过：Dashboard Controller / Tab 内容消费点批次轻量门禁，`npm run checkTs`
+- 通过：Dashboard Controller / Tab 内容消费点批次定向测试，`npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts src/app/pages/DashBoardPage/components/Widgets/GroupWidget/__tests__/utils.test.ts src/app/migration/__tests__/migrateWidgets.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts`，7 个测试文件通过，59 个测试通过，3 个跳过
 
 触发完整前端门禁的条件：
 

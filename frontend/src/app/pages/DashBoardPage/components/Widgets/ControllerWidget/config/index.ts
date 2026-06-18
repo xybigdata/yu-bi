@@ -18,6 +18,7 @@
 
 import {
   ControllerWidgetContent,
+  isControllerWidgetContent,
   Relation,
   RelationConfigType,
 } from 'app/pages/DashBoardPage/pages/Board/slice/types';
@@ -71,7 +72,9 @@ export const controlWidgetTpl = (opt: WidgetCreateProps) => {
   widget.datachartId = opt.datachartId || '';
   widget.viewIds = opt.viewIds || [];
   widget.relations = opt.relations || [];
-  widget.config.content = opt.content as ControllerWidgetContent | undefined;
+  widget.config.content = isControllerWidgetContent(opt.content)
+    ? opt.content
+    : undefined;
   widget.config.name = opt.name || '';
   widget.config.type = 'controller';
   widget.config.customConfig.props = [{ ...initTitleTpl() }];

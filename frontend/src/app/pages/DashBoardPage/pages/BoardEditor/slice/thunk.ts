@@ -13,9 +13,9 @@ import { ORIGINAL_TYPE_MAP } from 'app/pages/DashBoardPage/constants';
 import { boardActions } from 'app/pages/DashBoardPage/pages/Board/slice';
 import {
   BoardState,
-  ControllerWidgetContent,
   DataChart,
   getDataOption,
+  isControllerWidgetContent,
   SaveDashboard,
   ServerDatachart,
   WidgetData,
@@ -702,7 +702,8 @@ export const getEditControllerOptions = createAsyncThunk<
     const { widgetRecord: widgetMap } = stackEditBoard.stack.present;
     const widget = widgetMap[widgetId];
     if (!widget) return null;
-    const content = widget.config.content as ControllerWidgetContent;
+    const content = widget.config.content;
+    if (!isControllerWidgetContent(content)) return null;
     const config = content.config;
     if (!Array.isArray(config.assistViewFields)) return null;
     if (config.assistViewFields.length < 2) return null;

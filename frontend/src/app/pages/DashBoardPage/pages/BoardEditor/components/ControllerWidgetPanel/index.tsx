@@ -30,6 +30,7 @@ import {
 import { selectViewMap } from 'app/pages/DashBoardPage/pages/Board/slice/selector';
 import {
   ControllerWidgetContent,
+  isControllerWidgetContent,
   RelatedView,
   WidgetControllerPanelParams,
 } from 'app/pages/DashBoardPage/pages/Board/slice/types';
@@ -170,8 +171,10 @@ const ControllerWidgetPanel: React.FC<WidgetControllerPanelParams> = memo(
 
         return;
       }
-      const confContent = curFilterWidget.config
-        .content as ControllerWidgetContent;
+      const confContent = curFilterWidget.config.content;
+      if (!isControllerWidgetContent(confContent)) {
+        return;
+      }
       const oldRelations = curFilterWidget?.relations;
       const oldRelatedWidgetIds = oldRelations
         .filter(t => widgetMap[t.targetId])
@@ -242,8 +245,11 @@ const ControllerWidgetPanel: React.FC<WidgetControllerPanelParams> = memo(
             config: config,
           });
 
+          const currentContent = curFilterWidget.config.content;
           const nextContent: ControllerWidgetContent = {
-            ...(curFilterWidget.config.content as ControllerWidgetContent),
+            ...(isControllerWidgetContent(currentContent)
+              ? currentContent
+              : { type: controllerType!, relatedViews: [], name, config }),
             name,
             relatedViews,
             config: postControlConfig(config, controllerType!),
