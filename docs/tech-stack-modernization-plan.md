@@ -327,6 +327,7 @@
 - 已完成：`Avatar`、`ListTitle` 与 `AddButton` 的局部 UI 回调和状态类型收口，复用 antd 公开 props 与菜单点击参数类型，保留按钮点击无参和菜单点击带参两种调用方式
 - 已完成：`ThemeProvider` 测试里的主题变量与 store state 断言去掉局部 `any`，改用 `DefaultTheme` 与 `RootState`
 - 已完成：`Split` 组件的 split.js 子节点收集改为显式 `HTMLElement[]` 过滤，内部 gutter 标记用局部 DOM 扩展类型承接，去掉 ref 和 gutter 判断里的宽泛强转
+- 已完成：`SplitPane` 的尺寸 state patch、鼠标转触摸事件和默认尺寸计算补齐局部显式类型，去掉 `setState<any>`，保留 pane size 允许字符串、数字或空值的既有语义
 - 已完成：Redux 动态 reducer 注入工厂参数改为 `unknown` 入口，继续由 `checkStore` 做运行时 shape 校验，非法 store 测试不再需要 `as any`
 - 已完成：`DragSortEditTable` 的表格 props、编辑表单上下文和拖拽行 props 改为基于 `RelationFilterValue` 的显式类型，保留现有可编辑拖拽行为不变
 - 已完成：`BasicSelector` 的动态选项结果收口为局部显式选项类型，保留标量选项与 `label/value` 对象选项两种兼容形态
