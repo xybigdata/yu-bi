@@ -71,7 +71,7 @@ class PivotSheetChart extends ReactChart {
   isISOContainer = 'piovt-sheet';
   config = Config;
   chart: null | SpreadSheet = null;
-  private updateOptions: any = {};
+  private updateOptions: AndvS2Config = { options: {} };
   private lastRowsConfig: ChartDataSectionField[] = [];
   private hierarchyCollapse: boolean = true;
   private drillLevel: number = 0;

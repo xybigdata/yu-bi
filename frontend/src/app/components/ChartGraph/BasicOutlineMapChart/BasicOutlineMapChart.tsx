@@ -377,22 +377,23 @@ class BasicOutlineMapChart extends Chart {
         sizeConfigs,
         styleConfigs,
       ),
-      series: this.getGeoSeries(
-        chartDataSet,
-        groupConfigs,
-        aggregateConfigs,
-        sizeConfigs,
-        styleConfigs,
-      ).concat(
-        this.getMetricAndSizeSeries(
+      series: [
+        ...this.getGeoSeries(
+          chartDataSet,
+          groupConfigs,
+          aggregateConfigs,
+          sizeConfigs,
+          styleConfigs,
+        ),
+        ...this.getMetricAndSizeSeries(
           chartDataSet,
           groupConfigs,
           aggregateConfigs,
           sizeConfigs,
           styleConfigs,
           selectedItems,
-        ) as any,
-      ),
+        ),
+      ],
       tooltip: this.getTooltip(
         chartDataSet,
         groupConfigs,

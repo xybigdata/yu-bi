@@ -251,6 +251,11 @@
   - ViewDetail 自定义字段从 `any[]` 收口为 `string[]`
   - `internalChartHelper` 读取自定义关系时补齐空数组兜底，保持未配置场景的既有空结果语义
   - 本批不改 FormGenerator 全局 `ItemLayoutProps` 和配置 JSON 协议宽口
+- 前端图表 option 局部类型边界继续收口：
+  - 透视表缓存的 `updateOptions` 改为复用已有 `AndvS2Config`
+  - 散点图 metric / size series 的混合值数组补齐真实 `string | number | undefined` 边界，去掉局部 `as any`
+  - 轮廓地图 option 的 `series` 改为地图 series 与散点 series 联合类型，去掉 series 拼接处的局部 `as any`
+  - 本批不迁移 ECharts 实例、地图注册入参、tooltip params 和 rowData 宽口
 - Maven 对外品牌元数据继续收口：
   - 根 POM 与各服务端模块补齐 `name`、`description` 等对外元数据，统一以 `yu-bi` 对外呈现
   - SCM 与许可证信息指向 `yu-bi` 新仓库

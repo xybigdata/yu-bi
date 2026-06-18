@@ -83,7 +83,7 @@ export type MetricAndSizeSeriesStyle = {
 export interface MapOption {
   geo?: GeoInfo;
   visualMap?: GeoVisualMapStyle[];
-  series?: GeoSeries[];
+  series?: Array<GeoSeries | MetricAndSizeSeriesStyle>;
   tooltip?: { trigger: string; formatter: (params: any) => string };
   toolbox?: {
     orient: string;
