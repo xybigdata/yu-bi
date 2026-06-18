@@ -285,12 +285,6 @@ export type MediaWidgetContent = {
   };
 };
 // 容器组件配置
-// export type ContainerWidgetContent = {
-//   type: ContainerWidgetType;
-//   itemMap: Record<string, ContainerItem>;
-//   tabConfig?: any;
-//   carouselConfig?: any;
-// };
 export type TabWidgetContent = {
   itemMap: Record<string, ContainerItem>;
 };

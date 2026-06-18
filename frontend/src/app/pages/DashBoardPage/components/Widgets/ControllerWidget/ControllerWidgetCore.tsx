@@ -180,20 +180,6 @@ export const ControllerWidgetCore: React.FC<{}> = memo(() => {
 
     refreshLinkedWidgets(widget);
   };
-  // const onSqlOperatorAndValues = useCallback(
-  //   (sql: FilterSqlOperator, values: any[]) => {
-  //     const nextWidget = produce(widget, draft => {
-  //       (draft.config.content as ControllerWidgetContent).config.sqlOperator =
-  //         sql;
-  //       (
-  //         draft.config.content as ControllerWidgetContent
-  //       ).config.controllerValues = values;
-  //     });
-  //     widgetUpdate(nextWidget);
-  //     refreshWidgetsByFilter(nextWidget);
-  //   },
-  //   [refreshWidgetsByFilter, widget, widgetUpdate],
-  // );
   const onRangeTimeChange = useCallback(
     (timeValues: [string | null, string | null] | null) => {
       const nextFilterDate: ControllerDate = {
