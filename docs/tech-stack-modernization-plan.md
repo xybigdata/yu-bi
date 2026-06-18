@@ -320,6 +320,7 @@
 - 已完成：前端源码复扫已无 `antd/es`、`antd/lib`、`rc-*/es`、`rc-*/lib` 这类历史深路径类型入口；Monaco 剩余 `esm` 路径仅保留在运行时懒加载与语言贡献加载入口
 - 已完成：看板与图表 MockData 面板的样例数据状态、编辑器回调和导出参数补齐 `ChartDataSetDTO` / 行数组 / 模板导出 payload 局部类型，去掉面板链路里的宽泛 `any` 与原地修改
 - 已完成：Workbench、图表预览、分享预览和看板 widget 数据请求的排序、分页、执行 token 参数补齐 `ChartDataRequest` / `ChartDatasetPageInfo` / `ExecuteToken` 类型边界，去掉请求构造链路里的局部 `as any` 与 `getState() as any`
+- 已完成：Share/Viz 预览数据集 fulfilled payload 补齐 `ChartDataSetDTO` 边界，computed fields 更新 payload 对齐 `ChartDataViewMeta[]`，去掉分享预览 dataset 的局部 `as any`
 - 已完成：Workbench 数据集 thunk 与 reducer 补齐 `ChartDataSetDTO` 和 reject payload 最小结构，去掉 dataset fulfilled / rejected 链路里的局部 `as any`；配置 payload 的动态 `value` 仍按协议宽口暂缓
 - 已完成：BasicRichText MarkdownModule 的 Delta op 与 Quill line 补齐最小局部类型，RichTextPluginLoader 的 calcfield/tag/custom color 数据入口去掉局部 `any`，保持 Quill DOM 数据写读行为不变
 - 已完成：BasicFunnelChart 的数据行与指标排序比较改为局部数值读取 helper，去掉 `getCell(...) as any` 的数值比较中转，保持原 Number 转换语义不变

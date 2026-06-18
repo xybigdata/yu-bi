@@ -29,7 +29,10 @@ import {
 import { handleServerStoryAction } from 'app/pages/StoryBoardPage/slice/actions';
 import { ServerStoryBoard } from 'app/pages/StoryBoardPage/slice/types';
 import type { ChartDataRequest } from 'app/types/ChartDataRequest';
-import type { ChartDatasetPageInfo } from 'app/types/ChartDataSet';
+import type {
+  ChartDataSetDTO,
+  ChartDatasetPageInfo,
+} from 'app/types/ChartDataSet';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { convertToChartDto } from 'app/utils/ChartDtoHelper';
 import { fetchAvailableSourceFunctionsAsyncForShare } from 'app/utils/fetch';
@@ -149,18 +152,18 @@ export const fetchShareVizInfo = createAsyncThunk(
   },
 );
 
-export const fetchShareDataSetByPreviewChartAction = createAsyncThunk(
+export const fetchShareDataSetByPreviewChartAction = createAsyncThunk<
+  ChartDataSetDTO | undefined,
+  {
+    preview: ChartPreview;
+    pageInfo?: ChartDatasetPageInfo;
+    sorter?: RequestSorter;
+    drillOption?: IChartDrillOption;
+    filterSearchParams?: FilterSearchParams;
+  }
+>(
   'share/fetchDataSetByPreviewChartAction',
-  async (
-    args: {
-      preview: ChartPreview;
-      pageInfo?: ChartDatasetPageInfo;
-      sorter?: RequestSorter;
-      drillOption?: IChartDrillOption;
-      filterSearchParams?: FilterSearchParams;
-    },
-    thunkAPI,
-  ) => {
+  async (args, thunkAPI) => {
     const state = thunkAPI.getState() as RootState;
     const shareState = state.share;
     if (!args.preview?.backendChart?.view.id) {
@@ -186,7 +189,7 @@ export const fetchShareDataSetByPreviewChartAction = createAsyncThunk(
       .addDrillOption(args?.drillOption)
       .build();
 
-    const response = await request2({
+    const response = await request2<ChartDataSetDTO>({
       method: 'POST',
       url: `shares/execute`,
       params: {
