@@ -260,6 +260,10 @@
   - 删除看板 widget 工具、控制器核心、容器内容类型和查询/重置按钮配置里的失效注释代码
   - 清理注释中的历史 `as any` / `any[]` 噪音，降低后续低风险扫描误判
   - 本批不改变运行时代码，不改 widget content 协议宽口
+- 前端翻译函数局部类型继续收口：
+  - FormGenerator 的 `translate` 参数复用统一 `I18NTranslateOptions`
+  - Waterfall 图表内部翻译参数复用统一 `I18NTranslate`，并补齐可选翻译函数缺省回退
+  - `ChartFilterCondition.value` 经 `checkTs` 验证仍属于运行时宽口，继续暂缓不纳入低风险批次
 - Maven 对外品牌元数据继续收口：
   - 根 POM 与各服务端模块补齐 `name`、`description` 等对外元数据，统一以 `yu-bi` 对外呈现
   - SCM 与许可证信息指向 `yu-bi` 新仓库

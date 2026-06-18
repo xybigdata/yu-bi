@@ -17,6 +17,7 @@
  */
 
 import { ChartDataSectionType } from 'app/constants';
+import { I18NTranslate } from 'app/hooks/useI18NPrefix';
 import Chart from 'app/models/Chart';
 import { ChartSelectionManager } from 'app/models/ChartSelectionManager';
 import {
@@ -260,7 +261,7 @@ class WaterfallChart extends Chart {
     chartDataSet: IChartDataSet<string>,
     aggregateConfigs: ChartDataSectionField[],
     group: ChartDataSectionField[],
-    t?: (key: string, disablePrefix?: boolean, options?: any) => any,
+    t?: I18NTranslate,
     selectedItems?: SelectedItem[],
   ) {
     const xAxisColumns: XAxisColumns = {
@@ -401,7 +402,7 @@ class WaterfallChart extends Chart {
     dataList: string[],
     xAxisColumns: XAxisColumns,
     styles: ChartStyleConfig[],
-    t?: (key: string, disablePrefix?: boolean, options?: any) => any,
+    t?: I18NTranslate,
     selectedItems?: SelectedItem[],
   ): WaterfallDataListConfig {
     const [totalColor] = getStyles(styles, ['bar'], ['totalColor']);
@@ -482,7 +483,7 @@ class WaterfallChart extends Chart {
       }
     });
     if (isIncrement && xAxisColumns?.data?.length) {
-      xAxisColumns.data.push(t?.('common.total'));
+      xAxisColumns.data.push(t?.('common.total') || '');
       const resultData = precisionCalculation(CalculationType.ADD, [
         dataList[dataList.length - 1],
         baseData[baseData.length - 1],
