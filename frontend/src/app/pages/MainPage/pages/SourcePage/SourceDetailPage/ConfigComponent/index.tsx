@@ -32,12 +32,27 @@ import {
   QueryResult,
   QueryResultDataSourceRow,
 } from 'app/pages/MainPage/pages/ViewPage/slice/types';
-import { DataProviderAttribute } from 'app/pages/MainPage/slice/types';
+import {
+  DataProviderAttribute,
+  DataProviderAttributeOption,
+} from 'app/pages/MainPage/slice/types';
 import { ReactElement } from 'react';
 import { ArrayConfig } from './ArrayConfig';
 import { FileUpload } from './FileUpload';
 import { Properties } from './Properties';
 import { SchemaComponent } from './SchemaComponent';
+
+const isDbTypeOption = (
+  option: DataProviderAttributeOption,
+): option is Extract<DataProviderAttributeOption, { dbType: string }> => {
+  return typeof option === 'object' && option !== null && 'dbType' in option;
+};
+
+const isStringOption = (
+  option: DataProviderAttributeOption,
+): option is string => {
+  return typeof option === 'string';
+};
 
 interface ConfigComponentProps {
   attr: DataProviderAttribute;
@@ -113,7 +128,7 @@ export function ConfigComponent({
           showSearch
           allowClear
         >
-          {options?.map(({ dbType }) => (
+          {options?.filter(isDbTypeOption).map(({ dbType }) => (
             <Select.Option key={dbType} value={dbType}>
               {dbType}
             </Select.Option>
@@ -138,10 +153,11 @@ export function ConfigComponent({
       switch (type) {
         case 'string':
           if (options && options.length > 0) {
-            if (options.length > 3) {
+            const stringOptions = options.filter(isStringOption);
+            if (stringOptions.length > 3) {
               component = (
                 <Select disabled={disabled} showSearch allowClear>
-                  {options.map(o => (
+                  {stringOptions.map(o => (
                     <Select.Option key={o} value={o}>
                       {o}
                     </Select.Option>
@@ -151,7 +167,7 @@ export function ConfigComponent({
             } else {
               component = (
                 <Radio.Group disabled={disabled}>
-                  {options.map(o => (
+                  {stringOptions.map(o => (
                     <Radio key={o} value={o}>
                       {o}
                     </Radio>

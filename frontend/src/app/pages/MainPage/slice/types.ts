@@ -84,10 +84,25 @@ export interface DataProviderConfigTemplate {
   attributes: DataProviderAttribute[];
 }
 
+export type DataProviderAttributeValue =
+  | string
+  | number
+  | boolean
+  | null
+  | DataProviderAttributeValue[]
+  | { [key: string]: DataProviderAttributeValue };
+
+export type DataProviderAttributeOption =
+  | string
+  | {
+      dbType: string;
+      [key: string]: DataProviderAttributeValue;
+    };
+
 export interface DataProviderAttribute {
   name: string;
   displayName: string;
-  defaultValue: any;
+  defaultValue: DataProviderAttributeValue;
   type:
     | 'string'
     | 'password'
@@ -99,7 +114,7 @@ export interface DataProviderAttribute {
   key?: string;
   required?: boolean;
   description?: string;
-  options?: any[];
+  options?: DataProviderAttributeOption[];
   children?: DataProviderAttribute[];
 }
 

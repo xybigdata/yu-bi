@@ -41,6 +41,7 @@ import React, {
 } from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
+import { DataProviderAttributeOption } from 'app/pages/MainPage/slice/types';
 import styled from 'styled-components';
 import {
   BORDER_RADIUS,
@@ -87,6 +88,12 @@ import {
 import { SourceFormModel, SourceSimple } from '../slice/types';
 import { allowManageSource } from '../utils';
 import { ConfigComponent } from './ConfigComponent';
+
+const isDbTypeOption = (
+  option: DataProviderAttributeOption,
+): option is Extract<DataProviderAttributeOption, { dbType: string }> => {
+  return typeof option === 'object' && option !== null && 'dbType' in option;
+};
 
 const parseSourceConfig = (config: string): SourceFormModel['config'] => {
   try {
@@ -211,9 +218,9 @@ export function SourceDetailPage() {
         ({ name }) => name === 'dbType',
       );
       if (dbTypeConfig) {
-        const selected = dbTypeConfig.options?.find(
-          ({ dbType }) => dbType === val,
-        );
+        const selected = dbTypeConfig.options
+          ?.filter(isDbTypeOption)
+          .find(option => option.dbType === val);
         if (selected) {
           const { url, driverClass } = selected;
           form.setFieldsValue({ config: { url, driverClass } });
