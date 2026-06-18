@@ -19,8 +19,6 @@
 import BasicPieChart from '../BasicPieChart';
 
 class PieChart extends BasicPieChart {
-  chart: any = null;
-
   isCircle = false;
   isRose = false;
 

@@ -56,7 +56,11 @@ import {
 import { transparentize } from 'polished';
 import { UniqArray } from 'utils/object';
 import Chart from '../../../models/Chart';
-import { loadEChartsRuntime } from '../echartsRuntime';
+import {
+  EChartsInstance,
+  isEChartsDataZoomEvent,
+  loadEChartsRuntime,
+} from '../echartsRuntime';
 import Config from './config';
 import { Series } from './types';
 
@@ -74,7 +78,7 @@ type DataZoomShowConfig =
 
 class BasicLineChart extends Chart {
   config = Config;
-  chart: any = null;
+  chart: EChartsInstance | null = null;
   selectionManager?: ChartSelectionManager;
   protected container: HTMLElement | null = null;
   private latestMountPayload?: {
@@ -196,7 +200,11 @@ class BasicLineChart extends Chart {
           this.selectionManager.attachEChartsListeners(this.chart);
 
           // TODO(TL): refactor to chart data zoom manager model
-          this.chart.on('datazoom', ({ end, start }) => {
+          this.chart.on('datazoom', event => {
+            if (!isEChartsDataZoomEvent(event)) {
+              return;
+            }
+            const { end, start } = event;
             this.dataZoomConfig.showConfig = {
               end,
               start,

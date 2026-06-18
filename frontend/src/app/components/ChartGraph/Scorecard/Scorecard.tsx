@@ -42,7 +42,6 @@ import ScorecardAdapter from './ScorecardAdapter';
 import { LabelConfig, PaddingConfig } from './types';
 
 class Scorecard extends ReactChart {
-  chart: any = null;
   isISOContainer = 'react-scorecard';
   config = Config;
   protected isAutoMerge = false;

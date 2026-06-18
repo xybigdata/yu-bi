@@ -49,14 +49,14 @@ import {
 } from 'app/utils/chartHelper';
 import Chart from '../../../models/Chart';
 import { ChartSelectionManager } from '../../../models/ChartSelectionManager';
-import { loadEChartsRuntime } from '../echartsRuntime';
+import { EChartsInstance, loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 import { DoubleYChartXAxis, DoubleYChartYAxis, Series } from './types';
 import { getYAxisIntervalConfig } from './utils';
 class BasicDoubleYChart extends Chart {
   dependency = [];
   config = Config;
-  chart: any = null;
+  chart: EChartsInstance | null = null;
   selectionManager?: ChartSelectionManager;
   protected container: HTMLElement | null = null;
   private latestMountPayload?: {

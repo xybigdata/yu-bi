@@ -1,5 +1,6 @@
 import { ChartRowData } from 'app/types/Chart';
 import { BorderStyle, FontStyle, LabelStyle } from '../../../types/ChartConfig';
+import { EChartsOption } from '../echartsRuntime';
 
 export type GeoInfo = {
   map?: string;
@@ -81,7 +82,7 @@ export type MetricAndSizeSeriesStyle = {
   };
 } & LabelStyle;
 
-export interface MapOption {
+export interface MapOption extends EChartsOption {
   geo?: GeoInfo;
   visualMap?: GeoVisualMapStyle[];
   series?: Array<GeoSeries | MetricAndSizeSeriesStyle>;

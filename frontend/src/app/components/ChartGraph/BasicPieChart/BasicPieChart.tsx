@@ -47,12 +47,12 @@ import {
   valueFormatter,
 } from 'app/utils/chartHelper';
 import Config from './config';
-import { loadEChartsRuntime } from '../echartsRuntime';
+import { EChartsInstance, loadEChartsRuntime } from '../echartsRuntime';
 import { PieSeries, PieSeriesImpl, PieSeriesStyle } from './types';
 
 class BasicPieChart extends Chart {
   config = Config;
-  chart: any = null;
+  chart: EChartsInstance | null = null;
   selectionManager?: ChartSelectionManager;
   protected container: HTMLElement | null = null;
   private latestMountPayload?: {

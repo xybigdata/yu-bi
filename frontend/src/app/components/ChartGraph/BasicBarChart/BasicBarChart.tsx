@@ -55,7 +55,11 @@ import { transparentize } from 'polished';
 import { UniqArray } from 'utils/object';
 import Chart from '../../../models/Chart';
 import { ChartRequirement } from '../../../types/ChartMetadata';
-import { loadEChartsRuntime } from '../echartsRuntime';
+import {
+  EChartsInstance,
+  isEChartsDataZoomEvent,
+  loadEChartsRuntime,
+} from '../echartsRuntime';
 import Config from './config';
 import { BarBorderStyle, BarSeriesImpl, Series } from './types';
 
@@ -73,7 +77,7 @@ type DataZoomShowConfig =
 
 class BasicBarChart extends Chart implements IChartLifecycle {
   config = Config;
-  chart: any = null;
+  chart: EChartsInstance | null = null;
   selectionManager?: ChartSelectionManager;
   protected container: HTMLElement | null = null;
   private latestMountPayload?: {
@@ -204,7 +208,11 @@ class BasicBarChart extends Chart implements IChartLifecycle {
           this.selectionManager.attachEChartsListeners(this.chart);
 
           // TODO(TL): refactor to chart data zoom manager model
-          this.chart.on('datazoom', ({ end, start }) => {
+          this.chart.on('datazoom', event => {
+            if (!isEChartsDataZoomEvent(event)) {
+              return;
+            }
+            const { end, start } = event;
             this.dataZoomConfig.showConfig = {
               end,
               start,

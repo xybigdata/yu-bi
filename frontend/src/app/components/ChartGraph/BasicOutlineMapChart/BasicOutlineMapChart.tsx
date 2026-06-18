@@ -39,7 +39,7 @@ import {
   transformToDataSet,
 } from 'app/utils/chartHelper';
 import { CloneValueDeep } from 'utils/object';
-import { loadEChartsRuntime } from '../echartsRuntime';
+import { EChartsInstance, loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 import {
   GeoInfo,
@@ -97,7 +97,7 @@ const loadGeoMap = async (level: GeoMapLevel): Promise<GeoMapData> => {
 
 class BasicOutlineMapChart extends Chart {
   config = Config;
-  chart: any = null;
+  chart: EChartsInstance | null = null;
   selectionManager?: ChartSelectionManager;
 
   protected isNormalGeoMap = false;
@@ -132,7 +132,7 @@ class BasicOutlineMapChart extends Chart {
     ];
   }
 
-  getOptionsConfig(geoConfig: GeoInfo, chart?: any) {
+  getOptionsConfig(geoConfig: GeoInfo, chart?: EChartsInstance | null) {
     const newOption: any = CloneValueDeep(chart?.getOption());
     geoConfig.center = newOption?.geo?.[0].center;
     geoConfig.zoom = newOption?.geo?.[0].zoom;

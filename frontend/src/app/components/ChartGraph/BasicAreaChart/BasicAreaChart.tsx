@@ -18,13 +18,13 @@
 
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import Chart from '../../../models/Chart';
-import { loadEChartsRuntime } from '../echartsRuntime';
+import { EChartsInstance, loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 
 class BasicAreaChart extends Chart {
   dependency = [];
   config = Config;
-  chart: any = null;
+  chart: EChartsInstance | null = null;
   protected container: HTMLElement | null = null;
   private latestMountPayload?: {
     options: BrokerOption;
