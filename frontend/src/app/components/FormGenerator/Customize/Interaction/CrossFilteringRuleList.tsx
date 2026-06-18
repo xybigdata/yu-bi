@@ -28,13 +28,20 @@ import { InteractionFieldRelation } from '../../constants';
 import BoardRelationList from './BoardRelationList';
 import { CrossFilteringInteractionRule, I18nTranslator } from './types';
 
+type CrossFilteringRuleKey = keyof CrossFilteringInteractionRule;
+type CrossFilteringRuleChange = <K extends CrossFilteringRuleKey>(
+  id: string,
+  prop: K,
+  value: CrossFilteringInteractionRule[K],
+) => void;
+
 const CrossFilteringRuleList: FC<
   {
     widgetId: string;
     rules?: CrossFilteringInteractionRule[];
     boardVizs?: Array<Widget>;
     dataview?: ChartDataView;
-    onRuleChange: (id, prop, value) => void;
+    onRuleChange: CrossFilteringRuleChange;
     onSelectedRules: (rules: CrossFilteringInteractionRule[]) => void;
   } & I18nTranslator
 > = ({
@@ -125,7 +132,7 @@ const CrossFilteringRuleList: FC<
                       onRuleChange(
                         record?.id,
                         InteractionFieldRelation.Customize,
-                        newRelations,
+                        newRelations || [],
                       );
                     }}
                   />

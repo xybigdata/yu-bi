@@ -60,7 +60,10 @@ const JumpToDashboard: FC<
         value={value?.relId}
         placeholder={t('drillThrough.rule.reference.title')}
         onChange={relId =>
-          onValueChange({ ...value, ...{ relId } } as JumpToDashboardRule)
+          onValueChange({
+            ...value,
+            relId,
+          })
         }
       >
         {vizs

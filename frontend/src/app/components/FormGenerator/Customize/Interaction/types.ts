@@ -24,6 +24,8 @@ import {
   InteractionMouseEvent,
   InteractionRelationType,
 } from '../../constants';
+import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
+import ChartDataView from 'app/types/ChartDataView';
 
 export type VizType = {
   relId: string;
@@ -95,4 +97,11 @@ export type ViewDetailSetting = {
   event: InteractionMouseEvent;
   mapper?: InteractionFieldMapper;
   [InteractionFieldMapper.Customize]?: string[];
+};
+
+export type InteractionPanelContext = {
+  vizs?: VizType[];
+  boardVizs?: Widget[];
+  dataview?: ChartDataView;
+  widgetId?: string;
 };

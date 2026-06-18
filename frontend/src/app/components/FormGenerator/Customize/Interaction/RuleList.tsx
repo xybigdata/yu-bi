@@ -142,36 +142,45 @@ const RuleList: FC<
         if (!record.category) {
           return <></>;
         }
-        const category = record.category;
-        const ruleValue = record[category];
-        const props = {
-          translate: t,
-          vizs: vizs,
-          dataview: dataview,
-          value: ruleValue,
-          onValueChange: value =>
-            onRuleChange(record.id, category, value),
-        };
-        switch (category) {
+        switch (record.category) {
           case InteractionCategory.JumpToChart:
             return (
               <JumpToChart
-                {...props}
-                value={ruleValue as JumpToChartRule | undefined}
+                translate={t}
+                vizs={vizs}
+                dataview={dataview}
+                value={record[InteractionCategory.JumpToChart]}
+                onValueChange={value =>
+                  onRuleChange(record.id, InteractionCategory.JumpToChart, value)
+                }
               />
             );
           case InteractionCategory.JumpToDashboard:
             return (
               <JumpToDashboard
-                {...props}
-                value={ruleValue as JumpToDashboardRule | undefined}
+                translate={t}
+                vizs={vizs}
+                dataview={dataview}
+                value={record[InteractionCategory.JumpToDashboard]}
+                onValueChange={value =>
+                  onRuleChange(
+                    record.id,
+                    InteractionCategory.JumpToDashboard,
+                    value,
+                  )
+                }
               />
             );
           case InteractionCategory.JumpToUrl:
             return (
               <JumpToUrl
-                {...props}
-                value={ruleValue as JumpToUrlRule | undefined}
+                translate={t}
+                vizs={vizs}
+                dataview={dataview}
+                value={record[InteractionCategory.JumpToUrl]}
+                onValueChange={value =>
+                  onRuleChange(record.id, InteractionCategory.JumpToUrl, value)
+                }
               />
             );
           default:

@@ -29,9 +29,18 @@ import { uuidv4 } from 'utils/utils';
 import { ItemLayoutProps } from '../../types';
 import { itemLayoutComparer } from '../../utils';
 import AddModal from './add';
-import { ScorecardConditionalStyleFormValues } from './types';
+import {
+  ScorecardConditionalStyleContext,
+  ScorecardConditionalStyleFormValues,
+} from './types';
 
-const ScorecardConditionalStyle: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
+const ScorecardConditionalStyle: FC<
+  ItemLayoutProps<
+    ChartStyleConfig,
+    ChartStyleConfig,
+    ScorecardConditionalStyleContext
+  >
+> = memo(
   ({
     ancestors,
     translate: t = title => title,

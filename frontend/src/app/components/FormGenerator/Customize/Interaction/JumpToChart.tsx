@@ -61,7 +61,10 @@ const JumpToChart: FC<
         value={value?.relId}
         placeholder={t('drillThrough.rule.reference.title')}
         onChange={relId =>
-          onValueChange({ ...value, ...{ relId } } as JumpToChartRule)
+          onValueChange({
+            ...value,
+            relId,
+          })
         }
       >
         {vizs
@@ -78,7 +81,10 @@ const JumpToChart: FC<
         value={value?.relation}
         placeholder={t('drillThrough.rule.relation.title')}
         onChange={relation =>
-          onValueChange({ ...value, ...{ relation } } as JumpToChartRule)
+          onValueChange({
+            ...value,
+            relation,
+          })
         }
       >
         <Select.Option value={InteractionFieldRelation.Auto}>

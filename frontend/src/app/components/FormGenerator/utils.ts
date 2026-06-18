@@ -43,8 +43,8 @@ export const invokeDependencyWatcher = (
 };
 
 export function itemLayoutComparer<T>(
-  prevProps: ItemLayoutProps<T>,
-  nextProps: ItemLayoutProps<T>,
+  prevProps: ItemLayoutProps<T, never, unknown>,
+  nextProps: ItemLayoutProps<T, never, unknown>,
 ) {
   if (
     prevProps.data !== nextProps.data ||
@@ -58,8 +58,8 @@ export function itemLayoutComparer<T>(
 }
 
 export function groupLayoutComparer<T>(
-  prevProps: FormGeneratorLayoutProps<T>,
-  nextProps: FormGeneratorLayoutProps<T>,
+  prevProps: FormGeneratorLayoutProps<T, never, unknown>,
+  nextProps: FormGeneratorLayoutProps<T, never, unknown>,
 ) {
   if (
     prevProps.mode !== nextProps.mode ||

@@ -25,11 +25,17 @@ import { uuidv4 } from 'utils/utils';
 import { ItemLayoutProps } from '../../types';
 import { itemLayoutComparer } from '../../utils';
 import RuleList from './RuleList';
-import { DrillThroughSetting, InteractionRule } from './types';
+import {
+  DrillThroughSetting,
+  InteractionPanelContext,
+  InteractionRule,
+} from './types';
 
 type InteractionRuleKey = keyof InteractionRule;
 
-const DrillThroughPanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
+const DrillThroughPanel: FC<
+  ItemLayoutProps<ChartStyleConfig, DrillThroughSetting, InteractionPanelContext>
+> = memo(
   ({ ancestors, translate: t = title => title, data, onChange, context }) => {
     const [drillThroughRules, setDrillThroughRules] = useState<
       DrillThroughSetting['rules']
