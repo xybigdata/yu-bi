@@ -49,7 +49,7 @@
 
 - 当前分支：`codex/modernization-compatible-boundaries`
 - 当前分支基点：`b519a24cd chore: 合入 Dashboard widget 内容协议边界批次`
-- 复盘时当前分支相对 `origin/main`：领先 5 个提交，未落后
+- 复盘时当前分支相对 `origin/main`：领先 6 个提交，未落后
 - 最近业务改造提交：`9599cc59f chore: 收口 FormGenerator 交互规则构造边界`
 - 最近一次复盘前工作区干净
 
@@ -154,6 +154,19 @@ git rev-list --left-right --count origin/main...HEAD
 
 ### 3.6 当前分支已完成批次
 
+未提交批次：
+
+- FormGenerator 交互规则回调边界：
+  - 新增共享 `InteractionRuleChange` 泛型回调类型
+  - `RuleList` / `DrillThroughPanel` 共用同一规则回调协议，避免子组件继续使用宽泛 union 值
+  - P1 范围复扫已完成，当前残留 `unknown` 主要是 FormGenerator 默认泛型、翻译 options 和通用 value 入口，暂不作为弱类型问题处理
+
+验证已通过：
+
+```bash
+npm run checkTs
+```
+
 提交：`9599cc59f chore: 收口 FormGenerator 交互规则构造边界`
 
 已完成：
@@ -251,12 +264,6 @@ npm run test:ci -- src/app/components/FormGenerator/__tests__/utils.test.tsx src
 ### 5.1 当前分支继续推进
 
 继续在 `codex/modernization-compatible-boundaries` 上累计，不切新分支，不合 `main`。
-
-P1：
-
-1. 复扫当前专题改动范围内的残留 `as any`、`@ts-ignore`、宽泛 `unknown` 消费点
-2. 只处理同一协议边界内的问题，不扩散到图表运行时或 View/Source 其他模块
-3. 当前批次达到提交点后提交并推送专题分支
 
 P2：
 

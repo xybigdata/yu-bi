@@ -28,9 +28,8 @@ import {
   DrillThroughSetting,
   InteractionPanelContext,
   InteractionRule,
+  InteractionRuleChange,
 } from './types';
-
-type InteractionRuleKey = keyof InteractionRule;
 
 const DrillThroughPanel: FC<
   ItemLayoutProps<
@@ -58,11 +57,7 @@ const DrillThroughPanel: FC<
       handleDrillThroughSettingChange(newRules);
     };
 
-    const handleUpdateRule = <K extends InteractionRuleKey>(
-      id: string,
-      prop: K,
-      value: InteractionRule[K],
-    ) => {
+    const handleUpdateRule: InteractionRuleChange = (id, prop, value) => {
       const updatorIndex = (drillThroughRules || []).findIndex(
         r => r.id === id,
       );

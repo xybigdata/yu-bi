@@ -32,26 +32,19 @@ import JumpToUrl from './JumpToUrl';
 import {
   I18nTranslator,
   InteractionRule,
+  InteractionRuleChange,
   JumpToChartRule,
   JumpToDashboardRule,
   JumpToUrlRule,
   VizType,
 } from './types';
 
-type InteractionRuleKey = keyof InteractionRule;
-
-type InteractionRuleValue = InteractionRule[InteractionRuleKey];
-
 const RuleList: FC<
   {
     rules?: InteractionRule[];
     vizs?: VizType[];
     dataview?: ChartDataView;
-    onRuleChange: (
-      id: string,
-      prop: InteractionRuleKey,
-      value: InteractionRuleValue,
-    ) => void;
+    onRuleChange: InteractionRuleChange;
     onDeleteRule: (id: string) => void;
   } & I18nTranslator
 > = ({ rules, vizs, dataview, onRuleChange, onDeleteRule, translate: t }) => {
@@ -151,7 +144,11 @@ const RuleList: FC<
                 dataview={dataview}
                 value={record[InteractionCategory.JumpToChart]}
                 onValueChange={value =>
-                  onRuleChange(record.id, InteractionCategory.JumpToChart, value)
+                  onRuleChange(
+                    record.id,
+                    InteractionCategory.JumpToChart,
+                    value,
+                  )
                 }
               />
             );
