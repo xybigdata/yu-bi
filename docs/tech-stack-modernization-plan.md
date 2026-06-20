@@ -49,8 +49,8 @@
 
 - 当前分支：`codex/modernization-compatible-boundaries`
 - 当前分支基点：`b519a24cd chore: 合入 Dashboard widget 内容协议边界批次`
-- 复盘时当前分支相对 `origin/main`：领先 4 个提交，未落后
-- 最近业务改造提交：`bd633990a chore: 收口 FormGenerator 关系编辑边界`
+- 复盘时当前分支相对 `origin/main`：领先 5 个提交，未落后
+- 最近业务改造提交：`9599cc59f chore: 收口 FormGenerator 交互规则构造边界`
 - 最近一次复盘前工作区干净
 
 后续恢复工作时先执行：
@@ -154,7 +154,9 @@ git rev-list --left-right --count origin/main...HEAD
 
 ### 3.6 当前分支已完成批次
 
-未提交批次：
+提交：`9599cc59f chore: 收口 FormGenerator 交互规则构造边界`
+
+已完成：
 
 - FormGenerator 交互规则构造边界：
   - `ViewDetailPanel` 自定义字段写回改为显式构造，清空字段时稳定写回空数组
