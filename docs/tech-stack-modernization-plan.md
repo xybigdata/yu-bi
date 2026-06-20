@@ -279,6 +279,23 @@ P2-B AntV S2 / 透视表链路审计：
 - `npm run test:ci -- src/app/components/ChartGraph/PivotSheetChart` 已通过，结果为 2 个测试文件通过、2 个测试通过
 - 测试输出存在 `@antv/s2` 包自身 source map 指向缺失源文件的 warning；不影响测试结果，后续仅在影响门禁或调试体验时处理
 
+专题完整门禁：
+
+```bash
+npm run checkTs
+npm run test:ci
+npm run lint:css
+npm run lint:style
+```
+
+结果：
+
+- `npm run checkTs` 已通过
+- `npm run test:ci` 已通过，结果为 131 个测试文件通过、910 个测试通过、4 个跳过
+- `npm run lint:css` 已通过
+- `npm run lint:style` 已通过
+- 合并回 `main` 前无需补后端门禁，本专题未改后端、Maven、Docker 或安装包链路
+
 ## 6. 风险分层
 
 ### 6.1 可继续推进
