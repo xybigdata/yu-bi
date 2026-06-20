@@ -52,6 +52,7 @@ import {
   ChartStyleConfigDTO,
 } from 'app/types/ChartConfigDTO';
 import {
+  ChartDataSetCellValue,
   ChartDatasetMeta,
   IChartDataSet,
   IChartDataSetRow,
@@ -78,6 +79,9 @@ import {
   UniqWith,
 } from 'utils/object';
 import { TableColumnsList } from '../components/ChartGraph/BasicTableChart/types';
+
+const toChartDataSetNumber = (value: ChartDataSetCellValue): number =>
+  Number(value ?? 0);
 
 type RuntimeDateLevelSource<T> = T & {
   [RUNTIME_DATE_LEVEL_KEY]?: T | null;
@@ -531,7 +535,7 @@ export function getReference(
 
 export function getReference2(
   settingConfigs: ChartStyleConfig[],
-  dataSetRows: IChartDataSet<string>,
+  dataSetRows: IChartDataSet<ChartDataSetCellValue>,
   dataConfig: ChartDataSectionField,
   isHorizonDisplay: boolean,
 ): { markLine: MarkLine; markArea: MarkArea } {
@@ -659,7 +663,7 @@ function getMarkLineData(
 
 function getMarkLine2(
   refTabs: ChartStyleSectionGroup[],
-  dataSetRows: IChartDataSetRow<string>[],
+  dataSetRows: IChartDataSetRow<ChartDataSetCellValue>[],
   dataConfig: ChartDataSectionField,
   isHorizonDisplay: boolean,
 ): MarkLine {
@@ -691,7 +695,7 @@ function getMarkLine2(
 
 function getMarkLineData2(
   mark: ChartStyleSectionGroup | undefined,
-  dataSetRows: IChartDataSetRow<string>[],
+  dataSetRows: IChartDataSetRow<ChartDataSetCellValue>[],
   valueTypeKey: string,
   constantValueKey: string,
   metricKey: string,
@@ -732,7 +736,7 @@ function getMarkLineData2(
 
   const metricDatas =
     dataConfig.uid === metricUid
-      ? dataSetRows.map(d => +d.getCell(dataConfig))
+      ? dataSetRows.map(d => toChartDataSetNumber(d.getCell(dataConfig)))
       : [];
   let yAxis: number = 0;
   switch (valueType) {
@@ -763,7 +767,7 @@ function getMarkLineData2(
 
 function getMarkAreaData2(
   mark: ChartStyleSectionGroup | undefined,
-  dataSetRows: IChartDataSetRow<string>[],
+  dataSetRows: IChartDataSetRow<ChartDataSetCellValue>[],
   valueTypeKey: string,
   constantValueKey: string,
   metricKey: string,
@@ -803,7 +807,7 @@ function getMarkAreaData2(
   const name: string = mark.value;
   const metricDatas =
     dataConfig.uid === metric
-      ? dataSetRows.map(d => +d.getCell(dataConfig))
+      ? dataSetRows.map(d => toChartDataSetNumber(d.getCell(dataConfig)))
       : [];
   let yAxis: number = 0;
   switch (valueType) {
@@ -955,7 +959,7 @@ function getMarkArea(refTabs, dataColumns, isHorizonDisplay) {
 
 function getMarkArea2(
   refTabs: ChartStyleSectionGroup[],
-  dataSetRows: IChartDataSetRow<string>[],
+  dataSetRows: IChartDataSetRow<ChartDataSetCellValue>[],
   dataConfig: ChartDataSectionField,
   isHorizonDisplay: boolean,
 ): MarkArea {
@@ -1194,7 +1198,7 @@ export function getDataColumnMaxAndMin(
 }
 
 export function getDataColumnMaxAndMin2(
-  chartDataSetRows: IChartDataSetRow<string>[],
+  chartDataSetRows: IChartDataSetRow<ChartDataSetCellValue>[],
   config?: ChartDataSectionField,
 ): { min: number; max: number } {
   if (!config || !chartDataSetRows?.length) {
@@ -1220,7 +1224,7 @@ export function getSeriesTooltips4Scatter(
 }
 
 export function getSeriesTooltips4Rectangular2(
-  chartDataSet: IChartDataSet<string>,
+  chartDataSet: IChartDataSet<ChartDataSetCellValue>,
   tooltipParam: {
     componentType: string;
     seriesName?: string;
@@ -1259,7 +1263,7 @@ export function getSeriesTooltips4Rectangular2(
 }
 
 export function getSeriesTooltips4Polar2(
-  chartDataSet: IChartDataSet<string>,
+  chartDataSet: IChartDataSet<ChartDataSetCellValue>,
   tooltipParam: {
     data: {
       name: string;
@@ -1375,7 +1379,7 @@ export function getGridStyle(styles: ChartStyleConfig[]): GridStyle {
 
 // TODO(Stephen): to be used chart DataSetRow model for all charts
 export function getExtraSeriesRowData(
-  data: IChartDataSetRow<string> | ChartRowData,
+  data: IChartDataSetRow<ChartDataSetCellValue> | ChartRowData,
 ): { rowData: ChartRowData } {
   if (data instanceof ChartDataSetRow) {
     return {
@@ -1397,9 +1401,9 @@ export function getExtraSeriesDataFormat(format?: FormatFieldAction): {
 }
 
 export function getColorizeGroupSeriesColumns(
-  chartDataSet: IChartDataSet<string>,
+  chartDataSet: IChartDataSet<ChartDataSetCellValue>,
   groupConfig: ChartDataSectionField,
-): { [x: string]: IChartDataSet<string> }[] {
+): { [x: string]: IChartDataSetRow<ChartDataSetCellValue>[] }[] {
   return Object.entries(chartDataSet.groupBy(groupConfig)).map(([k, v]) => {
     let a = {};
     a[k] = v;
@@ -1857,7 +1861,7 @@ export function round(x: number | string, precision?: number): number {
  */
 export function getMinAndMaxNumber(
   configs: ChartDataSectionField[],
-  chartDataset: IChartDataSet<string>,
+  chartDataset: IChartDataSet<ChartDataSetCellValue>,
 ) {
   const datas = configs
     .reduce(

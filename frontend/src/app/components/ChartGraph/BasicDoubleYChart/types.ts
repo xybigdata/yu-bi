@@ -28,6 +28,7 @@ import {
   MarkLine,
 } from 'app/types/ChartConfig';
 import { ChartRowData } from 'app/types/Chart';
+import { ChartDataSetCellValue } from 'app/types/ChartDataSet';
 
 export type DoubleYChartXAxis = {
   axisPointer?: {
@@ -37,7 +38,7 @@ export type DoubleYChartXAxis = {
   axisLabel: AxisLabel;
   axisLine: AxisLineStyle;
   axisTick: AxisLineStyle;
-  data: string[];
+  data: ChartDataSetCellValue[];
   inverse: boolean;
   splitLine: AxisLineStyle;
   tooltip: { show: boolean };
@@ -68,7 +69,7 @@ export type Series = {
   data: Array<
     {
       rowData: ChartRowData;
-      value: number | string;
+      value: ChartDataSetCellValue;
       total?: number;
       format: FormatFieldAction | undefined;
     } & ChartDataSectionField

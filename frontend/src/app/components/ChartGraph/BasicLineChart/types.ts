@@ -5,10 +5,11 @@ import {
   MarkLine,
 } from 'app/types/ChartConfig';
 import { ChartRowData } from 'app/types/Chart';
+import { ChartDataSetCellValue } from 'app/types/ChartDataSet';
 export type Series = {
   data: Array<{
     rowData: ChartRowData;
-    value: number | string | undefined;
+    value: ChartDataSetCellValue;
     name?: string | undefined;
     format: FormatFieldAction | undefined;
   }>;

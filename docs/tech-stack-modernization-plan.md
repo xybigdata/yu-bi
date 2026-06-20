@@ -49,9 +49,9 @@
 
 - 当前分支：`codex/modernization-compatible-boundaries`
 - 当前分支基点：`b519a24cd chore: 合入 Dashboard widget 内容协议边界批次`
-- 复盘时当前分支相对 `origin/main`：领先 8 个提交，未落后
-- 最近已推送提交：`6a97284b2 docs: 复盘现代化改造执行板`
-- 复盘时工作区为 `ChartFilterCondition.value` 协议收口批次，验证已通过，待提交
+- 复盘时当前分支相对 `origin/main`：领先 9 个提交，未落后
+- 最近已推送提交：`deb647680 chore: 收口 ChartFilterCondition 值协议边界`
+- 复盘时工作区为 `ChartDataSet` 单元格值协议试点批次，验证已通过，待提交
 
 恢复工作时先执行：
 
@@ -142,6 +142,7 @@ git rev-list --left-right --count origin/main...HEAD
 | `bd633990a` | FormGenerator 关系编辑边界   | `relationUtils`、关系数组增删改、事件切换 bug 修正   | `checkTs` + 定向测试 |
 | `9599cc59f` | FormGenerator 交互规则构造   | ViewDetail / Jump 规则构造函数与构造语义测试         | `checkTs` + 定向测试 |
 | `7083dae3f` | FormGenerator 交互规则回调   | `InteractionRuleChange` 泛型回调协议，规则值映射收口 | `checkTs`            |
+| `deb647680` | ChartFilterCondition 值协议  | 筛选值联合协议、关系值守卫、筛选 UI 消费点归一化     | `checkTs` + 定向测试 |
 
 本阶段结论：
 
@@ -151,51 +152,50 @@ git rev-list --left-right --count origin/main...HEAD
 
 ### 3.4 当前待提交批次
 
-批次：`ChartFilterCondition.value` 公共协议收口
+批次：`ChartDataSet` 单元格值协议试点
 
 已完成：
 
-- `frontend/src/app/types/ChartConfig.ts`
-- `frontend/src/app/models/ChartFilterCondition.ts`
-- `frontend/src/app/models/__tests__/ChartFilterCondition.test.ts`
-- `frontend/src/app/models/ChartDrillOption.ts`
-- `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterAction/ArrangeFilterAction.tsx`
-- `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterAction/RelationTypeFilter.tsx`
-- `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterAction/SingleFilterRow.tsx`
-- `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterControlPanel/CategoryConditionRelationSelector.tsx`
-- `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterControlPanel/FilterFacadeConfiguration.tsx`
-- `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterControlPanel/ValueConditionConfiguration.tsx`
+- `frontend/src/app/types/ChartDataSet.ts`
+- `frontend/src/app/utils/chartHelper.ts`
+- `frontend/src/app/components/ChartGraph/BasicDoubleYChart/BasicDoubleYChart.tsx`
+- `frontend/src/app/components/ChartGraph/BasicDoubleYChart/types.ts`
+- `frontend/src/app/components/ChartGraph/BasicDoubleYChart/utils.ts`
+- `frontend/src/app/components/ChartGraph/BasicBarChart/types.ts`
+- `frontend/src/app/components/ChartGraph/BasicLineChart/types.ts`
+- `frontend/src/app/pages/DashBoardPage/components/Widgets/ControllerWidget/ControllerWidgetCore.tsx`
+- `frontend/src/app/pages/DashBoardPage/utils/widget.ts`
 
 本批结果：
 
-- `FilterCondition.value` 收口为显式 `FilterConditionValue` 联合协议
-- 数值筛选显式支持 `number | null` 数组，兼容输入框清空行为
-- `ChartFilterCondition` 增加关系值、关系选项数组、数值输入、文本输入和未知筛选值守卫
-- 下钻筛选值、关系编辑、筛选 UI 输入值改为先归一化再写回
-- 新增 helper 测试，固定合法历史值和非法未知对象边界
-- `ChartDataSetDTO.rows` 影响全图表运行时，本轮只做梳理和记录，暂不直接改为新泛型协议
+- 新增 `ChartDataSetCellValue` / `ChartDataSetRow` / `ChartDataSetRows`，显式记录图表数据单元真实支持 `string | number | null | undefined`
+- `ChartDataSetDTO.rows` 暂不全局切换，仍保持 `string[][]`，避免一次性强迫所有图表运行时迁移
+- 公共 `chartHelper` 中 min/max、mark line、mark area、tooltip rowData 等入口先接受 `ChartDataSetCellValue`
+- `BasicDoubleYChart` 作为有测试覆盖的图表链路完成标量值协议试点
+- Bar / Line series 类型补齐空值协议，匹配图表数据真实可能出现的 null/undefined
+- Dashboard 控制器选项和树形数据边界将数据集值显式字符串化，避免非字符串单元格泄漏到 key/label 协议
 
 验证已通过：
 
 ```bash
 npm run checkTs
-npm run test:ci -- src/app/models/__tests__/ChartFilterCondition.test.ts
-npm run test:ci -- src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/__tests__/utils.test.ts
+npm run test:ci -- src/app/models/__tests__/ChartDataSet.test.ts src/app/components/ChartGraph/BasicDoubleYChart/__tests__/utils.test.ts
+npm run test:ci -- src/app/utils/__tests__/chartHelper.test.ts
 ```
 
 ## 4. 下一步执行队列
 
 ### 4.1 当前批次 P0
 
-提交并推送 `ChartFilterCondition.value` 批次：
+提交并推送 `ChartDataSet` 单元格值协议试点批次：
 
-1. 复核暂存范围，只包含本批筛选协议和执行文档
+1. 复核暂存范围，只包含本批数据集单元格协议、公共 helper、双轴试点和执行文档
 2. 提交信息使用：
 
 建议提交信息：
 
 ```text
-chore: 收口 ChartFilterCondition 值协议边界
+chore: 收口 ChartDataSet 单元格值协议边界
 ```
 
 3. 推送当前专题分支
@@ -206,7 +206,7 @@ chore: 收口 ChartFilterCondition 值协议边界
 
 | 专题                         | 下一步                                           | 风险 |
 | ---------------------------- | ------------------------------------------------ | ---- |
-| `ChartDataSetDTO.rows`       | 只做调用面审计、记录影响范围和可测子链路        | 高   |
+| `ChartDataSetDTO.rows`       | 暂不全局切换，按图表链路逐批迁移 `IChartDataSet<string>` | 高   |
 | 图表筛选值协议               | 复扫筛选 UI、下钻、联动参数写回的残留断言       | 中   |
 | 图表 helper 类型边界         | 选择已有测试覆盖的 helper 做小批收口            | 中   |
 | 时间体系剩余调用点           | 复扫零散原生时间调用                            | 低   |

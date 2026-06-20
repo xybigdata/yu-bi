@@ -24,6 +24,7 @@ import {
   MarkLine,
 } from 'app/types/ChartConfig';
 import { ChartRowData } from 'app/types/Chart';
+import { ChartDataSetCellValue } from 'app/types/ChartDataSet';
 
 export type BarBorderStyle = {
   color?: string;
@@ -45,7 +46,7 @@ export type Series = {
   data: Array<{
     rowData: ChartRowData;
     name: string;
-    value: number | string;
+    value: ChartDataSetCellValue;
     total?: number;
     format: FormatFieldAction | undefined;
   }>;

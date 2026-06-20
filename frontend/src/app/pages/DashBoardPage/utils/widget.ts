@@ -25,6 +25,7 @@ import {
 } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { FilterSearchParamsWithMatch } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import { ChartsEventData } from 'app/types/Chart';
+import { ChartDataSetRows } from 'app/types/ChartDataSet';
 import ChartDataView from 'app/types/ChartDataView';
 import { View } from 'app/types/View';
 import {
@@ -820,15 +821,17 @@ export function cloneWidgets(args: {
  * @returns [{id:'',parentId:'',value:''}....]
  */
 export const handleRowDataForTree = (
-  collection?: string[][],
+  collection?: ChartDataSetRows,
 ): TreeListNode[] => {
   const nodeMap: Record<string, TreeListNode & { isLeaf?: boolean }> = {};
   collection?.forEach(v => {
     v.forEach((val, ind) => {
-      if (!nodeMap[val] || nodeMap[val]?.isLeaf) {
-        nodeMap[val] = {
-          id: val,
-          parentId: ind ? v[ind - 1] : null,
+      const nodeId = String(val ?? '');
+      const parentId = ind ? String(v[ind - 1] ?? '') : null;
+      if (!nodeMap[nodeId] || nodeMap[nodeId]?.isLeaf) {
+        nodeMap[nodeId] = {
+          id: nodeId,
+          parentId,
         };
       }
     });
