@@ -1,262 +1,132 @@
 # yu-bi 现代化改造执行板
 
-本文档是“现代化改造”的恢复入口和执行工作板。它只记录当前目标、边界、状态、下一步和验证策略；历史细节通过 git 追溯。
+本文档是现代化改造的恢复入口和执行看板。它优先记录目标、边界、当前状态、下一步和验证策略；历史细节通过 git 追溯。
 
-“现代化”不是追最新版本，而是在兼容、正确、可回归的前提下，把前后端核心技术栈和关键运行链路收口到较新的稳定状态。
+复盘时间：2026-06-20
 
-最后复盘时间：2026-06-20
+## 1. 目标
 
-## 1. 目标与边界
+现代化改造不追求所有技术栈都使用最新版本，而是在保证兼容、正确、可回归的前提下，把前后端核心技术栈和关键运行链路收口到较新的稳定状态。
 
-### 1.1 长期目标
+硬性兼容目标：
 
-- 后端稳定兼容 `JDK 21`
-- 前端工程链稳定兼容 `Node 24`
-- 前后端核心技术栈保持在较新的稳定版，不盲目追最新
-- 中高风险项先收窄协议边界、补足验证证据，再渐进替换或升级
-- 同一改造专题尽量在一条长期分支累计，减少分支创建、主线合并和完整门禁次数
+- 后端兼容 `JDK 21`
+- 前端兼容 `Node 24`
 
-### 1.2 当前短期目标
+执行原则：
 
-当前专题分支继续推进“前端兼容边界收口”：
+- 不直接在 `main` 开发；专题分支完成后 push，再 merge 回 `main`
+- 当前专题分支持续累计前端兼容边界改造，减少分支创建和主线合并频率
+- 尽量多改一点再提交，避免每个小改动都触发完整门禁
+- 中高风险项可以推进，但必须拆成可验证子链路，不能无证据大迁移
+- 每次阶段性提交前同步本文档的进度、风险和验证记录
 
-- 已完成 `FormGenerator` 交互配置边界阶段性收口
-- 已完成 `ChartFilterCondition.value` 公共协议收口
-- 正在推进图表数据集标量协议迁移
-- `ChartDataSetDTO.rows` 暂不全局切换，避免一次性影响所有图表运行时
-- 剩余中高风险链路按可验证子链路推进，不做无验证的大迁移
+固定禁止项：
 
-### 1.3 固定边界
+- 不贸然改 Java 包名 `datart.*`
+- 不贸然改配置前缀 `datart.*`
+- 不贸然改 `DATART_*` 等内部技术符号
+- 不贸然改数据迁移相关稳定常量、后缀、内部标识
 
-- 工作目录：`/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi`
-- 主线分支：`main`
-- 当前专题分支：`codex/modernization-compatible-boundaries`
-- `main` 不直接开发，只允许通过 merge 接收专题分支
-- 专题分支可以推送远端
-- 默认自动 `git add`、`git commit --no-verify`，必要时 `git push origin <branch>`
-- `.tmp/`、`logs/` 已加入 `.gitignore`
-
-禁止贸然重构：
-
-- Java 包名 `datart.*`
-- 配置前缀 `datart.*`
-- `DATART_*` 等内部技术符号
-- 数据迁移相关稳定常量、后缀、内部标识
-
-## 2. 当前状态快照
-
-### 2.1 Git 状态
-
-- 当前分支：`codex/modernization-compatible-boundaries`
-- 当前分支相对 `origin/main`：领先 15 个提交，未落后
-- 最近已推送提交：`874c31804 chore: 清理图表筛选值协议残留`
-- 当前工作区：前端时间调用残留清理批次，准备提交
-- 当前轻量验证：`npm run checkTs` 已通过
+## 2. 当前快照
 
 恢复工作时先执行：
 
 ```bash
 git status --short --branch
-git log --oneline --decorate -8
 git rev-list --left-right --count origin/main...HEAD
+git log --oneline --decorate -8
 ```
 
-判断：
+当前已知状态：
 
-- 当前分支不能是 `main`
-- 当前改动必须属于当前专题
-- 不能触碰禁止重构标识
-- 如果 `main` 已前进，先判断是否需要同步；不为小改动频繁合并
+| 项目 | 状态 |
+| --- | --- |
+| 工作目录 | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
+| 主线分支 | `main` |
+| 当前专题分支 | `codex/modernization-compatible-boundaries` |
+| 当前分支相对 `origin/main` | 以恢复命令为准；本次复盘开始时领先 16 个提交，未落后 |
+| 最近业务提交 | `0fed0168c chore: 清理前端时间调用残留` |
+| 工作区 | 本文档提交后应恢复干净 |
+| 远端 | `git@github.com:xybigdata/yu-bi.git` |
 
-### 2.2 后端基线
+注意：
 
-| 项目                | 当前基线   | 状态                     |
-| ------------------- | ---------- | ------------------------ |
-| Java                | `21`       | 已达硬性目标             |
-| Maven               | `>=3.9`    | 已由 Enforcer 约束       |
-| Spring Boot         | `3.5.12`   | 当前主链稳定             |
-| Spring Cloud        | `2025.0.1` | 与 Boot 3.5 配套         |
-| MyBatis Spring Boot | `3.0.4`    | 已适配 Boot 3            |
-| GraalJS             | `25.0.1`   | 已替代 Nashorn 主链      |
-| Springdoc           | `2.8.17`   | 已适配 Boot 3            |
-| H2                  | `2.4.240`  | 已升级                   |
-| Selenium            | `4.31.0`   | 已升级                   |
-| Shiro               | `2.0.5`    | 高风险，只做可验证子问题 |
-| Druid               | `1.2.28`   | 暂不优先动               |
-| Calcite             | 现网主链   | 高风险，先审计和补用例   |
+- `.tmp/`、`logs/` 已加入 `.gitignore`
+- 专题分支可以推送远端
+- 允许自动执行 `git add`、`git commit --no-verify`、`git push origin <branch>`
+- 推送 `main` 前必须走完整门禁
 
-### 2.3 前端基线
+## 3. 技术栈基线
 
-| 项目              | 当前基线   | 状态                     |
-| ----------------- | ---------- | ------------------------ |
-| Node              | `>=24.0.0` | 硬性目标                 |
-| `frontend/.nvmrc` | `v24.0.0`  | 与目标一致               |
-| npm               | `>=11.0.0` | 已写入 `engines`         |
-| React             | `18.3.1`   | 当前稳定主链             |
-| React Router      | `6.30.1`   | 已完成主升级             |
-| Ant Design        | `5.26.2`   | 已完成主升级             |
-| Redux Toolkit     | `2.12.0`   | 已完成主升级             |
-| React Redux       | `9.3.0`    | 已完成主升级             |
-| TypeScript        | `5.9.3`    | 当前稳定主线             |
-| Vite              | `6.4.3`    | 已替代 CRA 主工作流      |
-| Vitest            | `4.1.8`    | 当前主测试栈             |
-| styled-components | `6.1.19`   | 已完成主升级             |
-| react-quill       | `2.0.0`    | 已升级，兼容层继续稳定化 |
-| monaco-editor     | `0.52.2`   | 真实运行时依赖           |
-| reveal.js         | `6.0.1`    | 真实运行时依赖           |
-| react-window      | `1.8.6`    | 使用面窄，先稳定边界     |
-| flexlayout-react  | `0.5.21`   | 当前小版本已收口         |
-| react-grid-layout | `1.3.4`    | 当前小版本已收口         |
+### 3.1 后端
 
-## 3. 阶段复盘
+| 技术栈 | 当前基线 | 判断 |
+| --- | --- | --- |
+| Java | `21` | 已达硬性目标 |
+| Maven | `>=3.9` | 已由 Enforcer 约束 |
+| Spring Boot | `3.5.12` | 当前稳定主链 |
+| Spring Cloud | `2025.0.1` | 与 Boot 3.5 配套 |
+| MyBatis Spring Boot | `3.0.4` | 已适配 Boot 3 |
+| GraalJS | `25.0.1` | 已替代 Nashorn 主链 |
+| Springdoc | `2.8.17` | 已适配 Boot 3 |
+| H2 | `2.4.240` | 已升级 |
+| Selenium | `4.31.0` | 已升级 |
+| Shiro | `2.0.5` | 高风险，只做可验证子问题 |
+| Druid | `1.2.28` | 暂不优先动 |
+| Calcite | 现网主链 | 高风险，先审计和补用例 |
 
-### 3.1 已建立的主链
+### 3.2 前端
+
+| 技术栈 | 当前基线 | 判断 |
+| --- | --- | --- |
+| Node | `>=24.0.0` | 硬性目标 |
+| npm | `>=11.0.0` | 与 Node 24 配套 |
+| React | `18.3.1` | 当前稳定主链 |
+| React Router | `6.30.1` | 已完成主升级 |
+| Ant Design | `5.26.2` | 已完成主升级 |
+| Redux Toolkit | `2.12.0` | 已完成主升级 |
+| React Redux | `9.3.0` | 已完成主升级 |
+| TypeScript | `5.9.3` | 当前稳定主链 |
+| Vite | `6.4.3` | 已替代 CRA 主工作流 |
+| Vitest | `4.1.8` | 当前主测试栈 |
+| styled-components | `6.1.19` | 已完成主升级 |
+| react-quill | `2.0.0` | 已升级，保留兼容层 |
+| monaco-editor | `0.52.2` | 真实运行时依赖 |
+| reveal.js | `6.0.1` | 真实运行时依赖 |
+| ECharts | `5.3.1` | 后续中风险专题 |
+| AntV S2 | `2.7.2 / 2.3.1` | 后续中风险专题 |
+| react-window | `1.8.6` | 使用面窄，先稳定边界 |
+
+## 4. 阶段复盘
+
+### 4.1 主链已建立
 
 - 项目已从 datart 独立为 `yu-bi`
-- README、NOTICE、SECURITY、ROADMAP、CHANGELOG、issue template 等治理文档已完成独立项目表述
-- Maven 对外坐标、安装包、Docker 运行目录、部署文档已开始向 `yu-bi` 收口
-- 保留 `datart.*` Java 包名、配置前缀和稳定内部标识不动
-- 后端已建立 `JDK 21 + Spring Boot 3.5.x` 主链
-- 前端已建立 `React 18 + Ant Design 5 + Vite 6 + Vitest 4 + Node 24` 主链
+- 治理文档、README、NOTICE、SECURITY、ROADMAP、CHANGELOG、issue template 已收口为独立开源项目表述
+- GitHub 新仓库、默认分支、远端和主线门禁已切到 `yu-bi / main`
+- 后端已建立 `JDK 21 + Spring Boot 3.5.x + Spring Cloud 2025.0.x` 主链
+- 前端已建立 `Node 24 + React 18 + Ant Design 5 + Vite 6 + Vitest 4` 主链
 - CRA / CRACO、IE11 主兼容链、Nashorn、PhantomJS 等历史主链已退出
-- GitHub Actions 主线门禁已切到 `main`
-- 安装包闭环验证已打通，`yu-bi-server-*.zip` 可解压，demo 健康检查脚本可通过真实端口环境验证
+- 安装包闭环验证已打通，`yu-bi-server-*.zip` 可解压并通过 demo 健康检查脚本验证
 
-### 3.2 当前分支已完成批次
+### 4.2 当前分支已完成
 
-| 提交        | 批次                         | 结果                                                     |
-| ----------- | ---------------------------- | -------------------------------------------------------- |
-| `64d62d771` | FormGenerator 交互配置边界   | 泛型、context、配置行守卫、规则写回完成收口              |
-| `bd633990a` | FormGenerator 关系编辑边界   | `relationUtils`、关系数组增删改、事件切换 bug 修正       |
-| `9599cc59f` | FormGenerator 交互规则构造   | ViewDetail / Jump 规则构造函数与构造语义测试完成         |
-| `7083dae3f` | FormGenerator 交互规则回调   | `InteractionRuleChange` 泛型回调协议和规则值映射完成收口 |
-| `deb647680` | ChartFilterCondition 值协议  | 筛选值联合协议、关系值守卫、筛选 UI 消费点归一化完成     |
-| `26bf8a959` | ChartDataSet 单元格值协议    | 公共数据集单元格协议、helper、双轴图表试点完成           |
-| `e043c93f7` | 图表数据集标量协议迁移       | 普通图表内部标量值协议完成迁移                           |
-| `b828250bc` | 表格 / 透视表数据集协议      | 表格和透视表生产代码旧数据集泛型入口完成清理             |
-| `666bbfd48` | 图表数据集改造进度同步       | 执行板同步到表格 / 透视表批次完成状态                    |
-| `faa95c996` | 图表数据集泛型残留清理       | helper 注释和测试旧数据集泛型断言完成清理                |
-| `874c31804` | 图表筛选值协议残留清理       | ControllerPanel 和 ChartWorkbench 明显筛选值断言完成清理 |
+| 批次 | 结果 |
+| --- | --- |
+| FormGenerator 交互配置边界 | 泛型、context、配置行守卫、规则写回完成收口 |
+| FormGenerator 关系编辑边界 | `relationUtils`、关系数组增删改、事件切换问题完成修正 |
+| FormGenerator 交互规则构造 | ViewDetail / Jump 规则构造函数和语义测试完成 |
+| FormGenerator 交互规则回调 | `InteractionRuleChange` 泛型回调协议完成收口 |
+| `ChartFilterCondition.value` 协议 | 筛选值联合协议、关系值守卫、筛选 UI 消费点完成归一化 |
+| `ChartDataSetCellValue` 协议 | 公共数据集单元格协议、helper、双轴图表试点完成 |
+| 普通图表数据集标量协议 | 普通图表内部 `IChartDataSet<string>` 假设完成迁移 |
+| 表格 / 透视表数据集协议 | 生产代码旧数据集泛型入口完成清理 |
+| 数据集泛型残留清理 | helper 注释和测试旧泛型断言完成清理 |
+| 图表筛选值协议残留清理 | ControllerPanel 和 ChartWorkbench 明显筛选值断言完成清理 |
+| 前端时间调用残留清理 | 生产代码和相关测试裸时间调用残留完成清理 |
 
-### 3.3 阶段完成批次
-
-批次：图表数据集标量协议迁移
-
-目标：
-
-- 将普通图表内部 `IChartDataSet<string>` 假设迁移为 `ChartDataSetCellValue`
-- 对 key、name、category 等字符串协议入口显式 `String(value ?? '')`
-- 对 ECharts 数值协议入口显式使用 `toSafeNumber` 或保留 `undefined`
-- 不全局修改 `ChartDataSetDTO.rows`
-
-当前已覆盖文件：
-
-- `BasicBarChart`
-- `BasicLineChart`
-- `BasicGaugeChart`
-- `BasicRichText`
-- `WordCloudChart`
-- `WaterfallChart`
-- `Scorecard`
-- `BasicPieChart`
-- `BasicFunnelChart`
-- `BasicScatterChart`
-- `BasicOutlineMapChart`
-
-当前验证：
-
-```bash
-npm run checkTs
-npm run test:ci -- src/app/utils/__tests__/chartHelper.test.ts src/app/components/ChartGraph/BasicDoubleYChart/__tests__/utils.test.ts
-```
-
-结果：已通过。
-
-测试缺口：
-
-- 未找到上述具体图表组件的现成 `*.test.ts` / `*.test.tsx`
-- 本批暂以类型门禁和协议边界复核为主
-- 后续迁移 `BasicTableChart` / `PivotSheetChart` 时需要补更有价值的运行时用例
-
-### 3.4 阶段完成批次
-
-批次：表格 / 透视表图表数据集协议迁移
-
-目标：
-
-- 表格数据源和行类型从 `IChartDataSetRow<string>` 迁移为 `IChartDataSetRow<ChartDataSetCellValue>`
-- 表格渲染、条件样式、点击事件保留真实单元格值协议
-- 汇总计算过滤 `null` / `undefined` 后再进入 `precisionCalculation`
-- 透视表选中项、折叠路径、样式配置和排序函数迁移到 `ChartDataSetCellValue` 协议
-- 透视表折叠路径和排序比较显式字符串化，避免隐藏的隐式类型转换
-- 不改变 `ChartDataSetDTO.rows` 全局协议
-
-当前验证：
-
-```bash
-npm run checkTs
-npm run test:ci -- src/app/utils/__tests__/chartHelper.test.ts src/app/components/ChartGraph/BasicDoubleYChart/__tests__/utils.test.ts
-```
-
-结果：已通过。
-
-测试缺口：
-
-- 未找到 `BasicTableChart` / `PivotSheetChart` 现成 `*.test.ts` / `*.test.tsx`
-- 本批以类型门禁、生产代码残留复扫和协议边界复核为主
-
-### 3.5 阶段完成批次
-
-批次：图表 helper 数据集泛型残留清理
-
-目标：
-
-- 清理 `chartHelper` 注释中的旧 `IChartDataSet<string>` 说明
-- 清理 `chartHelper` 和 `BasicDoubleYChart` 测试中的旧数据集泛型断言
-- 保持 `ChartDataSetDTO.rows` 全局协议不变
-
-当前验证：
-
-```bash
-npm run checkTs
-npm run test:ci -- src/app/utils/__tests__/chartHelper.test.ts src/app/components/ChartGraph/BasicDoubleYChart/__tests__/utils.test.ts
-git diff --check
-```
-
-结果：已通过。
-
-### 3.6 阶段完成批次
-
-批次：图表筛选值协议残留清理
-
-目标：
-
-- 为 ControllerPanel 筛选值新增 `filterValueUtils` 守卫和读取工具
-- 清理控制器筛选组件中关系值、树值、数值区间的直接类型断言
-- 复用关系筛选值守卫清理 ChartWorkbench 筛选配置中的明显残留断言
-- 保持 `FilterConditionValue` 联合协议不变
-
-当前验证：
-
-```bash
-npm run checkTs
-npm run test:ci -- src/app/models/__tests__/ChartFilterCondition.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/filterValueUtils.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts
-git diff --check
-```
-
-结果：已通过。
-
-### 3.7 当前进行中批次
-
-批次：前端时间调用残留清理
-
-目标：
-
-- 复扫前端原生 `new Date()` / `Date.now()` / `dayjs()` / `getTime()` 调用
-- 生产代码保持使用既有 `getDatartNow` / `getDatartNowMillis` / `datartDayjs` 主链
-- 清理时间工具测试中的原生时间调用残留
-
-当前验证：
+最近验证已通过：
 
 ```bash
 npm run checkTs
@@ -264,102 +134,47 @@ npm run test:ci -- src/app/utils/__tests__/date.test.ts src/app/utils/__tests__/
 git diff --check
 ```
 
-结果：已通过。
-
-### 3.8 当前残留弱类型入口
-
-当前复扫命令：
-
 ```bash
-rg -n "new Date\\(|Date\\.now\\(|dayjs\\(\\)|performance\\.now\\(|getTime\\(\\)" frontend/src/app -g '*.ts' -g '*.tsx'
+npm run checkTs
+npm run test:ci -- src/app/models/__tests__/ChartFilterCondition.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/filterValueUtils.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts
+git diff --check
 ```
 
-剩余重点：
+## 5. 下一步执行队列
 
-| 模块             | 状态   | 处理策略                                      |
-| ---------------- | ------ | --------------------------------------------- |
-| 生产代码时间入口 | 已清空 | 未发现裸 `new Date()` / `Date.now()` 调用     |
-| 测试时间残留     | 已清空 | 时间工具测试改为使用 `datartDayjs` / `valueOf` |
+### 5.1 P0：完成当前分支收尾审计
 
-## 4. 下一步执行队列
+目标：判断 `codex/modernization-compatible-boundaries` 是否已经可以进入完整门禁和合并准备。
 
-### 4.1 当前批次 P0
+执行项：
 
-复扫前端公开类型入口：
+- 复扫 Ant Design / rc 生态深路径类型入口
+- 复扫前端公开类型入口，避免依赖包内部路径回退
+- 复扫安装健康度，确认 `package.json`、lockfile、Node 24 约束没有漂移
+- 复扫 Maven 坐标和展示元数据中的 `datart` 残留，只处理品牌 / 发布元数据，不碰 Java 包名和配置前缀
+- 更新本文档的审计结果
 
-1. 复扫 Ant Design / rc 生态深路径类型入口
-2. 优先替换为公开包导出的类型入口
-3. 运行：
+建议命令：
 
 ```bash
+rg -n "from ['\"](?:antd/es|antd/lib|rc-[^'\"]+/(?:es|lib)|@ant-design/[^'\"]+/(?:es|lib))|import\(['\"](?:antd/es|antd/lib|rc-[^'\"]+/(?:es|lib)|@ant-design/[^'\"]+/(?:es|lib))" frontend/src frontend -g '*.ts' -g '*.tsx'
+rg -n "datart" pom.xml core security data-providers server -g 'pom.xml'
 npm run checkTs
 git diff --check
 ```
 
-建议提交信息：
+当前初步结论：
 
-```text
-chore: 清理前端公开类型入口
-```
+- 未发现明显 `antd/es`、`antd/lib`、`rc-*/es`、`rc-*/lib` 深路径类型入口
+- `frontend/.nvmrc` 已是 `v24.0.0`
+- `frontend/package.json` 已约束 `node >=24.0.0`、`npm >=11.0.0`
+- `frontend/package-lock.json` 仍是 `lockfileVersion: 2`，暂不无验证改动；后续需在 Node 24 / npm 11 下做安装健康度确认
+- 顶层和子模块 POM 的 `groupId`、`artifactId`、`name`、`description` 已收口到 `yu-bi`
+- POM 中唯一 `datart` 命中为 `server/pom.xml` 的 `mainClass=datart.DatartServerApplication`，这是 Java 包名启动入口，按固定禁止项保留，不作为品牌残留处理
 
-### 4.2 下一批 P1
+### 5.2 P1：完整门禁与合并准备
 
-继续在同一分支推进，不立即切新分支：
-
-| 优先级 | 专题                         | 下一步                                           | 风险 |
-| ------ | ---------------------------- | ------------------------------------------------ | ---- |
-| P1     | 前端公开类型入口            | 防止 Ant Design / rc 深路径类型入口回退          | 低   |
-| P2     | 安装健康度                  | 防止锁文件与 package 声明漂移                    | 低   |
-
-### 4.3 合并主线观察点
-
-当前专题分支已经连续累计多批前端兼容边界收口。准备合回 `main` 前执行：
-
-```bash
-npm run checkTs
-npm run test:ci
-npm run lint:css
-npm run lint:style
-```
-
-如果合并前改到后端或构建链路，再补对应 Maven 门禁。
-
-### 4.4 暂缓或只做审计
-
-| 专题                  | 暂不做                                  | 可做                               |
-| --------------------- | --------------------------------------- | ---------------------------------- |
-| `ChartDataSetDTO.rows` | 不直接改全图表 rows 协议                | 记录调用面、补运行时用例、选子链路 |
-| Shiro                 | 不整体迁移认证授权                      | 依赖健康度、兼容验证、最小认证用例 |
-| Calcite               | 不整体升级或替换 SQL 解析链             | 版本约束、SQL 解析用例、边界审计   |
-| 数据源 / 脚本深层架构 | 不整体重构 provider / 方言 / 脚本运行时 | 配置解析、异常兜底、测试覆盖       |
-| 内部命名与稳定标识    | 不做包名、配置前缀、迁移标识重构        | 仅继续收口对外品牌元数据           |
-
-## 5. 验证策略
-
-### 5.1 开发期轻量验证
-
-日常前端类型边界改造默认执行：
-
-```bash
-npm run checkTs
-npm run test:ci -- <related test files>
-```
-
-如果没有相关测试文件：
-
-- 必须记录测试缺口
-- 必须说明本批验证依赖类型门禁还是手工运行时复核
-- 不为了覆盖率硬造低价值快照测试
-
-### 5.2 分层门禁
-
-| 场景                             | 门禁                                             |
-| -------------------------------- | ------------------------------------------------ |
-| 纯类型边界、小范围组件迁移       | `npm run checkTs` + 相关测试                     |
-| helper、模型、共享协议变化       | `npm run checkTs` + 相关模型 / helper 测试       |
-| 依赖、构建配置、运行时加载变化   | `npm run checkTs` + `npm run test:ci`            |
-| 准备 merge 回 `main`             | 前端完整门禁 + 后端必要门禁                      |
-| 推送 `main`                      | 不跳过完整门禁                                   |
+当前分支已累计较多前端兼容边界改造。P0 收尾审计完成后，不再继续无限追加低价值小改动，应准备完整门禁和合并。
 
 前端完整门禁：
 
@@ -370,37 +185,109 @@ npm run lint:css
 npm run lint:style
 ```
 
-后端必要门禁按改动范围选择：
+如果 P0 改到 Maven、后端依赖或安装包，再补：
 
 ```bash
 mvn test
 mvn package -DskipTests
 ```
 
-## 6. 提交与合并节奏
+合并流程：
 
-- 当前专题内可以多改一点再提交，不因单个小文件改动立即提交
-- 每次提交前更新本文档的阶段记录和验证记录
-- 专题分支可以推送远端
-- 合回 `main` 使用 `git merge --no-ff <branch>`
-- 合回 `main` 后再推送主线
+```bash
+git push origin codex/modernization-compatible-boundaries
+git checkout main
+git merge --no-ff codex/modernization-compatible-boundaries
+git push origin main
+```
 
-推荐提交粒度：
+### 5.3 P2：下一专题候选
 
-- 小批类型边界：累计 3 到 10 个相关文件后提交
-- 中风险运行时链路：每条链路独立提交
-- 依赖或构建链路：独立提交并跑更强验证
-- 文档阶段复盘：可以随同当前批次提交
+当前分支合回 `main` 后，再按专题创建新分支。优先级如下：
 
-## 7. 历史检索提示
+| 优先级 | 专题 | 风险 | 处理策略 |
+| --- | --- | --- | --- |
+| P2-A | 前端安装健康度和依赖漂移治理 | 低 | Node 24 下复核 install、lockfile、engines、CI 版本 |
+| P2-B | Maven / 发布元数据品牌残留 | 低到中 | 仅改 POM 坐标、描述、包名展示和文档，不改 Java 包名 |
+| P2-C | ECharts / 图表运行时依赖升级评估 | 中 | 先做版本审计、图表 smoke test、关键 helper 用例 |
+| P2-D | AntV S2 / 透视表链路升级评估 | 中 | 先补透视表最小运行时用例，再升级 |
+| P2-E | 后端 Shiro / Calcite 健康度审计 | 高 | 只做用例和兼容边界，不直接整体替换 |
 
-此前大量细粒度流水已压缩为专题摘要。需要追溯具体实现时用 git 历史检索：
+## 6. 风险分层
+
+### 6.1 可继续推进
+
+- 前端公开类型入口清理
+- 时间工具、筛选值、数据集值协议边界清理
+- POM / README / 发布脚本中的 yu-bi 展示元数据收口
+- Node 24 / npm 11 安装健康度复核
+- `.gitignore`、CI、文档类低风险治理
+
+### 6.2 需要先补验证
+
+- `ChartDataSetDTO.rows` 全局协议切换
+- ECharts 主版本或关键运行时升级
+- AntV S2 / 透视表运行时升级
+- react-window、react-grid-layout、flexlayout-react 等布局运行时升级
+- Dashboard widget 内容协议继续收口
+- Maven 打包、Docker、安装包和 demo 启动链路调整
+
+### 6.3 暂不做整体重构
+
+- Java 包名 `datart.*`
+- 配置前缀 `datart.*`
+- `DATART_*`
+- 数据迁移稳定标识
+- Shiro 认证授权整体替换
+- Calcite SQL 解析主链整体替换
+- 数据源 provider / 方言 / 脚本运行时的大规模重构
+
+## 7. 门禁策略
+
+开发期按风险分层验证，不为每个小改动跑完整门禁：
+
+| 场景 | 最低门禁 |
+| --- | --- |
+| 文档或纯元数据 | `git diff --check` |
+| 前端类型边界、小范围组件迁移 | `npm run checkTs` + 相关测试 |
+| helper、模型、共享协议变化 | `npm run checkTs` + 相关模型 / helper 测试 |
+| 依赖、构建配置、运行时加载变化 | `npm run checkTs` + `npm run test:ci` |
+| 准备 merge 回 `main` | 前端完整门禁，必要时补后端门禁 |
+| 推送 `main` | 不跳过完整门禁 |
+
+测试缺口处理：
+
+- 找不到现成相关测试时，必须记录缺口
+- 优先补 helper / 协议 / 运行时最小用例
+- 不为了覆盖率硬造低价值快照测试
+
+## 8. 提交节奏
+
+- 同一专题内累计一组相关改动后再提交
+- 不因单个小文件改动立即提交
+- 文档复盘可以随当前批次一起提交
+- 中风险运行时链路按可验证子链路独立提交
+- 依赖、构建、安装包链路独立提交，并跑更强验证
+
+建议提交粒度：
+
+| 类型 | 粒度 |
+| --- | --- |
+| 低风险类型边界 | 累计 3 到 10 个相关文件后提交 |
+| 中风险运行时链路 | 每条可验证链路独立提交 |
+| 依赖和构建链路 | 独立提交 |
+| 阶段复盘 | 跟随当前批次提交或单独文档提交 |
+
+## 9. 历史追溯
+
+需要追溯具体实现时使用：
 
 ```bash
 git log --oneline -- docs/tech-stack-modernization-plan.md
 git log --oneline -- frontend/src/app/components/FormGenerator
-git log --oneline -- frontend/src/app/pages/DashBoardPage
 git log --oneline -- frontend/src/app/components/ChartGraph
+git log --oneline -- frontend/src/app/pages/DashBoardPage
+git log --oneline -- frontend/src/app/pages/MainPage/pages/VizPage
 ```
 
 关键合并点：
