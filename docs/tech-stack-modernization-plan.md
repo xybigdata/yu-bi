@@ -48,9 +48,9 @@
 ### 2.1 Git 状态
 
 - 当前分支：`codex/modernization-compatible-boundaries`
-- 当前分支相对 `origin/main`：领先 11 个提交，未落后
-- 最近已推送提交：`e043c93f7 chore: 迁移图表数据集标量值边界`
-- 当前工作区：表格 / 透视表图表数据集协议迁移批次，尚未提交
+- 当前分支相对 `origin/main`：领先 12 个提交，未落后
+- 最近已推送提交：`b828250bc chore: 迁移表格图表数据集值边界`
+- 当前工作区：干净
 - 当前轻量验证：`npm run checkTs` 已通过
 
 恢复工作时先执行：
@@ -133,8 +133,9 @@ git rev-list --left-right --count origin/main...HEAD
 | `deb647680` | ChartFilterCondition 值协议  | 筛选值联合协议、关系值守卫、筛选 UI 消费点归一化完成     |
 | `26bf8a959` | ChartDataSet 单元格值协议    | 公共数据集单元格协议、helper、双轴图表试点完成           |
 | `e043c93f7` | 图表数据集标量协议迁移       | 普通图表内部标量值协议完成迁移                           |
+| `b828250bc` | 表格 / 透视表数据集协议      | 表格和透视表生产代码旧数据集泛型入口完成清理             |
 
-### 3.3 当前进行中批次
+### 3.3 阶段完成批次
 
 批次：图表数据集标量协议迁移
 
@@ -174,7 +175,7 @@ npm run test:ci -- src/app/utils/__tests__/chartHelper.test.ts src/app/component
 - 本批暂以类型门禁和协议边界复核为主
 - 后续迁移 `BasicTableChart` / `PivotSheetChart` 时需要补更有价值的运行时用例
 
-### 3.4 当前进行中批次
+### 3.4 阶段完成批次
 
 批次：表格 / 透视表图表数据集协议迁移
 
@@ -221,10 +222,11 @@ rg -n "IChartDataSet<string>|IChartDataSetRow<string>" frontend/src/app/componen
 
 ### 4.1 当前批次 P0
 
-完成并提交“表格 / 透视表图表数据集协议迁移”：
+清理图表 helper 类型边界：
 
-1. 复核 diff，只包含表格 / 透视表图表数据集协议迁移和本文档
-2. 运行：
+1. 清理 `chartHelper` 注释和测试中残留的旧数据集泛型断言
+2. 不扩大到 `ChartDataSetDTO.rows` 全局协议
+3. 运行：
 
 ```bash
 npm run checkTs
@@ -232,16 +234,10 @@ npm run test:ci -- src/app/utils/__tests__/chartHelper.test.ts src/app/component
 git diff --check
 ```
 
-3. 提交信息：
+建议提交信息：
 
 ```text
-chore: 迁移表格图表数据集值边界
-```
-
-4. 推送当前专题分支：
-
-```bash
-git push origin codex/modernization-compatible-boundaries
+chore: 清理图表数据集泛型残留
 ```
 
 ### 4.2 下一批 P1
@@ -256,7 +252,20 @@ git push origin codex/modernization-compatible-boundaries
 | P2     | 前端公开类型入口            | 防止 Ant Design / rc 深路径类型入口回退          | 低   |
 | P2     | 安装健康度                  | 防止锁文件与 package 声明漂移                    | 低   |
 
-### 4.3 暂缓或只做审计
+### 4.3 合并主线观察点
+
+当前专题分支已经连续累计多批前端兼容边界收口。准备合回 `main` 前执行：
+
+```bash
+npm run checkTs
+npm run test:ci
+npm run lint:css
+npm run lint:style
+```
+
+如果合并前改到后端或构建链路，再补对应 Maven 门禁。
+
+### 4.4 暂缓或只做审计
 
 | 专题                  | 暂不做                                  | 可做                               |
 | --------------------- | --------------------------------------- | ---------------------------------- |
