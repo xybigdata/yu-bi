@@ -23,12 +23,21 @@ import { FC, memo, useState } from 'react';
 import { isEmpty } from 'utils/object';
 import { InteractionFieldRelation } from '../../constants';
 import ChartRelationList from './ChartRelationList';
+import { normalizeRelations } from './relationUtils';
 import {
   CustomizeRelation,
   I18nTranslator,
   JumpToChartRule,
   VizType,
 } from './types';
+
+export const buildJumpToChartRule = (
+  value: JumpToChartRule | undefined,
+  relations: CustomizeRelation[],
+): JumpToChartRule => ({
+  ...value,
+  [InteractionFieldRelation.Customize]: relations,
+});
 
 const JumpToChart: FC<
   {
@@ -43,12 +52,9 @@ const JumpToChart: FC<
   );
 
   const handleUpdateRelations = (relations?: CustomizeRelation[]) => {
-    const newRelations = [...(relations || [])];
+    const newRelations = normalizeRelations(relations);
     setRelations(newRelations);
-    onValueChange({
-      ...value,
-      ...{ [InteractionFieldRelation.Customize]: newRelations },
-    });
+    onValueChange(buildJumpToChartRule(value, newRelations));
   };
   return (
     <Space>

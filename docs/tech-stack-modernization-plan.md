@@ -49,7 +49,7 @@
 
 - 当前分支：`codex/modernization-compatible-boundaries`
 - 当前分支基点：`b519a24cd chore: 合入 Dashboard widget 内容协议边界批次`
-- 复盘时当前分支相对 `origin/main`：领先 3 个提交，未落后
+- 复盘时当前分支相对 `origin/main`：领先 4 个提交，未落后
 - 最近业务改造提交：`bd633990a chore: 收口 FormGenerator 关系编辑边界`
 - 最近一次复盘前工作区干净
 
@@ -154,6 +154,23 @@ git rev-list --left-right --count origin/main...HEAD
 
 ### 3.6 当前分支已完成批次
 
+未提交批次：
+
+- FormGenerator 交互规则构造边界：
+  - `ViewDetailPanel` 自定义字段写回改为显式构造，清空字段时稳定写回空数组
+  - `JumpToChart` / `JumpToDashboard` / `JumpToUrl` 统一使用规则构造函数写回 `customize` 关系数组
+  - `JumpToUrl` URL 与关系数组写回共享同一构造路径，减少旧 `value` 快照穿透
+  - 新增 `interactionRuleBuilders.test.ts` 固定 ViewDetail 与 Jump 规则构造语义
+  - 当前 Interaction 目录 P0 扫描项已清空
+
+验证已通过：
+
+```bash
+npm run checkTs
+npm run test:ci -- src/app/components/FormGenerator/__tests__/interactionRuleBuilders.test.ts src/app/components/FormGenerator/__tests__/interactionRelationUtils.test.ts src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx
+git diff --check
+```
+
 提交：`bd633990a chore: 收口 FormGenerator 关系编辑边界`
 
 已完成：
@@ -232,12 +249,6 @@ npm run test:ci -- src/app/components/FormGenerator/__tests__/utils.test.tsx src
 ### 5.1 当前分支继续推进
 
 继续在 `codex/modernization-compatible-boundaries` 上累计，不切新分支，不合 `main`。
-
-P0：
-
-1. 处理 `ViewDetailPanel` 自定义字段编辑边界
-2. 处理 `JumpToUrl` URL 参数关系写回边界
-3. 复扫当前 Interaction 目录是否还有同链路强转和弱类型写回
 
 P1：
 

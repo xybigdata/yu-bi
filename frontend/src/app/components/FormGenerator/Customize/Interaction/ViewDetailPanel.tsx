@@ -20,11 +20,21 @@ import { Form, Radio, RadioChangeEvent, Select, Space } from 'antd';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
-import { isEmptyArray } from 'utils/object';
 import { InteractionFieldMapper, InteractionMouseEvent } from '../../constants';
 import { ItemLayoutProps } from '../../types';
 import { itemLayoutComparer } from '../../utils';
 import { InteractionPanelContext, ViewDetailSetting } from './types';
+
+export const buildViewDetailSetting = (
+  event: InteractionMouseEvent,
+  mapper: ViewDetailSetting['mapper'],
+  customFields: string[],
+): ViewDetailSetting => ({
+  event,
+  mapper,
+  [InteractionFieldMapper.Customize]:
+    mapper === InteractionFieldMapper.Customize ? customFields : [],
+});
 
 const ViewDetailPanel: FC<
   ItemLayoutProps<ChartStyleConfig, ViewDetailSetting, InteractionPanelContext>
@@ -57,21 +67,24 @@ const ViewDetailPanel: FC<
     const handleViewDetailSettingChange = (
       newEvent?: InteractionMouseEvent,
       newMapper?: InteractionFieldMapper,
-      customFields?: string[],
+      nextCustomFields?: string[],
     ) => {
-      let newSetting: ViewDetailSetting = {
-        event: newEvent || event,
-        mapper: newMapper || mapper,
-        [InteractionFieldMapper.Customize]: customFields,
-      };
+      const finalEvent = newEvent || event;
+      const finalMapper = newMapper || mapper;
+      const finalCustomFields = nextCustomFields || customFields;
+      const newSetting = buildViewDetailSetting(
+        finalEvent,
+        finalMapper,
+        finalCustomFields,
+      );
       if (newEvent) {
         setEvent(newEvent);
       }
       if (newMapper) {
         setMapper(newMapper);
       }
-      if (!isEmptyArray(customFields)) {
-        setCustomFields(customFields!);
+      if (nextCustomFields) {
+        setCustomFields(nextCustomFields);
       }
       onChange?.(ancestors, newSetting, false);
     };
