@@ -66,14 +66,7 @@ export type FilterFacade =
 export type FilterCondition = {
   name: string;
   type: FilterConditionType;
-  value?:
-    | Lowercase<keyof typeof FilterRelationType>
-    | string
-    | number
-    | [number, number]
-    | string[]
-    | Array<RelationFilterValue>
-    | TimeFilterConditionValue;
+  value?: FilterConditionValue;
   visualType: string;
   operator?:
     | string
@@ -82,15 +75,49 @@ export type FilterCondition = {
   children?: FilterCondition[];
 };
 
+export type FilterConditionValue =
+  | null
+  | FilterRelationValue
+  | string
+  | number
+  | NumericFilterValue
+  | [number | null, number | null]
+  | string[]
+  | RelationFilterValue[]
+  | ConditionFilterValue
+  | TimeFilterConditionValue;
+
+export type FilterRelationValue =
+  (typeof FilterRelationType)[keyof typeof FilterRelationType];
+
+export type ConditionFilterValue = {
+  filter?: string;
+  relation?: string;
+  value?: string | number | string[] | NumericFilterValue;
+};
+
+export type NumericFilterValue = Array<number | null>;
+
+export type ManualRelativeTimeFilterValue = {
+  unit: string;
+  amount: number;
+  direction?: string;
+  isStart?: boolean;
+};
+
+export type ManualRangeTimeFilterValue = [
+  ManualTimeFilterValue | undefined,
+  ManualTimeFilterValue | undefined,
+];
+
+export type ManualTimeFilterValue = string | ManualRelativeTimeFilterValue;
+
 export type TimeFilterConditionValue =
   | string
   | string[]
   | Lowercase<keyof typeof RECOMMEND_TIME>
-  | Array<{
-      unit;
-      amount;
-      direction?: string;
-    }>;
+  | ManualRelativeTimeFilterValue[]
+  | ManualRangeTimeFilterValue;
 
 export type RelationFilterValue = {
   key: string;

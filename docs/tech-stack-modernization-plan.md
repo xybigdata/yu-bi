@@ -49,9 +49,9 @@
 
 - 当前分支：`codex/modernization-compatible-boundaries`
 - 当前分支基点：`b519a24cd chore: 合入 Dashboard widget 内容协议边界批次`
-- 复盘时当前分支相对 `origin/main`：领先 7 个提交，未落后
-- 最近已推送业务改造提交：`7083dae3f chore: 收口 FormGenerator 交互规则回调边界`
-- 复盘时工作区存在未提交的 `ChartFilterCondition.value` 协议中间改动
+- 复盘时当前分支相对 `origin/main`：领先 8 个提交，未落后
+- 最近已推送提交：`6a97284b2 docs: 复盘现代化改造执行板`
+- 复盘时工作区为 `ChartFilterCondition.value` 协议收口批次，验证已通过，待提交
 
 恢复工作时先执行：
 
@@ -149,56 +149,48 @@ git rev-list --left-right --count origin/main...HEAD
 - 剩余 `unknown` 主要是默认泛型、翻译 options 和通用 value 入口，暂不作为同类弱类型问题继续消耗
 - 下一阶段应转入图表筛选值协议，而不是继续在 FormGenerator 内做低收益扫尾
 
-### 3.4 正在进行的未提交批次
+### 3.4 当前待提交批次
 
 批次：`ChartFilterCondition.value` 公共协议收口
 
-已开始修改：
+已完成：
 
+- `frontend/src/app/types/ChartConfig.ts`
 - `frontend/src/app/models/ChartFilterCondition.ts`
 - `frontend/src/app/models/__tests__/ChartFilterCondition.test.ts`
-- `frontend/src/app/types/ChartConfig.ts`
+- `frontend/src/app/models/ChartDrillOption.ts`
+- `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterAction/ArrangeFilterAction.tsx`
+- `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterAction/RelationTypeFilter.tsx`
+- `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterAction/SingleFilterRow.tsx`
+- `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterControlPanel/CategoryConditionRelationSelector.tsx`
+- `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterControlPanel/FilterFacadeConfiguration.tsx`
+- `frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterControlPanel/ValueConditionConfiguration.tsx`
 
-本批目标：
+本批结果：
 
-- 将 `ChartFilterCondition.value` 从宽松值收口为显式公共协议
-- 将 `operator`、`relation value`、`ConditionBuilder` 写回入口补齐类型
-- 在消费点补值守卫和归一化 helper，避免大面积 `as`
-- 保持现有筛选 UI 行为不变
-
-当前判断：
-
-- `ChartFilterCondition.value` 可以继续推进，属于中等风险但调用面可验证
+- `FilterCondition.value` 收口为显式 `FilterConditionValue` 联合协议
+- 数值筛选显式支持 `number | null` 数组，兼容输入框清空行为
+- `ChartFilterCondition` 增加关系值、关系选项数组、数值输入、文本输入和未知筛选值守卫
+- 下钻筛选值、关系编辑、筛选 UI 输入值改为先归一化再写回
+- 新增 helper 测试，固定合法历史值和非法未知对象边界
 - `ChartDataSetDTO.rows` 影响全图表运行时，本轮只做梳理和记录，暂不直接改为新泛型协议
+
+验证已通过：
+
+```bash
+npm run checkTs
+npm run test:ci -- src/app/models/__tests__/ChartFilterCondition.test.ts
+npm run test:ci -- src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/__tests__/utils.test.ts
+```
 
 ## 4. 下一步执行队列
 
 ### 4.1 当前批次 P0
 
-继续在 `codex/modernization-compatible-boundaries` 上完成 `ChartFilterCondition.value`：
+提交并推送 `ChartFilterCondition.value` 批次：
 
-1. 在模型层或局部 helper 中增加筛选值守卫：
-   - `isFilterRelationValue`
-   - `toFilterRelationValue`
-   - `isRelationFilterValue`
-   - `isRelationFilterValues`
-   - `toNumberFilterValues`
-   - `toStringInputValue`
-   - 必要时增加 `isFilterConditionValue`
-2. 修复 `npm run checkTs` 暴露的筛选消费点：
-   - `ChartDrillOption.ts`
-   - `ArrangeFilterAction.tsx`
-   - `RelationTypeFilter.tsx`
-   - `SingleFilterRow.tsx`
-   - `CategoryConditionRelationSelector.tsx`
-   - `FilterFacadeConfiguration.tsx`
-   - `ValueConditionConfiguration.tsx`
-3. 补齐或更新定向测试：
-   - `frontend/src/app/models/__tests__/ChartFilterCondition.test.ts`
-   - 相关筛选工具测试
-4. 通过轻量验证后再提交：
-   - `npm run checkTs`
-   - `npm run test:ci -- <related test files>`
+1. 复核暂存范围，只包含本批筛选协议和执行文档
+2. 提交信息使用：
 
 建议提交信息：
 
@@ -206,13 +198,16 @@ git rev-list --left-right --count origin/main...HEAD
 chore: 收口 ChartFilterCondition 值协议边界
 ```
 
-### 4.2 当前分支后续 P1
+3. 推送当前专题分支
 
-完成当前批次后，继续在同一分支推进以下可控项，不立即切新分支：
+### 4.2 下一批 P1
+
+继续在同一分支推进以下可控项，不立即切新分支：
 
 | 专题                         | 下一步                                           | 风险 |
 | ---------------------------- | ------------------------------------------------ | ---- |
-| 图表筛选值协议               | 复扫筛选 UI、下钻、联动参数写回                 | 中   |
+| `ChartDataSetDTO.rows`       | 只做调用面审计、记录影响范围和可测子链路        | 高   |
+| 图表筛选值协议               | 复扫筛选 UI、下钻、联动参数写回的残留断言       | 中   |
 | 图表 helper 类型边界         | 选择已有测试覆盖的 helper 做小批收口            | 中   |
 | 时间体系剩余调用点           | 复扫零散原生时间调用                            | 低   |
 | 前端公开类型入口             | 防止 Ant Design / rc 深路径类型入口回退         | 低   |

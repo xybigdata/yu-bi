@@ -23,7 +23,10 @@ import {
 } from 'app/types/ChartDrillOption';
 import { FilterSqlOperator } from 'globalConstants';
 import { isEmptyArray } from 'utils/object';
-import { ConditionBuilder } from './ChartFilterCondition';
+import {
+  ConditionBuilder,
+  isFilterConditionValue,
+} from './ChartFilterCondition';
 
 export enum DrillMode {
   Normal = 'normal',
@@ -117,10 +120,11 @@ export class ChartDrillOption implements IChartDrillOption {
     const currentField = this.drillFields[this.cursor];
     let cond;
     if (currentField && filterData) {
+      const filterValue = filterData[currentField.colName];
       cond = new ConditionBuilder()
         .setName(currentField.colName)
         .setOperator(FilterSqlOperator.Equal)
-        .setValue(filterData[currentField.colName])
+        .setValue(isFilterConditionValue(filterValue) ? filterValue : undefined)
         .asFilter();
     }
     this.drillDownFields.push({

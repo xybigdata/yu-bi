@@ -17,15 +17,104 @@
  */
 
 import { FilterConditionType, FilterRelationType } from 'app/constants';
-import { FilterCondition } from 'app/types/ChartConfig';
+import {
+  ConditionFilterValue,
+  FilterCondition,
+  FilterConditionValue,
+  ManualRelativeTimeFilterValue,
+  NumericFilterValue,
+  RelationFilterValue,
+} from 'app/types/ChartConfig';
 import { FilterSqlOperator } from 'globalConstants';
+
+export type ChartFilterConditionValue = FilterCondition['value'];
+export type ChartFilterConditionOperator = FilterCondition['operator'];
+export type ChartFilterRelationValue =
+  (typeof FilterRelationType)[keyof typeof FilterRelationType];
+
+export const isFilterRelationValue = (
+  value: unknown,
+): value is ChartFilterRelationValue =>
+  Object.values(FilterRelationType).includes(value as ChartFilterRelationValue);
+
+export const toFilterRelationValue = (
+  value: unknown,
+): ChartFilterRelationValue | undefined =>
+  isFilterRelationValue(value) ? value : undefined;
+
+export const isRelationFilterValue = (
+  value: unknown,
+): value is RelationFilterValue =>
+  typeof value === 'object' &&
+  value !== null &&
+  'key' in value &&
+  'label' in value;
+
+export const isRelationFilterValues = (
+  value: unknown,
+): value is RelationFilterValue[] =>
+  Array.isArray(value) && value.every(isRelationFilterValue);
+
+export const toNumberFilterValues = (
+  value: ChartFilterConditionValue,
+): NumericFilterValue =>
+  Array.isArray(value) &&
+  value.every(item => typeof item === 'number' || item === null)
+    ? value
+    : [];
+
+export const toStringInputValue = (
+  value: ChartFilterConditionValue,
+): string | number | undefined =>
+  typeof value === 'string' || typeof value === 'number' ? value : undefined;
+
+const isManualRelativeTimeFilterValue = (
+  value: unknown,
+): value is ManualRelativeTimeFilterValue =>
+  typeof value === 'object' &&
+  value !== null &&
+  'unit' in value &&
+  'amount' in value &&
+  typeof value.unit === 'string' &&
+  typeof value.amount === 'number';
+
+const isConditionFilterValue = (
+  value: unknown,
+): value is ConditionFilterValue =>
+  typeof value === 'object' &&
+  value !== null &&
+  !Array.isArray(value) &&
+  ('filter' in value || 'relation' in value || 'value' in value);
+
+const isFilterConditionValueArray = (value: unknown): boolean =>
+  Array.isArray(value) &&
+  value.every(
+    item =>
+      item === undefined ||
+      item === null ||
+      typeof item === 'string' ||
+      typeof item === 'number' ||
+      isRelationFilterValue(item) ||
+      isManualRelativeTimeFilterValue(item),
+  );
+
+export const isFilterConditionValue = (
+  value: unknown,
+): value is FilterConditionValue =>
+  value === null ||
+  typeof value === 'string' ||
+  typeof value === 'number' ||
+  isFilterConditionValueArray(value) ||
+  isRelationFilterValue(value) ||
+  isManualRelativeTimeFilterValue(value) ||
+  isConditionFilterValue(value);
 
 class ChartFilterCondition implements FilterCondition {
   name = '';
   type = FilterConditionType.Filter;
-  value?;
+  value?: ChartFilterConditionValue;
   visualType = '';
-  operator?: any;
+  operator?: ChartFilterConditionOperator;
   children?: ChartFilterCondition[];
 
   constructor(condition?: FilterCondition) {
@@ -41,19 +130,19 @@ class ChartFilterCondition implements FilterCondition {
     }
   }
 
-  setValue(value) {
+  setValue(value?: ChartFilterConditionValue) {
     this.value = value;
   }
 
-  setType(type) {
+  setType(type: FilterConditionType) {
     this.type = type;
   }
 
-  setOperator(operator) {
+  setOperator(operator?: ChartFilterConditionOperator) {
     this.operator = operator;
   }
 
-  removeChild(index) {
+  removeChild(index: number) {
     if (this.children && this.children.length > 2) {
       this.children?.splice(index, 1);
     } else if (this.children && this.children.length === 2) {
@@ -66,7 +155,7 @@ class ChartFilterCondition implements FilterCondition {
     }
   }
 
-  updateChild(index, child) {
+  updateChild(index: number, child: ChartFilterCondition) {
     if (this.children && this.children.length >= index + 1) {
       this.children[index] = child;
     }
@@ -122,12 +211,12 @@ export class ConditionBuilder {
     return this;
   }
 
-  setValue(value?: any) {
+  setValue(value?: ChartFilterConditionValue) {
     this.condition.value = value;
     return this;
   }
 
-  setOperator(operator?: string) {
+  setOperator(operator?: ChartFilterConditionOperator) {
     this.condition.operator = operator;
     return this;
   }
@@ -141,7 +230,10 @@ export class ConditionBuilder {
     return this.condition;
   }
 
-  asRelation(value?: any, children?: ChartFilterCondition[]) {
+  asRelation(
+    value?: ChartFilterRelationValue,
+    children?: ChartFilterCondition[],
+  ) {
     this.condition.type = FilterConditionType.Relation;
     this.condition.value = value || this.condition.value;
     this.condition.children = children || this.condition.children;

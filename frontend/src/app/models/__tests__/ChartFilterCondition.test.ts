@@ -20,6 +20,12 @@ import { FilterConditionType, FilterRelationType } from 'app/constants';
 import { FilterSqlOperator } from 'globalConstants';
 import ChartFilterCondition, {
   ConditionBuilder,
+  isFilterConditionValue,
+  isFilterRelationValue,
+  isRelationFilterValues,
+  toFilterRelationValue,
+  toNumberFilterValues,
+  toStringInputValue,
 } from '../ChartFilterCondition';
 
 describe('ChartFilterCondition Tests', () => {
@@ -253,6 +259,48 @@ describe('ChartFilterCondition Tests', () => {
   });
 });
 
+describe('ChartFilterCondition value helpers', () => {
+  test('should normalize relation values', () => {
+    expect(isFilterRelationValue(FilterRelationType.AND)).toBe(true);
+    expect(toFilterRelationValue(FilterRelationType.OR)).toEqual(
+      FilterRelationType.OR,
+    );
+    expect(toFilterRelationValue('unknown')).toBeUndefined();
+  });
+
+  test('should normalize numeric filter values', () => {
+    expect(toNumberFilterValues([1, null, 3])).toEqual([1, null, 3]);
+    expect(toNumberFilterValues(['1'])).toEqual([]);
+    expect(toNumberFilterValues(undefined)).toEqual([]);
+  });
+
+  test('should normalize string input values', () => {
+    expect(toStringInputValue('name')).toEqual('name');
+    expect(toStringInputValue(1)).toEqual(1);
+    expect(toStringInputValue(['name'])).toBeUndefined();
+  });
+
+  test('should recognize relation filter value arrays', () => {
+    expect(
+      isRelationFilterValues([{ key: 'key', label: 'label' }]),
+    ).toBe(true);
+    expect(isRelationFilterValues([{ key: 'key' }])).toBe(false);
+  });
+
+  test('should recognize compatible filter condition values', () => {
+    expect(isFilterConditionValue(null)).toBe(true);
+    expect(isFilterConditionValue('value')).toBe(true);
+    expect(isFilterConditionValue([1, null])).toBe(true);
+    expect(
+      isFilterConditionValue([{ key: 'key', label: 'label' }]),
+    ).toBe(true);
+    expect(isFilterConditionValue([{ unit: 'd', amount: 1 }])).toBe(true);
+    expect(isFilterConditionValue({ filter: 'name', value: 'a' })).toBe(true);
+    expect(isFilterConditionValue({ unexpected: true })).toBe(false);
+    expect(isFilterConditionValue([{ unexpected: true }])).toBe(false);
+  });
+});
+
 describe('ConditionBuilder Tests', () => {
   let initCondition;
   beforeEach(() => {
@@ -328,10 +376,12 @@ describe('ConditionBuilder Tests', () => {
   test('should get condition from asRelation with value and children', () => {
     const builder = new ConditionBuilder(initCondition);
 
-    const newCondition = builder.asRelation('value', [initCondition]);
+    const newCondition = builder.asRelation(FilterRelationType.OR, [
+      initCondition,
+    ]);
 
     expect(newCondition.name).toEqual(initCondition.name);
-    expect(newCondition.value).toEqual('value');
+    expect(newCondition.value).toEqual(FilterRelationType.OR);
     expect(newCondition.operator).toEqual(initCondition.operator);
     expect(newCondition.type).toEqual(FilterConditionType.Relation);
     expect(newCondition.children).toEqual([initCondition]);

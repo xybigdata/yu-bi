@@ -21,6 +21,8 @@ import { Col, Row, Select, Switch } from 'antd';
 import { FilterConditionType, FilterRelationType } from 'app/constants';
 import ChartFilterCondition, {
   ConditionBuilder,
+  toFilterRelationValue,
+  toStringInputValue,
 } from 'app/models/ChartFilterCondition';
 import { ChartDataSectionField } from 'app/types/ChartConfig';
 import { getColumnRenderName } from 'app/utils/chartHelper';
@@ -81,7 +83,7 @@ const ConditionCol: FC<{
   const onAddSubRelation = () => {
     const newCondition = new ConditionBuilder(condition)
       .setOperator(FilterRelationType.AND)
-      .asRelation(condition.value, [
+      .asRelation(toFilterRelationValue(condition.value), [
         new ChartFilterCondition(),
         new ChartFilterCondition(),
       ]);
@@ -132,7 +134,7 @@ const ConditionCol: FC<{
     <StyledRelationCol>
       <Row>
         <Select
-          value={condition?.value as string}
+          value={toStringInputValue(condition?.value)}
           onChange={handleConditionChange}
         >
           {fields.map(c => (
