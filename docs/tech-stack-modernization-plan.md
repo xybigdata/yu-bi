@@ -48,9 +48,9 @@
 ### 2.1 Git 状态
 
 - 当前分支：`codex/modernization-compatible-boundaries`
-- 当前分支相对 `origin/main`：领先 12 个提交，未落后
-- 最近已推送提交：`b828250bc chore: 迁移表格图表数据集值边界`
-- 当前工作区：干净
+- 当前分支相对 `origin/main`：领先 13 个提交，未落后
+- 最近已推送提交：`666bbfd48 docs: 同步图表数据集改造进度`
+- 当前工作区：图表 helper 数据集泛型残留清理批次，尚未提交
 - 当前轻量验证：`npm run checkTs` 已通过
 
 恢复工作时先执行：
@@ -134,6 +134,7 @@ git rev-list --left-right --count origin/main...HEAD
 | `26bf8a959` | ChartDataSet 单元格值协议    | 公共数据集单元格协议、helper、双轴图表试点完成           |
 | `e043c93f7` | 图表数据集标量协议迁移       | 普通图表内部标量值协议完成迁移                           |
 | `b828250bc` | 表格 / 透视表数据集协议      | 表格和透视表生产代码旧数据集泛型入口完成清理             |
+| `666bbfd48` | 图表数据集改造进度同步       | 执行板同步到表格 / 透视表批次完成状态                    |
 
 ### 3.3 阶段完成批次
 
@@ -202,31 +203,17 @@ npm run test:ci -- src/app/utils/__tests__/chartHelper.test.ts src/app/component
 - 未找到 `BasicTableChart` / `PivotSheetChart` 现成 `*.test.ts` / `*.test.tsx`
 - 本批以类型门禁、生产代码残留复扫和协议边界复核为主
 
-### 3.5 当前残留弱类型入口
+### 3.5 当前进行中批次
 
-当前复扫命令：
+批次：图表 helper 数据集泛型残留清理
 
-```bash
-rg -n "IChartDataSet<string>|IChartDataSetRow<string>" frontend/src/app/components/ChartGraph frontend/src/app/utils frontend/src/app/pages -g '*.ts' -g '*.tsx'
-```
+目标：
 
-剩余重点：
+- 清理 `chartHelper` 注释中的旧 `IChartDataSet<string>` 说明
+- 清理 `chartHelper` 和 `BasicDoubleYChart` 测试中的旧数据集泛型断言
+- 保持 `ChartDataSetDTO.rows` 全局协议不变
 
-| 模块              | 状态   | 处理策略                                         |
-| ----------------- | ------ | ------------------------------------------------ |
-| 生产代码          | 已清空 | 当前只剩注释和测试断言中的旧泛型字样             |
-| 测试断言          | 可保留 | 测试构造数据仍按当前 DTO rows 协议断言           |
-| 注释              | 可保留 | 顺手修正，不单独作为改造目标                     |
-
-## 4. 下一步执行队列
-
-### 4.1 当前批次 P0
-
-清理图表 helper 类型边界：
-
-1. 清理 `chartHelper` 注释和测试中残留的旧数据集泛型断言
-2. 不扩大到 `ChartDataSetDTO.rows` 全局协议
-3. 运行：
+当前验证：
 
 ```bash
 npm run checkTs
@@ -234,10 +221,44 @@ npm run test:ci -- src/app/utils/__tests__/chartHelper.test.ts src/app/component
 git diff --check
 ```
 
+结果：已通过。
+
+### 3.6 当前残留弱类型入口
+
+当前复扫命令：
+
+```bash
+rg -n "IChartDataSet<string>|IChartDataSetRow<string>|asStringDataSet|asCellValueDataSet" frontend/src/app/components/ChartGraph frontend/src/app/utils frontend/src/app/pages -g '*.ts' -g '*.tsx'
+```
+
+剩余重点：
+
+| 模块                  | 状态   | 处理策略                                  |
+| --------------------- | ------ | ----------------------------------------- |
+| 数据集旧泛型生产入口  | 已清空 | 本轮复扫无残留                            |
+| 数据集旧泛型测试断言  | 已清空 | 本轮复扫无残留                            |
+| `ChartDataSetDTO.rows` | 暂不动 | 继续保持 `string[][]` 全局协议，另行审计  |
+
+## 4. 下一步执行队列
+
+### 4.1 当前批次 P0
+
+复扫图表筛选值协议残留：
+
+1. 复扫筛选 UI、下钻、联动参数写回的残留类型断言
+2. 优先处理 `ChartFilterCondition.value` 已收口协议周边的低风险调用点
+3. 运行：
+
+```bash
+npm run checkTs
+npm run test:ci -- src/app/models/__tests__/ChartFilterCondition.test.ts
+git diff --check
+```
+
 建议提交信息：
 
 ```text
-chore: 清理图表数据集泛型残留
+chore: 清理图表筛选值协议残留
 ```
 
 ### 4.2 下一批 P1
@@ -246,10 +267,8 @@ chore: 清理图表数据集泛型残留
 
 | 优先级 | 专题                         | 下一步                                           | 风险 |
 | ------ | ---------------------------- | ------------------------------------------------ | ---- |
-| P1     | 图表 helper 类型边界         | 清理剩余注释、测试断言和 helper 入参假设         | 低   |
-| P2     | 图表筛选值协议残留          | 复扫筛选 UI、下钻、联动参数写回的残留断言        | 中   |
-| P2     | 时间体系剩余调用点          | 复扫零散原生时间调用                             | 低   |
-| P2     | 前端公开类型入口            | 防止 Ant Design / rc 深路径类型入口回退          | 低   |
+| P1     | 时间体系剩余调用点          | 复扫零散原生时间调用                             | 低   |
+| P1     | 前端公开类型入口            | 防止 Ant Design / rc 深路径类型入口回退          | 低   |
 | P2     | 安装健康度                  | 防止锁文件与 package 声明漂移                    | 低   |
 
 ### 4.3 合并主线观察点

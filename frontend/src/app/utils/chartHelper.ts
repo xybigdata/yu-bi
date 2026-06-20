@@ -1856,7 +1856,7 @@ export function round(x: number | string, precision?: number): number {
  * Get min and max number.
  *
  * @param {ChartDataSectionField[]} configs
- * @param {IChartDataSet<string>} [chartDataset]
+ * @param {IChartDataSet<ChartDataSetCellValue>} [chartDataset]
  * @return {[number, number]}  minAndMax
  */
 export function getMinAndMaxNumber(
