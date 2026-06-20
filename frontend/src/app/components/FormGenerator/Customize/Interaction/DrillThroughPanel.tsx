@@ -18,7 +18,6 @@
 
 import { Button, Form, Space } from 'antd';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
-import { updateBy } from 'app/utils/mutation';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
 import { uuidv4 } from 'utils/utils';
@@ -34,7 +33,11 @@ import {
 type InteractionRuleKey = keyof InteractionRule;
 
 const DrillThroughPanel: FC<
-  ItemLayoutProps<ChartStyleConfig, DrillThroughSetting, InteractionPanelContext>
+  ItemLayoutProps<
+    ChartStyleConfig,
+    DrillThroughSetting,
+    InteractionPanelContext
+  >
 > = memo(
   ({ ancestors, translate: t = title => title, data, onChange, context }) => {
     const [drillThroughRules, setDrillThroughRules] = useState<
@@ -64,9 +67,9 @@ const DrillThroughPanel: FC<
         r => r.id === id,
       );
       if (updatorIndex > -1) {
-        const newRules = updateBy(drillThroughRules, draft => {
-          draft![updatorIndex][prop] = value;
-        });
+        const newRules = (drillThroughRules || []).map(rule =>
+          rule.id === id ? { ...rule, [prop]: value } : rule,
+        );
         handleDrillThroughSettingChange(newRules);
       }
     };

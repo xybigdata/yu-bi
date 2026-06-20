@@ -63,12 +63,14 @@ const CrossFilteringRuleList: FC<
         if (enableRule) {
           return enableRule;
         }
-        return {
+        const defaultRule: CrossFilteringInteractionRule = {
           id: uuidv4(),
           enable: false,
           relId: bvz.datachartId,
           relation: InteractionFieldRelation.Auto,
-        } as CrossFilteringInteractionRule;
+          [InteractionFieldRelation.Customize]: [],
+        };
+        return defaultRule;
       });
   }, [boardVizs, rules, widgetId]);
 

@@ -20,11 +20,16 @@ import { Button, Input, Radio, Select, Table } from 'antd';
 import type { TableColumnsType as ColumnsType } from 'antd';
 import { handleDateLevelsName } from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/utils';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
-import { updateBy } from 'app/utils/mutation';
 import { FC } from 'react';
 import styled from 'styled-components';
-import { uuidv4 } from 'utils/utils';
 import { InteractionRelationType } from '../../constants';
+import {
+  addDefaultRelation,
+  deleteRelationById,
+  isFieldRelation,
+  updateRelationType,
+  updateRelationValue,
+} from './relationUtils';
 import { CustomizeRelation, I18nTranslator } from './types';
 
 const UrlParamList: FC<
@@ -44,21 +49,11 @@ const UrlParamList: FC<
   translate: t,
 }) => {
   const handleAddRelation = () => {
-    onRelationChange(
-      relations?.concat({ id: uuidv4(), type: InteractionRelationType.Field }),
-    );
+    onRelationChange(addDefaultRelation(relations));
   };
 
   const handleDeleteRelation = (id?: string) => {
-    if (id) {
-      const newRelations = updateBy(relations, draft => {
-        const index = draft!.findIndex(v => v.id === id);
-        if (index > -1) {
-          draft?.splice(index, 1);
-        }
-      });
-      onRelationChange(newRelations);
-    }
+    onRelationChange(deleteRelationById(relations, id));
   };
 
   const handleRelationChange = (
@@ -66,35 +61,14 @@ const UrlParamList: FC<
     key: 'source' | 'target',
     value: string,
   ) => {
-    if (id) {
-      const newRelations = updateBy(relations, draft => {
-        const config = draft!.find(v => v.id === id);
-        config && (config[key] = value);
-      });
-      onRelationChange(newRelations);
-    }
+    onRelationChange(updateRelationValue(relations, id, key, value));
   };
 
   const handleRelationTypeChange = (
     id: string | undefined,
     value: InteractionRelationType,
   ) => {
-    if (id) {
-      const newRelations = updateBy(relations, draft => {
-        const index = draft!.findIndex(v => v.id === id);
-        if (index > -1) {
-          draft![index] = {
-            id: uuidv4(),
-            type: value,
-          };
-        }
-      });
-      onRelationChange(newRelations);
-    }
-  };
-
-  const isFieldType = (relation: CustomizeRelation) => {
-    return relation?.type === InteractionRelationType.Field;
+    onRelationChange(updateRelationType(relations, id, value));
   };
 
   const columns: ColumnsType<CustomizeRelation> = [
@@ -129,13 +103,15 @@ const UrlParamList: FC<
           onChange={value => handleRelationChange(record.id, 'source', value)}
           popupMatchSelectWidth={false}
         >
-          {(isFieldType(record) ? sourceFields : sourceVariables)?.map(sf => {
-            return (
-              <Select.Option value={sf?.name}>
-                {handleDateLevelsName(sf)}
-              </Select.Option>
-            );
-          })}
+          {(isFieldRelation(record) ? sourceFields : sourceVariables)?.map(
+            sf => {
+              return (
+                <Select.Option value={sf?.name}>
+                  {handleDateLevelsName(sf)}
+                </Select.Option>
+              );
+            },
+          )}
         </Select>
       ),
     },

@@ -18,7 +18,6 @@
 
 import { Form, Radio, RadioChangeEvent, Space } from 'antd';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
-import { updateBy } from 'app/utils/mutation';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
 import { InteractionMouseEvent } from '../../constants';
@@ -63,9 +62,9 @@ const CrossFilteringPanel: FC<
     ) => {
       const updatorIndex = (rules || []).findIndex(r => r.id === id);
       if (updatorIndex > -1) {
-        const newRules = updateBy(rules, draft => {
-          draft![updatorIndex][prop] = value;
-        });
+        const newRules = (rules || []).map(rule =>
+          rule.id === id ? { ...rule, [prop]: value } : rule,
+        );
         handleSettingChange(undefined, newRules);
       }
     };
@@ -80,7 +79,7 @@ const CrossFilteringPanel: FC<
       };
       if (newEvent) {
         newSetting.event = newEvent;
-        setEvent(event);
+        setEvent(newEvent);
       }
       if (newRules) {
         newSetting.rules = [...newRules];

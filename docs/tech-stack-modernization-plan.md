@@ -4,7 +4,7 @@
 
 “现代化”不是追最新版本，而是在兼容、正确、可回归的前提下，把前后端核心技术栈和关键运行链路收口到较新的稳定状态。
 
-最后复盘时间：2026-06-18
+最后复盘时间：2026-06-20
 
 ## 1. 目标
 
@@ -49,7 +49,7 @@
 
 - 当前分支：`codex/modernization-compatible-boundaries`
 - 当前分支基点：`b519a24cd chore: 合入 Dashboard widget 内容协议边界批次`
-- 复盘时当前分支相对 `origin/main`：领先 1 个提交，未落后
+- 复盘时当前分支相对 `origin/main`：领先 2 个提交，未落后
 - 最近业务改造提交：`64d62d771 chore: 收口 FormGenerator 交互配置边界`
 - 最近一次复盘前工作区干净
 
@@ -154,6 +154,24 @@ git rev-list --left-right --count origin/main...HEAD
 
 ### 3.6 当前分支已完成批次
 
+未提交批次：
+
+- FormGenerator 交互关系编辑边界：
+  - 新增 `relationUtils`，统一关系数组归一、新增、删除、字段更新和类型切换逻辑
+  - `ControllerList` / `UrlParamList` / `ChartRelationList` / `BoardRelationList` 移除重复 `updateBy(relations)` 与非空断言
+  - `CrossFilteringRuleList` 默认规则改为显式完整对象，补齐空 `customize` 关系数组
+  - `DrillThroughPanel` / `CrossFilteringPanel` 规则写回改为不可变 `map` 更新
+  - 修正 CrossFiltering 事件切换时本地状态仍写回旧事件的问题
+  - 新增 `interactionRelationUtils.test.ts` 固定关系编辑语义
+
+验证已通过：
+
+```bash
+npm run checkTs
+npm run test:ci -- src/app/components/FormGenerator/__tests__/interactionRelationUtils.test.ts src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx
+git diff --check
+```
+
 提交：`64d62d771 chore: 收口 FormGenerator 交互配置边界`
 
 已完成：
@@ -215,11 +233,9 @@ npm run test:ci -- src/app/components/FormGenerator/__tests__/utils.test.tsx src
 
 P0：
 
-1. 收口 FormGenerator 交互规则内部 `value / Customize` 子链路
-2. 处理 `CrossFilteringRuleList` 默认规则构造里的残留强转
-3. 处理 `ViewDetailPanel` 自定义字段编辑边界
-4. 处理 `JumpToUrl` URL 参数关系写回边界
-5. 复扫 `ControllerList` / `UrlParamList` / `ChartRelationList` / `BoardRelationList` 的重复关系编辑结构
+1. 处理 `ViewDetailPanel` 自定义字段编辑边界
+2. 处理 `JumpToUrl` URL 参数关系写回边界
+3. 复扫当前 Interaction 目录是否还有同链路强转和弱类型写回
 
 P1：
 
