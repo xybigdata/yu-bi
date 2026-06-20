@@ -44,9 +44,9 @@ git log --oneline --decorate -8
 | --- | --- |
 | 工作目录 | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
 | 主线分支 | `main` |
-| 当前专题分支 | `codex/modernization-compatible-boundaries` |
-| 当前分支相对 `origin/main` | 以恢复命令为准；本次复盘继续推进时领先 17 个提交，未落后 |
-| 最近业务提交 | `0fed0168c chore: 清理前端时间调用残留` |
+| 当前专题分支 | `codex/modernization-chart-runtime` |
+| 当前分支相对 `origin/main` | 新专题分支从 `origin/main` 最新合并点创建 |
+| 最近主线合并 | `c67e2d2c7 chore: 合入现代化兼容边界批次` |
 | 工作区 | 本文档提交后应恢复干净 |
 | 远端 | `git@github.com:xybigdata/yu-bi.git` |
 
@@ -184,7 +184,7 @@ git diff --check
 
 状态：已完成。
 
-当前分支已累计较多前端兼容边界改造。P0 收尾审计已完成，不再继续无限追加低价值小改动，应准备完整门禁和合并。
+上一专题分支已累计较多前端兼容边界改造。P0 收尾审计已完成，不再继续无限追加低价值小改动，应准备完整门禁和合并。
 
 前端完整门禁：
 
@@ -218,17 +218,34 @@ git merge --no-ff codex/modernization-compatible-boundaries
 git push origin main
 ```
 
-### 5.3 P2：下一专题候选
+合并结果：
 
-当前分支合回 `main` 后，再按专题创建新分支。优先级如下：
+- 已通过 `--no-ff` 合并到 `main`
+- 合并提交：`c67e2d2c7 chore: 合入现代化兼容边界批次`
+- `main` 已推送到 `origin/main`
+- 推送前和 push hook 均已通过完整前端门禁
+
+### 5.3 P2：当前专题
+
+当前专题分支：`codex/modernization-chart-runtime`
+
+专题目标：评估并渐进推进图表运行时依赖现代化，优先从 ECharts 运行时开始。先补审计和 smoke test，再决定是否升级依赖版本；不做无验证的大版本跳跃。
+
+优先级如下：
 
 | 优先级 | 专题 | 风险 | 处理策略 |
 | --- | --- | --- | --- |
-| P2-A | 前端安装健康度和依赖漂移治理 | 低 | Node 24 下复核 install、lockfile、engines、CI 版本 |
-| P2-B | Maven / 发布元数据品牌残留 | 低到中 | 仅改 POM 坐标、描述、包名展示和文档，不改 Java 包名 |
-| P2-C | ECharts / 图表运行时依赖升级评估 | 中 | 先做版本审计、图表 smoke test、关键 helper 用例 |
-| P2-D | AntV S2 / 透视表链路升级评估 | 中 | 先补透视表最小运行时用例，再升级 |
+| P2-A | ECharts / 图表运行时依赖升级评估 | 中 | 先做版本审计、图表 smoke test、关键 helper 用例 |
+| P2-B | AntV S2 / 透视表链路升级评估 | 中 | 先补透视表最小运行时用例，再升级 |
+| P2-C | 前端安装健康度和依赖漂移治理 | 低 | Node 24 下复核 install、lockfile、engines、CI 版本 |
+| P2-D | Maven / 发布元数据品牌残留 | 低到中 | 仅改 POM 坐标、描述、包名展示和文档，不改 Java 包名 |
 | P2-E | 后端 Shiro / Calcite 健康度审计 | 高 | 只做用例和兼容边界，不直接整体替换 |
+
+当前第一步：
+
+1. 审计 `echarts`、`echarts-wordcloud`、图表组件和测试覆盖现状
+2. 复核当前 `echarts` 版本在 Node 24 / Vite 6 / Vitest 4 下的运行时边界
+3. 补足低成本 smoke test 后，再决定是否升级到更高的 ECharts 5.x 稳定版
 
 ## 6. 风险分层
 
