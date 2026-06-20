@@ -247,6 +247,27 @@ git push origin main
 2. 复核当前 `echarts` 版本在 Node 24 / Vite 6 / Vitest 4 下的运行时边界
 3. 补足低成本 smoke test 后，再决定是否升级到更高的 ECharts 5.x 稳定版
 
+当前进展：
+
+- 已联网确认 `echarts` 最新主线为 `6.1.0`
+- 已确认 `echarts-wordcloud@2.1.0` 的 peer 约束为 `echarts ^5.0.1`
+- 因词云扩展仍约束 ECharts 5，本专题不直接升级到 ECharts 6
+- 已将 `echarts` 从 `5.3.1` 升级到 ECharts 5.x 最新补丁 `5.6.0`
+- 已补充 ECharts 主运行时真实动态导入 smoke test
+- 已补充词云运行时真实动态导入 smoke test，并在测试内提供最小 Canvas 2D 能力 stub 覆盖导入期能力检查
+- `frontend/package-lock.json` 已验证为可解析 JSON，根依赖和 legacy 依赖均指向 `echarts 5.6.0`
+
+当前验证：
+
+```bash
+npm run checkTs
+npm run test:ci -- src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts src/app/utils/__tests__/echartsThemeRuntime.test.ts src/app/components/ChartGraph/BasicBarChart/__tests__/BasicBarChart.test.jsx src/app/components/ChartGraph/BasicLineChart/__tests__/BasicLineChart.test.jsx src/app/components/ChartGraph/BasicPieChart/__tests__/BasicPieChart.test.jsx src/app/components/ChartGraph/BasicDoubleYChart/__tests__/BasicDoubleYChart.test.jsx src/app/components/ChartGraph/WordCloudChart/__tests__/WordCloudChart.test.jsx src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx
+npm install --package-lock-only --dry-run --ignore-scripts
+npm ci --dry-run --ignore-scripts
+```
+
+结果：均已通过。
+
 ## 6. 风险分层
 
 ### 6.1 可继续推进
