@@ -1,30 +1,31 @@
 # yu-bi 现代化改造执行板
 
-本文档是后续改造的工作板，只保留决策、执行顺序和验证策略。
+本文档是“现代化改造”的恢复入口和执行工作板。它只记录目标、边界、阶段复盘、下一批任务和验证策略，历史细节通过 git 追溯。
 
 “现代化”不是追最新版本，而是在兼容、正确、可回归的前提下，把前后端核心技术栈和关键运行链路收口到较新的稳定状态。
 
 最后复盘时间：2026-06-20
 
-## 1. 目标
+## 1. 目标与边界
 
 ### 1.1 长期目标
 
 - 后端稳定兼容 `JDK 21`
 - 前端工程链稳定兼容 `Node 24`
 - 前端 CI 与本地开发基线统一使用 `Node 24.x`
-- 前后端核心技术栈保持在较新的稳定版，而不是盲目追最新
-- 中高风险项必须先收窄边界、补足验证证据，再渐进替换或升级
-- 全过程以本文档作为执行记录和下一步依据
+- 前后端核心技术栈保持在较新的稳定版，不盲目追最新
+- 中高风险项先收窄边界、补足验证证据，再渐进替换或升级
+- 同一专题尽量在一条长期分支累计，减少分支创建、主线合并和完整门禁次数
 
 ### 1.2 当前短期目标
 
 当前专题分支继续推进“前端兼容边界收口”：
 
-- 优先处理 FormGenerator / 交互配置 / Dashboard 配置链路中的弱类型边界
-- 顺手处理同一调用链内可验证的中风险边界
+- 先完成 `ChartFilterCondition.value` 公共协议收口
+- 梳理但暂不贸然改造 `ChartDataSetDTO.rows`，因为它影响全图表运行时
+- 继续处理同一调用链内可验证的中风险边界
 - 不扩散到无关模块，不做内部命名大迁移
-- 累计到一批值得回归的改造后再合回 `main`
+- 累计到一批值得回归的改造后，再合回 `main`
 
 ### 1.3 固定边界
 
@@ -32,7 +33,6 @@
 - 主线分支：`main`
 - 当前专题分支：`codex/modernization-compatible-boundaries`
 - `main` 不直接开发，只允许通过 merge 接收专题分支
-- 同一专题尽量在一条长期分支累计，不频繁创建分支或合并 `main`
 - 默认自动 `git add`、`git commit --no-verify`，必要时 `git push origin <branch>`
 - `.tmp/`、`logs/` 已加入 `.gitignore`
 
@@ -43,17 +43,17 @@
 - `DATART_*` 等内部技术符号
 - 数据迁移相关稳定常量、后缀、内部标识
 
-## 2. 当前项目现状
+## 2. 当前状态快照
 
 ### 2.1 Git 状态
 
 - 当前分支：`codex/modernization-compatible-boundaries`
 - 当前分支基点：`b519a24cd chore: 合入 Dashboard widget 内容协议边界批次`
-- 复盘时当前分支相对 `origin/main`：领先 6 个提交，未落后
-- 最近业务改造提交：`9599cc59f chore: 收口 FormGenerator 交互规则构造边界`
-- 最近一次复盘前工作区干净
+- 复盘时当前分支相对 `origin/main`：领先 7 个提交，未落后
+- 最近已推送业务改造提交：`7083dae3f chore: 收口 FormGenerator 交互规则回调边界`
+- 复盘时工作区存在未提交的 `ChartFilterCondition.value` 协议中间改动
 
-后续恢复工作时先执行：
+恢复工作时先执行：
 
 ```bash
 git status --short --branch
@@ -61,22 +61,29 @@ git log --oneline --decorate -8
 git rev-list --left-right --count origin/main...HEAD
 ```
 
+判断：
+
+- 当前分支不能是 `main`
+- 当前改动必须属于当前专题
+- 不能触碰禁止重构标识
+- 如果 `main` 已前进，先判断是否需要同步；不为小改动频繁合并
+
 ### 2.2 后端基线
 
-| 项目                | 当前基线     | 判断                     |
-| ------------------- | ------------ | ------------------------ |
-| Java                | `21`         | 已达硬性目标             |
-| Maven               | `>=3.9`      | 已由 Enforcer 约束       |
-| Spring Boot         | `3.5.12`     | 当前主链稳定             |
-| Spring Cloud        | `2025.0.1`   | 与 Boot 3.5 配套         |
-| MyBatis Spring Boot | `3.0.4`      | 已适配 Boot 3            |
-| GraalJS             | `25.0.1`     | 已替代 Nashorn 主链      |
-| Springdoc           | `2.8.17`     | 已适配 Boot 3            |
-| H2                  | `2.4.240`    | 已升级                   |
-| Selenium            | `4.31.0`     | 已升级                   |
-| Shiro               | `2.0.5`      | 高风险，只做可验证子问题 |
-| Druid               | `1.2.28`     | 暂不优先动               |
-| Calcite             | 现网主链依赖 | 高风险，先审计和补用例   |
+| 项目                | 当前基线   | 判断                     |
+| ------------------- | ---------- | ------------------------ |
+| Java                | `21`       | 已达硬性目标             |
+| Maven               | `>=3.9`    | 已由 Enforcer 约束       |
+| Spring Boot         | `3.5.12`   | 当前主链稳定             |
+| Spring Cloud        | `2025.0.1` | 与 Boot 3.5 配套         |
+| MyBatis Spring Boot | `3.0.4`    | 已适配 Boot 3            |
+| GraalJS             | `25.0.1`   | 已替代 Nashorn 主链      |
+| Springdoc           | `2.8.17`   | 已适配 Boot 3            |
+| H2                  | `2.4.240`  | 已升级                   |
+| Selenium            | `4.31.0`   | 已升级                   |
+| Shiro               | `2.0.5`    | 高风险，只做可验证子问题 |
+| Druid               | `1.2.28`   | 暂不优先动               |
+| Calcite             | 现网主链   | 高风险，先审计和补用例   |
 
 ### 2.3 前端基线
 
@@ -101,7 +108,9 @@ git rev-list --left-right --count origin/main...HEAD
 | flexlayout-react  | `0.5.21`   | 当前小版本已收口         |
 | react-grid-layout | `1.3.4`    | 当前小版本已收口         |
 
-### 2.4 已完成的阶段成果
+## 3. 阶段复盘
+
+### 3.1 已建立的主链
 
 - 项目已从 datart 独立为 `yu-bi`
 - README、NOTICE、SECURITY、ROADMAP、CHANGELOG、issue template 等治理文档已完成独立项目表述
@@ -113,203 +122,137 @@ git rev-list --left-right --count origin/main...HEAD
 - GitHub Actions 主线门禁已切到 `main`
 - 安装包闭环验证已打通，`yu-bi-server-*.zip` 可解压，demo 健康检查脚本可通过真实端口环境验证
 
-## 3. 已完成专题复盘
+### 3.2 已完成的改造专题
 
-### 3.1 依赖与工程链
+| 专题                         | 状态     | 结果                                                     |
+| ---------------------------- | -------- | -------------------------------------------------------- |
+| 依赖与工程链                 | 已完成   | 清理未使用依赖，收口声明与锁文件，移除 CRA/CRACO 主链    |
+| 运行时加载与兜底             | 已完成   | 懒加载失败清空缓存 Promise，调用层补齐失败兜底           |
+| 时间体系                     | 已完成   | 当前时间入口统一到 `getDatartNow()` 等工具               |
+| 富文本兼容层                 | 阶段完成 | `react-quill 2` 已在用，内容解析和运行时就绪态已补强     |
+| Dashboard / Widget 内容协议  | 阶段完成 | `WidgetConf.content`、参数、权限、迁移链路已分批收口     |
+| 图表 / 查询运行时边界        | 阶段完成 | 事件行数据、实例、请求参数、变量参数、查询 rows 已收口   |
+| FormGenerator / 交互配置边界 | 阶段完成 | 关系编辑、规则构造、规则回调协议已收口，定向测试已补齐   |
 
-- 清理未使用依赖，例如 `@antv/g2`、`html2canvas`
-- `react-resizable`、`flexlayout-react`、`react-grid-layout` 等声明与锁文件已收口
-- `react-dev-inspector` 已从开发态接入中移除
-- Ant Design / rc 历史深路径类型入口已清零
-- Monaco 静态类型导入切到包根入口，运行时懒加载路径保留
+### 3.3 当前分支已完成批次
 
-### 3.2 运行时加载与兜底
+| 提交       | 批次                         | 关键内容                                             | 验证摘要             |
+| ---------- | ---------------------------- | ---------------------------------------------------- | -------------------- |
+| `64d62d771` | FormGenerator 交互配置边界   | FormGenerator 泛型、context、配置行守卫、规则写回    | `checkTs` + 定向测试 |
+| `bd633990a` | FormGenerator 关系编辑边界   | `relationUtils`、关系数组增删改、事件切换 bug 修正   | `checkTs` + 定向测试 |
+| `9599cc59f` | FormGenerator 交互规则构造   | ViewDetail / Jump 规则构造函数与构造语义测试         | `checkTs` + 定向测试 |
+| `7083dae3f` | FormGenerator 交互规则回调   | `InteractionRuleChange` 泛型回调协议，规则值映射收口 | `checkTs`            |
 
-- ECharts、WordCloud、Split、React Window、Reveal、Monaco、SQL formatter 等懒加载失败后清空缓存 Promise，支持重试
-- 运行时加载调用层补齐失败兜底，减少未处理 Promise
-- 富文本、Reveal、Monaco 等真实运行时依赖已建立局部 runtime 封装
+本阶段结论：
 
-### 3.3 时间体系
+- FormGenerator P0 弱类型边界已基本清空
+- 剩余 `unknown` 主要是默认泛型、翻译 options 和通用 value 入口，暂不作为同类弱类型问题继续消耗
+- 下一阶段应转入图表筛选值协议，而不是继续在 FormGenerator 内做低收益扫尾
 
-- 当前时间入口统一到 `getDatartNow()` / `getDatartNowMillis()` / `formatCurrentDatartDate()`
-- 图表筛选默认时间、分享过期时间、区间默认值、迁移链路等已逐步收口
-- 日期工具补齐 `Dayjs` / `Date` 输入的稳定转换语义
+### 3.4 正在进行的未提交批次
 
-### 3.4 富文本
+批次：`ChartFilterCondition.value` 公共协议收口
 
-- `react-quill 2` 已在用
-- 内容解析、Delta 归一化、运行时就绪态、字段引用、图片插入、模块销毁、运行时重试均已补强
-- 富文本仍属中风险链路，后续只做可验证稳定化，不整体替换
+已开始修改：
 
-### 3.5 Dashboard / 图表 / 查询链路
+- `frontend/src/app/models/ChartFilterCondition.ts`
+- `frontend/src/app/models/__tests__/ChartFilterCondition.test.ts`
+- `frontend/src/app/types/ChartConfig.ts`
 
-- Dashboard widget 内容协议已完成第一阶段收口
-- `WidgetConf.content` 从裸 `any` 收口为兼容结构，`WidgetCreateProps.content` 改为 `unknown`
-- 新增 chart / controller / tab 内容守卫，消费点改为先守卫再读取
-- Dashboard permissions、WidgetInfo parameters 等弱类型边界已收紧
-- 图表事件行数据、ECharts 实例、BasicTable、地图、分享链路、请求参数、变量参数等多个运行时边界已收口
-- View config / model / detail / columnPermission 消费链补齐安全解析
-- 数据源配置坏 JSON 回退到默认图标或空配置
-- QueryResult rows 已从 `any[][]` 收口为查询结果标量二维数组
+本批目标：
 
-### 3.6 当前分支已完成批次
+- 将 `ChartFilterCondition.value` 从宽松值收口为显式公共协议
+- 将 `operator`、`relation value`、`ConditionBuilder` 写回入口补齐类型
+- 在消费点补值守卫和归一化 helper，避免大面积 `as`
+- 保持现有筛选 UI 行为不变
 
-未提交批次：
+当前判断：
 
-- FormGenerator 交互规则回调边界：
-  - 新增共享 `InteractionRuleChange` 泛型回调类型
-  - `RuleList` / `DrillThroughPanel` 共用同一规则回调协议，避免子组件继续使用宽泛 union 值
-  - P1 范围复扫已完成，当前残留 `unknown` 主要是 FormGenerator 默认泛型、翻译 options 和通用 value 入口，暂不作为弱类型问题处理
+- `ChartFilterCondition.value` 可以继续推进，属于中等风险但调用面可验证
+- `ChartDataSetDTO.rows` 影响全图表运行时，本轮只做梳理和记录，暂不直接改为新泛型协议
 
-验证已通过：
+## 4. 下一步执行队列
 
-```bash
-npm run checkTs
+### 4.1 当前批次 P0
+
+继续在 `codex/modernization-compatible-boundaries` 上完成 `ChartFilterCondition.value`：
+
+1. 在模型层或局部 helper 中增加筛选值守卫：
+   - `isFilterRelationValue`
+   - `toFilterRelationValue`
+   - `isRelationFilterValue`
+   - `isRelationFilterValues`
+   - `toNumberFilterValues`
+   - `toStringInputValue`
+   - 必要时增加 `isFilterConditionValue`
+2. 修复 `npm run checkTs` 暴露的筛选消费点：
+   - `ChartDrillOption.ts`
+   - `ArrangeFilterAction.tsx`
+   - `RelationTypeFilter.tsx`
+   - `SingleFilterRow.tsx`
+   - `CategoryConditionRelationSelector.tsx`
+   - `FilterFacadeConfiguration.tsx`
+   - `ValueConditionConfiguration.tsx`
+3. 补齐或更新定向测试：
+   - `frontend/src/app/models/__tests__/ChartFilterCondition.test.ts`
+   - 相关筛选工具测试
+4. 通过轻量验证后再提交：
+   - `npm run checkTs`
+   - `npm run test:ci -- <related test files>`
+
+建议提交信息：
+
+```text
+chore: 收口 ChartFilterCondition 值协议边界
 ```
 
-提交：`9599cc59f chore: 收口 FormGenerator 交互规则构造边界`
+### 4.2 当前分支后续 P1
 
-已完成：
+完成当前批次后，继续在同一分支推进以下可控项，不立即切新分支：
 
-- FormGenerator 交互规则构造边界：
-  - `ViewDetailPanel` 自定义字段写回改为显式构造，清空字段时稳定写回空数组
-  - `JumpToChart` / `JumpToDashboard` / `JumpToUrl` 统一使用规则构造函数写回 `customize` 关系数组
-  - `JumpToUrl` URL 与关系数组写回共享同一构造路径，减少旧 `value` 快照穿透
-  - 新增 `interactionRuleBuilders.test.ts` 固定 ViewDetail 与 Jump 规则构造语义
-  - 当前 Interaction 目录 P0 扫描项已清空
+| 专题                         | 下一步                                           | 风险 |
+| ---------------------------- | ------------------------------------------------ | ---- |
+| 图表筛选值协议               | 复扫筛选 UI、下钻、联动参数写回                 | 中   |
+| 图表 helper 类型边界         | 选择已有测试覆盖的 helper 做小批收口            | 中   |
+| 时间体系剩余调用点           | 复扫零散原生时间调用                            | 低   |
+| 前端公开类型入口             | 防止 Ant Design / rc 深路径类型入口回退         | 低   |
+| 安装健康度                   | 防止锁文件与 package 声明漂移                   | 低   |
 
-验证已通过：
-
-```bash
-npm run checkTs
-npm run test:ci -- src/app/components/FormGenerator/__tests__/interactionRuleBuilders.test.ts src/app/components/FormGenerator/__tests__/interactionRelationUtils.test.ts src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx
-git diff --check
-```
-
-提交：`bd633990a chore: 收口 FormGenerator 关系编辑边界`
-
-已完成：
-
-- FormGenerator 交互关系编辑边界：
-  - 新增 `relationUtils`，统一关系数组归一、新增、删除、字段更新和类型切换逻辑
-  - `ControllerList` / `UrlParamList` / `ChartRelationList` / `BoardRelationList` 移除重复 `updateBy(relations)` 与非空断言
-  - `CrossFilteringRuleList` 默认规则改为显式完整对象，补齐空 `customize` 关系数组
-  - `DrillThroughPanel` / `CrossFilteringPanel` 规则写回改为不可变 `map` 更新
-  - 修正 CrossFiltering 事件切换时本地状态仍写回旧事件的问题
-  - 新增 `interactionRelationUtils.test.ts` 固定关系编辑语义
-
-验证已通过：
-
-```bash
-npm run checkTs
-npm run test:ci -- src/app/components/FormGenerator/__tests__/interactionRelationUtils.test.ts src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx
-git diff --check
-```
-
-提交：`64d62d771 chore: 收口 FormGenerator 交互配置边界`
-
-已完成：
-
-- `ItemLayoutProps` / `FormGeneratorLayoutProps` 从全局 `any` 改为显式 `FormGeneratorValue` 和泛型 `context`
-- `useDebouncedFormValue` 补齐泛型返回 tuple
-- 交互面板、条件样式面板、指标卡条件样式面板补齐局部 `context` 类型
-- `ChartStyleConfigPanel`、`BoardConfigPanel`、`WidgetConfigPanel` 增加配置行守卫
-- `CrossFilteringRuleList.onRuleChange` 改为按 `CrossFilteringInteractionRule` 键值映射约束
-- CrossFiltering 自定义关系写回时把空输入归一为空数组
-- `RuleList` 按 `JumpToChart` / `JumpToDashboard` / `JumpToUrl` 三类规则分别写回
-- `JumpToChart` / `JumpToDashboard` 的规则更新改为显式对象构造，去掉 `as JumpTo...Rule` 桥接
-
-验证已通过：
-
-```bash
-npm run checkTs
-npm run test:ci -- src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/components/FormGenerator/__tests__/BasicCheckbox.test.jsx src/app/components/FormGenerator/__tests__/BasicColorSelector.test.jsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts
-npm run test:ci -- src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx
-npm run test:ci -- src/app/components/FormGenerator/__tests__/utils.test.tsx src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx
-```
-
-## 4. 风险分层
-
-### 4.1 可持续推进
-
-| 专题                         | 下一步                                                       |
-| ---------------------------- | ------------------------------------------------------------ |
-| FormGenerator / 交互配置边界 | 继续按 CrossFiltering / DrillThrough / ViewDetail 子链路收口 |
-| 前端局部类型边界             | 按调用链推进，优先处理 `unknown` 入口和 `any` 消费点         |
-| 时间体系剩余调用点           | 复扫零散原生时间调用                                         |
-| 前端公开类型入口             | 防止 Ant Design / rc 深路径类型入口回退                      |
-| 安装健康度                   | 防止锁文件与 package 声明漂移                                |
-
-### 4.2 中风险，可同步处理但必须有验证
-
-| 专题                                          | 风险                       | 策略                                           |
-| --------------------------------------------- | -------------------------- | ---------------------------------------------- |
-| 富文本兼容层                                  | 编辑态、只读态、分享态回归 | 只做小步稳定化，每步配富文本定向测试           |
-| 图表运行时类型边界                            | 渲染、事件、分页排序回归   | 先收口 helper 与事件 payload，再补图表定向测试 |
-| Dashboard widget 内容协议                     | 多类 widget 与迁移链路耦合 | 按 widget 类型分批，避免一次性改协议           |
-| react-window / flexlayout / react-grid-layout | 真实运行时链路             | 不盲目替换，优先包兼容边界和异常兜底           |
-| Docker / 安装包闭环                           | 交付结构与启动链           | 涉及时跑安装包验证                             |
-
-### 4.3 高风险，只做可控子问题
+### 4.3 暂缓或只做审计
 
 | 专题                  | 暂不做                                  | 可做                               |
 | --------------------- | --------------------------------------- | ---------------------------------- |
+| `ChartDataSetDTO.rows` | 不直接改全图表 rows 协议                | 记录调用面、补运行时用例、选子链路 |
 | Shiro                 | 不整体迁移认证授权                      | 依赖健康度、兼容验证、最小认证用例 |
 | Calcite               | 不整体升级或替换 SQL 解析链             | 版本约束、SQL 解析用例、边界审计   |
 | 数据源 / 脚本深层架构 | 不整体重构 provider / 方言 / 脚本运行时 | 配置解析、异常兜底、测试覆盖       |
 | 内部命名与稳定标识    | 不做包名、配置前缀、迁移标识重构        | 仅继续收口对外品牌元数据           |
 
-## 5. 下一步执行队列
+## 5. 验证策略
 
-### 5.1 当前分支继续推进
+### 5.1 开发期轻量验证
 
-继续在 `codex/modernization-compatible-boundaries` 上累计，不切新分支，不合 `main`。
-
-P2：
-
-1. 梳理 `ChartFilterCondition.value` 公共协议
-2. 梳理 `ChartDataSetDTO.rows` 泛型边界
-3. 选择已有测试覆盖的图表 helper 做下一批收口
-
-### 5.2 进入下一专题的条件
-
-满足以下条件后，再考虑合回 `main` 或切新专题：
-
-- 当前 FormGenerator / 交互配置边界 P0 已完成
-- 当前分支没有明显散落的同链路强转
-- `npm run checkTs` 通过
-- 相关 FormGenerator / Dashboard 定向测试通过
-- 文档记录本批改动和验证
-
-合回 `main` 前必须再跑完整门禁。
-
-## 6. 执行方法
-
-### 6.1 每轮开始检查
-
-```bash
-git status --short --branch
-git log --oneline --decorate -8
-git rev-list --left-right --count origin/main...HEAD
-```
-
-判断：
-
-- 当前分支不能是 `main`
-- 当前改动必须属于当前专题
-- 不能触碰禁止重构标识
-- 如果 `main` 已前进，先判断是否需要同步；不为小改动频繁合并
-
-### 6.2 开发期验证
-
-日常前端改造默认轻量验证：
+日常前端改造默认执行：
 
 ```bash
 npm run checkTs
 npm run test:ci -- <related test files>
 ```
 
-触发更强验证的条件：
+当前 `ChartFilterCondition.value` 批次优先执行：
+
+```bash
+npm run checkTs
+npm run test:ci -- src/app/models/__tests__/ChartFilterCondition.test.ts
+```
+
+如果改到筛选 UI 或时间筛选工具，再补跑：
+
+```bash
+npm run test:ci -- src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/__tests__/utils.test.ts
+```
+
+### 5.2 触发更强验证的条件
 
 - 依赖、构建配置、路由入口、运行时加载、共享模型、迁移链路变化
 - 定向测试覆盖不足
@@ -324,14 +267,15 @@ npm run lint:css
 npm run lint:style
 ```
 
-### 6.3 提交与推送节奏
+推送 `main` 前不跳过完整门禁。
 
-- 当前专题内可以多改一点再提交
-- 不因单个小文件改动立即提交
+## 6. 提交与合并节奏
+
+- 当前专题内可以多改一点再提交，不因单个小文件改动立即提交
 - 每次提交前更新本文档的阶段记录和验证记录
 - 专题分支可以推送远端
 - 合回 `main` 使用 `git merge --no-ff <branch>`
-- 推送 `main` 前不跳过完整门禁
+- 合回 `main` 后再推送主线
 
 推荐提交粒度：
 
