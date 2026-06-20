@@ -18,7 +18,10 @@
 
 import { DataViewFieldType } from 'app/constants';
 import { ChartDataSectionField } from 'app/types/ChartConfig';
-import { IChartDataSet } from 'app/types/ChartDataSet';
+import {
+  ChartDataSetCellValue,
+  IChartDataSet,
+} from 'app/types/ChartDataSet';
 import { getMinAndMaxNumber, transformToDataSet } from 'app/utils/chartHelper';
 import { getYAxisIntervalConfig } from '../utils';
 
@@ -43,16 +46,12 @@ const createRows = (): ChartDataSectionField[] => [
 const createChartDataSet = (
   columns: Array<Array<string | number | null | undefined>>,
   rows: ChartDataSectionField[],
-): IChartDataSet<string | number | null | undefined> =>
+): IChartDataSet<ChartDataSetCellValue> =>
   transformToDataSet(
     columns,
     [{ name: 'name' }, { name: 'age' }, { name: 'number' }],
     [{ key: 'metrics', rows }],
   );
-
-const asStringDataSet = (
-  chartDataSet: IChartDataSet<string | number | null | undefined>,
-): IChartDataSet<string> => chartDataSet as IChartDataSet<string>;
 
 describe('DoubleYChart calc medthod', () => {
   describe('getYAxisIntervalConfig Test - ', () => {
@@ -64,7 +63,7 @@ describe('DoubleYChart calc medthod', () => {
         ['john', '32', '324'],
       ];
       const rows = createRows();
-      const chartDataSet = asStringDataSet(createChartDataSet(columns, rows));
+      const chartDataSet = createChartDataSet(columns, rows);
       expect(getMinAndMaxNumber([rows[1]], chartDataSet)).toEqual([0, 36]);
       expect(getMinAndMaxNumber([rows[2]], chartDataSet)).toEqual([0, 3587]);
       expect(
@@ -87,7 +86,7 @@ describe('DoubleYChart calc medthod', () => {
         ['john', 32, 324],
       ];
       const rows = createRows();
-      const chartDataSet = asStringDataSet(createChartDataSet(columns, rows));
+      const chartDataSet = createChartDataSet(columns, rows);
       expect(getMinAndMaxNumber([rows[1]], chartDataSet)).toEqual([0, 36]);
       expect(getMinAndMaxNumber([rows[2]], chartDataSet)).toEqual([0, 3587]);
       expect(
@@ -110,7 +109,7 @@ describe('DoubleYChart calc medthod', () => {
         ['john', -98, 95],
       ];
       const rows = createRows();
-      const chartDataSet = asStringDataSet(createChartDataSet(columns, rows));
+      const chartDataSet = createChartDataSet(columns, rows);
       expect(getMinAndMaxNumber([rows[1]], chartDataSet)).toEqual([-102, 0]);
       expect(getMinAndMaxNumber([rows[2]], chartDataSet)).toEqual([0, 105]);
       expect(
@@ -133,7 +132,7 @@ describe('DoubleYChart calc medthod', () => {
         ['john', -98, 95],
       ];
       const rows = createRows();
-      const chartDataSet = asStringDataSet(createChartDataSet(columns, rows));
+      const chartDataSet = createChartDataSet(columns, rows);
       expect(getMinAndMaxNumber([rows[1]], chartDataSet)).toEqual([-102, 0]);
       expect(getMinAndMaxNumber([rows[2]], chartDataSet)).toEqual([0, 102]);
       expect(
@@ -156,7 +155,7 @@ describe('DoubleYChart calc medthod', () => {
         ['john', -98, 95],
       ];
       const rows = createRows();
-      const chartDataSet = asStringDataSet(createChartDataSet(columns, rows));
+      const chartDataSet = createChartDataSet(columns, rows);
       expect(getMinAndMaxNumber([rows[1]], chartDataSet)).toEqual([-102, 0]);
       expect(getMinAndMaxNumber([rows[2]], chartDataSet)).toEqual([0, 102]);
       expect(
@@ -179,7 +178,7 @@ describe('DoubleYChart calc medthod', () => {
         ['john', -98, 95],
       ];
       const rows = createRows();
-      const chartDataSet = asStringDataSet(createChartDataSet(columns, rows));
+      const chartDataSet = createChartDataSet(columns, rows);
       expect(getMinAndMaxNumber([rows[1]], chartDataSet)).toEqual([-102, 0]);
       expect(getMinAndMaxNumber([rows[2]], chartDataSet)).toEqual([0, 102]);
       expect(
@@ -201,7 +200,7 @@ describe('DoubleYChart calc medthod', () => {
         ['john', undefined, undefined],
       ];
       const rows = createRows();
-      const chartDataSet = asStringDataSet(createChartDataSet(columns, rows));
+      const chartDataSet = createChartDataSet(columns, rows);
       expect(getMinAndMaxNumber([rows[1]], chartDataSet)).toEqual([0, 0]);
       expect(getMinAndMaxNumber([rows[2]], chartDataSet)).toEqual([0, 0]);
       expect(

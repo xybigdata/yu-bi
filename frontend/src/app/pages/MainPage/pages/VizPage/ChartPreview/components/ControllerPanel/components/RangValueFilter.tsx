@@ -21,14 +21,12 @@ import { updateBy } from 'app/utils/mutation';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
 import { PresentControllerFilterProps } from '.';
+import { getNumberRangeValue } from './filterValueUtils';
 
 const RangValueFilter: FC<PresentControllerFilterProps> = memo(
   ({ condition, onConditionChange }) => {
     const [valueRange, setValueRange] = useState<[number, number] | []>(() => {
-      if (Array.isArray(condition?.value)) {
-        return condition?.value as [number, number];
-      }
-      return [];
+      return getNumberRangeValue(condition?.value) || [];
     });
 
     const handleValueChange = index => value => {
@@ -39,7 +37,7 @@ const RangValueFilter: FC<PresentControllerFilterProps> = memo(
       });
 
       onConditionChange(newCondition);
-      setValueRange(newCondition.value as [number, number]);
+      setValueRange(getNumberRangeValue(newCondition.value) || []);
     };
 
     return (

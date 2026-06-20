@@ -17,6 +17,7 @@
  */
 
 import { Input } from 'antd';
+import type { InputProps } from 'antd';
 import useDebouncedFormValue from 'app/hooks/useDebouncedFormValue';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo, useCallback } from 'react';
@@ -51,7 +52,7 @@ const BasicInput: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
         <Input
           className="datart-ant-input"
           {...inputOptions}
-          value={formValue}
+          value={formValue as InputProps['value']}
           disabled={data.disabled}
           onChange={inputOnChange}
           defaultValue={data?.default}

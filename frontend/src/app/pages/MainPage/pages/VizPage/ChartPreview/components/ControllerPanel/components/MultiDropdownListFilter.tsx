@@ -23,13 +23,16 @@ import { RelationFilterValue } from 'app/types/ChartConfig';
 import { updateBy } from 'app/utils/mutation';
 import { FC, memo, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { IsKeyIn } from 'utils/object';
 import { PresentControllerFilterProps } from '.';
+import {
+  getRelationFilterValues,
+  getSelectedRelationKeys,
+} from './filterValueUtils';
 
 const MultiDropdownListFilter: FC<PresentControllerFilterProps> = memo(
   ({ viewId, view, condition, executeToken, onConditionChange }) => {
     const [originalNodes, setOriginalNodes] = useState<RelationFilterValue[]>(
-      condition?.value as RelationFilterValue[],
+      getRelationFilterValues(condition?.value),
     );
 
     useFetchFilterDataByCondition(
@@ -57,22 +60,7 @@ const MultiDropdownListFilter: FC<PresentControllerFilterProps> = memo(
         onConditionChange(newCondition);
       };
     const selectedNodes = useMemo(() => {
-      if (Array.isArray(condition?.value)) {
-        const item = condition?.value?.[0];
-        if (typeof item === 'object') {
-          const firstValues =
-            (condition?.value as [])?.filter(n => {
-              if (IsKeyIn(n as RelationFilterValue, 'key')) {
-                return (n as RelationFilterValue).isSelected;
-              }
-              return false;
-            }) || [];
-          return firstValues?.map((n: RelationFilterValue) => n.key);
-        } else {
-          return condition?.value || [];
-        }
-      }
-      return [];
+      return getSelectedRelationKeys(condition?.value);
     }, [condition]);
     return (
       <StyledMultiDropdownListFilter

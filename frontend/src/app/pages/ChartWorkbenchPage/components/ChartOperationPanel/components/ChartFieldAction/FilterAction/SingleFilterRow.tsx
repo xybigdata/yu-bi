@@ -20,6 +20,7 @@ import { InputNumber, Select, Space } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import ChartFilterCondition, {
   ConditionBuilder,
+  toNumberFilterValues,
 } from 'app/models/ChartFilterCondition';
 import { FilterSqlOperator } from 'globalConstants';
 import { FC, memo, useState } from 'react';
@@ -54,7 +55,9 @@ const SingleFilter: FC<{
     const [operator, setOperator] = useState<string | undefined>(
       condition?.operator || operators[0],
     );
-    const [inputValue, setInputValue] = useState<number[]>(condition?.value);
+    const [inputValue, setInputValue] = useState(() =>
+      toNumberFilterValues(condition?.value),
+    );
 
     const handleOnChange = (operator, inputValue) => {
       setOperator(operator);

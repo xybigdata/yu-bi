@@ -26,9 +26,14 @@ import { uuidv4 } from 'utils/utils';
 import { ItemLayoutProps } from '../../types';
 import { itemLayoutComparer } from '../../utils';
 import AddModal from './add';
-import { ConditionalStyleFormValues } from './types';
+import {
+  ConditionalStyleContext,
+  ConditionalStyleFormValues,
+} from './types';
 
-const ConditionalStyle: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
+const ConditionalStyle: FC<
+  ItemLayoutProps<ChartStyleConfig, ChartStyleConfig, ConditionalStyleContext>
+> = memo(
   ({
     ancestors,
     translate: t = title => title,

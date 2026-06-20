@@ -70,8 +70,11 @@ import {
   WidgetBorder,
   YAxisNumberFormatPanel,
 } from '../Customize';
-import { FormGeneratorLayoutProps } from '../types';
+import { FormGeneratorLayoutProps, FormGeneratorValue } from '../types';
 import { groupLayoutComparer, invokeDependencyWatcher } from '../utils';
+import { ConditionalStyleContext } from '../Customize/ConditionalStyle/types';
+import { InteractionPanelContext } from '../Customize/Interaction/types';
+import { ScorecardConditionalStyleContext } from '../Customize/ScorecardConditionalStyle/types';
 
 const PERMIT_COMPONENT_PROPS = ['disabled'];
 
@@ -118,7 +121,7 @@ const ItemLayout: FC<FormGeneratorLayoutProps<ChartStyleConfig>> = memo(
 
     const handleDataChange = (
       ancestors: number[],
-      value: string | number | ChartStyleSectionRow | null | undefined,
+      value: FormGeneratorValue | ChartStyleSectionRow,
       needRefresh?: boolean,
     ) => {
       const newRow = isChartConfigRow(value)
@@ -135,6 +138,18 @@ const ItemLayout: FC<FormGeneratorLayoutProps<ChartStyleConfig>> = memo(
         onChange: handleDataChange,
         dataConfigs,
         context,
+      };
+      const conditionalStyleProps = {
+        ...props,
+        context: context as ConditionalStyleContext | undefined,
+      };
+      const scorecardConditionalStyleProps = {
+        ...props,
+        context: context as ScorecardConditionalStyleContext | undefined,
+      };
+      const interactionProps = {
+        ...props,
+        context: context as InteractionPanelContext | undefined,
       };
 
       switch (data.comType) {
@@ -177,7 +192,7 @@ const ItemLayout: FC<FormGeneratorLayoutProps<ChartStyleConfig>> = memo(
         case ChartStyleSectionComponentType.TABLE_HEADER:
           return <UnControlledTableHeaderPanel {...props} />;
         case ChartStyleSectionComponentType.CONDITIONAL_STYLE:
-          return <ConditionalStylePanel {...props} />;
+          return <ConditionalStylePanel {...conditionalStyleProps} />;
         case ChartStyleSectionComponentType.GROUP:
           return <GroupLayout {...props} />;
         case ChartStyleSectionComponentType.TEXT:
@@ -195,7 +210,11 @@ const ItemLayout: FC<FormGeneratorLayoutProps<ChartStyleConfig>> = memo(
         case ChartStyleSectionComponentType.LEGEND_POSITION:
           return <LegendPosition {...props} />;
         case ChartStyleSectionComponentType.SCORECARD_CONDITIONAL_STYLE:
-          return <ScorecardConditionalStylePanel {...props} />;
+          return (
+            <ScorecardConditionalStylePanel
+              {...scorecardConditionalStyleProps}
+            />
+          );
         case ChartStyleSectionComponentType.PIVOT_SHEET_THEME:
           return <PivotSheetTheme {...props} />;
         case ChartStyleSectionComponentType.BACKGROUND:
@@ -207,11 +226,11 @@ const ItemLayout: FC<FormGeneratorLayoutProps<ChartStyleConfig>> = memo(
         case ChartStyleSectionComponentType.CHECKBOX_MODAL:
           return <CheckboxModal {...props} />;
         case ChartStyleSectionComponentType.INTERACTION_DRILL_THROUGH_PANEL:
-          return <DrillThroughPanel {...props} />;
+          return <DrillThroughPanel {...interactionProps} />;
         case ChartStyleSectionComponentType.INTERACTION_CROSS_FILTERING:
-          return <CrossFilteringPanel {...props} />;
+          return <CrossFilteringPanel {...interactionProps} />;
         case ChartStyleSectionComponentType.INTERACTION_VIEW_DETAIL_PANEL:
-          return <ViewDetailPanel {...props} />;
+          return <ViewDetailPanel {...interactionProps} />;
         case ChartStyleSectionComponentType.DATA_ZOOM_PANEL:
           return <DataZoomPanel {...props} />;
         case ChartStyleSectionComponentType.Y_AXIS_NUMBER_FORMAT_PANEL:

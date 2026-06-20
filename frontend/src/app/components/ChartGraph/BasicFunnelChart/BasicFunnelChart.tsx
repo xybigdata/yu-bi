@@ -29,6 +29,7 @@ import {
   SelectedItem,
 } from 'app/types/ChartConfig';
 import ChartDataSetDTO, {
+  ChartDataSetCellValue,
   IChartDataSet,
   IChartDataSetRow,
 } from 'app/types/ChartDataSet';
@@ -52,7 +53,7 @@ import Config from './config';
 import { Series, SeriesData } from './types';
 
 const getNumericCellValue = (
-  row: IChartDataSetRow<string> | undefined,
+  row: IChartDataSetRow<ChartDataSetCellValue> | undefined,
   field: ChartDataSectionField | undefined,
 ) => Number(field ? row?.getCell(field) : undefined);
 
@@ -261,7 +262,7 @@ class BasicFunnelChart extends Chart {
   private getDataItemStyle(
     config: ChartDataSectionField,
     colorConfigs: ChartDataSectionField[],
-    chartDataSetRow: IChartDataSetRow<string>,
+    chartDataSetRow: IChartDataSetRow<ChartDataSetCellValue>,
   ): { color: string | undefined } | undefined {
     const colorColConfig = colorConfigs?.[0];
     const columnColor = config?.color?.start;
@@ -375,7 +376,7 @@ class BasicFunnelChart extends Chart {
     styles: ChartStyleConfig[],
     aggregateConfigs: ChartDataSectionField[],
     groupConfigs: ChartDataSectionField[],
-    dataList: IChartDataSet<string>,
+    dataList: IChartDataSet<ChartDataSetCellValue>,
     infoConfigs: ChartDataSectionField[],
     selectedItems?: SelectedItem[],
   ): Series {

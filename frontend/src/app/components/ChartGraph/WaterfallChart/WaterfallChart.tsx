@@ -32,7 +32,10 @@ import {
   YAxis,
 } from 'app/types/ChartConfig';
 import { ChartRowData } from 'app/types/Chart';
-import ChartDataSetDTO, { IChartDataSet } from 'app/types/ChartDataSet';
+import ChartDataSetDTO, {
+  ChartDataSetCellValue,
+  IChartDataSet,
+} from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
   getColumnRenderName,
@@ -267,7 +270,7 @@ class WaterfallChart extends Chart {
 
   private getSeries(
     styles: ChartStyleConfig[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
     aggregateConfigs: ChartDataSectionField[],
     group: ChartDataSectionField[],
     t?: I18NTranslate,
@@ -276,7 +279,9 @@ class WaterfallChart extends Chart {
     const xAxisColumns: XAxisColumns = {
       type: 'category',
       tooltip: { show: true },
-      data: UniqArray(chartDataSet.map(dc => dc.getCell(group[0]))),
+      data: UniqArray(
+        chartDataSet.map(dc => String(dc.getCell(group[0]) ?? '')),
+      ),
     };
     const yAxisNames: string[] = aggregateConfigs.map(getColumnRenderName);
     const [isIncrement, ascendColor, descendColor] = getStyles(
@@ -408,7 +413,7 @@ class WaterfallChart extends Chart {
 
   private getDataList(
     isIncrement: boolean,
-    dataList: string[],
+    dataList: ChartDataSetCellValue[],
     xAxisColumns: XAxisColumns,
     styles: ChartStyleConfig[],
     t?: I18NTranslate,
@@ -494,7 +499,7 @@ class WaterfallChart extends Chart {
     if (isIncrement && xAxisColumns?.data?.length) {
       xAxisColumns.data.push(t?.('common.total') || '');
       const resultData = precisionCalculation(CalculationType.ADD, [
-        dataList[dataList.length - 1],
+        toSafeNumber(dataList[dataList.length - 1]),
         baseData[baseData.length - 1],
       ]);
       if (resultData > 0) {

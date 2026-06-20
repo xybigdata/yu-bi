@@ -22,7 +22,10 @@ import {
   ChartDataSectionField,
   ChartStyleConfig,
 } from 'app/types/ChartConfig';
-import ChartDataSetDTO, { IChartDataSet } from 'app/types/ChartDataSet';
+import ChartDataSetDTO, {
+  ChartDataSetCellValue,
+  IChartDataSet,
+} from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
   getColumnRenderName,
@@ -212,7 +215,7 @@ class BasicGaugeChart extends Chart {
 
   private getSeries(
     styleConfigs: ChartStyleConfig[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
     aggConfig: ChartDataSectionField,
   ): SeriesConfig {
     const detail = this.getDetail(styleConfigs, aggConfig);

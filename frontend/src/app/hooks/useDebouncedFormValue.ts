@@ -27,17 +27,17 @@ export default function useDebouncedFormValue<T>(
     delay: number;
   },
   onChange?: (ancestors: number[], value: T, needRefresh?: boolean) => void,
-) {
+): [T, (newValue: T) => void] {
   const [cachedValue, setCachedValue] = useState(initValue);
 
-  const valueChange = newValue => {
+  const valueChange = (newValue: T) => {
     setCachedValue(newValue);
     debouncedValueChange(newValue);
   };
 
   const debouncedValueChange = useMemo(
     () =>
-      debounce(newValue => {
+      debounce((newValue: T) => {
         onChange?.(options.ancestors, newValue, options?.needRefresh);
       }, options.delay),
     [options.ancestors, options.delay, onChange, options?.needRefresh],

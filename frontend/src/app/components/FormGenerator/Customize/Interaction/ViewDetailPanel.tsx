@@ -16,17 +16,29 @@
  * limitations under the License.
  */
 
-import { Form, Radio, Select, Space } from 'antd';
+import { Form, Radio, RadioChangeEvent, Select, Space } from 'antd';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
-import { isEmptyArray } from 'utils/object';
 import { InteractionFieldMapper, InteractionMouseEvent } from '../../constants';
 import { ItemLayoutProps } from '../../types';
 import { itemLayoutComparer } from '../../utils';
-import { ViewDetailSetting } from './types';
+import { InteractionPanelContext, ViewDetailSetting } from './types';
 
-const ViewDetailPanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
+export const buildViewDetailSetting = (
+  event: InteractionMouseEvent,
+  mapper: ViewDetailSetting['mapper'],
+  customFields: string[],
+): ViewDetailSetting => ({
+  event,
+  mapper,
+  [InteractionFieldMapper.Customize]:
+    mapper === InteractionFieldMapper.Customize ? customFields : [],
+});
+
+const ViewDetailPanel: FC<
+  ItemLayoutProps<ChartStyleConfig, ViewDetailSetting, InteractionPanelContext>
+> = memo(
   ({ ancestors, translate: t = title => title, data, context, onChange }) => {
     const [event, setEvent] = useState<ViewDetailSetting['event']>(
       data.value?.event || InteractionMouseEvent.Left,
@@ -38,38 +50,41 @@ const ViewDetailPanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       data?.value?.[InteractionFieldMapper.Customize] || [],
     );
 
-    const handleViewDetailEventChange = e => {
+    const handleViewDetailEventChange = (e: RadioChangeEvent) => {
       const event = e.target.value;
       handleViewDetailSettingChange(event);
     };
 
-    const handleViewDetailMapperChange = e => {
+    const handleViewDetailMapperChange = (e: RadioChangeEvent) => {
       const mapper = e.target.value;
       handleViewDetailSettingChange(undefined, mapper);
     };
 
-    const handleViewDetailCustomFieldsChange = values => {
+    const handleViewDetailCustomFieldsChange = (values: string[]) => {
       handleViewDetailSettingChange(undefined, undefined, values);
     };
 
     const handleViewDetailSettingChange = (
       newEvent?: InteractionMouseEvent,
       newMapper?: InteractionFieldMapper,
-      customFields?: string[],
+      nextCustomFields?: string[],
     ) => {
-      let newSetting: ViewDetailSetting = {
-        event: newEvent || event,
-        mapper: newMapper || mapper,
-        [InteractionFieldMapper.Customize]: customFields,
-      };
+      const finalEvent = newEvent || event;
+      const finalMapper = newMapper || mapper;
+      const finalCustomFields = nextCustomFields || customFields;
+      const newSetting = buildViewDetailSetting(
+        finalEvent,
+        finalMapper,
+        finalCustomFields,
+      );
       if (newEvent) {
         setEvent(newEvent);
       }
       if (newMapper) {
         setMapper(newMapper);
       }
-      if (!isEmptyArray(customFields)) {
-        setCustomFields(customFields!);
+      if (nextCustomFields) {
+        setCustomFields(nextCustomFields);
       }
       onChange?.(ancestors, newSetting, false);
     };

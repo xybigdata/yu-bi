@@ -24,11 +24,12 @@ import {
   FilterConditionType,
 } from 'app/constants';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
-import ChartFilterCondition from 'app/models/ChartFilterCondition';
+import ChartFilterCondition, {
+  isRelationFilterValues,
+} from 'app/models/ChartFilterCondition';
 import { FilterFacade } from 'app/types/ChartConfig';
 import { FC, memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { IsKeyIn } from 'utils/object';
 
 type SliderFacadeConfig = Extract<FilterFacade, { facade: string }> & {
   min?: number | null;
@@ -41,11 +42,9 @@ const isDisableSingleDropdownListFacade = (
   condition?: ChartFilterCondition,
 ) => {
   let isDisableSingleDropdownList = true;
-  if (Array.isArray(condition?.value)) {
-    if (IsKeyIn(condition?.value?.[0], 'key')) {
-      isDisableSingleDropdownList =
-        condition?.value?.filter(n => n.isSelected)?.length > 1;
-    }
+  if (isRelationFilterValues(condition?.value)) {
+    isDisableSingleDropdownList =
+      condition.value.filter(n => n.isSelected).length > 1;
   }
   return isDisableSingleDropdownList;
 };

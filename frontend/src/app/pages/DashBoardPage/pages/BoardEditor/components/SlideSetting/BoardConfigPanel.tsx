@@ -28,6 +28,7 @@ import { ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo, useContext } from 'react';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
+import { isConfigRow } from 'utils/object';
 import { editBoardStackActions } from '../../slice';
 
 const StyledWrapper = styled.div`
@@ -69,6 +70,15 @@ export const BoardConfigCollapse: FC<{
   ) => void;
 }> = memo(({ configs, onChange }) => {
   const t = useI18NPrefix();
+  const handleConfigChange = (
+    ancestors: number[],
+    value: unknown,
+    needRefresh?: boolean,
+  ) => {
+    if (isConfigRow(value)) {
+      onChange(ancestors, value, needRefresh);
+    }
+  };
   const collapseItems = configs
     ?.filter(c => !Boolean(c.hidden))
     .map((c, index) => ({
@@ -85,7 +95,7 @@ export const BoardConfigCollapse: FC<{
           data={c}
           translate={t}
           dataConfigs={[]}
-          onChange={onChange}
+          onChange={handleConfigChange}
         />
       ),
     }));

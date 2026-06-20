@@ -60,6 +60,10 @@ export type ChartDataSetDTO = {
   script?: string;
 };
 
+export type ChartDataSetCellValue = string | number | null | undefined;
+export type ChartDataSetRow = ChartDataSetCellValue[];
+export type ChartDataSetRows = ChartDataSetRow[];
+
 export type ChartDatasetPageInfo = Partial<PageInfo>;
 
 export type ChartDatasetMeta = {

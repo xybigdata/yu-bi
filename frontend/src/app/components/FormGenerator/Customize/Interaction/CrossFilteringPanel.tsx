@@ -16,20 +16,29 @@
  * limitations under the License.
  */
 
-import { Form, Radio, Space } from 'antd';
+import { Form, Radio, RadioChangeEvent, Space } from 'antd';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
-import { updateBy } from 'app/utils/mutation';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
 import { InteractionMouseEvent } from '../../constants';
 import { ItemLayoutProps } from '../../types';
 import { itemLayoutComparer } from '../../utils';
 import CrossFilteringRuleList from './CrossFilteringRuleList';
-import { CrossFilteringInteractionRule, CrossFilteringSetting } from './types';
+import {
+  CrossFilteringInteractionRule,
+  CrossFilteringSetting,
+  InteractionPanelContext,
+} from './types';
 
 type CrossFilteringRuleKey = keyof CrossFilteringInteractionRule;
 
-const CrossFilteringPanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
+const CrossFilteringPanel: FC<
+  ItemLayoutProps<
+    ChartStyleConfig,
+    CrossFilteringSetting,
+    InteractionPanelContext
+  >
+> = memo(
   ({ ancestors, translate: t = title => title, data, onChange, context }) => {
     const [event, setEvent] = useState<CrossFilteringSetting['event']>(
       data.value?.event || InteractionMouseEvent.Left,
@@ -38,11 +47,11 @@ const CrossFilteringPanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       data.value?.rules || [],
     );
 
-    const handleEventChange = event => {
-      handleSettingChange(event);
+    const handleEventChange = (nextEvent: InteractionMouseEvent) => {
+      handleSettingChange(nextEvent);
     };
 
-    const handleSelectedRules = newRules => {
+    const handleSelectedRules = (newRules: CrossFilteringInteractionRule[]) => {
       handleSettingChange(undefined, newRules);
     };
 
@@ -53,9 +62,9 @@ const CrossFilteringPanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
     ) => {
       const updatorIndex = (rules || []).findIndex(r => r.id === id);
       if (updatorIndex > -1) {
-        const newRules = updateBy(rules, draft => {
-          draft![updatorIndex][prop] = value;
-        });
+        const newRules = (rules || []).map(rule =>
+          rule.id === id ? { ...rule, [prop]: value } : rule,
+        );
         handleSettingChange(undefined, newRules);
       }
     };
@@ -70,7 +79,7 @@ const CrossFilteringPanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       };
       if (newEvent) {
         newSetting.event = newEvent;
-        setEvent(event);
+        setEvent(newEvent);
       }
       if (newRules) {
         newSetting.rules = [...newRules];
@@ -100,12 +109,14 @@ const CrossFilteringPanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
                   value: InteractionMouseEvent.Right,
                 },
               ]}
-              onChange={e => handleEventChange(e.target.value)}
+              onChange={(e: RadioChangeEvent) =>
+                handleEventChange(e.target.value)
+              }
             />
           </Form.Item>
           <Form.Item label={t('crossFiltering.rule.title')} name="rule">
             <CrossFilteringRuleList
-              widgetId={context?.widgetId}
+              widgetId={context?.widgetId || ''}
               boardVizs={context?.boardVizs}
               dataview={context?.dataview}
               rules={rules}

@@ -27,7 +27,10 @@ import {
   SelectedItem,
   SeriesStyle,
 } from 'app/types/ChartConfig';
-import ChartDataSetDTO, { IChartDataSet } from 'app/types/ChartDataSet';
+import ChartDataSetDTO, {
+  ChartDataSetCellValue,
+  IChartDataSet,
+} from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
   getAxisLabel,
@@ -277,7 +280,7 @@ class BasicDoubleYChart extends Chart {
     settingConfigs: ChartStyleConfig[],
     leftDeminsionConfigs,
     rightDeminsionConfigs,
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
     selectedItems?: SelectedItem[],
   ): Series[] {
     const _getSeriesByDemisionPostion =
@@ -286,7 +289,7 @@ class BasicDoubleYChart extends Chart {
         config: ChartDataSectionField,
         styles: ChartStyleConfig[],
         settings: ChartStyleConfig[],
-        data: IChartDataSet<string>,
+        data: IChartDataSet<ChartDataSetCellValue>,
         direction: string,
         yAxisIndex: number,
         cIndex: number,
@@ -372,7 +375,7 @@ class BasicDoubleYChart extends Chart {
   private getXAxis(
     styles: ChartStyleConfig[],
     xAxisConfigs: ChartDataSectionField[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
   ): DoubleYChartXAxis {
     const fisrtXAxisConfig = xAxisConfigs[0];
     const [
@@ -428,7 +431,7 @@ class BasicDoubleYChart extends Chart {
     styles: ChartStyleConfig[],
     leftDeminsionConfigs: ChartDataSectionField[],
     rightDeminsionConfigs: ChartDataSectionField[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
   ): DoubleYChartYAxis[] {
     const [showHorizonLine, horizonLineStyle] = getStyles(
       styles,
@@ -572,7 +575,7 @@ class BasicDoubleYChart extends Chart {
     aggregateConfigs: ChartDataSectionField[],
     colorConfigs: ChartDataSectionField[],
     infoConfigs: ChartDataSectionField[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
   ): (params) => string {
     return seriesParams => {
       return getSeriesTooltips4Polar2(

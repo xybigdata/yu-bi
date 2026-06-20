@@ -32,7 +32,10 @@ import {
   ChartStyleConfig,
   FormatFieldAction,
 } from 'app/types/ChartConfig';
-import { IChartDataSet } from 'app/types/ChartDataSet';
+import {
+  ChartDataSetCellValue,
+  IChartDataSet,
+} from 'app/types/ChartDataSet';
 import type ChartMetadata from 'app/types/ChartMetadata';
 import {
   clearRuntimeDateLevelFieldsInChartConfig,
@@ -1649,7 +1652,7 @@ describe('Chart Helper ', () => {
         JSON.stringify(
           getReference2(
             style as ChartStyleConfig[],
-            chartDataSet as IChartDataSet<string>,
+            chartDataSet as IChartDataSet<ChartDataSetCellValue>,
             config[1]!.rows![0] as ChartDataSectionField,
             isHorizonDisplay,
           ),
@@ -1832,7 +1835,7 @@ describe('Chart Helper ', () => {
       expect(
         JSON.stringify(
           getDataColumnMaxAndMin2(
-            chartDataSet as IChartDataSet<string>,
+            chartDataSet as IChartDataSet<ChartDataSetCellValue>,
             config as ChartDataSectionField,
           ),
         ),

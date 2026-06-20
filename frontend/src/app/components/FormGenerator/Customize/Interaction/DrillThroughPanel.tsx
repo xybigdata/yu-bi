@@ -18,18 +18,26 @@
 
 import { Button, Form, Space } from 'antd';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
-import { updateBy } from 'app/utils/mutation';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
 import { uuidv4 } from 'utils/utils';
 import { ItemLayoutProps } from '../../types';
 import { itemLayoutComparer } from '../../utils';
 import RuleList from './RuleList';
-import { DrillThroughSetting, InteractionRule } from './types';
+import {
+  DrillThroughSetting,
+  InteractionPanelContext,
+  InteractionRule,
+  InteractionRuleChange,
+} from './types';
 
-type InteractionRuleKey = keyof InteractionRule;
-
-const DrillThroughPanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
+const DrillThroughPanel: FC<
+  ItemLayoutProps<
+    ChartStyleConfig,
+    DrillThroughSetting,
+    InteractionPanelContext
+  >
+> = memo(
   ({ ancestors, translate: t = title => title, data, onChange, context }) => {
     const [drillThroughRules, setDrillThroughRules] = useState<
       DrillThroughSetting['rules']
@@ -49,18 +57,14 @@ const DrillThroughPanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       handleDrillThroughSettingChange(newRules);
     };
 
-    const handleUpdateRule = <K extends InteractionRuleKey>(
-      id: string,
-      prop: K,
-      value: InteractionRule[K],
-    ) => {
+    const handleUpdateRule: InteractionRuleChange = (id, prop, value) => {
       const updatorIndex = (drillThroughRules || []).findIndex(
         r => r.id === id,
       );
       if (updatorIndex > -1) {
-        const newRules = updateBy(drillThroughRules, draft => {
-          draft![updatorIndex][prop] = value;
-        });
+        const newRules = (drillThroughRules || []).map(rule =>
+          rule.id === id ? { ...rule, [prop]: value } : rule,
+        );
         handleDrillThroughSettingChange(newRules);
       }
     };

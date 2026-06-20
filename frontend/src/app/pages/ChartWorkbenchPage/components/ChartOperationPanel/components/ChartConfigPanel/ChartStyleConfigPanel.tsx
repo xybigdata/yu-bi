@@ -24,6 +24,7 @@ import GroupLayout from 'app/components/FormGenerator/Layout/GroupLayout';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ChartDataConfig, ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo } from 'react';
+import { isConfigRow } from 'utils/object';
 
 const ChartStyleConfigPanel: FC<{
   configs?: ChartStyleConfig[];
@@ -38,6 +39,15 @@ const ChartStyleConfigPanel: FC<{
 }> = memo(
   ({ configs, dataConfigs, i18nPrefix, context, onChange }) => {
     const t = useI18NPrefix(i18nPrefix);
+    const handleConfigChange = (
+      ancestors: number[],
+      value: unknown,
+      needRefresh?: boolean,
+    ) => {
+      if (isConfigRow(value)) {
+        onChange(ancestors, value, needRefresh);
+      }
+    };
 
     return (
       <Collapse className="datart-config-panel" ghost>
@@ -61,7 +71,7 @@ const ChartStyleConfigPanel: FC<{
                         data={c}
                         translate={t}
                         dataConfigs={dataConfigs}
-                        onChange={onChange}
+                        onChange={handleConfigChange}
                         context={context}
                         flatten
                       />
@@ -78,7 +88,7 @@ const ChartStyleConfigPanel: FC<{
                   data={c}
                   translate={t}
                   dataConfigs={dataConfigs}
-                  onChange={onChange}
+                  onChange={handleConfigChange}
                   context={context}
                 />
               );

@@ -1,4 +1,5 @@
 import { ChartRowData } from 'app/types/Chart';
+import { ChartDataSetCellValue } from 'app/types/ChartDataSet';
 import { BorderStyle, FontStyle, LabelStyle } from '../../../types/ChartConfig';
 import { EChartsOption } from '../echartsRuntime';
 
@@ -59,7 +60,7 @@ export interface GeoSeries {
   data: Array<{
     rowData: ChartRowData;
     name: string;
-    value: string;
+    value: ChartDataSetCellValue;
     visualMap?: boolean;
   }>;
 }

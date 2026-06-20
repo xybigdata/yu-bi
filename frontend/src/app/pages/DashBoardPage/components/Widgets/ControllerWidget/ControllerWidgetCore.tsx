@@ -147,9 +147,10 @@ const ControllerWidgetContentCore: React.FC<{
         return convertToTree(dataRows, buildingMethod);
       }
       return dataRows.map(ele => {
+        const key = String(ele?.[0] ?? '');
         const item: RelationFilterValue = {
-          key: ele?.[0],
-          label: ele?.[1] ?? ele?.[0],
+          key,
+          label: String(ele?.[1] ?? key),
           // children?
         };
         return item;

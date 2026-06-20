@@ -1,9 +1,25 @@
-import { ChartDataConfig } from 'app/types/ChartConfig';
+import { ChartDataConfig, ChartStyleSectionRow } from 'app/types/ChartConfig';
 import { I18NTranslateOptions } from 'app/hooks/useI18NPrefix';
 import { ReactNode } from 'react';
 import { FormGroupLayoutMode } from './constants';
 
-export interface ItemLayoutProps<T> {
+export type FormGeneratorValue =
+  | string
+  | number
+  | boolean
+  | null
+  | undefined
+  | string[]
+  | number[]
+  | boolean[]
+  | ChartStyleSectionRow
+  | Record<string, unknown>;
+
+export interface ItemLayoutProps<
+  T,
+  TValue = FormGeneratorValue,
+  TContext = unknown,
+> {
   children?: ReactNode;
   ancestors: number[];
   data: T;
@@ -14,15 +30,19 @@ export interface ItemLayoutProps<T> {
   ) => string;
   onChange?: (
     ancestors: number[],
-    value: T | any,
+    value: TValue,
     needRefresh?: boolean,
   ) => void;
   dataConfigs?: ChartDataConfig[];
   flatten?: boolean;
-  context?: any;
+  context?: TContext;
 }
 
-export interface FormGeneratorLayoutProps<T> extends ItemLayoutProps<T> {
+export interface FormGeneratorLayoutProps<
+  T,
+  TValue = FormGeneratorValue,
+  TContext = unknown,
+> extends ItemLayoutProps<T, TValue, TContext> {
   mode?: FormGroupLayoutMode; // NOTE: inner means this group panel whether wrap into a panel. Default is outer, no parent panel.
   dependency?: string;
 }

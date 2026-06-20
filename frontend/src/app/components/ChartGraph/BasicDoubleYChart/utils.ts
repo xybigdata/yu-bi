@@ -17,7 +17,7 @@
  */
 
 import { ChartDataSectionField } from 'app/types/ChartConfig';
-import { IChartDataSet } from 'app/types/ChartDataSet';
+import { ChartDataSetCellValue, IChartDataSet } from 'app/types/ChartDataSet';
 import { getMinAndMaxNumber, round } from 'app/utils/chartHelper';
 import { calcNiceExtent } from 'app/utils/internalChartHelper';
 import { IntervalConfig } from './types';
@@ -25,7 +25,7 @@ import { IntervalConfig } from './types';
 export function getYAxisIntervalConfig(
   leftConfigs: ChartDataSectionField[],
   rightConfigs: ChartDataSectionField[],
-  chartDataset: IChartDataSet<string>,
+  chartDataset: IChartDataSet<ChartDataSetCellValue>,
 ): IntervalConfig {
   const [lMin, lMax] = getMinAndMaxNumber(leftConfigs, chartDataset);
   const [rMin, rMax] = getMinAndMaxNumber(rightConfigs, chartDataset);

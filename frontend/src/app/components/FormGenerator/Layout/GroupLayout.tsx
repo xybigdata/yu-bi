@@ -24,7 +24,7 @@ import styled from 'styled-components';
 import { SPACE_MD } from 'styles/StyleConstants';
 import { BW } from '../Basic/components/BasicWrapper';
 import { FormGroupLayoutMode, FormItemComponentType } from '../constants';
-import { FormGeneratorLayoutProps } from '../types';
+import { FormGeneratorLayoutProps, FormGeneratorValue } from '../types';
 import { groupLayoutComparer } from '../utils';
 import CollapseHeader from './CollapseHeader';
 import CollectionLayout from './CollectionLayout';
@@ -50,9 +50,9 @@ const GroupLayout: FC<FormGeneratorLayoutProps<ChartStyleConfig>> = memo(
     const [expand] = useState(!!data?.options?.expand);
 
     const handleConfirmModalDialogOrDataUpdate = (
-      ancestors,
-      data,
-      needRefresh,
+      ancestors: number[],
+      data: FormGeneratorValue,
+      needRefresh?: boolean,
     ) => {
       onChange?.(ancestors, data, needRefresh);
     };
@@ -67,7 +67,11 @@ const GroupLayout: FC<FormGeneratorLayoutProps<ChartStyleConfig>> = memo(
       });
     };
 
-    const renderGroupByMode = (mode, comType, data) => {
+    const renderGroupByMode = (
+      mode: FormGroupLayoutMode,
+      comType: string,
+      data: ChartStyleConfig,
+    ) => {
       if (mode === FormGroupLayoutMode.INNER) {
         return renderCollectionComponents(
           data,
@@ -111,7 +115,10 @@ const GroupLayout: FC<FormGeneratorLayoutProps<ChartStyleConfig>> = memo(
       );
     };
 
-    const renderCollectionComponents = (data, onChangeEvent) => {
+    const renderCollectionComponents = (
+      data: ChartStyleConfig,
+      onChangeEvent: FormGeneratorLayoutProps<ChartStyleConfig>['onChange'],
+    ) => {
       return (
         <CollectionLayout
           ancestors={ancestors}

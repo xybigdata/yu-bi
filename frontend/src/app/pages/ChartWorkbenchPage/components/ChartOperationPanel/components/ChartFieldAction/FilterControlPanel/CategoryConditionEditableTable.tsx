@@ -25,6 +25,7 @@ import ChartFilterCondition, {
 import { RelationFilterValue } from 'app/types/ChartConfig';
 import ChartDataView from 'app/types/ChartDataView';
 import { getDistinctFields } from 'app/utils/fetch';
+import { getRelationFilterValues } from 'app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/filterValueUtils';
 import { FilterSqlOperator } from 'globalConstants';
 import { FC, memo, useCallback, useEffect, useState } from 'react';
 
@@ -52,11 +53,7 @@ const CategoryConditionEditableTable: FC<
     const [rows, setRows] = useState<RelationFilterValue[]>([]);
 
     useEffect(() => {
-      if (Array.isArray(condition?.value)) {
-        setRows(condition?.value as RelationFilterValue[]);
-      } else {
-        setRows([]);
-      }
+      setRows(getRelationFilterValues(condition?.value));
     }, [condition?.value]);
 
     const columns = [

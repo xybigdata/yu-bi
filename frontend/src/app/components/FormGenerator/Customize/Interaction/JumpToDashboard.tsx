@@ -22,12 +22,21 @@ import { getAllColumnInMeta } from 'app/utils/chartHelper';
 import { FC, memo, useState } from 'react';
 import { InteractionFieldRelation } from '../../constants';
 import ControllerList from './ControllerList';
+import { normalizeRelations } from './relationUtils';
 import {
   CustomizeRelation,
   I18nTranslator,
   JumpToDashboardRule,
   VizType,
 } from './types';
+
+export const buildJumpToDashboardRule = (
+  value: JumpToDashboardRule | undefined,
+  relations: CustomizeRelation[],
+): JumpToDashboardRule => ({
+  ...value,
+  [InteractionFieldRelation.Customize]: relations,
+});
 
 const JumpToDashboard: FC<
   {
@@ -42,12 +51,9 @@ const JumpToDashboard: FC<
   );
 
   const handleUpdateRelations = (relations?: CustomizeRelation[]) => {
-    const newRelations = [...(relations || [])];
+    const newRelations = normalizeRelations(relations);
     setRelations(newRelations);
-    onValueChange({
-      ...value,
-      ...{ [InteractionFieldRelation.Customize]: newRelations },
-    });
+    onValueChange(buildJumpToDashboardRule(value, newRelations));
   };
   return (
     <Space>
@@ -60,7 +66,10 @@ const JumpToDashboard: FC<
         value={value?.relId}
         placeholder={t('drillThrough.rule.reference.title')}
         onChange={relId =>
-          onValueChange({ ...value, ...{ relId } } as JumpToDashboardRule)
+          onValueChange({
+            ...value,
+            relId,
+          })
         }
       >
         {vizs

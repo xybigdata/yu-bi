@@ -20,6 +20,7 @@ import { Input, Select, Space } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import ChartFilterCondition, {
   ConditionBuilder,
+  toStringInputValue,
 } from 'app/models/ChartFilterCondition';
 import { FilterSqlOperator } from 'globalConstants';
 import debounce from 'lodash/debounce';
@@ -31,7 +32,9 @@ const CategoryConditionRelationSelector: FC<{
 }> = memo(({ condition, onConditionChange }) => {
   const t = useI18NPrefix('viz.common.filter.category');
   const t2 = useI18NPrefix('viz.common.enum.filterOperator');
-  const [inputValue, setInputValue] = useState(() => condition?.value);
+  const [inputValue, setInputValue] = useState(() =>
+    toStringInputValue(condition?.value),
+  );
 
   const handleConditionFilterChange = useCallback(
     (relation, value) => {

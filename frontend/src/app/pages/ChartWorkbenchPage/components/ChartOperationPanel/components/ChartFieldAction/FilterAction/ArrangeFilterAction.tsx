@@ -18,6 +18,7 @@
 
 import ChartFilterCondition, {
   ConditionBuilder,
+  toFilterRelationValue,
 } from 'app/models/ChartFilterCondition';
 import { ChartDataConfig } from 'app/types/ChartConfig';
 import { FC, memo, useState } from 'react';
@@ -32,16 +33,16 @@ const ArrangeFilterAction: FC<{
     if (config?.fieldRelation) {
       const condition = config.fieldRelation;
       return new ConditionBuilder(condition).asRelation(
-        condition.value,
+        toFilterRelationValue(condition.value),
         condition.children as ChartFilterCondition[],
       );
     }
-    return new ConditionBuilder().asRelation(null, []);
+    return new ConditionBuilder().asRelation(undefined, []);
   });
 
-  const handleRelationChange = relation => {
+  const handleRelationChange = (relation: ChartFilterCondition) => {
     const relationCondition = new ConditionBuilder(relation).asRelation(
-      relation.value,
+      toFilterRelationValue(relation.value),
       relation.children,
     );
     setRelation(relationCondition);

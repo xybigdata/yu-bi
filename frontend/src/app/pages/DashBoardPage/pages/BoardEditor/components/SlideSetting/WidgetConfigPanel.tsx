@@ -27,6 +27,7 @@ import { WidgetContext } from 'app/pages/DashBoardPage/components/WidgetProvider
 import { ChartDataConfig, ChartStyleConfig } from 'app/types/ChartConfig';
 import { FC, memo, useContext } from 'react';
 import styled from 'styled-components';
+import { isConfigRow } from 'utils/object';
 import widgetManagerInstance from '../../../../components/WidgetManager';
 
 type WidgetConfigContext = unknown;
@@ -78,6 +79,15 @@ export const BoardConfigCollapse: FC<{
   ) => void;
 }> = memo(({ configs, dataConfigs, context, onChange }) => {
   const t = useI18NPrefix();
+  const handleConfigChange = (
+    ancestors: number[],
+    value: unknown,
+    needRefresh?: boolean,
+  ) => {
+    if (isConfigRow(value)) {
+      onChange(ancestors, value, needRefresh);
+    }
+  };
   return (
     <Collapse className="datart-config-panel" ghost>
       {configs
@@ -101,7 +111,7 @@ export const BoardConfigCollapse: FC<{
                       translate={t}
                       dataConfigs={[]}
                       context={context}
-                      onChange={onChange}
+                      onChange={handleConfigChange}
                     />
                   ),
                 },
@@ -117,7 +127,7 @@ export const BoardConfigCollapse: FC<{
                 translate={t}
                 dataConfigs={dataConfigs}
                 context={context}
-                onChange={onChange}
+                onChange={handleConfigChange}
               />
             );
           }

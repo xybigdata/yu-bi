@@ -23,12 +23,21 @@ import { FC, memo, useState } from 'react';
 import { isEmpty } from 'utils/object';
 import { InteractionFieldRelation } from '../../constants';
 import ChartRelationList from './ChartRelationList';
+import { normalizeRelations } from './relationUtils';
 import {
   CustomizeRelation,
   I18nTranslator,
   JumpToChartRule,
   VizType,
 } from './types';
+
+export const buildJumpToChartRule = (
+  value: JumpToChartRule | undefined,
+  relations: CustomizeRelation[],
+): JumpToChartRule => ({
+  ...value,
+  [InteractionFieldRelation.Customize]: relations,
+});
 
 const JumpToChart: FC<
   {
@@ -43,12 +52,9 @@ const JumpToChart: FC<
   );
 
   const handleUpdateRelations = (relations?: CustomizeRelation[]) => {
-    const newRelations = [...(relations || [])];
+    const newRelations = normalizeRelations(relations);
     setRelations(newRelations);
-    onValueChange({
-      ...value,
-      ...{ [InteractionFieldRelation.Customize]: newRelations },
-    });
+    onValueChange(buildJumpToChartRule(value, newRelations));
   };
   return (
     <Space>
@@ -61,7 +67,10 @@ const JumpToChart: FC<
         value={value?.relId}
         placeholder={t('drillThrough.rule.reference.title')}
         onChange={relId =>
-          onValueChange({ ...value, ...{ relId } } as JumpToChartRule)
+          onValueChange({
+            ...value,
+            relId,
+          })
         }
       >
         {vizs
@@ -78,7 +87,10 @@ const JumpToChart: FC<
         value={value?.relation}
         placeholder={t('drillThrough.rule.relation.title')}
         onChange={relation =>
-          onValueChange({ ...value, ...{ relation } } as JumpToChartRule)
+          onValueChange({
+            ...value,
+            relation,
+          })
         }
       >
         <Select.Option value={InteractionFieldRelation.Auto}>

@@ -20,6 +20,7 @@ import { FilterConditionType } from 'app/constants';
 import { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import ChartFilterCondition, {
   ConditionBuilder,
+  toNumberFilterValues,
 } from 'app/models/ChartFilterCondition';
 import MultiFilterRow from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterAction/MultiFilterRow';
 import SingleFilterRow from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterAction/SingleFilterRow';
@@ -54,7 +55,10 @@ const ValueConditionConfiguration: ForwardRefRenderFunction<
           args?.operator as FilterSqlOperator,
         )
       ) {
-        return args?.value?.filter(v => !isEmpty(v))?.length === 2;
+        return (
+          toNumberFilterValues(args?.value).filter(v => !isEmpty(v)).length ===
+          2
+        );
       } else if (
         [
           FilterSqlOperator.Equal,
@@ -65,9 +69,10 @@ const ValueConditionConfiguration: ForwardRefRenderFunction<
           FilterSqlOperator.GreaterThan,
         ].includes(args?.operator as FilterSqlOperator)
       ) {
+        const values = toNumberFilterValues(args?.value);
         return (
           !isEmpty(args?.value) &&
-          !isEmptyArray(args?.value?.filter(v => !isEmpty(v)))
+          !isEmptyArray(values.filter(v => !isEmpty(v)))
         );
       } else if (
         [FilterSqlOperator.Null, FilterSqlOperator.NotNull].includes(
