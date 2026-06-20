@@ -25,7 +25,10 @@ import {
   ChartStyleConfig,
   SelectedItem,
 } from 'app/types/ChartConfig';
-import ChartDataSetDTO, { IChartDataSet } from 'app/types/ChartDataSet';
+import ChartDataSetDTO, {
+  ChartDataSetCellValue,
+  IChartDataSet,
+} from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
   getDataColumnMaxAndMin2,
@@ -476,7 +479,7 @@ class BasicOutlineMapChart extends Chart {
 
   private getGeoInfo(
     styleConfigs: ChartStyleConfig[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
     groupConfigs: ChartDataSectionField[],
     selectedItems?: SelectedItem[],
   ): GeoInfo {
@@ -530,7 +533,7 @@ class BasicOutlineMapChart extends Chart {
         return Object.assign(
           {
             name: this.mappingGeoName(
-              row.getCell(groupConfigs[0]),
+              String(row.getCell(groupConfigs[0]) ?? ''),
               styleConfigs,
             ),
           },
@@ -543,7 +546,7 @@ class BasicOutlineMapChart extends Chart {
   }
 
   protected getGeoSeries(
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
     groupConfigs: ChartDataSectionField[],
     aggregateConfigs: ChartDataSectionField[],
     sizeConfigs: ChartDataSectionField[],
@@ -569,7 +572,7 @@ class BasicOutlineMapChart extends Chart {
             return {
               ...getExtraSeriesRowData(row),
               name: this.mappingGeoName(
-                row.getCell(groupConfigs[0]),
+                String(row.getCell(groupConfigs[0]) ?? ''),
                 styleConfigs,
               ),
               value: row.getCell(aggregateConfigs[0]),
@@ -582,7 +585,7 @@ class BasicOutlineMapChart extends Chart {
   }
 
   protected getMetricAndSizeSeries(
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
     groupConfigs: ChartDataSectionField[],
     aggregateConfigs: ChartDataSectionField[],
     sizeConfigs: ChartDataSectionField[],
@@ -610,12 +613,12 @@ class BasicOutlineMapChart extends Chart {
             return {
               ...getExtraSeriesRowData(row),
               name: this.mappingGeoName(
-                row.getCell(groupConfigs[0]),
+                String(row.getCell(groupConfigs[0]) ?? ''),
                 styleConfigs,
               ),
               value: this.mappingGeoCoordination(
                 styleConfigs,
-                row.getCell(groupConfigs[0]),
+                String(row.getCell(groupConfigs[0]) ?? ''),
                 row.getCell(aggregateConfigs[0]) || defaultColorValue,
                 row.getCell(sizeConfigs[0]) || defaultSizeValue,
               ),
@@ -639,7 +642,7 @@ class BasicOutlineMapChart extends Chart {
   }
 
   protected getTooltip(
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
     groupConfigs: ChartDataSectionField[],
     aggregateConfigs: ChartDataSectionField[],
     sizeConfigs: ChartDataSectionField[],
@@ -698,7 +701,7 @@ class BasicOutlineMapChart extends Chart {
   }
 
   protected getVisualMap(
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
     groupConfigs: ChartDataSectionField[],
     aggregateConfigs: ChartDataSectionField[],
     sizeConfigs: ChartDataSectionField[],

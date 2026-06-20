@@ -26,7 +26,10 @@ import {
   ChartStyleConfig,
   FontStyle,
 } from 'app/types/ChartConfig';
-import ChartDataSetDTO, { IChartDataSet } from 'app/types/ChartDataSet';
+import ChartDataSetDTO, {
+  ChartDataSetCellValue,
+  IChartDataSet,
+} from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
   getColumnRenderName,
@@ -178,7 +181,7 @@ class Scorecard extends ReactChart {
   getColorConfig(
     style: ChartStyleConfig[],
     aggConfig: ChartDataSectionField[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
   ): CSSProperties[] {
     const [conditionalStylePanel] = getStyles(
       style,

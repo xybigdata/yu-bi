@@ -31,7 +31,10 @@ import {
   XAxisColumns,
   YAxis,
 } from 'app/types/ChartConfig';
-import ChartDataSetDTO, { IChartDataSet } from 'app/types/ChartDataSet';
+import ChartDataSetDTO, {
+  ChartDataSetCellValue,
+  IChartDataSet,
+} from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
   getAxisLabel,
@@ -419,7 +422,7 @@ class BasicLineChart extends Chart {
     settingConfigs: ChartStyleConfig[],
     styleConfigs: ChartStyleConfig[],
     colorConfigs: ChartDataSectionField[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
     groupConfigs: ChartDataSectionField[],
     aggregateConfigs: ChartDataSectionField[],
     infoConfigs: ChartDataSectionField[],

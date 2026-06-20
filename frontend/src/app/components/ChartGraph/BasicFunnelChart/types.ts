@@ -4,6 +4,7 @@ import {
   LabelStyle,
 } from 'app/types/ChartConfig';
 import { ChartRowData } from 'app/types/Chart';
+import { ChartDataSetCellValue } from 'app/types/ChartDataSet';
 
 export type SeriesData = {
   itemStyle?: {
@@ -13,7 +14,7 @@ export type SeriesData = {
   name: string;
   rowData: ChartRowData;
   select: boolean;
-  value: string[];
+  value: ChartDataSetCellValue[];
 } & ChartDataSectionField;
 
 export type Series = {

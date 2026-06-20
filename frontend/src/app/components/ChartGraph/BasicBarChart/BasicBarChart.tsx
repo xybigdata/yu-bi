@@ -32,7 +32,10 @@ import {
   XAxisColumns,
   YAxis,
 } from 'app/types/ChartConfig';
-import ChartDataSetDTO, { IChartDataSet } from 'app/types/ChartDataSet';
+import ChartDataSetDTO, {
+  ChartDataSetCellValue,
+  IChartDataSet,
+} from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
   getColorizeGroupSeriesColumns,
@@ -460,7 +463,7 @@ class BasicBarChart extends Chart implements IChartLifecycle {
     settingConfigs: ChartStyleConfig[],
     styleConfigs: ChartStyleConfig[],
     colorConfigs: ChartDataSectionField[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
     groupConfigs: ChartDataSectionField[],
     aggregateConfigs: ChartDataSectionField[],
     infoConfigs: ChartDataSectionField[],
@@ -544,7 +547,7 @@ class BasicBarChart extends Chart implements IChartLifecycle {
   private getBarSeriesImpl(
     styleConfigs: ChartStyleConfig[],
     settingConfigs: ChartStyleConfig[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
     dataConfig: ChartDataSectionField,
   ): BarSeriesImpl {
     return {
@@ -871,7 +874,7 @@ class BasicBarChart extends Chart implements IChartLifecycle {
   }
 
   private getTooltipFormatterFunc(
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
     groupConfigs: ChartDataSectionField[],
     aggregateConfigs: ChartDataSectionField[],
     colorConfigs: ChartDataSectionField[],

@@ -30,6 +30,7 @@ import {
   SelectedItem,
 } from 'app/types/ChartConfig';
 import ChartDataSetDTO, {
+  ChartDataSetCellValue,
   IChartDataSet,
   IChartDataSetRow,
 } from 'app/types/ChartDataSet';
@@ -235,7 +236,7 @@ class BasicPieChart extends Chart {
 
   private getSeries(
     styleConfigs: ChartStyleConfig[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
     groupConfigs: ChartDataSectionField[],
     aggregateConfigs: ChartDataSectionField[],
     infoConfigs: ChartDataSectionField[],
@@ -292,7 +293,7 @@ class BasicPieChart extends Chart {
   private getDataItemStyle(
     config: ChartDataSectionField,
     colorConfigs: ChartDataSectionField[],
-    row: IChartDataSetRow<string>,
+    row: IChartDataSetRow<ChartDataSetCellValue>,
   ): { color: string | undefined } | undefined {
     const colorConfig = colorConfigs?.[0];
     const columnColor = config?.color?.start;
@@ -473,7 +474,7 @@ class BasicPieChart extends Chart {
     groupConfigs: ChartDataSectionField[],
     aggregateConfigs: ChartDataSectionField[],
     infoConfigs: ChartDataSectionField[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
   ): (params) => string {
     return seriesParams => {
       if (seriesParams.componentType !== 'series') {
@@ -490,7 +491,7 @@ class BasicPieChart extends Chart {
       const infoTotal = infoConfigs.map(info => {
         let total = 0;
         chartDataSet.forEach(row => {
-          total += Number((row as IChartDataSetRow<string>).getCell(info));
+          total += Number(row.getCell(info));
         });
         return total;
       });

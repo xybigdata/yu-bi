@@ -29,7 +29,10 @@ import {
   SelectedItem,
   YAxis,
 } from 'app/types/ChartConfig';
-import ChartDataSetDTO, { IChartDataSet } from 'app/types/ChartDataSet';
+import ChartDataSetDTO, {
+  ChartDataSetCellValue,
+  IChartDataSet,
+} from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
   getColumnRenderName,
@@ -48,6 +51,10 @@ import {
 import { EChartsInstance, loadEChartsRuntime } from '../echartsRuntime';
 import Config from './config';
 import { ScatterMetricAndSizeSerie } from './types';
+
+const toScatterValue = (
+  value: ChartDataSetCellValue,
+): string | number | undefined => value ?? undefined;
 
 class BasicScatterChart extends Chart {
   dependency = [];
@@ -265,7 +272,7 @@ class BasicScatterChart extends Chart {
   }
 
   protected getSeriesGroupByColorConfig(
-    chartDataSetRows: IChartDataSet<string>,
+    chartDataSetRows: IChartDataSet<ChartDataSetCellValue>,
     groupConfigs: ChartDataSectionField[],
     aggregateConfigs: ChartDataSectionField[],
     sizeConfigs: ChartDataSectionField[],
@@ -303,9 +310,12 @@ class BasicScatterChart extends Chart {
 
     // TODO(Stephen): should be refactor by ChartDataSet groupBy function
     const groupedObjDataColumns: {
-      [key: string]: { color: string; datas: IChartDataSet<string> };
+      [key: string]: {
+        color: string;
+        datas: IChartDataSet<ChartDataSetCellValue>;
+      };
     } = chartDataSetRows?.reduce((acc, cur) => {
-      const key = cur.getCell(colorConfigs?.[0]);
+      const key = String(cur.getCell(colorConfigs?.[0]) ?? '');
       if (acc?.[key]) {
         acc[key].datas.push(cur);
       } else {
@@ -340,7 +350,7 @@ class BasicScatterChart extends Chart {
 
   protected getMetricAndSizeSerie(
     { max, min }: { max: number; min: number },
-    dataSetRows: IChartDataSet<string>,
+    dataSetRows: IChartDataSet<ChartDataSetCellValue>,
     groupConfigs: ChartDataSectionField[],
     aggregateConfigs: ChartDataSectionField[],
     sizeConfigs: ChartDataSectionField[],
@@ -362,15 +372,15 @@ class BasicScatterChart extends Chart {
         ? row.getCell(sizeConfigs?.[0]) || min
         : defaultSizeValue;
       const value: Array<string | number | undefined> = [
-        ...aggregateConfigs.map(row.getCell, row),
-        ...infoConfigs.map(row.getCell, row),
-        sizeValue,
+        ...aggregateConfigs.map(field => toScatterValue(row.getCell(field))),
+        ...infoConfigs.map(field => toScatterValue(row.getCell(field))),
+        toScatterValue(sizeValue),
         colorSeriesName,
       ];
       return {
         ...getExtraSeriesRowData(row),
         ...getSelectedItemStyles(comIndex, dcIndex, selectedItems || []),
-        name: groupConfigs?.map(row.getCell, row).join('-'),
+        name: groupConfigs?.map(field => row.getCell(field) ?? '').join('-'),
         value,
       };
     });
@@ -550,7 +560,7 @@ class BasicScatterChart extends Chart {
     colorConfigs: ChartDataSectionField[],
     sizeConfigs: ChartDataSectionField[],
     infoConfigs: ChartDataSectionField[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
   ): (params) => string {
     return seriesParams => {
       return getSeriesTooltips4Polar2(

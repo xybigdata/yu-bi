@@ -25,7 +25,10 @@ import {
   ChartStyleConfig,
   SelectedItem,
 } from 'app/types/ChartConfig';
-import ChartDataSetDTO, { IChartDataSet } from 'app/types/ChartDataSet';
+import ChartDataSetDTO, {
+  ChartDataSetCellValue,
+  IChartDataSet,
+} from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
   getDefaultThemeColor,
@@ -243,7 +246,7 @@ class WordCloudChart extends Chart {
 
   getLabel(
     style: ChartStyleConfig[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
     groupConfigs: ChartDataSectionField[],
     aggregateConfigs: ChartDataSectionField[],
     selectedItems?: SelectedItem[],
@@ -291,8 +294,8 @@ class WordCloudChart extends Chart {
       },
       data: chartDataSet?.map((dc, dIndex) => {
         return {
-          name: dc.getCell(groupConfigs[0]),
-          value: dc.getCell(aggregateConfigs[0]),
+          name: String(dc.getCell(groupConfigs[0]) ?? ''),
+          value: String(dc.getCell(aggregateConfigs[0]) ?? ''),
           ...getExtraSeriesRowData(dc),
           textStyle: getSelectedItemStyles(0, dIndex, selectedItems || [], {
             fontFamily,

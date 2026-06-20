@@ -19,7 +19,10 @@
 import { ChartDataSectionType, ChartInteractionEvent } from 'app/constants';
 import ReactChart from 'app/models/ReactChart';
 import { ChartConfig, ChartDataSectionField } from 'app/types/ChartConfig';
-import ChartDataSetDTO, { IChartDataSet } from 'app/types/ChartDataSet';
+import ChartDataSetDTO, {
+  ChartDataSetCellValue,
+  IChartDataSet,
+} from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
   getColumnRenderName,
@@ -137,7 +140,7 @@ class BasicRichText extends ReactChart {
 
   getDataListValue(
     config: ChartDataSectionField,
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: IChartDataSet<ChartDataSetCellValue>,
   ): string {
     const value = chartDataSet.map(dc =>
       toFormattedValue(dc.getCell(config), config.format),
