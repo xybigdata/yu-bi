@@ -45,7 +45,7 @@ git log --oneline --decorate -8
 | 工作目录 | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
 | 主线分支 | `main` |
 | 当前专题分支 | `codex/modernization-compatible-boundaries` |
-| 当前分支相对 `origin/main` | 以恢复命令为准；本次复盘开始时领先 16 个提交，未落后 |
+| 当前分支相对 `origin/main` | 以恢复命令为准；本次复盘继续推进时领先 17 个提交，未落后 |
 | 最近业务提交 | `0fed0168c chore: 清理前端时间调用残留` |
 | 工作区 | 本文档提交后应恢复干净 |
 | 远端 | `git@github.com:xybigdata/yu-bi.git` |
@@ -142,39 +142,47 @@ git diff --check
 
 ## 5. 下一步执行队列
 
-### 5.1 P0：完成当前分支收尾审计
+### 5.1 P0：当前分支收尾审计
+
+状态：已完成。
 
 目标：判断 `codex/modernization-compatible-boundaries` 是否已经可以进入完整门禁和合并准备。
 
 执行项：
 
-- 复扫 Ant Design / rc 生态深路径类型入口
-- 复扫前端公开类型入口，避免依赖包内部路径回退
-- 复扫安装健康度，确认 `package.json`、lockfile、Node 24 约束没有漂移
-- 复扫 Maven 坐标和展示元数据中的 `datart` 残留，只处理品牌 / 发布元数据，不碰 Java 包名和配置前缀
-- 更新本文档的审计结果
+- 已复扫 Ant Design / rc 生态深路径类型入口
+- 已复扫前端公开类型入口，避免依赖包内部路径回退
+- 已在 Node 24 / npm 11 下复扫安装健康度
+- 已复扫 Maven 坐标和展示元数据中的 `datart` 残留，只处理品牌 / 发布元数据，不碰 Java 包名和配置前缀
+- 已更新本文档的审计结果
 
-建议命令：
+已执行命令：
 
 ```bash
+node -v
+npm -v
+npm install --package-lock-only --dry-run --ignore-scripts
+npm ci --dry-run --ignore-scripts
 rg -n "from ['\"](?:antd/es|antd/lib|rc-[^'\"]+/(?:es|lib)|@ant-design/[^'\"]+/(?:es|lib))|import\(['\"](?:antd/es|antd/lib|rc-[^'\"]+/(?:es|lib)|@ant-design/[^'\"]+/(?:es|lib))" frontend/src frontend -g '*.ts' -g '*.tsx'
 rg -n "datart" pom.xml core security data-providers server -g 'pom.xml'
 npm run checkTs
 git diff --check
 ```
 
-当前初步结论：
+结论：
 
 - 未发现明显 `antd/es`、`antd/lib`、`rc-*/es`、`rc-*/lib` 深路径类型入口
+- 本机验证环境为 `node v24.16.0`、`npm 11.13.0`
 - `frontend/.nvmrc` 已是 `v24.0.0`
 - `frontend/package.json` 已约束 `node >=24.0.0`、`npm >=11.0.0`
-- `frontend/package-lock.json` 仍是 `lockfileVersion: 2`，暂不无验证改动；后续需在 Node 24 / npm 11 下做安装健康度确认
+- `frontend/package-lock.json` 仍是 `lockfileVersion: 2`，但 `npm install --package-lock-only --dry-run --ignore-scripts` 和 `npm ci --dry-run --ignore-scripts` 在 npm 11 下均通过，暂不无意义改写 lockfile
 - 顶层和子模块 POM 的 `groupId`、`artifactId`、`name`、`description` 已收口到 `yu-bi`
 - POM 中唯一 `datart` 命中为 `server/pom.xml` 的 `mainClass=datart.DatartServerApplication`，这是 Java 包名启动入口，按固定禁止项保留，不作为品牌残留处理
+- `npm run checkTs` 已通过
 
 ### 5.2 P1：完整门禁与合并准备
 
-当前分支已累计较多前端兼容边界改造。P0 收尾审计完成后，不再继续无限追加低价值小改动，应准备完整门禁和合并。
+当前分支已累计较多前端兼容边界改造。P0 收尾审计已完成，不再继续无限追加低价值小改动，应准备完整门禁和合并。
 
 前端完整门禁：
 
