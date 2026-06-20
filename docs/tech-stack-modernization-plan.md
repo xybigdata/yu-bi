@@ -48,9 +48,9 @@
 ### 2.1 Git 状态
 
 - 当前分支：`codex/modernization-compatible-boundaries`
-- 当前分支相对 `origin/main`：领先 14 个提交，未落后
-- 最近已推送提交：`faa95c996 chore: 清理图表数据集泛型残留`
-- 当前工作区：图表筛选值协议残留清理批次，准备提交
+- 当前分支相对 `origin/main`：领先 15 个提交，未落后
+- 最近已推送提交：`874c31804 chore: 清理图表筛选值协议残留`
+- 当前工作区：前端时间调用残留清理批次，准备提交
 - 当前轻量验证：`npm run checkTs` 已通过
 
 恢复工作时先执行：
@@ -136,6 +136,7 @@ git rev-list --left-right --count origin/main...HEAD
 | `b828250bc` | 表格 / 透视表数据集协议      | 表格和透视表生产代码旧数据集泛型入口完成清理             |
 | `666bbfd48` | 图表数据集改造进度同步       | 执行板同步到表格 / 透视表批次完成状态                    |
 | `faa95c996` | 图表数据集泛型残留清理       | helper 注释和测试旧数据集泛型断言完成清理                |
+| `874c31804` | 图表筛选值协议残留清理       | ControllerPanel 和 ChartWorkbench 明显筛选值断言完成清理 |
 
 ### 3.3 阶段完成批次
 
@@ -224,7 +225,7 @@ git diff --check
 
 结果：已通过。
 
-### 3.6 当前进行中批次
+### 3.6 阶段完成批次
 
 批次：图表筛选值协议残留清理
 
@@ -245,30 +246,49 @@ git diff --check
 
 结果：已通过。
 
-### 3.7 当前残留弱类型入口
+### 3.7 当前进行中批次
+
+批次：前端时间调用残留清理
+
+目标：
+
+- 复扫前端原生 `new Date()` / `Date.now()` / `dayjs()` / `getTime()` 调用
+- 生产代码保持使用既有 `getDatartNow` / `getDatartNowMillis` / `datartDayjs` 主链
+- 清理时间工具测试中的原生时间调用残留
+
+当前验证：
+
+```bash
+npm run checkTs
+npm run test:ci -- src/app/utils/__tests__/date.test.ts src/app/utils/__tests__/time.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/__tests__/utils.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts
+git diff --check
+```
+
+结果：已通过。
+
+### 3.8 当前残留弱类型入口
 
 当前复扫命令：
 
 ```bash
-rg -n "condition\\?\\.value as|condition\\.value as|newCondition\\.value as|value as RelationFilterValue|as \\[number, number\\]|as RelationFilterValue\\[\\]|as TreeFilterNode\\[\\]|as \\[\\]" frontend/src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterControlPanel frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector -g '*.ts' -g '*.tsx'
+rg -n "new Date\\(|Date\\.now\\(|dayjs\\(\\)|performance\\.now\\(|getTime\\(\\)" frontend/src/app -g '*.ts' -g '*.tsx'
 ```
 
 剩余重点：
 
-| 模块                          | 状态   | 处理策略                                      |
-| ----------------------------- | ------ | --------------------------------------------- |
-| ControllerPanel 筛选值断言    | 已清空 | 本轮复扫无残留                                |
-| ChartWorkbench 明显残留断言   | 已清空 | 本轮复扫无残留                                |
-| `FilterConditionValue` 全局协议 | 暂不动 | 继续保持联合类型协议，按调用链渐进审计        |
+| 模块             | 状态   | 处理策略                                      |
+| ---------------- | ------ | --------------------------------------------- |
+| 生产代码时间入口 | 已清空 | 未发现裸 `new Date()` / `Date.now()` 调用     |
+| 测试时间残留     | 已清空 | 时间工具测试改为使用 `datartDayjs` / `valueOf` |
 
 ## 4. 下一步执行队列
 
 ### 4.1 当前批次 P0
 
-复扫时间体系剩余调用点：
+复扫前端公开类型入口：
 
-1. 复扫前端零散原生时间调用点
-2. 优先处理可替换为既有时间工具的低风险调用
+1. 复扫 Ant Design / rc 生态深路径类型入口
+2. 优先替换为公开包导出的类型入口
 3. 运行：
 
 ```bash
@@ -279,7 +299,7 @@ git diff --check
 建议提交信息：
 
 ```text
-chore: 清理前端时间调用残留
+chore: 清理前端公开类型入口
 ```
 
 ### 4.2 下一批 P1

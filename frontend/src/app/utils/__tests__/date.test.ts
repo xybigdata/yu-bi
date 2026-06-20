@@ -96,7 +96,7 @@ describe('toDatartDayjsList', () => {
 
   test('should preserve valid dayjs and date inputs', () => {
     const utcValue = datartDayjs.utc('2024-01-01 08:00:00');
-    const nativeDate = new Date('2024-01-03T08:00:00.000Z');
+    const nativeDate = datartDayjs.utc('2024-01-03T08:00:00.000Z').toDate();
 
     const values = toDatartDayjsList([utcValue, nativeDate]);
 
@@ -190,8 +190,8 @@ describe('current datart time helpers', () => {
     const expiresAt = getDatartDateAfter(1500);
 
     expect(expiresAt).toBeInstanceOf(Date);
-    expect(Math.abs(expiresAt.getTime() - (nowMillis + 1500))).toBeLessThan(
-      1000,
-    );
+    expect(
+      Math.abs(datartDayjs(expiresAt).valueOf() - (nowMillis + 1500)),
+    ).toBeLessThan(1000);
   });
 });
