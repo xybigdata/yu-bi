@@ -2,13 +2,16 @@ import { TableProps } from 'antd';
 import { AggregateFieldActionType } from 'app/constants';
 import { ChartDataSectionField, FontStyle } from 'app/types/ChartConfig';
 import { BrokerOption } from 'app/types/ChartLifecycleBroker';
-import { IChartDataSetRow } from 'app/types/ChartDataSet';
+import {
+  ChartDataSetCellValue,
+  IChartDataSetRow,
+} from 'app/types/ChartDataSet';
 import { CSSProperties, ReactNode } from 'react';
 import { ResizableProps } from 'react-resizable';
 
-export type BasicTableDataValue = unknown;
+export type BasicTableDataValue = ChartDataSetCellValue;
 export type BasicTableRowData = Record<string, BasicTableDataValue>;
-export type BasicTableDataSetRow = IChartDataSetRow<string>;
+export type BasicTableDataSetRow = IChartDataSetRow<ChartDataSetCellValue>;
 export type BasicTableWidgetSpecialConfig = BrokerOption['widgetSpecialConfig'] & {
   linkFields?: string[];
   jumpField?: string;
@@ -152,7 +155,7 @@ export type TableCellEvents = Pick<
 export type BasicTableOptions = TableStyleOptions & {
   rowKey: string;
   pagination: PageOptions;
-  dataSource: IChartDataSetRow<string>[];
+  dataSource: BasicTableDataSetRow[];
   columns: TableColumnsList[];
   summaryFn?: (value: unknown) => BasicTableSummary;
   onRow: (

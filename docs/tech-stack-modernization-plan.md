@@ -48,9 +48,9 @@
 ### 2.1 Git 状态
 
 - 当前分支：`codex/modernization-compatible-boundaries`
-- 当前分支相对 `origin/main`：领先 10 个提交，未落后
-- 最近已推送提交：`26bf8a959 chore: 收口 ChartDataSet 单元格值协议边界`
-- 当前工作区：图表数据集标量协议迁移批次，尚未提交
+- 当前分支相对 `origin/main`：领先 11 个提交，未落后
+- 最近已推送提交：`e043c93f7 chore: 迁移图表数据集标量值边界`
+- 当前工作区：表格 / 透视表图表数据集协议迁移批次，尚未提交
 - 当前轻量验证：`npm run checkTs` 已通过
 
 恢复工作时先执行：
@@ -132,6 +132,7 @@ git rev-list --left-right --count origin/main...HEAD
 | `7083dae3f` | FormGenerator 交互规则回调   | `InteractionRuleChange` 泛型回调协议和规则值映射完成收口 |
 | `deb647680` | ChartFilterCondition 值协议  | 筛选值联合协议、关系值守卫、筛选 UI 消费点归一化完成     |
 | `26bf8a959` | ChartDataSet 单元格值协议    | 公共数据集单元格协议、helper、双轴图表试点完成           |
+| `e043c93f7` | 图表数据集标量协议迁移       | 普通图表内部标量值协议完成迁移                           |
 
 ### 3.3 当前进行中批次
 
@@ -173,7 +174,34 @@ npm run test:ci -- src/app/utils/__tests__/chartHelper.test.ts src/app/component
 - 本批暂以类型门禁和协议边界复核为主
 - 后续迁移 `BasicTableChart` / `PivotSheetChart` 时需要补更有价值的运行时用例
 
-### 3.4 当前残留弱类型入口
+### 3.4 当前进行中批次
+
+批次：表格 / 透视表图表数据集协议迁移
+
+目标：
+
+- 表格数据源和行类型从 `IChartDataSetRow<string>` 迁移为 `IChartDataSetRow<ChartDataSetCellValue>`
+- 表格渲染、条件样式、点击事件保留真实单元格值协议
+- 汇总计算过滤 `null` / `undefined` 后再进入 `precisionCalculation`
+- 透视表选中项、折叠路径、样式配置和排序函数迁移到 `ChartDataSetCellValue` 协议
+- 透视表折叠路径和排序比较显式字符串化，避免隐藏的隐式类型转换
+- 不改变 `ChartDataSetDTO.rows` 全局协议
+
+当前验证：
+
+```bash
+npm run checkTs
+npm run test:ci -- src/app/utils/__tests__/chartHelper.test.ts src/app/components/ChartGraph/BasicDoubleYChart/__tests__/utils.test.ts
+```
+
+结果：已通过。
+
+测试缺口：
+
+- 未找到 `BasicTableChart` / `PivotSheetChart` 现成 `*.test.ts` / `*.test.tsx`
+- 本批以类型门禁、生产代码残留复扫和协议边界复核为主
+
+### 3.5 当前残留弱类型入口
 
 当前复扫命令：
 
@@ -185,18 +213,17 @@ rg -n "IChartDataSet<string>|IChartDataSetRow<string>" frontend/src/app/componen
 
 | 模块              | 状态   | 处理策略                                         |
 | ----------------- | ------ | ------------------------------------------------ |
-| `BasicTableChart` | 未迁移 | 表格渲染链路复杂，作为下一批独立收口             |
-| `PivotSheetChart` | 未迁移 | 透视表依赖 AntV S2，作为下一批独立收口           |
-| 测试断言          | 可保留 | 仅在生产代码迁移后同步调整                       |
+| 生产代码          | 已清空 | 当前只剩注释和测试断言中的旧泛型字样             |
+| 测试断言          | 可保留 | 测试构造数据仍按当前 DTO rows 协议断言           |
 | 注释              | 可保留 | 顺手修正，不单独作为改造目标                     |
 
 ## 4. 下一步执行队列
 
 ### 4.1 当前批次 P0
 
-完成并提交“图表数据集标量协议迁移”：
+完成并提交“表格 / 透视表图表数据集协议迁移”：
 
-1. 复核 diff，只包含当前普通图表数据集标量协议迁移和本文档
+1. 复核 diff，只包含表格 / 透视表图表数据集协议迁移和本文档
 2. 运行：
 
 ```bash
@@ -208,7 +235,7 @@ git diff --check
 3. 提交信息：
 
 ```text
-chore: 迁移图表数据集标量值边界
+chore: 迁移表格图表数据集值边界
 ```
 
 4. 推送当前专题分支：
@@ -223,8 +250,6 @@ git push origin codex/modernization-compatible-boundaries
 
 | 优先级 | 专题                         | 下一步                                           | 风险 |
 | ------ | ---------------------------- | ------------------------------------------------ | ---- |
-| P1     | `BasicTableChart` 数据集协议 | 迁移表格行和单元格值协议，补必要用例             | 中   |
-| P1     | `PivotSheetChart` 数据集协议 | 迁移 S2 输入边界，重点验证 null/number/string    | 中   |
 | P1     | 图表 helper 类型边界         | 清理剩余注释、测试断言和 helper 入参假设         | 低   |
 | P2     | 图表筛选值协议残留          | 复扫筛选 UI、下钻、联动参数写回的残留断言        | 中   |
 | P2     | 时间体系剩余调用点          | 复扫零散原生时间调用                             | 低   |

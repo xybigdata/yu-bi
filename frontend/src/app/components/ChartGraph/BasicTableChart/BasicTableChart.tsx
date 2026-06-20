@@ -26,7 +26,10 @@ import {
   ChartStyleConfig,
   ChartStyleSectionGroup,
 } from 'app/types/ChartConfig';
-import ChartDataSetDTO, { IChartDataSet } from 'app/types/ChartDataSet';
+import ChartDataSetDTO, {
+  ChartDataSetCellValue,
+  IChartDataSet,
+} from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
   getColumnRenderName,
@@ -84,6 +87,11 @@ type ColumnRowSpanState = {
   nextRowSpan: number;
 };
 type TableSortOrder = 'ascend' | 'descend' | undefined;
+type BasicTableChartDataSet = IChartDataSet<ChartDataSetCellValue>;
+
+const isSummaryValue = (
+  value: ChartDataSetCellValue,
+): value is string | number => value !== null && value !== undefined;
 
 class BasicTableChart extends ReactChart {
   useIFrame = false;
@@ -367,7 +375,7 @@ class BasicTableChart extends ReactChart {
 
   private getTableSummaryFn(
     settingConfigs: ChartStyleConfig[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: BasicTableChartDataSet,
     tableColumns: TableColumnsList[],
     aggregateConfigs: ChartDataSectionField[],
     context: BrokerContext,
@@ -414,9 +422,9 @@ class BasicTableChart extends ReactChart {
               c => chartDataSet.getFieldKey(c) === k,
             );
             if (currentSummaryField) {
-              const total = chartDataSet?.map(dc =>
-                dc.getCell(currentSummaryField),
-              );
+              const total = chartDataSet
+                ?.map(dc => dc.getCell(currentSummaryField))
+                .filter(isSummaryValue);
               return (
                 (!index
                   ? context?.translator?.('viz.palette.graph.summary') + ': '
@@ -438,7 +446,7 @@ class BasicTableChart extends ReactChart {
 
   private calculateFieldsMaxWidth(
     mixedSectionConfigRows: ChartDataSectionField[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: BasicTableChartDataSet,
     styleConfigs: ChartStyleConfig[],
     context: BrokerContext,
     settingConfigs: ChartStyleConfig[],
@@ -546,9 +554,11 @@ class BasicTableChart extends ReactChart {
           ac => ac.uid === c.uid,
         );
         const total = currentSummaryField
-          ? chartDataSet?.map(dc => dc.getCell(currentSummaryField))
+          ? chartDataSet
+              ?.map(dc => dc.getCell(currentSummaryField))
+              .filter(isSummaryValue)
           : [];
-        const summaryText = total.reduce((acc, cur) => acc + Number(cur), 0);
+        const summaryText = precisionCalculation(CalculationType.ADD, total);
         const summaryWidth = this.getTextWidth(
           context,
           toFormattedValue(summaryText, c.format),
@@ -829,7 +839,7 @@ class BasicTableChart extends ReactChart {
     mixedSectionConfigRows: ChartDataSectionField[],
     styleConfigs: ChartStyleConfig[],
     settingConfigs: ChartStyleConfig[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: BasicTableChartDataSet,
     context: BrokerContext,
   ): TableColumnsList[] {
     const [enableRowNumber, leftFixedColumns, rightFixedColumns] = getStyles(
@@ -877,7 +887,7 @@ class BasicTableChart extends ReactChart {
 
   getFlatColumns(
     dataConfigs: TableHeaderConfig[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: BasicTableChartDataSet,
     styleConfigs: ChartStyleConfig[],
   ): TableColumnsList[] {
     const [autoMergeFields] = getStyles(
@@ -1029,7 +1039,7 @@ class BasicTableChart extends ReactChart {
   getGroupColumnsOfFlattenedColumns = (
     tableHeader: TableHeaderConfig[],
     mixedSectionConfigRows: ChartDataSectionField[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: BasicTableChartDataSet,
   ): TableHeaderConfig[] => {
     const newMixedConfig = mixedSectionConfigRows?.concat();
     let list: TableHeaderConfig[] = [];
@@ -1080,7 +1090,7 @@ class BasicTableChart extends ReactChart {
   getGroupColumns(
     mixedSectionConfigRows: ChartDataSectionField[],
     tableHeader: TableHeaderConfig[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: BasicTableChartDataSet,
     styleConfigs: ChartStyleConfig[],
   ): TableColumnsList[] {
     const dataConfigs = this.getGroupColumnsOfFlattenedColumns(
@@ -1107,7 +1117,7 @@ class BasicTableChart extends ReactChart {
   }
 
   private getHeaderColumnGroup(
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: BasicTableChartDataSet,
     tableHeader: TableHeaderConfig,
     columns: TableColumnsList[],
   ): TableColumnsList {

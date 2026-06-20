@@ -30,7 +30,10 @@ import {
   ChartStyleConfig,
   SelectedItem,
 } from 'app/types/ChartConfig';
-import ChartDataSetDTO, { IChartDataSet } from 'app/types/ChartDataSet';
+import ChartDataSetDTO, {
+  ChartDataSetCellValue,
+  IChartDataSet,
+} from 'app/types/ChartDataSet';
 import { BrokerContext, BrokerOption } from 'app/types/ChartLifecycleBroker';
 import {
   compareSelectedItems,
@@ -63,6 +66,8 @@ enum BolderFontWeight {
   bold = 'bolder',
   bolder = 'bolder',
 }
+
+type PivotSheetChartDataSet = IChartDataSet<ChartDataSetCellValue>;
 
 class PivotSheetChart extends ReactChart {
   static icon = `<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' aria-hidden='true' role='img' width='1em' height='1em' preserveAspectRatio='xMidYMid meet' viewBox='0 0 24 24'><path d='M10 8h11V5c0-1.1-.9-2-2-2h-9v5zM3 8h5V3H5c-1.1 0-2 .9-2 2v3zm2 13h3V10H3v9c0 1.1.9 2 2 2zm8 1l-4-4l4-4zm1-9l4-4l4 4zm.58 6H13v-2h1.58c1.33 0 2.42-1.08 2.42-2.42V13h2v1.58c0 2.44-1.98 4.42-4.42 4.42z' fill='gray'/></svg>`;
@@ -319,7 +324,7 @@ class PivotSheetChart extends ReactChart {
             return {
               field: chartDataSet.getFieldKey(config),
               name: getColumnRenderName(config),
-              formatter: (value?: string | number) =>
+              formatter: (value?: string | number | null) =>
                 toFormattedValue(value, config?.format),
             } as Meta;
           }),
@@ -385,7 +390,7 @@ class PivotSheetChart extends ReactChart {
 
   changeSelectedItems(
     cells: S2CellType<ViewMeta>[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: PivotSheetChartDataSet,
   ) {
     const selectedItems: SelectedItem[] = [];
 
@@ -503,7 +508,7 @@ class PivotSheetChart extends ReactChart {
 
   getCollapsedRows(
     rowSectionConfigRows: ChartDataSectionField[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: PivotSheetChartDataSet,
     initState?: boolean,
   ) {
     chartDataSet.forEach(dc => {
@@ -513,7 +518,7 @@ class PivotSheetChart extends ReactChart {
           !isUndefined(dc.getCell(rc)) &&
           index < rowSectionConfigRows.length - 1
         ) {
-          path = path + '[&]' + dc.getCell(rc);
+          path = path + '[&]' + String(dc.getCell(rc));
           this.collapsedRows[path] = !isUndefined(initState)
             ? Boolean(initState)
             : isUndefined(this.collapsedRows?.[path])
@@ -538,7 +543,7 @@ class PivotSheetChart extends ReactChart {
     style: ChartStyleConfig[],
     metricsSectionConfigRows: ChartDataSectionField[],
     columnSectionConfigRows: ChartDataSectionField[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: PivotSheetChartDataSet,
   ): Partial<S2Style> {
     const [bodyHeight, bodyWidth] = getStyles(
       style,
@@ -582,7 +587,7 @@ class PivotSheetChart extends ReactChart {
 
   private getTableSorters(
     sectionConfigRows: ChartDataSectionField[],
-    chartDataSet: IChartDataSet<string>,
+    chartDataSet: PivotSheetChartDataSet,
   ): Array<SortParam> {
     return sectionConfigRows
       .map(config => {
@@ -594,9 +599,13 @@ class PivotSheetChart extends ReactChart {
           sortFieldId: chartDataSet.getFieldKey(config),
           sortFunc: params => {
             const { data } = params;
-            return data?.sort((a, b) =>
-              isASC ? a?.localeCompare(b) : b?.localeCompare(a),
-            );
+            return data?.sort((a, b) => {
+              const left = String(a ?? '');
+              const right = String(b ?? '');
+              return isASC
+                ? left.localeCompare(right)
+                : right.localeCompare(left);
+            });
           },
         };
       })
