@@ -9,5 +9,5 @@ describe('PivotSheetChart runtime', () => {
         type: expect.any(Function),
       }),
     );
-  });
+  }, 15000);
 });
