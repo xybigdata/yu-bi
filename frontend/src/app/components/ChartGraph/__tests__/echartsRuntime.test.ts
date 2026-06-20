@@ -39,4 +39,12 @@ describe('loadEChartsRuntime', () => {
     await expect(loadEChartsRuntime()).resolves.toBe(runtimeModule);
     expect(loader).toHaveBeenCalledTimes(2);
   });
+
+  test('should load actual ECharts runtime module', async () => {
+    const runtimeModule = await loadEChartsRuntime();
+
+    expect(runtimeModule.init).toEqual(expect.any(Function));
+    expect(runtimeModule.registerMap).toEqual(expect.any(Function));
+    expect(runtimeModule.registerTheme).toEqual(expect.any(Function));
+  });
 });
