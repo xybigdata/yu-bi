@@ -182,6 +182,8 @@ git diff --check
 
 ### 5.2 P1：完整门禁与合并准备
 
+状态：已完成。
+
 当前分支已累计较多前端兼容边界改造。P0 收尾审计已完成，不再继续无限追加低价值小改动，应准备完整门禁和合并。
 
 前端完整门禁：
@@ -192,6 +194,13 @@ npm run test:ci
 npm run lint:css
 npm run lint:style
 ```
+
+验证结果：
+
+- `npm run checkTs` 已通过
+- `npm run test:ci` 已通过，结果为 130 个测试文件通过、907 个测试通过、4 个跳过
+- `npm run lint:css` 已通过
+- `npm run lint:style` 已通过
 
 如果 P0 改到 Maven、后端依赖或安装包，再补：
 
