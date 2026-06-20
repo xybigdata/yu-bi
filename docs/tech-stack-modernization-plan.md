@@ -262,11 +262,22 @@ git push origin main
 ```bash
 npm run checkTs
 npm run test:ci -- src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts src/app/utils/__tests__/echartsThemeRuntime.test.ts src/app/components/ChartGraph/BasicBarChart/__tests__/BasicBarChart.test.jsx src/app/components/ChartGraph/BasicLineChart/__tests__/BasicLineChart.test.jsx src/app/components/ChartGraph/BasicPieChart/__tests__/BasicPieChart.test.jsx src/app/components/ChartGraph/BasicDoubleYChart/__tests__/BasicDoubleYChart.test.jsx src/app/components/ChartGraph/WordCloudChart/__tests__/WordCloudChart.test.jsx src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx
+npm run test:ci -- src/app/components/ChartGraph
 npm install --package-lock-only --dry-run --ignore-scripts
 npm ci --dry-run --ignore-scripts
 ```
 
 结果：均已通过。
+
+P2-B AntV S2 / 透视表链路审计：
+
+- 已联网确认 `@antv/s2` 当前稳定版为 `2.7.2`，本项目 lockfile 已是 `2.7.2`
+- 已联网确认 `@antv/s2-react` 当前稳定版为 `2.3.1`，本项目 lockfile 已是 `2.3.1`
+- `@antv/s2-react@2.3.1` 的 peer 约束为 `@antv/s2 ^2.0.0`、`react >=16.9.0`、`react-dom >=16.9.0`、`less >=4.0.0`，当前 React 18 / Less 4 满足约束
+- 当前无 S2 版本可升级，暂不为了改动而改动依赖声明
+- 已补充 `PivotSheetChart` 的真实 `AntVS2Wrapper` 动态导入 smoke test，覆盖 `@antv/s2`、`@antv/s2-react` 和 CSS 入口在 Vite / Vitest 链路下可加载
+- `npm run test:ci -- src/app/components/ChartGraph/PivotSheetChart` 已通过，结果为 2 个测试文件通过、2 个测试通过
+- 测试输出存在 `@antv/s2` 包自身 source map 指向缺失源文件的 warning；不影响测试结果，后续仅在影响门禁或调试体验时处理
 
 ## 6. 风险分层
 
