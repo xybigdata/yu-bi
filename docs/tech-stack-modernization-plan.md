@@ -48,9 +48,9 @@
 ### 2.1 Git 状态
 
 - 当前分支：`codex/modernization-compatible-boundaries`
-- 当前分支相对 `origin/main`：领先 13 个提交，未落后
-- 最近已推送提交：`666bbfd48 docs: 同步图表数据集改造进度`
-- 当前工作区：图表 helper 数据集泛型残留清理批次，尚未提交
+- 当前分支相对 `origin/main`：领先 14 个提交，未落后
+- 最近已推送提交：`faa95c996 chore: 清理图表数据集泛型残留`
+- 当前工作区：图表筛选值协议残留清理批次，准备提交
 - 当前轻量验证：`npm run checkTs` 已通过
 
 恢复工作时先执行：
@@ -135,6 +135,7 @@ git rev-list --left-right --count origin/main...HEAD
 | `e043c93f7` | 图表数据集标量协议迁移       | 普通图表内部标量值协议完成迁移                           |
 | `b828250bc` | 表格 / 透视表数据集协议      | 表格和透视表生产代码旧数据集泛型入口完成清理             |
 | `666bbfd48` | 图表数据集改造进度同步       | 执行板同步到表格 / 透视表批次完成状态                    |
+| `faa95c996` | 图表数据集泛型残留清理       | helper 注释和测试旧数据集泛型断言完成清理                |
 
 ### 3.3 阶段完成批次
 
@@ -203,7 +204,7 @@ npm run test:ci -- src/app/utils/__tests__/chartHelper.test.ts src/app/component
 - 未找到 `BasicTableChart` / `PivotSheetChart` 现成 `*.test.ts` / `*.test.tsx`
 - 本批以类型门禁、生产代码残留复扫和协议边界复核为主
 
-### 3.5 当前进行中批次
+### 3.5 阶段完成批次
 
 批次：图表 helper 数据集泛型残留清理
 
@@ -223,42 +224,62 @@ git diff --check
 
 结果：已通过。
 
-### 3.6 当前残留弱类型入口
+### 3.6 当前进行中批次
+
+批次：图表筛选值协议残留清理
+
+目标：
+
+- 为 ControllerPanel 筛选值新增 `filterValueUtils` 守卫和读取工具
+- 清理控制器筛选组件中关系值、树值、数值区间的直接类型断言
+- 复用关系筛选值守卫清理 ChartWorkbench 筛选配置中的明显残留断言
+- 保持 `FilterConditionValue` 联合协议不变
+
+当前验证：
+
+```bash
+npm run checkTs
+npm run test:ci -- src/app/models/__tests__/ChartFilterCondition.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/filterValueUtils.test.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/__tests__/timeFilterUtils.test.ts
+git diff --check
+```
+
+结果：已通过。
+
+### 3.7 当前残留弱类型入口
 
 当前复扫命令：
 
 ```bash
-rg -n "IChartDataSet<string>|IChartDataSetRow<string>|asStringDataSet|asCellValueDataSet" frontend/src/app/components/ChartGraph frontend/src/app/utils frontend/src/app/pages -g '*.ts' -g '*.tsx'
+rg -n "condition\\?\\.value as|condition\\.value as|newCondition\\.value as|value as RelationFilterValue|as \\[number, number\\]|as RelationFilterValue\\[\\]|as TreeFilterNode\\[\\]|as \\[\\]" frontend/src/app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartFieldAction/FilterControlPanel frontend/src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector -g '*.ts' -g '*.tsx'
 ```
 
 剩余重点：
 
-| 模块                  | 状态   | 处理策略                                  |
-| --------------------- | ------ | ----------------------------------------- |
-| 数据集旧泛型生产入口  | 已清空 | 本轮复扫无残留                            |
-| 数据集旧泛型测试断言  | 已清空 | 本轮复扫无残留                            |
-| `ChartDataSetDTO.rows` | 暂不动 | 继续保持 `string[][]` 全局协议，另行审计  |
+| 模块                          | 状态   | 处理策略                                      |
+| ----------------------------- | ------ | --------------------------------------------- |
+| ControllerPanel 筛选值断言    | 已清空 | 本轮复扫无残留                                |
+| ChartWorkbench 明显残留断言   | 已清空 | 本轮复扫无残留                                |
+| `FilterConditionValue` 全局协议 | 暂不动 | 继续保持联合类型协议，按调用链渐进审计        |
 
 ## 4. 下一步执行队列
 
 ### 4.1 当前批次 P0
 
-复扫图表筛选值协议残留：
+复扫时间体系剩余调用点：
 
-1. 复扫筛选 UI、下钻、联动参数写回的残留类型断言
-2. 优先处理 `ChartFilterCondition.value` 已收口协议周边的低风险调用点
+1. 复扫前端零散原生时间调用点
+2. 优先处理可替换为既有时间工具的低风险调用
 3. 运行：
 
 ```bash
 npm run checkTs
-npm run test:ci -- src/app/models/__tests__/ChartFilterCondition.test.ts
 git diff --check
 ```
 
 建议提交信息：
 
 ```text
-chore: 清理图表筛选值协议残留
+chore: 清理前端时间调用残留
 ```
 
 ### 4.2 下一批 P1
@@ -267,7 +288,6 @@ chore: 清理图表筛选值协议残留
 
 | 优先级 | 专题                         | 下一步                                           | 风险 |
 | ------ | ---------------------------- | ------------------------------------------------ | ---- |
-| P1     | 时间体系剩余调用点          | 复扫零散原生时间调用                             | 低   |
 | P1     | 前端公开类型入口            | 防止 Ant Design / rc 深路径类型入口回退          | 低   |
 | P2     | 安装健康度                  | 防止锁文件与 package 声明漂移                    | 低   |
 

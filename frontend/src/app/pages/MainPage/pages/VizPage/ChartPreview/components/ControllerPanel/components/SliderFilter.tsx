@@ -19,6 +19,7 @@ import { Slider } from 'antd';
 import { updateBy } from 'app/utils/mutation';
 import { FC, memo, useState } from 'react';
 import { PresentControllerFilterProps } from '.';
+import { getNumberRangeValue, isNumberRangeValue } from './filterValueUtils';
 
 type SliderRangeOnChange = (value: number[]) => void;
 
@@ -28,22 +29,19 @@ const SliderFilter: FC<PresentControllerFilterProps> = memo(
       typeof options === 'object' && options ? options : undefined;
 
     const [valueRange, setValueRange] = useState(() => {
-      if (Array.isArray(condition?.value)) {
-        return condition?.value as [number, number];
-      }
+      return getNumberRangeValue(condition?.value);
     });
 
     const handleValueChange: SliderRangeOnChange = values => {
-      if (!Array.isArray(values) || values.length !== 2) {
+      if (!isNumberRangeValue(values)) {
         return;
       }
 
-      const nextValues = values as [number, number];
       const newCondition = updateBy(condition!, draft => {
-        draft.value = nextValues;
+        draft.value = values;
       });
       onConditionChange(newCondition);
-      setValueRange(newCondition.value as [number, number]);
+      setValueRange(getNumberRangeValue(newCondition.value));
     };
 
     return (

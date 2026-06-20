@@ -29,6 +29,7 @@ import { RelationFilterValue } from 'app/types/ChartConfig';
 import ChartDataView from 'app/types/ChartDataView';
 import { getDistinctFields } from 'app/utils/fetch';
 import { FilterSqlOperator } from 'globalConstants';
+import { getSelectedRelationKeys } from 'app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/filterValueUtils';
 import {
   forwardRef,
   ForwardRefRenderFunction,
@@ -42,7 +43,6 @@ import {
   isEmpty,
   isEmptyArray,
   isEmptyString,
-  IsKeyIn,
   isTreeModel,
 } from 'utils/object';
 import { FilterOptionForwardRef } from '.';
@@ -90,14 +90,7 @@ const CategoryConditionConfiguration: ForwardRefRenderFunction<
     if (condition?.operator === FilterSqlOperator.In) {
       values = condition?.value;
       if (Array.isArray(condition?.value)) {
-        const firstValues =
-          (condition?.value as [])?.filter(n => {
-            if (IsKeyIn(n as RelationFilterValue, 'key')) {
-              return (n as RelationFilterValue).isSelected;
-            }
-            return false;
-          }) || [];
-        values = firstValues?.map((n: RelationFilterValue) => n.key);
+        values = getSelectedRelationKeys(condition.value);
       }
     }
     return values || [];

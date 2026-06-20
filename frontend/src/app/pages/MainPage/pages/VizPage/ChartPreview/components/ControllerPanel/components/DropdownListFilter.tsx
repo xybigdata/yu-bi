@@ -23,24 +23,19 @@ import { RelationFilterValue } from 'app/types/ChartConfig';
 import { updateBy } from 'app/utils/mutation';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
-import { IsKeyIn } from 'utils/object';
 import { PresentControllerFilterProps } from '.';
+import {
+  getRelationFilterValues,
+  getSelectedRelationKeys,
+} from './filterValueUtils';
 
 const DropdownListFilter: FC<PresentControllerFilterProps> = memo(
   ({ viewId, view, condition, executeToken, onConditionChange }) => {
     const [originalNodes, setOriginalNodes] = useState<RelationFilterValue[]>(
-      condition?.value as RelationFilterValue[],
+      getRelationFilterValues(condition?.value),
     );
     const [selectedNode, setSelectedNode] = useState<string | undefined>(() => {
-      if (Array.isArray(condition?.value)) {
-        const firstValue = (condition?.value as [])?.find(n => {
-          if (IsKeyIn(n as RelationFilterValue, 'key')) {
-            return (n as RelationFilterValue).isSelected;
-          }
-          return false;
-        });
-        return (firstValue as RelationFilterValue | undefined)?.key;
-      }
+      return getSelectedRelationKeys(condition?.value)[0];
     });
 
     useFetchFilterDataByCondition(

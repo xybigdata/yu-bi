@@ -35,7 +35,7 @@ const RecommendRangeTimeSelector: FC<
 > = memo(({ i18nPrefix, condition, onConditionChange }) => {
   const t = useI18NPrefix(i18nPrefix);
   const [recommend, setRecommend] = useState<string | undefined>(
-    condition?.value as string,
+    typeof condition?.value === 'string' ? condition.value : undefined,
   );
 
   const handleChange = recommendTime => {

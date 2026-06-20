@@ -20,36 +20,24 @@ import { Tree, TreeDataNode } from 'antd';
 import { FC, Key, memo, useState } from 'react';
 import { RelationFilterValue } from 'app/types/ChartConfig';
 import { PresentControllerFilterProps } from '.';
+import {
+  collectSelectedTreeKeys,
+  getTreeFilterNodes,
+} from './filterValueUtils';
 
 type TreeFilterNode = RelationFilterValue & TreeDataNode;
 
 const TreeFilter: FC<PresentControllerFilterProps> = memo(
   ({ condition, onConditionChange }) => {
-    const getSelectedKeysFromTreeModel = (
-      list: TreeFilterNode[] | undefined,
-      collector: Key[],
-    ) => {
-      list?.forEach(l => {
-        if (l.isSelected) {
-          collector.push(l.key);
-        }
-        if (l.children) {
-          getSelectedKeysFromTreeModel(l.children, collector);
-        }
-      });
-    };
     const [treeData] = useState(() => {
-      if (Array.isArray(condition?.value)) {
-        return condition?.value as TreeFilterNode[];
-      }
-      return [];
+      return getTreeFilterNodes(condition?.value);
     });
     const [selectedKeys, setSelectedKeys] = useState(() => {
       if (!treeData) {
         return [];
       }
       const selectedKeys: Key[] = [];
-      getSelectedKeysFromTreeModel(treeData, selectedKeys);
+      collectSelectedTreeKeys(treeData, selectedKeys);
       return selectedKeys;
     });
 
