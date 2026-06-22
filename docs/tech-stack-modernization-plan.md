@@ -45,11 +45,11 @@ git log --oneline --decorate -8
 | 工作目录 | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
 | 远端 | `git@github.com:xybigdata/yu-bi.git` |
 | 主线分支 | `main` |
-| 当前专题分支 | `codex/modernization-build-package` |
-| 当前专题 | P2-A Maven、Docker、安装包链路复核 |
+| 当前专题分支 | `codex/modernization-shiro-health` |
+| 当前专题 | P2-B Shiro 认证授权健康度审计 |
 | 当前分支相对 `origin/main` | 以恢复命令输出为准，当前专题持续领先主线 |
 | 最近专题提交 | 以 `git log --oneline --decorate -8` 为准 |
-| 最近主线提交 | `77217676b chore: 合入前端运行时现代化批次` |
+| 最近主线提交 | `2c691916b chore: 合入构建与安装包链路现代化` |
 
 已确认的自动化权限和偏好：
 
@@ -73,10 +73,10 @@ git log --oneline --decorate -8
 当前专题分支：
 
 ```bash
-codex/modernization-build-package
+codex/modernization-shiro-health
 ```
 
-当前专题收口前不要创建新分支。P2-A 完成 Docker、部署文档、安装包 smoke 后，再统一验证、提交、推送；是否合入 `main` 取决于本批次完整门禁结果和主线节奏。
+当前专题收口前不要创建新分支。P2-B 先补认证授权边界测试和小修，再判断是否继续处理 JWK / BouncyCastle 兼容缺口；专题完成后再统一验证、提交、推送。
 
 ## 4. 技术栈基线
 
@@ -90,6 +90,7 @@ codex/modernization-build-package
 | Spring Cloud | `2025.0.1` | 与 Boot 3.5 配套 |
 | MyBatis Spring Boot | `3.0.4` | 已适配 Boot 3 |
 | GraalJS | `25.0.1` | 已替代 Nashorn 主链 |
+| BouncyCastle | `1.81.1` | 已统一到 `jdk18on` 组件线 |
 | Springdoc | `2.8.17` | 已适配 Boot 3 |
 | H2 | `2.4.240` | 已升级 |
 | Selenium | `4.31.0` | 已升级 |
@@ -149,6 +150,7 @@ codex/modernization-build-package
 | 现代化兼容边界 | 已合入并推送 `origin/main` |
 | 图表运行时现代化 | 已合入并推送 `origin/main` |
 | 前端运行时现代化批次 | 已合入并推送 `origin/main`，主线提交 `77217676b` |
+| 构建与安装包链路现代化 | 已合入并推送 `origin/main`，主线提交 `2c691916b` |
 
 ### 5.3 前端运行时专题复盘
 
@@ -228,23 +230,66 @@ P2-A 本批次完成状态：
 | Deployment.md 品牌文案 | 低 | 仅收口用户可见安装包示例，不改 `datart.conf` 和 `datart.*` 配置前缀 |
 | Docker build 验证 | 受环境限制 | 当前本机无 `docker` 命令，记录为验证缺口 |
 
-P2-A 本批次下一步：
+P2-A 后续缺口：
 
-- 提交门禁记录后按 `--no-ff` 合并回 `main`
 - 后续具备 Docker 环境后补 `docker build` 和容器健康检查验证
 
-## 7. 后续队列
+## 7. 当前短期目标：P2-B Shiro 认证授权健康度审计
+
+分支：`codex/modernization-shiro-health`
+
+目标：不整体替换 Shiro，只补认证授权关键边界用例，并修复能被测试证明的授权正确性问题。
+
+本批次已完成：
+
+- 审计 `security` 模块 Shiro 适配层：`ShiroSecurityManager`、`ShiroSubjectFacade`、`ShiroAuthenticationTokenAdapter`
+- 新增 `ShiroSecurityManagerTest`，覆盖 `requireAllPermissions` 的权限缓存边界
+- 修复 `requireAllPermissions` 在已缓存允许权限时提前返回的问题；现在会继续检查后续权限
+- 新增 `ShiroAuthenticationTokenAdapterTest`，覆盖密码 token、合法 bearer token、非法 bearer token 边界
+- `ShiroAuthenticationTokenAdapter` 对非法 bearer token 返回稳定认证失败结果，不再向后传递空指针风险
+- 排除钉钉 SDK 传入的旧 `bcpkix-jdk15on` / `bcprov-jdk15on` `1.65`
+- 将 security 模块 BouncyCastle 组件统一到 `jdk18on` `1.81.1`
+- 修复 EC PEM / JWK 测试里的 BouncyCastle `NoSuchMethodError`
+- 确认本批次不触碰 Java 包名 `datart.*`、配置前缀 `datart.*`、`DATART_*` 和迁移稳定标识
+
+已通过验证：
+
+```bash
+mvn -pl security -am -Dtest=datart.security.manager.shiro.ShiroSecurityManagerTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl security -am test
+mvn -pl security -am dependency:tree '-Dincludes=org.bouncycastle:*' -Dscope=test
+git diff --check
+npm run checkTs
+npm run test:ci
+npm run lint:css
+npm run lint:style
+```
+
+验证说明：
+
+- 普通沙箱运行 Maven 仍会因写 `~/.m2` 被拦截失败；提权后定向 Shiro 测试通过
+- `mvn -pl security -am test` 已通过，覆盖 core 3 个测试、security 12 个测试
+- BouncyCastle 依赖树已确认只保留 `bcpkix-jdk18on`、`bcutil-jdk18on`、`bcprov-jdk18on` `1.81.1`
+- 合入 `main` 前完整前端门禁已通过：`checkTs`、`test:ci`、`lint:css`、`lint:style`
+- `npm run test:ci` 已通过 132 个测试文件、919 个测试，4 个跳过
+- Maven 解析阿里云仓库 metadata 时出现过缺 checksum warning，但构建和测试通过
+
+P2-B 本批次下一步：
+
+- 提交并推送当前专题分支
+- 使用 `--no-ff` 合入 `main`，再推送主线
+
+## 8. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
-| P2-B | Shiro 认证授权健康度审计 | 高 | 只补边界用例和小修，不整体替换 |
 | P2-C | Calcite SQL 解析健康度审计 | 高 | 先补 SQL 解析兼容样例，不整体替换 |
 | P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
 | P2-E | 前端安全依赖治理 | 中高 | 单独专题处理 Dependabot 类问题，避免混入运行时改造 |
 | P2-F | React 19、AntD 6、Vite 8、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
 | P2-G | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 
-## 8. 门禁策略
+## 9. 门禁策略
 
 开发期按风险分层验证，不为每个小改动跑完整门禁。提交前做本批次相关门禁；准备合入 `main` 或推送 `main` 前做完整门禁。
 
@@ -288,7 +333,7 @@ npm ci --dry-run --ignore-scripts
 - 不为了覆盖率硬造低价值快照测试
 - 本机缺少外部工具时记录原因，例如当前无 `docker` 命令，不能本地验证 Docker build
 
-## 9. 提交节奏
+## 10. 提交节奏
 
 同一专题内累计一组相关改动后再提交，减少主线合并和完整回归次数。
 
@@ -301,18 +346,18 @@ npm ci --dry-run --ignore-scripts
 | 依赖和构建链路 | 独立提交，但尽量包含完整链路文档和验证记录 |
 | 阶段复盘 | 跟随当前批次提交，必要时可单独文档提交 |
 
-不要因为单个小文件改动立刻提交。当前 P2-A 应完成 Dockerfile、Deployment.md 和执行文档后再提交。
+不要因为单个小文件改动立刻提交。当前 P2-B 应完成 Shiro 边界测试、小修和执行文档同步后再提交。
 
-## 10. 恢复命令
+## 11. 恢复命令
 
-继续 P2-A：
+继续 P2-B：
 
 ```bash
 git status --short --branch
 git rev-list --left-right --count origin/main...HEAD
-sed -n '1,120p' Dockerfile
-sed -n '1,140p' Deployment.md
-sed -n '180,320p' server/pom.xml
+sed -n '120,175p' security/src/main/java/datart/security/manager/shiro/ShiroSecurityManager.java
+sed -n '1,180p' security/src/test/java/datart/security/manager/shiro/ShiroSecurityManagerTest.java
+mvn -pl security -am -Dtest=datart.security.manager.shiro.ShiroSecurityManagerTest -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
 追溯历史：
@@ -320,5 +365,6 @@ sed -n '180,320p' server/pom.xml
 ```bash
 git log --oneline -- docs/tech-stack-modernization-plan.md
 git log --oneline -- Dockerfile Deployment.md server/pom.xml bin/yu-bi-server.sh bin/yu-bi-server.cmd
+git log --oneline -- security/src/main/java/datart/security/manager/shiro security/src/test/java/datart/security
 git log --oneline -- frontend/package.json frontend/package-lock.json
 ```

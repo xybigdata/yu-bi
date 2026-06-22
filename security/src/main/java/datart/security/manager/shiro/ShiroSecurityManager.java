@@ -142,7 +142,7 @@ public class ShiroSecurityManager implements DatartSecurityManager {
                 if (!permitted) {
                     Exceptions.e(new SecurityAuthorizationException(null));
                 } else {
-                    return;
+                    continue;
                 }
             }
             Set<String> permissionString = PermissionStringCodec.toPermissionStrings(permission.getOrgId()
