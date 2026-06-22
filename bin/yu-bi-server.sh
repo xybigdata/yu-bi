@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Datart
+# yu-bi
 # <p>
 # Copyright 2021
 # <p>
@@ -25,11 +25,11 @@ cd "${BASE_DIR}"
 CLASS_PATH="${BASE_DIR}/lib/*"
 
 START_CLASS="datart.DatartServerApplication"
-
-#java -server -Xms2G -Xmx2G  -Dspring.profiles.active=config -Dfile.encoding=UTF-8 -cp "${CLASS_PATH}" datart.DatartServerApplication
+JAVA_OPENS_ARGS=(
+    "--add-opens=java.base/java.lang=ALL-UNNAMED"
+)
 
 datart_status(){
-    #result=`ps -ef | awk '/DatartServerApplication/ && !/awk/{print $2}' | wc -l`
     result=`ps -ef | grep -v grep | grep "${BASE_DIR}/lib" | grep 'DatartServerApplication' | awk {'print $2'} | wc -l`
 
     if [[ $result -eq 0 ]]; then
@@ -44,13 +44,12 @@ datart_start(){
     datart_status >/dev/null 2>&1
     if [[ $? -eq 0 ]]; then
 
-        nohup  java -server -Xms2G -Xmx2G -Dspring.profiles.active=config -Dfile.encoding=UTF-8 -cp "${CLASS_PATH}" "${START_CLASS}" &
+        nohup  java -server -Xms2G -Xmx2G "${JAVA_OPENS_ARGS[@]}" -Dspring.profiles.active=config -Dfile.encoding=UTF-8 -cp "${CLASS_PATH}" "${START_CLASS}" &
 
     else
         echo ""
-        #PID=`ps -ef | awk '/DatartServerApplication/ && !/awk/{print $2}'`
         PID=`ps -ef | grep -v grep | grep "${BASE_DIR}/lib" | grep 'DatartServerApplication' | awk {'print $2'}`
-        echo "Datart is Running Now..... PID is ${PID} "
+        echo "yu-bi is running now. PID is ${PID} "
     fi
 }
 
@@ -59,10 +58,9 @@ datart_stop(){
     datart_status >/dev/null 2>&1
     if [[ $? -eq 0 ]]; then
         echo ""
-        echo "Datart is not Running....."
+        echo "yu-bi is not running."
         echo ""
     else
-         #ps -ef | awk '/DatartServerApplication/ && !/awk/{print $2}'| xargs kill -9
          ps -ef | grep -v grep | grep "$BASE_DIR/lib" | grep 'DatartServerApplication' | awk {'print $2'} | xargs kill -9
 
     fi
@@ -72,7 +70,7 @@ datart_stop(){
 case $1 in
     start )
         echo ""
-        echo "Datart Starting........... "
+        echo "yu-bi starting..."
         echo ""
         datart_start
     ;;
@@ -80,18 +78,18 @@ case $1 in
     stop )
         echo ""
 
-        echo "Datart Stopping.......... "
+        echo "yu-bi stopping..."
 
         echo ""
         datart_stop
     ;;
 
     restart )
-        echo "Datart is Restarting.......... "
+        echo "yu-bi restarting..."
         datart_stop
         echo ""
         datart_start
-        echo "Datart is Starting.......... "
+        echo "yu-bi is starting..."
 
     ;;
 
@@ -99,13 +97,12 @@ case $1 in
         datart_status>/dev/null 2>&1
         if [[ $? -eq 0 ]]; then
             echo ""
-            echo "Datart is not Running......"
+            echo "yu-bi is not running."
             echo ""
         else
             echo ""
-            #PID=`ps -ef | awk '/DatartServerApplication/ && !/awk/{print $2}'`
             PID=`ps -ef | grep -v grep | grep "${BASE_DIR}/lib" | grep 'DatartServerApplication' | awk {'print $2'}`
-            echo "Datart is Running..... PID is ${PID}"
+            echo "yu-bi is running. PID is ${PID}"
             echo ""
         fi
      ;;

@@ -1,6 +1,6 @@
 @echo off
 
-REM Datart
+REM yu-bi
 REM <p>
 REM Copyright 2021
 REM <p>
@@ -26,4 +26,4 @@ cd /d %~dp0
 
 cd ..
 
-java -server -Xms2G -Xmx2G -Dspring.profiles.active=config -Dfile.encoding=UTF-8 -cp ".\lib\*" datart.DatartServerApplication
+java -server -Xms2G -Xmx2G --add-opens=java.base/java.lang=ALL-UNNAMED -Dspring.profiles.active=config -Dfile.encoding=UTF-8 -cp ".\lib\*" datart.DatartServerApplication

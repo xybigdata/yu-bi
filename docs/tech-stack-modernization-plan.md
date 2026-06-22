@@ -240,6 +240,34 @@ sed -n '360,540p' frontend/src/app/pages/DashBoardPage/pages/BoardEditor/slice/c
 | P2-E | 前端安全依赖治理 | 中高 | 单独专题处理 Dependabot 类问题，避免混入运行时改造 |
 | P2-F | React 19、AntD 6、Vite 8、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
 
+### 7.1 当前 P2-A 专题进度
+
+分支：`codex/modernization-build-package`
+
+已完成：
+
+- 清理 `server/pom.xml` 中已注释的旧 `frontend-maven-plugin` Node 14 / npm 6 配置块
+- 将 Maven 前端 bootstrap registry 从废弃 `registry.npm.taobao.org` 切到 `registry.npmmirror.com`
+- Linux / Windows 安装包启动脚本补齐 JDK 21 运行参数：`--add-opens=java.base/java.lang=ALL-UNNAMED`
+- Linux / Windows 安装包启动脚本用户可见文案收口为 `yu-bi`
+- 保留内部启动类 `datart.DatartServerApplication`，不触碰 Java 包名和稳定内部标识
+
+已通过验证：
+
+```bash
+bash -n bin/yu-bi-server.sh scripts/check-demo-health.sh
+java -version
+mvn -version
+mvn package -DskipTests
+scripts/check-demo-health.sh
+```
+
+说明：
+
+- `mvn package -DskipTests` 在普通沙箱下因无法写入 `~/.m2` resolver 状态文件失败；提权后通过
+- `scripts/check-demo-health.sh` 在普通沙箱下因本地端口绑定受限失败；提权后通过
+- Maven 打包已重新生成 `yu-bi-server-1.0.0-rc.3-install.zip`，构建产物未产生需要提交的跟踪文件变更
+
 暂不做整体重构：
 
 - Java 包名 `datart.*`
