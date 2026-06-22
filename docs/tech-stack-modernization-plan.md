@@ -165,7 +165,7 @@ codex/modernization-frontend-runtime-next
 - `react-window` 从 `^1.8.6` 升级到 `^1.8.11`
 - 暂不升级 `react-window` 2.x；当前项目依赖 `VariableSizeGrid`，2.x 需要独立迁移专题
 - `react-draggable` 从 `^4.4.3` 升级到 `^4.7.0`
-- `react-resizable` 从 `^3.0.4` 升级到 `^3.0.5`
+- `react-resizable` 从 `^3.0.4` 升级到 `^3.2.0`
 - 移除过时的 `@types/react-grid-layout`
 - 确认 `@hello-pangea/dnd`、`react-dnd`、`react-dnd-html5-backend` 当前已在稳定线
 - 补充前端布局、虚拟表格、拖拽运行时 smoke test
@@ -175,6 +175,9 @@ codex/modernization-frontend-runtime-next
 - 前端补丁线升级：`react-resizable` `3.2.0`、`vitest` `4.1.9`、`less` `4.6.6`、`lint-staged` `17.0.8`
 - Node 24 / React 18 类型边界对齐：`@types/node` `24.13.2`、`@types/react` `18.3.31`、`@types/react-dom` `18.3.7`、`@types/react-resizable` `3.0.8`
 - ESLint TypeScript 插件补丁线对齐：`@typescript-eslint/eslint-plugin` / `parser` `8.61.1`
+- 已复扫前端公开入口和深路径 import；仅保留 `react-grid-layout/css/styles.css` 这类公开样式入口
+- 已确认 `react-beautiful-dnd`、`react-sortable-hoc`、`react-virtualized`、`@types/react-grid-layout` 等旧依赖无源码和依赖树残留
+- 已在本机 `Node v24.16.0`、`npm 11.13.0` 下复核 lockfile dry-run 可解析
 
 已通过验证：
 
@@ -185,6 +188,8 @@ npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts
 npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts
 npm install --package-lock-only --dry-run --ignore-scripts
 npm ci --dry-run --ignore-scripts
+node -v
+npm -v
 git diff --check
 ```
 
@@ -198,10 +203,10 @@ git diff --check
 
 | 优先级 | 事项 | 风险 | 当前策略 |
 | --- | --- | --- | --- |
-| P1-C | Dashboard widget 内容协议继续收口 | 中 | 已新增统一读取 helper；下一步处理 action/thunk 剩余散点 |
+| P1-C | Dashboard widget 内容协议继续收口 | 中 | 已新增统一读取 helper，并收口 utils、TabWidgetCore、action/thunk 主要访问点 |
 | P1-F | 前端运行时依赖剩余项复扫 | 中 | 已完成一批补丁线升级；React 19 / AntD 6 / Vite 8 / TS 6 等主版本暂缓 |
-| P1-G | 前端公开入口和深路径 import 复扫 | 低 | 保留公开样式入口，清理过时类型包和私有入口 |
-| P1-H | Node 24 / npm 11 安装健康度复核 | 低 | 保持 lockfile 可解析，继续验证 `npm ci --dry-run --ignore-scripts` |
+| P1-G | 前端公开入口和深路径 import 复扫 | 低 | 已完成复扫，无需继续处理 |
+| P1-H | Node 24 / npm 11 安装健康度复核 | 低 | 已在 Node 24 / npm 11 下完成 dry-run 验证 |
 
 Dashboard widget 内容协议下一步切入点：
 
