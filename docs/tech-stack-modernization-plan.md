@@ -150,6 +150,7 @@ codex/modernization-shiro-health
 | 现代化兼容边界 | 已合入并推送 `origin/main` |
 | 图表运行时现代化 | 已合入并推送 `origin/main` |
 | 前端运行时现代化批次 | 已合入并推送 `origin/main`，主线提交 `77217676b` |
+| 构建与安装包链路现代化 | 已合入并推送 `origin/main`，主线提交 `2c691916b` |
 
 ### 5.3 前端运行时专题复盘
 
@@ -257,6 +258,11 @@ P2-A 后续缺口：
 mvn -pl security -am -Dtest=datart.security.manager.shiro.ShiroSecurityManagerTest -Dsurefire.failIfNoSpecifiedTests=false test
 mvn -pl security -am test
 mvn -pl security -am dependency:tree '-Dincludes=org.bouncycastle:*' -Dscope=test
+git diff --check
+npm run checkTs
+npm run test:ci
+npm run lint:css
+npm run lint:style
 ```
 
 验证说明：
@@ -264,12 +270,14 @@ mvn -pl security -am dependency:tree '-Dincludes=org.bouncycastle:*' -Dscope=tes
 - 普通沙箱运行 Maven 仍会因写 `~/.m2` 被拦截失败；提权后定向 Shiro 测试通过
 - `mvn -pl security -am test` 已通过，覆盖 core 3 个测试、security 12 个测试
 - BouncyCastle 依赖树已确认只保留 `bcpkix-jdk18on`、`bcutil-jdk18on`、`bcprov-jdk18on` `1.81.1`
+- 合入 `main` 前完整前端门禁已通过：`checkTs`、`test:ci`、`lint:css`、`lint:style`
+- `npm run test:ci` 已通过 132 个测试文件、919 个测试，4 个跳过
 - Maven 解析阿里云仓库 metadata 时出现过缺 checksum warning，但构建和测试通过
 
 P2-B 本批次下一步：
 
-- 运行 `git diff --check`
-- 提交并推送当前专题分支，暂不合并 `main`
+- 提交并推送当前专题分支
+- 使用 `--no-ff` 合入 `main`，再推送主线
 
 ## 8. 后续队列
 
