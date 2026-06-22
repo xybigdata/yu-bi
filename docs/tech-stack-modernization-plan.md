@@ -47,8 +47,8 @@ git log --oneline --decorate -8
 | 主线分支 | `main` |
 | 当前专题分支 | `codex/modernization-build-package` |
 | 当前专题 | P2-A Maven、Docker、安装包链路复核 |
-| 当前分支相对 `origin/main` | `0 1`，领先 1 个提交 |
-| 最近专题提交 | `273c87a6c chore: 优化构建与安装包启动链路` |
+| 当前分支相对 `origin/main` | 以恢复命令输出为准，当前专题持续领先主线 |
+| 最近专题提交 | 以 `git log --oneline --decorate -8` 为准 |
 | 最近主线提交 | `77217676b chore: 合入前端运行时现代化批次` |
 
 已确认的自动化权限和偏好：
@@ -188,6 +188,9 @@ npm run lint:style
 - 将 Maven 前端 bootstrap registry 从废弃 `registry.npm.taobao.org` 切到 `registry.npmmirror.com`
 - Linux / Windows 安装包启动脚本补齐 JDK 21 运行参数：`--add-opens=java.base/java.lang=ALL-UNNAMED`
 - Linux / Windows 安装包启动脚本用户可见文案收口为 `yu-bi`
+- Dockerfile 已将旧个人 label 收口为 OCI image labels
+- Dockerfile 已增加基于 `/api/v1/sys/info` 的 `HEALTHCHECK`
+- Deployment.md 安装包示例已从旧 beta 表述更新到当前 `1.0.0-rc.3`
 - 保留内部启动类 `datart.DatartServerApplication`，不触碰 Java 包名和稳定内部标识
 
 已通过验证：
@@ -198,6 +201,7 @@ java -version
 mvn -version
 mvn package -DskipTests
 scripts/check-demo-health.sh
+git diff --check
 ```
 
 验证说明：
@@ -205,23 +209,23 @@ scripts/check-demo-health.sh
 - `mvn package -DskipTests` 在普通沙箱下因无法写入 `~/.m2` resolver 状态文件失败；提权后通过
 - `scripts/check-demo-health.sh` 在普通沙箱下因本地端口绑定受限失败；提权后通过
 - Maven 打包已重新生成 `yu-bi-server-1.0.0-rc.3-install.zip`，构建产物未产生需要提交的跟踪文件变更
+- 本批次再次运行 `mvn package -DskipTests` 已通过，确认 Dockerfile 依赖的安装包可生成
+- 当前本机无 `docker` 命令，无法本地执行 Docker build；本批次只完成 Dockerfile 静态复扫
 
-P2-A 剩余改造点：
+P2-A 本批次完成状态：
 
-| 事项 | 风险 | 执行建议 |
+| 事项 | 风险 | 状态 |
 | --- | --- | --- |
-| Dockerfile 元数据 | 低 | 将旧个人 `LABEL "author"="tl"` 改为 OCI labels |
-| Docker 健康检查 | 中 | 可加 `HEALTHCHECK`，但需接受最终镜像保留 `curl` 或另找无新增工具方案 |
-| Deployment.md 安装包示例 | 低 | 将 `1.0.0-beta.x` 示例改为 `1.0.0-rc.3` 或通配包名 |
-| Deployment.md 品牌文案 | 低 | 只改用户可见品牌表述，不改 `datart.conf` 和 `datart.*` 配置前缀 |
+| Dockerfile 元数据 | 低 | 已将旧个人 label 改为 OCI labels |
+| Docker 健康检查 | 中 | 已增加 `HEALTHCHECK`；最终镜像保留 `curl` 用于健康探测 |
+| Deployment.md 安装包示例 | 低 | 已更新为当前 `1.0.0-rc.3` 示例 |
+| Deployment.md 品牌文案 | 低 | 仅收口用户可见安装包示例，不改 `datart.conf` 和 `datart.*` 配置前缀 |
 | Docker build 验证 | 受环境限制 | 当前本机无 `docker` 命令，记录为验证缺口 |
 
-P2-A 本批次下一次提交建议包含：
+P2-A 本批次下一步：
 
-- Dockerfile OCI 元数据调整
-- Deployment.md 安装包示例和用户可见文案调整
-- 本文档同步记录
-- 静态门禁结果
+- 提交并推送当前专题分支，暂不合并 `main`
+- 后续具备 Docker 环境后补 `docker build` 和容器健康检查验证
 
 ## 7. 后续队列
 

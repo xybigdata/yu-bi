@@ -56,7 +56,7 @@ datart.webdriver-path=http://127.0.0.1:4444/wd/hub
 
 - JDK 21+
 - MySql5.7+
-- yu-bi 安装包（yu-bi-server-1.0.0-beta.x-install.zip)
+- yu-bi 安装包（例如 `yu-bi-server-1.0.0-rc.3-install.zip`）
 - Mail Server （可选）
 - [ChromeWebDriver](https://chromedriver.chromium.org/) （可选）
 - Redis （可选）
@@ -64,7 +64,7 @@ datart.webdriver-path=http://127.0.0.1:4444/wd/hub
 方式1 :解压安装包 (官方提供的包)
 
 ```bash
-unzip yu-bi-server-1.0.0-beta.x-install.zip
+unzip yu-bi-server-1.0.0-rc.3-install.zip
 ```
 
 方式2 :自行编译
@@ -76,11 +76,11 @@ cd yu-bi
 
 mvn clean package -Dmaven.test.skip=true
 
-cp ./yu-bi-server-1.0.0-beta.x-install.zip  ${deployment_basedir}
+cp ./yu-bi-server-1.0.0-rc.3-install.zip  ${deployment_basedir}
 
 cd ${deployment_basedir}
 
-unzip yu-bi-server-1.0.0-beta.x-install.zip 
+unzip yu-bi-server-1.0.0-rc.3-install.zip
 
 ```
 
