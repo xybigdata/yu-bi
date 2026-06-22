@@ -390,6 +390,10 @@ mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.jdbc.S
 mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.sql.SqlScriptRenderExamplesTest -Dsurefire.failIfNoSpecifiedTests=false test
 mvn -pl data-providers/jdbc-data-provider -am test
 git diff --check
+npm run checkTs
+npm run test:ci
+npm run lint:css
+npm run lint:style
 ```
 
 验证说明：
@@ -398,11 +402,16 @@ git diff --check
 - `SqlScriptRenderTest` 5 个用例通过，新增重复简单变量替换、大小写不一致和正则敏感替换值窄用例
 - `mvn -pl data-providers/jdbc-data-provider -am test` 已通过，覆盖 core 3 个测试、data-provider-base 12 个测试、jdbc-data-provider 11 个启用测试，旧 `SqlScriptRenderTest` 仍跳过 6 个历史用例
 - 曾并行执行两个 Maven 测试命令，定向 `data-provider-base` 测试出现一次 `SqlScriptRender$1` 类加载缺失；单独复跑 base 定向测试后通过，判断为并行 target 目录竞争
+- 合入主线前完整前端门禁已通过：
+  - `npm run checkTs`
+  - `npm run test:ci`：132 个测试文件通过，919 个用例通过，4 个跳过
+  - `npm run lint:css`
+  - `npm run lint:style`
 
-P2-G 本批次下一步：
+P2-G 合入状态：
 
-- 提交并推送专题分支
-- 继续评估是否还有类似重复简单变量替换样例需要补充；不在本批次处理 PRESTO driver 元数据缺口
+- 已具备合入 `main` 条件
+- 本批次不处理 PRESTO driver 元数据缺口，保留为 P2-H 独立专题
 
 ## 10. 后续队列
 
