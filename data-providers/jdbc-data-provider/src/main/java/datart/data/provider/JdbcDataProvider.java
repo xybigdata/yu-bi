@@ -228,6 +228,7 @@ public class JdbcDataProvider extends DataProvider {
         private static final Map<String, JdbcDriverInfo> jdbcDriverInfoMap = new ConcurrentSkipListMap<>();
 
         public static JdbcDataProviderAdapter createDataProvider(JdbcProperties prop, boolean init) {
+            prop.setDbType(prop.getDbType().toUpperCase(Locale.ROOT));
             List<JdbcDriverInfo> jdbcDriverInfos = loadDriverInfoFromResource();
 
             List<JdbcDriverInfo> driverInfos = jdbcDriverInfos.stream().filter(item -> prop.getDbType().equals(item.getDbType()))
@@ -265,6 +266,9 @@ public class JdbcDataProvider extends DataProvider {
             }
             if (init) {
                 adapter.init(prop, driverInfo);
+            } else {
+                adapter.setJdbcProperties(prop);
+                adapter.setDriverInfo(driverInfo);
             }
             return adapter;
         }
@@ -329,6 +333,9 @@ public class JdbcDataProvider extends DataProvider {
         }
 
         private static Map<String, Map<String, String>> loadYml(File file) {
+            if (file == null || !file.exists()) {
+                return Collections.emptyMap();
+            }
             try (InputStream inputStream = new FileInputStream(file)) {
                 Yaml yaml = new Yaml();
                 return yaml.loadAs(inputStream, HashMap.class);
