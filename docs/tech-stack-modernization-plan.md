@@ -442,6 +442,10 @@ mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.jdbc.P
 mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.sql.SqlScriptRenderExamplesTest -Dsurefire.failIfNoSpecifiedTests=false test
 mvn -pl data-providers/jdbc-data-provider -am test
 git diff --check
+npm run checkTs
+npm run test:ci
+npm run lint:css
+npm run lint:style
 ```
 
 验证说明：
@@ -450,11 +454,15 @@ git diff --check
 - `SqlScriptRenderExamplesTest` 6 个用例通过，PRESTO 已重新纳入历史 SQL render 样例 dialect 初始化
 - `mvn -pl data-providers/jdbc-data-provider -am test` 已通过，覆盖 core 3 个测试、data-provider-base 14 个测试、jdbc-data-provider 12 个启用测试，旧 `SqlScriptRenderTest` 仍跳过 6 个历史用例
 - 测试日志中 `DBType PRESTO mismatched, use custom sql dialect` 是当前预期 fallback 路径，不代表失败
+- 合入主线前完整前端门禁已通过：
+  - `npm run checkTs`
+  - `npm run test:ci`：132 个测试文件通过，919 个用例通过，4 个跳过
+  - `npm run lint:css`
+  - `npm run lint:style`
 
 P2-H 合入状态：
 
-- 已具备提交专题分支条件
-- 合入 `main` 前需要按门禁策略补完整前端门禁
+- 已具备合入 `main` 条件
 
 ## 11. 后续队列
 
