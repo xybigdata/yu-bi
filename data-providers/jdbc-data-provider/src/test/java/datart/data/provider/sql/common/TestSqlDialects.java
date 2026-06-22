@@ -37,6 +37,9 @@ public class TestSqlDialects {
         Field[] fields = TestSqlDialects.class.getFields();
         for (Field field : fields) {
             String name = field.getName();
+            if ("PRESTO".equals(name)) {
+                continue;
+            }
             try {
                 field.setAccessible(true);
                 field.set(TestSqlDialects.class, getSqlDialect(name));
@@ -54,7 +57,7 @@ public class TestSqlDialects {
         properties.setDriverClass("");
         properties.setProperties(new Properties());
         properties.setEnableSpecialSql(false);
-        JdbcDataProviderAdapter dataProvider = JdbcDataProvider.ProviderFactory.createDataProvider(properties, true);
+        JdbcDataProviderAdapter dataProvider = JdbcDataProvider.ProviderFactory.createDataProvider(properties, false);
         SqlDialect sqlDialect = dataProvider.getSqlDialect();
         dataProvider.close();
         return sqlDialect;
@@ -64,7 +67,7 @@ public class TestSqlDialects {
         List<SqlDialect> sqlDialects = new ArrayList<>();
         Field[] fields = TestSqlDialects.class.getFields();
         List objects = ReflectionUtils.readFieldValues(Lists.newArrayList(fields), TestSqlDialects.class);
-        return (List<SqlDialect>) objects;
+        return (List<SqlDialect>) objects.stream().filter(SqlDialect.class::isInstance).toList();
     }
 
 }

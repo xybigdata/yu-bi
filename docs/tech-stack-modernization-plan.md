@@ -308,6 +308,13 @@ P2-B 完成状态：
   - MySQL、H2、Oracle、ClickHouse 的 adapter / dialect 映射
   - 小写 `dbType` 自动归一为大写
   - 未知 `dbType` 的错误边界
+- 新增 `SqlScriptRenderExamplesTest`，从历史禁用的 `SqlScriptRenderTest` 中拆出一批无需 Spring Boot 上下文、无需真实数据库连接的稳定样例，覆盖：
+  - normal SQL、变量 SQL、fallback SQL 的代表性渲染路径
+  - forbidden SQL 的拒绝边界
+  - `enableSpecialSql=true` 时特殊 SQL 可放行的边界
+- 调整测试侧 `TestSqlDialects`：
+  - 复用 `init=false` adapter 创建路径获取 dialect，避免仅为测试初始化数据源
+  - `PRESTO` 暂不纳入自动初始化集合；当前内置 driver 元数据缺少 `identifierQuote` / `literalQuote`，需要后续单独治理
 - 修复 JDBC provider 默认加载边界：
   - `config/jdbc-driver-ext.yml` 不存在时回退为空扩展配置，不阻断内置驱动加载
   - `init=false` 创建 adapter 时同步设置 `JdbcProperties` 和 `JdbcDriverInfo`，让方言发现和分页能力判断可用
@@ -322,6 +329,7 @@ mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.calcit
 mvn -pl core -Dtest=datart.core.common.POIUtilsTest test
 mvn -pl data-providers/data-provider-base -am test
 mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.jdbc.ProviderFactoryTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.sql.SqlScriptRenderExamplesTest -Dsurefire.failIfNoSpecifiedTests=false test
 mvn -pl data-providers/jdbc-data-provider -am test
 ```
 
@@ -332,16 +340,18 @@ mvn -pl data-providers/jdbc-data-provider -am test
 - `SqlScriptRenderTest` 2 个轻量渲染用例通过
 - `mvn -pl data-providers/data-provider-base -am test` 已通过，覆盖 core 3 个测试、data-provider-base 8 个测试，共 11 个测试
 - `ProviderFactoryTest` 4 个用例通过
-- `mvn -pl data-providers/jdbc-data-provider -am test` 已通过，覆盖 core 3 个测试、data-provider-base 8 个测试、jdbc-data-provider 5 个启用测试，旧 `SqlScriptRenderTest` 仍跳过 6 个历史用例
+- `SqlScriptRenderExamplesTest` 6 个用例通过
+- `mvn -pl data-providers/jdbc-data-provider -am test` 已通过，覆盖 core 3 个测试、data-provider-base 8 个测试、jdbc-data-provider 11 个启用测试，旧 `SqlScriptRenderTest` 仍跳过 6 个历史用例
+- 历史 SQL render 样例中发现 `ORDER BY $部门$` 当前不会被变量替换，暂不纳入本批次绿色基线，后续作为 SQL 变量替换行为专项处理
 - JavaCC 生成代码在 JDK 21 编译下仍有 deprecated annotation warning，暂不阻塞
 - `POIUtilsTest` 在默认 fork JVM 下曾稳定出现 `Abort trap: 6`；加入 `-Djava.awt.headless=true` 后定向和完整 data-provider-base 门禁均通过
 - 本批次只建立健康度基线，不做 Calcite 主版本升级
 
 P2-C 本批次下一步：
 
-- 继续评估是否将更多禁用的 `SqlScriptRenderTest` 样例拆出为无需 Spring 上下文的轻量参数化测试
+- 继续评估是否将更多禁用的 `SqlScriptRenderTest` 样例拆出为无需 Spring 上下文的轻量测试；当前先保留 `ORDER BY $变量$` 行为差异，避免把非绿色行为混入基线
 - 评估 P2-C 是否已具备合入主线条件；准备合入前需补完整前端门禁
-- 累计本批次 provider factory 修复、测试和文档后提交并推送专题分支
+- 累计本批次 provider factory 修复、SQL render 样例轻量化、测试和文档后提交并推送专题分支
 
 ## 9. 后续队列
 
@@ -350,6 +360,8 @@ P2-C 本批次下一步：
 | P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
 | P2-E | 前端安全依赖治理 | 中高 | 单独专题处理 Dependabot 类问题，避免混入运行时改造 |
 | P2-F | React 19、AntD 6、Vite 8、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
+| P2-G | SQL 变量替换行为专项 | 中 | 补齐 `ORDER BY $变量$` 等历史期望与当前行为差异，先补测试再修复 |
+| P2-H | PRESTO JDBC driver 元数据治理 | 中 | 补齐 `identifierQuote` / `literalQuote` 或专用 dialect，避免 fallback `CustomSqlDialect` 校验失败 |
 | P2-G | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 
 ## 10. 门禁策略
