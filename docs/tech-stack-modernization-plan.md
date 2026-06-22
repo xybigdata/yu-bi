@@ -45,11 +45,11 @@ git log --oneline --decorate -8
 | 工作目录 | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
 | 远端 | `git@github.com:xybigdata/yu-bi.git` |
 | 主线分支 | `main` |
-| 当前专题分支 | `codex/modernization-shiro-health` |
-| 当前专题 | P2-B Shiro 认证授权健康度审计 |
-| 当前分支相对 `origin/main` | 以恢复命令输出为准，当前专题持续领先主线 |
+| 当前专题分支 | `codex/modernization-calcite-health` |
+| 当前专题 | P2-C Calcite SQL 解析健康度审计 |
+| 当前分支相对 `origin/main` | 以恢复命令输出为准 |
 | 最近专题提交 | 以 `git log --oneline --decorate -8` 为准 |
-| 最近主线提交 | `2c691916b chore: 合入构建与安装包链路现代化` |
+| 最近主线提交 | `99336814e chore: 合入 Shiro 健康度现代化` |
 
 已确认的自动化权限和偏好：
 
@@ -73,10 +73,10 @@ git log --oneline --decorate -8
 当前专题分支：
 
 ```bash
-codex/modernization-shiro-health
+codex/modernization-calcite-health
 ```
 
-当前专题收口前不要创建新分支。P2-B 先补认证授权边界测试和小修，再判断是否继续处理 JWK / BouncyCastle 兼容缺口；专题完成后再统一验证、提交、推送。
+当前专题收口前不要创建新分支。P2-C 先补 Calcite SQL 解析、变量解析和方言输出健康度基线，不直接升级 Calcite 主版本；具备测试证据后再评估是否替换或升级。
 
 ## 4. 技术栈基线
 
@@ -151,6 +151,7 @@ codex/modernization-shiro-health
 | 图表运行时现代化 | 已合入并推送 `origin/main` |
 | 前端运行时现代化批次 | 已合入并推送 `origin/main`，主线提交 `77217676b` |
 | 构建与安装包链路现代化 | 已合入并推送 `origin/main`，主线提交 `2c691916b` |
+| Shiro 认证授权健康度审计 | 已合入并推送 `origin/main`，主线提交 `99336814e` |
 
 ### 5.3 前端运行时专题复盘
 
@@ -234,7 +235,7 @@ P2-A 后续缺口：
 
 - 后续具备 Docker 环境后补 `docker build` 和容器健康检查验证
 
-## 7. 当前短期目标：P2-B Shiro 认证授权健康度审计
+## 7. 已完成短期目标：P2-B Shiro 认证授权健康度审计
 
 分支：`codex/modernization-shiro-health`
 
@@ -274,22 +275,64 @@ npm run lint:style
 - `npm run test:ci` 已通过 132 个测试文件、919 个测试，4 个跳过
 - Maven 解析阿里云仓库 metadata 时出现过缺 checksum warning，但构建和测试通过
 
-P2-B 本批次下一步：
+P2-B 完成状态：
 
-- 提交并推送当前专题分支
-- 使用 `--no-ff` 合入 `main`，再推送主线
+- 已提交并推送专题分支
+- 已使用 `--no-ff` 合入 `main` 并推送主线
 
-## 8. 后续队列
+## 8. 当前短期目标：P2-C Calcite SQL 解析健康度审计
+
+分支：`codex/modernization-calcite-health`
+
+目标：不直接升级或替换 Calcite，先为 SQL 解析、变量解析和方言输出建立可重复的 JDK 21 健康度基线，为后续 Calcite 版本评估提供回归证据。
+
+本批次已完成：
+
+- 盘点 Calcite 主要使用点：自定义 JavaCC parser、`SqlParserUtils`、`SqlQueryScriptProcessor`、`SqlParserVariableResolver`、`SqlNodeUtils` 和各数据库方言 `unparse`
+- 确认 `data-provider-base` 原先缺少启用状态的 Calcite parser 单元测试
+- 新增 `SqlParserUtilsTest`，覆盖：
+  - 常见 snippet 表达式解析
+  - MySQL 反引号标识符解析和 SQL 输出
+  - yu-bi 自定义 `AGG_DATE_MONTH` 在 MySQL 方言下的输出合约
+  - 非法 snippet 的明确解析失败边界
+  - `$status$` 查询变量通过 parser visitor 识别，并将多值等值条件替换为 `IN`
+- 新增 `SqlQueryScriptProcessorTest`，覆盖：
+  - 注释清理后的单查询脚本处理
+  - 多查询脚本拒绝边界
+  - parser 无法识别但字符串校验仍属于查询时的 fallback 包装行为
+- 确认本批次不触碰 Calcite 版本、不改 Java 包名 `datart.*`、配置前缀 `datart.*`、`DATART_*` 和迁移稳定标识
+
+已通过验证：
+
+```bash
+mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.calcite.SqlParserUtilsTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.calcite.SqlParserUtilsTest,datart.data.provider.calcite.SqlQueryScriptProcessorTest -Dsurefire.failIfNoSpecifiedTests=false test
+```
+
+验证说明：
+
+- 定向测试覆盖 core、data-provider 聚合模块和 data-provider-base，`SqlParserUtilsTest` 5 个用例通过
+- P2-C 两个新增测试类共 8 个用例通过
+- JavaCC 生成代码在 JDK 21 编译下仍有 deprecated annotation warning，暂不阻塞
+- `mvn -pl data-providers/data-provider-base -am test` 曾在 `core` 模块 `POIUtilsTest` 处出现 forked VM `Abort trap: 6`，未跑到 data-provider-base；定向 P2-C 测试已通过，后续需要复核该本机 JDK/POI fork 崩溃是否可复现
+- 本批次只建立健康度基线，不做 Calcite 主版本升级
+
+P2-C 本批次下一步：
+
+- 评估是否将部分禁用的 `SqlScriptRenderTest` 拆出为无需 Spring 上下文的轻量参数化测试
+- 复跑 data-provider-base 模块完整测试，若 `POIUtilsTest` fork 崩溃可复现，则单独记录为 JDK 21 / POI 环境问题
+- 累计本批次测试和文档后提交并推送专题分支
+
+## 9. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
-| P2-C | Calcite SQL 解析健康度审计 | 高 | 先补 SQL 解析兼容样例，不整体替换 |
 | P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
 | P2-E | 前端安全依赖治理 | 中高 | 单独专题处理 Dependabot 类问题，避免混入运行时改造 |
 | P2-F | React 19、AntD 6、Vite 8、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
 | P2-G | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 
-## 9. 门禁策略
+## 10. 门禁策略
 
 开发期按风险分层验证，不为每个小改动跑完整门禁。提交前做本批次相关门禁；准备合入 `main` 或推送 `main` 前做完整门禁。
 
@@ -333,7 +376,7 @@ npm ci --dry-run --ignore-scripts
 - 不为了覆盖率硬造低价值快照测试
 - 本机缺少外部工具时记录原因，例如当前无 `docker` 命令，不能本地验证 Docker build
 
-## 10. 提交节奏
+## 11. 提交节奏
 
 同一专题内累计一组相关改动后再提交，减少主线合并和完整回归次数。
 
@@ -346,18 +389,17 @@ npm ci --dry-run --ignore-scripts
 | 依赖和构建链路 | 独立提交，但尽量包含完整链路文档和验证记录 |
 | 阶段复盘 | 跟随当前批次提交，必要时可单独文档提交 |
 
-不要因为单个小文件改动立刻提交。当前 P2-B 应完成 Shiro 边界测试、小修和执行文档同步后再提交。
+不要因为单个小文件改动立刻提交。当前 P2-C 应继续补 Calcite 解析和 SQL 处理边界测试，累计一组有价值的健康度基线后再提交。
 
-## 11. 恢复命令
+## 12. 恢复命令
 
-继续 P2-B：
+继续 P2-C：
 
 ```bash
 git status --short --branch
 git rev-list --left-right --count origin/main...HEAD
-sed -n '120,175p' security/src/main/java/datart/security/manager/shiro/ShiroSecurityManager.java
-sed -n '1,180p' security/src/test/java/datart/security/manager/shiro/ShiroSecurityManagerTest.java
-mvn -pl security -am -Dtest=datart.security.manager.shiro.ShiroSecurityManagerTest -Dsurefire.failIfNoSpecifiedTests=false test
+sed -n '1,220p' data-providers/data-provider-base/src/test/java/datart/data/provider/calcite/SqlParserUtilsTest.java
+mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.calcite.SqlParserUtilsTest,datart.data.provider.calcite.SqlQueryScriptProcessorTest -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
 追溯历史：
