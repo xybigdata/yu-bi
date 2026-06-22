@@ -186,6 +186,9 @@ npm run checkTs
 npm run test:ci -- src/app/components/__tests__/dndRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/components/__tests__/VirtualTable.test.tsx src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx
 npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts
 npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts
+npm run test:ci
+npm run lint:css
+npm run lint:style
 npm install --package-lock-only --dry-run --ignore-scripts
 npm ci --dry-run --ignore-scripts
 node -v
@@ -193,7 +196,7 @@ npm -v
 git diff --check
 ```
 
-当前专题尚未合入 `main`。
+专题收尾完整前端门禁已通过，当前专题准备合入 `main`。
 
 ## 6. 当前短期目标
 
