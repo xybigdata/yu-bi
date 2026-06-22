@@ -1,0 +1,84 @@
+package datart.data.provider.jdbc;
+
+import datart.core.base.consts.ValueType;
+import datart.core.base.consts.VariableTypeEnum;
+import datart.core.data.provider.QueryScript;
+import datart.core.data.provider.ScriptType;
+import datart.core.data.provider.ScriptVariable;
+import datart.data.provider.calcite.dialect.MysqlSqlStdOperatorSupport;
+import datart.data.provider.script.SqlStringUtils;
+import org.apache.calcite.sql.SqlDialect;
+import org.apache.calcite.sql.parser.SqlParseException;
+import org.junit.jupiter.api.Test;
+
+import java.util.LinkedHashSet;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class SqlScriptRenderTest {
+
+    private final SqlDialect mysqlDialect = new MysqlSqlStdOperatorSupport();
+
+    @Test
+    void shouldRenderSqlQueryAndCleanupComments() throws SqlParseException {
+        SqlScriptRender render = new SqlScriptRender(
+                queryScript(
+                        "-- ignored\n" +
+                                "SELECT `id`, `status` FROM `orders` WHERE `status` = 'paid';"
+                ),
+                null,
+                mysqlDialect
+        );
+
+        assertEquals(
+                "SELECT * FROM ( SELECT `id`, `status` FROM `orders` WHERE `status` = 'paid' ) AS `DATART_VTABLE`",
+                cleanup(render.render(false, false, false))
+        );
+    }
+
+    @Test
+    void shouldReplaceQueryVariableWhenRenderingSql() throws SqlParseException {
+        ScriptVariable status = variable(
+                "$status$",
+                ValueType.STRING,
+                VariableTypeEnum.QUERY,
+                "paid",
+                "refunded"
+        );
+        SqlScriptRender render = new SqlScriptRender(
+                queryScript(
+                        "SELECT * FROM `orders` WHERE `status` = $status$",
+                        status
+                ),
+                null,
+                mysqlDialect
+        );
+
+        assertEquals(
+                "SELECT * FROM ( SELECT * FROM `orders` WHERE `status` IN ('paid', 'refunded') ) AS `DATART_VTABLE`",
+                cleanup(render.render(false, false, false))
+        );
+    }
+
+    private QueryScript queryScript(String script, ScriptVariable... variables) {
+        QueryScript queryScript = new QueryScript();
+        queryScript.setScriptType(ScriptType.SQL);
+        queryScript.setScript(script);
+        queryScript.setVariables(List.of(variables));
+        return queryScript;
+    }
+
+    private ScriptVariable variable(String name, ValueType valueType, VariableTypeEnum type, String... values) {
+        ScriptVariable variable = new ScriptVariable();
+        variable.setName(name);
+        variable.setValueType(valueType);
+        variable.setType(type);
+        variable.setValues(new LinkedHashSet<>(List.of(values)));
+        return variable;
+    }
+
+    private String cleanup(String sql) {
+        return SqlStringUtils.cleanupSql(sql).replaceAll("\\s+", " ");
+    }
+}
