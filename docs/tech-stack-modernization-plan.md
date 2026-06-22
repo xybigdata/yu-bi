@@ -45,11 +45,11 @@ git log --oneline --decorate -8
 | 工作目录 | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
 | 远端 | `git@github.com:xybigdata/yu-bi.git` |
 | 主线分支 | `main` |
-| 当前专题分支 | `codex/modernization-build-package` |
-| 当前专题 | P2-A Maven、Docker、安装包链路复核 |
+| 当前专题分支 | `codex/modernization-shiro-health` |
+| 当前专题 | P2-B Shiro 认证授权健康度审计 |
 | 当前分支相对 `origin/main` | 以恢复命令输出为准，当前专题持续领先主线 |
 | 最近专题提交 | 以 `git log --oneline --decorate -8` 为准 |
-| 最近主线提交 | `77217676b chore: 合入前端运行时现代化批次` |
+| 最近主线提交 | `2c691916b chore: 合入构建与安装包链路现代化` |
 
 已确认的自动化权限和偏好：
 
@@ -73,10 +73,10 @@ git log --oneline --decorate -8
 当前专题分支：
 
 ```bash
-codex/modernization-build-package
+codex/modernization-shiro-health
 ```
 
-当前专题收口前不要创建新分支。P2-A 完成 Docker、部署文档、安装包 smoke 后，再统一验证、提交、推送；是否合入 `main` 取决于本批次完整门禁结果和主线节奏。
+当前专题收口前不要创建新分支。P2-B 先补认证授权边界测试和小修，再判断是否继续处理 JWK / BouncyCastle 兼容缺口；专题完成后再统一验证、提交、推送。
 
 ## 4. 技术栈基线
 
@@ -228,23 +228,52 @@ P2-A 本批次完成状态：
 | Deployment.md 品牌文案 | 低 | 仅收口用户可见安装包示例，不改 `datart.conf` 和 `datart.*` 配置前缀 |
 | Docker build 验证 | 受环境限制 | 当前本机无 `docker` 命令，记录为验证缺口 |
 
-P2-A 本批次下一步：
+P2-A 后续缺口：
 
-- 提交门禁记录后按 `--no-ff` 合并回 `main`
 - 后续具备 Docker 环境后补 `docker build` 和容器健康检查验证
 
-## 7. 后续队列
+## 7. 当前短期目标：P2-B Shiro 认证授权健康度审计
+
+分支：`codex/modernization-shiro-health`
+
+目标：不整体替换 Shiro，只补认证授权关键边界用例，并修复能被测试证明的授权正确性问题。
+
+本批次已完成：
+
+- 审计 `security` 模块 Shiro 适配层：`ShiroSecurityManager`、`ShiroSubjectFacade`、`ShiroAuthenticationTokenAdapter`
+- 新增 `ShiroSecurityManagerTest`，覆盖 `requireAllPermissions` 的权限缓存边界
+- 修复 `requireAllPermissions` 在已缓存允许权限时提前返回的问题；现在会继续检查后续权限
+- 确认本批次不触碰 Java 包名 `datart.*`、配置前缀 `datart.*`、`DATART_*` 和迁移稳定标识
+
+已通过验证：
+
+```bash
+mvn -pl security -am -Dtest=datart.security.manager.shiro.ShiroSecurityManagerTest -Dsurefire.failIfNoSpecifiedTests=false test
+```
+
+验证说明：
+
+- 普通沙箱运行 Maven 仍会因写 `~/.m2` 被拦截失败；提权后定向 Shiro 测试通过
+- `mvn -pl security -am test` 当前会被既存 `TestJwkParse.testEcPemJwt` 的 BouncyCastle `NoSuchMethodError` 挡住
+- JWK / BouncyCastle 兼容问题属于 P2-B 后续安全链路健康缺口，本批次不混入依赖升级
+
+P2-B 本批次下一步：
+
+- 运行 `git diff --check`
+- 提交并推送当前专题分支，暂不合并 `main`
+
+## 8. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
-| P2-B | Shiro 认证授权健康度审计 | 高 | 只补边界用例和小修，不整体替换 |
+| P2-B-2 | JWK / BouncyCastle 兼容缺口 | 高 | 先定位依赖冲突和最小版本组合，不直接大版本升级 |
 | P2-C | Calcite SQL 解析健康度审计 | 高 | 先补 SQL 解析兼容样例，不整体替换 |
 | P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
 | P2-E | 前端安全依赖治理 | 中高 | 单独专题处理 Dependabot 类问题，避免混入运行时改造 |
 | P2-F | React 19、AntD 6、Vite 8、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
 | P2-G | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 
-## 8. 门禁策略
+## 9. 门禁策略
 
 开发期按风险分层验证，不为每个小改动跑完整门禁。提交前做本批次相关门禁；准备合入 `main` 或推送 `main` 前做完整门禁。
 
@@ -288,7 +317,7 @@ npm ci --dry-run --ignore-scripts
 - 不为了覆盖率硬造低价值快照测试
 - 本机缺少外部工具时记录原因，例如当前无 `docker` 命令，不能本地验证 Docker build
 
-## 9. 提交节奏
+## 10. 提交节奏
 
 同一专题内累计一组相关改动后再提交，减少主线合并和完整回归次数。
 
@@ -301,18 +330,18 @@ npm ci --dry-run --ignore-scripts
 | 依赖和构建链路 | 独立提交，但尽量包含完整链路文档和验证记录 |
 | 阶段复盘 | 跟随当前批次提交，必要时可单独文档提交 |
 
-不要因为单个小文件改动立刻提交。当前 P2-A 应完成 Dockerfile、Deployment.md 和执行文档后再提交。
+不要因为单个小文件改动立刻提交。当前 P2-B 应完成 Shiro 边界测试、小修和执行文档同步后再提交。
 
-## 10. 恢复命令
+## 11. 恢复命令
 
-继续 P2-A：
+继续 P2-B：
 
 ```bash
 git status --short --branch
 git rev-list --left-right --count origin/main...HEAD
-sed -n '1,120p' Dockerfile
-sed -n '1,140p' Deployment.md
-sed -n '180,320p' server/pom.xml
+sed -n '120,175p' security/src/main/java/datart/security/manager/shiro/ShiroSecurityManager.java
+sed -n '1,180p' security/src/test/java/datart/security/manager/shiro/ShiroSecurityManagerTest.java
+mvn -pl security -am -Dtest=datart.security.manager.shiro.ShiroSecurityManagerTest -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
 追溯历史：
@@ -320,5 +349,6 @@ sed -n '180,320p' server/pom.xml
 ```bash
 git log --oneline -- docs/tech-stack-modernization-plan.md
 git log --oneline -- Dockerfile Deployment.md server/pom.xml bin/yu-bi-server.sh bin/yu-bi-server.cmd
+git log --oneline -- security/src/main/java/datart/security/manager/shiro security/src/test/java/datart/security
 git log --oneline -- frontend/package.json frontend/package-lock.json
 ```
