@@ -45,11 +45,11 @@ git log --oneline --decorate -8
 | 工作目录 | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
 | 远端 | `git@github.com:xybigdata/yu-bi.git` |
 | 主线分支 | `main` |
-| 当前专题分支 | `codex/modernization-sql-variable-render` |
-| 当前专题 | P2-G SQL 变量替换行为专项 |
+| 当前专题分支 | `codex/modernization-presto-driver-metadata` |
+| 当前专题 | P2-H PRESTO JDBC driver 元数据治理 |
 | 当前分支相对 `origin/main` | 以恢复命令输出为准 |
 | 最近专题提交 | 以 `git log --oneline --decorate -8` 为准 |
-| 最近主线提交 | `065e4d007 chore: 合入 Calcite SQL 健康度现代化` |
+| 最近主线提交 | `bf6eee2e2 chore: 合入 SQL 变量替换行为修复` |
 
 已确认的自动化权限和偏好：
 
@@ -57,6 +57,7 @@ git log --oneline --decorate -8
 - 可以自动执行 `git commit --no-verify -m "..."`
 - 可以自动执行 `git push origin <branch>`
 - `npm view ...` 查询已授权，后续不再单独询问
+- `mvn -pl security ...` 命令已授权，后续不再单独询问
 - 同一专题内尽量累计一组相关改动后再提交，避免过频繁提交
 - 当前专题继续在同一分支推进，不因为小批次改动立即合入 `main`
 
@@ -73,10 +74,10 @@ git log --oneline --decorate -8
 当前专题分支：
 
 ```bash
-codex/modernization-sql-variable-render
+codex/modernization-presto-driver-metadata
 ```
 
-当前专题收口前不要创建新分支。P2-G 聚焦 SQL 变量替换行为专项：先用现有 SQL render 样例和窄单测复现行为差异，再做最小修复，不升级 Calcite 主版本，不扩大数据源方言重构范围。
+当前专题收口前不要创建新分支。P2-H 聚焦 PRESTO JDBC driver 元数据缺口：补齐现有 `CustomSqlDialect` fallback 所需 quote 元数据，恢复 PRESTO 测试侧自动初始化，不升级 Calcite 主版本，不扩大数据源方言重构范围。
 
 ## 4. 技术栈基线
 
@@ -153,6 +154,7 @@ codex/modernization-sql-variable-render
 | 构建与安装包链路现代化 | 已合入并推送 `origin/main`，主线提交 `2c691916b` |
 | Shiro 认证授权健康度审计 | 已合入并推送 `origin/main`，主线提交 `99336814e` |
 | Calcite SQL 解析健康度审计 | 已合入并推送 `origin/main`，主线提交 `065e4d007` |
+| SQL 变量替换行为修复 | 已合入并推送 `origin/main`，主线提交 `bf6eee2e2` |
 
 ### 5.3 前端运行时专题复盘
 
@@ -362,7 +364,7 @@ P2-C 合入状态：
 - 已具备合入 `main` 条件
 - 保留 `ORDER BY $变量$` 行为差异和 PRESTO driver 元数据缺口为后续独立专题，避免在本批次扩大行为变更面
 
-## 9. 当前短期目标：P2-G SQL 变量替换行为专项
+## 9. 已完成短期目标：P2-G SQL 变量替换行为专项
 
 分支：`codex/modernization-sql-variable-render`
 
@@ -410,20 +412,60 @@ npm run lint:style
 
 P2-G 合入状态：
 
-- 已具备合入 `main` 条件
+- 已合入并推送 `origin/main`，主线提交 `bf6eee2e2`
 - 本批次不处理 PRESTO driver 元数据缺口，保留为 P2-H 独立专题
 
-## 10. 后续队列
+## 10. 当前短期目标：P2-H PRESTO JDBC driver 元数据治理
+
+分支：`codex/modernization-presto-driver-metadata`
+
+目标：补齐 PRESTO 内置 JDBC driver 的 quote 元数据，让 PRESTO 在无 Calcite 内置 `DatabaseProduct` 映射时仍可稳定走现有 `CustomSqlDialect` fallback，并恢复测试侧 `TestSqlDialects.PRESTO` 自动初始化。
+
+本批次已完成：
+
+- 为 `jdbc-driver.yml` 中的 `PRESTO` 增加：
+  - `literal-quote: "'"`
+  - `identifier-quote: "\""`
+- 新增 `ProviderFactoryTest` 覆盖：
+  - `PRESTO` 创建 `PrestoDataProviderAdapter`
+  - `init=false` 下不初始化数据源
+  - dialect fallback 为 `CustomSqlDialect`
+  - quote 元数据正确加载
+  - PRESTO 当前 `supportPaging=false` 行为保持不变
+- 恢复 `TestSqlDialects.PRESTO` 自动初始化，不再在测试初始化集合中跳过 PRESTO
+- 确认本批次不触碰 Java 包名 `datart.*`、配置前缀 `datart.*`、`DATART_*` 和迁移稳定标识
+
+已通过验证：
+
+```bash
+mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.jdbc.ProviderFactoryTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.sql.SqlScriptRenderExamplesTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/jdbc-data-provider -am test
+git diff --check
+```
+
+验证说明：
+
+- `ProviderFactoryTest` 5 个用例通过
+- `SqlScriptRenderExamplesTest` 6 个用例通过，PRESTO 已重新纳入历史 SQL render 样例 dialect 初始化
+- `mvn -pl data-providers/jdbc-data-provider -am test` 已通过，覆盖 core 3 个测试、data-provider-base 14 个测试、jdbc-data-provider 12 个启用测试，旧 `SqlScriptRenderTest` 仍跳过 6 个历史用例
+- 测试日志中 `DBType PRESTO mismatched, use custom sql dialect` 是当前预期 fallback 路径，不代表失败
+
+P2-H 合入状态：
+
+- 已具备提交专题分支条件
+- 合入 `main` 前需要按门禁策略补完整前端门禁
+
+## 11. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
 | P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
 | P2-E | 前端安全依赖治理 | 中高 | 单独专题处理 Dependabot 类问题，避免混入运行时改造 |
 | P2-F | React 19、AntD 6、Vite 8、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
-| P2-H | PRESTO JDBC driver 元数据治理 | 中 | 补齐 `identifierQuote` / `literalQuote` 或专用 dialect，避免 fallback `CustomSqlDialect` 校验失败 |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 
-## 11. 门禁策略
+## 12. 门禁策略
 
 开发期按风险分层验证，不为每个小改动跑完整门禁。提交前做本批次相关门禁；准备合入 `main` 或推送 `main` 前做完整门禁。
 
@@ -467,7 +509,7 @@ npm ci --dry-run --ignore-scripts
 - 不为了覆盖率硬造低价值快照测试
 - 本机缺少外部工具时记录原因，例如当前无 `docker` 命令，不能本地验证 Docker build
 
-## 12. 提交节奏
+## 13. 提交节奏
 
 同一专题内累计一组相关改动后再提交，减少主线合并和完整回归次数。
 
@@ -480,17 +522,17 @@ npm ci --dry-run --ignore-scripts
 | 依赖和构建链路 | 独立提交，但尽量包含完整链路文档和验证记录 |
 | 阶段复盘 | 跟随当前批次提交，必要时可单独文档提交 |
 
-不要因为单个小文件改动立刻提交。当前 P2-G 应围绕 SQL 变量替换行为累计一组有价值的修复、测试和文档记录后再提交。
+不要因为单个小文件改动立刻提交。当前 P2-H 应围绕 PRESTO driver 元数据治理累计代码、测试和文档记录后再提交。
 
-## 13. 恢复命令
+## 14. 恢复命令
 
-继续 P2-G：
+继续 P2-H：
 
 ```bash
 git status --short --branch
 git rev-list --left-right --count origin/main...HEAD
-sed -n '1,130p' data-providers/data-provider-base/src/test/java/datart/data/provider/jdbc/SqlScriptRenderTest.java
-mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.jdbc.SqlScriptRenderTest -Dsurefire.failIfNoSpecifiedTests=false test
+sed -n '150,175p' data-providers/jdbc-data-provider/src/main/resources/jdbc-driver.yml
+mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.jdbc.ProviderFactoryTest -Dsurefire.failIfNoSpecifiedTests=false test
 mvn -pl data-providers/jdbc-data-provider -am test
 ```
 
