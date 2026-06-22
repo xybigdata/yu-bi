@@ -47,9 +47,9 @@ git log --oneline --decorate -8
 | 主线分支 | `main` |
 | 当前专题分支 | `codex/modernization-frontend-runtime-next` |
 | 当前专题状态 | 前端运行时现代化继续累计中 |
-| 当前分支相对 `origin/main` | 领先 2 个提交，主线无反向领先 |
+| 当前分支相对 `origin/main` | 以恢复命令输出为准，当前专题持续领先主线 |
 | 最近主线提交 | `a208481b0 docs: 复盘现代化改造阶段进度` |
-| 最近专题提交 | `1e975a6b0 chore: 清理过时前端类型依赖` |
+| 最近专题提交 | 以 `git log --oneline --decorate -8` 为准 |
 
 已确认的自动化权限和偏好：
 
@@ -169,12 +169,16 @@ codex/modernization-frontend-runtime-next
 - 移除过时的 `@types/react-grid-layout`
 - 确认 `@hello-pangea/dnd`、`react-dnd`、`react-dnd-html5-backend` 当前已在稳定线
 - 补充前端布局、虚拟表格、拖拽运行时 smoke test
+- 新增 Dashboard widget content 读取 helper：`getChartWidgetContent`、`getControllerWidgetContent`、`getTabWidgetContent`
+- 将 Dashboard utils、TabWidgetCore、action/thunk 的 chart/controller/tab content 访问收口到统一 helper
+- 补充 widget content helper 测试，覆盖有效协议和错配协议分支
 
 已通过验证：
 
 ```bash
 npm run checkTs
 npm run test:ci -- src/app/components/__tests__/dndRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/components/__tests__/VirtualTable.test.tsx src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx
+npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts
 npm install --package-lock-only --dry-run --ignore-scripts
 npm ci --dry-run --ignore-scripts
 git diff --check
@@ -190,15 +194,15 @@ git diff --check
 
 | 优先级 | 事项 | 风险 | 当前策略 |
 | --- | --- | --- | --- |
-| P1-C | Dashboard widget 内容协议继续收口 | 中 | 先收敛 helper、type guard、组件入口，不改协议字段含义 |
+| P1-C | Dashboard widget 内容协议继续收口 | 中 | 已新增统一读取 helper；下一步处理 action/thunk 剩余散点 |
 | P1-F | 前端运行时依赖剩余项复扫 | 中 | 只升级兼容性明确的补丁或小版本，先 `npm view` 审计 |
 | P1-G | 前端公开入口和深路径 import 复扫 | 低 | 保留公开样式入口，清理过时类型包和私有入口 |
 | P1-H | Node 24 / npm 11 安装健康度复核 | 低 | 保持 lockfile 可解析，继续验证 `npm ci --dry-run --ignore-scripts` |
 
 Dashboard widget 内容协议下一步切入点：
 
-- 找出仍直接访问 `widget.config.content.xxx` 或 `content.type` 的路径
-- 优先复用 `isChartWidgetContent`、`isControllerWidgetContent`、`isTabWidgetContent`
+- 找出仍直接访问 `widget.config.content.xxx` 或未复用 content helper 的路径
+- 优先复用 `getChartWidgetContent`、`getControllerWidgetContent`、`getTabWidgetContent`
 - 必要时补充轻量 helper，避免在组件中散落结构判断
 - 不改变保存协议、不做数据迁移、不重命名稳定字段
 - 对 reducer、helper、核心组件补最小测试或 smoke test

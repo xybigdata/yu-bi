@@ -329,6 +329,19 @@ export const isChartWidgetContent = (
   return !!content && typeof content === 'object' && 'dataChart' in content;
 };
 
+type WidgetContentHost = {
+  config: {
+    content?: unknown;
+  };
+};
+
+export const getChartWidgetContent = (
+  widget: WidgetContentHost,
+): ChartWidgetContent | undefined => {
+  const content = widget.config.content;
+  return isChartWidgetContent(content) ? content : undefined;
+};
+
 export const isControllerWidgetContent = (
   content: unknown,
 ): content is ControllerWidgetContent => {
@@ -342,11 +355,25 @@ export const isControllerWidgetContent = (
   );
 };
 
+export const getControllerWidgetContent = (
+  widget: WidgetContentHost,
+): ControllerWidgetContent | undefined => {
+  const content = widget.config.content;
+  return isControllerWidgetContent(content) ? content : undefined;
+};
+
 export const isTabWidgetContent = (
   content: unknown,
 ): content is TabWidgetContent => {
   const candidate = content as Partial<TabWidgetContent> | undefined;
   return !!candidate && typeof candidate === 'object' && !!candidate.itemMap;
+};
+
+export const getTabWidgetContent = (
+  widget: WidgetContentHost,
+): TabWidgetContent | undefined => {
+  const content = widget.config.content;
+  return isTabWidgetContent(content) ? content : undefined;
 };
 
 export const WidgetTypes = [

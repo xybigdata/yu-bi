@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'vitest';
+import { ControllerFacadeTypes } from 'app/constants';
 import type { ChartsEventData } from 'app/types/Chart';
+import {
+  getChartWidgetContent,
+  getControllerWidgetContent,
+  getTabWidgetContent,
+} from '../../pages/Board/slice/types';
 import { getValueByRowData, parseLinkedFieldPath } from '../widget';
 
 describe('dashboard widget utils', () => {
@@ -36,5 +42,74 @@ describe('dashboard widget utils', () => {
 
     expect(() => getValueByRowData(data, '{bad json')).not.toThrow();
     expect(getValueByRowData(data, '{bad json')).toBeUndefined();
+  });
+
+  test('should read chart widget content only when protocol matches', () => {
+    const widget = {
+      config: {
+        content: {
+          type: 'dataChart',
+          dataChart: { id: 'chart-1' },
+        },
+      },
+    };
+
+    expect(getChartWidgetContent(widget)?.dataChart?.id).toBe('chart-1');
+    expect(
+      getChartWidgetContent({ config: { content: { type: 'richText' } } }),
+    ).toBeUndefined();
+  });
+
+  test('should read controller widget content only when protocol matches', () => {
+    const widget = {
+      config: {
+        content: {
+          type: ControllerFacadeTypes.Text,
+          name: 'keyword',
+          relatedViews: [],
+          config: {
+            visibility: {
+              visibilityType: 'show',
+            },
+          },
+        },
+      },
+    };
+
+    expect(getControllerWidgetContent(widget)?.name).toBe('keyword');
+    expect(
+      getControllerWidgetContent({
+        config: {
+          content: {
+            type: ControllerFacadeTypes.Text,
+            config: {},
+          },
+        },
+      }),
+    ).toBeUndefined();
+  });
+
+  test('should read tab widget content only when protocol matches', () => {
+    const widget = {
+      config: {
+        content: {
+          itemMap: {
+            tab_a: {
+              index: 0,
+              name: 'tab',
+              tabId: 'tab_a',
+              childWidgetId: 'widget_a',
+            },
+          },
+        },
+      },
+    };
+
+    expect(getTabWidgetContent(widget)?.itemMap.tab_a.childWidgetId).toBe(
+      'widget_a',
+    );
+    expect(
+      getTabWidgetContent({ config: { content: { type: 'dataChart' } } }),
+    ).toBeUndefined();
   });
 });
