@@ -331,6 +331,10 @@ mvn -pl data-providers/data-provider-base -am test
 mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.jdbc.ProviderFactoryTest -Dsurefire.failIfNoSpecifiedTests=false test
 mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.sql.SqlScriptRenderExamplesTest -Dsurefire.failIfNoSpecifiedTests=false test
 mvn -pl data-providers/jdbc-data-provider -am test
+npm run checkTs
+npm run test:ci
+npm run lint:css
+npm run lint:style
 ```
 
 验证说明：
@@ -342,16 +346,20 @@ mvn -pl data-providers/jdbc-data-provider -am test
 - `ProviderFactoryTest` 4 个用例通过
 - `SqlScriptRenderExamplesTest` 6 个用例通过
 - `mvn -pl data-providers/jdbc-data-provider -am test` 已通过，覆盖 core 3 个测试、data-provider-base 8 个测试、jdbc-data-provider 11 个启用测试，旧 `SqlScriptRenderTest` 仍跳过 6 个历史用例
+- 合入主线前完整前端门禁已通过：
+  - `npm run checkTs`
+  - `npm run test:ci`：132 个测试文件通过，919 个用例通过，4 个跳过
+  - `npm run lint:css`
+  - `npm run lint:style`
 - 历史 SQL render 样例中发现 `ORDER BY $部门$` 当前不会被变量替换，暂不纳入本批次绿色基线，后续作为 SQL 变量替换行为专项处理
 - JavaCC 生成代码在 JDK 21 编译下仍有 deprecated annotation warning，暂不阻塞
 - `POIUtilsTest` 在默认 fork JVM 下曾稳定出现 `Abort trap: 6`；加入 `-Djava.awt.headless=true` 后定向和完整 data-provider-base 门禁均通过
 - 本批次只建立健康度基线，不做 Calcite 主版本升级
 
-P2-C 本批次下一步：
+P2-C 合入状态：
 
-- 继续评估是否将更多禁用的 `SqlScriptRenderTest` 样例拆出为无需 Spring 上下文的轻量测试；当前先保留 `ORDER BY $变量$` 行为差异，避免把非绿色行为混入基线
-- 评估 P2-C 是否已具备合入主线条件；准备合入前需补完整前端门禁
-- 累计本批次 provider factory 修复、SQL render 样例轻量化、测试和文档后提交并推送专题分支
+- 已具备合入 `main` 条件
+- 保留 `ORDER BY $变量$` 行为差异和 PRESTO driver 元数据缺口为后续独立专题，避免在本批次扩大行为变更面
 
 ## 9. 后续队列
 
