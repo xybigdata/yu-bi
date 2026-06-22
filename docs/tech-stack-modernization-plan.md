@@ -45,11 +45,11 @@ git log --oneline --decorate -8
 | 工作目录 | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
 | 远端 | `git@github.com:xybigdata/yu-bi.git` |
 | 主线分支 | `main` |
-| 当前专题分支 | `codex/modernization-calcite-health` |
-| 当前专题 | P2-C Calcite SQL 解析健康度审计 |
+| 当前专题分支 | `codex/modernization-sql-variable-render` |
+| 当前专题 | P2-G SQL 变量替换行为专项 |
 | 当前分支相对 `origin/main` | 以恢复命令输出为准 |
 | 最近专题提交 | 以 `git log --oneline --decorate -8` 为准 |
-| 最近主线提交 | `99336814e chore: 合入 Shiro 健康度现代化` |
+| 最近主线提交 | `065e4d007 chore: 合入 Calcite SQL 健康度现代化` |
 
 已确认的自动化权限和偏好：
 
@@ -73,10 +73,10 @@ git log --oneline --decorate -8
 当前专题分支：
 
 ```bash
-codex/modernization-calcite-health
+codex/modernization-sql-variable-render
 ```
 
-当前专题收口前不要创建新分支。P2-C 先补 Calcite SQL 解析、变量解析和方言输出健康度基线，不直接升级 Calcite 主版本；具备测试证据后再评估是否替换或升级。
+当前专题收口前不要创建新分支。P2-G 聚焦 SQL 变量替换行为专项：先用现有 SQL render 样例和窄单测复现行为差异，再做最小修复，不升级 Calcite 主版本，不扩大数据源方言重构范围。
 
 ## 4. 技术栈基线
 
@@ -152,6 +152,7 @@ codex/modernization-calcite-health
 | 前端运行时现代化批次 | 已合入并推送 `origin/main`，主线提交 `77217676b` |
 | 构建与安装包链路现代化 | 已合入并推送 `origin/main`，主线提交 `2c691916b` |
 | Shiro 认证授权健康度审计 | 已合入并推送 `origin/main`，主线提交 `99336814e` |
+| Calcite SQL 解析健康度审计 | 已合入并推送 `origin/main`，主线提交 `065e4d007` |
 
 ### 5.3 前端运行时专题复盘
 
@@ -179,7 +180,7 @@ npm run lint:css
 npm run lint:style
 ```
 
-## 6. 当前短期目标：P2-A 构建与安装包链路
+## 6. 已完成短期目标：P2-A 构建与安装包链路
 
 分支：`codex/modernization-build-package`
 
@@ -280,7 +281,7 @@ P2-B 完成状态：
 - 已提交并推送专题分支
 - 已使用 `--no-ff` 合入 `main` 并推送主线
 
-## 8. 当前短期目标：P2-C Calcite SQL 解析健康度审计
+## 8. 已完成短期目标：P2-C Calcite SQL 解析健康度审计
 
 分支：`codex/modernization-calcite-health`
 
@@ -361,18 +362,58 @@ P2-C 合入状态：
 - 已具备合入 `main` 条件
 - 保留 `ORDER BY $变量$` 行为差异和 PRESTO driver 元数据缺口为后续独立专题，避免在本批次扩大行为变更面
 
-## 9. 后续队列
+## 9. 当前短期目标：P2-G SQL 变量替换行为专项
+
+分支：`codex/modernization-sql-variable-render`
+
+目标：补齐 P2-C 中发现的 SQL 变量替换行为差异，优先恢复历史样例中 `ORDER BY $变量$` 等简单变量重复出现时的替换行为，并用 JDK 21 可重复测试证明修复。
+
+本批次已完成：
+
+- 复现并定位 `SELECT $部门$ ... ORDER BY $部门$` 只替换第一处变量的问题
+- 确认根因：
+  - parser visitor 能为普通位置变量生成 `SimpleVariablePlaceholder`
+  - render 阶段对每个 placeholder 使用单次 `replaceIgnoreCase`
+  - 同一个简单变量在 SQL 中重复出现时，只会替换第一处，后续同名变量残留
+- 修复 `SimpleVariablePlaceholder` 替换路径：
+  - 表达式级 placeholder 仍保持单次替换，避免误伤结构化 SQL 片段
+  - 简单变量 placeholder 改为大小写无关的全量替换，覆盖同名变量多次出现
+  - 使用 `Pattern.quote` 与 `Matcher.quoteReplacement`，避免变量名或替换值包含正则特殊字符时出现误替换
+- 扩展 `SqlScriptRenderExamplesTest`，恢复历史样例中 `order by $部门$` 的断言
+- 扩展 `SqlScriptRenderTest`，新增窄用例覆盖同一个简单变量在 SELECT 和 ORDER BY 中重复出现时都应被替换
+
+已通过验证：
+
+```bash
+mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.jdbc.SqlScriptRenderTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.sql.SqlScriptRenderExamplesTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/jdbc-data-provider -am test
+git diff --check
+```
+
+验证说明：
+
+- `SqlScriptRenderExamplesTest` 6 个用例通过，已恢复 `ORDER BY $变量$` 历史样例
+- `SqlScriptRenderTest` 3 个用例通过，新增重复简单变量替换窄用例
+- `mvn -pl data-providers/jdbc-data-provider -am test` 已通过，覆盖 core 3 个测试、data-provider-base 12 个测试、jdbc-data-provider 11 个启用测试，旧 `SqlScriptRenderTest` 仍跳过 6 个历史用例
+- 曾并行执行两个 Maven 测试命令，定向 `data-provider-base` 测试出现一次 `SqlScriptRender$1` 类加载缺失；单独复跑 base 定向测试后通过，判断为并行 target 目录竞争
+
+P2-G 本批次下一步：
+
+- 提交并推送专题分支
+- 继续评估是否还有类似重复简单变量替换样例需要补充；不在本批次处理 PRESTO driver 元数据缺口
+
+## 10. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
 | P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
 | P2-E | 前端安全依赖治理 | 中高 | 单独专题处理 Dependabot 类问题，避免混入运行时改造 |
 | P2-F | React 19、AntD 6、Vite 8、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
-| P2-G | SQL 变量替换行为专项 | 中 | 补齐 `ORDER BY $变量$` 等历史期望与当前行为差异，先补测试再修复 |
 | P2-H | PRESTO JDBC driver 元数据治理 | 中 | 补齐 `identifierQuote` / `literalQuote` 或专用 dialect，避免 fallback `CustomSqlDialect` 校验失败 |
-| P2-G | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
+| P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 
-## 10. 门禁策略
+## 11. 门禁策略
 
 开发期按风险分层验证，不为每个小改动跑完整门禁。提交前做本批次相关门禁；准备合入 `main` 或推送 `main` 前做完整门禁。
 
@@ -416,7 +457,7 @@ npm ci --dry-run --ignore-scripts
 - 不为了覆盖率硬造低价值快照测试
 - 本机缺少外部工具时记录原因，例如当前无 `docker` 命令，不能本地验证 Docker build
 
-## 11. 提交节奏
+## 12. 提交节奏
 
 同一专题内累计一组相关改动后再提交，减少主线合并和完整回归次数。
 
@@ -429,17 +470,18 @@ npm ci --dry-run --ignore-scripts
 | 依赖和构建链路 | 独立提交，但尽量包含完整链路文档和验证记录 |
 | 阶段复盘 | 跟随当前批次提交，必要时可单独文档提交 |
 
-不要因为单个小文件改动立刻提交。当前 P2-C 应继续补 Calcite 解析和 SQL 处理边界测试，累计一组有价值的健康度基线后再提交。
+不要因为单个小文件改动立刻提交。当前 P2-G 应围绕 SQL 变量替换行为累计一组有价值的修复、测试和文档记录后再提交。
 
-## 12. 恢复命令
+## 13. 恢复命令
 
-继续 P2-C：
+继续 P2-G：
 
 ```bash
 git status --short --branch
 git rev-list --left-right --count origin/main...HEAD
-sed -n '1,220p' data-providers/data-provider-base/src/test/java/datart/data/provider/calcite/SqlParserUtilsTest.java
-mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.calcite.SqlParserUtilsTest,datart.data.provider.calcite.SqlQueryScriptProcessorTest -Dsurefire.failIfNoSpecifiedTests=false test
+sed -n '1,130p' data-providers/data-provider-base/src/test/java/datart/data/provider/jdbc/SqlScriptRenderTest.java
+mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.jdbc.SqlScriptRenderTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/jdbc-data-provider -am test
 ```
 
 追溯历史：

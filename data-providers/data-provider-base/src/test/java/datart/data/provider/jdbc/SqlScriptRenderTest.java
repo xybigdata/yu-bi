@@ -61,6 +61,29 @@ class SqlScriptRenderTest {
         );
     }
 
+    @Test
+    void shouldReplaceRepeatedSimpleVariableWhenRenderingSql() throws SqlParseException {
+        ScriptVariable department = variable(
+                "$department$",
+                ValueType.STRING,
+                VariableTypeEnum.QUERY,
+                "sales"
+        );
+        SqlScriptRender render = new SqlScriptRender(
+                queryScript(
+                        "SELECT $department$ AS `department` FROM `orders` ORDER BY $department$",
+                        department
+                ),
+                null,
+                mysqlDialect
+        );
+
+        assertEquals(
+                "SELECT * FROM ( SELECT 'sales' AS `department` FROM `orders` ORDER BY 'sales' ) AS `DATART_VTABLE`",
+                cleanup(render.render(false, false, false))
+        );
+    }
+
     private QueryScript queryScript(String script, ScriptVariable... variables) {
         QueryScript queryScript = new QueryScript();
         queryScript.setScriptType(ScriptType.SQL);

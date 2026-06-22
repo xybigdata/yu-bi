@@ -42,6 +42,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static datart.core.base.consts.Const.VARIABLE_PATTERN;
@@ -159,7 +161,11 @@ public class SqlScriptRender extends ScriptRender {
         if (CollectionUtils.isNotEmpty(placeholders)) {
             for (VariablePlaceholder placeholder : placeholders) {
                 ReplacementPair replacementPair = placeholder.replacementPair();
-                selectSql = replaceIgnoreCase(selectSql, replacementPair.getPattern(), replacementPair.getReplacement());
+                if (placeholder instanceof SimpleVariablePlaceholder) {
+                    selectSql = replaceAllIgnoreCase(selectSql, replacementPair.getPattern(), replacementPair.getReplacement());
+                } else {
+                    selectSql = replaceIgnoreCase(selectSql, replacementPair.getPattern(), replacementPair.getReplacement());
+                }
             }
         }
 
@@ -184,6 +190,15 @@ public class SqlScriptRender extends ScriptRender {
             return text;
         }
         return text.substring(0, index) + replacement + text.substring(index + searchString.length());
+    }
+
+    private String replaceAllIgnoreCase(String text, String searchString, String replacement) {
+        if (StringUtils.isAnyEmpty(text, searchString)) {
+            return text;
+        }
+        return Pattern.compile(Pattern.quote(searchString), Pattern.CASE_INSENSITIVE)
+                .matcher(text)
+                .replaceAll(Matcher.quoteReplacement(replacement));
     }
 
 }
