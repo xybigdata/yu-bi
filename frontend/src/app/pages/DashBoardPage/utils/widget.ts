@@ -38,6 +38,7 @@ import { updateBy } from 'app/utils/mutation';
 import { BOARD_COPY_CHART_SUFFIX, FilterSqlOperator } from 'globalConstants';
 import produce from 'immer';
 import { CSSProperties } from 'react';
+import type { LayoutItem } from 'react-grid-layout/legacy';
 import { CloneValueDeep } from 'utils/object';
 import { adaptBoardImageUrl, fillPx, getBackgroundImage } from '.';
 import { initClientId } from '../components/WidgetManager/utils/init';
@@ -49,9 +50,9 @@ import {
   ChartWidgetContent,
   ControllerWidgetContent,
   DataChart,
-  isChartWidgetContent,
-  isControllerWidgetContent,
-  isTabWidgetContent,
+  getChartWidgetContent,
+  getControllerWidgetContent,
+  getTabWidgetContent,
   Relation,
   ServerRelation,
   ServerWidget,
@@ -154,7 +155,7 @@ export const adjustWidgetsToBoard = (args: {
   widgets: Widget[];
   boardType: BoardType;
   boardId: string;
-  layouts?: ReactGridLayout.Layout[];
+  layouts?: LayoutItem[];
 }) => {
   const { widgets, boardType, layouts } = args;
 
@@ -168,7 +169,7 @@ export const adjustWidgetsToBoard = (args: {
 
 export const updateAutoWidgetsRect = (
   widgets: Widget[],
-  layouts: ReactGridLayout.Layout[],
+  layouts: LayoutItem[],
 ): Widget[] => {
   const upDatedWidgets: Widget[] = [];
   const dashWidgetRectYs = layouts.map(ele => ele.y);
@@ -218,14 +219,15 @@ export const createToSaveWidgetGroup = (
 ) => {
   widgets = updateBy(widgets, draft => {
     draft.forEach(v => {
+      const content = getChartWidgetContent(v);
       if (
         v.config.type === 'chart' &&
-        v.config?.content?.dataChart?.config?.computedFields
+        content?.dataChart?.config?.computedFields
       ) {
-        v.config.content.dataChart.config.computedFields =
+        content.dataChart.config.computedFields =
           filterCurrentUsedComputedFields(
-            v.config?.content?.dataChart?.config?.chartConfig,
-            v.config?.content?.dataChart?.config?.computedFields.filter(
+            content.dataChart.config.chartConfig,
+            content.dataChart.config.computedFields?.filter(
               v => !v.isViewComputedFields,
             ),
           );
@@ -307,8 +309,9 @@ export const convertWrapChartWidget = (params: {
     const dataChart = dashboardDataChartMap[widget.datachartId];
     const newWidget = produce(widget, draft => {
       draft.datachartId = '';
-      if (isChartWidgetContent(draft.config.content)) {
-        draft.config.content.dataChart = dataChart;
+      const content = getChartWidgetContent(draft);
+      if (content) {
+        content.dataChart = dataChart;
       }
     });
     return newWidget;
@@ -340,8 +343,8 @@ export const getOtherStringControlWidgets = (
     if (ele.config.type !== 'controller') {
       return false;
     }
-    const content = ele.config.content;
-    if (!isControllerWidgetContent(content)) {
+    const content = getControllerWidgetContent(ele);
+    if (!content) {
       return false;
     }
     return StrControlTypes.includes(content.type);
@@ -381,8 +384,8 @@ export const getNoHiddenControllers = (widgets: Widget[]) => {
     if (w.config.type !== 'controller') {
       return true;
     }
-    const content = w.config.content;
-    if (!isControllerWidgetContent(content)) {
+    const content = getControllerWidgetContent(w);
+    if (!content) {
       return false;
     }
     const visibility = content.config.visibility;
@@ -406,8 +409,8 @@ export const getNoHiddenControllers = (widgets: Widget[]) => {
         if (!dependWidget) {
           return false;
         }
-        const dependContent = dependWidget.config.content;
-        if (!isControllerWidgetContent(dependContent)) {
+        const dependContent = getControllerWidgetContent(dependWidget);
+        if (!dependContent) {
           return false;
         }
         const dependWidgetValue = dependContent.config.controllerValues?.[0];
@@ -563,14 +566,12 @@ export const getWidgetMap = (
         transformToHierarchyModel(
           serverViews.find(v => v.id === viewIds[0])?.model,
         )?.computedFields || [];
-      if (
-        cur.config.type === 'chart' &&
-        cur.config?.content?.dataChart?.config
-      ) {
-        cur.config.content.dataChart.config.computedFields =
+      const content = getChartWidgetContent(cur);
+      if (cur.config.type === 'chart' && content?.dataChart?.config) {
+        content.dataChart.config.computedFields =
           mergeChartAndViewComputedField(
             viewComputerFields,
-            cur.config?.content?.dataChart?.config?.computedFields,
+            content.dataChart.config.computedFields,
           );
       }
 
@@ -591,8 +592,8 @@ export const getWidgetMap = (
   widgetList
     .filter(w => w.config.type === 'controller')
     .forEach(widget => {
-      const content = widget.config.content;
-      if (!isControllerWidgetContent(content)) {
+      const content = getControllerWidgetContent(widget);
+      if (!content) {
         return;
       }
       // 根据 url参数修改filter 默认值
@@ -654,10 +655,11 @@ export const getWidgetMap = (
   widgetList
     .filter(w => w.config.originalType === ORIGINAL_TYPE_MAP.ownedChart)
     .forEach(widget => {
-      if (!isChartWidgetContent(widget.config.content)) {
+      const content = getChartWidgetContent(widget);
+      if (!content) {
         return;
       }
-      let dataChart = widget.config.content.dataChart;
+      let dataChart = content.dataChart;
       if (dataChart) {
         wrappedDataCharts.push(dataChart!);
         widget.datachartId = dataChart.id;
@@ -677,8 +679,8 @@ export const getWidgetMap = (
       if (parentWidget.config.originalType !== ORIGINAL_TYPE_MAP.tab) {
         return;
       }
-      const tabContent = parentWidget.config.content;
-      if (!isTabWidgetContent(tabContent)) {
+      const tabContent = getTabWidgetContent(parentWidget);
+      if (!tabContent) {
         widget.parentId = '';
         return;
       }
@@ -773,8 +775,8 @@ export function cloneWidgets(args: {
     });
     // tab
     if (newWidget.config.type === 'container') {
-      const content = newWidget.config.content;
-      if (!isTabWidgetContent(content)) {
+      const content = getTabWidgetContent(newWidget);
+      if (!content) {
         return;
       }
       const itemList = Object.values(content.itemMap);

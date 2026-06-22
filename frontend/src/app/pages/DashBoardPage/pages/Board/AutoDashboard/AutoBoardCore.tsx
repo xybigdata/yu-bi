@@ -27,7 +27,7 @@ import useGridLayoutMap from 'app/pages/DashBoardPage/hooks/useGridLayoutMap';
 import useLayoutMap from 'app/pages/DashBoardPage/hooks/useLayoutMap';
 import { getBoardMarginPadding } from 'app/pages/DashBoardPage/utils/board';
 import { memo, useCallback, useContext, useMemo } from 'react';
-import RGL, { Layout, WidthProvider } from 'react-grid-layout';
+import RGL, { LayoutItem, WidthProvider } from 'react-grid-layout/legacy';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import styled from 'styled-components';
@@ -52,7 +52,7 @@ export const AutoBoardCore: React.FC<{ boardId: string }> = memo(
     const layoutMap = useGridLayoutMap(sortedLayoutWidgets);
 
     const onLayoutChange = useCallback(
-      (layouts: Layout[]) => {
+      (layouts: LayoutItem[]) => {
         thEmitScroll();
       },
       [thEmitScroll],

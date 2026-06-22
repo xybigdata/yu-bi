@@ -16,8 +16,12 @@ declare module '*.svg' {
   export const ReactComponent: FC<SVGProps<SVGSVGElement>>;
 }
 
-declare module 'react-draggable' {
-  interface DraggableCoreProps {
-    children?: React.ReactNode;
-  }
+declare module 'react-grid-layout/legacy' {
+  export {
+    default,
+    Layout,
+    LayoutItem,
+    ResponsiveLayouts,
+    WidthProvider,
+  } from 'react-grid-layout';
 }

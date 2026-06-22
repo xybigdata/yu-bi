@@ -21,7 +21,7 @@ import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
 import DndProviderCompat from 'app/components/DndProviderCompat';
 import { ChartConfigPayloadType } from 'app/pages/ChartWorkbenchPage/slice/types';
 import type { BackendFactory } from 'dnd-core';
-import FlexLayout, { Model, TabNode } from 'flexlayout-react';
+import { Layout, Model, TabNode } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css';
 import { FC, memo, useContext, useState } from 'react';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -112,7 +112,7 @@ const ChartOperationPanel: FC<{
 
     return (
       <StyledChartOperationPanel backend={HTML5Backend}>
-        <FlexLayout.Layout
+        <Layout
           model={layout}
           onModelChange={setLayout}
           factory={layoutFactory}

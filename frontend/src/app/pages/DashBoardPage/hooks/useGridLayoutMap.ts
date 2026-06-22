@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { useMemo } from 'react';
-import { Layouts } from 'react-grid-layout';
+import { LayoutItem } from 'react-grid-layout/legacy';
 import { LAYOUT_COLS_MAP } from '../constants';
 import { RectConfig } from '../pages/Board/slice/types';
 import { Widget } from '../types/widgetTypes';
@@ -72,7 +72,7 @@ const getNormalizedRect = (
 
 export default function useGridLayoutMap(layoutWidgets: Widget[]) {
   const layoutMap = useMemo(() => {
-    const layoutMap: Layouts = {
+    const layoutMap: Record<'lg' | 'sm', LayoutItem[]> = {
       lg: [],
       sm: [],
     };

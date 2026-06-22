@@ -17,7 +17,7 @@
  */
 import type { TabsProps } from 'antd';
 import { Tabs } from 'antd';
-import { isTabWidgetContent } from 'app/pages/DashBoardPage/pages/Board/slice/types';
+import { getTabWidgetContent } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { memo, useCallback, useContext, useEffect, useState } from 'react';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import { scheduleMicrotask } from 'app/pages/DashBoardPage/utils/scheduleMicrotask';
@@ -49,9 +49,7 @@ export const TabWidgetCore: React.FC<{}> = memo(() => {
     editing: boardEditing,
     boardId,
   } = useContext(BoardContext);
-  const itemMap = isTabWidgetContent(widget.config.content)
-    ? widget.config.content.itemMap
-    : {};
+  const itemMap = getTabWidgetContent(widget)?.itemMap || {};
   const tabsCons = Object.values(itemMap).sort((a, b) => a.index - b.index);
   const [activeKey, SetActiveKey] = useState<string | number>(
     tabsCons[0]?.index || 0,

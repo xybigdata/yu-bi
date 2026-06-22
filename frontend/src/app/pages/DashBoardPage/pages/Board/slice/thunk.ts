@@ -46,7 +46,7 @@ import {
   BoardState,
   Dashboard,
   getDataOption,
-  isControllerWidgetContent,
+  getControllerWidgetContent,
   ServerDashboard,
   VizRenderMode,
   WidgetData,
@@ -495,8 +495,8 @@ export const getControllerOptions = createAsyncThunk<
     const widgetMap = widgetMapMap[boardId];
     const widget = widgetMap[widgetId];
     if (!widget) return null;
-    const content = widget.config.content;
-    if (!isControllerWidgetContent(content)) return null;
+    const content = getControllerWidgetContent(widget);
+    if (!content) return null;
     const config = content.config;
     if (!Array.isArray(config.assistViewFields)) return null;
     if (config.assistViewFields.length < 2) return null;

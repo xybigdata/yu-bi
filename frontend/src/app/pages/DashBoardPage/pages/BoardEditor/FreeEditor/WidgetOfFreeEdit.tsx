@@ -177,8 +177,13 @@ export const WidgetOfFreeEdit: React.FC<{}> = () => {
       onStart={dragStart}
       onDrag={drag}
       onStop={dragStop}
+      onMouseDown={() => undefined}
       handle={`.${WIDGET_DRAG_HANDLE}`}
+      cancel=""
+      allowMobileScroll={false}
       disabled={lock}
+      enableUserSelectHack
+      offsetParent={document.body}
     >
       <Resizable
         axis={'both'}

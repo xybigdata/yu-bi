@@ -33,7 +33,7 @@ import {
 } from 'app/types/ChartDataRequest';
 import { ChartDatasetMeta } from 'app/types/ChartDataSet';
 import ChartDataView from 'app/types/ChartDataView';
-import { Layout } from 'react-grid-layout';
+import { LayoutItem } from 'react-grid-layout/legacy';
 import type { DeltaStatic } from 'app/components/ChartGraph/BasicRichText/quillCompat';
 import { IFontDefault } from '../../../../../../types';
 import { ChartDataSectionField } from '../../../../../types/ChartConfig';
@@ -329,6 +329,19 @@ export const isChartWidgetContent = (
   return !!content && typeof content === 'object' && 'dataChart' in content;
 };
 
+type WidgetContentHost = {
+  config: {
+    content?: unknown;
+  };
+};
+
+export const getChartWidgetContent = (
+  widget: WidgetContentHost,
+): ChartWidgetContent | undefined => {
+  const content = widget.config.content;
+  return isChartWidgetContent(content) ? content : undefined;
+};
+
 export const isControllerWidgetContent = (
   content: unknown,
 ): content is ControllerWidgetContent => {
@@ -342,11 +355,25 @@ export const isControllerWidgetContent = (
   );
 };
 
+export const getControllerWidgetContent = (
+  widget: WidgetContentHost,
+): ControllerWidgetContent | undefined => {
+  const content = widget.config.content;
+  return isControllerWidgetContent(content) ? content : undefined;
+};
+
 export const isTabWidgetContent = (
   content: unknown,
 ): content is TabWidgetContent => {
   const candidate = content as Partial<TabWidgetContent> | undefined;
   return !!candidate && typeof candidate === 'object' && !!candidate.itemMap;
+};
+
+export const getTabWidgetContent = (
+  widget: WidgetContentHost,
+): TabWidgetContent | undefined => {
+  const content = widget.config.content;
+  return isTabWidgetContent(content) ? content : undefined;
 };
 
 export const WidgetTypes = [
@@ -446,7 +473,7 @@ export interface BoardInfo {
   showBlockMask: boolean; //?
   isDroppable: boolean;
   clipboardWidgetMap: Record<string, WidgetOfCopy>;
-  layouts: Layout[];
+  layouts: LayoutItem[];
   deviceType: DeviceType; // deviceType for autoBoard defaultValue = desktop
   widgetIds: string[]; // board保存的时候 区分那些是删除的，哪些是新增的
   controllerPanel: WidgetControllerPanelParams; //
