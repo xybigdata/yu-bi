@@ -1,10 +1,10 @@
 # yu-bi 现代化改造执行板
 
-本文档是 yu-bi 现代化改造的恢复入口、阶段看板和执行约束。恢复工作时优先读本页，不再从历史提交或聊天记录中重新拼上下文。
+本文档是 yu-bi 现代化改造的恢复入口、阶段复盘和后续执行清单。恢复工作时优先读本页，再按“当前短期目标”继续推进。
 
 复盘时间：2026-06-22
 
-## 1. 总目标
+## 1. 改造目标
 
 在保证业务兼容、数据兼容、发布链稳定、结果正确的前提下，分阶段把前后端核心技术栈收口到较新的稳定版本。
 
@@ -28,7 +28,7 @@
 - 不贸然改 `DATART_*` 等内部技术符号
 - 不贸然改数据迁移相关稳定常量、后缀和内部标识
 
-## 2. 当前状态
+## 2. 当前快照
 
 恢复时先执行：
 
@@ -38,27 +38,27 @@ git rev-list --left-right --count origin/main...HEAD
 git log --oneline --decorate -8
 ```
 
-当前快照：
+当前状态：
 
 | 项目 | 状态 |
 | --- | --- |
 | 工作目录 | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
 | 远端 | `git@github.com:xybigdata/yu-bi.git` |
 | 主线分支 | `main` |
-| 当前专题分支 | `codex/modernization-frontend-runtime-next` |
-| 当前专题状态 | 前端运行时现代化继续累计中 |
-| 当前分支相对 `origin/main` | 以恢复命令输出为准，当前专题持续领先主线 |
-| 最近主线提交 | `a208481b0 docs: 复盘现代化改造阶段进度` |
-| 最近专题提交 | 以 `git log --oneline --decorate -8` 为准 |
+| 当前专题分支 | `codex/modernization-build-package` |
+| 当前专题 | P2-A Maven、Docker、安装包链路复核 |
+| 当前分支相对 `origin/main` | `0 1`，领先 1 个提交 |
+| 最近专题提交 | `273c87a6c chore: 优化构建与安装包启动链路` |
+| 最近主线提交 | `77217676b chore: 合入前端运行时现代化批次` |
 
 已确认的自动化权限和偏好：
 
 - 可以自动执行 `git add`
 - 可以自动执行 `git commit --no-verify -m "..."`
 - 可以自动执行 `git push origin <branch>`
-- `npm view ...` 已授权，后续不再单独询问
+- `npm view ...` 查询已授权，后续不再单独询问
 - 同一专题内尽量累计一组相关改动后再提交，避免过频繁提交
-- 当前专题继续在同一分支推进，暂不因为小批次改动立即合入 `main`
+- 当前专题继续在同一分支推进，不因为小批次改动立即合入 `main`
 
 ## 3. 分支与合并规则
 
@@ -73,16 +73,16 @@ git log --oneline --decorate -8
 当前专题分支：
 
 ```bash
-codex/modernization-frontend-runtime-next
+codex/modernization-build-package
 ```
 
-当前专题收尾前不要创建新分支。只有当前专题达到一个清晰收口点，并完成必要验证后，才考虑合并 `main` 并开启下一个专题。
+当前专题收口前不要创建新分支。P2-A 完成 Docker、部署文档、安装包 smoke 后，再统一验证、提交、推送；是否合入 `main` 取决于本批次完整门禁结果和主线节奏。
 
 ## 4. 技术栈基线
 
 ### 4.1 后端
 
-| 技术栈 | 当前基线 | 处理状态 |
+| 技术栈 | 当前基线 | 状态 |
 | --- | --- | --- |
 | Java | `21` | 已达硬性目标 |
 | Maven | `>=3.9` | 已由 Enforcer 约束 |
@@ -99,7 +99,7 @@ codex/modernization-frontend-runtime-next
 
 ### 4.2 前端
 
-| 技术栈 | 当前基线 | 处理状态 |
+| 技术栈 | 当前基线 | 状态 |
 | --- | --- | --- |
 | Node | `>=24.0.0` | 硬性目标 |
 | npm | `>=11.0.0` | 与 Node 24 配套 |
@@ -110,18 +110,18 @@ codex/modernization-frontend-runtime-next
 | React Redux | `9.3.0` | 已完成主升级 |
 | TypeScript | `5.9.3` | 当前稳定主链 |
 | Vite | `6.4.3` | 已替代 CRA 主工作流 |
-| Vitest | `4.1.8` | 当前主测试栈 |
+| Vitest | `4.1.9` | 当前主测试栈 |
 | styled-components | `6.1.19` | 已完成主升级 |
 | react-quill | `2.0.0` | 已升级，保留兼容层 |
 | monaco-editor | `0.52.2` | 已补真实运行时加载边界 |
 | reveal.js | `6.0.1` | 已补真实运行时加载边界 |
 | ECharts | `5.6.0` | 已升级到 ECharts 5 稳定线 |
 | AntV S2 | `2.7.2 / 2.3.1` | 已确认当前稳定线 |
-| react-window | `1.8.11` | 已升级到 1.x 兼容补丁线 |
 | react-grid-layout | `2.2.3` | 已通过 legacy 入口升级 |
 | flexlayout-react | `0.9.1` | 已升级并改用命名导出 |
+| react-window | `1.8.11` | 保持 1.x 兼容线，2.x 独立评估 |
 | react-draggable | `4.7.0` | 已升级 |
-| react-resizable | `3.2.0` | 已升级到 3.x 稳定补丁线 |
+| react-resizable | `3.2.0` | 已升级 |
 | @hello-pangea/dnd | `18.0.1` | 已确认当前稳定线 |
 | react-dnd | `16.0.1` | 已确认当前稳定线 |
 | react-dnd-html5-backend | `16.0.1` | 已确认当前稳定线 |
@@ -135,114 +135,52 @@ codex/modernization-frontend-runtime-next
 - 后端已建立 `JDK 21 + Spring Boot 3.5.x + Spring Cloud 2025.0.x` 主链
 - 前端已建立 `Node 24 + React 18 + Ant Design 5 + Vite 6 + Vitest 4` 主链
 - CRA / CRACO、IE11 主兼容链、Nashorn、PhantomJS 等历史主链已退出
-- 安装包闭环验证已打通，`yu-bi-server-*.zip` 可解压并通过 demo 健康检查脚本验证
 - `.tmp/`、`logs/` 已加入 `.gitignore`
 
 ### 5.2 已合入批次
 
-| 批次 | 合并点 | 结果 |
-| --- | --- | --- |
-| Dashboard widget 内容协议边界 | `b519a24cd` | 已合入 |
-| 图表运行时类型边界 | `484c44fd9` | 已合入 |
-| 现代化兼容边界 | `c67e2d2c7` | 已合入并推送 `origin/main` |
-| 图表运行时现代化 | `e00ca3d87` | 已合入并推送 `origin/main` |
-| 阶段复盘文档 | `a208481b0` | 已推送 `origin/main` |
+| 批次 | 结果 |
+| --- | --- |
+| 独立开源治理与 yu-bi 基础品牌 | 已合入 `main` |
+| 后端 JDK 21 / Spring Boot 3 主链 | 已合入 `main` |
+| 前端 React 18 / AntD 5 / Vite 6 主链 | 已合入 `main` |
+| Dashboard widget 内容协议边界 | 已合入 `main` |
+| 图表运行时类型边界 | 已合入 `main` |
+| 现代化兼容边界 | 已合入并推送 `origin/main` |
+| 图表运行时现代化 | 已合入并推送 `origin/main` |
+| 前端运行时现代化批次 | 已合入并推送 `origin/main`，主线提交 `77217676b` |
 
-### 5.3 当前专题已完成内容
+### 5.3 前端运行时专题复盘
 
 分支：`codex/modernization-frontend-runtime-next`
 
-已完成：
+已完成并合入：
 
-- `react-grid-layout` 从 `^1.3.4` 升级到 `^2.2.3`
-- 使用 `react-grid-layout/legacy` 保持 v1 平铺 props 兼容，不切换到 2.x hooks API
-- 将旧单项 `Layout` 类型迁移为 `LayoutItem`
-- 为 `react-grid-layout/legacy` 补 ambient declaration，适配当前 `moduleResolution: node`
-- `flexlayout-react` 从 `^0.5.21` 升级到 `^0.9.1`
-- FlexLayout 入口改为命名导出
-- 布局配置中的旧 `width` 字段迁移为 `weight`
-- 移除新类型不支持的旧 `tabEnableFloat` / `splitterSize`
-- `react-window` 从 `^1.8.6` 升级到 `^1.8.11`
-- 暂不升级 `react-window` 2.x；当前项目依赖 `VariableSizeGrid`，2.x 需要独立迁移专题
-- `react-draggable` 从 `^4.4.3` 升级到 `^4.7.0`
-- `react-resizable` 从 `^3.0.4` 升级到 `^3.2.0`
+- `react-grid-layout` `^1.3.4 -> ^2.2.3`，通过 `react-grid-layout/legacy` 保持旧布局 props 兼容
+- `flexlayout-react` `^0.5.21 -> ^0.9.1`，入口改为命名导出，布局配置迁移到 `weight`
+- `react-window` `^1.8.6 -> ^1.8.11`，暂不升级 2.x
+- `react-draggable` `^4.4.3 -> ^4.7.0`
+- `react-resizable` `^3.0.4 -> ^3.2.0`
 - 移除过时的 `@types/react-grid-layout`
-- 确认 `@hello-pangea/dnd`、`react-dnd`、`react-dnd-html5-backend` 当前已在稳定线
-- 补充前端布局、虚拟表格、拖拽运行时 smoke test
-- 新增 Dashboard widget content 读取 helper：`getChartWidgetContent`、`getControllerWidgetContent`、`getTabWidgetContent`
-- 将 Dashboard utils、TabWidgetCore、action/thunk 的 chart/controller/tab content 访问收口到统一 helper
-- 补充 widget content helper 测试，覆盖有效协议和错配协议分支
-- 前端补丁线升级：`react-resizable` `3.2.0`、`vitest` `4.1.9`、`less` `4.6.6`、`lint-staged` `17.0.8`
-- Node 24 / React 18 类型边界对齐：`@types/node` `24.13.2`、`@types/react` `18.3.31`、`@types/react-dom` `18.3.7`、`@types/react-resizable` `3.0.8`
-- ESLint TypeScript 插件补丁线对齐：`@typescript-eslint/eslint-plugin` / `parser` `8.61.1`
-- 已复扫前端公开入口和深路径 import；仅保留 `react-grid-layout/css/styles.css` 这类公开样式入口
-- 已确认 `react-beautiful-dnd`、`react-sortable-hoc`、`react-virtualized`、`@types/react-grid-layout` 等旧依赖无源码和依赖树残留
-- 已在本机 `Node v24.16.0`、`npm 11.13.0` 下复核 lockfile dry-run 可解析
+- Node 24 / React 18 类型边界对齐：`@types/node` `24.13.2`、`@types/react` `18.3.31`、`@types/react-dom` `18.3.7`
+- 补丁线升级：`vitest` `4.1.9`、`less` `4.6.6`、`lint-staged` `17.0.8`
+- Dashboard widget content 统一读取 helper 已落地，避免组件散落结构判断
+- 旧依赖 `react-beautiful-dnd`、`react-sortable-hoc`、`react-virtualized` 等确认无源码和依赖树残留
 
-已通过验证：
+已通过完整前端门禁：
 
 ```bash
 npm run checkTs
-npm run test:ci -- src/app/components/__tests__/dndRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/components/__tests__/VirtualTable.test.tsx src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx
-npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts
-npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts
 npm run test:ci
 npm run lint:css
 npm run lint:style
-npm install --package-lock-only --dry-run --ignore-scripts
-npm ci --dry-run --ignore-scripts
-node -v
-npm -v
-git diff --check
 ```
 
-专题收尾完整前端门禁已通过，当前专题准备合入 `main`。
-
-## 6. 当前短期目标
-
-短期目标：在 `codex/modernization-frontend-runtime-next` 上继续累计前端运行时和前端协议边界改造，完成一个更完整批次后再统一验证、提交、推送、合并。
-
-优先推进顺序：
-
-| 优先级 | 事项 | 风险 | 当前策略 |
-| --- | --- | --- | --- |
-| P1-C | Dashboard widget 内容协议继续收口 | 中 | 已新增统一读取 helper，并收口 utils、TabWidgetCore、action/thunk 主要访问点 |
-| P1-F | 前端运行时依赖剩余项复扫 | 中 | 已完成一批补丁线升级；React 19 / AntD 6 / Vite 8 / TS 6 等主版本暂缓 |
-| P1-G | 前端公开入口和深路径 import 复扫 | 低 | 已完成复扫，无需继续处理 |
-| P1-H | Node 24 / npm 11 安装健康度复核 | 低 | 已在 Node 24 / npm 11 下完成 dry-run 验证 |
-
-Dashboard widget 内容协议下一步切入点：
-
-- 找出仍直接访问 `widget.config.content.xxx` 或未复用 content helper 的路径
-- 优先复用 `getChartWidgetContent`、`getControllerWidgetContent`、`getTabWidgetContent`
-- 必要时补充轻量 helper，避免在组件中散落结构判断
-- 不改变保存协议、不做数据迁移、不重命名稳定字段
-- 对 reducer、helper、核心组件补最小测试或 smoke test
-
-建议恢复命令：
-
-```bash
-rg -n "widget\\.config\\.content\\.[A-Za-z]|content\\.[A-Za-z]" frontend/src/app/pages/DashBoardPage -g '*.ts' -g '*.tsx'
-sed -n '230,380p' frontend/src/app/pages/DashBoardPage/pages/Board/slice/types.ts
-sed -n '280,430p' frontend/src/app/pages/DashBoardPage/utils/widget.ts
-sed -n '560,710p' frontend/src/app/pages/DashBoardPage/utils/widget.ts
-sed -n '360,540p' frontend/src/app/pages/DashBoardPage/pages/BoardEditor/slice/childSlice/stackSlice.ts
-```
-
-## 7. 后续队列
-
-| 阶段 | 事项 | 风险 | 执行策略 |
-| --- | --- | --- | --- |
-| P2-A | Maven、Docker、安装包链路复核 | 中 | 改构建链路前补 `mvn package -DskipTests` 和 demo smoke |
-| P2-B | Shiro 认证授权健康度审计 | 高 | 只做边界用例和小修，不整体替换 |
-| P2-C | Calcite SQL 解析健康度审计 | 高 | 先补 SQL 解析兼容样例，不整体替换 |
-| P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
-| P2-E | 前端安全依赖治理 | 中高 | 单独专题处理 Dependabot 类问题，避免混入运行时改造 |
-| P2-F | React 19、AntD 6、Vite 8、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
-
-### 7.1 当前 P2-A 专题进度
+## 6. 当前短期目标：P2-A 构建与安装包链路
 
 分支：`codex/modernization-build-package`
+
+目标：把 Maven、Docker、安装包、启动脚本、部署文档收口到 yu-bi 当前发布形态，并确保 JDK 21 安装包启动链路可验证。
 
 已完成：
 
@@ -262,25 +200,43 @@ mvn package -DskipTests
 scripts/check-demo-health.sh
 ```
 
-说明：
+验证说明：
 
 - `mvn package -DskipTests` 在普通沙箱下因无法写入 `~/.m2` resolver 状态文件失败；提权后通过
 - `scripts/check-demo-health.sh` 在普通沙箱下因本地端口绑定受限失败；提权后通过
 - Maven 打包已重新生成 `yu-bi-server-1.0.0-rc.3-install.zip`，构建产物未产生需要提交的跟踪文件变更
 
-暂不做整体重构：
+P2-A 剩余改造点：
 
-- Java 包名 `datart.*`
-- 配置前缀 `datart.*`
-- `DATART_*`
-- 数据迁移稳定标识
-- Shiro 认证授权整体替换
-- Calcite SQL 解析主链整体替换
-- 数据源 provider / 方言 / 脚本运行时的大规模重构
+| 事项 | 风险 | 执行建议 |
+| --- | --- | --- |
+| Dockerfile 元数据 | 低 | 将旧个人 `LABEL "author"="tl"` 改为 OCI labels |
+| Docker 健康检查 | 中 | 可加 `HEALTHCHECK`，但需接受最终镜像保留 `curl` 或另找无新增工具方案 |
+| Deployment.md 安装包示例 | 低 | 将 `1.0.0-beta.x` 示例改为 `1.0.0-rc.3` 或通配包名 |
+| Deployment.md 品牌文案 | 低 | 只改用户可见品牌表述，不改 `datart.conf` 和 `datart.*` 配置前缀 |
+| Docker build 验证 | 受环境限制 | 当前本机无 `docker` 命令，记录为验证缺口 |
+
+P2-A 本批次下一次提交建议包含：
+
+- Dockerfile OCI 元数据调整
+- Deployment.md 安装包示例和用户可见文案调整
+- 本文档同步记录
+- 静态门禁结果
+
+## 7. 后续队列
+
+| 阶段 | 事项 | 风险 | 执行策略 |
+| --- | --- | --- | --- |
+| P2-B | Shiro 认证授权健康度审计 | 高 | 只补边界用例和小修，不整体替换 |
+| P2-C | Calcite SQL 解析健康度审计 | 高 | 先补 SQL 解析兼容样例，不整体替换 |
+| P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
+| P2-E | 前端安全依赖治理 | 中高 | 单独专题处理 Dependabot 类问题，避免混入运行时改造 |
+| P2-F | React 19、AntD 6、Vite 8、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
+| P2-G | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 
 ## 8. 门禁策略
 
-开发期按风险分层验证，不为每个小改动跑完整门禁。
+开发期按风险分层验证，不为每个小改动跑完整门禁。提交前做本批次相关门禁；准备合入 `main` 或推送 `main` 前做完整门禁。
 
 | 场景 | 最低门禁 |
 | --- | --- |
@@ -288,7 +244,7 @@ scripts/check-demo-health.sh
 | 前端类型边界、小范围组件迁移 | `npm run checkTs` + 相关测试 |
 | helper、模型、共享协议变化 | `npm run checkTs` + 相关模型 / helper 测试 |
 | 依赖、构建配置、运行时加载变化 | `npm run checkTs` + 相关运行时测试；专题收尾补 `npm run test:ci` |
-| Maven、Docker、安装包链路变化 | `mvn test` 或 `mvn package -DskipTests`，必要时补 demo smoke |
+| Maven、Docker、安装包链路变化 | `mvn package -DskipTests`，必要时补 demo smoke |
 | 准备 merge 回 `main` | 前端完整门禁，必要时补后端门禁 |
 | 推送 `main` | 不跳过完整门禁 |
 
@@ -299,6 +255,13 @@ npm run checkTs
 npm run test:ci
 npm run lint:css
 npm run lint:style
+```
+
+构建与安装包门禁：
+
+```bash
+mvn package -DskipTests
+scripts/check-demo-health.sh
 ```
 
 依赖链路补充门禁：
@@ -313,10 +276,11 @@ npm ci --dry-run --ignore-scripts
 - 找不到现成相关测试时，必须记录缺口
 - 优先补 helper、协议、运行时最小用例
 - 不为了覆盖率硬造低价值快照测试
+- 本机缺少外部工具时记录原因，例如当前无 `docker` 命令，不能本地验证 Docker build
 
 ## 9. 提交节奏
 
-同一专题内累计一组相关改动后再提交。
+同一专题内累计一组相关改动后再提交，减少主线合并和完整回归次数。
 
 建议粒度：
 
@@ -324,26 +288,27 @@ npm ci --dry-run --ignore-scripts
 | --- | --- |
 | 低风险类型边界 | 累计 3 到 10 个相关文件后提交 |
 | 中风险运行时链路 | 每条可验证链路独立提交 |
-| 依赖和构建链路 | 独立提交 |
+| 依赖和构建链路 | 独立提交，但尽量包含完整链路文档和验证记录 |
 | 阶段复盘 | 跟随当前批次提交，必要时可单独文档提交 |
 
-当前专题下一次提交建议包含：
+不要因为单个小文件改动立刻提交。当前 P2-A 应完成 Dockerfile、Deployment.md 和执行文档后再提交。
 
-- Dashboard widget 内容协议边界收口
-- 与该收口直接相关的测试
-- 本文档同步记录
+## 10. 恢复命令
 
-不要因为单个小文件改动立刻提交。
+继续 P2-A：
 
-## 10. 历史追溯
+```bash
+git status --short --branch
+git rev-list --left-right --count origin/main...HEAD
+sed -n '1,120p' Dockerfile
+sed -n '1,140p' Deployment.md
+sed -n '180,320p' server/pom.xml
+```
 
-需要追溯具体实现时使用：
+追溯历史：
 
 ```bash
 git log --oneline -- docs/tech-stack-modernization-plan.md
-git log --oneline -- frontend/src/app/components/FormGenerator
-git log --oneline -- frontend/src/app/components/ChartGraph
-git log --oneline -- frontend/src/app/pages/DashBoardPage
-git log --oneline -- frontend/src/app/pages/MainPage/pages/VizPage
+git log --oneline -- Dockerfile Deployment.md server/pom.xml bin/yu-bi-server.sh bin/yu-bi-server.cmd
 git log --oneline -- frontend/package.json frontend/package-lock.json
 ```
