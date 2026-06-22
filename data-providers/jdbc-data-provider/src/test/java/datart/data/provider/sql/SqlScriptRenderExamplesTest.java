@@ -56,7 +56,6 @@ class SqlScriptRenderExamplesTest {
         validateExamples(
                 VariableSqlExamples.sqlList.stream()
                         .filter(sqlTest -> "MYSQL".equals(sqlTest.getSqlDialect().getDatabaseProduct().name()))
-                        .filter(sqlTest -> !sqlTest.getSql().contains("order by $部门$"))
                         .limit(6)
                         .toList(),
                 false
@@ -66,9 +65,7 @@ class SqlScriptRenderExamplesTest {
     @Test
     void shouldRenderFallbackSqlExamplesWithoutSpringContext() throws SqlParseException {
         validateExamples(
-                FallbackSqlExamples.sqlList.stream()
-                        .filter(sqlTest -> !sqlTest.getSql().contains("order by $部门$"))
-                        .toList(),
+                FallbackSqlExamples.sqlList,
                 false
         );
     }
