@@ -41,4 +41,10 @@ describe('loadVirtualTableRuntime', () => {
     await expect(loadVirtualTableRuntime()).resolves.toBe(runtimeModule);
     expect(loader).toHaveBeenCalledTimes(2);
   });
+
+  test('should load actual react-window grid runtime', async () => {
+    const runtimeModule = await loadVirtualTableRuntime();
+
+    expect(runtimeModule.VariableSizeGrid).toEqual(expect.any(Function));
+  });
 });

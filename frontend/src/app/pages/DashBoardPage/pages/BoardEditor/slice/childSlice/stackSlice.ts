@@ -38,7 +38,7 @@ import { Variable } from 'app/pages/MainPage/pages/VariablePage/slice/types';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
 import { updateCollectionByAction } from 'app/utils/mutation';
 import produce from 'immer';
-import { Layout } from 'react-grid-layout';
+import { LayoutItem } from 'react-grid-layout/legacy';
 import { createSlice } from 'utils/@reduxjs/toolkit';
 import { ORIGINAL_TYPE_MAP } from '../../../../constants';
 import { EditBoardStack } from '../types';
@@ -273,7 +273,7 @@ export const editBoardStackSlice = createSlice({
 
     changeAutoBoardWidgetsRect(
       state,
-      action: PayloadAction<{ layouts: Layout[]; deviceType: DeviceType }>,
+      action: PayloadAction<{ layouts: LayoutItem[]; deviceType: DeviceType }>,
     ) {
       const { layouts, deviceType } = action.payload;
       layouts.forEach(it => {

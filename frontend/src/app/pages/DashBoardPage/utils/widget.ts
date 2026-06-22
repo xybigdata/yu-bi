@@ -38,6 +38,7 @@ import { updateBy } from 'app/utils/mutation';
 import { BOARD_COPY_CHART_SUFFIX, FilterSqlOperator } from 'globalConstants';
 import produce from 'immer';
 import { CSSProperties } from 'react';
+import type { LayoutItem } from 'react-grid-layout/legacy';
 import { CloneValueDeep } from 'utils/object';
 import { adaptBoardImageUrl, fillPx, getBackgroundImage } from '.';
 import { initClientId } from '../components/WidgetManager/utils/init';
@@ -154,7 +155,7 @@ export const adjustWidgetsToBoard = (args: {
   widgets: Widget[];
   boardType: BoardType;
   boardId: string;
-  layouts?: ReactGridLayout.Layout[];
+  layouts?: LayoutItem[];
 }) => {
   const { widgets, boardType, layouts } = args;
 
@@ -168,7 +169,7 @@ export const adjustWidgetsToBoard = (args: {
 
 export const updateAutoWidgetsRect = (
   widgets: Widget[],
-  layouts: ReactGridLayout.Layout[],
+  layouts: LayoutItem[],
 ): Widget[] => {
   const upDatedWidgets: Widget[] = [];
   const dashWidgetRectYs = layouts.map(ele => ele.y);

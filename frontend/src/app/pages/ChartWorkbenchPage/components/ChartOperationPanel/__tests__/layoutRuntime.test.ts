@@ -104,3 +104,20 @@ describe('normalizeLayoutComponentType', () => {
     expect(normalizeLayoutComponentType(undefined)).toBeUndefined();
   });
 });
+
+describe('layout package runtime', () => {
+  test('should load actual flexlayout-react runtime exports', async () => {
+    const runtimeModule = await import('flexlayout-react');
+
+    expect(runtimeModule.Layout).toEqual(expect.any(Object));
+    expect(runtimeModule.Model.fromJson).toEqual(expect.any(Function));
+    expect(runtimeModule.TabNode).toEqual(expect.any(Function));
+  });
+
+  test('should load actual react-grid-layout legacy runtime exports', async () => {
+    const runtimeModule = await import('react-grid-layout/legacy');
+
+    expect(runtimeModule.default).toEqual(expect.any(Function));
+    expect(runtimeModule.WidthProvider).toEqual(expect.any(Function));
+  });
+});

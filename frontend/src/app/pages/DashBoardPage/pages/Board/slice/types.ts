@@ -33,7 +33,7 @@ import {
 } from 'app/types/ChartDataRequest';
 import { ChartDatasetMeta } from 'app/types/ChartDataSet';
 import ChartDataView from 'app/types/ChartDataView';
-import { Layout } from 'react-grid-layout';
+import { LayoutItem } from 'react-grid-layout/legacy';
 import type { DeltaStatic } from 'app/components/ChartGraph/BasicRichText/quillCompat';
 import { IFontDefault } from '../../../../../../types';
 import { ChartDataSectionField } from '../../../../../types/ChartConfig';
@@ -446,7 +446,7 @@ export interface BoardInfo {
   showBlockMask: boolean; //?
   isDroppable: boolean;
   clipboardWidgetMap: Record<string, WidgetOfCopy>;
-  layouts: Layout[];
+  layouts: LayoutItem[];
   deviceType: DeviceType; // deviceType for autoBoard defaultValue = desktop
   widgetIds: string[]; // board保存的时候 区分那些是删除的，哪些是新增的
   controllerPanel: WidgetControllerPanelParams; //

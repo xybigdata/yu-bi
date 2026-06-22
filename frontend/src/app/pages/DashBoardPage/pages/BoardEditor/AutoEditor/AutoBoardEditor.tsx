@@ -43,7 +43,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import RGL, { Layout, WidthProvider } from 'react-grid-layout';
+import RGL, { LayoutItem, WidthProvider } from 'react-grid-layout/legacy';
 import 'react-grid-layout/css/styles.css';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -77,7 +77,7 @@ export const AutoBoardEditor: React.FC<{}> = memo(() => {
     return getBoardMarginPadding(boardConfig, colsKey);
   }, [boardConfig, colsKey]);
 
-  const currentLayout = useRef<Layout[]>([]);
+  const currentLayout = useRef<LayoutItem[]>([]);
 
   const { gridWrapRef, thEmitScroll } = useBoardScroll(boardId);
 
@@ -93,7 +93,7 @@ export const AutoBoardEditor: React.FC<{}> = memo(() => {
   const sortedLayoutWidgets = useEditAutoLayoutMap(boardId);
   const layoutMap = useGridLayoutMap(sortedLayoutWidgets);
 
-  const changeWidgetLayouts = debounce((layouts: Layout[]) => {
+  const changeWidgetLayouts = debounce((layouts: LayoutItem[]) => {
     dispatch(
       editBoardStackActions.changeAutoBoardWidgetsRect({
         layouts,
@@ -102,7 +102,7 @@ export const AutoBoardEditor: React.FC<{}> = memo(() => {
     );
   }, 300);
 
-  const onLayoutChange = (layouts: Layout[]) => {
+  const onLayoutChange = (layouts: LayoutItem[]) => {
     currentLayout.current = layouts;
     thEmitScroll();
     // ignore isDraggable item from out

@@ -45,11 +45,11 @@ git log --oneline --decorate -8
 | 工作目录 | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
 | 主线分支 | `main` |
 | 远端 | `git@github.com:xybigdata/yu-bi.git` |
-| 当前阶段 | 图表运行时专题已本地合入 `main`，等待收尾门禁和推送远端 |
-| 本地 `main` | 相对 `origin/main` 领先 5 个提交 |
-| 最近本地主线合并 | `e00ca3d87 chore: 合入图表运行时现代化批次` |
-| 远端最新主线 | `c67e2d2c7 chore: 合入现代化兼容边界批次` |
-| 当前未提交修复 | `PivotSheetChart` 真实运行时加载测试 timeout 从 5s 放宽到 15s |
+| 当前专题分支 | `codex/modernization-frontend-runtime-next` |
+| 当前阶段 | 前端布局运行时现代化专题进行中 |
+| 本地 `main` | 已与 `origin/main` 对齐 |
+| 最近主线提交 | `a208481b0 docs: 复盘现代化改造阶段进度` |
+| 当前专题进展 | 布局运行时依赖已升级并通过分层验证，待继续累计同专题改造 |
 
 注意：
 
@@ -96,7 +96,14 @@ git log --oneline --decorate -8
 | reveal.js | `6.0.1` | 已补真实运行时加载边界 |
 | ECharts | `5.6.0` | 已升级到 ECharts 5 稳定线 |
 | AntV S2 | `2.7.2 / 2.3.1` | 已确认是当前稳定线 |
-| react-window | `1.8.6` | 使用面窄，待后续布局专题评估 |
+| react-window | `1.8.11` | 已升级到 1.x 兼容补丁线 |
+| react-grid-layout | `2.2.3` | 已通过 legacy 兼容入口升级 |
+| flexlayout-react | `0.9.1` | 已升级并改用命名导出 |
+| react-draggable | `4.7.0` | 已随布局链路同步升级 |
+| react-resizable | `3.0.5` | 已随布局链路同步升级 |
+| @hello-pangea/dnd | `18.0.1` | 已确认是当前稳定线 |
+| react-dnd | `16.0.1` | 已确认是当前稳定线 |
+| react-dnd-html5-backend | `16.0.1` | 已确认是当前稳定线 |
 
 ## 4. 阶段复盘
 
@@ -116,7 +123,7 @@ git log --oneline --decorate -8
 | Dashboard widget 内容协议边界 | `b519a24cd` | 已合入 |
 | 图表运行时类型边界 | `484c44fd9` | 已合入 |
 | 现代化兼容边界 | `c67e2d2c7` | 已合入并推送 `origin/main` |
-| 图表运行时现代化 | `e00ca3d87` | 已本地合入 `main`，待最终门禁和推送 |
+| 图表运行时现代化 | `e00ca3d87` | 已合入并推送 `origin/main` |
 
 ### 4.3 图表运行时专题结果
 
@@ -147,45 +154,58 @@ npm run lint:css
 npm run lint:style
 ```
 
-合入后发现 `PivotSheetChart` 真实运行时加载测试在完整 `test:ci` 中偶发超过默认 5s，已放宽到 15s。当前需要提交该收尾修复，并重新执行完整前端门禁后再推送 `main`。
+合入后发现 `PivotSheetChart` 真实运行时加载测试在完整 `test:ci` 中偶发超过默认 5s，已放宽到 15s。该收尾修复已随 `a208481b0` 推送到 `origin/main`。
 
 ## 5. 当前短期目标
 
-P0：收尾并推送图表运行时专题。
+P0：继续推进前端布局运行时专题。
 
-1. 提交 `PivotSheetChart` timeout 修复和本复盘文档。
-2. 重新执行完整前端门禁。
-3. 门禁通过后推送 `main`。
-4. 推送后核对 `origin/main...HEAD` 是否为 `0 0`。
+专题分支：
 
-建议命令：
+```bash
+codex/modernization-frontend-runtime-next
+```
+
+已完成：
+
+- `react-grid-layout` 从 `^1.3.4` 升级到 `^2.2.3`
+- 使用 `react-grid-layout/legacy` 保持 v1 平铺 props 兼容，不切换到 2.x hooks API
+- 将旧 `Layout` 单项类型迁移为 `LayoutItem`，避免和 2.x readonly layout 数组语义冲突
+- `flexlayout-react` 从 `^0.5.21` 升级到 `^0.9.1`
+- FlexLayout 入口改为命名导出，布局配置中的旧 `width` 字段迁移为 `weight`
+- `react-window` 从 `^1.8.6` 升级到 `^1.8.11`
+- 暂不升级到 `react-window` 2.x；2.x API 已转向 `Grid/List`，当前项目依赖 `VariableSizeGrid`，需要独立迁移专题
+- `react-draggable` 升级到 `^4.7.0`
+- `react-resizable` 升级到 `^3.0.5`
+- 补充 `react-window`、`react-grid-layout/legacy`、`flexlayout-react` 真实运行时导入 smoke test
+- 已确认 `@hello-pangea/dnd@18.0.1`、`react-dnd@16.0.1`、`react-dnd-html5-backend@16.0.1` 是当前稳定线，本专题不做无意义版本变更
+- 补充 `@hello-pangea/dnd`、`react-dnd`、`react-dnd-html5-backend` 真实运行时导入 smoke test
+
+已执行验证：
 
 ```bash
 npm run checkTs
-npm run test:ci
-npm run lint:css
-npm run lint:style
-git push origin main
+npm run test:ci -- src/app/components/__tests__/dndRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/components/__tests__/VirtualTable.test.tsx src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx
+npm install --package-lock-only --dry-run --ignore-scripts
+npm ci --dry-run --ignore-scripts
 ```
 
-P1：开启下一条专题分支。
+下一步：
 
-候选分支名：
-
-```bash
-git checkout -b codex/modernization-frontend-runtime-next
-```
-
-下一条分支不再只做低风险项，可以在同一专题内同时推进低风险和可验证的中风险项，但每条中风险链路必须有对应测试或 smoke test。
+- 继续在同一分支累计前端运行时相关改造，不急于合并 `main`
+- 优先复扫前端公开类型入口和深路径 import
+- 继续评估其它前端运行时依赖是否已有低中风险稳定补丁可升级
+- 若继续改动依赖，仍按“先版本审计，再补 smoke test，再分层验证”执行
 
 ## 6. 下一步队列
 
 | 优先级 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
-| P1-A | 前端布局运行时审计：`react-window`、`react-grid-layout`、`flexlayout-react` | 中 | 先查使用面和当前稳定版，再补关键渲染 / helper 用例 |
-| P1-B | Dashboard widget 内容协议继续收口 | 中 | 先收敛 helper 和类型边界，不做大规模数据结构替换 |
-| P1-C | 前端公开类型入口和深路径 import 复扫 | 低 | 作为同一分支内的低风险清理批次 |
-| P1-D | Node 24 / npm 11 安装健康度复核 | 低 | 保持 `npm ci --dry-run --ignore-scripts` 和 lockfile 可解析 |
+| P1-A | 前端布局运行时审计：`react-window`、`react-grid-layout`、`flexlayout-react` | 中 | 已完成第一批升级；`react-window` 2.x 独立迁移专题暂缓 |
+| P1-B | 拖拽运行时审计：`@hello-pangea/dnd`、`react-dnd`、`react-dnd-html5-backend` | 中 | 已确认当前稳定线并补真实运行时 smoke test |
+| P1-C | Dashboard widget 内容协议继续收口 | 中 | 先收敛 helper 和类型边界，不做大规模数据结构替换 |
+| P1-D | 前端公开类型入口和深路径 import 复扫 | 低 | 作为同一分支内的低风险清理批次 |
+| P1-E | Node 24 / npm 11 安装健康度复核 | 低 | 保持 `npm ci --dry-run --ignore-scripts` 和 lockfile 可解析 |
 | P2-A | Maven、Docker、安装包链路复核 | 中 | 改构建链路前补 `mvn package -DskipTests` 和 demo smoke |
 | P2-B | Shiro 认证授权健康度审计 | 高 | 只做边界用例和小修，不整体替换 |
 | P2-C | Calcite SQL 解析健康度审计 | 高 | 先补 SQL 解析兼容样例，不整体替换 |
