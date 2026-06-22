@@ -244,6 +244,8 @@ P2-A 后续缺口：
 - 审计 `security` 模块 Shiro 适配层：`ShiroSecurityManager`、`ShiroSubjectFacade`、`ShiroAuthenticationTokenAdapter`
 - 新增 `ShiroSecurityManagerTest`，覆盖 `requireAllPermissions` 的权限缓存边界
 - 修复 `requireAllPermissions` 在已缓存允许权限时提前返回的问题；现在会继续检查后续权限
+- 新增 `ShiroAuthenticationTokenAdapterTest`，覆盖密码 token、合法 bearer token、非法 bearer token 边界
+- `ShiroAuthenticationTokenAdapter` 对非法 bearer token 返回稳定认证失败结果，不再向后传递空指针风险
 - 排除钉钉 SDK 传入的旧 `bcpkix-jdk15on` / `bcprov-jdk15on` `1.65`
 - 将 security 模块 BouncyCastle 组件统一到 `jdk18on` `1.81.1`
 - 修复 EC PEM / JWK 测试里的 BouncyCastle `NoSuchMethodError`
@@ -260,7 +262,7 @@ mvn -pl security -am dependency:tree '-Dincludes=org.bouncycastle:*' -Dscope=tes
 验证说明：
 
 - 普通沙箱运行 Maven 仍会因写 `~/.m2` 被拦截失败；提权后定向 Shiro 测试通过
-- `mvn -pl security -am test` 已通过，覆盖 core 3 个测试、security 8 个测试
+- `mvn -pl security -am test` 已通过，覆盖 core 3 个测试、security 12 个测试
 - BouncyCastle 依赖树已确认只保留 `bcpkix-jdk18on`、`bcutil-jdk18on`、`bcprov-jdk18on` `1.81.1`
 - Maven 解析阿里云仓库 metadata 时出现过缺 checksum warning，但构建和测试通过
 

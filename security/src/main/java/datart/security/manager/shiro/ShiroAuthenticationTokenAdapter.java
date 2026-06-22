@@ -19,6 +19,7 @@
 package datart.security.manager.shiro;
 
 import datart.security.manager.AuthenticationTokenAdapter;
+import datart.security.base.JwtToken;
 import datart.security.util.JwtUtils;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authc.BearerToken;
@@ -32,7 +33,8 @@ public class ShiroAuthenticationTokenAdapter implements AuthenticationTokenAdapt
     @Override
     public String resolveUsername(AuthenticationToken token) {
         if (token instanceof BearerToken) {
-            return JwtUtils.toJwtToken((String) token.getPrincipal()).getSubject();
+            JwtToken jwtToken = JwtUtils.toJwtToken((String) token.getPrincipal());
+            return jwtToken == null ? null : jwtToken.getSubject();
         }
         return (String) token.getPrincipal();
     }
@@ -45,7 +47,8 @@ public class ShiroAuthenticationTokenAdapter implements AuthenticationTokenAdapt
             return BCrypt.checkpw(password, credentials);
         }
         BearerToken bearerToken = (BearerToken) token;
-        return JwtUtils.validTimeout(bearerToken.getToken());
+        JwtToken jwtToken = JwtUtils.toJwtToken(bearerToken.getToken());
+        return jwtToken != null && JwtUtils.validTimeout(jwtToken);
     }
 
 }
