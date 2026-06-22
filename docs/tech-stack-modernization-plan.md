@@ -300,6 +300,10 @@ P2-B 完成状态：
   - 注释清理后的单查询脚本处理
   - 多查询脚本拒绝边界
   - parser 无法识别但字符串校验仍属于查询时的 fallback 包装行为
+- 新增 `SqlScriptRenderTest`，覆盖：
+  - SQL render 默认包装为 `SELECT * FROM (...) AS DATART_VTABLE`
+  - render 阶段的查询变量多值等值条件替换为 `IN`
+- 父 POM 为 Surefire 增加 `-Djava.awt.headless=true`，修复 JDK 21 / macOS 下 `POIUtilsTest` fork JVM `Abort trap: 6`
 - 确认本批次不触碰 Calcite 版本、不改 Java 包名 `datart.*`、配置前缀 `datart.*`、`DATART_*` 和迁移稳定标识
 
 已通过验证：
@@ -307,21 +311,25 @@ P2-B 完成状态：
 ```bash
 mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.calcite.SqlParserUtilsTest -Dsurefire.failIfNoSpecifiedTests=false test
 mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.calcite.SqlParserUtilsTest,datart.data.provider.calcite.SqlQueryScriptProcessorTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl core -Dtest=datart.core.common.POIUtilsTest test
+mvn -pl data-providers/data-provider-base -am test
 ```
 
 验证说明：
 
 - 定向测试覆盖 core、data-provider 聚合模块和 data-provider-base，`SqlParserUtilsTest` 5 个用例通过
 - P2-C 两个新增测试类共 8 个用例通过
+- `SqlScriptRenderTest` 2 个轻量渲染用例通过
+- `mvn -pl data-providers/data-provider-base -am test` 已通过，覆盖 core 3 个测试、data-provider-base 8 个测试，共 11 个测试
 - JavaCC 生成代码在 JDK 21 编译下仍有 deprecated annotation warning，暂不阻塞
-- `mvn -pl data-providers/data-provider-base -am test` 曾在 `core` 模块 `POIUtilsTest` 处出现 forked VM `Abort trap: 6`，未跑到 data-provider-base；定向 P2-C 测试已通过，后续需要复核该本机 JDK/POI fork 崩溃是否可复现
+- `POIUtilsTest` 在默认 fork JVM 下曾稳定出现 `Abort trap: 6`；加入 `-Djava.awt.headless=true` 后定向和完整 data-provider-base 门禁均通过
 - 本批次只建立健康度基线，不做 Calcite 主版本升级
 
 P2-C 本批次下一步：
 
-- 评估是否将部分禁用的 `SqlScriptRenderTest` 拆出为无需 Spring 上下文的轻量参数化测试
-- 复跑 data-provider-base 模块完整测试，若 `POIUtilsTest` fork 崩溃可复现，则单独记录为 JDK 21 / POI 环境问题
-- 累计本批次测试和文档后提交并推送专题分支
+- 继续评估是否将更多禁用的 `SqlScriptRenderTest` 样例拆出为无需 Spring 上下文的轻量参数化测试
+- 补充 JDBC data-provider 层方言发现和 provider adapter 的轻量基线
+- 累计本批次测试、Surefire 门禁配置和文档后提交并推送专题分支
 
 ## 9. 后续队列
 
