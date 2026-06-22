@@ -180,6 +180,8 @@ codex/modernization-frontend-runtime-next
 - 补充 `react-window`、`react-grid-layout/legacy`、`flexlayout-react` 真实运行时导入 smoke test
 - 已确认 `@hello-pangea/dnd@18.0.1`、`react-dnd@16.0.1`、`react-dnd-html5-backend@16.0.1` 是当前稳定线，本专题不做无意义版本变更
 - 补充 `@hello-pangea/dnd`、`react-dnd`、`react-dnd-html5-backend` 真实运行时导入 smoke test
+- 已移除过时的 `@types/react-grid-layout`；`react-grid-layout@2.2.3` 已自带类型，npm 也将该 `@types` 包标记为 stub/deprecated
+- 已复扫前端依赖深路径入口；当前仅保留 `react-grid-layout/css/styles.css` 这类公开样式入口
 
 已执行验证：
 
@@ -188,13 +190,14 @@ npm run checkTs
 npm run test:ci -- src/app/components/__tests__/dndRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/components/__tests__/VirtualTable.test.tsx src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx
 npm install --package-lock-only --dry-run --ignore-scripts
 npm ci --dry-run --ignore-scripts
+rg --pcre2 -n "@types/react-grid-layout|ReactGridLayout\\.|react-grid-layout/(?!legacy)|from ['\\\"](?:antd/es|antd/lib|rc-[^'\\\"]+/(?:es|lib)|@ant-design/[^'\\\"]+/(?:es|lib)|react-grid-layout/(?!legacy)|flexlayout-react/|react-window/|react-dnd/|@hello-pangea/dnd/)" frontend/package.json frontend/src -g '*.json' -g '*.ts' -g '*.tsx' -g '*.js' -g '*.jsx'
 ```
 
 下一步：
 
 - 继续在同一分支累计前端运行时相关改造，不急于合并 `main`
-- 优先复扫前端公开类型入口和深路径 import
 - 继续评估其它前端运行时依赖是否已有低中风险稳定补丁可升级
+- 继续推进 Dashboard widget 内容协议收口，先从 helper 和类型边界切入
 - 若继续改动依赖，仍按“先版本审计，再补 smoke test，再分层验证”执行
 
 ## 6. 下一步队列
@@ -204,7 +207,7 @@ npm ci --dry-run --ignore-scripts
 | P1-A | 前端布局运行时审计：`react-window`、`react-grid-layout`、`flexlayout-react` | 中 | 已完成第一批升级；`react-window` 2.x 独立迁移专题暂缓 |
 | P1-B | 拖拽运行时审计：`@hello-pangea/dnd`、`react-dnd`、`react-dnd-html5-backend` | 中 | 已确认当前稳定线并补真实运行时 smoke test |
 | P1-C | Dashboard widget 内容协议继续收口 | 中 | 先收敛 helper 和类型边界，不做大规模数据结构替换 |
-| P1-D | 前端公开类型入口和深路径 import 复扫 | 低 | 作为同一分支内的低风险清理批次 |
+| P1-D | 前端公开类型入口和深路径 import 复扫 | 低 | 已移除 `@types/react-grid-layout`，仅保留公开样式入口 |
 | P1-E | Node 24 / npm 11 安装健康度复核 | 低 | 保持 `npm ci --dry-run --ignore-scripts` 和 lockfile 可解析 |
 | P2-A | Maven、Docker、安装包链路复核 | 中 | 改构建链路前补 `mvn package -DskipTests` 和 demo smoke |
 | P2-B | Shiro 认证授权健康度审计 | 高 | 只做边界用例和小修，不整体替换 |
