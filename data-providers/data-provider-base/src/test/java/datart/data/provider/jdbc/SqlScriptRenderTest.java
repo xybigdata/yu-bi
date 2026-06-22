@@ -84,6 +84,52 @@ class SqlScriptRenderTest {
         );
     }
 
+    @Test
+    void shouldReplaceRepeatedSimpleVariableIgnoringCase() throws SqlParseException {
+        ScriptVariable status = variable(
+                "$status$",
+                ValueType.STRING,
+                VariableTypeEnum.QUERY,
+                "PAID"
+        );
+        SqlScriptRender render = new SqlScriptRender(
+                queryScript(
+                        "SELECT $Status$ AS `status` FROM `orders` ORDER BY $status$",
+                        status
+                ),
+                null,
+                mysqlDialect
+        );
+
+        assertEquals(
+                "SELECT * FROM ( SELECT 'PAID' AS `status` FROM `orders` ORDER BY 'PAID' ) AS `DATART_VTABLE`",
+                cleanup(render.render(false, false, false))
+        );
+    }
+
+    @Test
+    void shouldReplaceRepeatedSimpleVariableWithRegexSensitiveValue() throws SqlParseException {
+        ScriptVariable keyword = variable(
+                "$keyword$",
+                ValueType.STRING,
+                VariableTypeEnum.QUERY,
+                "sales$north\\team"
+        );
+        SqlScriptRender render = new SqlScriptRender(
+                queryScript(
+                        "SELECT $keyword$ AS `keyword` FROM `orders` ORDER BY $keyword$",
+                        keyword
+                ),
+                null,
+                mysqlDialect
+        );
+
+        assertEquals(
+                "SELECT * FROM ( SELECT 'sales$north\\team' AS `keyword` FROM `orders` ORDER BY 'sales$north\\team' ) AS `DATART_VTABLE`",
+                cleanup(render.render(false, false, false))
+        );
+    }
+
     private QueryScript queryScript(String script, ScriptVariable... variables) {
         QueryScript queryScript = new QueryScript();
         queryScript.setScriptType(ScriptType.SQL);
