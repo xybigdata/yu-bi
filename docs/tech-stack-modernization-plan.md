@@ -199,6 +199,10 @@ npm run lint:style
 bash -n bin/yu-bi-server.sh scripts/check-demo-health.sh
 java -version
 mvn -version
+npm run checkTs
+npm run test:ci
+npm run lint:css
+npm run lint:style
 mvn package -DskipTests
 scripts/check-demo-health.sh
 git diff --check
@@ -210,6 +214,8 @@ git diff --check
 - `scripts/check-demo-health.sh` 在普通沙箱下因本地端口绑定受限失败；提权后通过
 - Maven 打包已重新生成 `yu-bi-server-1.0.0-rc.3-install.zip`，构建产物未产生需要提交的跟踪文件变更
 - 本批次再次运行 `mvn package -DskipTests` 已通过，确认 Dockerfile 依赖的安装包可生成
+- 合入 `main` 前完整前端门禁已通过：`checkTs`、`test:ci`、`lint:css`、`lint:style`
+- `scripts/check-demo-health.sh` 普通沙箱下无法连上本地 8080；提权后健康检查通过
 - 当前本机无 `docker` 命令，无法本地执行 Docker build；本批次只完成 Dockerfile 静态复扫
 
 P2-A 本批次完成状态：
@@ -224,7 +230,7 @@ P2-A 本批次完成状态：
 
 P2-A 本批次下一步：
 
-- 提交并推送当前专题分支，暂不合并 `main`
+- 提交门禁记录后按 `--no-ff` 合并回 `main`
 - 后续具备 Docker 环境后补 `docker build` 和容器健康检查验证
 
 ## 7. 后续队列
