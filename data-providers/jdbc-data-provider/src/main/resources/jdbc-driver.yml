@@ -163,6 +163,8 @@ PRESTO:
   name: PRESTO
   driver-class: io.prestosql.jdbc.PrestoDriver
   url-prefix: jdbc:presto://
+  literal-quote: "'"
+  identifier-quote: "\""
   adapter-class: datart.data.provider.jdbc.adapters.PrestoDataProviderAdapter
 
 SPARK:
@@ -194,5 +196,4 @@ VERTICA:
   name: VERTICA
   driver-class: com.vertica.jdbc.Driver
   url-prefix: jdbc:vertica://
-
 

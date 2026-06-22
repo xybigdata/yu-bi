@@ -2,6 +2,7 @@ package datart.data.provider.jdbc;
 
 import datart.core.base.exception.BaseException;
 import datart.data.provider.JdbcDataProvider;
+import datart.data.provider.calcite.dialect.CustomSqlDialect;
 import datart.data.provider.calcite.dialect.ClickHouseSqlDialectSupport;
 import datart.data.provider.calcite.dialect.H2Dialect;
 import datart.data.provider.calcite.dialect.MysqlSqlStdOperatorSupport;
@@ -9,6 +10,7 @@ import datart.data.provider.calcite.dialect.OracleSqlStdOperatorSupport;
 import datart.data.provider.jdbc.adapters.ClickHouseDataProviderAdapter;
 import datart.data.provider.jdbc.adapters.JdbcDataProviderAdapter;
 import datart.data.provider.jdbc.adapters.OracleDataProviderAdapter;
+import datart.data.provider.jdbc.adapters.PrestoDataProviderAdapter;
 import org.apache.calcite.sql.SqlDialect;
 import org.junit.jupiter.api.Test;
 
@@ -35,6 +37,19 @@ class ProviderFactoryTest {
         assertAdapter("H2", JdbcDataProviderAdapter.class, H2Dialect.class, true);
         assertAdapter("ORACLE", OracleDataProviderAdapter.class, OracleSqlStdOperatorSupport.class, false);
         assertAdapter("CLICKHOUSE", ClickHouseDataProviderAdapter.class, ClickHouseSqlDialectSupport.class, true);
+    }
+
+    @Test
+    void shouldCreatePrestoAdapterAndCustomDialectWithQuoteMetadata() {
+        JdbcDataProviderAdapter adapter = createAdapter("PRESTO");
+        JdbcDriverInfo presto = adapter.getDriverInfo();
+
+        assertInstanceOf(PrestoDataProviderAdapter.class, adapter);
+        assertFalse(adapter.isInit());
+        assertInstanceOf(CustomSqlDialect.class, adapter.getSqlDialect());
+        assertEquals("'", presto.getLiteralQuote());
+        assertEquals("\"", presto.getIdentifierQuote());
+        assertFalse(adapter.supportPaging());
     }
 
     @Test

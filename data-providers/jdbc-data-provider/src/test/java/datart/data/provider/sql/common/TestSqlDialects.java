@@ -37,9 +37,6 @@ public class TestSqlDialects {
         Field[] fields = TestSqlDialects.class.getFields();
         for (Field field : fields) {
             String name = field.getName();
-            if ("PRESTO".equals(name)) {
-                continue;
-            }
             try {
                 field.setAccessible(true);
                 field.set(TestSqlDialects.class, getSqlDialect(name));
