@@ -121,7 +121,7 @@ codex/modernization-frontend-runtime-next
 | react-grid-layout | `2.2.3` | 已通过 legacy 入口升级 |
 | flexlayout-react | `0.9.1` | 已升级并改用命名导出 |
 | react-draggable | `4.7.0` | 已升级 |
-| react-resizable | `3.0.5` | 已升级 |
+| react-resizable | `3.2.0` | 已升级到 3.x 稳定补丁线 |
 | @hello-pangea/dnd | `18.0.1` | 已确认当前稳定线 |
 | react-dnd | `16.0.1` | 已确认当前稳定线 |
 | react-dnd-html5-backend | `16.0.1` | 已确认当前稳定线 |
@@ -172,6 +172,9 @@ codex/modernization-frontend-runtime-next
 - 新增 Dashboard widget content 读取 helper：`getChartWidgetContent`、`getControllerWidgetContent`、`getTabWidgetContent`
 - 将 Dashboard utils、TabWidgetCore、action/thunk 的 chart/controller/tab content 访问收口到统一 helper
 - 补充 widget content helper 测试，覆盖有效协议和错配协议分支
+- 前端补丁线升级：`react-resizable` `3.2.0`、`vitest` `4.1.9`、`less` `4.6.6`、`lint-staged` `17.0.8`
+- Node 24 / React 18 类型边界对齐：`@types/node` `24.13.2`、`@types/react` `18.3.31`、`@types/react-dom` `18.3.7`、`@types/react-resizable` `3.0.8`
+- ESLint TypeScript 插件补丁线对齐：`@typescript-eslint/eslint-plugin` / `parser` `8.61.1`
 
 已通过验证：
 
@@ -179,6 +182,7 @@ codex/modernization-frontend-runtime-next
 npm run checkTs
 npm run test:ci -- src/app/components/__tests__/dndRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/components/__tests__/VirtualTable.test.tsx src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts src/app/components/ChartGraph/BasicTableChart/__tests__/BasicTableChart.test.jsx
 npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts
+npm run test:ci -- src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts
 npm install --package-lock-only --dry-run --ignore-scripts
 npm ci --dry-run --ignore-scripts
 git diff --check
@@ -195,7 +199,7 @@ git diff --check
 | 优先级 | 事项 | 风险 | 当前策略 |
 | --- | --- | --- | --- |
 | P1-C | Dashboard widget 内容协议继续收口 | 中 | 已新增统一读取 helper；下一步处理 action/thunk 剩余散点 |
-| P1-F | 前端运行时依赖剩余项复扫 | 中 | 只升级兼容性明确的补丁或小版本，先 `npm view` 审计 |
+| P1-F | 前端运行时依赖剩余项复扫 | 中 | 已完成一批补丁线升级；React 19 / AntD 6 / Vite 8 / TS 6 等主版本暂缓 |
 | P1-G | 前端公开入口和深路径 import 复扫 | 低 | 保留公开样式入口，清理过时类型包和私有入口 |
 | P1-H | Node 24 / npm 11 安装健康度复核 | 低 | 保持 lockfile 可解析，继续验证 `npm ci --dry-run --ignore-scripts` |
 
@@ -226,6 +230,7 @@ sed -n '360,540p' frontend/src/app/pages/DashBoardPage/pages/BoardEditor/slice/c
 | P2-C | Calcite SQL 解析健康度审计 | 高 | 先补 SQL 解析兼容样例，不整体替换 |
 | P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
 | P2-E | 前端安全依赖治理 | 中高 | 单独专题处理 Dependabot 类问题，避免混入运行时改造 |
+| P2-F | React 19、AntD 6、Vite 8、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
 
 暂不做整体重构：
 
