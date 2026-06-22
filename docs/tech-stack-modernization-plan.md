@@ -90,6 +90,7 @@ codex/modernization-shiro-health
 | Spring Cloud | `2025.0.1` | 与 Boot 3.5 配套 |
 | MyBatis Spring Boot | `3.0.4` | 已适配 Boot 3 |
 | GraalJS | `25.0.1` | 已替代 Nashorn 主链 |
+| BouncyCastle | `1.81.1` | 已统一到 `jdk18on` 组件线 |
 | Springdoc | `2.8.17` | 已适配 Boot 3 |
 | H2 | `2.4.240` | 已升级 |
 | Selenium | `4.31.0` | 已升级 |
@@ -243,19 +244,25 @@ P2-A 后续缺口：
 - 审计 `security` 模块 Shiro 适配层：`ShiroSecurityManager`、`ShiroSubjectFacade`、`ShiroAuthenticationTokenAdapter`
 - 新增 `ShiroSecurityManagerTest`，覆盖 `requireAllPermissions` 的权限缓存边界
 - 修复 `requireAllPermissions` 在已缓存允许权限时提前返回的问题；现在会继续检查后续权限
+- 排除钉钉 SDK 传入的旧 `bcpkix-jdk15on` / `bcprov-jdk15on` `1.65`
+- 将 security 模块 BouncyCastle 组件统一到 `jdk18on` `1.81.1`
+- 修复 EC PEM / JWK 测试里的 BouncyCastle `NoSuchMethodError`
 - 确认本批次不触碰 Java 包名 `datart.*`、配置前缀 `datart.*`、`DATART_*` 和迁移稳定标识
 
 已通过验证：
 
 ```bash
 mvn -pl security -am -Dtest=datart.security.manager.shiro.ShiroSecurityManagerTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl security -am test
+mvn -pl security -am dependency:tree '-Dincludes=org.bouncycastle:*' -Dscope=test
 ```
 
 验证说明：
 
 - 普通沙箱运行 Maven 仍会因写 `~/.m2` 被拦截失败；提权后定向 Shiro 测试通过
-- `mvn -pl security -am test` 当前会被既存 `TestJwkParse.testEcPemJwt` 的 BouncyCastle `NoSuchMethodError` 挡住
-- JWK / BouncyCastle 兼容问题属于 P2-B 后续安全链路健康缺口，本批次不混入依赖升级
+- `mvn -pl security -am test` 已通过，覆盖 core 3 个测试、security 8 个测试
+- BouncyCastle 依赖树已确认只保留 `bcpkix-jdk18on`、`bcutil-jdk18on`、`bcprov-jdk18on` `1.81.1`
+- Maven 解析阿里云仓库 metadata 时出现过缺 checksum warning，但构建和测试通过
 
 P2-B 本批次下一步：
 
@@ -266,7 +273,6 @@ P2-B 本批次下一步：
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
-| P2-B-2 | JWK / BouncyCastle 兼容缺口 | 高 | 先定位依赖冲突和最小版本组合，不直接大版本升级 |
 | P2-C | Calcite SQL 解析健康度审计 | 高 | 先补 SQL 解析兼容样例，不整体替换 |
 | P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
 | P2-E | 前端安全依赖治理 | 中高 | 单独专题处理 Dependabot 类问题，避免混入运行时改造 |
