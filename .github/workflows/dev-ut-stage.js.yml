@@ -13,16 +13,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [24.x]
-
     steps:
     - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js from frontend/.nvmrc
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
+        node-version-file: 'frontend/.nvmrc'
         cache: 'npm'
         cache-dependency-path: 'frontend/package-lock.json'
     - name: Use Temurin JDK 21
@@ -33,6 +29,7 @@ jobs:
         cache: maven
     - name: Verify frontend toolchain
       run: |
+        npm install -g npm@11.13.0
         node -v
         npm -v
         npm config get engine-strict

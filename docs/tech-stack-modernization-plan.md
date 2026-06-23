@@ -564,7 +564,7 @@ git diff --check
 P2-E 合入状态：
 
 - 当前分支继续累计前端安全 / 运行时改造
-- 当前分支已领先 `origin/main` 13 个专题提交，继续在同一分支推进
+- 当前分支已领先 `origin/main` 14 个专题提交，继续在同一分支推进
 - 暂不合入 `main`，减少主线合并和完整回归频率
 
 最新批次：前端直接依赖声明固定化
@@ -642,12 +642,15 @@ git diff --check
 最新批次：CI 前端工具链基线校验
 
 - 已在 GitHub Actions 前端门禁中增加 `Verify frontend toolchain` 步骤
+- CI 已从浮动 `node-version: 24.x` 改为读取 `frontend/.nvmrc`
+- CI 在 `npm ci` 前显式安装并校验 `packageManager` 声明的 `npm@11.13.0`
 - CI 在 `npm ci` 前输出并校验 Node/npm 基线、`engine-strict=true`、`packageManager=npm@11.13.0`
 - 本批次不改变 CI 的构建、测试、lint、Maven 门禁，只让错误 Node/npm 基线更早失败
 
 本批次验证命令：
 
 ```bash
+node -e "const fs=require('fs'); const p=require('./package.json'); if (fs.readFileSync('.nvmrc','utf8').trim() !== 'v24.16.0') throw new Error('Unexpected .nvmrc'); if (p.packageManager !== 'npm@11.13.0') throw new Error('Unexpected packageManager: '+p.packageManager)"
 node -v
 npm -v
 npm config get engine-strict
