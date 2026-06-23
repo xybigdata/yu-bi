@@ -115,6 +115,7 @@ codex/modernization-frontend-security-deps
 | TypeScript | `5.9.3` | 当前稳定主链 |
 | Vite | `6.4.3` | 已替代 CRA 主工作流 |
 | Vitest | `4.1.9` | 当前主测试栈 |
+| Testing Library | `@testing-library/react 16.3.2 / dom 10.4.1` | 已对齐 React 18 测试栈 |
 | styled-components | `6.4.2` | 已完成主升级并确认运行时依赖位置 |
 | 富文本编辑器 | `react-quill-new 3.7.0 / quill 2.0.2` | 当前 P2-E 正在迁移验证 |
 | monaco-editor | `0.52.2` | 已补真实运行时加载边界 |
@@ -533,12 +534,15 @@ git diff --check
 - AntD 主题切换已从废弃的 `ConfigProvider.config({ theme })` 迁移到 `ConfigProvider theme={{ token }}`，移除测试期 `[antd: ConfigProvider] config` warning
 - React Router 入口已集中通过 `app/routerCompat` 默认启用 `v7_startTransition` 和 `v7_relativeSplatPath`，移除测试期 React Router v7 future warning
 - `ChartIFrameContainer` 测试已等待异步 lifecycle effect 收敛，移除 React 18 `act(...)` warning
+- 已评估 `monaco-editor 0.55.1`，该版本引入的 `dompurify 3.2.7` 会让 `npm audit` 新增 2 个漏洞，暂不采用；当前继续保持 `monaco-editor 0.52.2`
+- `@testing-library/react` 已从 `14.3.1` 升级到 `16.3.2`，并显式补齐 peer 依赖 `@testing-library/dom 10.4.1`
 - `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过，确认 `package.json` 与 `package-lock.json` 一致可安装
 - `npm ls ... --all` 已通过，确认 override 后依赖树无 invalid / missing
 - `npm run checkTs` 已通过
 - 请求 wrapper 相关测试 3 个测试文件、15 个用例通过
 - AntD / Router 兼容 warning 相关测试 3 个测试文件、5 个用例通过
 - Chart iframe 容器测试 1 个测试文件、2 个用例通过
+- Testing Library 16 升级后 `npm run test:ci` 已通过：135 个测试文件通过，928 个用例通过，4 个跳过
 - 相关运行时测试 4 个测试文件、13 个用例通过
 - Quill 2 迁移后富文本相关测试 7 个测试文件、25 个用例通过
 - 已补真实 `RichTextEditorRuntime` 挂载 smoke，覆盖 Quill 2 runtime 在 jsdom 下挂载、读取 Delta 内容，以及图表富文本预览 calcfield 渲染
