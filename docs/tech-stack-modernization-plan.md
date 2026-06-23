@@ -119,6 +119,9 @@ codex/modernization-frontend-security-deps
 | Vite | `8.0.16` | 已升级到 Vite 8 主链，暂配 `@vitejs/plugin-react 5.2.0` |
 | Vitest | `4.1.9` | 当前主测试栈 |
 | Testing Library | `@testing-library/react 16.3.2 / dom 10.4.1` | 已对齐 React 19 测试栈 |
+| Less | `4.6.7` | 已完成补丁升级 |
+| vite-plugin-svgr | `5.2.0` | 已完成 Vite 8 下构建验证 |
+| stylelint-order | `8.1.1` | 已完成 Stylelint 17 下 lint 验证 |
 | styled-components | `6.4.2` | 已完成主升级并确认运行时依赖位置 |
 | 富文本编辑器 | `react-quill-new 3.7.0 / quill 2.0.2` | 当前 P2-E 正在迁移验证 |
 | monaco-editor | `0.52.2` | 已补真实运行时加载边界 |
@@ -1038,11 +1041,53 @@ git diff --check
 - `npm audit --json` 仍为 0 vulnerabilities
 - `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过
 
+最新批次：前端工具链补丁线升级
+
+- 已将 `less` 从 `4.6.6` 升级到 `4.6.7`
+- 已将 `stylelint-order` 从 `7.0.1` 升级到 `8.1.1`
+- 已将 `vite-plugin-svgr` 从 `4.5.0` 升级到 `5.2.0`
+- `stylelint-order 8.1.1` peer 支持 `stylelint ^16.18.0 || ^17.0.0`，与当前 `stylelint 17.13.0` 兼容
+- `vite-plugin-svgr 5.2.0` peer 支持 `vite >=3.0.0`，已在当前 Vite 8 构建链路验证通过
+- 本批次只处理开发 / 构建工具链补丁线和小版本升级，不改业务代码，不升级 React Router 7、ECharts 6、AntD 6、react-window 2 等高风险主版本
+
+本批次验证命令：
+
+```bash
+npm ls less stylelint-order vite-plugin-svgr --all
+npm run lint:css
+npm run lint:style
+npm run checkTs
+npm run build
+npm run build:task
+npm run eslint -- eslint.config.mjs vite.config.mts vite.task.config.mts vitest.config.mts vite.shared.mts
+npm exec -- prettier --check package.json
+npm audit --json
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+git diff --check
+```
+
+验证说明：
+
+- 依赖树已确认 `less 4.6.7`、`stylelint-order 8.1.1`、`vite-plugin-svgr 5.2.0` 均解析到目标版本，无 invalid 依赖
+- `npm run lint:css`、`npm run lint:style` 已通过
+- `npm run checkTs` 已通过
+- 主构建和 task bundle 构建均通过，继续使用 Vite 8.0.16
+- 配置文件 ESLint、`package.json` Prettier 检查和 `git diff --check` 均通过
+- `npm audit --json` 仍为 0 vulnerabilities
+- `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过
+
+本轮暂缓项：
+
+- AntD 6 暂缓：`antd` 最新稳定为 `6.4.5`，但最新稳定 `@ant-design/pro-components 2.8.10` peer 仍只支持 `antd ^4.24.15 || ^5.11.2`
+- `react-window` 2 暂缓：`react-window 2.2.7` 不再导出当前 `VirtualTable` 依赖的 `VariableSizeGrid`，新 API 改为 `Grid` / `cellComponent` / `gridRef`，需要独立组件适配专题
+- `quill 2.0.3` / `react-quill-new 3.8.3` 暂缓：此前已确认会触发 `GHSA-v3m3-f69x-jf25` 低危 XSS audit
+- `monaco-editor 0.55.1` 暂缓：此前已确认会通过 `dompurify 3.2.7` 引入新的 audit 风险
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
-| P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
+| P2-D | `react-window` 2.x 适配 | 中高 | 独立专题，当前 `VariableSizeGrid` API 已被 2.x 移除，需要改造 `VirtualTable` 到新 `Grid` API |
 | P2-F | AntD 6 主版本评估 | 高 | 稳定版 Pro Components 尚未支持 AntD 6，继续等待稳定生态链路 |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 | P2-J | 富文本编辑器运行时 smoke | 中 | P2-E 已迁移 Quill 2，后续补浏览器层编辑 / 预览 / 分享页验证 |
