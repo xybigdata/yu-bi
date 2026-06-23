@@ -115,7 +115,7 @@ codex/modernization-frontend-security-deps
 | Ant Design | `5.29.3` | 已收口到 AntD 5 稳定线，并迁移到 v5 theme token API |
 | Redux Toolkit | `2.12.0` | 已完成主升级 |
 | React Redux | `9.3.0` | 已完成主升级 |
-| TypeScript | `5.9.3` | 当前稳定主链 |
+| TypeScript | `6.0.3` | 已升级到 6.0 稳定线，`baseUrl` 已迁移为显式 `paths` |
 | Vite | `8.0.16` | 已升级到 Vite 8 主链，暂配 `@vitejs/plugin-react 5.2.0` |
 | Vitest | `4.1.9` | 当前主测试栈 |
 | Testing Library | `@testing-library/react 16.3.2 / dom 10.4.1` | 已对齐 React 18 测试栈 |
@@ -143,7 +143,7 @@ codex/modernization-frontend-security-deps
 - yu-bi 已从 datart 独立，仓库、默认分支、远端已切换完成
 - README、README_zh、NOTICE、SECURITY、ROADMAP、CHANGELOG、MAINTAINERS、issue template 已收口为独立开源项目表述
 - 后端已建立 `JDK 21 + Spring Boot 3.5.x + Spring Cloud 2025.0.x` 主链
-- 前端已建立 `Node 24 + React 18 + Ant Design 5 + Vite 6 + Vitest 4` 主链
+- 前端已建立 `Node 24 + React 18 + Ant Design 5 + Vite 8 + TypeScript 6 + Vitest 4` 主链
 - CRA / CRACO、IE11 主兼容链、Nashorn、PhantomJS 等历史主链已退出
 - `.tmp/`、`logs/` 已加入 `.gitignore`
 
@@ -806,7 +806,7 @@ git diff --check
 - 已将 `frontend/tsconfig.json` 的 `moduleResolution` 从旧 `node` 收口为 `bundler`
 - `tsc --showConfig` 已确认有效解析策略从 `node10` 变为 `bundler`
 - 已移除 `eslint.config.mjs` 中未使用的 `@eslint/js` 导入
-- 本批次让 TypeScript 解析模型更贴近 Vite 6 / ESM bundler 实际构建链路，不改业务逻辑、不升级依赖版本
+- 本批次让 TypeScript 解析模型更贴近 Vite / ESM bundler 实际构建链路，不改业务逻辑、不升级依赖版本
 
 本批次验证命令：
 
@@ -964,12 +964,45 @@ git diff --check
 - task bundle 从约 `420.87 kB` 增至约 `454.88 kB`，后续如需优化包体，单独进入构建产物治理
 - `npm audit --json` 仍为 0 vulnerabilities
 
+最新批次：前端 TypeScript 6 主链升级
+
+- 已将 `typescript` 从 `5.9.3` 升级到 `6.0.3`
+- 已将 `@typescript-eslint/parser`、`@typescript-eslint/eslint-plugin` 从 `8.61.1` 升级到 `8.62.0`
+- `@typescript-eslint 8.62.0` peer 支持 `typescript >=4.8.4 <6.1.0`，与 TypeScript 6.0.3 兼容
+- 已移除 TypeScript 6 标记废弃的 `compilerOptions.baseUrl`
+- 已使用显式 `paths` 覆盖现有 `app/*`、`redux/*`、`styles/*`、`utils/*`、`types`、`globalConstants`、`entryPointFactory` 等绝对导入
+- 本批次不使用 `ignoreDeprecations` 掩盖废弃项，直接完成 TS 解析配置迁移
+- React 19、AntD 6 继续保留为独立高风险评估，不并入本批次
+
+本批次验证命令：
+
+```bash
+npm exec -- tsc --version
+npm run checkTs
+npm exec -- tsc --showConfig
+npm run test -- src/__tests__/task.test.ts src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/components/__tests__/dndRuntime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/models/__tests__/ChartDataRequestBuilder.test.ts src/utils/__tests__/utils.test.ts
+npm run build
+npm run build:task
+npm audit --json
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+git diff --check
+```
+
+验证说明：
+
+- 本地实际 TypeScript 版本已确认为 `Version 6.0.3`
+- `npm run checkTs` 已通过
+- `tsc --showConfig` 已确认不再包含 `baseUrl`，路径解析由显式 `paths` 承接
+- 代表性测试 7 个文件、46 个用例通过
+- 主构建和 task bundle 构建均通过，继续使用 Vite 8.0.16
+- `npm audit --json` 仍为 0 vulnerabilities
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
 | P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
-| P2-F | React 19、AntD 6、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
+| P2-F | React 19、AntD 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 | P2-J | 富文本编辑器运行时 smoke | 中 | P2-E 已迁移 Quill 2，后续补浏览器层编辑 / 预览 / 分享页验证 |
 

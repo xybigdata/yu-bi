@@ -17,7 +17,17 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "types": ["node", "vitest/globals", "@testing-library/jest-dom"],
-    "baseUrl": "./src"
+    "paths": {
+      "app/*": ["./src/app/*"],
+      "entryPointFactory": ["./src/entryPointFactory.tsx"],
+      "globalConstants": ["./src/globalConstants.ts"],
+      "locales/*": ["./src/locales/*"],
+      "redux/*": ["./src/redux/*"],
+      "styles/*": ["./src/styles/*"],
+      "types": ["./src/types.ts"],
+      "types/*": ["./src/types/*"],
+      "utils/*": ["./src/utils/*"]
+    }
   },
   "include": ["src"]
 }
