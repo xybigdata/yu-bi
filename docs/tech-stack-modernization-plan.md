@@ -1629,6 +1629,36 @@ git diff --check
 - 主构建和 task bundle 构建均通过，继续使用 `vite v8.1.0`
 - 主构建仍有既有大 chunk warning，本批次不处理包体拆分
 
+最新批次：前端共享 Vite 配置测试基线
+
+- 已新增 `vite.shared.test.mts`，为当前共享 Vite helper 建立轻量行为基线
+- 覆盖 `createViteAliases` 的源码 alias 输出，避免后续继续整理构建配置时破坏绝对导入路径
+- 覆盖 `createReactPlugin` / `createReactBabelOptions`，确认继续加载 `babel-plugin-styled-components`
+- 覆盖 `lessTildeImportCompat`，确认只对 Less 文件重写 `~` import
+- 覆盖 `craSvgReactComponentCompat`，确认保留 CRA 风格 `ReactComponent as Xxx` SVG 导入兼容
+- 覆盖 `createLessPreprocessorOptions`，确认 Less `javascriptEnabled`、`rewriteUrls` 和 `~` 文件解析兼容仍有效
+- 本批次不改业务代码、不升级依赖版本，重点是为后续继续去兼容化或升级 Vite 插件提供回归证据
+
+本批次验证命令：
+
+```bash
+npm run test -- vite.shared.test.mts
+npm run checkTs
+npm run eslint -- vite.shared.mts vite.shared.test.mts
+npm exec -- prettier --check vite.shared.mts vite.shared.test.mts
+npm run build
+npm run build:task
+git diff --check
+```
+
+验证说明：
+
+- `vite.shared.test.mts` 5 个用例通过
+- `npm run checkTs` 已通过
+- Vite 共享配置和测试文件 ESLint / Prettier 检查通过
+- 主构建和 task bundle 构建均通过，继续使用 `vite v8.1.0`
+- 主构建仍有既有大 chunk warning，本批次不处理包体拆分
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |

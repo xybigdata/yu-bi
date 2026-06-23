@@ -4,12 +4,12 @@ import react, {
 } from '@vitejs/plugin-react';
 import type { AliasOptions, Plugin } from 'vite';
 
-export const createReactPlugin = (): Plugin =>
+export const createReactPlugin = () =>
   react({
     babel: createReactBabelOptions(),
   });
 
-const createReactBabelOptions = (): ReactPluginOptions['babel'] => ({
+export const createReactBabelOptions = (): ReactPluginOptions['babel'] => ({
   plugins: ['babel-plugin-styled-components'],
 });
 
