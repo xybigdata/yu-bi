@@ -1747,6 +1747,24 @@ npm run build:task
 git diff --check
 ```
 
+最新批次：前端 HTML / Helmet 元数据品牌收口
+
+- 已将 4 个 Vite HTML 入口的 `<meta name="description">` 从旧 `Data Art` 描述收口为 yu-bi 描述
+- 已将主应用 Helmet 默认标题从 `Datart` 收口为 `yu-bi`，标题模板从 `%s - Datart` 收口为 `%s - yu-bi`
+- 已将分享页 Helmet 描述收口为 `yu-bi shared analytics content`
+- 已将钻取弹窗 iframe 的可访问标题从 `Datart Iframe Window` 收口为 `yu-bi Iframe Window`
+- 本批次只处理前端用户可见元数据和无障碍标题，不改 Java 包名、配置前缀、迁移稳定标识或内部技术常量
+
+本批次验证命令：
+
+```bash
+rg -n "Data Art|titleTemplate=\"%s - Datart\"|defaultTitle=\"Datart\"|Datart Iframe Window" frontend/index.html frontend/shareChart.html frontend/shareDashboard.html frontend/shareStoryPlayer.html frontend/src/app --glob '!frontend/node_modules/**'
+npm run checkTs
+npm run build
+npm run build:task
+git diff --check
+```
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |

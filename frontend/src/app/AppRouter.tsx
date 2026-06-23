@@ -64,11 +64,14 @@ export function AppRouter() {
     <ConfigProvider locale={antdLocales[i18n.language]}>
       <BrowserRouter basename={PUBLIC_URL}>
         <Helmet
-          titleTemplate="%s - Datart"
-          defaultTitle="Datart"
+          titleTemplate="%s - yu-bi"
+          defaultTitle="yu-bi"
           htmlAttributes={{ lang: i18n.language }}
         >
-          <meta name="description" content="Data Art" />
+          <meta
+            name="description"
+            content="yu-bi business intelligence platform"
+          />
         </Helmet>
         <Routes>
           <Route path="/setup" element={<LazySetupPage />} />
