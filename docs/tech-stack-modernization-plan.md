@@ -1604,6 +1604,31 @@ git diff --check
 - 主构建和 task bundle 构建均通过，继续使用 `vite v8.1.0`
 - 主构建仍有既有大 chunk warning，本批次不处理包体拆分
 
+最新批次：前端 React 构建插件配置重复治理
+
+- 已将主 Vite 构建和 task bundle 构建中重复的 `@vitejs/plugin-react` 配置抽到 `vite.shared.mts#createReactPlugin`
+- 共享 React 插件配置继续保留现有 `babel-plugin-styled-components` 行为
+- 主构建和 task bundle 构建不再分别直接导入 `@vitejs/plugin-react`，后续如果调整 React plugin 或 styled-components 编译策略，只需维护共享入口
+- 本批次不升级依赖版本、不改业务代码，只降低 Vite / React 构建配置继续演进时的分叉风险
+
+本批次验证命令：
+
+```bash
+npm run eslint -- vite.config.mts vite.task.config.mts vite.shared.mts
+npm exec -- prettier --check vite.config.mts vite.task.config.mts vite.shared.mts
+npm run checkTs
+npm run build
+npm run build:task
+git diff --check
+```
+
+验证说明：
+
+- Vite 配置文件 ESLint 和 Prettier 检查通过
+- `npm run checkTs` 已通过
+- 主构建和 task bundle 构建均通过，继续使用 `vite v8.1.0`
+- 主构建仍有既有大 chunk warning，本批次不处理包体拆分
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |

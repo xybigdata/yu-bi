@@ -1,5 +1,17 @@
 import path from 'path';
+import react, {
+  type Options as ReactPluginOptions,
+} from '@vitejs/plugin-react';
 import type { AliasOptions, Plugin } from 'vite';
+
+export const createReactPlugin = (): Plugin =>
+  react({
+    babel: createReactBabelOptions(),
+  });
+
+const createReactBabelOptions = (): ReactPluginOptions['babel'] => ({
+  plugins: ['babel-plugin-styled-components'],
+});
 
 export const createViteAliases = (appRoot: string): AliasOptions => {
   const srcRoot = path.resolve(appRoot, 'src');

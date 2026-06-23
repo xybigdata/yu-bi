@@ -1,4 +1,3 @@
-import react from '@vitejs/plugin-react';
 import fs from 'fs';
 import path from 'path';
 import { defineConfig, type Plugin } from 'vite';
@@ -6,6 +5,7 @@ import svgr from 'vite-plugin-svgr';
 
 import {
   createLessPreprocessorOptions,
+  createReactPlugin,
   craSvgReactComponentCompat,
   createViteAliases,
   lessTildeImportCompat,
@@ -122,11 +122,7 @@ const vendorManualChunks = (id: string) => {
 export default defineConfig(({ mode }) => ({
   publicDir: 'public',
   plugins: [
-    react({
-      babel: {
-        plugins: ['babel-plugin-styled-components'],
-      },
-    }),
+    createReactPlugin(),
     svgr(),
     lessTildeImportCompat(),
     craSvgReactComponentCompat(),
