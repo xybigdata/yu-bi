@@ -540,6 +540,7 @@ git diff --check
 - 已评估 `monaco-editor 0.55.1`，该版本引入的 `dompurify 3.2.7` 会让 `npm audit` 新增 2 个漏洞，暂不采用；当前继续保持 `monaco-editor 0.52.2`
 - `@testing-library/react` 已从 `14.3.1` 升级到 `16.3.2`，并显式补齐 peer 依赖 `@testing-library/dom 10.4.1`
 - `@testing-library/dom` 已归位到 `devDependencies`，避免测试工具链进入生产依赖声明
+- 前端 lint 和 Husky 脚本已移除 `npx` 调用，统一走 npm scripts / `npm exec` 解析本地依赖，降低 Node 24 / npm 11 下隐式网络解析风险
 - `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过，确认 `package.json` 与 `package-lock.json` 一致可安装
 - `npm ls ... --all` 已通过，确认 override 后依赖树无 invalid / missing
 - `npm run checkTs` 已通过
@@ -615,6 +616,32 @@ git diff --check
 - `npm audit --json` 仍为 0 vulnerabilities，生产依赖计数从 305 降到 293
 - Testing Library 相关定向测试 4 个文件通过，13 个用例通过，1 个历史 skip
 - 测试日志中的 jsdom pseudo-element `getComputedStyle` warning 是既有噪声，不影响结果
+
+最新批次：前端本地工具链脚本收口
+
+- 已将 `lint:css`、`lint:style`、`lint:style:staged` 从 `npx stylelint` 改为直接调用 npm scripts 可解析的本地 `stylelint`
+- 已将 `prepare` 从 `npx --prefix frontend husky ...` 改为 `npm exec --prefix frontend -- husky ...`
+- 已将 Husky `pre-commit` 从 `npx lint-staged` 改为 `npm exec -- lint-staged`
+- 已将 Husky `commit-msg` 从 `npx --prefix frontend --no -- commitlint ...` 改为 `npm exec --prefix frontend -- commitlint ...`
+- 仓库非依赖目录已无 `npx` 残留；本批次不升级依赖版本、不改变门禁语义
+
+本批次验证命令：
+
+```bash
+rg -n "npx" . --glob '!frontend/node_modules/**' --glob '!node_modules/**' --glob '!**/target/**' --glob '!**/dist/**'
+npm run lint:css
+npm run lint:style
+npm exec --prefix frontend -- commitlint --version
+cd frontend && npm exec -- lint-staged --version
+npm exec --prefix frontend -- husky frontend/.husky
+git diff --check
+```
+
+验证说明：
+
+- `npm run lint:css` 和 `npm run lint:style` 已通过，确认 stylelint 本地 bin 可解析
+- `commitlint --version` 输出 `@commitlint/cli@21.0.2`，`lint-staged --version` 输出 `17.0.8`
+- Husky 初始化命令普通沙箱因无法写 `.git/config` 失败，提权复跑通过
 
 ## 12. 后续队列
 
