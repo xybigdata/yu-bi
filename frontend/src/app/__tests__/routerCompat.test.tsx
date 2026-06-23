@@ -1,28 +1,42 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { Route, Routes } from 'react-router-dom';
-import { afterEach, describe, expect, test, vi } from 'vitest';
-import { MemoryRouter } from '../routerCompat';
+import { describe, expect, test } from 'vitest';
+import { MemoryRouter, useParams } from '../routerCompat';
+
+const ProjectRoute = () => {
+  const params = useParams<{ orgId: string; projectId: string }>();
+  return (
+    <div>
+      {params.orgId}/{params.projectId}
+    </div>
+  );
+};
 
 describe('routerCompat', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  test('should opt into React Router v7 future flags by default', () => {
-    const consoleWarnSpy = vi
-      .spyOn(console, 'warn')
-      .mockImplementation(() => undefined);
-
+  test('should render routes through the compatibility memory router', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={['/route']}>
         <Routes>
-          <Route path="*" element={<div>route</div>} />
+          <Route path="/route" element={<div>route</div>} />
         </Routes>
       </MemoryRouter>,
     );
 
-    expect(consoleWarnSpy).not.toHaveBeenCalledWith(
-      expect.stringContaining('React Router Future Flag Warning'),
+    expect(screen.getByText('route')).toBeInTheDocument();
+  });
+
+  test('should keep typed route params helper', () => {
+    render(
+      <MemoryRouter initialEntries={['/org/o-1/project/p-1']}>
+        <Routes>
+          <Route
+            path="/org/:orgId/project/:projectId"
+            element={<ProjectRoute />}
+          />
+        </Routes>
+      </MemoryRouter>,
     );
+
+    expect(screen.getByText('o-1/p-1')).toBeInTheDocument();
   });
 });

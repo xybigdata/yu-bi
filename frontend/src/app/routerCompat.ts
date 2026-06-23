@@ -10,23 +10,12 @@ import {
   useParams as useReactRouterParams,
 } from 'react-router-dom';
 
-const routerFuture = {
-  v7_startTransition: true,
-  v7_relativeSplatPath: true,
-};
-
 export function BrowserRouter(props: BrowserRouterProps) {
-  return React.createElement(ReactRouterBrowserRouter, {
-    ...props,
-    future: { ...routerFuture, ...props.future },
-  });
+  return React.createElement(ReactRouterBrowserRouter, props);
 }
 
 export function MemoryRouter(props: MemoryRouterProps) {
-  return React.createElement(ReactRouterMemoryRouter, {
-    ...props,
-    future: { ...routerFuture, ...props.future },
-  });
+  return React.createElement(ReactRouterMemoryRouter, props);
 }
 
 export { Link, useLocation, useNavigate };

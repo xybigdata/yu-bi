@@ -111,7 +111,7 @@ codex/modernization-frontend-security-deps
 | Node | `>=24.0.0 <25.0.0` | 硬性目标，当前验证基线 `24.16.0` |
 | npm | `>=11.0.0 <12.0.0` | 与 Node 24 配套，当前验证基线 `11.13.0` |
 | React | `19.2.7` | 已升级到 React 19 稳定线 |
-| React Router | `6.30.4` | 已收口到 React Router 6 稳定线，并通过兼容层启用 v7 future flags |
+| React Router | `7.18.0` | 已升级到 React Router 7 稳定线 |
 | Ant Design | `5.29.3` | 已收口到 AntD 5 稳定线，并迁移到 v5 theme token API |
 | @ant-design/icons | `6.2.5` | 直接依赖已升级；AntD / Pro Components 内部仍保留 5.x |
 | Redux Toolkit | `2.12.0` | 已完成主升级 |
@@ -545,7 +545,7 @@ git diff --check
 - 已将一组 lockfile 已实际解析并通过验证的直接依赖声明固定为当前稳定基线：`react-router-dom 6.30.4`、`i18next 26.3.1`、`classnames 2.5.1`、`split.js 1.6.5`、`postcss 8.5.15`、`eslint-plugin-prettier 5.5.6`、`stylelint-order 7.0.1`
 - 已继续固定一组已由 lockfile 实际解析并验证的运行时依赖声明：`@ant-design/icons 5.6.1`、`@ant-design/pro-components 2.8.10`、`@antv/s2 2.7.2`、`@antv/s2-react 2.3.1`、`dayjs 1.11.21`、`immer 9.0.12`、`polished 4.1.4`、`react-dnd 16.0.1`、`react-dnd-html5-backend 16.0.1`、`react-hotkeys-hook 3.4.4`、`react-window 1.8.11`、`reveal.js 6.0.1`
 - AntD 主题切换已从废弃的 `ConfigProvider.config({ theme })` 迁移到 `ConfigProvider theme={{ token }}`，移除测试期 `[antd: ConfigProvider] config` warning
-- React Router 入口已集中通过 `app/routerCompat` 默认启用 `v7_startTransition` 和 `v7_relativeSplatPath`，移除测试期 React Router v7 future warning
+- React Router 入口已集中通过 `app/routerCompat` 管理；后续已升级到 React Router 7 并移除 v6 future flags
 - `ChartIFrameContainer` 测试已等待异步 lifecycle effect 收敛，移除 React 18 `act(...)` warning
 - 已评估 `monaco-editor 0.55.1`，该版本引入的 `dompurify 3.2.7` 会让 `npm audit` 新增 2 个漏洞，暂不采用；当前继续保持 `monaco-editor 0.52.2`
 - `@testing-library/react` 已从 `14.3.1` 升级到 `16.3.2`，并显式补齐 peer 依赖 `@testing-library/dom 10.4.1`
@@ -1240,6 +1240,35 @@ git diff --check
 - `npm run checkTs` 已通过
 - BasicTable / Dashboard 相关测试 3 个文件、10 个用例通过
 - Immer 相关测试 9 个文件、79 个用例通过、3 个既有 skipped
+- `npm audit --json` 仍为 0 vulnerabilities
+- 主构建和 task bundle 构建均通过；既有大 chunk warning 仍存在
+
+最新批次：前端路由主版本升级
+
+- 已将 `react-router-dom` 从 `6.30.4` 升级到 `7.18.0`，同步解析 `react-router 7.18.0`
+- React Router 7 peer 要求 `react >=18 / react-dom >=18`，engine 要求 `node >=20.0.0`，与当前 React 19 / Node 24 基线兼容
+- `app/routerCompat` 已移除 React Router 6 专用的 `v7_startTransition` 和 `v7_relativeSplatPath` future flags，保留 `BrowserRouter`、`MemoryRouter`、`Link`、`useLocation`、`useNavigate` 和类型化 `useParams` 入口
+- 已新增 `useShareRouteParams` hook 测试，覆盖 `shareChart`、`shareDashboard`、`shareStoryPlayer` 三类分享路径 token 解析，验证 React Router 7 下 `matchPath` 行为
+- 主构建中 `entryPointFactory` chunk 由约 `124.64 kB / gzip 44.95 kB` 增加到约 `143.38 kB / gzip 51.11 kB`，仍保持现有拆包结构
+
+本批次验证命令：
+
+```bash
+npm ls react-router-dom react-router --all
+npm run checkTs
+npm run test -- src/app/__tests__/routerCompat.test.tsx src/app/pages/SharePage/hooks/__tests__/useShareRouteParams.test.tsx src/app/pages/NotFoundPage/__tests__/index.test.tsx src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts
+npm audit --json
+npm run build
+npm run build:task
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+git diff --check
+```
+
+验证说明：
+
+- 依赖树已确认 `react-router-dom 7.18.0` 和 `react-router 7.18.0` 解析到目标版本
+- `npm run checkTs` 已通过
+- 路由兼容层、分享路由参数、404 页面和 Dashboard 编辑器路由相关测试 4 个文件、9 个用例通过
 - `npm audit --json` 仍为 0 vulnerabilities
 - 主构建和 task bundle 构建均通过；既有大 chunk warning 仍存在
 
