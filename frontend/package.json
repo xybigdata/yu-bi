@@ -73,7 +73,7 @@
     "flexlayout-react": "^0.9.1",
     "i18next": "^26.0.2",
     "immer": "^9.0.5",
-    "lodash": "^4.17.21",
+    "lodash": "4.18.1",
     "monaco-editor": "0.52.2",
     "polished": "^4.1.1",
     "react": "18.3.1",
@@ -93,7 +93,8 @@
     "redux-undo": "^1.0.1",
     "reveal.js": "^6.0.1",
     "split.js": "^1.6.4",
-    "sql-formatter": "9.2.0"
+    "sql-formatter": "9.2.0",
+    "styled-components": "6.4.2"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.0.2",
@@ -125,7 +126,6 @@
     "postcss-styled-syntax": "^0.7.1",
     "prettier": "^3.8.4",
     "prettier-plugin-organize-imports": "^4.3.0",
-    "styled-components": "6.1.19",
     "stylelint": "^17.13.0",
     "stylelint-config-recess-order": "^7.7.0",
     "stylelint-config-recommended": "^18.0.0",
@@ -138,6 +138,21 @@
   "config": {
     "commitizen": {
       "path": "cz-conventional-changelog"
+    }
+  },
+  "overrides": {
+    "lodash": "4.18.1",
+    "lodash-es": "4.18.1",
+    "path-to-regexp": "8.4.2",
+    "form-data": "4.0.6",
+    "undici": "7.28.0",
+    "brace-expansion": "1.1.13",
+    "braces": "3.0.3",
+    "micromatch": "4.0.8",
+    "minimist": "1.2.8",
+    "tmp": "0.2.7",
+    "strip-ansi@4.0.0": {
+      "ansi-regex": "3.0.1"
     }
   }
 }

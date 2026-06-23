@@ -45,11 +45,11 @@ git log --oneline --decorate -8
 | 工作目录 | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
 | 远端 | `git@github.com:xybigdata/yu-bi.git` |
 | 主线分支 | `main` |
-| 当前专题分支 | `codex/modernization-presto-driver-metadata` |
-| 当前专题 | P2-H PRESTO JDBC driver 元数据治理 |
+| 当前专题分支 | `codex/modernization-frontend-security-deps` |
+| 当前专题 | P2-E 前端安全依赖治理 |
 | 当前分支相对 `origin/main` | 以恢复命令输出为准 |
 | 最近专题提交 | 以 `git log --oneline --decorate -8` 为准 |
-| 最近主线提交 | `bf6eee2e2 chore: 合入 SQL 变量替换行为修复` |
+| 最近主线提交 | `f1739f621 chore: 合入 PRESTO driver 元数据治理` |
 
 已确认的自动化权限和偏好：
 
@@ -57,6 +57,7 @@ git log --oneline --decorate -8
 - 可以自动执行 `git commit --no-verify -m "..."`
 - 可以自动执行 `git push origin <branch>`
 - `npm view ...` 查询已授权，后续不再单独询问
+- `npm audit ...` 查询已授权，后续不再单独询问
 - `mvn -pl security ...` 命令已授权，后续不再单独询问
 - 同一专题内尽量累计一组相关改动后再提交，避免过频繁提交
 - 当前专题继续在同一分支推进，不因为小批次改动立即合入 `main`
@@ -74,10 +75,10 @@ git log --oneline --decorate -8
 当前专题分支：
 
 ```bash
-codex/modernization-presto-driver-metadata
+codex/modernization-frontend-security-deps
 ```
 
-当前专题收口前不要创建新分支。P2-H 聚焦 PRESTO JDBC driver 元数据缺口：补齐现有 `CustomSqlDialect` fallback 所需 quote 元数据，恢复 PRESTO 测试侧自动初始化，不升级 Calcite 主版本，不扩大数据源方言重构范围。
+当前专题收口前不要创建新分支。P2-E 聚焦前端安全依赖治理：优先处理补丁级升级、lockfile 和 npm overrides 可验证收口的问题；富文本编辑器 `react-quill -> quill 1.x` 漏洞需要独立迁移方案，不混入本批次盲改。
 
 ## 4. 技术栈基线
 
@@ -155,6 +156,7 @@ codex/modernization-presto-driver-metadata
 | Shiro 认证授权健康度审计 | 已合入并推送 `origin/main`，主线提交 `99336814e` |
 | Calcite SQL 解析健康度审计 | 已合入并推送 `origin/main`，主线提交 `065e4d007` |
 | SQL 变量替换行为修复 | 已合入并推送 `origin/main`，主线提交 `bf6eee2e2` |
+| PRESTO JDBC driver 元数据治理 | 已合入并推送 `origin/main`，主线提交 `f1739f621` |
 
 ### 5.3 前端运行时专题复盘
 
@@ -415,7 +417,7 @@ P2-G 合入状态：
 - 已合入并推送 `origin/main`，主线提交 `bf6eee2e2`
 - 本批次不处理 PRESTO driver 元数据缺口，保留为 P2-H 独立专题
 
-## 10. 当前短期目标：P2-H PRESTO JDBC driver 元数据治理
+## 10. 已完成短期目标：P2-H PRESTO JDBC driver 元数据治理
 
 分支：`codex/modernization-presto-driver-metadata`
 
@@ -462,18 +464,76 @@ npm run lint:style
 
 P2-H 合入状态：
 
+- 已合入并推送 `origin/main`，主线提交 `f1739f621`
+
+## 11. 当前短期目标：P2-E 前端安全依赖治理
+
+分支：`codex/modernization-frontend-security-deps`
+
+目标：在不替换富文本编辑器、不升级 React/AntD/Vite 主版本的前提下，优先消除补丁级、lockfile 级和 overrides 可安全治理的前端依赖漏洞，并明确剩余需要独立迁移的风险项。
+
+本批次已完成：
+
+- `npm audit --json` 初始结果：20 个 vulnerability 条目，包括 2 critical、10 high、6 moderate、2 low
+- 直接依赖调整：
+  - `lodash` `^4.17.21 -> 4.18.1`
+  - `styled-components` `6.1.19 -> 6.4.2`
+  - `styled-components` 从 `devDependencies` 移到 `dependencies`，匹配源码运行时真实使用方式
+- 通过 npm `overrides` 收口传递依赖安全版本：
+  - `lodash` / `lodash-es` `4.18.1`
+  - `path-to-regexp` `8.4.2`
+  - `form-data` `4.0.6`
+  - `undici` `7.28.0`
+  - `brace-expansion` `1.1.13`
+  - `braces` `3.0.3`
+  - `micromatch` `4.0.8`
+  - `minimist` `1.2.8`
+  - `tmp` `0.2.7`
+  - `strip-ansi@4.0.0` 下的 `ansi-regex` `3.0.1`
+- `tsconfig.json` 显式加入 `node` 类型，恢复 `process`、`global`、`NodeJS.Timeout` 等当前源码实际使用的 Node 24 类型边界
+- 同步 `package-lock.json` 和本地 `node_modules`，确认新依赖树可解析
+
+已通过验证：
+
+```bash
+npm audit --json
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+npm ls lodash lodash-es styled-components path-to-regexp form-data undici brace-expansion braces micromatch minimist tmp ansi-regex react-quill quill --all
+npm run checkTs
+npm run test -- src/styles/theme/__tests__/ThemeProvider.test.tsx src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/RichTextEditorRuntime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts
+npm run test:ci
+npm run lint:css
+npm run lint:style
+git diff --check
+```
+
+验证说明：
+
+- `npm audit --json` 已从 20 个 vulnerability 条目降到 2 个，剩余 2 个均来自 `react-quill -> quill@1.3.7`
+- `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过，确认 `package.json` 与 `package-lock.json` 一致可安装
+- `npm ls ... --all` 已通过，确认 override 后依赖树无 invalid / missing
+- `npm run checkTs` 已通过
+- 相关运行时测试 4 个测试文件、13 个用例通过
+- `npm run test:ci` 已通过：132 个测试文件通过，919 个用例通过，4 个跳过
+- `npm run lint:css`、`npm run lint:style` 已通过
+- `git diff --check` 已通过
+- 本批次未处理 `react-quill -> quill@1.3.7` XSS 风险；npm 推荐的 `react-quill@0.0.2` 是不可用回退方向，后续应作为富文本编辑器替换或 Quill 2 兼容迁移专题单独推进
+
+P2-E 合入状态：
+
+- 已具备提交专题分支条件
 - 已具备合入 `main` 条件
 
-## 11. 后续队列
+## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
 | P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
-| P2-E | 前端安全依赖治理 | 中高 | 单独专题处理 Dependabot 类问题，避免混入运行时改造 |
 | P2-F | React 19、AntD 6、Vite 8、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
+| P2-J | 富文本编辑器安全迁移 | 中高 | 处理 `react-quill -> quill@1.3.7` XSS 残留，先评估 Quill 2 或替代编辑器兼容层 |
 
-## 12. 门禁策略
+## 13. 门禁策略
 
 开发期按风险分层验证，不为每个小改动跑完整门禁。提交前做本批次相关门禁；准备合入 `main` 或推送 `main` 前做完整门禁。
 
@@ -517,7 +577,7 @@ npm ci --dry-run --ignore-scripts
 - 不为了覆盖率硬造低价值快照测试
 - 本机缺少外部工具时记录原因，例如当前无 `docker` 命令，不能本地验证 Docker build
 
-## 13. 提交节奏
+## 14. 提交节奏
 
 同一专题内累计一组相关改动后再提交，减少主线合并和完整回归次数。
 
@@ -530,18 +590,19 @@ npm ci --dry-run --ignore-scripts
 | 依赖和构建链路 | 独立提交，但尽量包含完整链路文档和验证记录 |
 | 阶段复盘 | 跟随当前批次提交，必要时可单独文档提交 |
 
-不要因为单个小文件改动立刻提交。当前 P2-H 应围绕 PRESTO driver 元数据治理累计代码、测试和文档记录后再提交。
+不要因为单个小文件改动立刻提交。当前 P2-E 应围绕前端安全依赖治理累计依赖升级、lockfile、门禁和文档记录后再提交。
 
-## 14. 恢复命令
+## 15. 恢复命令
 
-继续 P2-H：
+继续 P2-E：
 
 ```bash
 git status --short --branch
 git rev-list --left-right --count origin/main...HEAD
-sed -n '150,175p' data-providers/jdbc-data-provider/src/main/resources/jdbc-driver.yml
-mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.jdbc.ProviderFactoryTest -Dsurefire.failIfNoSpecifiedTests=false test
-mvn -pl data-providers/jdbc-data-provider -am test
+npm audit --json
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+npm run checkTs
+npm run test:ci
 ```
 
 追溯历史：
