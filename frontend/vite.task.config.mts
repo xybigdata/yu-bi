@@ -4,6 +4,12 @@ import path from 'path';
 import { defineConfig, type Plugin } from 'vite';
 import svgr from 'vite-plugin-svgr';
 
+import {
+  craSvgReactComponentCompat,
+  createViteAliases,
+  lessTildeImportCompat,
+} from './vite.shared.mts';
+
 const appRoot = __dirname;
 const srcRoot = path.resolve(appRoot, 'src');
 const publicUrl = process.env.PUBLIC_URL || '';
@@ -24,33 +30,6 @@ const syncTaskBundle = (): Plugin => ({
   },
 });
 
-const lessTildeImportCompat = (): Plugin => ({
-  name: 'datart-less-tilde-import-compat',
-  enforce: 'pre',
-  transform(code, id) {
-    if (!id.endsWith('.less')) {
-      return null;
-    }
-
-    return code.replace(/@import\s+(['"])~/g, '@import $1');
-  },
-});
-
-const craSvgReactComponentCompat = (): Plugin => ({
-  name: 'datart-cra-svg-react-component-compat',
-  enforce: 'pre',
-  transform(code, id) {
-    if (!/\.[jt]sx?$/.test(id)) {
-      return null;
-    }
-
-    return code.replace(
-      /import\s+\{\s*ReactComponent\s+as\s+([A-Za-z_$][\w$]*)\s*\}\s+from\s+(['"])([^'"]+\.svg)\2;?/g,
-      'import $1 from $2$3?react$2;',
-    );
-  },
-});
-
 export default defineConfig(({ mode }) => ({
   publicDir: false,
   plugins: [
@@ -65,29 +44,7 @@ export default defineConfig(({ mode }) => ({
     syncTaskBundle(),
   ],
   resolve: {
-    alias: [
-      { find: 'app', replacement: path.resolve(srcRoot, 'app') },
-      {
-        find: 'core-js',
-        replacement: path.resolve(appRoot, 'node_modules/core-js'),
-      },
-      {
-        find: 'entryPointFactory',
-        replacement: path.resolve(srcRoot, 'entryPointFactory.tsx'),
-      },
-      {
-        find: 'globalConstants',
-        replacement: path.resolve(srcRoot, 'globalConstants.ts'),
-      },
-      { find: 'locales', replacement: path.resolve(srcRoot, 'locales') },
-      {
-        find: /^redux\/(.+)/,
-        replacement: path.resolve(srcRoot, 'redux/$1'),
-      },
-      { find: 'styles', replacement: path.resolve(srcRoot, 'styles') },
-      { find: 'types', replacement: path.resolve(srcRoot, 'types') },
-      { find: 'utils', replacement: path.resolve(srcRoot, 'utils') },
-    ],
+    alias: createViteAliases(appRoot),
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify(mode),

@@ -23,7 +23,7 @@ export default [
     ignores: ['public/*'],
   },
   {
-    files: ['**/*.{js,jsx,ts,tsx}'],
+    files: ['**/*.{js,jsx,ts,tsx,mjs,mts}'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -71,8 +71,8 @@ export default [
   },
   {
     files: [
-      '**/*.test.{js,jsx,ts,tsx}',
-      '**/__tests__/**/*.{js,jsx,ts,tsx}',
+      '**/*.test.{js,jsx,ts,tsx,mjs,mts}',
+      '**/__tests__/**/*.{js,jsx,ts,tsx,mjs,mts}',
       'vitest.setup.ts',
     ],
     languageOptions: {
@@ -84,7 +84,7 @@ export default [
     },
   },
   {
-    files: ['**/*.ts', '**/*.tsx'],
+    files: ['**/*.{ts,tsx,mts}'],
     rules: {
       'prettier/prettier': ['warn', prettierOptions],
     },

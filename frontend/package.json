@@ -54,7 +54,11 @@
       "npm run lint:style:staged --",
       "prettier --write"
     ],
-    "*.{css,md,json,mjs}": [
+    "*.{mjs,mts}": [
+      "npm run eslint -- --fix",
+      "prettier --write"
+    ],
+    "*.{css,md,json}": [
       "prettier --write"
     ]
   },

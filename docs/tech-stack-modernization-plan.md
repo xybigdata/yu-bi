@@ -898,6 +898,39 @@ git diff --check
 - `npm run bootstrap -- --dry-run --ignore-scripts --no-audit --no-fund` 已通过，确认 Maven 调用的 bootstrap 脚本入口可用
 - `npm audit --json` 仍为 0 vulnerabilities
 
+最新批次：前端构建配置重复治理
+
+- 已新增 `frontend/vite.shared.mts`，集中维护 Vite / Vitest 共用 alias 配置
+- 主 Vite 构建、task bundle 构建和 Vitest 已统一调用 `createViteAliases`
+- 主构建和 task bundle 中重复的 Less `~` import 兼容插件、CRA SVG `ReactComponent` 兼容插件已抽到共享模块
+- ESLint flat config 已覆盖 `.mjs` / `.mts`，lint-staged 已为配置文件单独执行 ESLint + Prettier
+- 兼容插件名称保持 `datart-*` 不变，仅代表内部历史兼容标识，不触碰 Java 包名、配置前缀和迁移稳定标识
+- 本批次不升级依赖版本、不改业务逻辑，目标是降低后续 Vite / Vitest 工具链升级时的配置漂移风险
+- Less preprocessor 选项暂不抽象，避免为去重引入不清晰的 Less 内部类型边界
+
+本批次验证命令：
+
+```bash
+npm run checkTs
+npm run test -- src/__tests__/task.test.ts src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/components/__tests__/dndRuntime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts
+npm run build
+npm run build:task
+npm exec -- vitest run src/utils/__tests__/utils.test.ts
+npm run eslint -- eslint.config.mjs vite.config.mts vite.task.config.mts vitest.config.mts vite.shared.mts
+npm exec -- prettier --check package.json eslint.config.mjs vite.config.mts vite.task.config.mts vitest.config.mts vite.shared.mts
+npm audit --json
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+git diff --check
+```
+
+验证说明：
+
+- `.mjs` / `.mts` 配置文件已被 ESLint 实际检查，不再出现 no matching configuration warning
+- 代表性测试 6 个文件、24 个用例通过
+- 主构建和 task bundle 构建均通过
+- `npm audit --json` 仍为 0 vulnerabilities
+- 主构建仍有既有大 chunk warning，本批次未处理包体拆分
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
