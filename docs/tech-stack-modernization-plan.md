@@ -801,6 +801,30 @@ npm ci --dry-run --ignore-scripts --no-audit --no-fund
 git diff --check
 ```
 
+最新批次：前端 TypeScript 模块解析收口
+
+- 已将 `frontend/tsconfig.json` 的 `moduleResolution` 从旧 `node` 收口为 `bundler`
+- `tsc --showConfig` 已确认有效解析策略从 `node10` 变为 `bundler`
+- 已移除 `eslint.config.mjs` 中未使用的 `@eslint/js` 导入
+- 本批次让 TypeScript 解析模型更贴近 Vite 6 / ESM bundler 实际构建链路，不改业务逻辑、不升级依赖版本
+
+本批次验证命令：
+
+```bash
+npm exec -- tsc --showConfig
+npm run checkTs
+npm run test -- src/__tests__/task.test.ts src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/components/__tests__/dndRuntime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts
+npm run eslint -- eslint.config.mjs
+npm exec -- prettier --check eslint.config.mjs tsconfig.json
+npm run build
+npm run build:task
+```
+
+验证说明：
+
+- 相关测试 5 个文件、13 个用例通过
+- 主构建和 task bundle 构建均通过
+
 最新批次：前端测试依赖边界收口
 
 - 已确认 `@testing-library/dom` 只服务测试工具链和 `@testing-library/react` peer 依赖，源码运行时无引用
