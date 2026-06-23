@@ -108,8 +108,8 @@ codex/modernization-frontend-security-deps
 | Node | `>=24.0.0` | 硬性目标 |
 | npm | `>=11.0.0` | 与 Node 24 配套 |
 | React | `18.3.1` | 当前稳定主链 |
-| React Router | `6.30.4` | 已收口到 React Router 6 稳定线，暂不切 v7 |
-| Ant Design | `5.29.3` | 已收口到 AntD 5 稳定线，暂不切 AntD 6 |
+| React Router | `6.30.4` | 已收口到 React Router 6 稳定线，并通过兼容层启用 v7 future flags |
+| Ant Design | `5.29.3` | 已收口到 AntD 5 稳定线，并迁移到 v5 theme token API |
 | Redux Toolkit | `2.12.0` | 已完成主升级 |
 | React Redux | `9.3.0` | 已完成主升级 |
 | TypeScript | `5.9.3` | 当前稳定主链 |
@@ -530,10 +530,15 @@ git diff --check
 - `axios` 已从 `1.17.0` 小版本升级到 `1.18.1`，依赖树确认 `form-data` 继续受 override 约束到 `4.0.6`
 - `antd` 声明版本已从 `^5.26.2` 收口到当前 lockfile 实际解析并已验证的 `5.29.3`，避免恢复时误判 UI 基线；暂不切入 AntD 6
 - 已将一组 lockfile 已实际解析并通过验证的直接依赖声明固定为当前稳定基线：`react-router-dom 6.30.4`、`i18next 26.3.1`、`classnames 2.5.1`、`split.js 1.6.5`、`postcss 8.5.15`、`eslint-plugin-prettier 5.5.6`、`stylelint-order 7.0.1`
+- AntD 主题切换已从废弃的 `ConfigProvider.config({ theme })` 迁移到 `ConfigProvider theme={{ token }}`，移除测试期 `[antd: ConfigProvider] config` warning
+- React Router 入口已集中通过 `app/routerCompat` 默认启用 `v7_startTransition` 和 `v7_relativeSplatPath`，移除测试期 React Router v7 future warning
+- `ChartIFrameContainer` 测试已等待异步 lifecycle effect 收敛，移除 React 18 `act(...)` warning
 - `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过，确认 `package.json` 与 `package-lock.json` 一致可安装
 - `npm ls ... --all` 已通过，确认 override 后依赖树无 invalid / missing
 - `npm run checkTs` 已通过
 - 请求 wrapper 相关测试 3 个测试文件、15 个用例通过
+- AntD / Router 兼容 warning 相关测试 3 个测试文件、5 个用例通过
+- Chart iframe 容器测试 1 个测试文件、2 个用例通过
 - 相关运行时测试 4 个测试文件、13 个用例通过
 - Quill 2 迁移后富文本相关测试 7 个测试文件、25 个用例通过
 - 已补真实 `RichTextEditorRuntime` 挂载 smoke，覆盖 Quill 2 runtime 在 jsdom 下挂载、读取 Delta 内容，以及图表富文本预览 calcfield 渲染

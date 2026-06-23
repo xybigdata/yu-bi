@@ -1,4 +1,4 @@
-import { ConfigProvider } from 'antd';
+import type { ThemeConfig } from 'antd';
 import { StorageKeys } from 'globalConstants';
 import { ThemeKeyType } from './slice/types';
 import { themes } from './themes';
@@ -27,7 +27,7 @@ export function getThemeFromStorage(): ThemeKeyType {
   return theme;
 }
 
-export function getAntdThemeVariables(themeKey: string) {
+export function getAntdThemeVariables(themeKey: string): ThemeConfig['token'] {
   const currentTheme =
     themeKey === 'system'
       ? isSystemDark
@@ -35,17 +35,10 @@ export function getAntdThemeVariables(themeKey: string) {
         : themes.light
       : themes[themeKey];
   return {
-    primaryColor: currentTheme.primary,
-    infoColor: currentTheme.info,
-    successColor: currentTheme.success,
-    processingColor: currentTheme.processing,
-    errorColor: currentTheme.error,
-    warningColor: currentTheme.warning,
+    colorPrimary: currentTheme.primary,
+    colorInfo: currentTheme.info,
+    colorSuccess: currentTheme.success,
+    colorError: currentTheme.error,
+    colorWarning: currentTheme.warning,
   };
-}
-
-export function changeAntdTheme(themeKey: string) {
-  ConfigProvider.config({
-    theme: getAntdThemeVariables(themeKey),
-  });
 }

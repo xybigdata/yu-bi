@@ -16,14 +16,18 @@
  * limitations under the License.
  */
 
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { vi } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { ChartIFrameContainer } from '../index';
 
 vi.mock('uuid');
 
 describe('ChartIFrameContainer Test', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   test('should render within iframe when enable use iframe', async () => {
     const { container } = render(
       <ChartIFrameContainer
@@ -32,10 +36,15 @@ describe('ChartIFrameContainer Test', () => {
         config={{}}
       />,
     );
-    expect(container.querySelector('iframe')).not.toBeNull();
+    await waitFor(() => {
+      expect(container.querySelector('iframe')).not.toBeNull();
+    });
   });
 
   test('should not render iframe when disable use iframe', async () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
     const { container } = render(
       <ChartIFrameContainer
         dataset={[]}
@@ -43,6 +52,11 @@ describe('ChartIFrameContainer Test', () => {
         config={{}}
       />,
     );
-    expect(container.querySelector('iframe')).toBeNull();
+    await waitFor(() => {
+      expect(container.querySelector('iframe')).toBeNull();
+    });
+    expect(consoleErrorSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining('not wrapped in act'),
+    );
   });
 });
