@@ -499,6 +499,8 @@ P2-H 合入状态：
   - 富文本 CSS 入口切换到 `react-quill-new/dist/*`
   - Quill 2 的 `import`、`register`、Delta 和 Blot 类型差异集中在 `quillCompat.ts`
   - 自定义 `calcfield`、`tag`、`imageDrop` 注册逻辑改走兼容层
+  - Vite 手工分包将 `react-quill-new`、`quill`、`quill-delta`、`parchment` 统一收口到 `quill` chunk，避免富文本运行时依赖分散
+  - 清理 Quill 1 遗留的未注册 `bullet` / `mention` format；无序列表继续通过 Quill 标准 `list: 'bullet'` 值支持，引用字段继续通过 `calcfield` 支持
 
 已通过验证：
 
@@ -512,6 +514,7 @@ npm run test -- src/styles/theme/__tests__/ThemeProvider.test.tsx src/app/compon
 npm run test:ci
 npm run lint:css
 npm run lint:style
+npm run build
 git diff --check
 ```
 
@@ -524,14 +527,16 @@ git diff --check
 - `npm ls ... --all` 已通过，确认 override 后依赖树无 invalid / missing
 - `npm run checkTs` 已通过
 - 相关运行时测试 4 个测试文件、13 个用例通过
-- Quill 2 迁移后富文本相关测试 6 个测试文件、23 个用例通过
-- `npm run test:ci` 已通过：132 个测试文件通过，919 个用例通过，4 个跳过
+- Quill 2 迁移后富文本相关测试 7 个测试文件、25 个用例通过
+- 已补真实 `RichTextEditorRuntime` 挂载 smoke，覆盖 Quill 2 runtime 在 jsdom 下挂载、读取 Delta 内容，以及图表富文本预览 calcfield 渲染
+- `npm run test:ci` 已通过：133 个测试文件通过，921 个用例通过，4 个跳过
 - `npm run lint:css`、`npm run lint:style` 已通过
+- `npm run build` 已验证 Quill 2 迁移后的生产构建链路
 - `git diff --check` 已通过
 
 验证缺口：
 
-- 后续具备浏览器 smoke 条件时，补富文本编辑、预览、Dashboard 富文本 widget、分享页富文本展示的手工或自动化验证
+- 后续具备浏览器 smoke 条件时，补 Dashboard 富文本 widget、分享页富文本展示的端到端验证
 
 P2-E 合入状态：
 

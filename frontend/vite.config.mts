@@ -102,7 +102,12 @@ const vendorManualChunks = (id: string) => {
     return 'echarts';
   }
 
-  if (id.includes('/node_modules/quill/')) {
+  if (
+    id.includes('/node_modules/quill/') ||
+    id.includes('/node_modules/quill-delta/') ||
+    id.includes('/node_modules/parchment/') ||
+    id.includes('/node_modules/react-quill-new/')
+  ) {
     return 'quill';
   }
 
