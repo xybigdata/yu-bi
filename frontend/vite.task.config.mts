@@ -3,12 +3,7 @@ import path from 'path';
 import { defineConfig, type Plugin } from 'vite';
 import svgr from 'vite-plugin-svgr';
 
-import {
-  createLessPreprocessorOptions,
-  createReactPlugin,
-  createViteAliases,
-  lessTildeImportCompat,
-} from './vite.shared.mts';
+import { createReactPlugin, createViteAliases } from './vite.shared.mts';
 
 const appRoot = __dirname;
 const srcRoot = path.resolve(appRoot, 'src');
@@ -32,21 +27,13 @@ const syncTaskBundle = (): Plugin => ({
 
 export default defineConfig(({ mode }) => ({
   publicDir: false,
-  plugins: [
-    createReactPlugin(),
-    svgr(),
-    lessTildeImportCompat(),
-    syncTaskBundle(),
-  ],
+  plugins: [createReactPlugin(), svgr(), syncTaskBundle()],
   resolve: {
     alias: createViteAliases(appRoot),
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify(mode),
     'process.env.PUBLIC_URL': JSON.stringify(publicUrl),
-  },
-  css: {
-    preprocessorOptions: createLessPreprocessorOptions(appRoot),
   },
   build: {
     emptyOutDir: false,

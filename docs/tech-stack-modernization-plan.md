@@ -136,7 +136,7 @@ codex/modernization-frontend-security-deps
 | Vite | `8.1.0` | 已升级到 Vite 8 主链，暂配 `@vitejs/plugin-react 5.2.0` |
 | Vitest | `4.1.9` | 当前主测试栈 |
 | Testing Library | `@testing-library/react 16.3.2 / dom 10.4.1` | 已对齐 React 19 测试栈 |
-| Less | `4.6.7` | 已完成补丁升级 |
+| Less | `4.6.7` | 已完成补丁升级；保留用于满足 Vite / AntV S2 peer，源码构建侧已退出 `~` import 兼容 |
 | vite-plugin-svgr | `5.2.0` | 已完成 Vite 8 下构建验证 |
 | stylelint-order | `8.1.1` | 已完成 Stylelint 17 下 lint 验证 |
 | styled-components | `6.4.2` | 已完成主升级并确认运行时依赖位置 |
@@ -1677,6 +1677,31 @@ npm run test -- vite.shared.test.mts src/app/components/ChartIFrameContainer/__t
 npm run checkTs
 npm run eslint -- vite.config.mts vite.task.config.mts vite.shared.mts vite.shared.test.mts src/app/components/ChartIFrameContainer/ChartIFrameContainer.tsx
 npm exec -- prettier --check vite.config.mts vite.task.config.mts vite.shared.mts vite.shared.test.mts src/app/components/ChartIFrameContainer/ChartIFrameContainer.tsx src/react-app-env.d.ts
+npm run build
+npm run build:task
+git diff --check
+```
+
+最新批次：前端 Less `~` import 兼容退出
+
+- 已确认 `frontend/src` 源码中没有 `.less` / `.scss` 入口，实际样式入口均为 CSS
+- 已确认源码和配置中没有真实 `@import "~..."` Less 写法，之前命中项只来自兼容插件测试
+- 已移除主 Vite 构建和 task bundle 构建中的 `lessTildeImportCompat`
+- 已移除 `vite.shared.mts#createLessPreprocessorOptions` 中的 Less `~` 文件解析兼容和 `preprocessorOptions`
+- `vite.shared.test.mts` 已删除 Less `~` 兼容层测试，保留 alias 和 React plugin 共享配置基线
+- 保留 `less 4.6.7` 依赖声明：`@antv/s2-react 2.3.1` 仍声明 `less >=4.0.0` peer，Vite 8 也将 `less` 作为可选 peer；本批不制造 peer 缺口
+- 保留 `frontend/public/antd/theme.less` 静态资源，不纳入 Vite 源码构建兼容清理，避免影响外部仍可能引用的历史主题资产
+- 本批次不升级依赖版本、不改业务代码，只减少源码构建侧已无输入的历史 Less 兼容配置
+
+本批次验证命令：
+
+```bash
+rg -n "@import\\s+['\\\"]~|~[^'\\\")]+\\.(less|css)" frontend/src frontend -g '*.less' -g '*.css' -g '*.scss' -g '*.tsx' -g '*.ts' -g '*.mts' -g '*.mjs' --glob '!node_modules/**' --glob '!build/**'
+npm ls less --all
+npm run test -- vite.shared.test.mts
+npm run checkTs
+npm run eslint -- vite.config.mts vite.task.config.mts vite.shared.mts vite.shared.test.mts
+npm exec -- prettier --check vite.config.mts vite.task.config.mts vite.shared.mts vite.shared.test.mts docs/tech-stack-modernization-plan.md
 npm run build
 npm run build:task
 git diff --check

@@ -3,12 +3,7 @@ import path from 'path';
 import { defineConfig, type Plugin } from 'vite';
 import svgr from 'vite-plugin-svgr';
 
-import {
-  createLessPreprocessorOptions,
-  createReactPlugin,
-  createViteAliases,
-  lessTildeImportCompat,
-} from './vite.shared.mts';
+import { createReactPlugin, createViteAliases } from './vite.shared.mts';
 
 const appRoot = __dirname;
 const publicUrl = process.env.PUBLIC_URL || '';
@@ -123,7 +118,6 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     createReactPlugin(),
     svgr(),
-    lessTildeImportCompat(),
     customChartPluginsMiddleware(),
     shareHtmlFallback(),
   ],
@@ -146,9 +140,6 @@ export default defineConfig(({ mode }) => ({
         target: 'http://localhost:8080/',
       },
     },
-  },
-  css: {
-    preprocessorOptions: createLessPreprocessorOptions(appRoot),
   },
   build: {
     outDir: 'build',
