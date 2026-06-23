@@ -564,7 +564,7 @@ git diff --check
 P2-E 合入状态：
 
 - 当前分支继续累计前端安全 / 运行时改造
-- 当前分支已领先 `origin/main` 11 个专题提交，继续在同一分支推进
+- 当前分支已领先 `origin/main` 12 个专题提交，继续在同一分支推进
 - 暂不合入 `main`，减少主线合并和完整回归频率
 
 最新批次：前端直接依赖声明固定化
@@ -612,6 +612,31 @@ git diff --check
 
 - `package-lock.json` 当前为 `lockfileVersion: 3`
 - 直接依赖声明与 lockfile 根解析版本对账无差异
+- `npm ci --dry-run` 已通过，`npm audit --json` 仍为 0 vulnerabilities
+
+最新批次：前端 Node/npm 版本约束收口
+
+- 已将 `frontend/.nvmrc` 从 `v24.0.0` 对齐到当前验证基线 `v24.16.0`
+- 已在 `frontend/package.json` 增加 `packageManager: npm@11.13.0`
+- 已在 `frontend/.npmrc` 增加 `engine-strict=true`，让非 Node 24 / npm 11 环境在安装期更早失败
+- 本批次不升级依赖版本，只强化本地开发、CI 和 Maven bootstrap 使用同一 Node/npm 基线
+
+本批次验证命令：
+
+```bash
+node -v
+npm -v
+npm config get engine-strict
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+npm run checkTs
+npm audit --json
+git diff --check
+```
+
+验证说明：
+
+- 当前本机验证基线为 `Node v24.16.0 / npm 11.13.0`
+- `npm config get engine-strict` 输出 `true`
 - `npm ci --dry-run` 已通过，`npm audit --json` 仍为 0 vulnerabilities
 - 代表性前端测试 9 个文件、44 个用例通过
 - 测试日志中仍有 AntV S2 sourcemap 和 jsdom pseudo-element 历史噪声，不影响结果

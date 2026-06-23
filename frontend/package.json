@@ -13,6 +13,7 @@
   },
   "author": "chencongyu <congyu_email@163.com>",
   "license": "Apache-2.0",
+  "packageManager": "npm@11.13.0",
   "scripts": {
     "bootstrap": "npm ci",
     "start": "vite --host 0.0.0.0",
