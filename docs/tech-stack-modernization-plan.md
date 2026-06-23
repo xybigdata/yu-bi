@@ -63,6 +63,7 @@ git log --oneline --decorate -8
 - 当前专题继续在同一分支推进，不因为小批次改动立即合入 `main`
 - 减少 `main` 分支合并频率；前端安全和运行时相关改造优先在 `codex/modernization-frontend-security-deps` 上连续推进，累计足够完整的一批后再统一合入 `main`
 - 除非用户明确要求阶段合并，否则专题分支只推送远端，不主动 merge 回 `main`
+- 目标模式中的“专题完成后 push 再 merge 到 main”按最新执行口径理解为：专题分支可持续 push 保存进度，但 `main` 合并要减少频率，只在一批可验收成果完成后统一处理
 
 ## 3. 分支与合并规则
 
@@ -107,8 +108,8 @@ codex/modernization-frontend-security-deps
 
 | 技术栈 | 当前基线 | 状态 |
 | --- | --- | --- |
-| Node | `>=24.0.0` | 硬性目标 |
-| npm | `>=11.0.0` | 与 Node 24 配套 |
+| Node | `>=24.0.0 <25.0.0` | 硬性目标，当前验证基线 `24.16.0` |
+| npm | `>=11.0.0 <12.0.0` | 与 Node 24 配套，当前验证基线 `11.13.0` |
 | React | `18.3.1` | 当前稳定主链 |
 | React Router | `6.30.4` | 已收口到 React Router 6 稳定线，并通过兼容层启用 v7 future flags |
 | Ant Design | `5.29.3` | 已收口到 AntD 5 稳定线，并迁移到 v5 theme token API |
@@ -564,7 +565,7 @@ git diff --check
 P2-E 合入状态：
 
 - 当前分支继续累计前端安全 / 运行时改造
-- 当前分支已领先 `origin/main` 17 个专题提交，继续在同一分支推进
+- 当前分支继续领先 `origin/main` 多个专题提交，具体数量以恢复命令输出为准，继续在同一分支推进
 - 暂不合入 `main`，减少主线合并和完整回归频率
 
 最新批次：前端直接依赖声明固定化
@@ -738,6 +739,23 @@ git diff --check
 - `npm audit --json` 仍为 0 vulnerabilities，依赖总数保持 936
 - 代表性前端测试 9 个文件、44 个用例通过
 - 测试日志中仍有 AntV S2 sourcemap 和 jsdom pseudo-element 历史噪声，不影响结果
+
+最新批次：前端 Node/npm 主线约束收口
+
+- 已将 `frontend/package.json` 的 `engines.node` 从 `>=24.0.0` 收口为 `>=24.0.0 <25.0.0`
+- 已将 `engines.npm` 从 `>=11.0.0` 收口为 `>=11.0.0 <12.0.0`
+- 本批次明确当前前端只承诺 Node 24 / npm 11 主线兼容，避免未来 Node 25+ 或 npm 12+ 在安装期被 `engine-strict=true` 误放行
+- `.nvmrc` 和 CI 仍固定到当前验证基线 `Node v24.16.0 / npm 11.13.0`
+- 本批次不升级依赖版本、不改运行时代码
+
+最新批次：前端品牌展示与外链默认值收口
+
+- 已将 `Brand` 组件可见标题从 `datart` 改为 `yu-bi`，图片 alt 同步为 `yu-bi logo`
+- 已将 SQL 解析异常说明中的用户可见品牌文案从 Datart 收口为 yu-bi
+- 已将 SQL 解析异常一键提交 issue 的仓库地址从 `running-elephant/datart` 改为 `xybigdata/yu-bi`
+- 已新增 `newIssueUrl` 单元测试，覆盖 GitHub / Gitee issue 链接都指向 yu-bi 仓库
+- 已将邮件发件人默认展示名从 `Datart` 改为 `yu-bi`，保留配置键 `spring.mail.senderName` 不变
+- 本批次不触碰 Java 包名 `datart.*`、配置前缀 `datart.*`、`DATART_*`、迁移常量和内部稳定标识
 
 最新批次：前端测试依赖边界收口
 

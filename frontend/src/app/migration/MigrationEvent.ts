@@ -52,7 +52,7 @@ class MigrationEvent<
       return result;
     } catch (error) {
       console.log(
-        '%c Datart Migration Error | Version: %s | Please Contract Administrator! ',
+        '%c yu-bi Migration Error | Version: %s | Please Contact Administrator! ',
         'background: red; color: #fafafa',
         this.version,
       );

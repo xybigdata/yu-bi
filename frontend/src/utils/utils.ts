@@ -464,7 +464,7 @@ export function fastDeleteArrayElement<T>(arr: T[], index: number) {
 }
 
 export function newIssueUrl({ type, ...options }) {
-  const repoUrl = `https://${type}.com/running-elephant/datart`;
+  const repoUrl = `https://${type}.com/xybigdata/yu-bi`;
   let issuesUrl = '';
 
   if (repoUrl) {

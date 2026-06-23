@@ -1235,7 +1235,7 @@
     "sqlRequired": "SQL 语句不能为空",
     "sqlRunWraning": "SQL 解析失败，欢迎一键提交 issue 帮助我们优化。",
     "detail": "查看详情",
-    "warningDescription": "Datart 默认使用 calcite 解析 SQL 语句；calcite 拥有的非常棒的语法解析器，但依然做不到解析所有数据库的所有语法。当发生解析异常时，datart 对 SQL 语句进行必要的处理之后仍然会发送到数据库执行，如果可以执行成功，我们会认为解析器需要针对该条 SQL 语句的语法进行优化。在这种情况下，datart 会显示该警告信息，方便用户将解析异常的语句提交到 github 或 gitee issue，帮助我们优化解析器。",
+    "warningDescription": "yu-bi 默认使用 Calcite 解析 SQL 语句。Calcite 拥有很强的语法解析能力，但依然无法解析所有数据库的所有语法。当发生解析异常时，yu-bi 对 SQL 语句进行必要处理后仍会发送到数据库执行；如果可以执行成功，我们会认为解析器需要针对该条 SQL 语句的语法继续优化。在这种情况下，yu-bi 会显示该警告信息，方便用户将解析异常的语句提交到 GitHub 或 Gitee issue，帮助我们优化解析器。",
     "close": "关闭",
     "computedFieldNameExistWarning": "计算字段名称已经存在，请重新输入",
     "tabs": {
@@ -1592,7 +1592,7 @@
     "member": "成员",
     "role": "角色",
     "modulePermission": "功能权限",
-    "modulePermissionDesc": "开启功能权限之后，用户才能在 Datart 界面上使用该功能",
+    "modulePermissionDesc": "开启功能权限之后，用户才能在 yu-bi 界面上使用该功能",
     "resourceDetail": "资源明细",
     "createStoryboard": "新增故事板",
     "resourceName": "资源名称",
