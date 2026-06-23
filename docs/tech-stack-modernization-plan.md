@@ -564,7 +564,7 @@ git diff --check
 P2-E 合入状态：
 
 - 当前分支继续累计前端安全 / 运行时改造
-- 当前分支已领先 `origin/main` 15 个专题提交，继续在同一分支推进
+- 当前分支已领先 `origin/main` 16 个专题提交，继续在同一分支推进
 - 暂不合入 `main`，减少主线合并和完整回归频率
 
 最新批次：前端直接依赖声明固定化
@@ -687,6 +687,29 @@ git diff --check
 
 - lockfile 视角已无 `cz-conventional-changelog`、`commitizen`、`inquirer`、`external-editor`、`tmp`
 - `npm audit --json` 仍为 0 vulnerabilities，依赖总数从 1002 降到 937
+
+最新批次：前端未加载 Prettier 插件清理
+
+- 已确认 `prettier-plugin-organize-imports` 只存在于 package 声明和 lockfile，未在 `.prettierrc` 或脚本中加载
+- 已移除 `prettier-plugin-organize-imports`
+- 本批次不改变 Prettier 配置和格式化行为，只减少未使用开发依赖
+
+本批次验证命令：
+
+```bash
+npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+npm ls prettier prettier-plugin-organize-imports --package-lock-only --all
+npm run lint:css
+npm run lint:style
+npm audit --json
+npm run checkTs
+git diff --check
+```
+
+验证说明：
+
+- lockfile 视角已无 `prettier-plugin-organize-imports`
+- `npm audit --json` 仍为 0 vulnerabilities，依赖总数从 937 降到 936
 - 代表性前端测试 9 个文件、44 个用例通过
 - 测试日志中仍有 AntV S2 sourcemap 和 jsdom pseudo-element 历史噪声，不影响结果
 
