@@ -1,5 +1,12 @@
 import { ChartRowData } from 'app/types/Chart';
 
+export type WordCloudSeriesDataItem = [
+  name: string,
+  value: string,
+  rowData: { rowData: ChartRowData },
+  textStyle: { opacity?: number } & Record<string, unknown>,
+];
+
 export interface WordCloudConfig {
   drawOutOfBound: boolean;
   shape: string;
@@ -23,12 +30,5 @@ export interface WordCloudLabelConfig {
       textShadowColor: string;
     };
   };
-  data?:
-    | {
-        name: string;
-        rowData: ChartRowData;
-        textStyle: { opacity?: number } & Record<string, unknown>;
-        value: string;
-      }[]
-    | undefined;
+  data?: WordCloudSeriesDataItem[] | undefined;
 }

@@ -129,7 +129,7 @@ codex/modernization-frontend-security-deps
 | 富文本编辑器 | `react-quill-new 3.7.0 / quill 2.0.2` | 当前 P2-E 正在迁移验证 |
 | monaco-editor | `0.52.2` | 已补真实运行时加载边界 |
 | reveal.js | `6.0.1` | 已补真实运行时加载边界 |
-| ECharts | `5.6.0` | 已升级到 ECharts 5 稳定线 |
+| ECharts | `6.1.0` | 已升级到 ECharts 6 稳定线，词云改用 `@echarts-x/custom-word-cloud` |
 | Axios | `1.18.1` | 已补 request wrapper 行为基线后小版本升级 |
 | sql-formatter | `15.8.2` | 已补真实运行时 smoke 后升级 |
 | AntV S2 | `2.7.2 / 2.3.1` | 已确认当前稳定线 |
@@ -1358,13 +1358,83 @@ git diff --check
 - 测试日志中的 jsdom pseudo-element `getComputedStyle` warning 是 AntD / Quill 测试环境噪声，不影响结果
 - 本批次不升级依赖版本，不触碰高风险内部命名
 
+最新批次：ESLint 10 生态兼容复核
+
+- 已复核 `eslint 10.5.0`：Node engine 为 `^20.19.0 || ^22.13.0 || >=24`，满足 Node 24 目标
+- 已复核 `@typescript-eslint/parser`、`@typescript-eslint/eslint-plugin`、`typescript-eslint` 最新稳定线仍为 `8.62.0`，peer 已声明支持 `eslint ^8.57.0 || ^9.0.0 || ^10.0.0` 和 `typescript >=4.8.4 <6.1.0`
+- 当前阻塞来自 ESLint 插件生态：
+  - `eslint-plugin-react 7.37.5` 最新稳定版 peer 仅声明 `eslint ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7`
+  - `eslint-plugin-import 2.32.0` 最新稳定版 peer 仅声明 `eslint ^2 || ^3 || ^4 || ^5 || ^6 || ^7.2.0 || ^8 || ^9`
+- 当前不硬升 ESLint 10，避免在 lint 工具链上引入 peer 违约和隐性误报 / 漏报风险
+- 后续等待 `eslint-plugin-react`、`eslint-plugin-import` 发布支持 ESLint 10 的稳定版本后，再进入实际升级和完整 lint 门禁
+
+本批次验证命令：
+
+```bash
+npm view eslint@10.5.0 version engines peerDependencies dependencies --json
+npm view @typescript-eslint/parser@latest version peerDependencies engines --json
+npm view @typescript-eslint/eslint-plugin@latest version peerDependencies engines --json
+npm view typescript-eslint@latest version peerDependencies engines --json
+npm view eslint-plugin-react@latest version peerDependencies engines --json
+npm view eslint-plugin-import@latest version peerDependencies engines --json
+npm view eslint-plugin-react versions --json
+npm view eslint-plugin-import versions --json
+```
+
+验证说明：
+
+- ESLint 10 本体满足 Node 24，但当前 React / import 插件最新稳定版本尚未声明支持 ESLint 10
+- 本批次只记录兼容性结论，不改依赖版本，不触碰运行时代码
+
+最新批次：ECharts 6 与词云扩展迁移
+
+- 已将 `echarts` 从 `5.6.0` 升级到 `6.1.0`
+- 已移除只声明支持 `echarts ^5.0.1` 的 `echarts-wordcloud 2.1.0`
+- 已引入 `@echarts-x/custom-word-cloud 1.0.1`，其 peer 明确要求 `echarts ^6.0.0`，来源为 Apache ECharts custom series 词云扩展
+- `WordCloudChart` 运行时改为动态加载 `echarts` 和 `@echarts-x/custom-word-cloud`，并通过 `echarts.use(...)` 注册 custom series installer
+- 词云 option 已从旧扩展协议 `series.type = 'wordCloud'` 迁移为 ECharts 6 custom series 协议：
+  - `series.type = 'custom'`
+  - `series.renderItem = 'wordCloud'`
+  - 样式配置放入 `series.itemPayload`
+  - 数据使用 `[name, value, rowData, textStyle]` 数组，兼容新扩展 API
+- 为保持 yu-bi 现有联动 / 跳转 / 钻取依赖的 `params.data.rowData`，`WordCloudChart` 在点击事件进入 `ChartSelectionManager` 前将数组数据归一为原对象形态
+- 已补 `WordCloudChart` option smoke，覆盖 ECharts 6 custom word cloud 协议和 `rowData` 保留
+
+本批次验证命令：
+
+```bash
+npm view @echarts-x/custom-word-cloud@latest version peerDependencies dependencies engines exports main module types files --json
+npm view @echarts-x/custom-word-cloud@latest readme --json
+npm view echarts@6.1.0 version dependencies peerDependencies engines exports main module types --json
+npm pack @echarts-x/custom-word-cloud@1.0.1 --dry-run --json
+npm install echarts@6.1.0 @echarts-x/custom-word-cloud@1.0.1 --save --ignore-scripts --no-audit --no-fund
+npm run checkTs
+npm run test -- src/app/components/ChartGraph/WordCloudChart/__tests__/WordCloudChart.test.jsx src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/utils/__tests__/echartsThemeRuntime.test.ts
+npm ls echarts @echarts-x/custom-word-cloud echarts-wordcloud --all
+npm audit --json
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+npm run build
+npm run build:task
+npm outdated --json
+git diff --check
+```
+
+验证说明：
+
+- `npm ls` 已确认当前词云链路为 `echarts 6.1.0` + `@echarts-x/custom-word-cloud 1.0.1`，旧 `echarts-wordcloud` 已不在依赖树中
+- `npm audit --json` 仍为 0 vulnerabilities
+- 词云和 ECharts runtime 相关测试 4 个文件、10 个用例通过
+- `npm run checkTs` 已通过
+- 主构建和 task bundle 构建均通过；主构建出现独立 `word-cloud.esm` chunk，既有大 chunk warning 仍存在
+- `npm outdated --json` 中已无 `echarts`，P2-G 阻塞项解除
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
 | P2-F | AntD 6 主版本评估 | 高 | 稳定版 Pro Components 尚未支持 AntD 6，继续等待稳定生态链路 |
-| P2-G | ECharts 6 主版本评估 | 高 | 先处理 `echarts-wordcloud` 兼容来源或替代方案，再进入 ECharts 6 运行时适配 |
-| P2-H | ESLint 10 主版本评估 | 中高 | 独立 lint 工具链专题，先确认插件和 flat config 兼容 |
+| P2-G | ECharts 6 主版本评估 | 高 | 已通过 `@echarts-x/custom-word-cloud` 完成词云兼容迁移，后续仅保留浏览器层图表 smoke 缺口 |
+| P2-H | ESLint 10 主版本评估 | 中高 | 当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级 |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 | P2-J | 富文本编辑器运行时 smoke | 中 | 已补 jsdom 层运行时和 Dashboard Widget smoke；后续具备浏览器入口时补真实编辑 / 预览 / 分享页 E2E |
 
