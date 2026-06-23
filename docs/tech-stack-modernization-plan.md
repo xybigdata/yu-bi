@@ -1455,6 +1455,22 @@ git diff --check
 - `npm audit --json` 仍为 0 vulnerabilities
 - 主构建和 task bundle 构建均通过；既有大 chunk warning 仍存在
 
+最新批次：ECharts 6 词云残留清理
+
+- 已确认源码运行时只引用 `@echarts-x/custom-word-cloud`，不再引用旧 `echarts-wordcloud`
+- 已删除 `WordCloudChart/__mocks__/echarts-wordcloud.js`，避免旧扩展 mock 残留误导后续测试维护
+- 本批次不改运行时代码，只清理 ECharts 6 迁移后的无引用测试残留
+
+本批次验证命令：
+
+```bash
+rg -n "echarts-wordcloud|@echarts-x/custom-word-cloud|word-cloud" frontend/src docs/tech-stack-modernization-plan.md frontend/package.json
+npm run test -- src/app/components/ChartGraph/WordCloudChart/__tests__/WordCloudChart.test.jsx src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts
+npm run checkTs
+npm audit --json
+git diff --check
+```
+
 最新批次：Vite 8 小版本升级
 
 - 已将 `vite` 从 `8.0.16` 升级到 `8.1.0`
