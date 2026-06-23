@@ -1466,11 +1466,47 @@ git diff --check
 - `npm audit --json` 仍为 0 vulnerabilities
 - 主构建和 task bundle 构建均通过，输出均显示 `vite v8.1.0`
 
+最新批次：前端剩余阻塞项再复核
+
+- 当前 `npm outdated --json` 剩余项为 `@types/node`、`@vitejs/plugin-react`、`antd`、`eslint`、`monaco-editor`、`quill`、`react-quill-new`
+- `@types/node 26.0.0` 继续暂缓：当前硬性目标是 Node 24，继续保持 `@types/node 24.13.2`
+- `antd 6.4.5` 本体 peer 支持 React 18+，但最新稳定 `@ant-design/pro-components 2.8.10` peer 仍只支持 `antd ^4.24.15 || ^5.11.2`
+- `@ant-design/pro-components` 的 3.x 目前只有 `3.0.0-beta.*` 和 `3.x.x-0/-1` 预发布版本，尚无稳定 `3.0.0`；当前不以预发布链路升级 AntD 6
+- `monaco-editor 0.55.1` 仍直接依赖 `dompurify 3.2.7`；临时 lockfile 试装后 `npm audit --json` 会新增 1 low + 1 moderate，继续暂缓
+- `quill 2.0.3` / `react-quill-new 3.8.3` 临时 lockfile 试装后仍触发 `GHSA-v3m3-f69x-jf25` 低危 XSS audit，npm 修复建议为回退到当前 `quill 2.0.2` / `react-quill-new 3.7.0`
+- 本批次只更新阻塞项证据，不提交风险依赖版本变更
+
+本批次验证命令：
+
+```bash
+npm outdated --json
+npm view antd@latest version peerDependencies dependencies engines --json
+npm view @ant-design/pro-components@latest version peerDependencies dependencies engines --json
+npm view @ant-design/pro-components versions --json
+npm view @ant-design/pro-components@3.0.0 version peerDependencies dependencies engines --json
+npm view monaco-editor@0.55.1 version dependencies peerDependencies engines --json
+npm view react-quill-new@3.8.3 version peerDependencies dependencies engines --json
+npm view quill@2.0.3 version dependencies peerDependencies engines --json
+npm view dompurify@3.2.7 version dependencies peerDependencies --json
+npm install monaco-editor@0.55.1 --save --package-lock-only --ignore-scripts --no-audit --no-fund
+npm audit --json
+git checkout -- frontend/package.json frontend/package-lock.json
+npm install react-quill-new@3.8.3 quill@2.0.3 --save --package-lock-only --ignore-scripts --no-audit --no-fund
+npm audit --json
+git checkout -- frontend/package.json frontend/package-lock.json
+```
+
+验证说明：
+
+- AntD 6 仍被 Pro Components 稳定版 peer 阻塞
+- Monaco / Quill 最新组合仍会破坏当前 `npm audit` 清零状态
+- 临时试装改动均已恢复，工作区不保留风险依赖
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
-| P2-F | AntD 6 主版本评估 | 高 | 稳定版 Pro Components 尚未支持 AntD 6，继续等待稳定生态链路 |
+| P2-F | AntD 6 主版本评估 | 高 | 继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路 |
 | P2-G | ECharts 6 主版本评估 | 高 | 已通过 `@echarts-x/custom-word-cloud` 完成词云兼容迁移，后续仅保留浏览器层图表 smoke 缺口 |
 | P2-H | ESLint 10 主版本评估 | 中高 | 当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级 |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
