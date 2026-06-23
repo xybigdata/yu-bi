@@ -1730,6 +1730,23 @@ npm run build:task
 git diff --check
 ```
 
+最新批次：前端未使用 CRA HTML 模板清理
+
+- 已确认真实 Vite 入口为 `frontend/index.html`、`shareChart.html`、`shareDashboard.html`、`shareStoryPlayer.html`
+- 已确认 `frontend/public/index.html` 没有被源码、配置或文档引用
+- 已删除 `frontend/public/index.html`，该文件仍保留 CRA 模板注释、`%PUBLIC_URL%` 占位和旧 `logo192.png` 说明，当前 Vite 构建链路不会使用
+- 本批次不改变运行时 HTML 入口、不改 public 目录其他静态资源，只清理已退出的 CRA 模板残留
+
+本批次验证命令：
+
+```bash
+rg -n "public/index\\.html|%PUBLIC_URL%|logo192|Create React App|frontend/public/index\\.html" . --glob '!frontend/node_modules/**' --glob '!frontend/build/**' --glob '!**/target/**'
+npm run checkTs
+npm run build
+npm run build:task
+git diff --check
+```
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
