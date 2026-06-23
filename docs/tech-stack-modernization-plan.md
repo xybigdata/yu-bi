@@ -1304,11 +1304,43 @@ git diff --check
 - `npm audit --json` 仍为 0 vulnerabilities
 - 主构建和 task bundle 构建均通过；既有大 chunk warning 仍存在
 
+最新批次：前端剩余 outdated 复核
+
+- 当前剩余 outdated 已收敛到 `@types/node`、`@vitejs/plugin-react`、`antd`、`echarts`、`eslint`、`monaco-editor`、`quill`、`react-quill-new`
+- `@types/node 26.0.0` 暂不升级：当前硬性目标是 Node 24，继续保持 `@types/node 24.13.2`
+- `@vitejs/plugin-react 6.0.2` 复核后继续暂缓：虽然 peer 中 `@rolldown/plugin-babel` / `babel-plugin-react-compiler` 标记为 optional，但 npm 11 安装仍会解析到 Babel 8 peer 链并触发 `ERESOLVE`
+- `antd 6.4.5` 暂不升级：当前稳定 `@ant-design/pro-components 2.8.10` peer 仍只支持 AntD 4/5
+- `echarts 6.1.0` 暂不升级：当前 `echarts-wordcloud 2.1.0` peer 只声明支持 `echarts ^5.0.1`，直接升级会产生明确 peer 违约
+- `monaco-editor 0.55.1` 暂不升级：仍直接依赖 `dompurify 3.2.7`，会引入已知 audit 风险
+- `quill 2.0.3` / `react-quill-new 3.8.3` 暂不升级：`react-quill-new 3.8.3` 依赖 `quill ~2.0.3`，此前已确认会触发 `GHSA-v3m3-f69x-jf25` 低危 XSS audit
+- `eslint 10.5.0` 暂不并入当前批次：属于 lint 工具链主版本升级，需要独立检查 flat config、插件兼容和完整 lint 门禁
+
+本批次验证命令：
+
+```bash
+npm outdated --json
+npm view @vitejs/plugin-react@6.0.2 peerDependencies dependencies optionalDependencies peerDependenciesMeta engines --json
+npm install --ignore-scripts --no-audit --no-fund
+npm view echarts@6.1.0 version dependencies peerDependencies engines exports main module types --json
+npm view echarts-wordcloud@2.1.0 peerDependencies dependencies version --json
+npm view monaco-editor@0.55.1 version dependencies engines --json
+npm view react-quill-new@3.8.3 version peerDependencies dependencies engines --json
+git diff --check
+```
+
+验证说明：
+
+- `@vitejs/plugin-react 6.0.2` 试装失败，错误为 npm `ERESOLVE`，冲突来自可选 `@rolldown/plugin-babel` / Babel 8 peer 链；已回退到 `5.2.0` 且工作区恢复干净
+- ECharts 6 的阻塞来自 `echarts-wordcloud` peer，不是 ECharts 包本身；后续需要先找到兼容 ECharts 6 的词云扩展或替换方案
+- 本批次不提交依赖版本变更，只沉淀剩余项决策依据，避免后续重复试错
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
 | P2-F | AntD 6 主版本评估 | 高 | 稳定版 Pro Components 尚未支持 AntD 6，继续等待稳定生态链路 |
+| P2-G | ECharts 6 主版本评估 | 高 | 先处理 `echarts-wordcloud` 兼容来源或替代方案，再进入 ECharts 6 运行时适配 |
+| P2-H | ESLint 10 主版本评估 | 中高 | 独立 lint 工具链专题，先确认插件和 flat config 兼容 |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 | P2-J | 富文本编辑器运行时 smoke | 中 | P2-E 已迁移 Quill 2，后续补浏览器层编辑 / 预览 / 分享页验证 |
 
