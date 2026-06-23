@@ -782,6 +782,25 @@ npm run build:task
 - 主构建和 task bundle 构建均通过
 - task bundle 体积从约 `432.50 kB` 降到约 `420.87 kB`，符合退出 ES5 降级后的预期
 
+最新批次：前端格式化门禁稳定性收口
+
+- 已将 Prettier `endOfLine` 从 `auto` 固定为 `lf`，避免不同本地系统和 CI 产生换行漂移
+- 已将 lint-staged 的 Prettier 文件范围从 `*.{css,md,json}` 扩展为 `*.{css,md,json,mjs}`，覆盖当前 ESLint / commitlint 等 `.mjs` 配置文件
+- 已用当前 Prettier 配置格式化 `eslint.config.mjs`
+- 本批次不升级依赖版本、不改运行时代码
+
+本批次验证命令：
+
+```bash
+npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+npm exec -- prettier --check .prettierrc package.json package-lock.json eslint.config.mjs commitlint.config.mjs vite.config.mts vite.task.config.mts tsconfig.json src/task.ts
+npm run eslint -- eslint.config.mjs
+npm run checkTs
+npm audit --json
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+git diff --check
+```
+
 最新批次：前端测试依赖边界收口
 
 - 已确认 `@testing-library/dom` 只服务测试工具链和 `@testing-library/react` peer 依赖，源码运行时无引用

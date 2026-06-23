@@ -71,7 +71,11 @@ export default [
     },
   },
   {
-    files: ['**/*.test.{js,jsx,ts,tsx}', '**/__tests__/**/*.{js,jsx,ts,tsx}', 'vitest.setup.ts'],
+    files: [
+      '**/*.test.{js,jsx,ts,tsx}',
+      '**/__tests__/**/*.{js,jsx,ts,tsx}',
+      'vitest.setup.ts',
+    ],
     languageOptions: {
       globals: {
         ...globals.browser,
