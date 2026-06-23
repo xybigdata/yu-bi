@@ -4,7 +4,6 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Plugin } from 'vite';
 
 import {
-  craSvgReactComponentCompat,
   createLessPreprocessorOptions,
   createReactBabelOptions,
   createReactPlugin,
@@ -68,25 +67,6 @@ describe('vite shared config', () => {
     ).toBe('@import "antd/dist/reset.css";');
     expect(
       callTransform(plugin, '@import "~antd/dist/reset.css";', 'theme.css'),
-    ).toBeNull();
-  });
-
-  it('keeps CRA SVG ReactComponent import compatibility', () => {
-    const plugin = craSvgReactComponentCompat();
-
-    expect(
-      callTransform(
-        plugin,
-        "import { ReactComponent as Logo } from './logo.svg';",
-        'Brand.tsx',
-      ),
-    ).toBe("import Logo from './logo.svg?react';");
-    expect(
-      callTransform(
-        plugin,
-        "import { ReactComponent as Logo } from './logo.svg';",
-        'Brand.css',
-      ),
     ).toBeNull();
   });
 

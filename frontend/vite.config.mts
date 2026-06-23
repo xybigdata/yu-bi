@@ -6,7 +6,6 @@ import svgr from 'vite-plugin-svgr';
 import {
   createLessPreprocessorOptions,
   createReactPlugin,
-  craSvgReactComponentCompat,
   createViteAliases,
   lessTildeImportCompat,
 } from './vite.shared.mts';
@@ -125,7 +124,6 @@ export default defineConfig(({ mode }) => ({
     createReactPlugin(),
     svgr(),
     lessTildeImportCompat(),
-    craSvgReactComponentCompat(),
     customChartPluginsMiddleware(),
     shareHtmlFallback(),
   ],

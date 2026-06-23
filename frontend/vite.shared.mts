@@ -53,21 +53,6 @@ export const lessTildeImportCompat = (): Plugin => ({
   },
 });
 
-export const craSvgReactComponentCompat = (): Plugin => ({
-  name: 'datart-cra-svg-react-component-compat',
-  enforce: 'pre',
-  transform(code, id) {
-    if (!/\.[jt]sx?$/.test(id)) {
-      return null;
-    }
-
-    return code.replace(
-      /import\s+\{\s*ReactComponent\s+as\s+([A-Za-z_$][\w$]*)\s*\}\s+from\s+(['"])([^'"]+\.svg)\2;?/g,
-      'import $1 from $2$3?react$2;',
-    );
-  },
-});
-
 export const createLessPreprocessorOptions = (appRoot: string) => ({
   less: {
     javascriptEnabled: true,

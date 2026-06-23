@@ -2,7 +2,7 @@
 
 本文档是 yu-bi 现代化改造的恢复入口、阶段复盘和后续执行清单。恢复工作时优先读本页，再按“当前短期目标”继续推进。
 
-复盘时间：2026-06-22
+复盘时间：2026-06-23
 
 ## 0. 当前执行口径
 
@@ -1659,12 +1659,35 @@ git diff --check
 - 主构建和 task bundle 构建均通过，继续使用 `vite v8.1.0`
 - 主构建仍有既有大 chunk warning，本批次不处理包体拆分
 
+最新批次：前端 CRA SVG 兼容退出
+
+- 已确认源码中只剩 `ChartIFrameContainer` 使用 CRA 风格 `ReactComponent as Loading` SVG 导入
+- 已将该使用点迁移为 Vite / SVGR 原生 `*.svg?react` 导入
+- 已移除 `vite.shared.mts` 中的 CRA SVG `ReactComponent` 导入转换插件
+- 主 Vite 构建和 task bundle 构建不再加载该历史兼容插件
+- `react-app-env.d.ts` 已收紧 SVG 类型声明：普通 `*.svg` 只作为 URL 导入，`*.svg?react` 才作为 React 组件导入
+- `vite.shared.test.mts` 已删除旧 CRA SVG 兼容断言，避免继续为已退出的迁移兼容层建立回归责任
+- 本批次不升级依赖版本、不改运行时协议，只减少从 CRA 迁移遗留的构建时字符串重写逻辑
+
+本批次验证命令：
+
+```bash
+rg "ReactComponent as .*\\.svg|craSvgReactComponentCompat|datart-cra-svg-react-component-compat" frontend/src frontend/vite*.mts
+npm run test -- vite.shared.test.mts src/app/components/ChartIFrameContainer/__tests__/ChartIFrameContainer.test.jsx
+npm run checkTs
+npm run eslint -- vite.config.mts vite.task.config.mts vite.shared.mts vite.shared.test.mts src/app/components/ChartIFrameContainer/ChartIFrameContainer.tsx
+npm exec -- prettier --check vite.config.mts vite.task.config.mts vite.shared.mts vite.shared.test.mts src/app/components/ChartIFrameContainer/ChartIFrameContainer.tsx src/react-app-env.d.ts
+npm run build
+npm run build:task
+git diff --check
+```
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
 | P2-F | AntD 6 主版本评估 | 高 | 继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路 |
-| P2-G | ECharts 6 主版本评估 | 高 | 已通过 `@echarts-x/custom-word-cloud` 完成迁移并补 jsdom 生命周期 smoke，后续可增强浏览器层图表 smoke |
+| P2-G | ECharts 6 主版本评估 | 高 | 已完成；后续可增强浏览器层图表 smoke |
 | P2-H | ESLint 10 主版本评估 | 中高 | 当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级 |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 | P2-J | 富文本编辑器运行时 smoke | 中 | 已补 jsdom 层运行时和 Dashboard Widget smoke；后续具备浏览器入口时补真实编辑 / 预览 / 分享页 E2E |

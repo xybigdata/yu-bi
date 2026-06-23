@@ -9,11 +9,15 @@ declare namespace NodeJS {
 
 declare module '*.css';
 declare module '*.svg' {
-  import type { FC, SVGProps } from 'react';
-
   const src: string;
   export default src;
-  export const ReactComponent: FC<SVGProps<SVGSVGElement>>;
+}
+
+declare module '*.svg?react' {
+  import type { FC, SVGProps } from 'react';
+
+  const ReactComponent: FC<SVGProps<SVGSVGElement>>;
+  export default ReactComponent;
 }
 
 declare module 'react-grid-layout/legacy' {
