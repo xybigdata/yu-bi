@@ -539,6 +539,7 @@ git diff --check
 - `ChartIFrameContainer` 测试已等待异步 lifecycle effect 收敛，移除 React 18 `act(...)` warning
 - 已评估 `monaco-editor 0.55.1`，该版本引入的 `dompurify 3.2.7` 会让 `npm audit` 新增 2 个漏洞，暂不采用；当前继续保持 `monaco-editor 0.52.2`
 - `@testing-library/react` 已从 `14.3.1` 升级到 `16.3.2`，并显式补齐 peer 依赖 `@testing-library/dom 10.4.1`
+- `@testing-library/dom` 已归位到 `devDependencies`，避免测试工具链进入生产依赖声明
 - `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过，确认 `package.json` 与 `package-lock.json` 一致可安装
 - `npm ls ... --all` 已通过，确认 override 后依赖树无 invalid / missing
 - `npm run checkTs` 已通过
@@ -590,6 +591,30 @@ git diff --check
 - `npm audit --json` 仍为 0 vulnerabilities
 - 代表性前端测试 9 个文件、44 个用例通过
 - 测试日志中仍有 AntV S2 sourcemap 和 jsdom pseudo-element 历史噪声，不影响结果
+
+最新批次：前端测试依赖边界收口
+
+- 已确认 `@testing-library/dom` 只服务测试工具链和 `@testing-library/react` peer 依赖，源码运行时无引用
+- 已将 `@testing-library/dom 10.4.1` 从 `dependencies` 移到 `devDependencies`
+- 已同步 `package-lock.json`，确认根声明只保留 dev 依赖，`node_modules/@testing-library/dom` 标记为 `dev: true`
+- 本批次不升级版本、不改源码行为，只收口生产依赖边界
+
+本批次验证命令：
+
+```bash
+npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+npm ls @testing-library/dom @testing-library/react @testing-library/jest-dom @testing-library/user-event --all
+npm audit --json
+npm run checkTs
+npm run test -- src/styles/theme/__tests__/ThemeProvider.test.tsx src/app/__tests__/routerCompat.test.tsx src/app/components/__tests__/VirtualTable.test.tsx src/app/components/FormGenerator/__tests__/BasicFont.test.tsx
+git diff --check
+```
+
+验证说明：
+
+- `npm audit --json` 仍为 0 vulnerabilities，生产依赖计数从 305 降到 293
+- Testing Library 相关定向测试 4 个文件通过，13 个用例通过，1 个历史 skip
+- 测试日志中的 jsdom pseudo-element `getComputedStyle` warning 是既有噪声，不影响结果
 
 ## 12. 后续队列
 
