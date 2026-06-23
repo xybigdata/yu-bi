@@ -14,7 +14,7 @@
   "author": "chencongyu <congyu_email@163.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "bootstrap": "npm install",
+    "bootstrap": "npm ci",
     "start": "vite --host 0.0.0.0",
     "dev:vite": "npm run start",
     "build": "vite build",

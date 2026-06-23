@@ -564,7 +564,7 @@ git diff --check
 P2-E 合入状态：
 
 - 当前分支继续累计前端安全 / 运行时改造
-- 当前分支已领先 `origin/main` 7 个专题提交，继续在同一分支推进
+- 当前分支已领先 `origin/main` 10 个专题提交，继续在同一分支推进
 - 暂不合入 `main`，减少主线合并和完整回归频率
 
 最新批次：前端直接依赖声明固定化
@@ -642,6 +642,29 @@ git diff --check
 - `npm run lint:css` 和 `npm run lint:style` 已通过，确认 stylelint 本地 bin 可解析
 - `commitlint --version` 输出 `@commitlint/cli@21.0.2`，`lint-staged --version` 输出 `17.0.8`
 - Husky 初始化命令普通沙箱因无法写 `.git/config` 失败，提权复跑通过
+
+最新批次：前端 lockfile 驱动安装入口收口
+
+- 已将前端 `bootstrap` 脚本从 `npm install` 改为 `npm ci`
+- Maven `server` 模块仍调用 `npm run bootstrap`，因此打包链路会自动使用 lockfile 驱动安装
+- README / README_zh 前端本地初始化命令同步改为 `npm ci`
+- 本批次不升级依赖版本、不改构建产物，只减少安装时的版本漂移风险
+
+本批次验证命令：
+
+```bash
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+npm run bootstrap -- --dry-run --ignore-scripts --no-audit --no-fund
+npm run checkTs
+npm audit --json
+git diff --check
+```
+
+验证说明：
+
+- `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过，确认 lockfile 可驱动安装
+- `npm run bootstrap -- --dry-run --ignore-scripts --no-audit --no-fund` 已通过，确认 Maven 调用的 bootstrap 脚本入口可用
+- `npm audit --json` 仍为 0 vulnerabilities
 
 ## 12. 后续队列
 
