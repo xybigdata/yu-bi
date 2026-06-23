@@ -61,6 +61,7 @@ git log --oneline --decorate -8
 - `mvn -pl security ...` 命令已授权，后续不再单独询问
 - 同一专题内尽量累计一组相关改动后再提交，避免过频繁提交
 - 当前专题继续在同一分支推进，不因为小批次改动立即合入 `main`
+- 减少 `main` 分支合并频率；前端安全和运行时相关改造优先在 `codex/modernization-frontend-security-deps` 上连续推进，累计足够完整的一批后再统一合入 `main`
 
 ## 3. 分支与合并规则
 
@@ -78,7 +79,7 @@ git log --oneline --decorate -8
 codex/modernization-frontend-security-deps
 ```
 
-当前专题收口前不要创建新分支。P2-E 聚焦前端安全依赖治理：优先处理补丁级升级、lockfile 和 npm overrides 可验证收口的问题；富文本编辑器 `react-quill -> quill 1.x` 漏洞需要独立迁移方案，不混入本批次盲改。
+当前专题收口前不要创建新分支。P2-E 聚焦前端安全依赖治理：优先处理补丁级升级、lockfile、npm overrides 和可验证的富文本 Quill 2 迁移；本专题继续累计在 `codex/modernization-frontend-security-deps`，暂不因为单个小批次合入 `main`。
 
 ## 4. 技术栈基线
 
@@ -115,7 +116,7 @@ codex/modernization-frontend-security-deps
 | Vite | `6.4.3` | 已替代 CRA 主工作流 |
 | Vitest | `4.1.9` | 当前主测试栈 |
 | styled-components | `6.1.19` | 已完成主升级 |
-| react-quill | `2.0.0` | 已升级，保留兼容层 |
+| 富文本编辑器 | `react-quill-new 3.7.0 / quill 2.0.2` | 当前 P2-E 正在迁移验证 |
 | monaco-editor | `0.52.2` | 已补真实运行时加载边界 |
 | reveal.js | `6.0.1` | 已补真实运行时加载边界 |
 | ECharts | `5.6.0` | 已升级到 ECharts 5 稳定线 |
@@ -470,7 +471,7 @@ P2-H 合入状态：
 
 分支：`codex/modernization-frontend-security-deps`
 
-目标：在不替换富文本编辑器、不升级 React/AntD/Vite 主版本的前提下，优先消除补丁级、lockfile 级和 overrides 可安全治理的前端依赖漏洞，并明确剩余需要独立迁移的风险项。
+目标：在不升级 React/AntD/Vite 主版本的前提下，优先消除补丁级、lockfile 级、overrides 可安全治理的前端依赖漏洞，并完成富文本链路从 `react-quill -> quill@1.3.7` 到 Quill 2 兼容线的可验证迁移。
 
 本批次已完成：
 
@@ -492,11 +493,18 @@ P2-H 合入状态：
   - `strip-ansi@4.0.0` 下的 `ansi-regex` `3.0.1`
 - `tsconfig.json` 显式加入 `node` 类型，恢复 `process`、`global`、`NodeJS.Timeout` 等当前源码实际使用的 Node 24 类型边界
 - 同步 `package-lock.json` 和本地 `node_modules`，确认新依赖树可解析
+- 富文本编辑器安全迁移：
+  - 移除直接依赖 `react-quill`
+  - 新增 `react-quill-new 3.7.0`、`quill 2.0.2`、`quill-delta 5.1.0`
+  - 富文本 CSS 入口切换到 `react-quill-new/dist/*`
+  - Quill 2 的 `import`、`register`、Delta 和 Blot 类型差异集中在 `quillCompat.ts`
+  - 自定义 `calcfield`、`tag`、`imageDrop` 注册逻辑改走兼容层
 
 已通过验证：
 
 ```bash
 npm audit --json
+npm ls react-quill react-quill-new quill quill-delta --all
 npm ci --dry-run --ignore-scripts --no-audit --no-fund
 npm ls lodash lodash-es styled-components path-to-regexp form-data undici brace-expansion braces micromatch minimist tmp ansi-regex react-quill quill --all
 npm run checkTs
@@ -510,19 +518,25 @@ git diff --check
 验证说明：
 
 - `npm audit --json` 已从 20 个 vulnerability 条目降到 2 个，剩余 2 个均来自 `react-quill -> quill@1.3.7`
+- 迁移 Quill 2 后，`npm audit --json` 已清零
+- `npm ls react-quill react-quill-new quill quill-delta --all` 已确认 `react-quill` 不在依赖树中，当前富文本链路为 `react-quill-new 3.7.0 / quill 2.0.2`
 - `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过，确认 `package.json` 与 `package-lock.json` 一致可安装
 - `npm ls ... --all` 已通过，确认 override 后依赖树无 invalid / missing
 - `npm run checkTs` 已通过
 - 相关运行时测试 4 个测试文件、13 个用例通过
+- Quill 2 迁移后富文本相关测试 6 个测试文件、23 个用例通过
 - `npm run test:ci` 已通过：132 个测试文件通过，919 个用例通过，4 个跳过
 - `npm run lint:css`、`npm run lint:style` 已通过
 - `git diff --check` 已通过
-- 本批次未处理 `react-quill -> quill@1.3.7` XSS 风险；npm 推荐的 `react-quill@0.0.2` 是不可用回退方向，后续应作为富文本编辑器替换或 Quill 2 兼容迁移专题单独推进
+
+验证缺口：
+
+- 后续具备浏览器 smoke 条件时，补富文本编辑、预览、Dashboard 富文本 widget、分享页富文本展示的手工或自动化验证
 
 P2-E 合入状态：
 
-- 已具备提交专题分支条件
-- 已具备合入 `main` 条件
+- 当前分支继续累计前端安全 / 运行时改造
+- 暂不合入 `main`，减少主线合并和完整回归频率
 
 ## 12. 后续队列
 
@@ -531,7 +545,7 @@ P2-E 合入状态：
 | P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
 | P2-F | React 19、AntD 6、Vite 8、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
-| P2-J | 富文本编辑器安全迁移 | 中高 | 处理 `react-quill -> quill@1.3.7` XSS 残留，先评估 Quill 2 或替代编辑器兼容层 |
+| P2-J | 富文本编辑器运行时 smoke | 中 | P2-E 已迁移 Quill 2，后续补浏览器层编辑 / 预览 / 分享页验证 |
 
 ## 13. 门禁策略
 
@@ -600,6 +614,7 @@ npm ci --dry-run --ignore-scripts
 git status --short --branch
 git rev-list --left-right --count origin/main...HEAD
 npm audit --json
+npm ls react-quill react-quill-new quill quill-delta --all
 npm ci --dry-run --ignore-scripts --no-audit --no-fund
 npm run checkTs
 npm run test:ci

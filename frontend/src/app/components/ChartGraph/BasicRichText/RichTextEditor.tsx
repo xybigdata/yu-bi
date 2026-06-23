@@ -40,7 +40,7 @@ type RichTextChangeHandler = (
       right: number;
       top: number;
       width: number;
-    };
+    } | null;
   },
 ) => void;
 

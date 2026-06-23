@@ -1,4 +1,5 @@
 import {
+  ComponentProps,
   ForwardedRef,
   forwardRef,
   useEffect,
@@ -12,6 +13,7 @@ import type {
 } from './RichTextEditor';
 import MarkdownModule from './modules/MarkdownModule';
 import ReactQuill, {
+  DeltaStatic,
   QuillWithCalcFieldModule,
   SelectionChangeHandler,
   TextChangeHandler,
@@ -22,7 +24,8 @@ const destroyableRuntimeModules = ['imageDrop', 'calcfield'];
 
 export function destroyRichTextModules(editor: QuillWithCalcFieldModule) {
   destroyableRuntimeModules.forEach(moduleName => {
-    editor.getModule(moduleName)?.destroy?.();
+    const module = editor.getModule(moduleName);
+    module?.destroy?.();
   });
 }
 
@@ -56,14 +59,14 @@ function RichTextEditorRuntimeImpl(
       blur: () => editorRef.current?.blur(),
       isReady: () => !!editorRef.current,
       createMarkdownModule: options =>
-        new MarkdownModule(getEditorInstance(), options),
+        new MarkdownModule(getEditorInstance() as never, options),
       focus: () => editorRef.current?.focus(),
       format: (name, value, source) =>
-        getEditorInstance().format(name, value, source),
+        getEditorInstance().format(name, value, source) as DeltaStatic,
       getContents: (index, length) =>
         typeof index === 'number' && typeof length === 'number'
-          ? getEditorInstance().getContents(index, length)
-          : getEditorInstance().getContents(),
+          ? (getEditorInstance().getContents(index, length) as DeltaStatic)
+          : (getEditorInstance().getContents() as DeltaStatic),
       insertCalcFieldItem: (item, programmaticInsert) =>
         getEditorInstance()
           .getModule('calcfield')
@@ -94,7 +97,7 @@ function RichTextEditorRuntimeImpl(
     [],
   );
 
-  return <ReactQuill ref={editorRef} {...props} />;
+  return <ReactQuill ref={editorRef} {...(props as ComponentProps<typeof ReactQuill>)} />;
 }
 
 export default forwardRef(RichTextEditorRuntimeImpl);
