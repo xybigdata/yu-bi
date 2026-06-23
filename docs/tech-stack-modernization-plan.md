@@ -123,6 +123,7 @@ codex/modernization-frontend-security-deps
 | vite-plugin-svgr | `5.2.0` | 已完成 Vite 8 下构建验证 |
 | stylelint-order | `8.1.1` | 已完成 Stylelint 17 下 lint 验证 |
 | styled-components | `6.4.2` | 已完成主升级并确认运行时依赖位置 |
+| polished | `4.3.1` | 已完成样式工具小版本升级 |
 | 富文本编辑器 | `react-quill-new 3.7.0 / quill 2.0.2` | 当前 P2-E 正在迁移验证 |
 | monaco-editor | `0.52.2` | 已补真实运行时加载边界 |
 | reveal.js | `6.0.1` | 已补真实运行时加载边界 |
@@ -1082,6 +1083,34 @@ git diff --check
 - `react-window` 2 暂缓：`react-window 2.2.7` 不再导出当前 `VirtualTable` 依赖的 `VariableSizeGrid`，新 API 改为 `Grid` / `cellComponent` / `gridRef`，需要独立组件适配专题
 - `quill 2.0.3` / `react-quill-new 3.8.3` 暂缓：此前已确认会触发 `GHSA-v3m3-f69x-jf25` 低危 XSS audit
 - `monaco-editor 0.55.1` 暂缓：此前已确认会通过 `dompurify 3.2.7` 引入新的 audit 风险
+
+最新批次：前端样式工具小版本升级
+
+- 已将 `polished` 从 `4.1.4` 升级到 `4.3.1`
+- `polished` 当前主要用于主题色、图表色、拖拽占位色和按钮 hover 色计算；本批次不改样式逻辑，只升级同一主版本内的小版本
+- `redux-undo 1.1.0` 暂不并入本批次：它直接影响 Dashboard 编辑器 `undoable` 历史栈和撤销 / 重做语义，现有测试覆盖不足，后续需要先补独立行为用例
+
+本批次验证命令：
+
+```bash
+npm ls polished --all
+npm run test -- src/styles/theme/__tests__/ThemeProvider.test.tsx src/app/components/ChartGraph/BasicTableChart/__tests__/runtime.test.ts src/app/pages/DashBoardPage/utils/__tests__/board.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts
+npm run checkTs
+npm run build
+npm run build:task
+npm audit --json
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+git diff --check
+```
+
+验证说明：
+
+- 依赖树已确认 `polished 4.3.1` 解析到目标版本
+- 样式 / 图表 / Dashboard 相关测试 4 个文件、19 个用例通过
+- `npm run checkTs` 已通过
+- 主构建和 task bundle 构建均通过，继续使用 Vite 8.0.16
+- `npm audit --json` 仍为 0 vulnerabilities
+- `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过
 
 ## 12. 后续队列
 
