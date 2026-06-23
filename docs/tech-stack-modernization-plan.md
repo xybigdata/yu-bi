@@ -1428,6 +1428,33 @@ git diff --check
 - 主构建和 task bundle 构建均通过；主构建出现独立 `word-cloud.esm` chunk，既有大 chunk warning 仍存在
 - `npm outdated --json` 中已无 `echarts`，P2-G 阻塞项解除
 
+最新批次：ECharts 6 词云生命周期 smoke
+
+- 已补 `WordCloudChart` 生命周期 smoke，覆盖 `onMount` + `onUpdated` 后真实 ECharts 6 runtime 初始化并写入 custom word cloud option
+- smoke 发现 ECharts 6 custom series 在无坐标系词云场景下需要显式 `coordinateSystem: 'none'`，否则会按默认坐标系解析并报 `xAxis "0" not found`
+- 已为词云 option 增加 `coordinateSystem: 'none'`，并在 option smoke 和生命周期 smoke 中同时断言
+- 生命周期 smoke 继续覆盖点击事件数据归一化，确认 `[name, value, rowData, textStyle]` 数组能恢复为现有联动 / 跳转 / 钻取依赖的 `{ name, value, rowData, textStyle }` 形态
+- jsdom 层已补 ECharts 6 词云生命周期验证；后续可继续补浏览器层图表 smoke，但当前不再阻塞 P2-G
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/components/ChartGraph/WordCloudChart/__tests__/WordCloudChart.test.jsx src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts
+npm run test -- src/app/components/ChartGraph/WordCloudChart/__tests__/WordCloudChart.test.jsx src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/utils/__tests__/echartsThemeRuntime.test.ts
+npm run checkTs
+npm audit --json
+npm run build
+npm run build:task
+git diff --check
+```
+
+验证说明：
+
+- 词云和 ECharts runtime 相关测试 4 个文件、11 个用例通过
+- `npm run checkTs` 已通过
+- `npm audit --json` 仍为 0 vulnerabilities
+- 主构建和 task bundle 构建均通过；既有大 chunk warning 仍存在
+
 最新批次：Vite 8 小版本升级
 
 - 已将 `vite` 从 `8.0.16` 升级到 `8.1.0`
@@ -1507,7 +1534,7 @@ git checkout -- frontend/package.json frontend/package-lock.json
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
 | P2-F | AntD 6 主版本评估 | 高 | 继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路 |
-| P2-G | ECharts 6 主版本评估 | 高 | 已通过 `@echarts-x/custom-word-cloud` 完成词云兼容迁移，后续仅保留浏览器层图表 smoke 缺口 |
+| P2-G | ECharts 6 主版本评估 | 高 | 已通过 `@echarts-x/custom-word-cloud` 完成迁移并补 jsdom 生命周期 smoke，后续可增强浏览器层图表 smoke |
 | P2-H | ESLint 10 主版本评估 | 中高 | 当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级 |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 | P2-J | 富文本编辑器运行时 smoke | 中 | 已补 jsdom 层运行时和 Dashboard Widget smoke；后续具备浏览器入口时补真实编辑 / 预览 / 分享页 E2E |

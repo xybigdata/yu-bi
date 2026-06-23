@@ -157,8 +157,7 @@ class WordCloudChart extends Chart {
       return data;
     }
 
-    const [name, value, rowData, textStyle] =
-      data as WordCloudSeriesDataItem;
+    const [name, value, rowData, textStyle] = data as WordCloudSeriesDataItem;
     return {
       name,
       value,
@@ -246,6 +245,7 @@ class WordCloudChart extends Chart {
       series: [
         {
           type: 'custom',
+          coordinateSystem: 'none',
           renderItem: 'wordCloud',
           layoutAnimation: false,
           itemPayload: {
