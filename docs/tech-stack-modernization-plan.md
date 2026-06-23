@@ -564,7 +564,7 @@ git diff --check
 P2-E 合入状态：
 
 - 当前分支继续累计前端安全 / 运行时改造
-- 当前分支已领先 `origin/main` 16 个专题提交，继续在同一分支推进
+- 当前分支已领先 `origin/main` 17 个专题提交，继续在同一分支推进
 - 暂不合入 `main`，减少主线合并和完整回归频率
 
 最新批次：前端直接依赖声明固定化
@@ -710,6 +710,32 @@ git diff --check
 
 - lockfile 视角已无 `prettier-plugin-organize-imports`
 - `npm audit --json` 仍为 0 vulnerabilities，依赖总数从 937 降到 936
+
+最新批次：前端未直接使用 PostCSS 声明清理
+
+- 已确认项目没有 `postcss.config.*`、`.postcssrc*` 或源码直接导入 `postcss`
+- `postcss` 仍由 `postcss-styled-syntax`、`stylelint`、`stylelint-order`、`vite` 等工具链传递依赖提供，版本继续解析为 `8.5.15`
+- 已移除根 `devDependencies.postcss`，避免把传递工具依赖声明为项目直依赖
+- 本批次不改变 Stylelint、Vite 或 PostCSS 处理行为
+
+本批次验证命令：
+
+```bash
+npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+npm ls postcss postcss-styled-syntax stylelint vite --package-lock-only --all
+npm run lint:css
+npm run lint:style
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+npm run checkTs
+npm audit --json
+git diff --check
+```
+
+验证说明：
+
+- lockfile 视角 `postcss` 仍解析为 `8.5.15`
+- `npm run lint:css`、`npm run lint:style`、`npm run checkTs` 已通过
+- `npm audit --json` 仍为 0 vulnerabilities，依赖总数保持 936
 - 代表性前端测试 9 个文件、44 个用例通过
 - 测试日志中仍有 AntV S2 sourcemap 和 jsdom pseudo-element 历史噪声，不影响结果
 
