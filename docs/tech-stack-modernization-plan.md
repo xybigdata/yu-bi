@@ -757,6 +757,31 @@ git diff --check
 - 已将邮件发件人默认展示名从 `Datart` 改为 `yu-bi`，保留配置键 `spring.mail.senderName` 不变
 - 本批次不触碰 Java 包名 `datart.*`、配置前缀 `datart.*`、`DATART_*`、迁移常量和内部稳定标识
 
+最新批次：前端编译目标现代化
+
+- 已将 `frontend/tsconfig.json` 的 `compilerOptions.target` 从 `es5` 收口到 `es2020`
+- 已移除仅服务 ES5 降级的 `downlevelIteration`
+- 已在主 Vite 构建和 task bundle 构建中显式设置 `build.target: 'es2020'`
+- 已清理 `src/task.ts` 中旧 polyfill 注释，明确 task bundle 与主 Vite 构建使用同一现代浏览器基线
+- 本批次不改业务逻辑、不升级依赖版本、不触碰内部稳定标识
+
+本批次验证命令：
+
+```bash
+npm exec -- tsc --showConfig
+npm run checkTs
+npm run test -- src/__tests__/task.test.ts src/utils/__tests__/utils.test.ts src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/components/__tests__/dndRuntime.test.ts
+npm run build
+npm run build:task
+```
+
+验证说明：
+
+- `tsc --showConfig` 已确认有效 target 为 `es2020`
+- 相关测试 5 个文件、22 个用例通过
+- 主构建和 task bundle 构建均通过
+- task bundle 体积从约 `432.50 kB` 降到约 `420.87 kB`，符合退出 ES5 降级后的预期
+
 最新批次：前端测试依赖边界收口
 
 - 已确认 `@testing-library/dom` 只服务测试工具链和 `@testing-library/react` peer 依赖，源码运行时无引用

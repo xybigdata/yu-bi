@@ -35,8 +35,7 @@ import { ChartDetailConfigDTO } from 'app/types/ChartConfigDTO';
 import { ChartDTO } from 'app/types/ChartDTO';
 import { convertToChartDto, parseChartConfig } from 'app/utils/ChartDtoHelper';
 
-// import 'core-js/stable/map';
-// need polyfill [Object.values,Array.prototype.find,new Map]
+// The scheduled task bundle now targets the same modern browser baseline as the main Vite build.
 
 /**
  * @param ''
@@ -91,7 +90,8 @@ const getChartQueryData = (dataStr: string) => {
   ) as ChartDetailConfigDTO;
 
   const chartData = convertToChartDto(data);
-  const dataConfig: ChartDetailConfigDTO = chartData.config || chartDetailConfig;
+  const dataConfig: ChartDetailConfigDTO =
+    chartData.config || chartDetailConfig;
 
   const chartConfig: ChartConfig = dataConfig.chartConfig as ChartConfig;
   const builder = new ChartDataRequestBuilder(

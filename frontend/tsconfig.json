@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "noImplicitAny": false,
-    "target": "es5",
+    "target": "es2020",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -17,8 +17,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "types": ["node", "vitest/globals", "@testing-library/jest-dom"],
-    "baseUrl": "./src",
-    "downlevelIteration": true,
+    "baseUrl": "./src"
   },
   "include": ["src"]
 }

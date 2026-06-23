@@ -94,11 +94,17 @@ const vendorManualChunks = (id: string) => {
     return undefined;
   }
 
-  if (id.includes('/node_modules/antd/') || id.includes('/node_modules/@ant-design/')) {
+  if (
+    id.includes('/node_modules/antd/') ||
+    id.includes('/node_modules/@ant-design/')
+  ) {
     return 'antdDesign';
   }
 
-  if (id.includes('/node_modules/echarts/') || id.includes('/node_modules/zrender/')) {
+  if (
+    id.includes('/node_modules/echarts/') ||
+    id.includes('/node_modules/zrender/')
+  ) {
     return 'echarts';
   }
 
@@ -237,6 +243,7 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: 'build',
     sourcemap: false,
+    target: 'es2020',
     rollupOptions: {
       input: htmlInputs,
       output: {

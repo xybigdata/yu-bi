@@ -139,6 +139,7 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     emptyOutDir: false,
+    target: 'es2020',
     lib: {
       entry: path.resolve(srcRoot, 'task.ts'),
       fileName: () => 'index.js',
