@@ -10,7 +10,7 @@ const srcRoot = path.resolve(appRoot, 'src');
 const publicUrl = process.env.PUBLIC_URL || '';
 
 const syncTaskBundle = (): Plugin => ({
-  name: 'datart-sync-task-bundle',
+  name: 'yu-bi-sync-task-bundle',
   writeBundle() {
     const sourceFile = path.resolve(appRoot, 'build/task/index.js');
     const targetDir = path.resolve(appRoot, 'public/task');

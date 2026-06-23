@@ -1765,6 +1765,25 @@ npm run build:task
 git diff --check
 ```
 
+最新批次：前端 Vite 插件内部名称品牌收口
+
+- 已将 Vite dev server 自定义图表插件中间件名称从 `datart-custom-chart-plugins` 收口为 `yu-bi-custom-chart-plugins`
+- 已将分享页 HTML fallback 插件名称从 `datart-share-html-fallback` 收口为 `yu-bi-share-html-fallback`
+- 已将 task bundle 同步插件名称从 `datart-sync-task-bundle` 收口为 `yu-bi-sync-task-bundle`
+- 本批次只改变 Vite 插件调试标识，不改变插件逻辑、构建输入输出、HTTP 路径或前端运行时协议
+
+本批次验证命令：
+
+```bash
+rg -n "datart-custom-chart-plugins|datart-share-html-fallback|datart-sync-task-bundle" frontend/vite*.mts
+npm run eslint -- vite.config.mts vite.task.config.mts
+npm exec -- prettier --check vite.config.mts vite.task.config.mts
+npm run checkTs
+npm run build
+npm run build:task
+git diff --check
+```
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |

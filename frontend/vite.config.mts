@@ -16,7 +16,7 @@ const htmlInputs = {
 };
 
 const customChartPluginsMiddleware = (): Plugin => ({
-  name: 'datart-custom-chart-plugins',
+  name: 'yu-bi-custom-chart-plugins',
   configureServer(server) {
     server.middlewares.use('/api/v1/plugins/custom/charts', (req, res) => {
       const pluginPath = 'custom-chart-plugins';
@@ -38,7 +38,7 @@ const customChartPluginsMiddleware = (): Plugin => ({
 });
 
 const shareHtmlFallback = (): Plugin => ({
-  name: 'datart-share-html-fallback',
+  name: 'yu-bi-share-html-fallback',
   configureServer(server) {
     server.middlewares.use(async (req, res, next) => {
       const url = req.url || '';
