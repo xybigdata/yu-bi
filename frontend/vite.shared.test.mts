@@ -15,10 +15,6 @@ describe('vite shared config', () => {
     expect(createViteAliases(appRoot)).toEqual([
       { find: 'app', replacement: path.resolve(appRoot, 'src/app') },
       {
-        find: 'core-js',
-        replacement: path.resolve(appRoot, 'node_modules/core-js'),
-      },
-      {
         find: 'entryPointFactory',
         replacement: path.resolve(appRoot, 'src/entryPointFactory.tsx'),
       },

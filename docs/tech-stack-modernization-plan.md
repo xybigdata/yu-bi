@@ -1707,6 +1707,29 @@ npm run build:task
 git diff --check
 ```
 
+最新批次：前端 core-js alias 兼容退出
+
+- 已确认 `frontend/src` 源码没有 `core-js` / `regenerator-runtime` / `babel-polyfill` 导入
+- 已确认当前依赖树中不存在 `core-js`，`npm why core-js` 返回无匹配依赖
+- 已移除 `vite.shared.mts#createViteAliases` 中的 `core-js -> node_modules/core-js` alias
+- `vite.shared.test.mts` 已同步删除该 alias 期望，避免继续为不存在的旧 polyfill 包建立构建兼容
+- 本批次不升级依赖版本、不改运行时代码，只减少 CRA / 旧 polyfill 迁移遗留的无效 alias
+
+本批次验证命令：
+
+```bash
+rg -n "core-js|regenerator-runtime|babel-polyfill" frontend/src frontend/vite*.mts frontend/package.json frontend/package-lock.json docs/tech-stack-modernization-plan.md --glob '!frontend/node_modules/**' --glob '!frontend/build/**'
+npm ls core-js regenerator-runtime @babel/runtime --all
+npm why core-js
+npm run test -- vite.shared.test.mts
+npm run checkTs
+npm run eslint -- vite.shared.mts vite.shared.test.mts vite.config.mts vite.task.config.mts
+npm exec -- prettier --check vite.shared.mts vite.shared.test.mts vite.config.mts vite.task.config.mts
+npm run build
+npm run build:task
+git diff --check
+```
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |

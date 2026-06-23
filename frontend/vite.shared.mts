@@ -19,10 +19,6 @@ export const createViteAliases = (appRoot: string): AliasOptions => {
   return [
     { find: 'app', replacement: path.resolve(srcRoot, 'app') },
     {
-      find: 'core-js',
-      replacement: path.resolve(appRoot, 'node_modules/core-js'),
-    },
-    {
       find: 'entryPointFactory',
       replacement: path.resolve(srcRoot, 'entryPointFactory.tsx'),
     },
