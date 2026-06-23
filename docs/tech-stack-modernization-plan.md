@@ -1560,6 +1560,50 @@ git checkout -- frontend/package.json frontend/package-lock.json
 - Monaco / Quill 最新组合仍会破坏当前 `npm audit` 清零状态
 - 临时试装改动均已恢复，工作区不保留风险依赖
 
+最新批次：前端 Less 构建配置重复治理
+
+- 已先通过 `npm ci --ignore-scripts --no-audit --no-fund` 恢复本地 `node_modules` 与 lockfile 一致，清理此前临时试装 `quill 2.0.3` / `react-quill-new 3.8.3` 导致的本地依赖树漂移
+- 已复核当前本机基线为 `Node v24.16.0 / npm 11.13.0`
+- 已确认 `npm audit --json` 仍为 0 vulnerabilities
+- 已确认当前剩余 outdated 仍为 `@types/node`、`@vitejs/plugin-react`、`antd`、`eslint`、`monaco-editor`、`quill`、`react-quill-new`
+- 已复核 `@types/node` 的 24.x 最新版本仍是当前 `24.13.2`，不升级到 Node 26 类型线
+- 已复核安装期废弃提示：
+  - `intersection-observer` 来自 `@antv/s2-react -> ahooks`，ahooks 最新稳定版运行时代码仍在 `useInViewport` 中导入该 polyfill，暂不强行 override 删除
+  - `lodash.isequal` 来自 `quill-delta 5.1.0`，上游最新稳定版仍依赖它，暂不强行替换
+- 已将主 Vite 构建和 task bundle 构建中重复的 Less `preprocessorOptions` 抽到 `vite.shared.mts#createLessPreprocessorOptions`
+- 共享 Less 配置继续保留现有行为：
+  - `javascriptEnabled: true`
+  - `rewriteUrls: 'all'`
+  - Less `~` import 文件解析兼容
+- 本批次不升级依赖版本、不改业务代码，只降低后续 Vite / Less 构建配置继续演进时的漂移风险
+
+本批次验证命令：
+
+```bash
+npm ci --ignore-scripts --no-audit --no-fund
+npm ls quill react-quill-new vite @vitejs/plugin-react antd eslint monaco-editor --all
+npm audit --json
+npm outdated --json
+npm view @types/node@24 version dist-tags engines --json
+npm view @antv/s2-react@latest version peerDependencies dependencies engines --json
+npm view ahooks@latest version dependencies peerDependencies engines --json
+npm view quill-delta@latest version dependencies peerDependencies engines --json
+npm run eslint -- vite.config.mts vite.task.config.mts vite.shared.mts
+npm exec -- prettier --check vite.config.mts vite.task.config.mts vite.shared.mts
+npm run checkTs
+npm run build
+npm run build:task
+git diff --check
+```
+
+验证说明：
+
+- `npm ls` 已确认本地 `quill 2.0.2` / `react-quill-new 3.7.0` 与 package 声明一致，无 invalid 依赖
+- Vite 配置文件 ESLint 和 Prettier 检查通过
+- `npm run checkTs` 已通过
+- 主构建和 task bundle 构建均通过，继续使用 `vite v8.1.0`
+- 主构建仍有既有大 chunk warning，本批次不处理包体拆分
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |

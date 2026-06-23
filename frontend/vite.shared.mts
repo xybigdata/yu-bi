@@ -55,3 +55,47 @@ export const craSvgReactComponentCompat = (): Plugin => ({
     );
   },
 });
+
+export const createLessPreprocessorOptions = (appRoot: string) => ({
+  less: {
+    javascriptEnabled: true,
+    rewriteUrls: 'all',
+    plugins: [
+      {
+        install(less, pluginManager) {
+          const FileManager = less.FileManager;
+
+          class TildeFileManager extends FileManager {
+            supports(filename) {
+              return filename.startsWith('~');
+            }
+
+            supportsSync(filename) {
+              return this.supports(filename);
+            }
+
+            loadFile(filename, currentDirectory, options, environment) {
+              return super.loadFile(
+                path.resolve(appRoot, 'node_modules', filename.slice(1)),
+                '',
+                options,
+                environment,
+              );
+            }
+
+            loadFileSync(filename, currentDirectory, options, environment) {
+              return super.loadFileSync(
+                path.resolve(appRoot, 'node_modules', filename.slice(1)),
+                '',
+                options,
+                environment,
+              );
+            }
+          }
+
+          pluginManager.addFileManager(new TildeFileManager());
+        },
+      },
+    ],
+  },
+});
