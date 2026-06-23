@@ -118,7 +118,7 @@ codex/modernization-frontend-security-deps
 | React Redux | `9.3.0` | 已完成主升级 |
 | Immer | `11.1.8` | 已与 Redux Toolkit 依赖线去重 |
 | TypeScript | `6.0.3` | 已升级到 6.0 稳定线，`baseUrl` 已迁移为显式 `paths` |
-| Vite | `8.0.16` | 已升级到 Vite 8 主链，暂配 `@vitejs/plugin-react 5.2.0` |
+| Vite | `8.1.0` | 已升级到 Vite 8 主链，暂配 `@vitejs/plugin-react 5.2.0` |
 | Vitest | `4.1.9` | 当前主测试栈 |
 | Testing Library | `@testing-library/react 16.3.2 / dom 10.4.1` | 已对齐 React 19 测试栈 |
 | Less | `4.6.7` | 已完成补丁升级 |
@@ -1427,6 +1427,44 @@ git diff --check
 - `npm run checkTs` 已通过
 - 主构建和 task bundle 构建均通过；主构建出现独立 `word-cloud.esm` chunk，既有大 chunk warning 仍存在
 - `npm outdated --json` 中已无 `echarts`，P2-G 阻塞项解除
+
+最新批次：Vite 8 小版本升级
+
+- 已将 `vite` 从 `8.0.16` 升级到 `8.1.0`
+- `vite 8.1.0` engine 为 `^20.19.0 || >=22.12.0`，满足 Node 24 目标
+- 当前继续保留 `@vitejs/plugin-react 5.2.0`：该版本 peer 已支持 Vite 8，`@vitejs/plugin-react 6.0.3` 仍有可选 `@rolldown/plugin-babel` / `babel-plugin-react-compiler` peer 链风险，暂不并入本批次
+- `vitest 4.1.9` peer 已支持 `vite ^6.0.0 || ^7.0.0 || ^8.0.0`
+- 本批次只升级构建工具小版本，不改业务代码和运行时协议
+
+本批次验证命令：
+
+```bash
+npm view vite@8.1.0 version engines dependencies optionalDependencies peerDependencies peerDependenciesMeta dist --json
+npm view @vitejs/plugin-react@5.2.0 version peerDependencies engines dependencies optionalDependencies peerDependenciesMeta --json
+npm view @vitejs/plugin-react@6.0.3 version peerDependencies engines dependencies optionalDependencies peerDependenciesMeta --json
+npm view vitest@4.1.9 version peerDependencies engines dependencies optionalDependencies --json
+npm install vite@8.1.0 --save-dev --ignore-scripts --no-audit --no-fund
+npm exec -- vite --version
+npm ls vite @vitejs/plugin-react vitest --all
+npm run checkTs
+npm run test -- src/__tests__/task.test.ts src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/components/__tests__/dndRuntime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts src/app/components/ChartGraph/WordCloudChart/__tests__/WordCloudChart.test.jsx
+npm run eslint -- eslint.config.mjs vite.config.mts vite.task.config.mts vitest.config.mts vite.shared.mts
+npm audit --json
+npm run build
+npm run build:task
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+git diff --check
+```
+
+验证说明：
+
+- 本地实际 Vite 版本已确认为 `vite/8.1.0 darwin-arm64 node-v24.16.0`
+- `npm ls` 已确认 `@vitejs/plugin-react 5.2.0`、`vite-plugin-svgr 5.2.0`、`vitest 4.1.9` 均解析到 `vite 8.1.0`
+- `npm run checkTs` 已通过
+- 代表性测试 7 个文件、18 个用例通过
+- Vite / Vitest 配置文件 ESLint 已通过
+- `npm audit --json` 仍为 0 vulnerabilities
+- 主构建和 task bundle 构建均通过，输出均显示 `vite v8.1.0`
 
 ## 12. 后续队列
 
