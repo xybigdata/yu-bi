@@ -137,7 +137,7 @@ codex/modernization-frontend-security-deps
 | react-grid-layout | `2.2.3` | 已通过 legacy 入口升级 |
 | react-hotkeys-hook | `5.3.2` | 已完成快捷键 hook 主版本升级验证 |
 | flexlayout-react | `0.9.1` | 已升级并改用命名导出 |
-| react-window | `1.8.11` | 保持 1.x 兼容线，2.x 独立评估 |
+| react-window | `2.2.7` | 已适配 `Grid / cellComponent / gridRef` 新 API |
 | redux-undo | `1.1.0` | 已补撤销 / 重做历史栈测试后升级 |
 | react-draggable | `4.7.0` | 已升级 |
 | react-resizable | `4.0.2` | 已改用内置类型声明，移除旧 `@types` stub |
@@ -1085,7 +1085,7 @@ git diff --check
 本轮暂缓项：
 
 - AntD 6 暂缓：`antd` 最新稳定为 `6.4.5`，但最新稳定 `@ant-design/pro-components 2.8.10` peer 仍只支持 `antd ^4.24.15 || ^5.11.2`
-- `react-window` 2 暂缓：`react-window 2.2.7` 不再导出当前 `VirtualTable` 依赖的 `VariableSizeGrid`，新 API 改为 `Grid` / `cellComponent` / `gridRef`，需要独立组件适配专题
+- `react-window` 2 后续已完成适配：`VirtualTable` 已从旧 `VariableSizeGrid` 迁移到 `Grid / cellComponent / gridRef` 新 API
 - `quill 2.0.3` / `react-quill-new 3.8.3` 暂缓：此前已确认会触发 `GHSA-v3m3-f69x-jf25` 低危 XSS audit
 - `monaco-editor 0.55.1` 暂缓：此前已确认会通过 `dompurify 3.2.7` 引入新的 audit 风险
 
@@ -1272,11 +1272,42 @@ git diff --check
 - `npm audit --json` 仍为 0 vulnerabilities
 - 主构建和 task bundle 构建均通过；既有大 chunk warning 仍存在
 
+最新批次：前端虚拟表格运行时升级
+
+- 已将 `react-window` 从 `1.8.11` 升级到 `2.2.7`
+- `react-window 2` peer 支持 `react ^18.0.0 || ^19.0.0`，与当前 React 19 主链兼容
+- `VirtualTable` 已从旧 `VariableSizeGrid` render-prop API 迁移到 v2 `Grid / cellComponent / cellProps / gridRef` API
+- `virtualTableRuntime` 延迟加载入口已从 `VariableSizeGrid` 切换到 `Grid`，继续保持运行时动态拆包
+- 保留 AntD Table 自定义 body 的横向滚动同步：`scrollLeft` setter 改为通过 v2 `gridRef.current.element.scrollTo({ left })` 同步
+- 已移除 v1 专用的 `resetAfterIndices` 调用；v2 根据 `Grid` props 和 `cellProps` 重新计算渲染
+- 主构建中 `react-window` 独立 chunk 由约 `12.76 kB / gzip 4.05 kB` 降到约 `9.51 kB / gzip 3.44 kB`
+
+本批次验证命令：
+
+```bash
+npm ls react-window --all
+npm run checkTs
+npm run test -- src/app/components/__tests__/virtualTableRuntime.test.ts src/app/components/__tests__/VirtualTable.test.tsx
+npm audit --json
+npm run build
+npm run build:task
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+git diff --check
+```
+
+验证说明：
+
+- 依赖树已确认 `react-window 2.2.7` 解析到目标版本
+- `npm run checkTs` 已通过
+- 虚拟表格运行时和组件测试 2 个文件、7 个用例通过
+- 当前仓库没有 `SchemaTable` 专用单测；业务使用面由 `VirtualTable` 组件测试、类型检查和生产构建覆盖
+- `npm audit --json` 仍为 0 vulnerabilities
+- 主构建和 task bundle 构建均通过；既有大 chunk warning 仍存在
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
-| P2-D | `react-window` 2.x 适配 | 中高 | 独立专题，当前 `VariableSizeGrid` API 已被 2.x 移除，需要改造 `VirtualTable` 到新 `Grid` API |
 | P2-F | AntD 6 主版本评估 | 高 | 稳定版 Pro Components 尚未支持 AntD 6，继续等待稳定生态链路 |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 | P2-J | 富文本编辑器运行时 smoke | 中 | P2-E 已迁移 Quill 2，后续补浏览器层编辑 / 预览 / 分享页验证 |

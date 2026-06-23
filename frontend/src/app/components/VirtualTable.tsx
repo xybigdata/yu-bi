@@ -33,12 +33,9 @@ import styled from 'styled-components';
 import { SPACE_TIMES } from 'styles/StyleConstants';
 import {
   loadVirtualTableRuntime,
+  VirtualTableGridRef,
   VirtualTableGridModule,
 } from './virtualTableRuntime';
-
-type VirtualGridInstance = InstanceType<
-  VirtualTableGridModule['VariableSizeGrid']
->;
 
 type VirtualTableRecord = object;
 
@@ -79,6 +76,11 @@ type WidthColumn = {
   width?: number;
 };
 
+type VirtualGridCellProps = {
+  rawData: readonly VirtualTableRecord[];
+  mergedColumns: InternalVirtualTableColumn[];
+};
+
 interface VirtualTableProps extends TableProps<VirtualTableRecord> {
   width: number;
   scroll: { x: number; y: number };
@@ -108,7 +110,7 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
   const widthColumns: WidthColumn[] = typedColumns.map(v => {
     return { width: v.width, dataIndex: v.dataIndex };
   });
-  const gridRef = useRef<VirtualGridInstance | null>(null);
+  const gridRef = useRef<VirtualTableGridRef | null>(null);
   const isFull = useRef<boolean>(false);
   const widthColumnCount = getWidthColumnCount(widthColumns);
   const [connectObject] = useState(() => {
@@ -118,18 +120,16 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
     Object.defineProperty(obj, 'scrollLeft', {
       get: () => 0,
       set: scrollLeft => {
-        if (gridRef.current) {
-          gridRef.current.scrollTo({
-            scrollLeft,
-          });
-        }
+        gridRef.current?.element?.scrollTo({
+          left: scrollLeft,
+        });
       },
     });
     return obj;
   });
   const [Grid, setGrid] = useState<Awaited<
     ReturnType<typeof loadVirtualTableRuntime>
-  >['VariableSizeGrid'] | null>(null);
+  >['Grid'] | null>(null);
   isFull.current = boxWidth > scroll.x;
 
   useEffect(() => {
@@ -137,7 +137,7 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
 
     loadVirtualTableRuntime().then(module => {
       if (!cancelled) {
-        setGrid(() => module.VariableSizeGrid);
+        setGrid(() => module.Grid);
       }
     }).catch(error => {
       console.error('Load virtual table runtime failed', error);
@@ -171,17 +171,6 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
     });
   }, [boxWidth, typedColumns, widthColumnCount, widthColumns]);
 
-  const resetVirtualGrid = useCallback(() => {
-    gridRef.current?.resetAfterIndices({
-      columnIndex: 0,
-      shouldForceUpdate: true,
-    });
-  }, [gridRef]);
-
-  useEffect(() => {
-    resetVirtualGrid();
-  }, [boxWidth, dataSource, resetVirtualGrid]);
-
   const renderVirtualList = useCallback<CustomizeScrollBody<VirtualTableRecord>>(
     (rawData, { scrollbarSize, ref, onScroll }) => {
       if (typeof ref === 'function') {
@@ -201,51 +190,35 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
       }
 
       return (
-        <Grid
-          ref={gridRef}
+        <Grid<VirtualGridCellProps>
+          gridRef={gridRef}
           className="virtual-grid"
           columnCount={mergedColumns.length}
+          cellComponent={VirtualGridCell}
+          cellProps={{
+            rawData,
+            mergedColumns,
+          }}
           columnWidth={index => {
             const width = Number(mergedColumns[index]?.width || 0);
             return totalHeight > scroll.y && index === mergedColumns.length - 1
               ? Math.max(0, width - scrollbarSize - 16)
               : width;
           }}
-          height={scroll.y}
+          defaultHeight={scroll.y}
+          defaultWidth={boxWidth}
           rowCount={rawData.length}
-          rowHeight={() => 39}
-          width={boxWidth}
-          onScroll={({ scrollLeft }) => {
+          rowHeight={39}
+          style={{
+            height: scroll.y,
+            width: boxWidth,
+          }}
+          onScroll={event => {
             onScroll({
-              scrollLeft,
+              scrollLeft: event.currentTarget.scrollLeft,
             });
           }}
-        >
-          {({ rowIndex, columnIndex, style }) => {
-            const cellStyle: CSSProperties = {
-              padding: `${SPACE_TIMES(2)}`,
-              textAlign: mergedColumns[columnIndex].align,
-              ...style,
-            };
-            return (
-              <TableCell
-                className={classNames('virtual-table-cell', {
-                  'virtual-table-cell-last':
-                    columnIndex === mergedColumns.length - 1,
-                })}
-                style={cellStyle}
-                key={columnIndex}
-              >
-                {mergedColumns[columnIndex].dataIndex
-                  ? rawData[rowIndex][
-                      mergedColumns[columnIndex]
-                        .dataIndex as keyof (typeof rawData)[number]
-                    ]
-                  : null}
-              </TableCell>
-            );
-          }}
-        </Grid>
+        />
       );
     },
     [mergedColumns, boxWidth, connectObject, dataSource, scroll],
@@ -262,6 +235,44 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
     />
   );
 });
+
+const VirtualGridCell = ({
+  ariaAttributes,
+  columnIndex,
+  rowIndex,
+  style,
+  rawData,
+  mergedColumns,
+}: VirtualGridCellProps & {
+  ariaAttributes: {
+    'aria-colindex': number;
+    role: 'gridcell';
+  };
+  columnIndex: number;
+  rowIndex: number;
+  style: CSSProperties;
+}) => {
+  const column = mergedColumns[columnIndex];
+  const cellStyle: CSSProperties = {
+    padding: `${SPACE_TIMES(2)}`,
+    textAlign: column.align,
+    ...style,
+  };
+
+  return (
+    <TableCell
+      {...ariaAttributes}
+      className={classNames('virtual-table-cell', {
+        'virtual-table-cell-last': columnIndex === mergedColumns.length - 1,
+      })}
+      style={cellStyle}
+    >
+      {column.dataIndex
+        ? rawData[rowIndex][column.dataIndex as keyof (typeof rawData)[number]]
+        : null}
+    </TableCell>
+  );
+};
 
 const TableCell = styled.div`
   border-bottom: 1px solid ${p => p.theme.borderColorSplit};

@@ -7,8 +7,7 @@ import {
 } from '../virtualTableRuntime';
 
 const createRuntimeModule = (): VirtualTableGridModule => ({
-  VariableSizeGrid:
-    vi.fn() as unknown as VirtualTableGridModule['VariableSizeGrid'],
+  Grid: vi.fn() as unknown as VirtualTableGridModule['Grid'],
 });
 
 describe('loadVirtualTableRuntime', () => {
@@ -45,6 +44,6 @@ describe('loadVirtualTableRuntime', () => {
   test('should load actual react-window grid runtime', async () => {
     const runtimeModule = await loadVirtualTableRuntime();
 
-    expect(runtimeModule.VariableSizeGrid).toEqual(expect.any(Function));
+    expect(runtimeModule.Grid).toEqual(expect.any(Function));
   });
 });

@@ -71,28 +71,45 @@ describe('VirtualTable', () => {
     const columnWidths: number[] = [];
     type MockGridProps = {
       columnWidth: (index: number) => number;
-      children: (props: {
+      cellComponent: React.ComponentType<{
+        ariaAttributes: {
+          'aria-colindex': number;
+          role: 'gridcell';
+        };
         columnIndex: number;
         rowIndex: number;
         style: React.CSSProperties;
-      }) => React.ReactNode;
+        rawData: readonly object[];
+        mergedColumns: Array<{ dataIndex?: string; align?: React.CSSProperties['textAlign'] }>;
+      }>;
+      cellProps: {
+        rawData: readonly object[];
+        mergedColumns: Array<{ dataIndex?: string; align?: React.CSSProperties['textAlign'] }>;
+      };
     };
-    const MockGrid = React.forwardRef<HTMLDivElement, MockGridProps>(
-      ({ columnWidth, children }, _ref) => {
-        columnWidths.push(columnWidth(0));
-        return (
-          <div>
-            {children({
-              columnIndex: 0,
-              rowIndex: 0,
-              style: {},
-            })}
-          </div>
-        );
-      },
-    );
+    const MockGrid = ({
+      cellComponent: CellComponent,
+      cellProps,
+      columnWidth,
+    }: MockGridProps) => {
+      columnWidths.push(columnWidth(0));
+      return (
+        <div>
+          {React.createElement(CellComponent, {
+            ...cellProps,
+            ariaAttributes: {
+              'aria-colindex': 1,
+              role: 'gridcell',
+            },
+            columnIndex: 0,
+            rowIndex: 0,
+            style: {},
+          })}
+        </div>
+      );
+    };
     runtimeMock.loadVirtualTableRuntime.mockResolvedValue({
-      VariableSizeGrid: MockGrid,
+      Grid: MockGrid,
     });
 
     render(
