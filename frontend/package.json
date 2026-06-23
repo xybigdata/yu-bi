@@ -97,7 +97,7 @@
     "react-resizable": "3.2.0",
     "react-router-dom": "6.30.4",
     "react-window": "1.8.11",
-    "redux-undo": "1.0.1",
+    "redux-undo": "1.1.0",
     "reveal.js": "6.0.1",
     "split.js": "1.6.5",
     "sql-formatter": "9.2.0",

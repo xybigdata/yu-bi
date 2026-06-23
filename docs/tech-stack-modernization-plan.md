@@ -134,6 +134,7 @@ codex/modernization-frontend-security-deps
 | react-grid-layout | `2.2.3` | 已通过 legacy 入口升级 |
 | flexlayout-react | `0.9.1` | 已升级并改用命名导出 |
 | react-window | `1.8.11` | 保持 1.x 兼容线，2.x 独立评估 |
+| redux-undo | `1.1.0` | 已补撤销 / 重做历史栈测试后升级 |
 | react-draggable | `4.7.0` | 已升级 |
 | react-resizable | `3.2.0` | 已升级 |
 | @hello-pangea/dnd | `18.0.1` | 已确认当前稳定线 |
@@ -1088,7 +1089,7 @@ git diff --check
 
 - 已将 `polished` 从 `4.1.4` 升级到 `4.3.1`
 - `polished` 当前主要用于主题色、图表色、拖拽占位色和按钮 hover 色计算；本批次不改样式逻辑，只升级同一主版本内的小版本
-- `redux-undo 1.1.0` 暂不并入本批次：它直接影响 Dashboard 编辑器 `undoable` 历史栈和撤销 / 重做语义，现有测试覆盖不足，后续需要先补独立行为用例
+- `redux-undo 1.1.0` 当时未并入本批次：它直接影响 Dashboard 编辑器 `undoable` 历史栈和撤销 / 重做语义，需要先补独立行为用例
 
 本批次验证命令：
 
@@ -1107,6 +1108,40 @@ git diff --check
 
 - 依赖树已确认 `polished 4.3.1` 解析到目标版本
 - 样式 / 图表 / Dashboard 相关测试 4 个文件、19 个用例通过
+- `npm run checkTs` 已通过
+- 主构建和 task bundle 构建均通过，继续使用 Vite 8.0.16
+- `npm audit --json` 仍为 0 vulnerabilities
+- `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过
+
+最新批次：Dashboard 撤销历史依赖升级
+
+- 已新增 `BoardEditor/slice/__tests__/undoHistory.test.ts`，覆盖编辑器历史栈关键契约：
+  - 初始化看板进入编辑栈时不写入 undo history
+  - 白名单 action 会进入 past，可通过 `BOARD_UNDO.undo` / `BOARD_UNDO.redo` 恢复
+  - 非白名单 stack action 不进入 undo history
+- 已显式导出 `editBoardStackReducer` 供 reducer 层行为测试使用
+- 已将 `redux-undo` 从 `1.0.1` 升级到 `1.1.0`
+- 本批次不改 Dashboard 业务逻辑，只先补行为基线，再升级同一主版本内的小版本
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/undoHistory.test.ts
+npm ls redux-undo --all
+npm run test -- src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/undoHistory.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts src/app/pages/DashBoardPage/utils/__tests__/board.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts
+npm run checkTs
+npm run build
+npm run build:task
+npm audit --json
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+git diff --check
+```
+
+验证说明：
+
+- 升级前新增撤销历史基线测试已通过，确认测试能覆盖当前行为
+- 升级后依赖树已确认 `redux-undo 1.1.0` 解析到目标版本
+- Dashboard / 撤销历史相关测试 5 个文件、18 个用例通过
 - `npm run checkTs` 已通过
 - 主构建和 task bundle 构建均通过，继续使用 Vite 8.0.16
 - `npm audit --json` 仍为 0 vulnerabilities
