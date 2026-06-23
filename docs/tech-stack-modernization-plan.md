@@ -564,7 +564,7 @@ git diff --check
 P2-E 合入状态：
 
 - 当前分支继续累计前端安全 / 运行时改造
-- 当前分支已领先 `origin/main` 14 个专题提交，继续在同一分支推进
+- 当前分支已领先 `origin/main` 15 个专题提交，继续在同一分支推进
 - 暂不合入 `main`，减少主线合并和完整回归频率
 
 最新批次：前端直接依赖声明固定化
@@ -664,6 +664,29 @@ git diff --check
 
 - 当前本机验证基线为 `Node v24.16.0 / npm 11.13.0`
 - `engine-strict` 和 `packageManager` 校验均通过
+
+最新批次：前端未使用提交辅助工具链清理
+
+- 已移除未被脚本和文档使用的 `cz-conventional-changelog`
+- 已移除 `config.commitizen` 配置，保留现有 `commitlint` hook 作为提交信息校验入口
+- lockfile 已清理 `commitizen`、`inquirer`、`external-editor`、`tmp`、旧 `strip-ansi@4` 等传递链路
+- 已删除不再命中的 `tmp` 和 `strip-ansi@4.0.0 -> ansi-regex` overrides，保留仍被依赖树命中的 `minimist` override
+- 本批次不改变运行时代码和提交校验规则，只减少旧开发工具链和过期 overrides
+
+本批次验证命令：
+
+```bash
+npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+npm ls cz-conventional-changelog commitizen inquirer external-editor tmp strip-ansi ansi-regex minimist --package-lock-only --all
+npm audit --json
+npm run checkTs
+git diff --check
+```
+
+验证说明：
+
+- lockfile 视角已无 `cz-conventional-changelog`、`commitizen`、`inquirer`、`external-editor`、`tmp`
+- `npm audit --json` 仍为 0 vulnerabilities，依赖总数从 1002 降到 937
 - 代表性前端测试 9 个文件、44 个用例通过
 - 测试日志中仍有 AntV S2 sourcemap 和 jsdom pseudo-element 历史噪声，不影响结果
 
