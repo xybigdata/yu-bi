@@ -37,7 +37,7 @@ import { Widget, WidgetConf } from 'app/pages/DashBoardPage/types/widgetTypes';
 import { Variable } from 'app/pages/MainPage/pages/VariablePage/slice/types';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
 import { updateCollectionByAction } from 'app/utils/mutation';
-import produce from 'immer';
+import { produce } from 'immer';
 import { LayoutItem } from 'react-grid-layout/legacy';
 import { createSlice } from 'utils/@reduxjs/toolkit';
 import { ORIGINAL_TYPE_MAP } from '../../../../constants';

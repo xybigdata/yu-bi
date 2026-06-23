@@ -22,7 +22,7 @@ import {
 } from 'app/constants';
 import { ChartDataConfig } from 'app/types/ChartConfig';
 import { ChartDataConfigSectionProps } from 'app/types/ChartDataConfigSection';
-import produce from 'immer';
+import { produce } from 'immer';
 
 type ChartDataConfigActions = NonNullable<ChartDataConfig['actions']>;
 type ChartDataSectionFieldAction =

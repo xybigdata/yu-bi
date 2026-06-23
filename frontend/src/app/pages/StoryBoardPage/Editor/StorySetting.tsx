@@ -17,7 +17,7 @@
  */
 import { Checkbox, Form, InputNumber } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import produce from 'immer';
+import { produce } from 'immer';
 import React, { memo, useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';

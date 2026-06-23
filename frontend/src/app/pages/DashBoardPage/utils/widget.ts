@@ -36,7 +36,7 @@ import { formatDatartDateTime, getDatartNowMillis } from 'app/utils/date';
 import { transformToHierarchyModel } from 'app/utils/internalChartHelper';
 import { updateBy } from 'app/utils/mutation';
 import { BOARD_COPY_CHART_SUFFIX, FilterSqlOperator } from 'globalConstants';
-import produce from 'immer';
+import { produce } from 'immer';
 import { CSSProperties } from 'react';
 import type { LayoutItem } from 'react-grid-layout/legacy';
 import { CloneValueDeep } from 'utils/object';

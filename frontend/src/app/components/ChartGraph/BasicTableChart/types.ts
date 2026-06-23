@@ -7,7 +7,7 @@ import {
   IChartDataSetRow,
 } from 'app/types/ChartDataSet';
 import { CSSProperties, JSX as ReactJSX, ReactNode } from 'react';
-import { ResizableProps } from 'react-resizable';
+import type { Props as ResizableProps } from 'react-resizable';
 
 export type BasicTableDataValue = ChartDataSetCellValue;
 export type BasicTableRowData = Record<string, BasicTableDataValue>;

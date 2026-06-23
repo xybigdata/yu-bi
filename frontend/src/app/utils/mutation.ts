@@ -24,7 +24,7 @@ import {
   ChartStyleConfig,
   ChartStyleSectionRow,
 } from 'app/types/ChartConfig';
-import produce, { Draft } from 'immer';
+import { Draft, produce } from 'immer';
 
 type ChartConfigNode =
   | ChartConfigBase

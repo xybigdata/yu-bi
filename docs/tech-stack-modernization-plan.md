@@ -113,8 +113,10 @@ codex/modernization-frontend-security-deps
 | React | `19.2.7` | 已升级到 React 19 稳定线 |
 | React Router | `6.30.4` | 已收口到 React Router 6 稳定线，并通过兼容层启用 v7 future flags |
 | Ant Design | `5.29.3` | 已收口到 AntD 5 稳定线，并迁移到 v5 theme token API |
+| @ant-design/icons | `6.2.5` | 直接依赖已升级；AntD / Pro Components 内部仍保留 5.x |
 | Redux Toolkit | `2.12.0` | 已完成主升级 |
 | React Redux | `9.3.0` | 已完成主升级 |
+| Immer | `11.1.8` | 已与 Redux Toolkit 依赖线去重 |
 | TypeScript | `6.0.3` | 已升级到 6.0 稳定线，`baseUrl` 已迁移为显式 `paths` |
 | Vite | `8.0.16` | 已升级到 Vite 8 主链，暂配 `@vitejs/plugin-react 5.2.0` |
 | Vitest | `4.1.9` | 当前主测试栈 |
@@ -138,7 +140,7 @@ codex/modernization-frontend-security-deps
 | react-window | `1.8.11` | 保持 1.x 兼容线，2.x 独立评估 |
 | redux-undo | `1.1.0` | 已补撤销 / 重做历史栈测试后升级 |
 | react-draggable | `4.7.0` | 已升级 |
-| react-resizable | `3.2.0` | 已升级 |
+| react-resizable | `4.0.2` | 已改用内置类型声明，移除旧 `@types` stub |
 | @hello-pangea/dnd | `18.0.1` | 已确认当前稳定线 |
 | react-dnd | `16.0.1` | 已确认当前稳定线 |
 | react-dnd-html5-backend | `16.0.1` | 已确认当前稳定线 |
@@ -1206,6 +1208,40 @@ git diff --check
 - 主构建和 task bundle 构建均通过，继续使用 Vite 8.0.16
 - `npm audit --json` 仍为 0 vulnerabilities
 - `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过
+
+最新批次：前端交互基础依赖升级
+
+- 已将直接依赖 `@ant-design/icons` 从 `5.6.1` 升级到 `6.2.5`
+- 已将 `react-resizable` 从 `3.2.0` 升级到 `4.0.2`，并移除废弃的 `@types/react-resizable` stub
+- `react-resizable 4` 不再导出旧 `ResizableProps` 类型，本批次将表格列宽相关类型切到内置 `Props['onResize']`
+- 已将直接依赖 `immer` 从 `9.0.12` 升级到 `11.1.8`，与 `@reduxjs/toolkit 2.12.0` 带入版本去重
+- Immer 默认导入已统一改为命名导入 `{ produce }`，保持当前状态更新逻辑不变
+- `@ant-design/icons 6.2.5` peer 仍支持 `react >=16.0.0 / react-dom >=16.0.0`；当前 `antd 5.29.3` 和 `@ant-design/pro-components 2.8.10` 的内部依赖仍解析到 `@ant-design/icons 5.6.1`，本批次不做强制 override 去重
+
+本批次验证命令：
+
+```bash
+npm ls @ant-design/icons react-resizable @types/react-resizable --all
+npm ls immer --all
+npm run checkTs
+npm run test -- src/app/components/ChartGraph/BasicTableChart/__tests__ src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts
+npm run test -- src/app/utils/__tests__/mutation.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/DashBoardPage/utils/__tests__/index.test.tsx src/app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/__tests__/utils.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/undoHistory.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/events.test.ts src/app/migration/__tests__/migrateWidgets.test.ts src/app/migration/__tests__/migrateWidgetConfig.test.ts src/app/migration/__tests__/migrateWidgetChartConfig.test.ts src/app/migration/__tests__/migrateBoardConfig.test.ts
+npm audit --json
+npm run build
+npm run build:task
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+git diff --check
+```
+
+验证说明：
+
+- 直接依赖已确认解析到 `@ant-design/icons 6.2.5`、`react-resizable 4.0.2`、`immer 11.1.8`
+- `@types/react-resizable` 已从直接依赖树移除；`react-grid-layout 2.2.3` 仍自带其内部 `react-resizable 3.2.0`
+- `npm run checkTs` 已通过
+- BasicTable / Dashboard 相关测试 3 个文件、10 个用例通过
+- Immer 相关测试 9 个文件、79 个用例通过、3 个既有 skipped
+- `npm audit --json` 仍为 0 vulnerabilities
+- 主构建和 task bundle 构建均通过；既有大 chunk warning 仍存在
 
 ## 12. 后续队列
 

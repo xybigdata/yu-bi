@@ -53,7 +53,7 @@ import {
   transformToDataSet,
 } from 'app/utils/chartHelper';
 import { getChartDrillOption } from 'app/utils/internalChartHelper';
-import produce from 'immer';
+import { produce } from 'immer';
 import React, {
   memo,
   useCallback,

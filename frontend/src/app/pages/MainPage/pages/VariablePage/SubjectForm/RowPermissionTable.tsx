@@ -19,7 +19,7 @@
 import { Checkbox, Table, TableColumnProps } from 'antd';
 import { LoadingMask } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import produce from 'immer';
+import { produce } from 'immer';
 import { Key, memo, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { SPACE_TIMES } from 'styles/StyleConstants';

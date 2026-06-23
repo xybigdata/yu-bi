@@ -30,7 +30,7 @@ import type { MediaWidgetContent } from 'app/pages/DashBoardPage/pages/Board/sli
 import { editBoardStackActions } from 'app/pages/DashBoardPage/pages/BoardEditor/slice';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
 import { getDatartNowMillis } from 'app/utils/date';
-import produce from 'immer';
+import { produce } from 'immer';
 import React, {
   useCallback,
   useContext,

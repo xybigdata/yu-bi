@@ -32,7 +32,7 @@ import {
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
 import { getControllerDateValues } from 'app/pages/DashBoardPage/utils';
 import { RelationFilterValue } from 'app/types/ChartConfig';
-import produce from 'immer';
+import { produce } from 'immer';
 import React, { memo, useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'utils/object';
