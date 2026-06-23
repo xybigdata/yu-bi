@@ -6,7 +6,7 @@ import { useThemeSlice } from './slice';
 import { selectTheme, selectThemeKey } from './slice/selectors';
 import { getAntdThemeVariables } from './utils';
 
-export const ThemeProvider = (props: { children: React.ReactChild }) => {
+export const ThemeProvider = (props: { children: React.ReactNode }) => {
   useThemeSlice();
 
   const theme = useSelector(selectTheme);

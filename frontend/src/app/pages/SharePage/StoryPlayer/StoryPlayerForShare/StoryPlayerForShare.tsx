@@ -55,7 +55,7 @@ export const StoryPlayerForShare: React.FC<{
   const revealRef = useRef<RevealApi | null>(null);
   const dispatch = useAppDispatch();
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  const fullRef: RefObject<HTMLDivElement> = useRef(null);
+  const fullRef: RefObject<HTMLDivElement | null> = useRef(null);
   const pageMap = useSelector((state: { storyBoard: StoryBoardState }) =>
     makeSelectStoryPagesById(state, storyId),
   );

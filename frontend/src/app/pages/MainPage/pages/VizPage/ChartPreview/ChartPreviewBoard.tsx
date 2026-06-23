@@ -136,7 +136,7 @@ const ChartPreviewBoard: FC<{
     const chartConfigRef = useRef(chartPreview?.chartConfig);
     const [chart, setChart] = useState<IChart>();
     const [loadingStatus, setLoadingStatus] = useState<boolean>(false);
-    const drillOptionRef = useRef<IChartDrillOption>();
+    const drillOptionRef = useRef<IChartDrillOption | undefined>(undefined);
     const t = useI18NPrefix('viz.main');
     const tg = useI18NPrefix('global');
     const saveAsViz = useSaveAsViz();

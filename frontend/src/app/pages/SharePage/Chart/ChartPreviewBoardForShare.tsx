@@ -73,7 +73,7 @@ const ChartPreviewBoardForShare: FC<{
 }> = memo(
   ({ chartPreview, orgId, filterSearchParams, availableSourceFunctions }) => {
     const dispatch = useAppDispatch();
-    const drillOptionRef = useRef<IChartDrillOption>();
+    const drillOptionRef = useRef<IChartDrillOption | undefined>(undefined);
     const [chart] = useState<IChart | undefined>(() => {
       const currentChart = ChartManager.instance().getById(
         chartPreview?.backendChart?.config?.chartGraphId,

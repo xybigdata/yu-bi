@@ -46,7 +46,7 @@ git log --oneline --decorate -8
 | 远端 | `git@github.com:xybigdata/yu-bi.git` |
 | 主线分支 | `main` |
 | 当前专题分支 | `codex/modernization-frontend-security-deps` |
-| 当前专题 | P2-E 前端安全依赖治理 |
+| 当前专题 | P2-E 前端安全依赖与运行时治理 |
 | 当前分支相对 `origin/main` | 以恢复命令输出为准 |
 | 最近专题提交 | 以 `git log --oneline --decorate -8` 为准 |
 | 最近主线提交 | `f1739f621 chore: 合入 PRESTO driver 元数据治理` |
@@ -82,7 +82,7 @@ git log --oneline --decorate -8
 codex/modernization-frontend-security-deps
 ```
 
-当前专题收口前不要创建新分支。P2-E 聚焦前端安全依赖治理：优先处理补丁级升级、lockfile、npm overrides 和可验证的富文本 Quill 2 迁移；本专题继续累计在 `codex/modernization-frontend-security-deps`，暂不因为单个小批次合入 `main`。
+当前专题收口前不要创建新分支。P2-E 聚焦前端安全依赖、前端工具链和运行时主链治理：优先处理补丁级升级、lockfile、npm overrides、可验证的富文本 Quill 2 迁移，以及已经具备验证证据的 Vite / TypeScript / React 主链升级；本专题继续累计在 `codex/modernization-frontend-security-deps`，暂不因为单个小批次合入 `main`。
 
 ## 4. 技术栈基线
 
@@ -110,7 +110,7 @@ codex/modernization-frontend-security-deps
 | --- | --- | --- |
 | Node | `>=24.0.0 <25.0.0` | 硬性目标，当前验证基线 `24.16.0` |
 | npm | `>=11.0.0 <12.0.0` | 与 Node 24 配套，当前验证基线 `11.13.0` |
-| React | `18.3.1` | 当前稳定主链 |
+| React | `19.2.7` | 已升级到 React 19 稳定线 |
 | React Router | `6.30.4` | 已收口到 React Router 6 稳定线，并通过兼容层启用 v7 future flags |
 | Ant Design | `5.29.3` | 已收口到 AntD 5 稳定线，并迁移到 v5 theme token API |
 | Redux Toolkit | `2.12.0` | 已完成主升级 |
@@ -118,7 +118,7 @@ codex/modernization-frontend-security-deps
 | TypeScript | `6.0.3` | 已升级到 6.0 稳定线，`baseUrl` 已迁移为显式 `paths` |
 | Vite | `8.0.16` | 已升级到 Vite 8 主链，暂配 `@vitejs/plugin-react 5.2.0` |
 | Vitest | `4.1.9` | 当前主测试栈 |
-| Testing Library | `@testing-library/react 16.3.2 / dom 10.4.1` | 已对齐 React 18 测试栈 |
+| Testing Library | `@testing-library/react 16.3.2 / dom 10.4.1` | 已对齐 React 19 测试栈 |
 | styled-components | `6.4.2` | 已完成主升级并确认运行时依赖位置 |
 | 富文本编辑器 | `react-quill-new 3.7.0 / quill 2.0.2` | 当前 P2-E 正在迁移验证 |
 | monaco-editor | `0.52.2` | 已补真实运行时加载边界 |
@@ -143,7 +143,7 @@ codex/modernization-frontend-security-deps
 - yu-bi 已从 datart 独立，仓库、默认分支、远端已切换完成
 - README、README_zh、NOTICE、SECURITY、ROADMAP、CHANGELOG、MAINTAINERS、issue template 已收口为独立开源项目表述
 - 后端已建立 `JDK 21 + Spring Boot 3.5.x + Spring Cloud 2025.0.x` 主链
-- 前端已建立 `Node 24 + React 18 + Ant Design 5 + Vite 8 + TypeScript 6 + Vitest 4` 主链
+- 前端已建立 `Node 24 + React 19 + Ant Design 5 + Vite 8 + TypeScript 6 + Vitest 4` 主链
 - CRA / CRACO、IE11 主兼容链、Nashorn、PhantomJS 等历史主链已退出
 - `.tmp/`、`logs/` 已加入 `.gitignore`
 
@@ -473,11 +473,11 @@ P2-H 合入状态：
 
 - 已合入并推送 `origin/main`，主线提交 `f1739f621`
 
-## 11. 当前短期目标：P2-E 前端安全依赖治理
+## 11. 当前短期目标：P2-E 前端安全依赖与运行时治理
 
 分支：`codex/modernization-frontend-security-deps`
 
-目标：在不升级 React/AntD/Vite 主版本的前提下，优先消除补丁级、lockfile 级、overrides 可安全治理的前端依赖漏洞，并完成富文本链路从 `react-quill -> quill@1.3.7` 到 Quill 2 兼容线的可验证迁移。
+目标：在同一专题分支上持续推进前端依赖安全、工具链和运行时主链现代化。优先消除补丁级、lockfile 级、overrides 可安全治理的前端依赖漏洞；完成富文本链路从 `react-quill -> quill@1.3.7` 到 Quill 2 兼容线的可验证迁移；对具备生态兼容证据和门禁结果的 Vite / TypeScript / React 主链升级，在本分支内连续推进。
 
 本批次已完成：
 
@@ -997,12 +997,53 @@ git diff --check
 - 主构建和 task bundle 构建均通过，继续使用 Vite 8.0.16
 - `npm audit --json` 仍为 0 vulnerabilities
 
+最新批次：前端 React 19 运行时升级
+
+- 已将 `react`、`react-dom` 从 `18.3.1` 升级到 `19.2.7`
+- 已将 `@types/react` 从 `18.3.31` 升级到 `19.2.17`
+- 已将 `@types/react-dom` 从 `18.3.7` 升级到 `19.2.3`
+- 依赖树已确认 AntD 5.29.3、Pro Components 2.8.10、Testing Library 16.3.2、react-grid-layout 2.2.3、react-quill-new 3.7.0、react-helmet-async 3.0.0 等当前主链可解析到 React 19
+- 已补 React 19 类型适配：
+  - `useRef<T>()` 改为显式 `undefined` 或 `null` 初始化
+  - 全局 `JSX.Element` 改为 `React.JSX.Element` 或显式导入 `JSX`
+  - `React.ReactChild` 改为 `React.ReactNode`
+  - `cloneElement` 注入 props 的旧写法集中通过 `utils/reactCompat.ts` 收窄
+  - `react-dnd` connector 作为 `ref` 时改为 void-return callback 包装
+  - 真实初始值可能为 `null` 的 DOM ref hook 签名改为 nullable
+- 本批次只做 React 19 运行时和类型兼容，不升级 AntD 6，不触碰 Java 包名、配置前缀、`DATART_*` 或迁移稳定标识
+
+本批次验证命令：
+
+```bash
+npm ls react react-dom @types/react @types/react-dom --all
+npm run checkTs
+npm run test -- src/__tests__/task.test.ts src/app/__tests__/routerCompat.test.tsx src/styles/theme/__tests__/ThemeProvider.test.tsx src/app/components/__tests__/VirtualTable.test.tsx src/app/components/__tests__/Split.test.tsx src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts
+npm exec -- vitest run src/app/models/__tests__/ReactLifecycleAdapter.test.ts src/app/models/__tests__/ReactChart.test.ts src/app/components/ChartIFrameContainer/__tests__/ChartIFrameContainer.test.jsx
+npm run build
+npm run build:task
+npm run eslint -- eslint.config.mjs vite.config.mts vite.task.config.mts vitest.config.mts vite.shared.mts
+npm exec -- prettier --check package.json
+npm audit --json
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+git diff --check
+```
+
+验证说明：
+
+- `npm ls react react-dom @types/react @types/react-dom --all` 已确认依赖树统一解析到 React 19.2.7 / React DOM 19.2.7 / React types 19.2.x，无 invalid 依赖
+- `npm run checkTs` 已通过
+- 第一组代表性测试 6 个文件、14 个用例通过；日志中 jsdom pseudo-element `getComputedStyle` warning 为既有噪声
+- React lifecycle / ReactChart / ChartIFrameContainer 相关测试 3 个文件、8 个用例通过
+- 主构建和 task bundle 构建均通过，继续使用 Vite 8.0.16
+- `npm audit --json` 仍为 0 vulnerabilities
+- `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
 | P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
-| P2-F | React 19、AntD 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
+| P2-F | AntD 6 主版本评估 | 高 | 稳定版 Pro Components 尚未支持 AntD 6，继续等待稳定生态链路 |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 | P2-J | 富文本编辑器运行时 smoke | 中 | P2-E 已迁移 Quill 2，后续补浏览器层编辑 / 预览 / 分享页验证 |
 

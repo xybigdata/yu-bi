@@ -31,7 +31,7 @@ export const Background: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
   ({ ancestors, data, onChange }) => {
     const { value, options } = data;
     const gt = useI18NPrefix(`viz.board.setting`);
-    const valRef = useRef<BackgroundConfig>();
+    const valRef = useRef<BackgroundConfig | undefined>(undefined);
     useEffect(() => {
       valRef.current = value;
     }, [value]);

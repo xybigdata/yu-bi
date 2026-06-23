@@ -59,7 +59,9 @@ export const useEditorContext = (): EditorContextValue => {
     useState<Monaco.editor.IStandaloneCodeEditor>();
   const [onRun, setOnRun] = useState<() => void>(() => () => {});
   const [onSave, setOnSave] = useState<() => void>(() => () => {});
-  const editorCompletionItemProviderRef = useRef<Monaco.IDisposable>();
+  const editorCompletionItemProviderRef = useRef<Monaco.IDisposable | undefined>(
+    undefined,
+  );
 
   const initActions = useCallback(({ onRun, onSave }) => {
     setOnRun(() => onRun);

@@ -1,7 +1,8 @@
 import { LoadingOutlined } from '@ant-design/icons';
-import { cloneElement, ReactElement } from 'react';
+import { ReactElement } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { LEVEL_1 } from 'styles/StyleConstants';
+import { cloneElementWithClassName } from 'utils/reactCompat';
 
 interface LoadingMaskProps {
   loading: boolean;
@@ -16,7 +17,7 @@ export function LoadingMask({ loading, children }: LoadingMaskProps) {
           <LoadingOutlined />
         </SpinWrapper>
       )}
-      {cloneElement(children, loading ? { className: 'blur' } : void 0)}
+      {loading ? cloneElementWithClassName(children, 'blur') : children}
       <LoadingMaskStyle />
     </>
   );

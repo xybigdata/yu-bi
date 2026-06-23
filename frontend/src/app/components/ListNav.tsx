@@ -1,6 +1,5 @@
 import {
   Children,
-  cloneElement,
   memo,
   ReactElement,
   useCallback,
@@ -8,6 +7,7 @@ import {
   useState,
 } from 'react';
 import styled from 'styled-components';
+import { cloneElementWithProps } from 'utils/reactCompat';
 import { ListTitle } from './ListTitle';
 
 interface ListNavProps {
@@ -53,7 +53,7 @@ export const ListNav = memo(
     return (
       <Wrapper className={className}>
         {panes[activeKey] &&
-          cloneElement(panes[activeKey], {
+          cloneElementWithProps(panes[activeKey], {
             onPrevious: previous,
             onNext: next,
           })}
@@ -74,7 +74,9 @@ export const ListPane = memo(
     return (
       <>
         {Children.map(children, e =>
-          e.type === ListTitle ? cloneElement(e, { onPrevious, onNext }) : e,
+          e.type === ListTitle
+            ? cloneElementWithProps(e, { onPrevious, onNext })
+            : e,
         )}
       </>
     );

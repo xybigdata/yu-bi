@@ -67,7 +67,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
     selectScheduleFolderTree(state, { id: initialValues?.id, getDisabled }),
   );
   const orgId = useSelector(selectOrgId);
-  const formRef = useRef<FormInstance>();
+  const formRef = useRef<FormInstance | undefined>(undefined);
   const t = useI18NPrefix('schedule.saveForm');
   const tg = useI18NPrefix('global');
 

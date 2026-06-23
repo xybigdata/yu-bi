@@ -20,7 +20,6 @@ import { CaretRightFilled } from '@ant-design/icons';
 import classnames from 'classnames';
 import {
   Children,
-  cloneElement,
   memo,
   ReactElement,
   ReactNode,
@@ -36,6 +35,7 @@ import {
   SPACE_MD,
   SPACE_XS,
 } from 'styles/StyleConstants';
+import { cloneElementWithProps } from 'utils/reactCompat';
 
 interface FlexCollapseProps {
   defaultActiveKeys?: string[];
@@ -49,7 +49,9 @@ const Collapse = memo(
       let panels: ReactElement[] = [];
       Children.forEach(children, c => {
         if (c.type === Panel) {
-          panels.push(cloneElement(c, { defaultActiveKeys, activeKeys }));
+          panels.push(
+            cloneElementWithProps(c, { defaultActiveKeys, activeKeys }),
+          );
         }
       });
       return panels;

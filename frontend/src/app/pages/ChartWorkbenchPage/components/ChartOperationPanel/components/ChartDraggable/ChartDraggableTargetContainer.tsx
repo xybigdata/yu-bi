@@ -382,7 +382,13 @@ export const ChartDraggableTargetContainer: FC<ChartDataConfigSectionProps> =
       };
 
     return (
-      <StyledContainer ref={drop} isOver={isOver} canDrop={canDrop}>
+      <StyledContainer
+        ref={node => {
+          drop(node);
+        }}
+        isOver={isOver}
+        canDrop={canDrop}
+      >
         <>
           {renderDropItems()}
           {renderDrillFilters()}

@@ -26,7 +26,9 @@ export const useDebouncedLoadingStatus = ({
   isLoading,
 }: DebouncedLoadingStatusArgs) => {
   const [lazyLoading, setLazyLoading] = useState(false);
-  const timerIdRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerIdRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
 
   if (isLoading) {
     if (timerIdRef.current) {

@@ -29,7 +29,9 @@ interface ChronographProps {
 
 export function Chronograph({ running, status }: ChronographProps) {
   const [label, setLabel] = useState('00:00:00.00');
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+  const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(
+    undefined,
+  );
 
   const formatElapsed = useCallback((elapsed: number) => {
     const centiseconds = String(Math.floor((elapsed % 1000) / 10)).padStart(

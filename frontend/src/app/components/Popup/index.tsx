@@ -1,11 +1,11 @@
 import { Popover, PopoverProps } from 'antd';
 import React, {
-  cloneElement,
   isValidElement,
   useCallback,
   useMemo,
   useState,
 } from 'react';
+import { cloneElementWithProps } from 'utils/reactCompat';
 import { mergeClassNames } from 'utils/utils';
 
 export function Popup({
@@ -30,7 +30,9 @@ export function Popup({
 
   const injectedContent = useMemo(
     () =>
-      isValidElement(content) ? cloneElement(content, { onClose }) : content,
+      isValidElement<{ onClose?: () => void }>(content)
+        ? cloneElementWithProps(content, { onClose })
+        : content,
     [content, onClose],
   );
 

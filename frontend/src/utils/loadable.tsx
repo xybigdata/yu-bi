@@ -15,12 +15,12 @@ export function lazyLoad<
   importFunc: () => Promise<TModule>,
   selectorFunc?: undefined,
   opts?: Opts,
-): (props: React.ComponentProps<TModule['default']>) => JSX.Element;
+): (props: React.ComponentProps<TModule['default']>) => React.JSX.Element;
 export function lazyLoad<TModule, C extends LoadableComponent>(
   importFunc: () => Promise<TModule>,
   selectorFunc: (s: TModule) => C,
   opts?: Opts,
-): (props: React.ComponentProps<C>) => JSX.Element;
+): (props: React.ComponentProps<C>) => React.JSX.Element;
 export function lazyLoad<TModule, C extends LoadableComponent>(
   importFunc: () => Promise<TModule>,
   selectorFunc?: (s: TModule) => C,
@@ -37,7 +37,7 @@ export function lazyLoad<TModule, C extends LoadableComponent>(
 
   const LazyComponent = lazy(lazyFactory);
 
-  return (props: React.ComponentProps<C>): JSX.Element => (
+  return (props: React.ComponentProps<C>): React.JSX.Element => (
     <Suspense fallback={opts.fallback!}>
       <LazyComponent {...props} />
     </Suspense>
@@ -50,12 +50,12 @@ export function defaultLazyLoad<
   importFunc: () => Promise<TModule>,
   selectorFunc?: undefined,
   opts?: Opts,
-): (props: React.ComponentProps<TModule['default']>) => JSX.Element;
+): (props: React.ComponentProps<TModule['default']>) => React.JSX.Element;
 export function defaultLazyLoad<TModule, C extends LoadableComponent>(
   importFunc: () => Promise<TModule>,
   selectorFunc: (s: TModule) => C,
   opts?: Opts,
-): (props: React.ComponentProps<C>) => JSX.Element;
+): (props: React.ComponentProps<C>) => React.JSX.Element;
 export function defaultLazyLoad<TModule, C extends LoadableComponent>(
   importFunc: () => Promise<TModule>,
   selectorFunc?: (s: TModule) => C,

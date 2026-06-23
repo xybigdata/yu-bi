@@ -1,12 +1,12 @@
 import { Modal, ModalProps } from 'antd';
-import React, { cloneElement, ReactElement, ReactNode } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import styled from 'styled-components';
 import {
   FONT_SIZE_HEADING,
   FONT_SIZE_ICON_MD,
   SPACE_SM,
 } from 'styles/StyleConstants';
-import { mergeClassNames } from 'utils/utils';
+import { cloneElementWithClassName } from 'utils/reactCompat';
 
 export interface ConfirmProps extends Omit<ModalProps, 'visible'> {
   icon?: ReactElement;
@@ -25,10 +25,7 @@ export function Confirm({
   return (
     <Modal width={400} closable={false} open={open} {...modalProps}>
       <ConfirmBody>
-        {icon &&
-          cloneElement(icon, {
-            className: mergeClassNames(icon.props.className, 'icon'),
-          })}
+        {icon && cloneElementWithClassName(icon, 'icon')}
         <ConfirmContent>
           {title && typeof title === 'string' ? <h2>{title}</h2> : title}
           {content && typeof content === 'string' ? <p>{content}</p> : content}

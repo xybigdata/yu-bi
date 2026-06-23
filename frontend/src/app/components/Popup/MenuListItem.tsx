@@ -1,7 +1,7 @@
-import { cloneElement, ReactElement, ReactNode } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import styled from 'styled-components';
 import { SPACE, SPACE_XS } from 'styles/StyleConstants';
-import { mergeClassNames } from 'utils/utils';
+import { cloneElementWithClassName } from 'utils/reactCompat';
 
 interface ListItemProps {
   prefix?: ReactElement;
@@ -12,15 +12,9 @@ interface ListItemProps {
 export function MenuItemContent({ prefix, suffix, children }: ListItemProps) {
   return (
     <StyledListItem>
-      {prefix &&
-        cloneElement(prefix, {
-          className: mergeClassNames(prefix.props.className, 'prefix'),
-        })}
+      {prefix && cloneElementWithClassName(prefix, 'prefix')}
       {children}
-      {suffix &&
-        cloneElement(suffix, {
-          className: mergeClassNames(suffix.props.className, 'suffix'),
-        })}
+      {suffix && cloneElementWithClassName(suffix, 'suffix')}
     </StyledListItem>
   );
 }

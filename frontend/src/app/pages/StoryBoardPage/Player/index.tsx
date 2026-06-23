@@ -60,7 +60,7 @@ export const StoryPlayer: React.FC<{}> = memo(() => {
   const domId = useMemo(() => uuidv4(), []);
   const revealRef = useRef<RevealApi | null>(null);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  const fullRef: RefObject<HTMLDivElement> = useRef(null);
+  const fullRef: RefObject<HTMLDivElement | null> = useRef(null);
 
   const storyBoard = useSelector((state: { storyBoard: StoryBoardState }) =>
     makeSelectStoryBoardById(state, storyId),
