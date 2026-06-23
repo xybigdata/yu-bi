@@ -62,6 +62,7 @@ git log --oneline --decorate -8
 - 同一专题内尽量累计一组相关改动后再提交，避免过频繁提交
 - 当前专题继续在同一分支推进，不因为小批次改动立即合入 `main`
 - 减少 `main` 分支合并频率；前端安全和运行时相关改造优先在 `codex/modernization-frontend-security-deps` 上连续推进，累计足够完整的一批后再统一合入 `main`
+- 除非用户明确要求阶段合并，否则专题分支只推送远端，不主动 merge 回 `main`
 
 ## 3. 分支与合并规则
 
@@ -70,7 +71,8 @@ git log --oneline --decorate -8
 - 不直接在 `main` 开发
 - 按专题使用 `codex/*` 分支
 - 专题分支可以推送远端
-- 专题完成后再 `--no-ff` merge 回 `main`
+- 同一专题尽量长期保留一条分支连续推进，避免为小批次改动频繁创建新分支
+- 专题累计到一批可验收成果后，再按用户确认节奏 `--no-ff` merge 回 `main`
 - 推送 `main` 前必须完整门禁
 
 当前专题分支：
@@ -560,7 +562,34 @@ git diff --check
 P2-E 合入状态：
 
 - 当前分支继续累计前端安全 / 运行时改造
+- 当前分支已领先 `origin/main` 7 个专题提交，继续在同一分支推进
 - 暂不合入 `main`，减少主线合并和完整回归频率
+
+最新批次：前端直接依赖声明固定化
+
+- 已将 `frontend/package.json` 中剩余带 `^` 的直接依赖和开发工具依赖全部固定到当前 lockfile 已解析版本
+- 本批次不拉取新版本、不改源码行为，只降低后续恢复安装时的漂移风险
+- 固定范围包含 `echarts-wordcloud`、`react-draggable`、`react-grid-layout`、`react-i18next`、`react-resizable`、`redux-undo`、`eslint`、`vite`、`vitest`、`stylelint`、`prettier`、`husky`、`lint-staged`、`jsdom`、`less`、`@typescript-eslint/*`、`@testing-library/jest-dom` 等直接声明
+- 直接依赖声明与 `package-lock.json` 根解析版本已对账一致，`rg -n "\^" frontend/package.json` 无剩余输出
+
+本批次已通过验证：
+
+```bash
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+npm audit --json
+npm run checkTs
+npm run test -- src/app/components/ChartGraph/PivotSheetChart/__tests__/runtime.test.ts src/app/pages/StoryBoardPage/__tests__/revealRuntime.test.ts src/app/components/__tests__/dndRuntime.test.ts src/app/components/__tests__/VirtualTable.test.tsx src/app/components/__tests__/Split.test.tsx src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts src/app/utils/__tests__/date.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/__tests__/routerCompat.test.tsx
+npm run lint:css
+npm run lint:style
+git diff --check
+```
+
+验证说明：
+
+- 直接依赖声明对账无输出，说明 `package.json` 声明版本与 lockfile 根解析版本一致
+- `npm audit --json` 仍为 0 vulnerabilities
+- 代表性前端测试 9 个文件、44 个用例通过
+- 测试日志中仍有 AntV S2 sourcemap 和 jsdom pseudo-element 历史噪声，不影响结果
 
 ## 12. 后续队列
 
@@ -617,7 +646,7 @@ npm ci --dry-run --ignore-scripts
 
 ## 14. 提交节奏
 
-同一专题内累计一组相关改动后再提交，减少主线合并和完整回归次数。
+同一专题内累计一组相关改动后再提交，减少主线合并和完整回归次数。专题分支可以阶段性 push 远端保存进度，但不要因为单个小批次改动就合入 `main`。
 
 建议粒度：
 
