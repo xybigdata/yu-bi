@@ -129,6 +129,7 @@ codex/modernization-frontend-security-deps
 | reveal.js | `6.0.1` | 已补真实运行时加载边界 |
 | ECharts | `5.6.0` | 已升级到 ECharts 5 稳定线 |
 | Axios | `1.18.1` | 已补 request wrapper 行为基线后小版本升级 |
+| sql-formatter | `15.8.2` | 已补真实运行时 smoke 后升级 |
 | AntV S2 | `2.7.2 / 2.3.1` | 已确认当前稳定线 |
 | i18next / react-i18next | `26.3.1 / 17.0.8` | 已确认国际化主链 |
 | react-grid-layout | `2.2.3` | 已通过 legacy 入口升级 |
@@ -1173,6 +1174,35 @@ git diff --check
 - 依赖树已确认 `react-hotkeys-hook 5.3.2` 解析到目标版本
 - `npm run checkTs` 已通过，确认当前 `useHotkeys` 调用签名兼容 v5
 - Dashboard 编辑器和 SQL 编辑器相关测试 4 个文件、9 个用例通过
+- 主构建和 task bundle 构建均通过，继续使用 Vite 8.0.16
+- `npm audit --json` 仍为 0 vulnerabilities
+- `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过
+
+最新批次：前端 SQL 格式化依赖升级
+
+- 已将 `sql-formatter` 从 `9.2.0` 升级到 `15.8.2`
+- 已在 `sqlFormatterRuntime.test.ts` 增加真实运行时 smoke，覆盖动态加载后的基础 SQL 格式化行为
+- 当前业务使用点通过 `loadSqlFormatter()` 延迟加载格式化运行时；本批次不改变 SQL 编辑器交互和格式化入口
+- 主构建中 `sql-formatter` 独立 chunk 由约 `240.89 kB / gzip 58.26 kB` 增加到约 `262.41 kB / gzip 74.55 kB`，仍保持动态拆包
+
+本批次验证命令：
+
+```bash
+npm ls sql-formatter --all
+npm run test -- src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/sqlFormatterRuntime.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/completionRuntime.test.ts
+npm run checkTs
+npm audit --json
+npm run build
+npm run build:task
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+git diff --check
+```
+
+验证说明：
+
+- 依赖树已确认 `sql-formatter 15.8.2` 解析到目标版本
+- SQL 编辑器格式化运行时和 completion runtime 测试 2 个文件、5 个用例通过
+- `npm run checkTs` 已通过，确认升级后类型边界兼容
 - 主构建和 task bundle 构建均通过，继续使用 Vite 8.0.16
 - `npm audit --json` 仍为 0 vulnerabilities
 - `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过
