@@ -116,7 +116,7 @@ codex/modernization-frontend-security-deps
 | Redux Toolkit | `2.12.0` | 已完成主升级 |
 | React Redux | `9.3.0` | 已完成主升级 |
 | TypeScript | `5.9.3` | 当前稳定主链 |
-| Vite | `6.4.3` | 已替代 CRA 主工作流 |
+| Vite | `8.0.16` | 已升级到 Vite 8 主链，暂配 `@vitejs/plugin-react 5.2.0` |
 | Vitest | `4.1.9` | 当前主测试栈 |
 | Testing Library | `@testing-library/react 16.3.2 / dom 10.4.1` | 已对齐 React 18 测试栈 |
 | styled-components | `6.4.2` | 已完成主升级并确认运行时依赖位置 |
@@ -931,12 +931,45 @@ git diff --check
 - `npm audit --json` 仍为 0 vulnerabilities
 - 主构建仍有既有大 chunk warning，本批次未处理包体拆分
 
+最新批次：前端 Vite 8 主链升级
+
+- 已将 `vite` 从 `6.4.3` 升级到 `8.0.16`
+- 已将 `@vitejs/plugin-react` 从 `4.7.0` 升级到 `5.2.0`
+- 当前暂不采用 `@vitejs/plugin-react 6.0.2`：npm 11 解析其可选 `@rolldown/plugin-babel` / Babel 8 peer 链时出现 `ERESOLVE`
+- 当前不采用 Vite 7 作为中间线：`7.2.7` 会触发 Vite high audit，`7.3.5` 会引入 `esbuild 0.27.7` low audit
+- Vite 8 当前通过 `rolldown 1.0.3` / `lightningcss 1.32.0` 构建链路，`npm audit --json` 仍为 0 vulnerabilities
+- AntD 6 暂不升级：稳定版 `@ant-design/pro-components 2.8.10` peer 只支持 AntD 4/5，支持 AntD 6 的 3.x 仍是预发布链路
+- React 19、TypeScript 6 继续保留为独立高风险评估，不并入本批次
+
+本批次验证命令：
+
+```bash
+npm exec -- vite --version
+npm run checkTs
+npm run test -- src/__tests__/task.test.ts src/app/components/__tests__/splitRuntime.test.ts src/app/components/__tests__/virtualTableRuntime.test.ts src/app/components/__tests__/dndRuntime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts
+npm exec -- vitest run src/utils/__tests__/utils.test.ts src/app/components/MonacoEditor/__tests__/runtime.test.ts src/app/pages/StoryBoardPage/__tests__/revealRuntime.test.ts
+npm run eslint -- eslint.config.mjs vite.config.mts vite.task.config.mts vitest.config.mts vite.shared.mts
+npm run build
+npm run build:task
+npm audit --json
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+git diff --check
+```
+
+验证说明：
+
+- 本地实际 Vite 版本已确认为 `vite/8.0.16 darwin-arm64 node-v24.16.0`
+- 代表性测试 8 个文件、32 个用例通过
+- 主构建和 task bundle 构建均通过，输出均显示 `vite v8.0.16`
+- task bundle 从约 `420.87 kB` 增至约 `454.88 kB`，后续如需优化包体，单独进入构建产物治理
+- `npm audit --json` 仍为 0 vulnerabilities
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
 | --- | --- | --- | --- |
 | P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
-| P2-F | React 19、AntD 6、Vite 8、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
+| P2-F | React 19、AntD 6、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 | P2-J | 富文本编辑器运行时 smoke | 中 | P2-E 已迁移 Quill 2，后续补浏览器层编辑 / 预览 / 分享页验证 |
 
