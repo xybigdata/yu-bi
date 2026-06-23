@@ -108,19 +108,21 @@ codex/modernization-frontend-security-deps
 | Node | `>=24.0.0` | 硬性目标 |
 | npm | `>=11.0.0` | 与 Node 24 配套 |
 | React | `18.3.1` | 当前稳定主链 |
-| React Router | `6.30.1` | 已完成主升级 |
-| Ant Design | `5.26.2` | 已完成主升级 |
+| React Router | `6.30.4` | 已收口到 React Router 6 稳定线，暂不切 v7 |
+| Ant Design | `5.29.3` | 已收口到 AntD 5 稳定线，暂不切 AntD 6 |
 | Redux Toolkit | `2.12.0` | 已完成主升级 |
 | React Redux | `9.3.0` | 已完成主升级 |
 | TypeScript | `5.9.3` | 当前稳定主链 |
 | Vite | `6.4.3` | 已替代 CRA 主工作流 |
 | Vitest | `4.1.9` | 当前主测试栈 |
-| styled-components | `6.1.19` | 已完成主升级 |
+| styled-components | `6.4.2` | 已完成主升级并确认运行时依赖位置 |
 | 富文本编辑器 | `react-quill-new 3.7.0 / quill 2.0.2` | 当前 P2-E 正在迁移验证 |
 | monaco-editor | `0.52.2` | 已补真实运行时加载边界 |
 | reveal.js | `6.0.1` | 已补真实运行时加载边界 |
 | ECharts | `5.6.0` | 已升级到 ECharts 5 稳定线 |
+| Axios | `1.18.1` | 已补 request wrapper 行为基线后小版本升级 |
 | AntV S2 | `2.7.2 / 2.3.1` | 已确认当前稳定线 |
+| i18next / react-i18next | `26.3.1 / 17.0.8` | 已确认国际化主链 |
 | react-grid-layout | `2.2.3` | 已通过 legacy 入口升级 |
 | flexlayout-react | `0.9.1` | 已升级并改用命名导出 |
 | react-window | `1.8.11` | 保持 1.x 兼容线，2.x 独立评估 |
@@ -523,13 +525,19 @@ git diff --check
 - `npm audit --json` 已从 20 个 vulnerability 条目降到 2 个，剩余 2 个均来自 `react-quill -> quill@1.3.7`
 - 迁移 Quill 2 后，`npm audit --json` 已清零
 - `npm ls react-quill react-quill-new quill quill-delta --all` 已确认 `react-quill` 不在依赖树中，当前富文本链路为 `react-quill-new 3.7.0 / quill 2.0.2`
+- 已评估 `react-quill-new 3.8.3 / quill 2.0.3`，该组合会触发 `GHSA-v3m3-f69x-jf25` 低危 XSS audit，暂不采用
+- 已补 `utils/request` 行为基线测试，覆盖 token header、响应 token 刷新、API body 展开、header 返回和后端错误消息转换
+- `axios` 已从 `1.17.0` 小版本升级到 `1.18.1`，依赖树确认 `form-data` 继续受 override 约束到 `4.0.6`
+- `antd` 声明版本已从 `^5.26.2` 收口到当前 lockfile 实际解析并已验证的 `5.29.3`，避免恢复时误判 UI 基线；暂不切入 AntD 6
+- 已将一组 lockfile 已实际解析并通过验证的直接依赖声明固定为当前稳定基线：`react-router-dom 6.30.4`、`i18next 26.3.1`、`classnames 2.5.1`、`split.js 1.6.5`、`postcss 8.5.15`、`eslint-plugin-prettier 5.5.6`、`stylelint-order 7.0.1`
 - `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过，确认 `package.json` 与 `package-lock.json` 一致可安装
 - `npm ls ... --all` 已通过，确认 override 后依赖树无 invalid / missing
 - `npm run checkTs` 已通过
+- 请求 wrapper 相关测试 3 个测试文件、15 个用例通过
 - 相关运行时测试 4 个测试文件、13 个用例通过
 - Quill 2 迁移后富文本相关测试 7 个测试文件、25 个用例通过
 - 已补真实 `RichTextEditorRuntime` 挂载 smoke，覆盖 Quill 2 runtime 在 jsdom 下挂载、读取 Delta 内容，以及图表富文本预览 calcfield 渲染
-- `npm run test:ci` 已通过：133 个测试文件通过，921 个用例通过，4 个跳过
+- `npm run test:ci` 已通过：134 个测试文件通过，926 个用例通过，4 个跳过
 - `npm run lint:css`、`npm run lint:style` 已通过
 - `npm run build` 已验证 Quill 2 迁移后的生产构建链路
 - `git diff --check` 已通过
