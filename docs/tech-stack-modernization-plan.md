@@ -1334,6 +1334,30 @@ git diff --check
 - ECharts 6 的阻塞来自 `echarts-wordcloud` peer，不是 ECharts 包本身；后续需要先找到兼容 ECharts 6 的词云扩展或替换方案
 - 本批次不提交依赖版本变更，只沉淀剩余项决策依据，避免后续重复试错
 
+最新批次：富文本 Widget Quill 2 业务入口 smoke
+
+- 已新增 `RichTextWidgetCore` smoke，覆盖 Dashboard 富文本 Widget 展示层渲染 Delta 内容
+- 已覆盖编辑弹窗挂载真实 Quill 2 运行时，并通过 Quill API 触发内容变更后保存到 `changeMediaWidgetConfig`
+- 修复编辑态初始挂载期间 Quill 2 触发 `onChange` 时读取未就绪 ref 的边界；现在 `quillChange` 只在运行时 ready 后读取内容
+- 保存逻辑改为使用组件已维护的 `quillValue` 状态，避免确认保存时再依赖 Quill ref 即时读取，降低弹窗关闭和运行时未就绪边界风险
+- jsdom 层已补 Dashboard 富文本 Widget 展示 / 编辑保存 smoke；真实浏览器 E2E 仍留作后续端到端验证，不阻塞当前 P2-E 继续推进
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/pages/DashBoardPage/components/Widgets/RichTextWidget/__tests__/RichTextWidgetCore.smoke.test.tsx
+npm run checkTs
+npm run test -- src/app/components/ChartGraph/BasicRichText/__tests__/RichTextEditorRuntime.smoke.test.tsx src/app/pages/DashBoardPage/components/Widgets/RichTextWidget/__tests__/RichTextWidgetCore.smoke.test.tsx
+git diff --check
+```
+
+验证说明：
+
+- 富文本相关 smoke 2 个测试文件、4 个用例通过
+- `npm run checkTs` 已通过
+- 测试日志中的 jsdom pseudo-element `getComputedStyle` warning 是 AntD / Quill 测试环境噪声，不影响结果
+- 本批次不升级依赖版本，不触碰高风险内部命名
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
@@ -1342,7 +1366,7 @@ git diff --check
 | P2-G | ECharts 6 主版本评估 | 高 | 先处理 `echarts-wordcloud` 兼容来源或替代方案，再进入 ECharts 6 运行时适配 |
 | P2-H | ESLint 10 主版本评估 | 中高 | 独立 lint 工具链专题，先确认插件和 flat config 兼容 |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
-| P2-J | 富文本编辑器运行时 smoke | 中 | P2-E 已迁移 Quill 2，后续补浏览器层编辑 / 预览 / 分享页验证 |
+| P2-J | 富文本编辑器运行时 smoke | 中 | 已补 jsdom 层运行时和 Dashboard Widget smoke；后续具备浏览器入口时补真实编辑 / 预览 / 分享页 E2E |
 
 ## 13. 门禁策略
 

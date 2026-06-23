@@ -127,29 +127,27 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
 
   useEffect(() => {
     if (widgetInfo.editing === false && contentSavable && boardEditing) {
-      if (quillRef.current) {
-        const contents = normalizeRichTextValue(quillRef.current.getContents());
-        if (typeof contents === 'string') {
-          setContentSavable(false);
-          return;
-        }
-        if (JSON.stringify(contents) !== JSON.stringify(initContent)) {
-          const nextMediaWidgetContent = produce(
-            widgetContent,
-            draft => {
-              draft.type = 'richText';
-              draft.richText = { content: contents };
-            },
-          );
+      const contents = normalizeRichTextValue(quillValue);
+      if (typeof contents === 'string') {
+        setContentSavable(false);
+        return;
+      }
+      if (JSON.stringify(contents) !== JSON.stringify(initContent)) {
+        const nextMediaWidgetContent = produce(
+          widgetContent,
+          draft => {
+            draft.type = 'richText';
+            draft.richText = { content: contents };
+          },
+        );
 
-          dispatch(
-            editBoardStackActions.changeMediaWidgetConfig({
-              id: widget.id,
-              mediaWidgetContent: nextMediaWidgetContent,
-            }),
-          );
-          setContentSavable(false);
-        }
+        dispatch(
+          editBoardStackActions.changeMediaWidgetConfig({
+            id: widget.id,
+            mediaWidgetContent: nextMediaWidgetContent,
+          }),
+        );
+        setContentSavable(false);
       }
     }
   }, [
@@ -157,6 +155,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
     dispatch,
     initContent,
     contentSavable,
+    quillValue,
     widgetContent,
     widget.id,
     widgetInfo.editing,
@@ -177,7 +176,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
   };
 
   const quillChange = useCallback(() => {
-    if (quillRef.current) {
+    if (quillRef.current?.isReady()) {
       const contents = normalizeRichTextValue(quillRef.current.getContents());
       setQuillValue(contents);
     }
