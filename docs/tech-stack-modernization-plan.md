@@ -564,7 +564,7 @@ git diff --check
 P2-E 合入状态：
 
 - 当前分支继续累计前端安全 / 运行时改造
-- 当前分支已领先 `origin/main` 10 个专题提交，继续在同一分支推进
+- 当前分支已领先 `origin/main` 11 个专题提交，继续在同一分支推进
 - 暂不合入 `main`，减少主线合并和完整回归频率
 
 最新批次：前端直接依赖声明固定化
@@ -590,6 +590,29 @@ git diff --check
 
 - 直接依赖声明对账无输出，说明 `package.json` 声明版本与 lockfile 根解析版本一致
 - `npm audit --json` 仍为 0 vulnerabilities
+
+最新批次：前端 npm 11 lockfile 格式收口
+
+- 已使用当前基线 `Node 24.16.0 / npm 11.13.0` 将 `frontend/package-lock.json` 从 lockfile v2 转换到 v3
+- v3 lockfile 保留 `packages` 作为唯一依赖树来源，移除 v2 兼容用的 legacy `dependencies` 镜像，降低锁文件冗余
+- 本批次不升级依赖版本、不改 `package.json`，只收口 npm 11 原生 lockfile 格式
+
+本批次验证命令：
+
+```bash
+npm install --package-lock-only --lockfile-version=3 --ignore-scripts --no-audit --no-fund
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+npm audit --json
+npm run checkTs
+node -e "const p=require('./package.json'); const lock=require('./package-lock.json'); let mismatches=[]; for (const section of ['dependencies','devDependencies']) { for (const [name, spec] of Object.entries(p[section]||{})) { const locked=lock.packages?.['node_modules/'+name]?.version; if (locked && spec !== locked) mismatches.push(section+'\t'+name+'\t'+spec+'\t'+locked); } } console.log(JSON.stringify({lockfileVersion:lock.lockfileVersion, hasDependencies:Boolean(lock.dependencies), mismatches}, null, 2));"
+git diff --check
+```
+
+验证说明：
+
+- `package-lock.json` 当前为 `lockfileVersion: 3`
+- 直接依赖声明与 lockfile 根解析版本对账无差异
+- `npm ci --dry-run` 已通过，`npm audit --json` 仍为 0 vulnerabilities
 - 代表性前端测试 9 个文件、44 个用例通过
 - 测试日志中仍有 AntV S2 sourcemap 和 jsdom pseudo-element 历史噪声，不影响结果
 
