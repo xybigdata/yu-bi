@@ -132,6 +132,7 @@ codex/modernization-frontend-security-deps
 | AntV S2 | `2.7.2 / 2.3.1` | 已确认当前稳定线 |
 | i18next / react-i18next | `26.3.1 / 17.0.8` | 已确认国际化主链 |
 | react-grid-layout | `2.2.3` | 已通过 legacy 入口升级 |
+| react-hotkeys-hook | `5.3.2` | 已完成快捷键 hook 主版本升级验证 |
 | flexlayout-react | `0.9.1` | 已升级并改用命名导出 |
 | react-window | `1.8.11` | 保持 1.x 兼容线，2.x 独立评估 |
 | redux-undo | `1.1.0` | 已补撤销 / 重做历史栈测试后升级 |
@@ -1143,6 +1144,35 @@ git diff --check
 - 升级后依赖树已确认 `redux-undo 1.1.0` 解析到目标版本
 - Dashboard / 撤销历史相关测试 5 个文件、18 个用例通过
 - `npm run checkTs` 已通过
+- 主构建和 task bundle 构建均通过，继续使用 Vite 8.0.16
+- `npm audit --json` 仍为 0 vulnerabilities
+- `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过
+
+最新批次：前端快捷键 hook 升级
+
+- 已将 `react-hotkeys-hook` 从 `3.4.4` 升级到 `5.3.2`
+- `react-hotkeys-hook 5.3.2` peer 支持 `react >=16.8.0` 和 `react-dom >=16.8.0`，与当前 React 19 主链兼容
+- 已检查 v5 类型签名：`useHotkeys(keys, callback, options?, dependencies?)` 仍可兼容当前依赖数组调用方式
+- 当前使用点集中在 Dashboard 编辑器快捷键和 SQL 编辑器执行 / 保存快捷键；本批次不改快捷键行为，只升级 hook 运行时
+
+本批次验证命令：
+
+```bash
+npm ls react-hotkeys-hook --all
+npm run checkTs
+npm run test -- src/app/pages/DashBoardPage/pages/BoardEditor/__tests__/index.test.ts src/app/pages/DashBoardPage/pages/BoardEditor/slice/__tests__/undoHistory.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/completionRuntime.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/sqlFormatterRuntime.test.ts
+npm run build
+npm run build:task
+npm audit --json
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+git diff --check
+```
+
+验证说明：
+
+- 依赖树已确认 `react-hotkeys-hook 5.3.2` 解析到目标版本
+- `npm run checkTs` 已通过，确认当前 `useHotkeys` 调用签名兼容 v5
+- Dashboard 编辑器和 SQL 编辑器相关测试 4 个文件、9 个用例通过
 - 主构建和 task bundle 构建均通过，继续使用 Vite 8.0.16
 - `npm audit --json` 仍为 0 vulnerabilities
 - `npm ci --dry-run --ignore-scripts --no-audit --no-fund` 已通过

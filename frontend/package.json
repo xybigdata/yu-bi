@@ -90,7 +90,7 @@
     "react-draggable": "4.7.0",
     "react-grid-layout": "2.2.3",
     "react-helmet-async": "3.0.0",
-    "react-hotkeys-hook": "3.4.4",
+    "react-hotkeys-hook": "5.3.2",
     "react-i18next": "17.0.8",
     "react-quill-new": "3.7.0",
     "react-redux": "9.3.0",
