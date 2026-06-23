@@ -31,6 +31,15 @@ jobs:
         distribution: temurin
         java-version: '21'
         cache: maven
+    - name: Verify frontend toolchain
+      run: |
+        node -v
+        npm -v
+        npm config get engine-strict
+        test "$(npm -v)" = "11.13.0"
+        test "$(npm config get engine-strict)" = "true"
+        node -e "const p=require('./package.json'); if (p.packageManager !== 'npm@11.13.0') throw new Error('Unexpected packageManager: '+p.packageManager)"
+      working-directory: ./frontend
     - run: npm ci
       working-directory: ./frontend
     - run: npm run checkTs

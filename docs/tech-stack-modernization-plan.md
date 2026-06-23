@@ -564,7 +564,7 @@ git diff --check
 P2-E 合入状态：
 
 - 当前分支继续累计前端安全 / 运行时改造
-- 当前分支已领先 `origin/main` 12 个专题提交，继续在同一分支推进
+- 当前分支已领先 `origin/main` 13 个专题提交，继续在同一分支推进
 - 暂不合入 `main`，减少主线合并和完整回归频率
 
 最新批次：前端直接依赖声明固定化
@@ -638,6 +638,29 @@ git diff --check
 - 当前本机验证基线为 `Node v24.16.0 / npm 11.13.0`
 - `npm config get engine-strict` 输出 `true`
 - `npm ci --dry-run` 已通过，`npm audit --json` 仍为 0 vulnerabilities
+
+最新批次：CI 前端工具链基线校验
+
+- 已在 GitHub Actions 前端门禁中增加 `Verify frontend toolchain` 步骤
+- CI 在 `npm ci` 前输出并校验 Node/npm 基线、`engine-strict=true`、`packageManager=npm@11.13.0`
+- 本批次不改变 CI 的构建、测试、lint、Maven 门禁，只让错误 Node/npm 基线更早失败
+
+本批次验证命令：
+
+```bash
+node -v
+npm -v
+npm config get engine-strict
+node -e "const p=require('./package.json'); if (p.packageManager !== 'npm@11.13.0') throw new Error('Unexpected packageManager: '+p.packageManager)"
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+npm run checkTs
+git diff --check
+```
+
+验证说明：
+
+- 当前本机验证基线为 `Node v24.16.0 / npm 11.13.0`
+- `engine-strict` 和 `packageManager` 校验均通过
 - 代表性前端测试 9 个文件、44 个用例通过
 - 测试日志中仍有 AntV S2 sourcemap 和 jsdom pseudo-element 历史噪声，不影响结果
 
