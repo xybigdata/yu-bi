@@ -108,19 +108,23 @@ codex/modernization-frontend-security-deps
 | Java | `21` | 已达硬性目标 |
 | Maven | `>=3.9` | 已由 Enforcer 约束 |
 | JavaCC Maven Plugin | `3.2.0` | 已验证 SQL parser clean 重生成链路 |
-| Spring Boot | `3.5.12` | 当前主链 |
+| Spring Boot | `3.5.15` | Boot 3.5 补丁线，继续保持 Spring Framework 6 / Security 6 主链 |
 | Spring Cloud | `2025.0.1` | 与 Boot 3.5 配套 |
-| MyBatis Spring Boot | `3.0.4` | 已适配 Boot 3 |
+| Spring Security | `6.5.11` | 由 Boot 3.5.15 管理，暂不跳 Spring Security 7 |
+| MyBatis Spring Boot | `3.0.5` | 已适配 Boot 3 |
+| MyBatis Generator | `1.4.2` | 继续保留 1.x 线，插件 profile 依赖版本已补齐 |
 | GraalJS | `25.0.3` | 已替代 Nashorn 主链，当前保持 25.0.x 补丁线 |
 | BouncyCastle | `1.84` | 已统一到 `jdk18on` 组件线 |
 | Springdoc | `2.8.17` | 已适配 Boot 3 |
 | H2 | `2.4.240` | 已升级 |
+| Hibernate Validator | `8.0.4.Final` | 继续保持 Jakarta Validation 3 线，HV 9 暂缓 |
 | MySQL Connector/J | `9.7.0` | 通过 Boot BOM 属性覆盖完成补丁升级，JDBC provider 基线已验证 |
 | HikariCP | `7.1.0` | 已补 JDBC 配置映射测试后通过 Boot BOM 属性覆盖升级 |
 | Selenium | `4.45.0` | 已升级到 Selenium 4 稳定线较新补丁版本 |
 | JsonPath | `3.0.0` | 已补 OAuth 属性映射行为测试后升级 |
+| DingTalk SDK | `1.1.100` | 继续保持 1.x 线补丁升级，暂不跳 DingTalk 2 |
 | Maven 仓库 | Maven Central / Spring Boot 默认仓库 | 已移除不再需要的 Spring milestone 仓库声明 |
-| Shiro | `2.0.5` | 高风险，只做认证授权边界审计和小步修复 |
+| Shiro | `2.0.6` | 高风险，只做认证授权边界审计和小步修复；Shiro 3 alpha 暂缓 |
 | Druid | `1.2.28` | 中风险，暂不优先 |
 | Calcite | 现网主链 | 高风险，先补 SQL 解析兼容样例 |
 
@@ -2030,6 +2034,42 @@ git diff --check
 mvn dependency:tree -Dincludes=io.jsonwebtoken:jjwt-api,io.jsonwebtoken:jjwt-impl,io.jsonwebtoken:jjwt-jackson,org.bitbucket.b_c:jose4j,com.aliyun:dingtalk,org.apache.calcite:calcite-core,com.github.vertical-blank:sql-formatter,org.apache.pdfbox:pdfbox,org.apache.poi:poi-ooxml,org.apache.httpcomponents.client5:httpclient5,org.javassist:javassist,net.coobird:thumbnailator,org.mybatis.generator:mybatis-generator-core
 mvn -pl security -am -Dtest=datart.security.test.jwt.TestJwkParse,datart.security.manager.shiro.ShiroAuthenticationTokenAdapterTest -Dsurefire.failIfNoSpecifiedTests=false test
 mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.calcite.SqlParserUtilsTest,datart.data.provider.calcite.SqlQueryScriptProcessorTest,datart.data.provider.jdbc.ProviderFactoryTest,datart.data.provider.sql.SqlScriptRenderExamplesTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl server -am -DskipTests package
+git diff --check
+```
+
+最新批次：后端补丁线与前端布局类型边界收口
+
+- 已将 Spring Boot parent 从 `3.5.12` 升级到 `3.5.15`，继续保持 Boot 3.5 稳定线，不跳 Boot 4
+- 已确认 Spring Security 随 Boot 3.5.15 解析到 `6.5.11`，暂不升级 Spring Security 7
+- 已将 `mybatis-spring-boot-starter` 从 `3.0.4` 升级到 `3.0.5`
+- 已将 `mybatis-generator-core` / `mybatis-generator-maven-plugin` 从 `1.4.0` 升级到 `1.4.2`
+- 已为 `core` 的 `mybatis-generator` profile 中插件依赖 `com.mysql:mysql-connector-j` 补齐显式 `${mysql.version}`，避免插件依赖不继承项目 `dependencyManagement` 导致 profile 模型解析失败
+- 已将 Shiro 从 `2.0.5` 升级到 `2.0.6`，继续停留在 Shiro 2 稳定线
+- 已将 DingTalk SDK 从 `1.1.86` 升级到 `1.1.100`，继续停留在 1.x 线
+- 已显式覆盖 Hibernate Validator 到 `8.0.4.Final`，继续保持 Jakarta Validation 3 线
+- 已新增 `BeanUtilsTest`，覆盖 `BeanUtils.requireNotNull` 和 Jakarta Validation `@NotBlank` / `@Pattern` 行为，约束 message 显式固定，避免受系统 Locale 影响
+- 已移除 `react-grid-layout/legacy` 的本地类型 shim，改用 `react-grid-layout 2.2.3` 官方 legacy 入口类型
+- 已将 Dashboard 自动布局回调类型收口到官方只读 `Layout`，进入 Redux 前浅拷贝为项目内部可变 `LayoutItem[]`
+- 本批次不改 Java 包名 `datart.*`、配置前缀 `datart.*`、`DATART_*`、迁移常量和内部稳定标识
+- Hibernate Validator 9.1.1 暂缓：它目标 Jakarta Validation 3.1 / Jakarta EL 6，而当前 Boot 3.5 主线仍管理 Jakarta Validation API 3.0.2；不作为当前稳定基线
+- Springdoc 3 暂缓：当前稳定 3.x 已进入 Boot 4 / Spring 7 生态，不并入 Boot 3.5 主线
+- MyBatis Generator `generate` 未执行：真实生成依赖本地 MySQL `127.0.0.1:3306/datart` schema；本批次只验证 profile 模型和插件依赖可解析
+
+本批次验证命令：
+
+```bash
+mvn help:evaluate -Dexpression=spring-security.version -q -DforceStdout
+mvn help:evaluate -Dexpression=hibernate-validator.version -q -DforceStdout
+mvn -pl security -am dependency:tree -Dincludes=org.apache.shiro:*,org.springframework.security:*,com.aliyun:dingtalk,org.hibernate.validator:hibernate-validator,jakarta.validation:jakarta.validation-api,org.bouncycastle:*
+mvn -pl core dependency:tree -Dincludes=org.mybatis.generator:mybatis-generator-core,org.mybatis.spring.boot:mybatis-spring-boot-starter,org.hibernate.validator:hibernate-validator,jakarta.validation:jakarta.validation-api
+mvn -pl core -Dtest=datart.core.common.BeanUtilsTest test
+mvn -pl security -am test
+mvn -pl core -DskipTests install
+mvn -pl core -Pmybatis-generator mybatis-generator:help -Ddetail=false
+npm run checkTs
+npm run test -- src/app/pages/DashBoardPage/hooks/__tests__/useGridLayoutMap.test.ts src/app/pages/DashBoardPage/utils/__tests__/widget.test.ts src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/__tests__/layoutRuntime.test.ts
+npm exec -- prettier --check src/react-app-env.d.ts src/app/pages/DashBoardPage/pages/BoardEditor/AutoEditor/AutoBoardEditor.tsx src/app/pages/DashBoardPage/pages/Board/AutoDashboard/AutoBoardCore.tsx
 mvn -pl server -am -DskipTests package
 git diff --check
 ```

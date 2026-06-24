@@ -19,13 +19,3 @@ declare module '*.svg?react' {
   const ReactComponent: FC<SVGProps<SVGSVGElement>>;
   export default ReactComponent;
 }
-
-declare module 'react-grid-layout/legacy' {
-  export {
-    default,
-    Layout,
-    LayoutItem,
-    ResponsiveLayouts,
-    WidthProvider,
-  } from 'react-grid-layout';
-}
