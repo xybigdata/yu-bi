@@ -2074,6 +2074,26 @@ mvn -pl server -am -DskipTests package
 git diff --check
 ```
 
+最新批次：用户可见旧品牌与 Nashorn 运行时提示清理
+
+- 已将服务端 i18n 中注册激活、邀请、找回密码邮件标题 / 主题 / 正文提示里的用户可见品牌从 `Datart` 收口为 `yu-bi`
+- 已将 JDBC 配置模板中 `enableSpecialSQL` 和 `enableSyncSchemas` 的用户可见描述从 `Datart` 收口为 `yu-bi`
+- 已将英文、中文和默认 i18n 文件同步处理，保持同一批用户可见文案一致
+- 已从 `JavascriptUtils` 默认脚本引擎候选中移除 `nashorn`，默认主链只保留 GraalJS / 通用 JavaScript 引擎名称
+- 已将 JavaScript 引擎缺失错误提示从“安装 Nashorn 或 GraalJS”收口为“安装 GraalJS”
+- 已补充 `JavascriptUtilsTest`，确认默认候选不再包含 `nashorn` 且仍包含 `graal.js`
+- 本批次不改 i18n key 名、文件名、Java 包名 `datart.*`、配置前缀 `datart.*`、`DATART_SCRIPT_ENGINE`、Quartz `DatartScheduleCluster` 等内部稳定标识
+- Quartz scheduler name 暂不改：`application.yml` 中的 `DatartScheduleCluster` 可能影响持久化调度实例标识，应作为调度迁移专题单独评估
+
+本批次验证命令：
+
+```bash
+rg -n "Datart|DATART|Nashorn" server/src/main/resources/i18n core/src/main/java/datart/core/common/JavascriptUtils.java core/src/test/java/datart/core/common/JavascriptUtilsTest.java
+mvn -pl core -Dtest=datart.core.common.JavascriptUtilsTest test
+mvn -pl server -am -DskipTests package
+git diff --check
+```
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
