@@ -116,6 +116,7 @@ codex/modernization-frontend-security-deps
 | Springdoc | `2.8.17` | 已适配 Boot 3 |
 | H2 | `2.4.240` | 已升级 |
 | MySQL Connector/J | `9.7.0` | 通过 Boot BOM 属性覆盖完成补丁升级，JDBC provider 基线已验证 |
+| HikariCP | `7.1.0` | 已补 JDBC 配置映射测试后通过 Boot BOM 属性覆盖升级 |
 | Selenium | `4.45.0` | 已升级到 Selenium 4 稳定线较新补丁版本 |
 | JsonPath | `3.0.0` | 已补 OAuth 属性映射行为测试后升级 |
 | Maven 仓库 | Maven Central / Spring Boot 默认仓库 | 已移除不再需要的 Spring milestone 仓库声明 |
@@ -1990,6 +1991,31 @@ mvn -pl core -Dtest=datart.core.common.POIUtilsTest test
 mvn -pl server -am -DskipTests package
 git diff --check
 ```
+
+最新批次：HikariCP 主版本升级与配置映射基线
+
+- 已通过 Spring Boot BOM 属性 `hikaricp.version` 将 `com.zaxxer:HikariCP` 从 `6.3.3` 升级到 `7.1.0`
+- 已将 `DataSourceFactoryHikariImpl` 中的 Hikari 配置构建拆为包内可测试方法，`createDataSource` 的外部行为保持不变
+- 新增 `DataSourceFactoryHikariImplTest`，不创建真实连接池，覆盖 JDBC driver、url、用户名、密码、连接超时、初始化失败超时和自定义 data source properties 映射
+- 已确认 `core` 的 Spring Boot JDBC 传递链路和 `jdbc-data-provider` 直接依赖均解析到 `HikariCP 7.1.0`
+- 本批次不改变数据库配置键、不改 Java 包名、配置前缀、`DATART_*` 或迁移稳定标识
+
+本批次验证命令：
+
+```bash
+mvn help:evaluate -Dexpression=hikaricp.version -q -DforceStdout
+mvn -pl data-providers/jdbc-data-provider -am dependency:tree -Dincludes=com.zaxxer:HikariCP
+mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.jdbc.DataSourceFactoryHikariImplTest,datart.data.provider.jdbc.ProviderFactoryTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl server -am -DskipTests package
+git diff --check
+```
+
+验证说明：
+
+- 普通沙箱首次解析 `HikariCP 7.1.0` 时因无法写 `~/.m2` tracking 文件失败；提权复跑依赖树和定向测试通过
+- `DataSourceFactoryHikariImplTest` 2 个用例、`ProviderFactoryTest` 5 个用例通过
+- `mvn -pl server -am -DskipTests package` 已通过，覆盖 JDK 21 编译、前端 build、task build 和安装包 assembly
+- 主构建仍有既有前端大 chunk warning，本批次未处理包体拆分
 
 最新批次：后端 Maven 版本属性集中管理
 
