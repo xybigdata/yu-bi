@@ -102,7 +102,7 @@
         <dependency>
             <groupId>net.coobird</groupId>
             <artifactId>thumbnailator</artifactId>
-            <version>0.4.14</version>
+            <version>0.4.21</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate.validator</groupId>
@@ -122,7 +122,7 @@
         <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
-            <version>3.28.0-GA</version>
+            <version>3.32.0-GA</version>
         </dependency>
 
         <dependency>

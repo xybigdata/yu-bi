@@ -110,7 +110,7 @@ codex/modernization-frontend-security-deps
 | Spring Boot | `3.5.12` | 当前主链 |
 | Spring Cloud | `2025.0.1` | 与 Boot 3.5 配套 |
 | MyBatis Spring Boot | `3.0.4` | 已适配 Boot 3 |
-| GraalJS | `25.0.1` | 已替代 Nashorn 主链 |
+| GraalJS | `25.0.3` | 已替代 Nashorn 主链，当前保持 25.0.x 补丁线 |
 | BouncyCastle | `1.81.1` | 已统一到 `jdk18on` 组件线 |
 | Springdoc | `2.8.17` | 已适配 Boot 3 |
 | H2 | `2.4.240` | 已升级 |
@@ -1781,6 +1781,27 @@ npm exec -- prettier --check vite.config.mts vite.task.config.mts
 npm run checkTs
 npm run build
 npm run build:task
+git diff --check
+```
+
+最新批次：后端低风险依赖和 Maven 插件补丁线收口
+
+- 已将 GraalJS 组件线从 `25.0.1` 补丁升级到 `25.0.3`，继续保持同一 GraalVM 25.0.x 稳定线
+- 已将 `thumbnailator` 从 `0.4.14` 升级到 `0.4.21`，用于图片缩略图生成链路
+- 已将 `javassist` 从 `3.28.0-GA` 升级到 `3.32.0-GA`，用于现有 ClassTransformer / JDBC adapter 动态类处理链路
+- 已将 `maven-compiler-plugin` 从 `3.14.1` 升级到 `3.15.0`
+- 已将 `maven-enforcer-plugin` 从 `3.6.2` 升级到 `3.6.3`
+- 暂不升级 Spring Boot 4、Spring Security 7、Calcite 1.42、MyBatis Generator 2、DingTalk 2、Shiro 3 alpha、AntD 6、ESLint 10、`@vitejs/plugin-react` 6、Monaco 最新线和 Quill 最新线；这些都需要单独兼容验证或当前已知会破坏 audit / peer 状态
+- 本批次验证时，非提权 Maven 首次执行因沙箱不能写 `~/.m2` 下载跟踪文件失败；提权重跑后通过
+
+本批次验证命令：
+
+```bash
+mvn versions:display-dependency-updates -Dincludes=net.coobird:thumbnailator,org.javassist:javassist,org.mybatis.generator:mybatis-generator-core,com.jayway.jsonpath:json-path,org.bitbucket.b_c:jose4j,com.github.vertical-blank:sql-formatter -DprocessDependencyManagement=false -DgenerateBackupPoms=false
+mvn versions:display-plugin-updates -DgenerateBackupPoms=false
+mvn -pl core -Dtest=datart.core.common.POIUtilsTest test
+mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.jdbc.ProviderFactoryTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl server -am -DskipTests package
 git diff --check
 ```
 
