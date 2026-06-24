@@ -141,14 +141,14 @@ codex/modernization-frontend-security-deps
 | stylelint-order | `8.1.1` | 已完成 Stylelint 17 下 lint 验证 |
 | styled-components | `6.4.2` | 已完成主升级并确认运行时依赖位置 |
 | polished | `4.3.1` | 已完成样式工具小版本升级 |
-| 富文本编辑器 | `react-quill-new 3.7.0 / quill 2.0.2` | 当前 P2-E 正在迁移验证 |
+| 富文本编辑器 | `react-quill-new 3.7.0 / quill 2.0.2` | 已完成 Quill 2 迁移；暂不升 `react-quill-new 3.8.x / quill 2.0.3`，因为会重新引入 npm audit 低危 XSS advisory |
 | monaco-editor | `0.52.2` | 已补真实运行时加载边界 |
 | reveal.js | `6.0.1` | 已补真实运行时加载边界 |
 | ECharts | `6.1.0` | 已升级到 ECharts 6 稳定线，词云改用 `@echarts-x/custom-word-cloud` |
 | Axios | `1.18.1` | 已补 request wrapper 行为基线后小版本升级 |
 | sql-formatter | `15.8.2` | 已补真实运行时 smoke 后升级 |
 | AntV S2 | `2.7.2 / 2.3.1` | 已确认当前稳定线 |
-| i18next / react-i18next | `26.3.1 / 17.0.8` | 已确认国际化主链 |
+| i18next / react-i18next | `26.3.2 / 17.0.8` | 已确认国际化主链 |
 | react-grid-layout | `2.2.3` | 已通过 legacy 入口升级 |
 | react-hotkeys-hook | `5.3.2` | 已完成快捷键 hook 主版本升级验证 |
 | flexlayout-react | `0.9.1` | 已升级并改用命名导出 |
@@ -1822,6 +1822,27 @@ mvn -pl security -am -Dtest=datart.security.test.jwt.TestJwkParse,datart.securit
 mvn -pl data-providers/http-data-provider -am -DskipTests package
 mvn -pl server -am -DskipTests package
 git diff --check
+```
+
+最新批次：前端安全依赖小版本收口
+
+- 已将 `i18next` 从 `26.3.1` 升级到 `26.3.2`
+- 已将 `postcss-styled-syntax` 从 `0.7.1` 升级到 `0.7.2`
+- 已将 `@commitlint/cli`、`@commitlint/config-conventional` 从 `21.0.2` 升级到 `21.1.0`
+- 已复核 `react-quill-new 3.8.3 / quill 2.0.3`，该组合会重新引入 `GHSA-v3m3-f69x-jf25` 低危 XSS advisory；当前继续保留 `react-quill-new 3.7.0 / quill 2.0.2`，保持 `npm audit` 0 漏洞
+- 本批次不升级 `@types/node 26`，继续保持 Node 24 类型基线
+
+本批次验证命令：
+
+```bash
+npm view i18next@26.3.2 version peerDependencies dependencies engines
+npm view postcss-styled-syntax@0.7.2 version peerDependencies dependencies engines
+npm view quill@2.0.3 version peerDependencies dependencies engines
+npm view react-quill-new@3.8.3 version peerDependencies dependencies engines
+npm audit --json
+npm run checkTs
+npm run test:ci -- src/__tests__/task.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/RichTextEditorRuntime.smoke.test.tsx src/app/pages/DashBoardPage/components/Widgets/RichTextWidget/__tests__/RichTextWidgetCore.smoke.test.tsx
+npm run lint:style
 ```
 
 ## 12. 后续队列
