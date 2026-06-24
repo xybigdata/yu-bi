@@ -2113,6 +2113,25 @@ mvn -pl server -am -DskipTests package
 git diff --check
 ```
 
+最新批次：Monaco 编辑器组件运行时 smoke 补强
+
+- 已补强 `MonacoEditor` 组件测试，从仅覆盖 runtime 加载失败态扩展到成功挂载主路径
+- 新增可控 Monaco runtime mock，验证组件会创建 model、创建 editor、合并 `editorWillMount` 返回选项、调用 `editorDidMount`
+- 已覆盖用户编辑触发 `onChange`、受控 `value` 变更通过 `pushEditOperations` 同步、`language` 变更调用 `setModelLanguage`、`theme` 变更调用 `setTheme`
+- 已覆盖组件卸载时调用 `editorWillUnmount` 和 `editor.dispose`
+- 本批次不升级 `monaco-editor` 版本；`0.55.1` 仍因 `dompurify 3.2.7` audit 风险暂缓
+- 该 smoke 为后续 Monaco 版本升级、Vite chunk 拆分和 SQL / JS 编辑器入口调整提供组件级回归入口
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/components/MonacoEditor/__tests__/index.test.tsx
+npm run test -- src/app/components/MonacoEditor/__tests__/runtime.test.ts src/app/components/MonacoEditor/__tests__/index.test.tsx src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/completionRuntime.test.ts
+npm run checkTs
+npm exec -- prettier --check src/app/components/MonacoEditor/__tests__/index.test.tsx
+git diff --check
+```
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
