@@ -1849,6 +1849,29 @@ npm run test:ci -- src/__tests__/task.test.ts src/app/components/ChartGraph/Basi
 npm run lint:style
 ```
 
+最新批次：前端现代浏览器 polyfill 依赖清理
+
+- 已确认 `intersection-observer 0.12.2` 来自 `@antv/s2-react -> ahooks -> useInViewport` 的传递依赖，`ahooks` 通过 side-effect import 加载该 polyfill
+- 当前前端基线已经收口到 `Node 24`、现代浏览器和 `build.target: es2020`，Intersection Observer 已是浏览器 Baseline 能力，不再需要该旧 polyfill
+- 已新增本地 no-op 兼容包 `frontend/npm-overrides/intersection-observer`，并通过根依赖 `file:./npm-overrides/intersection-observer` 满足 `ahooks` 的模块解析
+- `npm ls intersection-observer` 已确认 `ahooks` 解析到本地 no-op 包，不再使用 registry 上 deprecated 的 polyfill 包
+- `lodash.isequal 4.5.0` 仍来自 `quill-delta 5.1.0`，属于 Quill Delta 内部依赖；当前不替换，避免影响富文本 Delta 比较语义
+- 本批次不升级 AntV S2、不改 PivotSheet 业务代码、不改变浏览器运行时协议
+
+本批次验证命令：
+
+```bash
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+npm ls intersection-observer lodash.isequal --all
+npm audit --json
+npm run checkTs
+npm run test -- src/app/components/ChartGraph/PivotSheetChart/__tests__/runtime.test.ts src/app/components/ChartGraph/PivotSheetChart/__tests__/LazyAntVS2Wrapper.test.tsx src/app/components/__tests__/Split.test.tsx src/app/components/__tests__/VirtualTable.test.tsx
+npm exec -- prettier --check package.json package-lock.json npm-overrides/intersection-observer/package.json npm-overrides/intersection-observer/index.js npm-overrides/intersection-observer/index.d.ts
+npm run build
+npm run build:task
+git diff --check
+```
+
 最新批次：后端构建仓库治理收口
 
 - 已确认当前 POM 中没有 `SNAPSHOT`、milestone、RC、alpha、beta 版本依赖
