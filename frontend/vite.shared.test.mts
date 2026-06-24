@@ -45,7 +45,12 @@ describe('vite shared config', () => {
 
   it.each([
     ['node_modules/antd/es/button/index.js', 'antdDesign'],
-    ['node_modules/@ant-design/icons/es/index.js', 'antdDesign'],
+    ['node_modules/@ant-design/pro-components/es/index.js', 'antdPro'],
+    ['node_modules/@ant-design/pro-table/es/index.js', 'antdPro'],
+    ['node_modules/@ant-design/icons/es/index.js', 'antdIcons'],
+    ['node_modules/@ant-design/icons-svg/es/asn/PlusOutlined.js', 'antdIcons'],
+    ['node_modules/@antv/s2/esm/index.js', 'antv'],
+    ['node_modules/@antv/g2/esm/index.js', 'antv'],
     ['node_modules/echarts/core.js', 'echarts'],
     ['node_modules/zrender/lib/core/util.js', 'echarts'],
     ['node_modules/quill/quill.js', 'quill'],

@@ -2171,6 +2171,41 @@ git diff --check
 - 主构建和 task bundle 构建均通过，继续使用 `vite v8.1.0`
 - 主构建仍有既有大 chunk warning，本批次只建立分包规则回归基线，不做包体拆分
 
+最新批次：前端 vendor 分包边界细化
+
+- 已在 `createVendorManualChunks` 中细化 Ant Design 生态分包：
+  - `antd` 保持进入 `antdDesign`
+  - `@ant-design/pro-*` 进入 `antdPro`
+  - `@ant-design/icons` / `@ant-design/icons-svg` 进入 `antdIcons`
+- 已将 AntV 生态包 `@antv/*` 统一拆到 `antv` vendor chunk，降低 PivotSheet 业务 wrapper chunk 体积
+- 已扩展 `vite.shared.test.mts`，覆盖 Pro Components、Pro Table、icons、icons-svg、AntV S2、AntV G2 等新分包规则
+- 本批次不改变源码加载方式、不升级依赖版本、不调高 `chunkSizeWarningLimit`，只细化现有 vendor 边界，让后续包体治理可定位性更强
+
+本批次验证命令：
+
+```bash
+npm run test -- vite.shared.test.mts
+npm run eslint -- vite.shared.mts vite.shared.test.mts vite.config.mts
+npm exec -- prettier --check vite.shared.mts vite.shared.test.mts vite.config.mts
+npm run checkTs
+npm run build
+npm run build:task
+npm audit --json
+git diff --check
+```
+
+验证说明：
+
+- `vite.shared.test.mts` 22 个用例通过
+- Vite 配置文件 ESLint 和 Prettier 检查通过
+- `npm run checkTs` 已通过
+- 主构建和 task bundle 构建均通过，继续使用 `vite v8.1.0`
+- `npm audit --json` 仍为 0 vulnerabilities
+- 主构建中 `antdDesign` 从约 `2,149.72 kB / gzip 655.82 kB` 降到约 `1,321.55 kB / gzip 409.69 kB`
+- 新增 `antdIcons` 约 `356.99 kB / gzip 100.85 kB`、`antdPro` 约 `469.16 kB / gzip 141.62 kB`、`antv` 约 `1,716.88 kB / gzip 504.54 kB`
+- 原 `AntVS2Wrapper` 大 chunk 收缩为约 `1.42 kB / gzip 0.79 kB` 的业务 wrapper；AntV S2 生态体积已归入 `antv`
+- `editor.api`、`echarts`、地图 JSON 和 `antv` 仍超过 500 kB，保留为后续构建产物治理对象
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。

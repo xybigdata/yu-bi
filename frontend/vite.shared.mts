@@ -9,6 +9,9 @@ const nodeModulePath = (packageName: string) => `/node_modules/${packageName}/`;
 const isNodeModule = (id: string, packageName: string) =>
   id.includes(nodeModulePath(packageName));
 
+const isAntDesignProModule = (id: string) =>
+  /\/node_modules\/@ant-design\/pro-[^/]+\//.test(id);
+
 export const createReactPlugin = () =>
   react({
     babel: createReactBabelOptions(),
@@ -47,8 +50,23 @@ export const createVendorManualChunks = (id: string) => {
     return undefined;
   }
 
-  if (isNodeModule(id, 'antd') || isNodeModule(id, '@ant-design')) {
+  if (isAntDesignProModule(id)) {
+    return 'antdPro';
+  }
+
+  if (
+    isNodeModule(id, '@ant-design/icons') ||
+    isNodeModule(id, '@ant-design/icons-svg')
+  ) {
+    return 'antdIcons';
+  }
+
+  if (isNodeModule(id, 'antd')) {
     return 'antdDesign';
+  }
+
+  if (isNodeModule(id, '@antv')) {
+    return 'antv';
   }
 
   if (isNodeModule(id, 'echarts') || isNodeModule(id, 'zrender')) {
