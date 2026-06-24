@@ -13,10 +13,20 @@ import datart.data.provider.jdbc.adapters.OracleDataProviderAdapter;
 import datart.data.provider.jdbc.adapters.PrestoDataProviderAdapter;
 import org.apache.calcite.sql.SqlDialect;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.DynamicTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -72,6 +82,31 @@ class ProviderFactoryTest {
         assertEquals("message.provider.jdbc.dbtype", exception.getMessage());
     }
 
+    @Test
+    void shouldLoadAllBuiltInDriverInfoWithStableDefaults() {
+        List<JdbcDriverInfo> driverInfos = builtInDbTypes().map(this::createAdapter)
+                .map(JdbcDataProviderAdapter::getDriverInfo)
+                .toList();
+
+        assertEquals(30, driverInfos.size());
+        assertTrue(driverInfos.stream().map(JdbcDriverInfo::getDbType).allMatch(dbType -> dbType.equals(dbType.toUpperCase())));
+        assertTrue(driverInfos.stream().allMatch(driverInfo -> JdbcDataProvider.DEFAULT_ADAPTER.equals(driverInfo.getAdapterClass())
+                || !driverInfo.getAdapterClass().isBlank()));
+        assertTrue(driverInfos.stream().allMatch(JdbcDriverInfo::getQuoteIdentifiers));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> shouldCreateAdapterAndDialectForEveryBuiltInDriver() {
+        return builtInDbTypes()
+                .map(dbType -> DynamicTest.dynamicTest(dbType, () -> {
+                    JdbcDataProviderAdapter adapter = createAdapter(dbType);
+
+                    assertFalse(adapter.isInit());
+                    assertNotNull(adapter.getDriverInfo().getDriverClass());
+                    assertNotNull(adapter.getSqlDialect());
+                }));
+    }
+
     private void assertAdapter(
             String dbType,
             Class<? extends JdbcDataProviderAdapter> adapterType,
@@ -92,5 +127,16 @@ class ProviderFactoryTest {
         properties.setUrl("jdbc:test://localhost");
         properties.setDriverClass("");
         return JdbcDataProvider.ProviderFactory.createDataProvider(properties, false);
+    }
+
+    private Stream<String> builtInDbTypes() {
+        try (InputStream inputStream = JdbcDataProvider.ProviderFactory.class.getResourceAsStream("/jdbc-driver.yml")) {
+            assertNotNull(inputStream);
+            Yaml yaml = new Yaml();
+            Map<String, Map<String, String>> driverInfo = yaml.load(inputStream);
+            return driverInfo.keySet().stream().sorted();
+        } catch (Exception e) {
+            throw new AssertionError("failed to load built-in jdbc driver metadata", e);
+        }
     }
 }

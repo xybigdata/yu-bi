@@ -2094,6 +2094,25 @@ mvn -pl server -am -DskipTests package
 git diff --check
 ```
 
+最新批次：JDBC provider 内置驱动元数据与 CustomSqlDialect 回退基线
+
+- 已扩展 `ProviderFactoryTest`，通过公开 `createDataProvider(..., false)` 路径覆盖 30 个内置 JDBC driver 元数据
+- 新增动态测试，确认每个内置 `db-type` 都能在不初始化真实连接池、不连接数据库的情况下创建 adapter 并解析 SQL dialect
+- 已确认内置 driver 元数据继续保持大写 `dbType`、默认 adapter 和默认 `quoteIdentifiers` 兜底
+- 测试暴露出一类既有问题：部分 JDBC 类型不在 Calcite 默认 `DatabaseProduct` 中，会回退到 `CustomSqlDialect`，但内置元数据没有 `literalQuote` / `identifierQuote` 时会在 Jakarta Validation 阶段失败
+- 已在 `CustomSqlDialect` 中为回退方言补齐默认 literal quote `'` 和 identifier quote `"`，并在 Bean Validation 前应用默认值
+- 本批次不连接真实数据库、不升级 Calcite、不改 `jdbc-driver.yml` 中各数据库类型标识、不改 Java 包名、配置前缀、`DATART_*` 或迁移稳定标识
+- 该基线为后续 Calcite 1.42、JDBC driver 元数据和方言适配升级提供快速回归入口
+
+本批次验证命令：
+
+```bash
+mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.jdbc.ProviderFactoryTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.calcite.SqlParserUtilsTest,datart.data.provider.calcite.SqlQueryScriptProcessorTest,datart.data.provider.jdbc.ProviderFactoryTest,datart.data.provider.sql.SqlScriptRenderExamplesTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl server -am -DskipTests package
+git diff --check
+```
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
