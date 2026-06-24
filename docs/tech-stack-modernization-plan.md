@@ -111,10 +111,10 @@ codex/modernization-frontend-security-deps
 | Spring Cloud | `2025.0.1` | 与 Boot 3.5 配套 |
 | MyBatis Spring Boot | `3.0.4` | 已适配 Boot 3 |
 | GraalJS | `25.0.3` | 已替代 Nashorn 主链，当前保持 25.0.x 补丁线 |
-| BouncyCastle | `1.81.1` | 已统一到 `jdk18on` 组件线 |
+| BouncyCastle | `1.84` | 已统一到 `jdk18on` 组件线 |
 | Springdoc | `2.8.17` | 已适配 Boot 3 |
 | H2 | `2.4.240` | 已升级 |
-| Selenium | `4.31.0` | 已升级 |
+| Selenium | `4.45.0` | 已升级到 Selenium 4 稳定线较新补丁版本 |
 | Shiro | `2.0.5` | 高风险，只做认证授权边界审计和小步修复 |
 | Druid | `1.2.28` | 中风险，暂不优先 |
 | Calcite | 现网主链 | 高风险，先补 SQL 解析兼容样例 |
@@ -1801,6 +1801,25 @@ mvn versions:display-dependency-updates -Dincludes=net.coobird:thumbnailator,org
 mvn versions:display-plugin-updates -DgenerateBackupPoms=false
 mvn -pl core -Dtest=datart.core.common.POIUtilsTest test
 mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.jdbc.ProviderFactoryTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl server -am -DskipTests package
+git diff --check
+```
+
+最新批次：后端 JWT / HTTP / 浏览器截图依赖补丁线收口
+
+- 已将 `jjwt-api`、`jjwt-impl`、`jjwt-jackson` 从 `0.12.7` 升级到 `0.13.0`
+- 已将 `jose4j` 从 `0.7.12` 升级到 `0.9.6`
+- 已将 BouncyCastle `bcpkix-jdk18on`、`bcutil-jdk18on` 从 `1.81.1` 升级到 `1.84`
+- 已将 `httpclient5` 从 `5.5` 升级到 `5.6.1`
+- 已将 Selenium 组件线从 `4.31.0` 升级到 `4.45.0`
+- 本批次不升级 Spring Boot 4、Spring Security 7、Shiro 3 alpha、Calcite 1.42、MyBatis Generator 2、DingTalk 2、Springdoc 3、JsonPath 3、HikariCP 7；这些仍按中高风险或主版本跳跃单独评估
+
+本批次验证命令：
+
+```bash
+mvn versions:display-dependency-updates -Dincludes=org.apache.httpcomponents.client5:httpclient5,com.mysql:mysql-connector-j,io.jsonwebtoken:jjwt-api,io.jsonwebtoken:jjwt-impl,io.jsonwebtoken:jjwt-jackson,org.bouncycastle:bcpkix-jdk18on,org.bouncycastle:bcutil-jdk18on,org.seleniumhq.selenium:selenium-java,org.springdoc:springdoc-openapi-starter-webmvc-ui,org.apache.pdfbox:pdfbox -DprocessDependencyManagement=false -DgenerateBackupPoms=false
+mvn -pl security -am -Dtest=datart.security.test.jwt.TestJwkParse,datart.security.manager.shiro.ShiroAuthenticationTokenAdapterTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/http-data-provider -am -DskipTests package
 mvn -pl server -am -DskipTests package
 git diff --check
 ```
