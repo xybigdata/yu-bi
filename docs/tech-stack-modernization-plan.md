@@ -2206,6 +2206,32 @@ git diff --check
 - 原 `AntVS2Wrapper` 大 chunk 收缩为约 `1.42 kB / gzip 0.79 kB` 的业务 wrapper；AntV S2 生态体积已归入 `antv`
 - `editor.api`、`echarts`、地图 JSON 和 `antv` 仍超过 500 kB，保留为后续构建产物治理对象
 
+最新批次：ECharts 默认主题运行时入口收口
+
+- 已将 `ensureEChartsDefaultTheme` 从独立 `import('echarts')` loader 收口为复用 `loadEChartsRuntime()`
+- ECharts 默认主题注册和图表运行时加载现在共享同一个 ECharts runtime promise，后续如评估 ECharts core/components 按需迁移，只需优先收口 `echartsRuntime`
+- 已保留默认主题注册自己的 promise 缓存和失败重试语义，避免重复注册主题或吞掉加载失败后的重试
+- 已扩展 `echartsThemeRuntime` 测试，确认默认主题注册后再调用 `loadEChartsRuntime()` 不会重复触发 runtime loader
+- 本批次不改变页面加载方式、不升级 ECharts、不拆 ECharts 主包，只减少重复动态加载入口
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/utils/__tests__/echartsThemeRuntime.test.ts src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts
+npm run checkTs
+npm exec -- prettier --check src/app/utils/echartsThemeRuntime.ts src/app/utils/__tests__/echartsThemeRuntime.test.ts
+npm run build
+npm run build:task
+git diff --check
+```
+
+验证说明：
+
+- ECharts 主题 / runtime / 词云 runtime 相关 3 个测试文件、9 个用例通过
+- `npm run checkTs` 已通过
+- 主构建和 task bundle 构建均通过，继续使用 `vite v8.1.0`
+- 构建产物体积基本不变，本批次是运行时入口收口，不是 ECharts 拆包
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。
