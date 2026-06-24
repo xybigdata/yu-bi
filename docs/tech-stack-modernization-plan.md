@@ -2,7 +2,7 @@
 
 本文档是 yu-bi 现代化改造的恢复入口、阶段复盘和后续执行清单。恢复工作时优先读本页，再按“当前短期目标”继续推进。
 
-复盘时间：2026-06-23
+复盘时间：2026-06-24
 
 ## 0. 当前执行口径
 
@@ -115,6 +115,7 @@ codex/modernization-frontend-security-deps
 | BouncyCastle | `1.84` | 已统一到 `jdk18on` 组件线 |
 | Springdoc | `2.8.17` | 已适配 Boot 3 |
 | H2 | `2.4.240` | 已升级 |
+| MySQL Connector/J | `9.7.0` | 通过 Boot BOM 属性覆盖完成补丁升级，JDBC provider 基线已验证 |
 | Selenium | `4.45.0` | 已升级到 Selenium 4 稳定线较新补丁版本 |
 | JsonPath | `3.0.0` | 已补 OAuth 属性映射行为测试后升级 |
 | Maven 仓库 | Maven Central / Spring Boot 默认仓库 | 已移除不再需要的 Spring milestone 仓库声明 |
@@ -1903,6 +1904,25 @@ mvn -pl server -am -DskipTests package
 git diff --check
 ```
 
+最新批次：MySQL Connector/J 补丁线收口
+
+- 已通过父 POM 覆盖 Spring Boot BOM 的 `mysql.version`，将 `com.mysql:mysql-connector-j` 从 `9.6.0` 升级到 `9.7.0`
+- `core` 模块直接依赖和 `mybatis-generator` profile 中的 MySQL driver 继续共用同一个 BOM 属性版本，避免双轨版本
+- 已确认当前源码和配置继续使用稳定驱动类 `com.mysql.cj.jdbc.Driver`
+- 本批次只做 JDBC driver 补丁升级，不修改数据库配置键、MyBatis Generator 主版本、Java 包名、配置前缀、`DATART_*` 或迁移稳定标识
+- Spring Boot 4、Spring Security 7、Shiro 3 alpha、Calcite 1.42、MyBatis Generator 2、DingTalk 2、Springdoc 3、HikariCP 7 仍按中高风险或主版本跳跃暂缓
+
+本批次验证命令：
+
+```bash
+mvn versions:display-dependency-updates -DprocessDependencyManagement=false -DgenerateBackupPoms=false
+mvn dependency:tree -Dincludes=com.mysql:mysql-connector-j
+mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.jdbc.ProviderFactoryTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl core -Dtest=datart.core.common.POIUtilsTest test
+mvn -pl server -am -DskipTests package
+git diff --check
+```
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
@@ -1912,6 +1932,7 @@ git diff --check
 | P2-H | ESLint 10 主版本评估 | 中高 | 当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级 |
 | P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
 | P2-J | 富文本编辑器运行时 smoke | 中 | 已补 jsdom 层运行时和 Dashboard Widget smoke；后续具备浏览器入口时补真实编辑 / 预览 / 分享页 E2E |
+| P2-K | 后端依赖补丁线滚动收口 | 中 | 继续优先处理补丁级、同生态线、可被现有测试覆盖的升级；主版本跳跃单独评估 |
 
 ## 13. 门禁策略
 
