@@ -21,8 +21,10 @@ describe('report-build-chunks', () => {
     );
 
     expect(stdout).toContain('yu-bi build chunk report: rawThreshold=500 KiB');
+    expect(stdout).toContain('yu-bi build asset report: rawThreshold=500 KiB');
     expect(stdout).toContain('gzipThreshold=off');
-    expect(stdout).toContain('oversized=6');
+    expect(stdout).toContain('files=98, rawOversized=4');
+    expect(stdout).toContain('files=6, rawOversized=2');
     expect(stdout).toContain('raw=');
     expect(stdout).toContain('gzip=');
     expect(stdout).toContain('flags=raw,-');
@@ -30,6 +32,7 @@ describe('report-build-chunks', () => {
     expect(stdout).toContain('build/static/js/antv.');
     expect(stdout).toContain('build/static/js/antdDesign.');
     expect(stdout).toContain('build/task/index.js');
+    expect(stdout).toContain('build/static/media/geo-china-city.map.');
   });
 
   it('can fail when oversized chunks are explicitly forbidden', async () => {
@@ -65,7 +68,8 @@ describe('report-build-chunks', () => {
     );
 
     expect(stdout).toContain('gzipThreshold=500 KiB');
-    expect(stdout).toContain('gzipOversized=2');
+    expect(stdout).toContain('files=98, rawOversized=4, gzipOversized=1');
+    expect(stdout).toContain('files=6, rawOversized=2, gzipOversized=1');
     expect(stdout).toContain('flags=raw,gzip');
   });
 });

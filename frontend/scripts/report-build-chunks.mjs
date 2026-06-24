@@ -19,6 +19,7 @@ const limit = Number(process.env.YU_BI_CHUNK_REPORT_LIMIT || DEFAULT_LIMIT);
 const failOnOversized =
   process.env.YU_BI_CHUNK_REPORT_FAIL_ON_OVERSIZED === '1';
 const jsDir = path.resolve(appRoot, 'build/static/js');
+const mediaDir = path.resolve(appRoot, 'build/static/media');
 const taskBundle = path.resolve(appRoot, 'build/task/index.js');
 
 const formatKiB = bytes => `${(bytes / KiB).toFixed(2)} KiB`;
@@ -86,48 +87,96 @@ async function collectTaskBundle() {
   ];
 }
 
-const chunks = [...(await collectJsChunks()), ...(await collectTaskBundle())]
-  .sort((left, right) => right.bytes - left.bytes)
-  .map((chunk, index) => ({ ...chunk, rank: index + 1 }));
+async function collectMediaAssets() {
+  const entries = await readdir(mediaDir, { withFileTypes: true }).catch(
+    error => {
+      if (error.code === 'ENOENT') {
+        return [];
+      }
 
-const rawOversizedChunks = chunks.filter(
-  chunk => chunk.bytes > thresholdKiB * KiB,
-);
-const gzipOversizedChunks =
-  gzipThresholdKiB === null
-    ? []
-    : chunks.filter(chunk => chunk.gzipBytes > gzipThresholdKiB * KiB);
-const oversizedChunks = [...new Set([...rawOversizedChunks, ...gzipOversizedChunks])];
+      throw error;
+    },
+  );
 
-console.log(
-  `yu-bi build chunk report: rawThreshold=${thresholdKiB} KiB, gzipThreshold=${
-    gzipThresholdKiB === null ? 'off' : `${gzipThresholdKiB} KiB`
-  }, files=${chunks.length}, rawOversized=${rawOversizedChunks.length}, gzipOversized=${gzipOversizedChunks.length}, oversized=${oversizedChunks.length}`,
-);
+  const files = entries
+    .filter(entry => entry.isFile())
+    .map(async entry => {
+      const filePath = path.resolve(mediaDir, entry.name);
+      const size = await getChunkSize(filePath);
 
-for (const chunk of chunks.slice(0, limit)) {
-  const rawOversized = chunk.bytes > thresholdKiB * KiB;
+      return {
+        ...size,
+        name: entry.name,
+        path: path.relative(appRoot, filePath),
+      };
+    });
+
+  return Promise.all(files);
+}
+
+function rankItems(items) {
+  return items
+    .sort((left, right) => right.bytes - left.bytes)
+    .map((item, index) => ({ ...item, rank: index + 1 }));
+}
+
+function getOversizedItems(items) {
+  const rawOversized = items.filter(item => item.bytes > thresholdKiB * KiB);
   const gzipOversized =
-    gzipThresholdKiB !== null && chunk.gzipBytes > gzipThresholdKiB * KiB;
-  const mark = rawOversized || gzipOversized ? '!' : ' ';
-  console.log(
-    `${mark} #${String(chunk.rank).padStart(2, '0')} raw=${formatKiB(
-      chunk.bytes,
-    ).padStart(12, ' ')} gzip=${formatKiB(chunk.gzipBytes).padStart(
-      12,
-      ' ',
-    )} flags=${rawOversized ? 'raw' : '-'},${
-      gzipOversized ? 'gzip' : '-'
-    } ${chunk.path}`,
-  );
+    gzipThresholdKiB === null
+      ? []
+      : items.filter(item => item.gzipBytes > gzipThresholdKiB * KiB);
+  const oversized = [...new Set([...rawOversized, ...gzipOversized])];
+
+  return {
+    rawOversized,
+    gzipOversized,
+    oversized,
+  };
 }
 
-if (oversizedChunks.length > limit) {
+function printReport(title, items) {
+  const { rawOversized, gzipOversized, oversized } = getOversizedItems(items);
+
   console.log(
-    `... ${oversizedChunks.length - limit} more oversized chunks omitted`,
+    `yu-bi build ${title} report: rawThreshold=${thresholdKiB} KiB, gzipThreshold=${
+      gzipThresholdKiB === null ? 'off' : `${gzipThresholdKiB} KiB`
+    }, files=${items.length}, rawOversized=${rawOversized.length}, gzipOversized=${gzipOversized.length}, oversized=${oversized.length}`,
   );
+
+  for (const item of items.slice(0, limit)) {
+    const rawOversizedItem = item.bytes > thresholdKiB * KiB;
+    const gzipOversizedItem =
+      gzipThresholdKiB !== null && item.gzipBytes > gzipThresholdKiB * KiB;
+    const mark = rawOversizedItem || gzipOversizedItem ? '!' : ' ';
+    console.log(
+      `${mark} #${String(item.rank).padStart(2, '0')} raw=${formatKiB(
+        item.bytes,
+      ).padStart(12, ' ')} gzip=${formatKiB(item.gzipBytes).padStart(
+        12,
+        ' ',
+      )} flags=${rawOversizedItem ? 'raw' : '-'},${
+        gzipOversizedItem ? 'gzip' : '-'
+      } ${item.path}`,
+    );
+  }
+
+  if (oversized.length > limit) {
+    console.log(`... ${oversized.length - limit} more oversized ${title} omitted`);
+  }
+
+  return oversized.length;
 }
 
-if (failOnOversized && oversizedChunks.length > 0) {
+const chunks = rankItems([
+  ...(await collectJsChunks()),
+  ...(await collectTaskBundle()),
+]);
+const mediaAssets = rankItems(await collectMediaAssets());
+
+const oversizedChunks = printReport('chunk', chunks);
+const oversizedAssets = printReport('asset', mediaAssets);
+
+if (failOnOversized && oversizedChunks + oversizedAssets > 0) {
   process.exitCode = 1;
 }

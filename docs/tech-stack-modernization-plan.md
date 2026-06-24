@@ -69,8 +69,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | 以恢复命令输出为准                                         |
-| 最近专题提交               | 以 `git log --oneline --decorate -8` 为准                  |
+| 当前分支相对 `origin/main` | `0 74`，不落后、领先 74 个提交                             |
+| 最近专题提交               | `5df0dacf2 chore: 补强构建体积 gzip 阈值报告`              |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -87,6 +87,7 @@ git log --oneline --decorate -8
 - 除非用户明确要求阶段合并，否则专题分支只推送远端，不主动 merge 回 `main`
 - 目标模式中的“专题完成后 push 再 merge 到 main”按最新执行口径理解为：专题分支可持续 push 保存进度，但 `main` 合并要尽量少，只在一批可验收成果完成且用户明确要求时统一处理
 - 最新用户指令优先级高于目标旧文本：不要因为分支领先 `main` 很多就主动合并；当前阶段默认继续在一个分支上干活
+- 当前分支已经累计较多现代化提交，后续仍优先继续在本分支补齐前端安全、运行时、构建产物治理和必要的后端补丁线复核；不要为了“分支领先太多”主动切分支或合并主线
 
 ## 3. 分支与合并规则
 
@@ -2333,21 +2334,83 @@ npm exec -- prettier --check ../.github/workflows/dev-ut-stage.js.yml ../docs/te
 git diff --check
 ```
 
+最新批次：地图资源静态化与构建报告分层
+
+- 已将 `BasicOutlineMapChart` 的 `geo-china.map.json` / `geo-china-city.map.json` 从动态 JSON JS chunk 改为 `?url` 静态资源加载
+- 新增 `geoMapRuntime`，统一处理地图资源 URL、`fetch`、缓存、并发复用和失败重试；图表侧继续保持原有 ECharts `registerMap` 和渲染重放逻辑
+- 已补 `geoMapRuntime` 测试，覆盖同层级并发复用、加载后缓存、失败后可重试
+- `build:report` 已拆成 `chunk report` 和 `asset report` 两段输出：JS / task bundle 与 `static/media` 资源分开统计 raw / gzip 阈值，避免地图资源迁出 JS 后失去体积可见性
+- 主构建后地图 JSON 已进入 `build/static/media`，不再作为 `build/static/js/geo-china*.map.*.js` chunk 参与 JS 包预算
+- JS chunk raw 超限对象从 6 个降到 4 个：`editor.api`、`antv`、`antdDesign`、`echarts`
+- 设置 `YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB=500` 后，JS gzip 超限对象从 2 个降到 1 个，仅剩 `editor.api`
+- 地图资源本体仍在 asset report 中可见：`geo-china-city.map` raw / gzip 均超限，`geo-china.map` raw 超限；后续如继续治理，应面向地图数据压缩、层级拆分或服务端资源策略，而不是再把它们塞回 JS chunk
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/geoMapRuntime.test.ts src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx
+npm run eslint -- src/app/components/ChartGraph/BasicOutlineMapChart/BasicOutlineMapChart.tsx src/app/components/ChartGraph/BasicOutlineMapChart/geoMapRuntime.ts src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/geoMapRuntime.test.ts
+npm exec -- prettier --check ../docs/tech-stack-modernization-plan.md src/app/components/ChartGraph/BasicOutlineMapChart/BasicOutlineMapChart.tsx src/app/components/ChartGraph/BasicOutlineMapChart/geoMapRuntime.ts src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/geoMapRuntime.test.ts
+npm run checkTs
+npm run build
+npm run build:task
+npm run build:report
+YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB=500 npm run build:report
+npm run test -- scripts/__tests__/report-build-chunks.test.mts src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/geoMapRuntime.test.ts src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx
+npm run eslint -- scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts src/app/components/ChartGraph/BasicOutlineMapChart/BasicOutlineMapChart.tsx src/app/components/ChartGraph/BasicOutlineMapChart/geoMapRuntime.ts src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/geoMapRuntime.test.ts
+npm audit --json
+git diff --check
+```
+
+验证说明：
+
+- 地图 runtime 和构建报告相关 3 个测试文件、7 个用例通过
+- 相关源码和脚本 ESLint 通过
+- `npm run checkTs` 已通过
+- 主构建和 task bundle 构建通过
+- `npm audit --json` 仍为 0 vulnerabilities
+
 ## 12. 后续队列
 
-当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。
+当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
 
-| 阶段      | 事项                           | 风险 | 执行策略                                                                                                              |
-| --------- | ------------------------------ | ---- | --------------------------------------------------------------------------------------------------------------------- |
-| P2-E-Next | 前端剩余 outdated 复核         | 中   | 可推进；继续确认 `@vitejs/plugin-react`、AntD、ESLint、Monaco、Quill 的最新稳定状态，能升级则升级，不能升级则记录证据 |
-| P2-E-Next | 前端运行时 smoke 补强          | 中   | 可推进；优先补 Monaco、Quill、ECharts、分享页等动态运行时入口的最小回归                                               |
-| P2-E-Next | 前端构建产物治理               | 中   | 评估；当前有既有大 chunk warning，先分析 chunk 来源和可拆分点，不做盲目拆包                                           |
-| P2-F      | AntD 6 主版本评估              | 高   | 暂缓；继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路                                                |
-| P2-G      | ECharts 6 主版本评估           | 高   | 已完成；后续可增强浏览器层图表 smoke                                                                                  |
-| P2-H      | ESLint 10 主版本评估           | 中高 | 暂缓；当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级                  |
-| P2-I      | 数据源 provider / 方言依赖审计 | 高   | 评估；先盘点依赖树和驱动兼容，不做大规模重构                                                                          |
-| P2-J      | 富文本编辑器运行时 smoke       | 中   | 可推进；已补 jsdom 层运行时和 Dashboard Widget smoke，后续补分享页展示和浏览器入口                                    |
-| P2-K      | 后端依赖补丁线滚动收口         | 中   | 可推进；继续优先处理补丁级、同生态线、可被现有测试覆盖的升级；主版本跳跃单独评估                                      |
+### 12.1 当前 npm outdated 复核
+
+复核时间：2026-06-24
+
+当前 `npm outdated --json` 剩余 7 项，`npm audit --json` 仍为 0 vulnerabilities。处理原则是：能在 Node 24 / npm 11 / React 19 / Vite 8 / AntD 5 主链内安全升级的继续推进；会破坏 audit 清零、peer 合约或当前稳定生态的暂缓。
+
+| 依赖                   | 当前版本  | 最新版本 | 当前决策 | 依据                                                                                                          |
+| ---------------------- | --------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------- |
+| `@types/node`          | `24.13.2` | `26.0.0` | 暂缓     | 硬性目标是 Node 24，不切到 Node 26 类型线；24.x 当前已是最新                                                  |
+| `@vitejs/plugin-react` | `5.2.0`   | `6.0.3`  | 暂缓     | 5.2.0 已支持 Vite 8；6.x 仍需继续复核 optional Babel / Rolldown peer 链，避免 npm 11 安装解析风险             |
+| `antd`                 | `5.29.3`  | `6.4.5`  | 暂缓     | 当前稳定 `@ant-design/pro-components 2.8.10` peer 仍只支持 AntD 4/5；不采用 Pro Components 3.x 预发布链路     |
+| `eslint`               | `9.39.4`  | `10.5.0` | 暂缓     | ESLint 10 本体满足 Node 24，但 `eslint-plugin-react`、`eslint-plugin-import` 最新稳定版尚未声明支持 ESLint 10 |
+| `monaco-editor`        | `0.52.2`  | `0.55.1` | 暂缓     | 0.55.1 依赖 `dompurify 3.2.7`，此前临时试装会引入 npm audit 风险                                              |
+| `quill`                | `2.0.2`   | `2.0.3`  | 暂缓     | 与 `react-quill-new 3.8.3` 组合会触发 `GHSA-v3m3-f69x-jf25` 低危 XSS advisory                                 |
+| `react-quill-new`      | `3.7.0`   | `3.8.3`  | 暂缓     | 3.8.3 依赖 `quill ~2.0.3`，会破坏当前 audit 清零状态                                                          |
+
+下一步不要重复做无结果试装。只有出现以下变化时再重新评估对应依赖：
+
+- `@vitejs/plugin-react` 6.x peer 链可在 npm 11 下干净安装
+- Pro Components 稳定版明确支持 AntD 6
+- `eslint-plugin-react` 和 `eslint-plugin-import` 稳定版明确支持 ESLint 10
+- Monaco 最新版本不再引入当前 audit 风险
+- Quill / react-quill-new 最新组合不再触发 XSS advisory
+
+### 12.2 当前可推进事项
+
+| 阶段      | 事项                           | 风险 | 执行策略                                                                                                   |
+| --------- | ------------------------------ | ---- | ---------------------------------------------------------------------------------------------------------- |
+| P2-E-Next | 前端剩余 outdated 复核         | 中   | 暂停重复试装；按 12.1 的触发条件定期复核，当前不为这 7 项强行升级                                          |
+| P2-E-Next | 前端运行时 smoke 补强          | 中   | 可推进；优先补 Monaco、Quill、ECharts、分享页等动态运行时入口的最小回归                                    |
+| P2-E-Next | 前端构建产物治理               | 中   | 可推进；优先分析 `editor.api` 和地图 JSON gzip 超限对象，先补可重复报告和懒加载边界，不盲目拆 ECharts core |
+| P2-F      | AntD 6 主版本评估              | 高   | 暂缓；继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路                                     |
+| P2-G      | ECharts 6 主版本评估           | 高   | 已完成；后续可增强浏览器层图表 smoke                                                                       |
+| P2-H      | ESLint 10 主版本评估           | 中高 | 暂缓；当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级       |
+| P2-I      | 数据源 provider / 方言依赖审计 | 高   | 评估；先盘点依赖树和驱动兼容，不做大规模重构                                                               |
+| P2-J      | 富文本编辑器运行时 smoke       | 中   | 可推进；已补 jsdom 层运行时和 Dashboard Widget smoke，后续补分享页展示和浏览器入口                         |
+| P2-K      | 后端依赖补丁线滚动收口         | 中   | 可推进；继续优先处理补丁级、同生态线、可被现有测试覆盖的升级；主版本跳跃单独评估                           |
 
 ## 13. 门禁策略
 
