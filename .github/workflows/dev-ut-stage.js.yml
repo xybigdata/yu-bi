@@ -5,52 +5,53 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js from frontend/.nvmrc
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: 'frontend/.nvmrc'
-        cache: 'npm'
-        cache-dependency-path: 'frontend/package-lock.json'
-    - name: Use Temurin JDK 21
-      uses: actions/setup-java@v4
-      with:
-        distribution: temurin
-        java-version: '21'
-        cache: maven
-    - name: Verify frontend toolchain
-      run: |
-        npm install -g npm@11.13.0
-        node -v
-        npm -v
-        npm config get engine-strict
-        test "$(npm -v)" = "11.13.0"
-        test "$(npm config get engine-strict)" = "true"
-        node -e "const p=require('./package.json'); if (p.packageManager !== 'npm@11.13.0') throw new Error('Unexpected packageManager: '+p.packageManager)"
-      working-directory: ./frontend
-    - run: npm ci
-      working-directory: ./frontend
-    - run: npm run checkTs
-      working-directory: ./frontend
-    - run: npm run build:task
-      working-directory: ./frontend
-    - run: npm run build --if-present
-      working-directory: ./frontend
-    - run: npm run test:ci
-      working-directory: ./frontend
-    - run: npm run lint:css
-      working-directory: ./frontend
-    - run: npm run lint:style
-      working-directory: ./frontend
-    - run: mvn -pl server -am -DskipTests package
-    - run: mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.sql.SqlScriptRenderTest,datart.data.provider.function.SqlFunctionValidateTest -Dsurefire.failIfNoSpecifiedTests=false test
-    - run: bash ./scripts/check-demo-health.sh
+      - uses: actions/checkout@v4
+      - name: Use Node.js from frontend/.nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "frontend/.nvmrc"
+          cache: "npm"
+          cache-dependency-path: "frontend/package-lock.json"
+      - name: Use Temurin JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - name: Verify frontend toolchain
+        run: |
+          npm install -g npm@11.13.0
+          node -v
+          npm -v
+          npm config get engine-strict
+          node -e "const fs=require('fs'); const nvm=fs.readFileSync('.nvmrc','utf8').trim().replace(/^v/,''); const nodeVersion=fs.readFileSync('.node-version','utf8').trim().replace(/^v/,''); const actual=process.version.replace(/^v/,''); if (nvm !== nodeVersion) throw new Error('Node version files mismatch: '+nvm+' !== '+nodeVersion); if (actual !== nodeVersion) throw new Error('Unexpected node version: '+actual+' !== '+nodeVersion)"
+          test "$(npm -v)" = "11.13.0"
+          test "$(npm config get engine-strict)" = "true"
+          node -e "const p=require('./package.json'); if (p.packageManager !== 'npm@11.13.0') throw new Error('Unexpected packageManager: '+p.packageManager)"
+        working-directory: ./frontend
+      - run: npm ci
+        working-directory: ./frontend
+      - run: npm run checkTs
+        working-directory: ./frontend
+      - run: npm run build:task
+        working-directory: ./frontend
+      - run: npm run build --if-present
+        working-directory: ./frontend
+      - run: npm run test:ci
+        working-directory: ./frontend
+      - run: npm run lint:css
+        working-directory: ./frontend
+      - run: npm run lint:style
+        working-directory: ./frontend
+      - run: mvn -pl server -am -DskipTests package
+      - run: mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.sql.SqlScriptRenderTest,datart.data.provider.function.SqlFunctionValidateTest -Dsurefire.failIfNoSpecifiedTests=false test
+      - run: bash ./scripts/check-demo-health.sh

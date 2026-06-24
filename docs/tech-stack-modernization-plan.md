@@ -1893,6 +1893,30 @@ npm audit --json
 npm run checkTs
 ```
 
+最新批次：前端 Node 24 本地工具版本文件补强
+
+- 已新增 `frontend/.node-version`，内容与 `frontend/.nvmrc` 对齐到当前验证基线 `24.16.0`
+- CI 的 `Verify frontend toolchain` 步骤已校验 `.nvmrc`、`.node-version` 和实际 `node -v` 三者一致
+- README / README_zh 已同步当前前端基线为 `npm 11`、`Vite 8`、`React 19`，并提示使用 `.nvmrc` 或 `.node-version` 选择 Node 运行时
+- 本批次不升级依赖版本、不改业务代码，只补齐 nodenv / asdf / mise 等不读取 `.nvmrc` 的本地工具入口，降低 Node 版本漂移风险
+- 本轮复核 `@vitejs/plugin-react 6.0.3` 仍不并入当前批次：npm 11 试装会解析到可选 `@rolldown/plugin-babel` / Babel 8 peer 链并触发 `ERESOLVE`
+- 本轮复核 `@types/node 26.0.0` 继续暂缓：当前硬性目标是 Node 24，继续保持 `@types/node 24.13.2`
+- 本轮复核 AntD 6、ESLint 10、Monaco 0.55.1、Quill 2.0.3 / `react-quill-new 3.8.3` 均仍不满足当前稳定升级条件
+
+本批次验证命令：
+
+```bash
+node -e "const fs=require('fs'); const nvm=fs.readFileSync('.nvmrc','utf8').trim().replace(/^v/,''); const nodeVersion=fs.readFileSync('.node-version','utf8').trim().replace(/^v/,''); const actual=process.version.replace(/^v/,''); if (nvm !== nodeVersion) throw new Error('Node version files mismatch: '+nvm+' !== '+nodeVersion); if (actual !== nodeVersion) throw new Error('Unexpected node version: '+actual+' !== '+nodeVersion)"
+npm outdated --json
+npm view @vitejs/plugin-react@6.0.3 version peerDependencies dependencies engines peerDependenciesMeta --json
+npm install @vitejs/plugin-react@6.0.3 --save-dev --package-lock-only --ignore-scripts --no-audit --no-fund
+npm view @ant-design/pro-components@latest version peerDependencies dependencies engines --json
+npm view eslint-plugin-react@latest version peerDependencies engines --json
+npm view eslint-plugin-import@latest version peerDependencies engines --json
+npm exec -- prettier --check ../.github/workflows/dev-ut-stage.js.yml ../README.md ../README_zh.md
+git diff --check
+```
+
 最新批次：后端构建仓库治理收口
 
 - 已确认当前 POM 中没有 `SNAPSHOT`、milestone、RC、alpha、beta 版本依赖

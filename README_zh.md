@@ -38,8 +38,9 @@
 - Spring Boot：`3.5.12`
 - Spring Cloud：`2025.0.1`
 - Node.js：`24.x`
-- 前端构建：`Vite 6`
-- React：`18.3.x`
+- npm：`11.x`
+- 前端构建：`Vite 8`
+- React：`19.x`
 
 ## 本地开发
 
@@ -58,6 +59,7 @@ mvn -pl server -am -DskipTests package
 
 ```bash
 cd frontend
+# 使用 frontend/.nvmrc 或 frontend/.node-version 选择受支持的 Node 运行时。
 npm ci
 npm run checkTs
 npm run build
