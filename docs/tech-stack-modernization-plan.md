@@ -2261,6 +2261,23 @@ git diff --check
 - `npm run checkTs` 已通过
 - `npm audit --json` 仍为 0 vulnerabilities
 
+最新批次：前端 CI 构建体积报告接入
+
+- 已在 `.github/workflows/dev-ut-stage.js.yml` 中将 `npm run build:report` 接到前端 `build:task` 和 `build` 之后
+- CI 现在会在主线 push / PR 门禁中输出当前超阈值 chunk 清单，方便持续观察构建产物治理进度
+- `build:report` 仍是报告型步骤，不设置失败阈值，不通过调高 `chunkSizeWarningLimit` 掩盖 Vite warning
+- 本批次只调整 CI 可见性，不改业务代码、不升级依赖、不增加本地 push hook 耗时
+
+本批次验证命令：
+
+```bash
+npm run build
+npm run build:task
+npm run build:report
+npm exec -- prettier --check ../.github/workflows/dev-ut-stage.js.yml ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。

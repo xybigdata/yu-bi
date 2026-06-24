@@ -46,6 +46,8 @@ jobs:
         working-directory: ./frontend
       - run: npm run build --if-present
         working-directory: ./frontend
+      - run: npm run build:report
+        working-directory: ./frontend
       - run: npm run test:ci
         working-directory: ./frontend
       - run: npm run lint:css
