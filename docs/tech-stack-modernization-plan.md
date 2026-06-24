@@ -1923,6 +1923,23 @@ mvn -pl server -am -DskipTests package
 git diff --check
 ```
 
+最新批次：后端 Maven 版本属性集中管理
+
+- 已将一批后端直依赖和插件版本统一抽到父 POM 属性，包含 `jjwt`、`jose4j`、`dingtalk`、`httpclient5`、`poi`、`pdfbox`、`thumbnailator`、`javassist`、`aspectjweaver`、`calcite`、`sql-formatter`、`mybatis-generator`、`javacc-maven-plugin` 等
+- 已删除父 POM 中长期注释掉且无实际使用的 Spring Cloud Alibaba BOM 声明块，减少构建治理噪声
+- 本批次不改变任何依赖版本，不改变依赖 scope、exclusion、业务代码、Java 包名、配置前缀、`DATART_*` 或迁移稳定标识
+- 依赖树已确认属性化后解析版本保持不变：`jjwt 0.13.0`、`jose4j 0.9.6`、`dingtalk 1.1.86`、`calcite-core 1.26.0`、`sql-formatter 2.0.5`、`pdfbox 3.0.7` 等
+
+本批次验证命令：
+
+```bash
+mvn dependency:tree -Dincludes=io.jsonwebtoken:jjwt-api,io.jsonwebtoken:jjwt-impl,io.jsonwebtoken:jjwt-jackson,org.bitbucket.b_c:jose4j,com.aliyun:dingtalk,org.apache.calcite:calcite-core,com.github.vertical-blank:sql-formatter,org.apache.pdfbox:pdfbox,org.apache.poi:poi-ooxml,org.apache.httpcomponents.client5:httpclient5,org.javassist:javassist,net.coobird:thumbnailator,org.mybatis.generator:mybatis-generator-core
+mvn -pl security -am -Dtest=datart.security.test.jwt.TestJwkParse,datart.security.manager.shiro.ShiroAuthenticationTokenAdapterTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.calcite.SqlParserUtilsTest,datart.data.provider.calcite.SqlQueryScriptProcessorTest,datart.data.provider.jdbc.ProviderFactoryTest,datart.data.provider.sql.SqlScriptRenderExamplesTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl server -am -DskipTests package
+git diff --check
+```
+
 ## 12. 后续队列
 
 | 阶段 | 事项 | 风险 | 执行策略 |
