@@ -115,6 +115,7 @@ codex/modernization-frontend-security-deps
 | Springdoc | `2.8.17` | 已适配 Boot 3 |
 | H2 | `2.4.240` | 已升级 |
 | Selenium | `4.45.0` | 已升级到 Selenium 4 稳定线较新补丁版本 |
+| Maven 仓库 | Maven Central / Spring Boot 默认仓库 | 已移除不再需要的 Spring milestone 仓库声明 |
 | Shiro | `2.0.5` | 高风险，只做认证授权边界审计和小步修复 |
 | Druid | `1.2.28` | 中风险，暂不优先 |
 | Calcite | 现网主链 | 高风险，先补 SQL 解析兼容样例 |
@@ -1843,6 +1844,24 @@ npm audit --json
 npm run checkTs
 npm run test:ci -- src/__tests__/task.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/RichTextEditorRuntime.smoke.test.tsx src/app/pages/DashBoardPage/components/Widgets/RichTextWidget/__tests__/RichTextWidgetCore.smoke.test.tsx
 npm run lint:style
+```
+
+最新批次：后端构建仓库治理收口
+
+- 已确认当前 POM 中没有 `SNAPSHOT`、milestone、RC、alpha、beta 版本依赖
+- 已移除父 POM 中不再需要的 `spring-milestones` 仓库声明，避免稳定版构建链路继续暴露预发布仓库解析入口
+- 本批次只调整 Maven 仓库声明，不改变依赖版本、业务代码、Java 包名、配置前缀、`DATART_*` 或迁移稳定标识
+- 已试评估 `monaco-editor 0.55.1`，该版本新增的 `dompurify 3.2.7` 链路会引入 1 个 moderate 和 1 个 low audit advisory；当前继续保留 `monaco-editor 0.52.2`，保持 `npm audit` 0 漏洞
+
+本批次验证命令：
+
+```bash
+rg -n "spring-milestones|repo.spring.io/milestone|SNAPSHOT|M[0-9]|RC[0-9]|alpha|beta" pom.xml core/pom.xml security/pom.xml server/pom.xml data-providers -g 'pom.xml'
+mvn -q help:effective-pom -Doutput=/tmp/yu-bi-effective-pom-after-repo-cleanup.xml
+mvn -pl server -am -DskipTests package
+npm view monaco-editor@0.55.1 version dependencies peerDependencies optionalDependencies engines
+npm audit --json
+git diff --check
 ```
 
 ## 12. 后续队列
