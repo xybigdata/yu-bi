@@ -107,6 +107,7 @@ codex/modernization-frontend-security-deps
 | --- | --- | --- |
 | Java | `21` | 已达硬性目标 |
 | Maven | `>=3.9` | 已由 Enforcer 约束 |
+| JavaCC Maven Plugin | `3.2.0` | 已验证 SQL parser clean 重生成链路 |
 | Spring Boot | `3.5.12` | 当前主链 |
 | Spring Cloud | `2025.0.1` | 与 Boot 3.5 配套 |
 | MyBatis Spring Boot | `3.0.4` | 已适配 Boot 3 |
@@ -1880,6 +1881,24 @@ git diff --check
 rg -n "json-path|JsonPath|com\\.jayway\\.jsonpath|DocumentContext|Configuration\\.defaultConfiguration|Option\\." server core security data-providers -g '*.java' -g 'pom.xml'
 mvn -pl server -am -Dtest=datart.server.common.OAuth2AttributeMappingTest -Dsurefire.failIfNoSpecifiedTests=false test
 mvn -pl server -am dependency:tree -Dincludes=com.jayway.jsonpath:json-path
+mvn -pl server -am -DskipTests package
+git diff --check
+```
+
+最新批次：JavaCC 插件升级与 SQL parser 生成链路验证
+
+- 已将 `org.codehaus.mojo:javacc-maven-plugin` 从 `2.4` 升级到 `3.2.0`
+- 已通过 `clean test` 强制删除旧 generated-sources 后重新生成 SQL parser，确认 JavaCC 7.0.13 生成链路可在 JDK 21 下编译
+- 已确认 SQL parser / query processor / SQL render 相关 13 个用例通过
+- 新插件生成日志仍有 4 个语法 choice warning，属于 `Parser.jj` 既有语法结构提示；旧 generated source 的 deprecated annotation warning 已消失
+- 本批次不升级 Calcite，不修改 `Parser.jj` 语法，不改变 SQL 方言、Java 包名、配置前缀、`DATART_*` 或迁移稳定标识
+
+本批次验证命令：
+
+```bash
+mvn versions:display-plugin-updates -DgenerateBackupPoms=false -Dincludes=org.codehaus.mojo:javacc-maven-plugin
+mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.calcite.SqlParserUtilsTest,datart.data.provider.calcite.SqlQueryScriptProcessorTest,datart.data.provider.jdbc.SqlScriptRenderTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.calcite.SqlParserUtilsTest,datart.data.provider.calcite.SqlQueryScriptProcessorTest,datart.data.provider.jdbc.SqlScriptRenderTest -Dsurefire.failIfNoSpecifiedTests=false clean test
 mvn -pl server -am -DskipTests package
 git diff --check
 ```
