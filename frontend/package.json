@@ -22,6 +22,7 @@
     "build:vite": "vite build",
     "build:task": "vite build --config vite.task.config.mts",
     "build:all": "npm run build && npm run build:task",
+    "build:report": "node scripts/report-build-chunks.mjs",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:ci": "vitest run --reporter=default",

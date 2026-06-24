@@ -2232,6 +2232,35 @@ git diff --check
 - 主构建和 task bundle 构建均通过，继续使用 `vite v8.1.0`
 - 构建产物体积基本不变，本批次是运行时入口收口，不是 ECharts 拆包
 
+最新批次：前端构建产物体积报告基线
+
+- 已新增 `frontend/scripts/report-build-chunks.mjs`，读取 `build/static/js` 和 `build/task/index.js`，输出最大 chunk 和超过阈值的 chunk
+- 已新增 npm script `build:report`，默认阈值为 `500 KiB`，可通过 `YU_BI_CHUNK_REPORT_THRESHOLD_KIB` 和 `YU_BI_CHUNK_REPORT_LIMIT` 调整
+- 已新增 `scripts/__tests__/report-build-chunks.test.mts`，覆盖报告脚本输出结构，避免后续误改报告入口
+- 当前脚本只报告、不失败，不调高 Vite `chunkSizeWarningLimit`，先用于构建产物治理的可重复基线
+
+本批次验证命令：
+
+```bash
+npm run build
+npm run build:task
+npm run build:report
+npm run test -- scripts/__tests__/report-build-chunks.test.mts
+npm run eslint -- scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts
+npm exec -- prettier --check package.json package-lock.json scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts
+npm run checkTs
+npm audit --json
+git diff --check
+```
+
+验证说明：
+
+- `build:report` 已输出当前 100 个 JS / task 文件，超过 `500 KiB` 的 chunk 为 6 个
+- 当前超过阈值的对象为 `editor.api`、`antv`、`antdDesign`、`geo-china-city.map`、`echarts`、`geo-china.map`
+- `scripts/__tests__/report-build-chunks.test.mts` 1 个用例通过
+- `npm run checkTs` 已通过
+- `npm audit --json` 仍为 0 vulnerabilities
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。
