@@ -20,12 +20,12 @@ describe('report-build-chunks', () => {
       },
     );
 
-    expect(stdout).toContain(
-      'yu-bi build chunk report: threshold=500 KiB',
-    );
+    expect(stdout).toContain('yu-bi build chunk report: rawThreshold=500 KiB');
+    expect(stdout).toContain('gzipThreshold=off');
     expect(stdout).toContain('oversized=6');
     expect(stdout).toContain('raw=');
     expect(stdout).toContain('gzip=');
+    expect(stdout).toContain('flags=raw,-');
     expect(stdout).toContain('build/static/js/editor.api.');
     expect(stdout).toContain('build/static/js/antv.');
     expect(stdout).toContain('build/static/js/antdDesign.');
@@ -47,5 +47,25 @@ describe('report-build-chunks', () => {
       code: 1,
       stdout: expect.stringContaining('oversized='),
     });
+  });
+
+  it('can report gzip threshold independently', async () => {
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      ['scripts/report-build-chunks.mjs'],
+      {
+        cwd: process.cwd(),
+        env: {
+          ...process.env,
+          YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB: '500',
+          YU_BI_CHUNK_REPORT_LIMIT: '10',
+          YU_BI_CHUNK_REPORT_THRESHOLD_KIB: '500',
+        },
+      },
+    );
+
+    expect(stdout).toContain('gzipThreshold=500 KiB');
+    expect(stdout).toContain('gzipOversized=2');
+    expect(stdout).toContain('flags=raw,gzip');
   });
 });

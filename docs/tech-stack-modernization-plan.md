@@ -2287,6 +2287,35 @@ git diff --check
 - `npm run checkTs` 已通过
 - `npm audit --json` 仍为 0 vulnerabilities
 
+最新批次：前端构建体积 gzip 阈值报告
+
+- `build:report` 已支持独立 gzip 阈值 `YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB`
+- 报告头现在分别输出 `rawOversized`、`gzipOversized` 和去重后的 `oversized`
+- 每个 chunk 行增加 `flags=raw,gzip` 标记，便于区分 raw 超限、gzip 超限或两者都超限
+- 默认 gzip 阈值为 `off`，CI 当前仍只按 raw `500 KiB` 输出报告，不新增失败条件
+- 当前以 `YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB=500` 复核，gzip 超限对象为 `editor.api` 和 `geo-china-city.map`
+
+本批次验证命令：
+
+```bash
+npm run build:report
+YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB=500 npm run build:report
+npm run test -- scripts/__tests__/report-build-chunks.test.mts
+npm run eslint -- scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts
+npm exec -- prettier --check ../docs/tech-stack-modernization-plan.md scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts
+npm run checkTs
+npm audit --json
+git diff --check
+```
+
+验证说明：
+
+- 默认报告为 `rawOversized=6`、`gzipOversized=0`、`oversized=6`
+- 设置 gzip `500 KiB` 阈值后为 `rawOversized=6`、`gzipOversized=2`、`oversized=6`
+- `scripts/__tests__/report-build-chunks.test.mts` 3 个用例通过
+- `npm run checkTs` 已通过
+- `npm audit --json` 仍为 0 vulnerabilities
+
 最新批次：前端 CI 构建体积报告接入
 
 - 已在 `.github/workflows/dev-ut-stage.js.yml` 中将 `npm run build:report` 接到前端 `build:task` 和 `build` 之后

@@ -12,6 +12,9 @@ const appRoot = process.cwd();
 const thresholdKiB = Number(
   process.env.YU_BI_CHUNK_REPORT_THRESHOLD_KIB || DEFAULT_THRESHOLD_KIB,
 );
+const gzipThresholdKiB = process.env.YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB
+  ? Number(process.env.YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB)
+  : null;
 const limit = Number(process.env.YU_BI_CHUNK_REPORT_LIMIT || DEFAULT_LIMIT);
 const failOnOversized =
   process.env.YU_BI_CHUNK_REPORT_FAIL_ON_OVERSIZED === '1';
@@ -87,23 +90,35 @@ const chunks = [...(await collectJsChunks()), ...(await collectTaskBundle())]
   .sort((left, right) => right.bytes - left.bytes)
   .map((chunk, index) => ({ ...chunk, rank: index + 1 }));
 
-const oversizedChunks = chunks.filter(
+const rawOversizedChunks = chunks.filter(
   chunk => chunk.bytes > thresholdKiB * KiB,
 );
+const gzipOversizedChunks =
+  gzipThresholdKiB === null
+    ? []
+    : chunks.filter(chunk => chunk.gzipBytes > gzipThresholdKiB * KiB);
+const oversizedChunks = [...new Set([...rawOversizedChunks, ...gzipOversizedChunks])];
 
 console.log(
-  `yu-bi build chunk report: threshold=${thresholdKiB} KiB, files=${chunks.length}, oversized=${oversizedChunks.length}`,
+  `yu-bi build chunk report: rawThreshold=${thresholdKiB} KiB, gzipThreshold=${
+    gzipThresholdKiB === null ? 'off' : `${gzipThresholdKiB} KiB`
+  }, files=${chunks.length}, rawOversized=${rawOversizedChunks.length}, gzipOversized=${gzipOversizedChunks.length}, oversized=${oversizedChunks.length}`,
 );
 
 for (const chunk of chunks.slice(0, limit)) {
-  const mark = chunk.bytes > thresholdKiB * KiB ? '!' : ' ';
+  const rawOversized = chunk.bytes > thresholdKiB * KiB;
+  const gzipOversized =
+    gzipThresholdKiB !== null && chunk.gzipBytes > gzipThresholdKiB * KiB;
+  const mark = rawOversized || gzipOversized ? '!' : ' ';
   console.log(
     `${mark} #${String(chunk.rank).padStart(2, '0')} raw=${formatKiB(
       chunk.bytes,
     ).padStart(12, ' ')} gzip=${formatKiB(chunk.gzipBytes).padStart(
       12,
       ' ',
-    )} ${chunk.path}`,
+    )} flags=${rawOversized ? 'raw' : '-'},${
+      gzipOversized ? 'gzip' : '-'
+    } ${chunk.path}`,
   );
 }
 
