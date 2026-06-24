@@ -18,7 +18,6 @@
 
 package datart.server.service.impl;
 
-import com.jayway.jsonpath.JsonPath;
 import datart.core.base.exception.Exceptions;
 import datart.core.base.exception.ParamException;
 import datart.core.common.Application;
@@ -27,6 +26,7 @@ import datart.core.mappers.ext.UserMapperExt;
 import datart.security.base.PasswordToken;
 import datart.security.util.JwtUtils;
 import datart.server.base.params.UserRegisterParam;
+import datart.server.common.OAuth2AttributeMapping;
 import datart.server.service.ExternalRegisterService;
 import datart.server.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -127,7 +127,7 @@ public class ExternalRegisterServiceImpl implements ExternalRegisterService {
         userRegisterParam.setUsername(oauthUser.getName());
         userRegisterParam.setPassword(RandomStringUtils.secure().nextAscii(32));
         if (emailMapping != null) {
-            userRegisterParam.setEmail(JsonPath.read(attributeDocument, emailMapping));
+            userRegisterParam.setEmail(OAuth2AttributeMapping.readString(attributeDocument, emailMapping));
         }
         if (userService.register(userRegisterParam, false)) {
             PasswordToken passwordToken = new PasswordToken(userRegisterParam.getUsername(),

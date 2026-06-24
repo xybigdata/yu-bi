@@ -115,6 +115,7 @@ codex/modernization-frontend-security-deps
 | Springdoc | `2.8.17` | 已适配 Boot 3 |
 | H2 | `2.4.240` | 已升级 |
 | Selenium | `4.45.0` | 已升级到 Selenium 4 稳定线较新补丁版本 |
+| JsonPath | `3.0.0` | 已补 OAuth 属性映射行为测试后升级 |
 | Maven 仓库 | Maven Central / Spring Boot 默认仓库 | 已移除不再需要的 Spring milestone 仓库声明 |
 | Shiro | `2.0.5` | 高风险，只做认证授权边界审计和小步修复 |
 | Druid | `1.2.28` | 中风险，暂不优先 |
@@ -1861,6 +1862,25 @@ mvn -q help:effective-pom -Doutput=/tmp/yu-bi-effective-pom-after-repo-cleanup.x
 mvn -pl server -am -DskipTests package
 npm view monaco-editor@0.55.1 version dependencies peerDependencies optionalDependencies engines
 npm audit --json
+git diff --check
+```
+
+最新批次：JsonPath 主版本升级与 OAuth 属性映射边界收口
+
+- 已将 `com.jayway.jsonpath:json-path` 从 `2.7.0` 升级到 `3.0.0`
+- 已将 `json-path` 版本抽到父 POM 属性 `json-path.version`，避免 server 模块继续硬编码版本
+- 已新增 `OAuth2AttributeMapping` helper，集中 `UserServiceImpl` 和 `ExternalRegisterServiceImpl` 中 OAuth2 用户属性 JSONPath 读取逻辑
+- 已新增 `OAuth2AttributeMappingTest`，覆盖嵌套字符串属性、可选映射为空、非字符串属性保持原有强制字符串转换异常行为
+- 已确认 reactor 依赖树中 `json-path` 统一到 `3.0.0`，包括 server 直接依赖、Spring Boot test 传递链路和 Calcite 传递链路
+- 本批次不改变 OAuth2 配置键、用户注册语义、Java 包名、配置前缀、`DATART_*` 或迁移稳定标识
+
+本批次验证命令：
+
+```bash
+rg -n "json-path|JsonPath|com\\.jayway\\.jsonpath|DocumentContext|Configuration\\.defaultConfiguration|Option\\." server core security data-providers -g '*.java' -g 'pom.xml'
+mvn -pl server -am -Dtest=datart.server.common.OAuth2AttributeMappingTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl server -am dependency:tree -Dincludes=com.jayway.jsonpath:json-path
+mvn -pl server -am -DskipTests package
 git diff --check
 ```
 
