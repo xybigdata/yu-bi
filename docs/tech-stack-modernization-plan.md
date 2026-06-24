@@ -1573,7 +1573,8 @@ git checkout -- frontend/package.json frontend/package-lock.json
 - 已复核 `@types/node` 的 24.x 最新版本仍是当前 `24.13.2`，不升级到 Node 26 类型线
 - 已复核安装期废弃提示：
   - `intersection-observer` 来自 `@antv/s2-react -> ahooks`，ahooks 最新稳定版运行时代码仍在 `useInViewport` 中导入该 polyfill，暂不强行 override 删除
-  - `lodash.isequal` 来自 `quill-delta 5.1.0`，上游最新稳定版仍依赖它，暂不强行替换
+  - `lodash.isequal` 来自 `quill-delta 5.1.0`，上游最新稳定版仍依赖它；后续已通过本地兼容包转发到
+    `lodash/isEqual`，不再使用 registry 上 deprecated 的独立包
 - 已将主 Vite 构建和 task bundle 构建中重复的 Less `preprocessorOptions` 抽到 `vite.shared.mts#createLessPreprocessorOptions`
 - 共享 Less 配置继续保留现有行为：
   - `javascriptEnabled: true`
@@ -1855,7 +1856,6 @@ npm run lint:style
 - 当前前端基线已经收口到 `Node 24`、现代浏览器和 `build.target: es2020`，Intersection Observer 已是浏览器 Baseline 能力，不再需要该旧 polyfill
 - 已新增本地 no-op 兼容包 `frontend/npm-overrides/intersection-observer`，并通过根依赖 `file:./npm-overrides/intersection-observer` 满足 `ahooks` 的模块解析
 - `npm ls intersection-observer` 已确认 `ahooks` 解析到本地 no-op 包，不再使用 registry 上 deprecated 的 polyfill 包
-- `lodash.isequal 4.5.0` 仍来自 `quill-delta 5.1.0`，属于 Quill Delta 内部依赖；当前不替换，避免影响富文本 Delta 比较语义
 - 本批次不升级 AntV S2、不改 PivotSheet 业务代码、不改变浏览器运行时协议
 
 本批次验证命令：
@@ -1870,6 +1870,27 @@ npm exec -- prettier --check package.json package-lock.json npm-overrides/inters
 npm run build
 npm run build:task
 git diff --check
+```
+
+最新批次：Quill Delta 深比较依赖收口
+
+- 已确认 `lodash.isequal 4.5.0` 只来自 `quill-delta 5.1.0`，用于富文本 Delta attributes / ops
+  深比较
+- 已新增本地兼容包 `frontend/npm-overrides/lodash.isequal`，通过 CommonJS 转发到当前项目已使用的
+  `lodash/isEqual`
+- 已通过根依赖 `file:./npm-overrides/lodash.isequal` 满足 `quill-delta` 的 `require('lodash.isequal')`
+  解析，不再下载 registry 上 deprecated 的独立包
+- 本批次不升级 `react-quill-new`、`quill` 或 `quill-delta`，不改变富文本 Delta 语义，只清理废弃传递依赖来源
+
+本批次验证命令：
+
+```bash
+npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+npm install --ignore-scripts --no-audit --no-fund
+npm ls lodash.isequal lodash quill-delta --all
+node -e "const Delta=require('quill-delta'); const isEqual=require('lodash.isequal'); if(!isEqual({a:[1,{b:2}]},{a:[1,{b:2}]})) throw new Error('isEqual failed'); const a=new Delta().insert('x',{bold:true}); const b=new Delta().insert('x',{bold:true}); if(!isEqual(a.ops,b.ops)) throw new Error('Delta ops equality failed'); console.log('ok')"
+npm audit --json
+npm run checkTs
 ```
 
 最新批次：后端构建仓库治理收口
