@@ -3,7 +3,11 @@ import path from 'path';
 import { defineConfig, type Plugin } from 'vite';
 import svgr from 'vite-plugin-svgr';
 
-import { createReactPlugin, createViteAliases } from './vite.shared.mts';
+import {
+  createReactPlugin,
+  createVendorManualChunks,
+  createViteAliases,
+} from './vite.shared.mts';
 
 const appRoot = __dirname;
 const publicUrl = process.env.PUBLIC_URL || '';
@@ -62,57 +66,6 @@ const shareHtmlFallback = (): Plugin => ({
   },
 });
 
-const vendorManualChunks = (id: string) => {
-  if (!id.includes('node_modules')) {
-    return undefined;
-  }
-
-  if (
-    id.includes('/node_modules/antd/') ||
-    id.includes('/node_modules/@ant-design/')
-  ) {
-    return 'antdDesign';
-  }
-
-  if (
-    id.includes('/node_modules/echarts/') ||
-    id.includes('/node_modules/zrender/')
-  ) {
-    return 'echarts';
-  }
-
-  if (
-    id.includes('/node_modules/quill/') ||
-    id.includes('/node_modules/quill-delta/') ||
-    id.includes('/node_modules/parchment/') ||
-    id.includes('/node_modules/react-quill-new/')
-  ) {
-    return 'quill';
-  }
-
-  if (
-    id.includes('/node_modules/react/') ||
-    id.includes('/node_modules/react-dom/') ||
-    id.includes('/node_modules/scheduler/')
-  ) {
-    return 'react';
-  }
-
-  if (id.includes('/node_modules/react-grid-layout/')) {
-    return 'reactGridLayout';
-  }
-
-  if (id.includes('/node_modules/reveal.js/')) {
-    return 'reveal';
-  }
-
-  if (id.includes('/node_modules/flexlayout-react/')) {
-    return 'flexlayout';
-  }
-
-  return undefined;
-};
-
 export default defineConfig(({ mode }) => ({
   publicDir: 'public',
   plugins: [
@@ -156,7 +109,7 @@ export default defineConfig(({ mode }) => ({
             ? 'static/css/[name].[hash][extname]'
             : 'static/media/[name].[hash][extname]';
         },
-        manualChunks: vendorManualChunks,
+        manualChunks: createVendorManualChunks,
       },
     },
   },

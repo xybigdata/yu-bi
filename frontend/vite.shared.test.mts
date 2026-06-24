@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createReactBabelOptions,
   createReactPlugin,
+  createVendorManualChunks,
   createViteAliases,
 } from './vite.shared.mts';
 
@@ -40,5 +41,37 @@ describe('vite shared config', () => {
     expect(createReactBabelOptions()?.plugins).toContain(
       'babel-plugin-styled-components',
     );
+  });
+
+  it.each([
+    ['node_modules/antd/es/button/index.js', 'antdDesign'],
+    ['node_modules/@ant-design/icons/es/index.js', 'antdDesign'],
+    ['node_modules/echarts/core.js', 'echarts'],
+    ['node_modules/zrender/lib/core/util.js', 'echarts'],
+    ['node_modules/quill/quill.js', 'quill'],
+    ['node_modules/quill-delta/dist/Delta.js', 'quill'],
+    ['node_modules/parchment/dist/parchment.js', 'quill'],
+    ['node_modules/react-quill-new/lib/index.js', 'quill'],
+    ['node_modules/react/index.js', 'react'],
+    ['node_modules/react-dom/client.js', 'react'],
+    ['node_modules/scheduler/index.js', 'react'],
+    ['node_modules/react-grid-layout/build/index.js', 'reactGridLayout'],
+    ['node_modules/reveal.js/dist/reveal.esm.js', 'reveal'],
+    ['node_modules/flexlayout-react/lib/index.js', 'flexlayout'],
+  ])('maps %s to the %s vendor chunk', (modulePath, chunkName) => {
+    expect(createVendorManualChunks(path.resolve(appRoot, modulePath))).toBe(
+      chunkName,
+    );
+  });
+
+  it('leaves app files and uncategorized dependencies to Rollup defaults', () => {
+    expect(
+      createVendorManualChunks(path.resolve(appRoot, 'src/index.tsx')),
+    ).toBe(undefined);
+    expect(
+      createVendorManualChunks(
+        path.resolve(appRoot, 'node_modules/dayjs/dayjs.min.js'),
+      ),
+    ).toBe(undefined);
   });
 });

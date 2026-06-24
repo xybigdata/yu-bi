@@ -6,16 +6,25 @@
 
 ## 0. 当前执行口径
 
-当前阶段优先在同一条专题分支上连续推进，减少 `main` 分支合并和推送频率。
+当前阶段优先在同一条专题分支上连续推进，减少 `main` 分支合并和推送频率。恢复工作时先看本节和“后续队列”，不要从历史批次流水里反推执行策略。
 
 - 当前默认工作分支：`codex/modernization-frontend-security-deps`
 - 不直接在 `main` 开发
 - 不因为小批次改动创建新分支
 - 不因为小批次改动合入 `main`
+- 当前专题没有明确收口前，不新建下一条专题分支
 - 专题分支可以阶段性 push 到远端保存进度
 - 只有当前专题累计到一批可验收成果，并且用户明确要求阶段合并时，才准备 `main` 合并
 - 准备合入 `main` 或推送 `main` 前必须执行完整门禁
 - 日常开发按风险分层跑相关门禁，不为每个小改动执行完整门禁
+- 同一专题内尽量累计一组相关改动后再提交；提交后可 push 当前专题分支，但不自动 merge `main`
+
+当前短期执行指令：
+
+1. 继续在 `codex/modernization-frontend-security-deps` 上推进。
+2. 先处理能被现有门禁证明正确的前端安全、构建、运行时、工具链改造。
+3. 中高风险项可以同步评估和补基线；只有证据充分时才升级，不满足条件就记录暂缓原因。
+4. 不主动合并 `main`，即使 `main` 落后较多，也等用户明确要求阶段合并。
 
 ## 1. 改造目标
 
@@ -53,16 +62,16 @@ git log --oneline --decorate -8
 
 当前状态：
 
-| 项目 | 状态 |
-| --- | --- |
-| 工作目录 | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
-| 远端 | `git@github.com:xybigdata/yu-bi.git` |
-| 主线分支 | `main` |
-| 当前专题分支 | `codex/modernization-frontend-security-deps` |
-| 当前专题 | P2-E 前端安全依赖与运行时治理 |
-| 当前分支相对 `origin/main` | 以恢复命令输出为准 |
-| 最近专题提交 | 以 `git log --oneline --decorate -8` 为准 |
-| 最近主线提交 | `f1739f621 chore: 合入 PRESTO driver 元数据治理` |
+| 项目                       | 状态                                                       |
+| -------------------------- | ---------------------------------------------------------- |
+| 工作目录                   | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
+| 远端                       | `git@github.com:xybigdata/yu-bi.git`                       |
+| 主线分支                   | `main`                                                     |
+| 当前专题分支               | `codex/modernization-frontend-security-deps`               |
+| 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
+| 当前分支相对 `origin/main` | 以恢复命令输出为准                                         |
+| 最近专题提交               | 以 `git log --oneline --decorate -8` 为准                  |
+| 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
 
@@ -77,6 +86,7 @@ git log --oneline --decorate -8
 - 减少 `main` 分支合并频率；前端安全和运行时相关改造优先在 `codex/modernization-frontend-security-deps` 上连续推进
 - 除非用户明确要求阶段合并，否则专题分支只推送远端，不主动 merge 回 `main`
 - 目标模式中的“专题完成后 push 再 merge 到 main”按最新执行口径理解为：专题分支可持续 push 保存进度，但 `main` 合并要尽量少，只在一批可验收成果完成且用户明确要求时统一处理
+- 最新用户指令优先级高于目标旧文本：不要因为分支领先 `main` 很多就主动合并；当前阶段默认继续在一个分支上干活
 
 ## 3. 分支与合并规则
 
@@ -90,6 +100,8 @@ git log --oneline --decorate -8
 - 当前专题未收口前，默认不合入 `main`
 - 专题累计到一批可验收成果，并且用户明确要求阶段合并后，再按 `--no-ff` merge 回 `main`
 - 推送 `main` 前必须完整门禁
+- 不把“阶段性 push 专题分支”理解为“阶段性 merge main”
+- 不把“main 落后较多”作为自动合并理由
 
 当前专题分支：
 
@@ -103,71 +115,71 @@ codex/modernization-frontend-security-deps
 
 ### 4.1 后端
 
-| 技术栈 | 当前基线 | 状态 |
-| --- | --- | --- |
-| Java | `21` | 已达硬性目标 |
-| Maven | `>=3.9` | 已由 Enforcer 约束 |
-| JavaCC Maven Plugin | `3.2.0` | 已验证 SQL parser clean 重生成链路 |
-| Spring Boot | `3.5.15` | Boot 3.5 补丁线，继续保持 Spring Framework 6 / Security 6 主链 |
-| Spring Cloud | `2025.0.1` | 与 Boot 3.5 配套 |
-| Spring Security | `6.5.11` | 由 Boot 3.5.15 管理，暂不跳 Spring Security 7 |
-| MyBatis Spring Boot | `3.0.5` | 已适配 Boot 3 |
-| MyBatis Generator | `1.4.2` | 继续保留 1.x 线，插件 profile 依赖版本已补齐 |
-| GraalJS | `25.0.3` | 已替代 Nashorn 主链，当前保持 25.0.x 补丁线 |
-| BouncyCastle | `1.84` | 已统一到 `jdk18on` 组件线 |
-| Springdoc | `2.8.17` | 已适配 Boot 3 |
-| H2 | `2.4.240` | 已升级 |
-| Hibernate Validator | `8.0.4.Final` | 继续保持 Jakarta Validation 3 线，HV 9 暂缓 |
-| MySQL Connector/J | `9.7.0` | 通过 Boot BOM 属性覆盖完成补丁升级，JDBC provider 基线已验证 |
-| HikariCP | `7.1.0` | 已补 JDBC 配置映射测试后通过 Boot BOM 属性覆盖升级 |
-| Selenium | `4.45.0` | 已升级到 Selenium 4 稳定线较新补丁版本 |
-| JsonPath | `3.0.0` | 已补 OAuth 属性映射行为测试后升级 |
-| DingTalk SDK | `1.1.100` | 继续保持 1.x 线补丁升级，暂不跳 DingTalk 2 |
-| Maven 仓库 | Maven Central / Spring Boot 默认仓库 | 已移除不再需要的 Spring milestone 仓库声明 |
-| Shiro | `2.0.6` | 高风险，只做认证授权边界审计和小步修复；Shiro 3 alpha 暂缓 |
-| Druid | `1.2.28` | 中风险，暂不优先 |
-| Calcite | 现网主链 | 高风险，先补 SQL 解析兼容样例 |
+| 技术栈              | 当前基线                             | 状态                                                           |
+| ------------------- | ------------------------------------ | -------------------------------------------------------------- |
+| Java                | `21`                                 | 已达硬性目标                                                   |
+| Maven               | `>=3.9`                              | 已由 Enforcer 约束                                             |
+| JavaCC Maven Plugin | `3.2.0`                              | 已验证 SQL parser clean 重生成链路                             |
+| Spring Boot         | `3.5.15`                             | Boot 3.5 补丁线，继续保持 Spring Framework 6 / Security 6 主链 |
+| Spring Cloud        | `2025.0.1`                           | 与 Boot 3.5 配套                                               |
+| Spring Security     | `6.5.11`                             | 由 Boot 3.5.15 管理，暂不跳 Spring Security 7                  |
+| MyBatis Spring Boot | `3.0.5`                              | 已适配 Boot 3                                                  |
+| MyBatis Generator   | `1.4.2`                              | 继续保留 1.x 线，插件 profile 依赖版本已补齐                   |
+| GraalJS             | `25.0.3`                             | 已替代 Nashorn 主链，当前保持 25.0.x 补丁线                    |
+| BouncyCastle        | `1.84`                               | 已统一到 `jdk18on` 组件线                                      |
+| Springdoc           | `2.8.17`                             | 已适配 Boot 3                                                  |
+| H2                  | `2.4.240`                            | 已升级                                                         |
+| Hibernate Validator | `8.0.4.Final`                        | 继续保持 Jakarta Validation 3 线，HV 9 暂缓                    |
+| MySQL Connector/J   | `9.7.0`                              | 通过 Boot BOM 属性覆盖完成补丁升级，JDBC provider 基线已验证   |
+| HikariCP            | `7.1.0`                              | 已补 JDBC 配置映射测试后通过 Boot BOM 属性覆盖升级             |
+| Selenium            | `4.45.0`                             | 已升级到 Selenium 4 稳定线较新补丁版本                         |
+| JsonPath            | `3.0.0`                              | 已补 OAuth 属性映射行为测试后升级                              |
+| DingTalk SDK        | `1.1.100`                            | 继续保持 1.x 线补丁升级，暂不跳 DingTalk 2                     |
+| Maven 仓库          | Maven Central / Spring Boot 默认仓库 | 已移除不再需要的 Spring milestone 仓库声明                     |
+| Shiro               | `2.0.6`                              | 高风险，只做认证授权边界审计和小步修复；Shiro 3 alpha 暂缓     |
+| Druid               | `1.2.28`                             | 中风险，暂不优先                                               |
+| Calcite             | 现网主链                             | 高风险，先补 SQL 解析兼容样例                                  |
 
 ### 4.2 前端
 
-| 技术栈 | 当前基线 | 状态 |
-| --- | --- | --- |
-| Node | `>=24.0.0 <25.0.0` | 硬性目标，当前验证基线 `24.16.0` |
-| npm | `>=11.0.0 <12.0.0` | 与 Node 24 配套，当前验证基线 `11.13.0` |
-| React | `19.2.7` | 已升级到 React 19 稳定线 |
-| React Router | `7.18.0` | 已升级到 React Router 7 稳定线 |
-| Ant Design | `5.29.3` | 已收口到 AntD 5 稳定线，并迁移到 v5 theme token API |
-| @ant-design/icons | `6.2.5` | 直接依赖已升级；AntD / Pro Components 内部仍保留 5.x |
-| Redux Toolkit | `2.12.0` | 已完成主升级 |
-| React Redux | `9.3.0` | 已完成主升级 |
-| Immer | `11.1.8` | 已与 Redux Toolkit 依赖线去重 |
-| TypeScript | `6.0.3` | 已升级到 6.0 稳定线，`baseUrl` 已迁移为显式 `paths` |
-| Vite | `8.1.0` | 已升级到 Vite 8 主链，暂配 `@vitejs/plugin-react 5.2.0` |
-| Vitest | `4.1.9` | 当前主测试栈 |
-| Testing Library | `@testing-library/react 16.3.2 / dom 10.4.1` | 已对齐 React 19 测试栈 |
-| Less | `4.6.7` | 已完成补丁升级；保留用于满足 Vite / AntV S2 peer，源码构建侧已退出 `~` import 兼容 |
-| vite-plugin-svgr | `5.2.0` | 已完成 Vite 8 下构建验证 |
-| stylelint-order | `8.1.1` | 已完成 Stylelint 17 下 lint 验证 |
-| styled-components | `6.4.2` | 已完成主升级并确认运行时依赖位置 |
-| polished | `4.3.1` | 已完成样式工具小版本升级 |
-| 富文本编辑器 | `react-quill-new 3.7.0 / quill 2.0.2` | 已完成 Quill 2 迁移；暂不升 `react-quill-new 3.8.x / quill 2.0.3`，因为会重新引入 npm audit 低危 XSS advisory |
-| monaco-editor | `0.52.2` | 已补真实运行时加载边界 |
-| reveal.js | `6.0.1` | 已补真实运行时加载边界 |
-| ECharts | `6.1.0` | 已升级到 ECharts 6 稳定线，词云改用 `@echarts-x/custom-word-cloud` |
-| Axios | `1.18.1` | 已补 request wrapper 行为基线后小版本升级 |
-| sql-formatter | `15.8.2` | 已补真实运行时 smoke 后升级 |
-| AntV S2 | `2.7.2 / 2.3.1` | 已确认当前稳定线 |
-| i18next / react-i18next | `26.3.2 / 17.0.8` | 已确认国际化主链 |
-| react-grid-layout | `2.2.3` | 已通过 legacy 入口升级 |
-| react-hotkeys-hook | `5.3.2` | 已完成快捷键 hook 主版本升级验证 |
-| flexlayout-react | `0.9.1` | 已升级并改用命名导出 |
-| react-window | `2.2.7` | 已适配 `Grid / cellComponent / gridRef` 新 API |
-| redux-undo | `1.1.0` | 已补撤销 / 重做历史栈测试后升级 |
-| react-draggable | `4.7.0` | 已升级 |
-| react-resizable | `4.0.2` | 已改用内置类型声明，移除旧 `@types` stub |
-| @hello-pangea/dnd | `18.0.1` | 已确认当前稳定线 |
-| react-dnd | `16.0.1` | 已确认当前稳定线 |
-| react-dnd-html5-backend | `16.0.1` | 已确认当前稳定线 |
+| 技术栈                  | 当前基线                                     | 状态                                                                                                          |
+| ----------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Node                    | `>=24.0.0 <25.0.0`                           | 硬性目标，当前验证基线 `24.16.0`                                                                              |
+| npm                     | `>=11.0.0 <12.0.0`                           | 与 Node 24 配套，当前验证基线 `11.13.0`                                                                       |
+| React                   | `19.2.7`                                     | 已升级到 React 19 稳定线                                                                                      |
+| React Router            | `7.18.0`                                     | 已升级到 React Router 7 稳定线                                                                                |
+| Ant Design              | `5.29.3`                                     | 已收口到 AntD 5 稳定线，并迁移到 v5 theme token API                                                           |
+| @ant-design/icons       | `6.2.5`                                      | 直接依赖已升级；AntD / Pro Components 内部仍保留 5.x                                                          |
+| Redux Toolkit           | `2.12.0`                                     | 已完成主升级                                                                                                  |
+| React Redux             | `9.3.0`                                      | 已完成主升级                                                                                                  |
+| Immer                   | `11.1.8`                                     | 已与 Redux Toolkit 依赖线去重                                                                                 |
+| TypeScript              | `6.0.3`                                      | 已升级到 6.0 稳定线，`baseUrl` 已迁移为显式 `paths`                                                           |
+| Vite                    | `8.1.0`                                      | 已升级到 Vite 8 主链，暂配 `@vitejs/plugin-react 5.2.0`                                                       |
+| Vitest                  | `4.1.9`                                      | 当前主测试栈                                                                                                  |
+| Testing Library         | `@testing-library/react 16.3.2 / dom 10.4.1` | 已对齐 React 19 测试栈                                                                                        |
+| Less                    | `4.6.7`                                      | 已完成补丁升级；保留用于满足 Vite / AntV S2 peer，源码构建侧已退出 `~` import 兼容                            |
+| vite-plugin-svgr        | `5.2.0`                                      | 已完成 Vite 8 下构建验证                                                                                      |
+| stylelint-order         | `8.1.1`                                      | 已完成 Stylelint 17 下 lint 验证                                                                              |
+| styled-components       | `6.4.2`                                      | 已完成主升级并确认运行时依赖位置                                                                              |
+| polished                | `4.3.1`                                      | 已完成样式工具小版本升级                                                                                      |
+| 富文本编辑器            | `react-quill-new 3.7.0 / quill 2.0.2`        | 已完成 Quill 2 迁移；暂不升 `react-quill-new 3.8.x / quill 2.0.3`，因为会重新引入 npm audit 低危 XSS advisory |
+| monaco-editor           | `0.52.2`                                     | 已补真实运行时加载边界                                                                                        |
+| reveal.js               | `6.0.1`                                      | 已补真实运行时加载边界                                                                                        |
+| ECharts                 | `6.1.0`                                      | 已升级到 ECharts 6 稳定线，词云改用 `@echarts-x/custom-word-cloud`                                            |
+| Axios                   | `1.18.1`                                     | 已补 request wrapper 行为基线后小版本升级                                                                     |
+| sql-formatter           | `15.8.2`                                     | 已补真实运行时 smoke 后升级                                                                                   |
+| AntV S2                 | `2.7.2 / 2.3.1`                              | 已确认当前稳定线                                                                                              |
+| i18next / react-i18next | `26.3.2 / 17.0.8`                            | 已确认国际化主链                                                                                              |
+| react-grid-layout       | `2.2.3`                                      | 已通过 legacy 入口升级                                                                                        |
+| react-hotkeys-hook      | `5.3.2`                                      | 已完成快捷键 hook 主版本升级验证                                                                              |
+| flexlayout-react        | `0.9.1`                                      | 已升级并改用命名导出                                                                                          |
+| react-window            | `2.2.7`                                      | 已适配 `Grid / cellComponent / gridRef` 新 API                                                                |
+| redux-undo              | `1.1.0`                                      | 已补撤销 / 重做历史栈测试后升级                                                                               |
+| react-draggable         | `4.7.0`                                      | 已升级                                                                                                        |
+| react-resizable         | `4.0.2`                                      | 已改用内置类型声明，移除旧 `@types` stub                                                                      |
+| @hello-pangea/dnd       | `18.0.1`                                     | 已确认当前稳定线                                                                                              |
+| react-dnd               | `16.0.1`                                     | 已确认当前稳定线                                                                                              |
+| react-dnd-html5-backend | `16.0.1`                                     | 已确认当前稳定线                                                                                              |
 
 ## 5. 阶段复盘
 
@@ -182,21 +194,21 @@ codex/modernization-frontend-security-deps
 
 ### 5.2 已合入批次
 
-| 批次 | 结果 |
-| --- | --- |
-| 独立开源治理与 yu-bi 基础品牌 | 已合入 `main` |
-| 后端 JDK 21 / Spring Boot 3 主链 | 已合入 `main` |
-| 前端 React 18 / AntD 5 / Vite 6 主链 | 已合入 `main` |
-| Dashboard widget 内容协议边界 | 已合入 `main` |
-| 图表运行时类型边界 | 已合入 `main` |
-| 现代化兼容边界 | 已合入并推送 `origin/main` |
-| 图表运行时现代化 | 已合入并推送 `origin/main` |
-| 前端运行时现代化批次 | 已合入并推送 `origin/main`，主线提交 `77217676b` |
-| 构建与安装包链路现代化 | 已合入并推送 `origin/main`，主线提交 `2c691916b` |
-| Shiro 认证授权健康度审计 | 已合入并推送 `origin/main`，主线提交 `99336814e` |
-| Calcite SQL 解析健康度审计 | 已合入并推送 `origin/main`，主线提交 `065e4d007` |
-| SQL 变量替换行为修复 | 已合入并推送 `origin/main`，主线提交 `bf6eee2e2` |
-| PRESTO JDBC driver 元数据治理 | 已合入并推送 `origin/main`，主线提交 `f1739f621` |
+| 批次                                 | 结果                                             |
+| ------------------------------------ | ------------------------------------------------ |
+| 独立开源治理与 yu-bi 基础品牌        | 已合入 `main`                                    |
+| 后端 JDK 21 / Spring Boot 3 主链     | 已合入 `main`                                    |
+| 前端 React 18 / AntD 5 / Vite 6 主链 | 已合入 `main`                                    |
+| Dashboard widget 内容协议边界        | 已合入 `main`                                    |
+| 图表运行时类型边界                   | 已合入 `main`                                    |
+| 现代化兼容边界                       | 已合入并推送 `origin/main`                       |
+| 图表运行时现代化                     | 已合入并推送 `origin/main`                       |
+| 前端运行时现代化批次                 | 已合入并推送 `origin/main`，主线提交 `77217676b` |
+| 构建与安装包链路现代化               | 已合入并推送 `origin/main`，主线提交 `2c691916b` |
+| Shiro 认证授权健康度审计             | 已合入并推送 `origin/main`，主线提交 `99336814e` |
+| Calcite SQL 解析健康度审计           | 已合入并推送 `origin/main`，主线提交 `065e4d007` |
+| SQL 变量替换行为修复                 | 已合入并推送 `origin/main`，主线提交 `bf6eee2e2` |
+| PRESTO JDBC driver 元数据治理        | 已合入并推送 `origin/main`，主线提交 `f1739f621` |
 
 ### 5.3 前端运行时专题复盘
 
@@ -268,13 +280,13 @@ git diff --check
 
 P2-A 本批次完成状态：
 
-| 事项 | 风险 | 状态 |
-| --- | --- | --- |
-| Dockerfile 元数据 | 低 | 已将旧个人 label 改为 OCI labels |
-| Docker 健康检查 | 中 | 已增加 `HEALTHCHECK`；最终镜像保留 `curl` 用于健康探测 |
-| Deployment.md 安装包示例 | 低 | 已更新为当前 `1.0.0-rc.3` 示例 |
-| Deployment.md 品牌文案 | 低 | 仅收口用户可见安装包示例，不改 `datart.conf` 和 `datart.*` 配置前缀 |
-| Docker build 验证 | 受环境限制 | 当前本机无 `docker` 命令，记录为验证缺口 |
+| 事项                     | 风险       | 状态                                                                |
+| ------------------------ | ---------- | ------------------------------------------------------------------- |
+| Dockerfile 元数据        | 低         | 已将旧个人 label 改为 OCI labels                                    |
+| Docker 健康检查          | 中         | 已增加 `HEALTHCHECK`；最终镜像保留 `curl` 用于健康探测              |
+| Deployment.md 安装包示例 | 低         | 已更新为当前 `1.0.0-rc.3` 示例                                      |
+| Deployment.md 品牌文案   | 低         | 仅收口用户可见安装包示例，不改 `datart.conf` 和 `datart.*` 配置前缀 |
+| Docker build 验证        | 受环境限制 | 当前本机无 `docker` 命令，记录为验证缺口                            |
 
 P2-A 后续缺口：
 
@@ -2132,30 +2144,62 @@ npm exec -- prettier --check src/app/components/MonacoEditor/__tests__/index.tes
 git diff --check
 ```
 
+最新批次：前端 Vite 分包配置基线补强
+
+- 已将主 Vite 构建中的 `manualChunks` 规则抽到 `vite.shared.mts#createVendorManualChunks`
+- 已为关键运行时依赖分包建立测试基线，覆盖 AntD、ECharts / ZRender、Quill / react-quill-new、React、react-grid-layout、reveal.js 和 flexlayout-react
+- 已确认应用源码和未归类依赖继续交给 Rollup / Rolldown 默认策略处理
+- 本批次不改变现有分包策略、不升级依赖版本、不处理既有大 chunk warning，只为后续包体治理和运行时依赖升级提供回归入口
+
+本批次验证命令：
+
+```bash
+npm run test -- vite.shared.test.mts
+npm run eslint -- vite.config.mts vite.shared.mts vite.shared.test.mts
+npm exec -- prettier --check vite.config.mts vite.shared.mts vite.shared.test.mts ../docs/tech-stack-modernization-plan.md
+npm run checkTs
+npm run build
+npm run build:task
+git diff --check
+```
+
+验证说明：
+
+- `vite.shared.test.mts` 17 个用例通过
+- Vite 配置文件 ESLint 和 Prettier 检查通过
+- `npm run checkTs` 已通过
+- 主构建和 task bundle 构建均通过，继续使用 `vite v8.1.0`
+- 主构建仍有既有大 chunk warning，本批次只建立分包规则回归基线，不做包体拆分
+
 ## 12. 后续队列
 
-| 阶段 | 事项 | 风险 | 执行策略 |
-| --- | --- | --- | --- |
-| P2-F | AntD 6 主版本评估 | 高 | 继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路 |
-| P2-G | ECharts 6 主版本评估 | 高 | 已完成；后续可增强浏览器层图表 smoke |
-| P2-H | ESLint 10 主版本评估 | 中高 | 当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级 |
-| P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
-| P2-J | 富文本编辑器运行时 smoke | 中 | 已补 jsdom 层运行时和 Dashboard Widget smoke；后续具备浏览器入口时补真实编辑 / 预览 / 分享页 E2E |
-| P2-K | 后端依赖补丁线滚动收口 | 中 | 继续优先处理补丁级、同生态线、可被现有测试覆盖的升级；主版本跳跃单独评估 |
+当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。
+
+| 阶段      | 事项                           | 风险 | 执行策略                                                                                                              |
+| --------- | ------------------------------ | ---- | --------------------------------------------------------------------------------------------------------------------- |
+| P2-E-Next | 前端剩余 outdated 复核         | 中   | 可推进；继续确认 `@vitejs/plugin-react`、AntD、ESLint、Monaco、Quill 的最新稳定状态，能升级则升级，不能升级则记录证据 |
+| P2-E-Next | 前端运行时 smoke 补强          | 中   | 可推进；优先补 Monaco、Quill、ECharts、分享页等动态运行时入口的最小回归                                               |
+| P2-E-Next | 前端构建产物治理               | 中   | 评估；当前有既有大 chunk warning，先分析 chunk 来源和可拆分点，不做盲目拆包                                           |
+| P2-F      | AntD 6 主版本评估              | 高   | 暂缓；继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路                                                |
+| P2-G      | ECharts 6 主版本评估           | 高   | 已完成；后续可增强浏览器层图表 smoke                                                                                  |
+| P2-H      | ESLint 10 主版本评估           | 中高 | 暂缓；当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级                  |
+| P2-I      | 数据源 provider / 方言依赖审计 | 高   | 评估；先盘点依赖树和驱动兼容，不做大规模重构                                                                          |
+| P2-J      | 富文本编辑器运行时 smoke       | 中   | 可推进；已补 jsdom 层运行时和 Dashboard Widget smoke，后续补分享页展示和浏览器入口                                    |
+| P2-K      | 后端依赖补丁线滚动收口         | 中   | 可推进；继续优先处理补丁级、同生态线、可被现有测试覆盖的升级；主版本跳跃单独评估                                      |
 
 ## 13. 门禁策略
 
 开发期按风险分层验证，不为每个小改动跑完整门禁。提交前做本批次相关门禁；当前专题分支可阶段性 push 保存进度；准备合入 `main` 或推送 `main` 前做完整门禁。
 
-| 场景 | 最低门禁 |
-| --- | --- |
-| 文档或纯元数据 | `git diff --check` |
-| 前端类型边界、小范围组件迁移 | `npm run checkTs` + 相关测试 |
-| helper、模型、共享协议变化 | `npm run checkTs` + 相关模型 / helper 测试 |
+| 场景                           | 最低门禁                                                         |
+| ------------------------------ | ---------------------------------------------------------------- |
+| 文档或纯元数据                 | `git diff --check`                                               |
+| 前端类型边界、小范围组件迁移   | `npm run checkTs` + 相关测试                                     |
+| helper、模型、共享协议变化     | `npm run checkTs` + 相关模型 / helper 测试                       |
 | 依赖、构建配置、运行时加载变化 | `npm run checkTs` + 相关运行时测试；专题收尾补 `npm run test:ci` |
-| Maven、Docker、安装包链路变化 | `mvn package -DskipTests`，必要时补 demo smoke |
-| 准备 merge 回 `main` | 前端完整门禁，必要时补后端门禁 |
-| 推送 `main` | 不跳过完整门禁 |
+| Maven、Docker、安装包链路变化  | `mvn package -DskipTests`，必要时补 demo smoke                   |
+| 准备 merge 回 `main`           | 前端完整门禁，必要时补后端门禁                                   |
+| 推送 `main`                    | 不跳过完整门禁                                                   |
 
 完整前端门禁：
 
@@ -2193,12 +2237,12 @@ npm ci --dry-run --ignore-scripts
 
 建议粒度：
 
-| 类型 | 粒度 |
-| --- | --- |
-| 低风险类型边界 | 累计 3 到 10 个相关文件后提交 |
-| 中风险运行时链路 | 每条可验证链路独立提交 |
-| 依赖和构建链路 | 独立提交，但尽量包含完整链路文档和验证记录 |
-| 阶段复盘 | 跟随当前批次提交，必要时可单独文档提交 |
+| 类型             | 粒度                                       |
+| ---------------- | ------------------------------------------ |
+| 低风险类型边界   | 累计 3 到 10 个相关文件后提交              |
+| 中风险运行时链路 | 每条可验证链路独立提交                     |
+| 依赖和构建链路   | 独立提交，但尽量包含完整链路文档和验证记录 |
+| 阶段复盘         | 跟随当前批次提交，必要时可单独文档提交     |
 
 不要因为单个小文件改动立刻提交。当前 P2-E 应围绕前端安全依赖治理累计依赖升级、lockfile、门禁和文档记录后再提交。
 
@@ -2208,6 +2252,7 @@ npm ci --dry-run --ignore-scripts
 - 不因阶段性 push 或单个批次完成而切新分支
 - 不因阶段性 push 或单个批次完成而 merge `main`
 - 当 `main` 落后较多时，也先继续完成当前批次；只有用户明确要求合并时再执行主线合并门禁
+- 若只有文档复盘或小范围流程修正，默认先累计到下一批实际改造提交中，不为单个小改动单独提交
 
 ## 15. 恢复命令
 
@@ -2216,11 +2261,12 @@ npm ci --dry-run --ignore-scripts
 ```bash
 git status --short --branch
 git rev-list --left-right --count origin/main...HEAD
+git log --oneline --decorate -8
 npm audit --json
+npm outdated --json
 npm ls react-quill react-quill-new quill quill-delta --all
 npm ci --dry-run --ignore-scripts --no-audit --no-fund
 npm run checkTs
-npm run test:ci
 ```
 
 追溯历史：
