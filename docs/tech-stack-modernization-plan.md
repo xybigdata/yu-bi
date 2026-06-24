@@ -2261,6 +2261,32 @@ git diff --check
 - `npm run checkTs` 已通过
 - `npm audit --json` 仍为 0 vulnerabilities
 
+最新批次：前端构建产物体积报告增强
+
+- `build:report` 已新增 gzip 体积列，同时输出 raw / gzip 两种体积，避免只按未压缩体积判断治理优先级
+- 已新增可选强门禁开关 `YU_BI_CHUNK_REPORT_FAIL_ON_OVERSIZED=1`；默认不启用，CI 当前仍只报告不失败
+- 已扩展 `report-build-chunks` 测试，覆盖 gzip 输出和可选失败模式
+- 本批次不改变构建产物、不调整 Vite 阈值、不增加默认 CI 失败条件，只增强后续治理工具能力
+
+本批次验证命令：
+
+```bash
+npm run build:report
+npm run test -- scripts/__tests__/report-build-chunks.test.mts
+npm run eslint -- scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts
+npm exec -- prettier --check ../docs/tech-stack-modernization-plan.md scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts
+npm run checkTs
+npm audit --json
+git diff --check
+```
+
+验证说明：
+
+- `build:report` 已输出 raw / gzip 两列
+- `scripts/__tests__/report-build-chunks.test.mts` 2 个用例通过
+- `npm run checkTs` 已通过
+- `npm audit --json` 仍为 0 vulnerabilities
+
 最新批次：前端 CI 构建体积报告接入
 
 - 已在 `.github/workflows/dev-ut-stage.js.yml` 中将 `npm run build:report` 接到前端 `build:task` 和 `build` 之后
