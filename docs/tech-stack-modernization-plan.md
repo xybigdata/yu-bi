@@ -161,7 +161,7 @@ codex/modernization-frontend-security-deps
 | Less                    | `4.6.7`                                      | 已完成补丁升级；保留用于满足 Vite / AntV S2 peer，源码构建侧已退出 `~` import 兼容                            |
 | vite-plugin-svgr        | `5.2.0`                                      | 已完成 Vite 8 下构建验证                                                                                      |
 | stylelint-order         | `8.1.1`                                      | 已完成 Stylelint 17 下 lint 验证                                                                              |
-| styled-components       | `6.4.2`                                      | 已完成主升级并确认运行时依赖位置                                                                              |
+| styled-components       | `6.4.3`                                      | 已完成主升级并继续保持 6.x 补丁线                                                                             |
 | polished                | `4.3.1`                                      | 已完成样式工具小版本升级                                                                                      |
 | 富文本编辑器            | `react-quill-new 3.7.0 / quill 2.0.2`        | 已完成 Quill 2 迁移；暂不升 `react-quill-new 3.8.x / quill 2.0.3`，因为会重新引入 npm audit 低危 XSS advisory |
 | monaco-editor           | `0.52.2`                                     | 已补真实运行时加载边界                                                                                        |
@@ -2369,6 +2369,38 @@ git diff --check
 - `npm run checkTs` 已通过
 - 主构建和 task bundle 构建通过
 - `npm audit --json` 仍为 0 vulnerabilities
+
+最新批次：styled-components 补丁线收口
+
+- 2026-06-25 复核 `npm outdated --json` 时新增 `styled-components 6.4.2 -> 6.4.3`
+- 已复核 `styled-components 6.4.3` 的 peer、dependencies、engines 与 `6.4.2` 一致，Node engine 仍为 `>=16`，与 Node 24 / React 19 基线兼容
+- 已将 `styled-components` 升级到 `6.4.3`，并保持 `package.json` 精确版本声明，不恢复 `^` 范围
+- 依赖树已确认 `babel-plugin-styled-components` 和项目运行时均复用 `styled-components 6.4.3`
+- 升级后 `npm outdated --json` 又回到 7 个暂缓项：`@types/node`、`@vitejs/plugin-react`、AntD、ESLint、Monaco、Quill、`react-quill-new`
+- 本批次不改变样式代码，只做同一主版本补丁线升级
+
+本批次验证命令：
+
+```bash
+npm view styled-components@6.4.3 version peerDependencies dependencies engines dist-tags --json
+npm view styled-components@6.4.2 version peerDependencies dependencies engines --json
+npm install styled-components@6.4.3 --save --ignore-scripts --no-audit --no-fund
+npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+npm ls styled-components babel-plugin-styled-components --all
+npm run test -- src/styles/theme/__tests__/ThemeProvider.test.tsx src/styles/__tests__/media.test.ts vite.shared.test.mts
+npm run checkTs
+npm audit --json
+npm outdated --json
+npm run build:report
+git diff --check
+```
+
+验证说明：
+
+- 样式主题、媒体查询和 Vite shared 配置测试 3 个文件、26 个用例通过
+- `npm run checkTs` 已通过
+- `npm audit --json` 仍为 0 vulnerabilities
+- `build:report` 基线保持不变：JS chunk raw 超限 4 个，asset raw 超限 2 个
 
 ## 12. 后续队列
 
