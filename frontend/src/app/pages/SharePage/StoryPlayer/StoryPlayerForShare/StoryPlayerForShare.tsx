@@ -17,7 +17,7 @@
  */
 import { Layout } from 'antd';
 import DndProviderCompat from 'app/components/DndProviderCompat';
-import { loadRevealRuntime } from 'app/pages/StoryBoardPage/revealRuntime';
+import { createRevealPlayerRuntime } from 'app/pages/StoryBoardPage/playerRuntime';
 import React, {
   memo,
   RefObject,
@@ -30,7 +30,6 @@ import React, {
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
-import type { RevealApi } from 'reveal.js';
 import styled from 'styled-components';
 import { LEVEL_20, WHITE } from 'styles/StyleConstants';
 import { uuidv4 } from 'utils/utils';
@@ -52,7 +51,6 @@ export const StoryPlayerForShare: React.FC<{
 }> = memo(({ storyBoard, shareToken }) => {
   const { id: storyId } = storyBoard;
   const domId = useMemo(() => uuidv4(), []);
-  const revealRef = useRef<RevealApi | null>(null);
   const dispatch = useAppDispatch();
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const fullRef: RefObject<HTMLDivElement | null> = useRef(null);
@@ -104,54 +102,42 @@ export const StoryPlayerForShare: React.FC<{
     return false;
   }, [storyBoard?.config?.autoPlay?.auto, storyBoard?.config?.autoPlay?.delay]);
   useEffect(() => {
-    let cancelled = false;
     if (sortedPages.length > 0) {
-      void loadRevealRuntime()
-        .then(({ Reveal, RevealZoom }) => {
-          if (cancelled) {
-            return;
-          }
-          revealRef.current = new Reveal(document.getElementById(domId)!, {
-            hash: false,
-            history: false,
-            controls: true,
-            controlsLayout: 'bottom-right',
-            slideNumber: 'c/t',
-            controlsTutorial: false,
-            progress: false,
-            loop: true,
-            width: '100%',
-            height: '100%',
-            margin: 0,
-            minScale: 1,
-            maxScale: 1,
-            autoSlide: autoSlide,
-            transition: 'convex',
-            // backgroundTransition: 'fade',
-            transitionSpeed: 'slow',
-            viewDistance: 100,
-            plugins: [RevealZoom],
-            keyboard: {
-              27: () => {
-                // disabled esc
-              }, // do something custom when ESC is pressed
+      const runtime = createRevealPlayerRuntime({
+        domId,
+        onSlideChanged: changePage,
+        config: {
+          hash: false,
+          history: false,
+          controls: true,
+          controlsLayout: 'bottom-right',
+          slideNumber: 'c/t',
+          controlsTutorial: false,
+          progress: false,
+          loop: true,
+          width: '100%',
+          height: '100%',
+          margin: 0,
+          minScale: 1,
+          maxScale: 1,
+          autoSlide: autoSlide,
+          transition: 'convex',
+          transitionSpeed: 'slow',
+          viewDistance: 100,
+          keyboard: {
+            27: () => {
+              // disabled esc
             },
-          });
-          revealRef.current?.initialize();
-          revealRef.current?.addEventListener('slidechanged', changePage);
-        })
-        .catch(error => {
-          console.error('Load share story player runtime failed', error);
-        });
+          },
+        },
+      });
 
       return () => {
-        cancelled = true;
-        revealRef.current?.removeEventListener('slidechanged', changePage);
-        revealRef.current?.destroy();
-        revealRef.current = null;
+        runtime.cancel();
+        runtime.destroy();
       };
     }
-  }, [domId, changePage, sortedPages.length, autoSlide, dispatch]);
+  }, [domId, changePage, sortedPages.length, autoSlide]);
 
   useEffect(() => {
     const curPage = sortedPages[currentPageIndex];

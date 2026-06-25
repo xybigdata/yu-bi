@@ -25,7 +25,7 @@ import { useBoardSlice } from 'app/pages/DashBoardPage/pages/Board/slice';
 import { useEditBoardSlice } from 'app/pages/DashBoardPage/pages/BoardEditor/slice';
 import { useParams } from 'app/routerCompat';
 import { StoryContext } from 'app/pages/StoryBoardPage/contexts/StoryContext';
-import { loadRevealRuntime } from 'app/pages/StoryBoardPage/revealRuntime';
+import { createRevealPlayerRuntime } from 'app/pages/StoryBoardPage/playerRuntime';
 import { dispatchResize } from 'app/utils/dispatchResize';
 import React, {
   memo,
@@ -192,49 +192,40 @@ export const StoryEditor: React.FC<{}> = memo(() => {
     navigate.push(`/organizations/${orgId}/vizs/${storyId}`);
   }, [navigate, orgId, storyId]);
   useEffect(() => {
-    let cancelled = false;
     if (sortedPages.length > 0) {
-      void loadRevealRuntime()
-        .then(({ Reveal, RevealZoom }) => {
-          if (cancelled) {
-            return;
-          }
-          revealRef.current = new Reveal(document.getElementById(domId)!, {
-            hash: false,
-            history: false,
-            controls: false,
-            controlsLayout: 'bottom-right',
-            slideNumber: 'c/t',
-            controlsTutorial: false,
-            progress: false,
-            loop: true,
-            width: '100%',
-            height: '100%',
-            margin: 0,
-            minScale: 1,
-            maxScale: 1,
-            autoSlide: false,
-            transition: 'convex',
-            // backgroundTransition: 'fade',
-            transitionSpeed: 'slow',
-            viewDistance: 100,
-            plugins: [RevealZoom],
-            keyboard: {
-              70: () => {},
-            },
-          });
-          revealRef.current?.initialize();
-          revealRef.current?.addEventListener('slidechanged', changePage);
-        })
-        .catch(error => {
-          console.error('Load story editor runtime failed', error);
-        });
+      const runtime = createRevealPlayerRuntime({
+        domId,
+        onSlideChanged: changePage,
+        onReady: reveal => {
+          revealRef.current = reveal;
+        },
+        config: {
+          hash: false,
+          history: false,
+          controls: false,
+          controlsLayout: 'bottom-right',
+          slideNumber: 'c/t',
+          controlsTutorial: false,
+          progress: false,
+          loop: true,
+          width: '100%',
+          height: '100%',
+          margin: 0,
+          minScale: 1,
+          maxScale: 1,
+          autoSlide: false,
+          transition: 'convex',
+          transitionSpeed: 'slow',
+          viewDistance: 100,
+          keyboard: {
+            70: () => {},
+          },
+        },
+      });
 
       return () => {
-        cancelled = true;
-        revealRef.current?.removeEventListener('slidechanged', changePage);
-        revealRef.current?.destroy();
-        revealRef.current = null;
+        runtime.cancel();
+        runtime.destroy();
       };
     }
 

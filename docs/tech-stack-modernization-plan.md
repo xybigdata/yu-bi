@@ -2660,6 +2660,31 @@ npm audit --json
 git diff --check
 ```
 
+最新批次：Reveal 播放器 runtime 收口
+
+- 已新增 `createRevealPlayerRuntime`，统一 Story 编辑器、Story 播放器和分享页 Story 播放器的 Reveal 初始化、zoom 插件注册、`slidechanged` 监听和销毁逻辑
+- 三处页面继续保留各自原有配置差异：
+  - 普通播放和分享播放保留 controls、自动播放和 ESC 禁用
+  - 编辑器保留 controls=false、autoSlide=false 和 F 键占位
+  - 编辑器继续通过 `onReady` 维护 `revealRef`，支持缩略图点击跳转 slide
+- 已新增 runtime 单元测试覆盖：
+  - Reveal 构造参数包含原配置和 Zoom 插件
+  - 初始化后绑定 `slidechanged`
+  - destroy 时解绑事件并销毁实例
+  - 加载完成前 cancel 不创建 Reveal 实例
+- 本批次不改变 Story 页面 Redux 数据流、页面排序和内容加载逻辑
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/pages/StoryBoardPage/__tests__/playerRuntime.test.ts src/app/pages/StoryBoardPage/__tests__/revealRuntime.test.ts
+npm run checkTs
+npm run eslint -- src/app/pages/StoryBoardPage/playerRuntime.ts src/app/pages/StoryBoardPage/__tests__/playerRuntime.test.ts src/app/pages/StoryBoardPage/Player/index.tsx src/app/pages/StoryBoardPage/Editor/index.tsx src/app/pages/SharePage/StoryPlayer/StoryPlayerForShare/StoryPlayerForShare.tsx
+npm exec -- prettier --check src/app/pages/StoryBoardPage/playerRuntime.ts src/app/pages/StoryBoardPage/__tests__/playerRuntime.test.ts src/app/pages/StoryBoardPage/Player/index.tsx src/app/pages/StoryBoardPage/Editor/index.tsx src/app/pages/SharePage/StoryPlayer/StoryPlayerForShare/StoryPlayerForShare.tsx ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
