@@ -103,8 +103,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 88`，以恢复时重新执行命令为准                           |
-| 最近专题提交               | `489d78974 chore: 收口 SQL formatter 调用边界`             |
+| 当前分支相对 `origin/main` | `0 89`，以恢复时重新执行命令为准                           |
+| 最近专题提交               | `14729bac0 test: 补强基础图表 ECharts 生命周期 smoke`      |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -2776,6 +2776,25 @@ npm run test -- src/app/components/ChartGraph/__tests__/basicEChartsLifecycle.te
 npm run checkTs
 npm run eslint -- src/app/components/ChartGraph/__tests__/basicEChartsLifecycle.test.ts
 npm exec -- prettier --check src/app/components/ChartGraph/__tests__/basicEChartsLifecycle.test.ts ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
+
+最新批次：分享页图表预览入口 smoke 补强
+
+- 已新增 `ChartPreviewBoardForShare` 组件级 smoke，覆盖分享页图表预览入口的只读渲染边界
+- 测试验证未绑定 view 的分享图表优先使用 `sampleData`，绑定 view 的分享图表使用已拉取 `dataset`
+- 测试验证 `ChartIFrameContainer` 能收到分享页的 `containerId`、尺寸、loading 和 dataset props
+- 测试验证 chart click 选中事件会通过分享页入口 dispatch selectedItems 更新
+- 本批次不改变分享页交互、不改数据请求协议，只补运行时入口回归证据
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/pages/SharePage/Chart/__tests__/ChartPreviewBoardForShare.smoke.test.tsx
+npm run checkTs
+npm run eslint -- src/app/pages/SharePage/Chart/__tests__/ChartPreviewBoardForShare.smoke.test.tsx
+npm exec -- prettier --check src/app/pages/SharePage/Chart/__tests__/ChartPreviewBoardForShare.smoke.test.tsx ../docs/tech-stack-modernization-plan.md
 npm audit --json
 git diff --check
 ```
