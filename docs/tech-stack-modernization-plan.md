@@ -2704,6 +2704,25 @@ npm audit --json
 git diff --check
 ```
 
+最新批次：Split 异步 runtime smoke 补强
+
+- 已补强 `Split` 组件级 smoke，覆盖 `split.js` runtime 加载成功后创建实例并只传入非 gutter 子节点
+- 已覆盖自定义 gutter 会被标记为内部 gutter，避免后续重建时误作为普通 pane 传回 `split.js`
+- 已覆盖初次挂载和更新重建两条异步加载路径：组件在 runtime resolve 前卸载时，不再创建 split 实例
+- 现有失败路径测试继续覆盖 runtime 加载失败时页面内容保持挂载
+- 本批次不升级 `split.js`，不改变 `Split` 对外 props 协议
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/components/__tests__/Split.test.tsx src/app/components/__tests__/splitRuntime.test.ts
+npm run checkTs
+npm run eslint -- src/app/components/Split.tsx src/app/components/__tests__/Split.test.tsx
+npm exec -- prettier --check src/app/components/Split.tsx src/app/components/__tests__/Split.test.tsx ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。

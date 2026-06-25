@@ -167,10 +167,11 @@ class SplitWrapper extends React.Component<SplitWrapperProps> {
         return;
       }
 
-      this.split = Split(
-        getSplitChildren(this.parent),
-        { ...options, minSize, sizes: sizes || this.split?.getSizes() },
-      );
+      this.split = Split(getSplitChildren(this.parent), {
+        ...options,
+        minSize,
+        sizes: sizes || this.split?.getSizes(),
+      });
     } else if (sizes) {
       // If only the size has changed, set the size. No need to do this if re-created.
       let sizeChanged = false;
