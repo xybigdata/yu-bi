@@ -1,10 +1,12 @@
 import {
   AggregateFieldActionType,
   ChartDataSectionType,
+  ChartInteractionEvent,
   DataViewFieldType,
 } from 'app/constants';
 import type { ChartConfig } from 'app/types/ChartConfig';
 import type ChartDataSetDTO from 'app/types/ChartDataSet';
+import { vi } from 'vitest';
 import BasicRichText from '../BasicRichText';
 
 const createDataset = (): ChartDataSetDTO => ({
@@ -150,5 +152,35 @@ describe('<BasicRichText />', () => {
     expect(
       chart.getOptions({}, createDataset(), createConfig()).isEditing,
     ).toBe(true);
+  });
+
+  test('should emit rich text change event through registered click interaction', () => {
+    const chart = new BasicRichText();
+    const callback = vi.fn();
+
+    chart.registerMouseEvents([{ name: 'click', callback }]);
+    chart.onMount(
+      {
+        containerId: 'event-rich-text',
+        dataset: createDataset(),
+        config: createConfig(),
+        widgetSpecialConfig: { env: 'edit' },
+      },
+      { document, window },
+    );
+
+    const options = chart.getOptions({}, createDataset(), createConfig());
+
+    expect('onChange' in options).toBe(true);
+    if ('onChange' in options) {
+      options.onChange?.('{"ops":[{"insert":"changed"}]}');
+    }
+
+    expect(callback).toHaveBeenCalledWith({
+      chartType: 'rich-text',
+      interactionType: ChartInteractionEvent.ChangeContext,
+      type: 'change',
+      value: '{"ops":[{"insert":"changed"}]}',
+    });
   });
 });

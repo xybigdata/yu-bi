@@ -104,8 +104,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 105`，以恢复时重新执行命令为准                          |
-| 最近专题提交               | `990205f56 chore: 支持构建体积报告按稳定 id 过滤`          |
+| 当前分支相对 `origin/main` | `0 107`，以恢复时重新执行命令为准                          |
+| 最近专题提交               | `e3525b3d1 test: 补强分享仪表盘运行时基线`                 |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -3089,6 +3089,24 @@ npm run test -- src/app/pages/SharePage/Dashboard/__tests__/DashboardForShare.sm
 npm run checkTs
 npm run eslint -- src/app/pages/SharePage/Dashboard/ShareDashboardPage.tsx src/app/pages/SharePage/Dashboard/__tests__/DashboardForShare.smoke.test.tsx src/app/pages/SharePage/Dashboard/__tests__/ShareDashboardPage.smoke.test.tsx
 npm exec -- prettier --check src/app/pages/SharePage/Dashboard/ShareDashboardPage.tsx src/app/pages/SharePage/Dashboard/__tests__/DashboardForShare.smoke.test.tsx src/app/pages/SharePage/Dashboard/__tests__/ShareDashboardPage.smoke.test.tsx ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
+最新批次：富文本只读展示 smoke 补强
+
+- 新增 `ChartRichTextAdapter` 只读展示态 smoke，覆盖 Quill 2 迁移后的只读 editor 参数、toolbar 关闭、`readOnly=true` 和 calcfield 展示值翻译
+- 测试覆盖纯字符串富文本内容不被当作 Delta 解析，避免历史内容在只读分享或看板展示场景出现空白回退
+- 测试覆盖编辑态默认只渲染编辑器、不提前渲染只读预览，为后续富文本弹窗预览和 Quill 运行时升级保留基线
+- 在 `BasicRichText` 中补充富文本 change 事件合同，验证编辑态 `onChange` 会通过已注册 click interaction 发出 `ChangeContext` 事件和 Delta 字符串
+- 本批次不升级 `quill` / `react-quill-new`，不改变富文本协议，只补分享页和看板只读展示链路的组件级证据
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/components/ChartGraph/BasicRichText/__tests__/ChartRichTextAdapter.readonly.test.tsx src/app/components/ChartGraph/BasicRichText/__tests__/BasicRichText.test.ts
+npm run checkTs
+npm run eslint -- src/app/components/ChartGraph/BasicRichText/__tests__/ChartRichTextAdapter.readonly.test.tsx src/app/components/ChartGraph/BasicRichText/__tests__/BasicRichText.test.ts
+npm exec -- prettier --check src/app/components/ChartGraph/BasicRichText/__tests__/ChartRichTextAdapter.readonly.test.tsx src/app/components/ChartGraph/BasicRichText/__tests__/BasicRichText.test.ts ../docs/tech-stack-modernization-plan.md
 git diff --check
 ```
 
