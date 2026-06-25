@@ -90,6 +90,7 @@ git log --oneline --decorate -8
 - 构建报告治理：vendor 分类已覆盖当前所有手工 vendor chunk，分类过滤可用于完整观察第三方包体积上下文
 - 构建基线治理：baseline 校验已覆盖 raw 超限稳定 id 和 raw 超限分类计数，能发现分包分类漂移
 - 后端方言基线：内置 JDBC driver 已固化 CustomSqlDialect fallback 与显式 / 标准方言边界，支撑后续 Calcite 和 driver 元数据评估
+- 后端 render 基线：CustomSqlDialect fallback driver 已覆盖基础 SQL 包装渲染合同，确认默认引号和 `DATART_VTABLE` 包装稳定
 
 ### 3.3 已验证但未收口的问题
 
@@ -185,7 +186,7 @@ git log --oneline --decorate -8
 | P0     | 执行文档瘦身和恢复入口维护 | 低   | 本轮完成；后续只记录阶段结论，不再堆叠长流水                                             |
 | P1     | 构建体积 raw 超限治理      | 中   | 用 `build:report` 的 `category`、`idFilter` 和 JSON baseline 聚焦 `monaco`、`antd`、地图 |
 | P1     | 前端动态运行时入口补强     | 中   | 继续补真实入口 smoke，优先覆盖分享页、图表 iframe、编辑器、地图和看板只读链路            |
-| P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback 边界；继续补更多 SQL render 和 driver metadata 合同        |
+| P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback 边界和基础 render 合同；继续补更多 driver metadata 合同    |
 | P2     | Shiro / Security 边界治理  | 中高 | 不整体替换 Shiro；继续补认证、授权、token、异常边界测试后做小步修复                      |
 
 ### 6.2 条件满足后推进

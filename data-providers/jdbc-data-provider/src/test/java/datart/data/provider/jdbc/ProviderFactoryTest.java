@@ -1,6 +1,8 @@
 package datart.data.provider.jdbc;
 
 import datart.core.base.exception.BaseException;
+import datart.core.data.provider.QueryScript;
+import datart.core.data.provider.ScriptType;
 import datart.data.provider.JdbcDataProvider;
 import datart.data.provider.calcite.dialect.CustomSqlDialect;
 import datart.data.provider.calcite.dialect.ClickHouseSqlDialectSupport;
@@ -11,6 +13,7 @@ import datart.data.provider.jdbc.adapters.ClickHouseDataProviderAdapter;
 import datart.data.provider.jdbc.adapters.JdbcDataProviderAdapter;
 import datart.data.provider.jdbc.adapters.OracleDataProviderAdapter;
 import datart.data.provider.jdbc.adapters.PrestoDataProviderAdapter;
+import datart.data.provider.script.SqlStringUtils;
 import org.apache.calcite.sql.SqlDialect;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
@@ -167,6 +170,26 @@ class ProviderFactoryTest {
                 }));
     }
 
+    @TestFactory
+    Stream<DynamicTest> shouldRenderBasicSqlForCustomDialectFallbackDrivers() {
+        return CUSTOM_DIALECT_FALLBACK_DB_TYPES.stream()
+                .sorted()
+                .map(dbType -> DynamicTest.dynamicTest(dbType, () -> {
+                    JdbcDataProviderAdapter adapter = createAdapter(dbType);
+                    SqlScriptRender render = new SqlScriptRender(
+                            queryScript("SELECT id, amount FROM orders WHERE status = 'paid'"),
+                            null,
+                            adapter.getSqlDialect(),
+                            false
+                    );
+
+                    assertEquals(
+                            "SELECT * FROM ( SELECT id, amount FROM orders WHERE status = 'paid' ) AS \"DATART_VTABLE\"",
+                            cleanup(render.render(false, false, false))
+                    );
+                }));
+    }
+
     private void assertAdapter(
             String dbType,
             Class<? extends JdbcDataProviderAdapter> adapterType,
@@ -187,6 +210,18 @@ class ProviderFactoryTest {
         properties.setUrl("jdbc:test://localhost");
         properties.setDriverClass("");
         return JdbcDataProvider.ProviderFactory.createDataProvider(properties, false);
+    }
+
+    private QueryScript queryScript(String script) {
+        QueryScript queryScript = new QueryScript();
+        queryScript.setScriptType(ScriptType.SQL);
+        queryScript.setScript(script);
+        queryScript.setVariables(List.of());
+        return queryScript;
+    }
+
+    private String cleanup(String sql) {
+        return SqlStringUtils.cleanupSql(sql).replaceAll("\\s+", " ");
     }
 
     private Stream<String> builtInDbTypes() {
