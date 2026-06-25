@@ -28,6 +28,7 @@ export const VENDOR_BUILD_ITEM_IDS = new Set([
 const gzipAsync = promisify(gzip);
 
 export const formatKiB = bytes => `${(bytes / KiB).toFixed(2)} KiB`;
+export const formatPercent = value => `${(value * 100).toFixed(1)}%`;
 
 export function getStableBuildItemId(fileName) {
   return fileName.replace(
@@ -268,6 +269,19 @@ export function countItemsByCategory(items) {
     }, {});
 }
 
+export function createSizeSummary(items) {
+  const bytes = items.reduce((total, item) => total + item.bytes, 0);
+  const gzipBytes = items.reduce((total, item) => total + item.gzipBytes, 0);
+  const gzipRatio = bytes > 0 ? gzipBytes / bytes : 0;
+
+  return {
+    bytes,
+    gzipBytes,
+    gzipRatio: Number(gzipRatio.toFixed(4)),
+    gzipSavingsBytes: bytes - gzipBytes,
+  };
+}
+
 export function createOversizedSummary(items, options) {
   const { rawOversized, gzipOversized, oversized } = getOversizedItems(
     items,
@@ -289,6 +303,7 @@ export function createOversizedSummary(items, options) {
       item => item.id ?? getStableBuildItemId(item.name),
     ),
     oversized: oversized.map(item => item.id ?? getStableBuildItemId(item.name)),
+    size: createSizeSummary(items),
   };
 }
 
@@ -317,6 +332,7 @@ export function createReportLines(title, items, options) {
     const gzipOversizedItem =
       options.gzipThresholdKiB !== null &&
       item.gzipBytes > options.gzipThresholdKiB * KiB;
+    const gzipRatio = item.bytes > 0 ? item.gzipBytes / item.bytes : 0;
     const mark = rawOversizedItem || gzipOversizedItem ? '!' : ' ';
     lines.push(
       `${mark} #${String(item.rank).padStart(2, '0')} raw=${formatKiB(
@@ -324,7 +340,9 @@ export function createReportLines(title, items, options) {
       ).padStart(12, ' ')} gzip=${formatKiB(item.gzipBytes).padStart(
         12,
         ' ',
-      )} flags=${rawOversizedItem ? 'raw' : '-'},${
+      )} gzipRatio=${formatPercent(gzipRatio).padStart(6, ' ')} flags=${
+        rawOversizedItem ? 'raw' : '-'
+      },${
         gzipOversizedItem ? 'gzip' : '-'
       } category=${item.category ?? getBuildItemCategory(item.name)} id=${
         item.id ?? getStableBuildItemId(item.name)

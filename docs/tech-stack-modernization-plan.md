@@ -40,15 +40,15 @@ git log --oneline --decorate -8
 | 工作目录                   | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
 | 远端                       | `git@github.com:xybigdata/yu-bi.git`                       |
 | 主线分支                   | `main`                                                     |
-| 当前专题分支               | `codex/modernization-frontend-security-deps`               |
-| 当前分支相对 `origin/main` | 以恢复命令输出为准；本轮复盘前为 `0 122`                   |
+| 当前专题分支               | `codex/modernization-build-size-governance`                |
+| 当前分支相对 `origin/main` | 以恢复命令输出为准                                         |
 | 最近专题提交               | 以 `git log -1 --oneline` 输出为准                         |
 | 当前工作区                 | 干净                                                       |
 
 分支纪律：
 
 - 不直接在 `main` 开发
-- 当前阶段继续在 `codex/modernization-frontend-security-deps` 上累计改造
+- 当前阶段继续在 `codex/modernization-build-size-governance` 上累计构建体积治理
 - 不因为单个小批次完成就新建分支
 - 不因为分支领先较多就主动合并 `main`
 - 专题分支可以阶段性 push 保存进度
@@ -69,9 +69,9 @@ git log --oneline --decorate -8
 - 前端 `npm audit` 当前保持 0 漏洞
 - 构建体积报告已具备文本、JSON、文件输出、观察基线、稳定 id、分类汇总和分类过滤能力
 
-### 3.2 当前专题成果
+### 3.2 已完成专题成果
 
-当前专题：P2-E 前端安全依赖与运行时治理。
+上一专题：P2-E 前端安全依赖与运行时治理，已合入 `main`。
 
 已完成的核心改造：
 
@@ -92,7 +92,18 @@ git log --oneline --decorate -8
 - 后端方言基线：内置 JDBC driver 已固化 CustomSqlDialect fallback 与显式 / 标准方言边界，支撑后续 Calcite 和 driver 元数据评估
 - 后端 render 基线：CustomSqlDialect fallback driver 已覆盖基础 SQL 包装渲染合同，确认默认引号和 `DATART_VTABLE` 包装稳定
 
-### 3.3 已验证但未收口的问题
+### 3.3 当前专题
+
+当前专题：P1 构建体积治理与报告可观测性。
+
+推进原则：
+
+- 不为降低 raw 数字做无收益拆包
+- 优先补强可观测性，再决定是否拆分地图、Monaco、AntD、AntV 等重资产
+- 构建报告应能同时说明 raw、gzip、压缩率和超限分类，支撑后续取舍
+- 本专题不改变业务协议和地图数据语义
+
+### 3.4 已验证但未收口的问题
 
 - JS raw 超限仍存在 7 个稳定 id：`monacoEditor.js`、`antdDesign.js`、`echarts.js`、`monacoBase.js`、`antvG2.js`、`antvS2.js`、`antvG.js`
 - asset raw 超限仍存在 2 个稳定 id：`geo-china-city.map.json`、`geo-china.map.json`
@@ -275,6 +286,8 @@ npm ls --all
 - `YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1`：只输出超限项
 - `YU_BI_CHUNK_REPORT_ID_FILTER=antdDesign.js`：按稳定 id 过滤
 - `YU_BI_CHUNK_REPORT_CATEGORY_FILTER=vendor`：按分类过滤
+- 文本报告每项输出 `gzipRatio`
+- JSON 报告 `summary.chunk.size` / `summary.asset.size` 输出 raw、gzip、压缩率和 gzip 节省字节
 - `npm run build:report:check`：按观察基线校验稳定 id 清单
 
 `vendor` 分类应覆盖 `vite.shared.mts#createVendorManualChunks` 中当前所有手工第三方分包，避免构建报告和实际分包规则漂移。
@@ -288,6 +301,13 @@ npm ls --all
 | JS / task | `monacoEditor.js`、`antdDesign.js`、`echarts.js`、`monacoBase.js`、`antvG2.js`、`antvS2.js`、`antvG.js` | 无                        |
 | asset     | `geo-china-city.map.json`、`geo-china.map.json`                                                         | `geo-china-city.map.json` |
 
+本轮真实报告观察：
+
+- JS vendor 超限项 gzip 压缩率约 `24.4%` 到 `32.9%`
+- `geo-china.map.json` gzip 压缩率约 `34.2%`
+- `geo-china-city.map.json` gzip 压缩率约 `58.8%`，gzip 后仍约 `693.80 KiB`
+- 地图 city 资源后续优先评估资源粒度和加载策略，不优先做 JS 分包式治理
+
 后续治理顺序：
 
 1. 先看 gzip 维度，避免把 raw 拆分后的统计变化误判为用户传输体积回退。
@@ -300,7 +320,7 @@ npm ls --all
 
 当前执行偏好：
 
-- `git add`、`git commit --no-verify -m "..."`、`git push origin codex/modernization-frontend-security-deps` 可以自动执行
+- `git add`、`git commit --no-verify -m "..."`、`git push origin codex/modernization-build-size-governance` 可以自动执行
 - 同一专题内累计一组相关改动后再提交
 - 文档复盘可以单独提交，但后续小型文档修正优先并入相关改造提交
 - 专题分支可 push；不主动 merge `main`

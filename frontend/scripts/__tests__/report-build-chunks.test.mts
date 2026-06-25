@@ -13,6 +13,7 @@ import {
   createOversizedSummary,
   createReportOptions,
   createReportLines,
+  createSizeSummary,
   filterItemsByCategory,
   filterItemsByStableId,
   getStableBuildItemId,
@@ -80,6 +81,7 @@ describe('report-build-chunks', () => {
     );
     expect(stdout).toContain('build/static/js/antdDesign.D8R05ovR.js');
     expect(stdout).toContain('category=vendor id=antdDesign.js');
+    expect(stdout).toContain('gzipRatio=');
     expect(stdout).toContain('id=antdDesign.js');
     expect(stdout).toContain('build/static/js/react.BIp4DLJn.js');
     expect(stdout).toContain('category=task id=task/index.js');
@@ -99,6 +101,12 @@ describe('report-build-chunks', () => {
         gzipOversized: [],
         oversized: [],
         rawOversized: [],
+        size: {
+          bytes: 900,
+          gzipBytes: expect.any(Number),
+          gzipRatio: expect.any(Number),
+          gzipSavingsBytes: expect.any(Number),
+        },
       },
       chunk: {
         categoryCounts: {
@@ -111,6 +119,12 @@ describe('report-build-chunks', () => {
         gzipOversized: [],
         oversized: ['antdDesign.js'],
         rawOversized: ['antdDesign.js'],
+        size: {
+          bytes: 2600,
+          gzipBytes: expect.any(Number),
+          gzipRatio: expect.any(Number),
+          gzipSavingsBytes: expect.any(Number),
+        },
       },
     });
   });
@@ -320,6 +334,26 @@ describe('report-build-chunks', () => {
       gzipOversized: ['gzip-heavy.js'],
       oversized: ['antdDesign.js', 'gzip-heavy.js'],
       rawOversized: ['antdDesign.js'],
+      size: {
+        bytes: 2500,
+        gzipBytes: 1800,
+        gzipRatio: 0.72,
+        gzipSavingsBytes: 700,
+      },
+    });
+  });
+
+  it('creates aggregate size summary for compression observability', () => {
+    expect(
+      createSizeSummary([
+        { bytes: 1000, gzipBytes: 250 },
+        { bytes: 3000, gzipBytes: 750 },
+      ]),
+    ).toEqual({
+      bytes: 4000,
+      gzipBytes: 1000,
+      gzipRatio: 0.25,
+      gzipSavingsBytes: 3000,
     });
   });
 
