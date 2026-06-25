@@ -1,0 +1,38 @@
+{
+  "summary": {
+    "chunk": {
+      "files": 101,
+      "rawOversized": [
+        "monacoEditor.js",
+        "antdDesign.js",
+        "echarts.js",
+        "monacoBase.js",
+        "antvG2.js",
+        "antvS2.js",
+        "antvG.js"
+      ],
+      "gzipOversized": [],
+      "oversized": [
+        "monacoEditor.js",
+        "antdDesign.js",
+        "echarts.js",
+        "monacoBase.js",
+        "antvG2.js",
+        "antvS2.js",
+        "antvG.js"
+      ]
+    },
+    "asset": {
+      "files": 6,
+      "rawOversized": [
+        "geo-china-city.map.json",
+        "geo-china.map.json"
+      ],
+      "gzipOversized": [],
+      "oversized": [
+        "geo-china-city.map.json",
+        "geo-china.map.json"
+      ]
+    }
+  }
+}

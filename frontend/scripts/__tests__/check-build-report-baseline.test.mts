@@ -114,4 +114,29 @@ describe('check-build-report-baseline', () => {
       'yu-bi build report baseline verified: chunkRawOversized=1, assetRawOversized=1',
     );
   });
+
+  it('uses the default baseline file when no override is provided', async () => {
+    const appRoot = await createTempRoot();
+    await mkdir(path.join(appRoot, 'scripts/baselines'), { recursive: true });
+    await writeFile(
+      path.join(appRoot, 'reports/report.json'),
+      JSON.stringify(createReport()),
+    );
+    await writeFile(
+      path.join(appRoot, 'scripts/baselines/build-report-baseline.json'),
+      JSON.stringify(createReport()),
+    );
+
+    const { stdout } = await execFileAsync(process.execPath, [baselineScript], {
+      cwd: appRoot,
+      env: {
+        ...process.env,
+        YU_BI_CHUNK_REPORT_BASELINE_REPORT: 'reports/report.json',
+      },
+    });
+
+    expect(stdout).toContain(
+      'yu-bi build report baseline verified: chunkRawOversized=1, assetRawOversized=1',
+    );
+  });
 });

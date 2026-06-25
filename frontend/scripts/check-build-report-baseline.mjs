@@ -5,11 +5,13 @@ import {
 
 const appRoot = process.cwd();
 const reportPath = process.env.YU_BI_CHUNK_REPORT_BASELINE_REPORT;
-const baselinePath = process.env.YU_BI_CHUNK_REPORT_BASELINE_FILE;
+const baselinePath =
+  process.env.YU_BI_CHUNK_REPORT_BASELINE_FILE ||
+  'scripts/baselines/build-report-baseline.json';
 
-if (!reportPath || !baselinePath) {
+if (!reportPath) {
   throw new Error(
-    '必须设置 YU_BI_CHUNK_REPORT_BASELINE_REPORT 和 YU_BI_CHUNK_REPORT_BASELINE_FILE',
+    '必须设置 YU_BI_CHUNK_REPORT_BASELINE_REPORT；可选设置 YU_BI_CHUNK_REPORT_BASELINE_FILE 覆盖默认基线',
   );
 }
 

@@ -104,8 +104,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 112`，以恢复时重新执行命令为准                          |
-| 最近专题提交               | `8f6e6b208 chore: 支持构建报告写入文件`                    |
+| 当前分支相对 `origin/main` | `0 113`，以恢复时重新执行命令为准                          |
+| 最近专题提交               | `970a7f31a chore: 增加构建报告基线校验`                    |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -3204,6 +3204,25 @@ YU_BI_CHUNK_REPORT_BASELINE_REPORT=../.tmp/build-report.json YU_BI_CHUNK_REPORT_
 npm run checkTs
 npm run eslint -- scripts/check-build-report-baseline-core.mjs scripts/check-build-report-baseline.mjs scripts/__tests__/check-build-report-baseline.test.mts
 npm exec -- prettier --check scripts/check-build-report-baseline-core.mjs scripts/check-build-report-baseline.mjs scripts/__tests__/check-build-report-baseline.test.mts package.json ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
+最新批次：构建体积报告基线文件
+
+- 新增 `scripts/baselines/build-report-baseline.json`，固化当前构建报告 summary 中的稳定 id 超限清单
+- `build:report:check` 未设置 `YU_BI_CHUNK_REPORT_BASELINE_FILE` 时默认读取该基线文件
+- 当前基线记录 JS raw 超限 7 个、asset raw 超限 2 个，gzip 超限均为空；只使用稳定 id，不固化 hash 文件名
+- 测试覆盖默认基线路径和显式 baseline override 两种模式
+- 该基线当前作为观察和回归对比入口，不接入主线强制门禁；后续包体治理减少超限项后，应同步更新基线并记录原因
+
+本批次验证命令：
+
+```bash
+npm run test -- scripts/__tests__/check-build-report-baseline.test.mts scripts/__tests__/report-build-chunks.test.mts
+YU_BI_CHUNK_REPORT_BASELINE_REPORT=../.tmp/build-report.json npm run build:report:check
+npm run checkTs
+npm run eslint -- scripts/check-build-report-baseline-core.mjs scripts/check-build-report-baseline.mjs scripts/__tests__/check-build-report-baseline.test.mts
+npm exec -- prettier --check scripts/check-build-report-baseline-core.mjs scripts/check-build-report-baseline.mjs scripts/__tests__/check-build-report-baseline.test.mts scripts/baselines/build-report-baseline.json package.json ../docs/tech-stack-modernization-plan.md
 git diff --check
 ```
 
