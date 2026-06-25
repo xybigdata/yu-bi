@@ -1,6 +1,11 @@
 {
   "summary": {
     "chunk": {
+      "categoryCounts": {
+        "rawOversized": {
+          "vendor": 7
+        }
+      },
       "files": 101,
       "rawOversized": [
         "monacoEditor.js",
@@ -23,6 +28,11 @@
       ]
     },
     "asset": {
+      "categoryCounts": {
+        "rawOversized": {
+          "geo": 2
+        }
+      },
       "files": 6,
       "rawOversized": [
         "geo-china-city.map.json",

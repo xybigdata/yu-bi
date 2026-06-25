@@ -24,6 +24,19 @@ const assertListEqual = (name, actual, expected) => {
   }
 };
 
+const assertObjectEqual = (name, actual, expected) => {
+  const actualObject = sortObjectKeys(actual);
+  const expectedObject = sortObjectKeys(expected);
+  const actualJson = JSON.stringify(actualObject);
+  const expectedJson = JSON.stringify(expectedObject);
+
+  if (actualJson !== expectedJson) {
+    throw new Error(
+      `${name} 不匹配: expected=${expectedJson}, actual=${actualJson}`,
+    );
+  }
+};
+
 export async function readJsonFile(appRoot, filePath) {
   return JSON.parse(await readFile(path.resolve(appRoot, filePath), 'utf8'));
 }
@@ -58,6 +71,16 @@ export function verifyBuildReportBaseline({ baseline, report }) {
     'asset gzipOversized',
     report.summary?.asset?.gzipOversized,
     baseline.summary?.asset?.gzipOversized,
+  );
+  assertObjectEqual(
+    'chunk raw categoryCounts',
+    report.summary?.chunk?.categoryCounts?.rawOversized,
+    baseline.summary?.chunk?.categoryCounts?.rawOversized,
+  );
+  assertObjectEqual(
+    'asset raw categoryCounts',
+    report.summary?.asset?.categoryCounts?.rawOversized,
+    baseline.summary?.asset?.categoryCounts?.rawOversized,
   );
 
   return {

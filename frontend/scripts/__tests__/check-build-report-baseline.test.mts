@@ -97,6 +97,23 @@ describe('check-build-report-baseline', () => {
     );
   });
 
+  it('reports raw oversized category count drift', () => {
+    expect(() =>
+      verifyBuildReportBaseline({
+        baseline: createReport({
+          chunkRawCategoryCounts: { runtime: 1, vendor: 1 },
+          chunkRawOversized: ['antdDesign.js', 'shareChart.js'],
+        }),
+        report: createReport({
+          chunkRawCategoryCounts: { vendor: 2 },
+          chunkRawOversized: ['antdDesign.js', 'shareChart.js'],
+        }),
+      }),
+    ).toThrow(
+      'chunk raw categoryCounts 不匹配: expected={"runtime":1,"vendor":1}, actual={"vendor":2}',
+    );
+  });
+
   it('reads report and baseline JSON files from the CLI', async () => {
     const appRoot = await createTempRoot();
     await writeFile(

@@ -88,6 +88,7 @@ git log --oneline --decorate -8
 - Monaco、ECharts、Quill、Reveal、Split、DnD、SQL formatter 等动态运行时入口已补最小 smoke
 - 构建体积治理：地图 JSON 已迁出 JS chunk，Monaco / AntV / AntD vendor 分包已细化，gzip 维度 JS 超限清零
 - 构建报告治理：vendor 分类已覆盖当前所有手工 vendor chunk，分类过滤可用于完整观察第三方包体积上下文
+- 构建基线治理：baseline 校验已覆盖 raw 超限稳定 id 和 raw 超限分类计数，能发现分包分类漂移
 
 ### 3.3 已验证但未收口的问题
 
@@ -275,6 +276,8 @@ npm ls --all
 - `npm run build:report:check`：按观察基线校验稳定 id 清单
 
 `vendor` 分类应覆盖 `vite.shared.mts#createVendorManualChunks` 中当前所有手工第三方分包，避免构建报告和实际分包规则漂移。
+
+`build:report:check` 会校验 raw / gzip 超限稳定 id，并校验 raw 超限分类计数。当前分类基线为 JS `vendor=7`、asset `geo=2`。
 
 当前观察对象：
 
