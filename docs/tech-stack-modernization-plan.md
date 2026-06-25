@@ -289,10 +289,12 @@ npm ls --all
 - 文本报告每项输出 `gzipRatio`
 - JSON 报告 `summary.chunk.size` / `summary.asset.size` 输出 raw、gzip、压缩率和 gzip 节省字节
 - `npm run build:report:check`：按观察基线校验稳定 id 清单
+- `npm run build:report:gzip`：生成 gzip 预算报告 `build/build-report-gzip.json`
+- `npm run build:report:gzip:check`：按 gzip 预算基线校验 raw / gzip 超限稳定 id 与分类计数
 
 `vendor` 分类应覆盖 `vite.shared.mts#createVendorManualChunks` 中当前所有手工第三方分包，避免构建报告和实际分包规则漂移。
 
-`build:report:check` 会校验 raw / gzip 超限稳定 id，并校验 raw 超限分类计数。当前分类基线为 JS `vendor=7`、asset `geo=2`。
+`build:report:check` 会校验 raw / gzip 超限稳定 id，并校验 raw / gzip 超限分类计数。当前 raw 分类基线为 JS `vendor=7`、asset `geo=2`。gzip 预算基线为 gzip 阈值 `500 KiB`，当前只有 asset `geo=1` 超限。
 
 当前观察对象：
 
@@ -358,6 +360,8 @@ cd frontend
 npm run build
 npm run build:task
 YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 npm run build:report
+npm run build:report:gzip
+npm run build:report:gzip:check
 YU_BI_CHUNK_REPORT_CATEGORY_FILTER=vendor YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 npm run build:report
 YU_BI_CHUNK_REPORT_FORMAT=json YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 YU_BI_CHUNK_REPORT_OUTPUT=build/build-report.json npm run build:report
 YU_BI_CHUNK_REPORT_BASELINE_REPORT=build/build-report.json npm run build:report:check

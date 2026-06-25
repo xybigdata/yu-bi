@@ -82,12 +82,30 @@ export function verifyBuildReportBaseline({ baseline, report }) {
     report.summary?.asset?.categoryCounts?.rawOversized,
     baseline.summary?.asset?.categoryCounts?.rawOversized,
   );
+  assertObjectEqual(
+    'chunk gzip categoryCounts',
+    report.summary?.chunk?.categoryCounts?.gzipOversized,
+    baseline.summary?.chunk?.categoryCounts?.gzipOversized,
+  );
+  assertObjectEqual(
+    'asset gzip categoryCounts',
+    report.summary?.asset?.categoryCounts?.gzipOversized,
+    baseline.summary?.asset?.categoryCounts?.gzipOversized,
+  );
 
   return {
+    assetGzipCategoryCounts: sortObjectKeys(
+      report.summary?.asset?.categoryCounts?.gzipOversized,
+    ),
+    assetGzipOversized: uniqueSorted(report.summary?.asset?.gzipOversized),
     assetRawCategoryCounts: sortObjectKeys(
       report.summary?.asset?.categoryCounts?.rawOversized,
     ),
     assetRawOversized: uniqueSorted(report.summary?.asset?.rawOversized),
+    chunkGzipCategoryCounts: sortObjectKeys(
+      report.summary?.chunk?.categoryCounts?.gzipOversized,
+    ),
+    chunkGzipOversized: uniqueSorted(report.summary?.chunk?.gzipOversized),
     chunkRawCategoryCounts: sortObjectKeys(
       report.summary?.chunk?.categoryCounts?.rawOversized,
     ),

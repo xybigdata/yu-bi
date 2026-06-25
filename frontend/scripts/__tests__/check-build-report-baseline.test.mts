@@ -20,24 +20,33 @@ const baselineScript = path.resolve(
 const tempRoots: string[] = [];
 
 const createReport = ({
+  assetGzipOversized = [],
+  assetGzipCategoryCounts = assetGzipOversized.length
+    ? { geo: assetGzipOversized.length }
+    : {},
   assetRawOversized = ['geo-china.map.json'],
   assetRawCategoryCounts = { geo: assetRawOversized.length },
   chunkGzipOversized = [],
+  chunkGzipCategoryCounts = chunkGzipOversized.length
+    ? { vendor: chunkGzipOversized.length }
+    : {},
   chunkRawOversized = ['antdDesign.js'],
   chunkRawCategoryCounts = { vendor: chunkRawOversized.length },
 } = {}) => ({
   summary: {
     asset: {
       categoryCounts: {
+        gzipOversized: assetGzipCategoryCounts,
         rawOversized: assetRawCategoryCounts,
       },
       files: 1,
-      gzipOversized: [],
-      oversized: assetRawOversized,
+      gzipOversized: assetGzipOversized,
+      oversized: [...assetRawOversized, ...assetGzipOversized],
       rawOversized: assetRawOversized,
     },
     chunk: {
       categoryCounts: {
+        gzipOversized: chunkGzipCategoryCounts,
         rawOversized: chunkRawCategoryCounts,
       },
       files: 1,
@@ -66,17 +75,23 @@ describe('check-build-report-baseline', () => {
     expect(
       verifyBuildReportBaseline({
         baseline: createReport({
+          assetGzipOversized: ['geo-china-city.map.json'],
           chunkGzipOversized: ['gzip-heavy.js'],
           chunkRawOversized: ['antdDesign.js'],
         }),
         report: createReport({
+          assetGzipOversized: ['geo-china-city.map.json'],
           chunkGzipOversized: ['gzip-heavy.js'],
           chunkRawOversized: ['antdDesign.js'],
         }),
       }),
     ).toEqual({
+      assetGzipCategoryCounts: { geo: 1 },
+      assetGzipOversized: ['geo-china-city.map.json'],
       assetRawCategoryCounts: { geo: 1 },
       assetRawOversized: ['geo-china.map.json'],
+      chunkGzipCategoryCounts: { vendor: 1 },
+      chunkGzipOversized: ['gzip-heavy.js'],
       chunkRawCategoryCounts: { vendor: 1 },
       chunkRawOversized: ['antdDesign.js'],
     });
@@ -114,6 +129,23 @@ describe('check-build-report-baseline', () => {
     );
   });
 
+  it('reports gzip oversized category count drift', () => {
+    expect(() =>
+      verifyBuildReportBaseline({
+        baseline: createReport({
+          assetGzipCategoryCounts: { geo: 1 },
+          assetGzipOversized: ['geo-china-city.map.json'],
+        }),
+        report: createReport({
+          assetGzipCategoryCounts: { asset: 1 },
+          assetGzipOversized: ['geo-china-city.map.json'],
+        }),
+      }),
+    ).toThrow(
+      'asset gzip categoryCounts 不匹配: expected={"geo":1}, actual={"asset":1}',
+    );
+  });
+
   it('reads report and baseline JSON files from the CLI', async () => {
     const appRoot = await createTempRoot();
     await writeFile(
@@ -143,6 +175,9 @@ describe('check-build-report-baseline', () => {
     );
     expect(stdout).toContain(
       'chunkRawCategories=vendor=1, assetRawCategories=geo=1',
+    );
+    expect(stdout).toContain(
+      'chunkGzipCategories=none, assetGzipCategories=none',
     );
   });
 

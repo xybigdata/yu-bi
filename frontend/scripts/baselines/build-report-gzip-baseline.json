@@ -1,0 +1,46 @@
+{
+  "summary": {
+    "chunk": {
+      "categoryCounts": {
+        "rawOversized": {
+          "vendor": 7
+        },
+        "gzipOversized": {}
+      },
+      "files": 101,
+      "rawOversized": [
+        "monacoEditor.js",
+        "antdDesign.js",
+        "echarts.js",
+        "monacoBase.js",
+        "antvG2.js",
+        "antvS2.js",
+        "antvG.js"
+      ],
+      "gzipOversized": [],
+      "oversized": []
+    },
+    "asset": {
+      "categoryCounts": {
+        "rawOversized": {
+          "geo": 2
+        },
+        "gzipOversized": {
+          "geo": 1
+        }
+      },
+      "files": 6,
+      "rawOversized": [
+        "geo-china-city.map.json",
+        "geo-china.map.json"
+      ],
+      "gzipOversized": [
+        "geo-china-city.map.json"
+      ],
+      "oversized": [
+        "geo-china-city.map.json",
+        "geo-china.map.json"
+      ]
+    }
+  }
+}

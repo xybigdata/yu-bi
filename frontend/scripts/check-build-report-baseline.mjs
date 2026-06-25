@@ -26,9 +26,17 @@ console.log(
     result.chunkRawOversized.length
   }, assetRawOversized=${
     result.assetRawOversized.length
+  }, chunkGzipOversized=${
+    result.chunkGzipOversized.length
+  }, assetGzipOversized=${
+    result.assetGzipOversized.length
   }, chunkRawCategories=${formatCategoryCounts(
     result.chunkRawCategoryCounts,
   )}, assetRawCategories=${formatCategoryCounts(
     result.assetRawCategoryCounts,
+  )}, chunkGzipCategories=${formatCategoryCounts(
+    result.chunkGzipCategoryCounts,
+  )}, assetGzipCategories=${formatCategoryCounts(
+    result.assetGzipCategoryCounts,
   )}`,
 );
