@@ -10,6 +10,7 @@ import {
   createBuildReport,
   createReportOptions,
   createReportLines,
+  getStableBuildItemId,
   rankItems,
 } from '../report-build-chunks-core.mjs';
 
@@ -26,11 +27,11 @@ const createTempBuild = async () => {
   await mkdir(path.join(appRoot, 'build/task'), { recursive: true });
 
   await writeFile(
-    path.join(appRoot, 'build/static/js/antdDesign.123.js'),
+    path.join(appRoot, 'build/static/js/antdDesign.D8R05ovR.js'),
     'a'.repeat(1300),
   );
   await writeFile(
-    path.join(appRoot, 'build/static/js/react.123.js'),
+    path.join(appRoot, 'build/static/js/react.BIp4DLJn.js'),
     'r'.repeat(600),
   );
   await writeFile(
@@ -72,10 +73,12 @@ describe('report-build-chunks', () => {
     expect(stdout).toContain(
       'yu-bi build asset report: rawThreshold=1 KiB, gzipThreshold=off, files=1, rawOversized=0',
     );
-    expect(stdout).toContain('build/static/js/antdDesign.123.js');
-    expect(stdout).toContain('build/static/js/react.123.js');
-    expect(stdout).toContain('build/task/index.js');
+    expect(stdout).toContain('build/static/js/antdDesign.D8R05ovR.js');
+    expect(stdout).toContain('id=antdDesign.js');
+    expect(stdout).toContain('build/static/js/react.BIp4DLJn.js');
+    expect(stdout).toContain('id=task/index.js');
     expect(stdout).toContain('build/static/media/geo-china.map.json');
+    expect(stdout).toContain('id=geo-china.map.json');
     expect(stdout).not.toContain('style.css');
     expect(report.oversizedCount).toBe(1);
   });
@@ -126,6 +129,15 @@ describe('report-build-chunks', () => {
     expect(stdout).toContain('rawOversized=0, gzipOversized=1');
     expect(stdout).toContain('flags=-,gzip');
     expect(report.oversizedCount).toBe(1);
+  });
+
+  it.each([
+    ['antdDesign.D8R05ovR.js', 'antdDesign.js'],
+    ['geo-china-city.map.DEZmHbjI.json', 'geo-china-city.map.json'],
+    ['shareChart.js', 'shareChart.js'],
+    ['task/index.js', 'task/index.js'],
+  ])('creates stable id for build item %s', (name, id) => {
+    expect(getStableBuildItemId(name)).toBe(id);
   });
 
   it.each([

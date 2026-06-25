@@ -103,8 +103,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 95`，以恢复时重新执行命令为准                           |
-| 最近专题提交               | `bddd37cdb test: 补强 Monaco 业务入口 smoke`               |
+| 当前分支相对 `origin/main` | `0 96`，以恢复时重新执行命令为准                           |
+| 最近专题提交               | `f5cdae3b7 test: 补强分享故事播放器入口 smoke`             |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -2915,6 +2915,28 @@ npm run test -- src/app/pages/SharePage/StoryPlayer/StoryPlayerForShare/__tests_
 npm run checkTs
 npm run eslint -- src/app/pages/SharePage/StoryPlayer/StoryPlayerForShare/__tests__/StoryPlayerForShare.smoke.test.tsx
 npm exec -- prettier --check src/app/pages/SharePage/StoryPlayer/StoryPlayerForShare/__tests__/StoryPlayerForShare.smoke.test.tsx ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
+
+最新批次：构建体积报告稳定 id 补强
+
+- 已为 `report-build-chunks` 输出增加稳定 `id=` 字段，用于跨构建跟踪逻辑 chunk / asset 名称，避免 hash 文件名变化影响体积基线对比
+- hash 文件名例如 `monacoEditor.CmoqNc9c.js` 会输出为 `id=monacoEditor.js`，地图资源例如 `geo-china-city.map.DEZmHbjI.json` 会输出为 `id=geo-china-city.map.json`
+- 无 hash 入口例如 `shareChart.js` 保持原名；`task/index.js` 保留目录前缀，避免与普通 `index.js` 混淆
+- 当前 `build:report` 基线：JS / task 文件 `102` 个，raw 超限 `7` 个，稳定 id 为 `monacoEditor.js`、`antdDesign.js`、`echarts.js`、`monacoBase.js`、`antvG2.js`、`antvS2.js`、`antvG.js`
+- 当前 asset 基线：资源文件 `6` 个，raw 超限 `2` 个，稳定 id 为 `geo-china-city.map.json`、`geo-china.map.json`
+- 设置 `YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB=500` 后，JS gzip 超限 `0` 个，asset gzip 超限 `1` 个：`geo-china-city.map.json`
+
+本批次验证命令：
+
+```bash
+npm run test -- scripts/__tests__/report-build-chunks.test.mts
+npm run build:report
+YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB=500 npm run build:report
+npm run checkTs
+npm run eslint -- scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts
+npm exec -- prettier --check scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md
 npm audit --json
 git diff --check
 ```

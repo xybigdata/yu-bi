@@ -11,6 +11,13 @@ const gzipAsync = promisify(gzip);
 
 export const formatKiB = bytes => `${(bytes / KiB).toFixed(2)} KiB`;
 
+export function getStableBuildItemId(fileName) {
+  return fileName.replace(
+    /^(.+)\.[A-Za-z0-9_-]{8,}\.([A-Za-z0-9]+)$/,
+    '$1.$2',
+  );
+}
+
 const parsePositiveNumberOption = (name, value, defaultValue) => {
   const normalizedValue = value || defaultValue;
   const parsedValue = Number(normalizedValue);
@@ -86,6 +93,7 @@ async function collectDirectoryFiles({
 
       return {
         ...size,
+        id: getStableBuildItemId(entry.name),
         name: entry.name,
         path: path.relative(appRoot, filePath),
       };
@@ -121,6 +129,7 @@ export async function collectTaskBundle(appRoot) {
   return [
     {
       ...size,
+      id: getStableBuildItemId('task/index.js'),
       name: 'task/index.js',
       path: path.relative(appRoot, taskBundle),
     },
@@ -186,7 +195,7 @@ export function createReportLines(title, items, options) {
         ' ',
       )} flags=${rawOversizedItem ? 'raw' : '-'},${
         gzipOversizedItem ? 'gzip' : '-'
-      } ${item.path}`,
+      } id=${item.id ?? getStableBuildItemId(item.name)} ${item.path}`,
     );
   }
 
