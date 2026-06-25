@@ -104,8 +104,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 108`，以恢复时重新执行命令为准                          |
-| 最近专题提交               | `b26180f4a test: 补强富文本只读运行时基线`                 |
+| 当前分支相对 `origin/main` | `0 109`，以恢复时重新执行命令为准                          |
+| 最近专题提交               | `db317db4e chore: 支持构建报告聚焦超限项`                  |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -3124,6 +3124,23 @@ git diff --check
 ```bash
 npm run test -- scripts/__tests__/report-build-chunks.test.mts
 YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 npm run build:report
+npm run checkTs
+npm run eslint -- scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts
+npm exec -- prettier --check scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
+最新批次：构建体积报告超限摘要对象
+
+- `createBuildReport` 新增 `summary` 返回值，按 `chunk` / `asset` 输出机器可读的 `files`、`rawOversized`、`gzipOversized` 和 `oversized` 稳定 id 列表
+- 新增 `createOversizedSummary` helper，复用现有 raw / gzip 阈值判断，不改变 CLI 文本输出
+- 测试覆盖 raw-only、gzip-only 和去重后的 oversized 稳定 id 列表，后续可直接基于 summary 做 CI 对比或 JSON 输出
+- 本批次不改变构建产物、不调整分包策略、不改变 `build:report` 默认文本输出，只为后续体积回归门禁提供结构化数据基础
+
+本批次验证命令：
+
+```bash
+npm run test -- scripts/__tests__/report-build-chunks.test.mts
 npm run checkTs
 npm run eslint -- scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts
 npm exec -- prettier --check scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md

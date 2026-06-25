@@ -180,6 +180,22 @@ export function getOversizedItems(
   };
 }
 
+export function createOversizedSummary(items, options) {
+  const { rawOversized, gzipOversized, oversized } = getOversizedItems(
+    items,
+    options,
+  );
+
+  return {
+    files: items.length,
+    rawOversized: rawOversized.map(item => item.id ?? getStableBuildItemId(item.name)),
+    gzipOversized: gzipOversized.map(
+      item => item.id ?? getStableBuildItemId(item.name),
+    ),
+    oversized: oversized.map(item => item.id ?? getStableBuildItemId(item.name)),
+  };
+}
+
 export function createReportLines(title, items, options) {
   const { rawOversized, gzipOversized, oversized } = getOversizedItems(
     items,
@@ -250,5 +266,9 @@ export async function createBuildReport(options = createReportOptions()) {
   return {
     lines: [...chunkReport.lines, ...assetReport.lines],
     oversizedCount: chunkReport.oversizedCount + assetReport.oversizedCount,
+    summary: {
+      chunk: createOversizedSummary(chunks, options),
+      asset: createOversizedSummary(mediaAssets, options),
+    },
   };
 }

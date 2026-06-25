@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   createBuildReport,
+  createOversizedSummary,
   createReportOptions,
   createReportLines,
   filterItemsByStableId,
@@ -82,6 +83,20 @@ describe('report-build-chunks', () => {
     expect(stdout).toContain('id=geo-china.map.json');
     expect(stdout).not.toContain('style.css');
     expect(report.oversizedCount).toBe(1);
+    expect(report.summary).toEqual({
+      asset: {
+        files: 1,
+        gzipOversized: [],
+        oversized: [],
+        rawOversized: [],
+      },
+      chunk: {
+        files: 3,
+        gzipOversized: [],
+        oversized: ['antdDesign.js'],
+        rawOversized: ['antdDesign.js'],
+      },
+    });
   });
 
   it('can report only oversized items while keeping full report counters', async () => {
@@ -157,6 +172,42 @@ describe('report-build-chunks', () => {
     expect(stdout).toContain('rawOversized=0, gzipOversized=1');
     expect(stdout).toContain('flags=-,gzip');
     expect(report.oversizedCount).toBe(1);
+  });
+
+  it('creates stable oversized summary lists', () => {
+    expect(
+      createOversizedSummary(
+        [
+          {
+            bytes: 1300,
+            gzipBytes: 300,
+            name: 'antdDesign.D8R05ovR.js',
+          },
+          {
+            bytes: 900,
+            gzipBytes: 1300,
+            id: 'gzip-heavy.js',
+            name: 'gzip-heavy.CAFEBABE.js',
+          },
+          {
+            bytes: 300,
+            gzipBytes: 200,
+            name: 'react.BIp4DLJn.js',
+          },
+        ],
+        createReportOptions({
+          env: {
+            YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB: '1',
+            YU_BI_CHUNK_REPORT_THRESHOLD_KIB: '1',
+          },
+        }),
+      ),
+    ).toEqual({
+      files: 3,
+      gzipOversized: ['gzip-heavy.js'],
+      oversized: ['antdDesign.js', 'gzip-heavy.js'],
+      rawOversized: ['antdDesign.js'],
+    });
   });
 
   it('can filter report items by stable id', async () => {
