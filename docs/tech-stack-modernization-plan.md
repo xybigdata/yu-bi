@@ -104,8 +104,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 104`，以恢复时重新执行命令为准                          |
-| 最近专题提交               | `6b35f1814 test: 补强 JDBC 多方言渲染合同`                 |
+| 当前分支相对 `origin/main` | `0 105`，以恢复时重新执行命令为准                          |
+| 最近专题提交               | `990205f56 chore: 支持构建体积报告按稳定 id 过滤`          |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -3080,19 +3080,19 @@ git diff --check
 
 ### 12.1 当前 npm outdated 复核
 
-复核时间：2026-06-25
+复核时间：2026-06-25 16:08
 
-当前 `npm outdated --json` 剩余 7 项，`npm audit --json` 仍为 0 vulnerabilities。处理原则是：能在 Node 24 / npm 11 / React 19 / Vite 8 / AntD 5 主链内安全升级的继续推进；会破坏 audit 清零、peer 合约或当前稳定生态的暂缓。
+当前 `npm audit --json` 仍为 0 vulnerabilities。`npm outdated --json` 访问官方 registry 时因 DNS `ENOTFOUND registry.npmjs.org` 失败；已使用 `--registry=https://registry.npmmirror.com` 复核成功，剩余 7 项不变，且 `wanted` 均等于当前版本。处理原则是：能在 Node 24 / npm 11 / React 19 / Vite 8 / AntD 5 主链内安全升级的继续推进；会破坏 audit 清零、peer 合约或当前稳定生态的暂缓。
 
-| 依赖                   | 当前版本  | 最新版本 | 当前决策 | 依据                                                                                                                              |
-| ---------------------- | --------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `@types/node`          | `24.13.2` | `26.0.1` | 暂缓     | 硬性目标是 Node 24，不切到 Node 26 类型线；24.x 当前已是最新                                                                      |
-| `@vitejs/plugin-react` | `5.2.0`   | `6.0.3`  | 暂缓     | 6.0.3 支持 Vite 8，但 `npm install --package-lock-only --dry-run` 仍因 optional Babel / Rolldown peer 解析到 Babel 8 相关冲突     |
-| `antd`                 | `5.29.3`  | `6.4.5`  | 暂缓     | 当前稳定 `@ant-design/pro-components 2.8.10` peer 仍只支持 AntD 4/5；不采用 Pro Components 3.x 预发布链路                         |
-| `eslint`               | `9.39.4`  | `10.5.0` | 暂缓     | ESLint 10 本体满足 Node 24，但 `eslint-plugin-react@7.37.5`、`eslint-plugin-import@2.32.0` 最新稳定版 peer 仍未声明支持 ESLint 10 |
-| `monaco-editor`        | `0.52.2`  | `0.55.1` | 暂缓     | 0.55.1 依赖 `dompurify 3.2.7`，此前临时试装会引入 npm audit 风险                                                                  |
-| `quill`                | `2.0.2`   | `2.0.3`  | 暂缓     | 与 `react-quill-new 3.8.3` 组合会触发 `GHSA-v3m3-f69x-jf25` 低危 XSS advisory                                                     |
-| `react-quill-new`      | `3.7.0`   | `3.8.3`  | 暂缓     | 3.8.3 依赖 `quill ~2.0.3`，会破坏当前 audit 清零状态                                                                              |
+| 依赖                   | 当前版本  | 最新版本 | 当前决策 | 依据                                                                                                                                                       |
+| ---------------------- | --------- | -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@types/node`          | `24.13.2` | `26.0.1` | 暂缓     | 硬性目标是 Node 24，不切到 Node 26 类型线；24.x 当前已是最新                                                                                               |
+| `@vitejs/plugin-react` | `5.2.0`   | `6.0.3`  | 暂缓     | 6.0.3 peer 为 Vite 8，Node engines 满足 Node 24，但 peer 链引入 `@rolldown/plugin-babel` / `babel-plugin-react-compiler`；此前 npm 11 dry-run 仍有解析风险 |
+| `antd`                 | `5.29.3`  | `6.4.5`  | 暂缓     | 当前稳定 `@ant-design/pro-components 2.8.10` peer 仍只支持 AntD 4/5；不采用 Pro Components 3.x 预发布链路                                                  |
+| `eslint`               | `9.39.4`  | `10.5.0` | 暂缓     | 最新稳定 `eslint-plugin-react@7.37.5` peer 为 `^3 ... ^9.7`，`eslint-plugin-import@2.32.0` peer 为 `^2 ... ^9`，均未声明支持 ESLint 10                     |
+| `monaco-editor`        | `0.52.2`  | `0.55.1` | 暂缓     | 0.55.1 仍依赖 `dompurify 3.2.7` 和 `marked 14.0.0`，此前临时试装会引入 npm audit 风险                                                                      |
+| `quill`                | `2.0.2`   | `2.0.3`  | 暂缓     | `react-quill-new 3.8.3` 仍依赖 `quill ~2.0.3`；该组合此前会触发 `GHSA-v3m3-f69x-jf25` 低危 XSS advisory                                                    |
+| `react-quill-new`      | `3.7.0`   | `3.8.3`  | 暂缓     | 3.8.3 仍依赖 `quill ~2.0.3`，会破坏当前 audit 清零状态                                                                                                     |
 
 下一步不要重复做无结果试装。只有出现以下变化时再重新评估对应依赖：
 
@@ -3101,6 +3101,22 @@ git diff --check
 - `eslint-plugin-react` 和 `eslint-plugin-import` 稳定版明确支持 ESLint 10
 - Monaco 最新版本不再引入当前 audit 风险
 - Quill / react-quill-new 最新组合不再触发 XSS advisory
+
+本轮复核命令：
+
+```bash
+npm audit --json
+npm outdated --json --registry=https://registry.npmmirror.com
+npm ls @types/node @vitejs/plugin-react antd eslint monaco-editor quill react-quill-new --depth=0 --json
+npm run verify:toolchain
+npm view @vitejs/plugin-react@6.0.3 peerDependencies optionalDependencies engines --json --registry=https://registry.npmmirror.com
+npm view @ant-design/pro-components@latest version peerDependencies --json --registry=https://registry.npmmirror.com
+npm view eslint-plugin-react@latest version peerDependencies --json --registry=https://registry.npmmirror.com
+npm view eslint-plugin-import@latest version peerDependencies --json --registry=https://registry.npmmirror.com
+npm view monaco-editor@0.55.1 version dependencies --json --registry=https://registry.npmmirror.com
+npm view react-quill-new@3.8.3 dependencies peerDependencies version --json --registry=https://registry.npmmirror.com
+git diff --check
+```
 
 ### 12.2 当前可推进事项
 
