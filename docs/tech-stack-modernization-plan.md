@@ -1,8 +1,42 @@
 # yu-bi 现代化改造执行板
 
-本文档是 yu-bi 现代化改造的恢复入口、阶段复盘和后续执行清单。恢复工作时优先读本页，再按“当前短期目标”继续推进。
+本文档是 yu-bi 现代化改造的恢复入口、阶段复盘和后续执行清单。恢复工作时先读“恢复必读”和“后续队列”，再继续当前专题分支，不从历史批次流水里反推执行策略。
 
 复盘时间：2026-06-25
+
+## 恢复必读
+
+当前目标不是追最新，而是在兼容、正确和可验证的前提下，把技术栈收口到较新的稳定版。硬性基线保持：
+
+- `JDK 21`
+- `Node 24`
+- `npm 11`
+
+当前长期专题分支：
+
+```bash
+codex/modernization-frontend-security-deps
+```
+
+当前执行规则：
+
+- 继续在这一条分支上推进，不因为单个小批次完成就新建分支
+- 不主动合并 `main`，也不因为 `main` 落后较多就自动合并
+- 专题分支可以阶段性 push 保存进度
+- 只有当前专题累计到一批可验收成果，并且用户明确要求阶段合并时，才准备合入 `main`
+- 推送 `main` 前必须完整门禁；日常开发按风险分层执行相关门禁
+- 提交节奏按“一组相关改动”提交，避免单文件小改动频繁提交
+
+当前优先队列：
+
+| 优先级 | 事项                             | 当前策略                                                                |
+| ------ | -------------------------------- | ----------------------------------------------------------------------- |
+| P0     | 分支纪律和执行文档同步           | 持续保持本文档与最新用户指令一致，避免恢复时误用旧目标文本              |
+| P1     | 分享页 / 图表运行时 smoke        | 补最小可维护测试，优先覆盖分享页只读图表和富文本展示链路                |
+| P1     | 构建产物治理                     | JS gzip 超限已清零；继续观察 raw 维度的 `monacoEditor`、`antdDesign` 等 |
+| P2     | 前端剩余 outdated 复核           | 暂缓重复试装，只在 peer、audit 或生态条件变化时复核                     |
+| P2     | 后端补丁线滚动复核               | 只处理同生态线、可验证的补丁升级；不触碰高风险内部稳定标识              |
+| 暂缓   | AntD 6 / ESLint 10 / Quill 2.0.3 | 等待生态兼容或 audit 风险解除后再评估                                   |
 
 ## 0. 当前执行口径
 
@@ -62,16 +96,16 @@ git log --oneline --decorate -8
 
 当前状态：
 
-| 项目                       | 状态                                                                 |
-| -------------------------- | -------------------------------------------------------------------- |
-| 工作目录                   | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi`           |
-| 远端                       | `git@github.com:xybigdata/yu-bi.git`                                 |
-| 主线分支                   | `main`                                                               |
-| 当前专题分支               | `codex/modernization-frontend-security-deps`                         |
-| 当前专题                   | P2-E 前端安全依赖与运行时治理                                        |
-| 当前分支相对 `origin/main` | 以恢复时 `git rev-list --left-right --count origin/main...HEAD` 为准 |
-| 最近专题提交               | 以恢复时 `git log --oneline -8` 为准                                 |
-| 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`                     |
+| 项目                       | 状态                                                       |
+| -------------------------- | ---------------------------------------------------------- |
+| 工作目录                   | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
+| 远端                       | `git@github.com:xybigdata/yu-bi.git`                       |
+| 主线分支                   | `main`                                                     |
+| 当前专题分支               | `codex/modernization-frontend-security-deps`               |
+| 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
+| 当前分支相对 `origin/main` | `0 81`，以恢复时重新执行命令为准                           |
+| 最近专题提交               | `1ce11e453 chore: 收口词云 ECharts runtime 入口`           |
+| 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
 
@@ -2580,6 +2614,30 @@ git diff --check
 - 设置 gzip `500 KiB` 阈值后，JS chunk `gzipOversized=0`
 - asset report 保持 `files=6`、`rawOversized=2`，设置 gzip `500 KiB` 阈值后 `gzipOversized=1`
 - 测试日志中的 jsdom canvas `getContext` warning 是当前词云 smoke 的测试环境噪声，不影响断言结果
+
+最新批次：图表预览数据入口 smoke 补强
+
+- 已将图表工作台、主工作台图表预览和分享页图表展示前的 dataset 选择逻辑收口到 `app/utils/chartPreviewDataset`
+- `selectDatasetByViewBinding` 负责“无视图绑定时优先使用模板 `sampleData`，否则使用查询 `dataset`”的通用规则
+- `selectChartPreviewDataset` 负责适配 `ChartPreview` 数据结构
+- 已新增单元测试覆盖：
+  - 无 `viewId` 且存在 `sampleData` 时使用模板样例数据
+  - 有 `viewId` 时使用后端查询返回的 `dataset`
+  - `sampleData` 缺失时回退到 `dataset`
+- `ChartPreviewBoard` 和 `ChartPreviewBoardForShare` 继续保持原展示协议，只通过共享 helper 获取传入 `ChartIFrameContainer` 的数据集
+- `datasetsSelector` 复用同一 helper，避免图表工作台和预览 / 分享链路规则漂移
+- 本批次为图表预览和分享页只读图表 smoke 建立最小可维护基线，暂不硬挂载整页组件，避免 Redux、Modal、resize observer 和 iframe 组合导致脆弱测试
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/utils/__tests__/chartPreviewDataset.test.ts
+npm run checkTs
+npm run eslint -- src/app/utils/chartPreviewDataset.ts src/app/utils/__tests__/chartPreviewDataset.test.ts src/app/pages/ChartWorkbenchPage/slice/selectors.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/ChartPreviewBoard.tsx src/app/pages/SharePage/Chart/ChartPreviewBoardForShare.tsx
+npm exec -- prettier --check src/app/utils/chartPreviewDataset.ts src/app/utils/__tests__/chartPreviewDataset.test.ts src/app/pages/ChartWorkbenchPage/slice/selectors.ts src/app/pages/MainPage/pages/VizPage/ChartPreview/ChartPreviewBoard.tsx src/app/pages/SharePage/Chart/ChartPreviewBoardForShare.tsx ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
 
 ## 12. 后续队列
 

@@ -50,6 +50,7 @@ import {
   pivotTableDrillEventListener,
   tablePagingAndSortEventListener,
 } from 'app/utils/ChartEventListenerHelper';
+import { selectChartPreviewDataset } from 'app/utils/chartPreviewDataset';
 import { generateShareLinkAsync, makeDownloadDataTask } from 'app/utils/fetch';
 import { ShareLinkCreateParams } from 'app/components/VizOperationMenu/components/slice/type';
 import { getChartDrillOption } from 'app/utils/internalChartHelper';
@@ -634,19 +635,10 @@ const ChartPreviewBoard: FC<{
       );
     };
 
-    const dataset = useMemo(() => {
-      if (
-        !chartPreview?.backendChart?.viewId &&
-        chartPreview?.backendChart?.config.sampleData
-      ) {
-        return chartPreview?.backendChart?.config.sampleData;
-      }
-      return chartPreview?.dataset;
-    }, [
-      chartPreview?.backendChart?.config.sampleData,
-      chartPreview?.backendChart?.viewId,
-      chartPreview?.dataset,
-    ]);
+    const dataset = useMemo(
+      () => selectChartPreviewDataset(chartPreview),
+      [chartPreview],
+    );
 
     return (
       <StyledChartPreviewBoard>
