@@ -2723,6 +2723,24 @@ npm audit --json
 git diff --check
 ```
 
+最新批次：DnD Provider runtime smoke 补强
+
+- 已新增 `DndProviderCompat` 组件级 smoke，覆盖真实 `react-dnd-html5-backend` 下 Provider 可以正常渲染子节点
+- 已补 `DragSortEditTable` 挂载 smoke，确认基于 `DndProviderCompat`、`useDrag`、`useDrop` 的表格行拖拽容器在 React 19 测试环境下可挂载
+- 继续保留 `dndRuntime` 包导出测试，覆盖 `react-dnd`、`react-dnd-html5-backend`、`@hello-pangea/dnd` 的运行时导出
+- 本批次不升级拖拽库，不改变 Dashboard / Story / ChartWorkbench 的拖拽行为
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/components/__tests__/DndProviderCompat.test.tsx src/app/components/__tests__/dndRuntime.test.ts
+npm run checkTs
+npm run eslint -- src/app/components/DndProviderCompat.tsx src/app/components/DragSortEditTable.tsx src/app/components/__tests__/DndProviderCompat.test.tsx
+npm exec -- prettier --check src/app/components/DndProviderCompat.tsx src/app/components/DragSortEditTable.tsx src/app/components/__tests__/DndProviderCompat.test.tsx ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
