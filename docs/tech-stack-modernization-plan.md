@@ -3009,6 +3009,23 @@ PATH=/usr/bin:/bin:/usr/sbin:/sbin frontend/.husky/commit-msg /tmp/yu-bi-commit-
 git diff --check
 ```
 
+最新批次：ECharts 6 事件守卫基线补强
+
+- 新增 `echartsRuntimeGuards.test.ts`，覆盖 `dataZoom` 和 `click` 事件类型守卫的有效 / 无效边界
+- `dataZoom` 事件必须同时带 numeric `start` / `end`，避免 ECharts 事件形态变化时误写入缩放状态
+- `click` 事件必须同时带 `dataIndex` / `componentIndex`，为瀑布图等手动转发点击事件的运行时兼容提供轻量回归证据
+- 本批次不改生产逻辑，不升级 ECharts，只补 ECharts 6 主链下的运行时事件合同测试
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/components/ChartGraph/__tests__/echartsRuntimeGuards.test.ts
+npm run checkTs
+npm run eslint -- src/app/components/ChartGraph/__tests__/echartsRuntimeGuards.test.ts
+npm exec -- prettier --check src/app/components/ChartGraph/__tests__/echartsRuntimeGuards.test.ts ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
