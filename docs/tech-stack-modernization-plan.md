@@ -103,8 +103,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 81`，以恢复时重新执行命令为准                           |
-| 最近专题提交               | `1ce11e453 chore: 收口词云 ECharts runtime 入口`           |
+| 当前分支相对 `origin/main` | `0 88`，以恢复时重新执行命令为准                           |
+| 最近专题提交               | `489d78974 chore: 收口 SQL formatter 调用边界`             |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -2757,6 +2757,25 @@ npm run test -- src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/form
 npm run checkTs
 npm run eslint -- src/app/pages/MainPage/pages/ViewPage/Main/Editor/formatSqlScript.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/formatSqlScript.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/Toolbar.tsx
 npm exec -- prettier --check src/app/pages/MainPage/pages/ViewPage/Main/Editor/formatSqlScript.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/formatSqlScript.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/Toolbar.tsx ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
+
+最新批次：基础及派生 ECharts 图表生命周期 smoke 补强
+
+- 已新增基础及派生 ECharts 图表生命周期 smoke，覆盖折线、面积、柱状、堆叠柱、百分比堆叠、饼图、环图、南丁格尔玫瑰图等 15 条类组件链路
+- 测试验证异步 `loadEChartsRuntime` resolve 后会 replay 最新 render，并调用 `setOption`
+- 测试验证组件在 runtime resolve 前 `onUnMount` 后，旧 promise 不再初始化图表，也不会调用 `setOption`
+- 测试保留真实 chart helper 数据转换路径，仅 mock ECharts 实例最小接口
+- 本批次不升级 `echarts`，不改变图表配置协议和渲染行为
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/components/ChartGraph/__tests__/basicEChartsLifecycle.test.ts
+npm run checkTs
+npm run eslint -- src/app/components/ChartGraph/__tests__/basicEChartsLifecycle.test.ts
+npm exec -- prettier --check src/app/components/ChartGraph/__tests__/basicEChartsLifecycle.test.ts ../docs/tech-stack-modernization-plan.md
 npm audit --json
 git diff --check
 ```
