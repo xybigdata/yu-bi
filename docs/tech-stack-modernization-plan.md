@@ -96,16 +96,16 @@ git log --oneline --decorate -8
 
 当前状态：
 
-| 项目                       | 状态                                                       |
-| -------------------------- | ---------------------------------------------------------- |
-| 工作目录                   | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
-| 远端                       | `git@github.com:xybigdata/yu-bi.git`                       |
-| 主线分支                   | `main`                                                     |
-| 当前专题分支               | `codex/modernization-frontend-security-deps`               |
-| 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 93`，以恢复时重新执行命令为准                           |
-| 最近专题提交               | `b4c784132 test: 补强构建体积报告参数校验`                 |
-| 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
+| 项目                       | 状态                                                         |
+| -------------------------- | ------------------------------------------------------------ |
+| 工作目录                   | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi`   |
+| 远端                       | `git@github.com:xybigdata/yu-bi.git`                         |
+| 主线分支                   | `main`                                                       |
+| 当前专题分支               | `codex/modernization-frontend-security-deps`                 |
+| 当前专题                   | P2-E 前端安全依赖与运行时治理                                |
+| 当前分支相对 `origin/main` | `0 94`，以恢复时重新执行命令为准                             |
+| 最近专题提交               | `3de2d0340 test: 补强 Dashboard mock 数据 Monaco 入口 smoke` |
+| 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`             |
 
 已确认的自动化权限和偏好：
 
@@ -2881,6 +2881,23 @@ npm run checkTs
 npm run eslint -- src/app/pages/DashBoardPage/components/MockDataPanel/__tests__/MockDataEditor.smoke.test.tsx
 npm exec -- prettier --check src/app/pages/DashBoardPage/components/MockDataPanel/__tests__/MockDataEditor.smoke.test.tsx ../docs/tech-stack-modernization-plan.md
 npm audit --json
+git diff --check
+```
+
+最新批次：SQL 编辑器与计算字段 Monaco 入口 smoke 补强
+
+- 已新增 `SQLEditor` 入口级 smoke，覆盖 SQL Monaco 配置、`ensureMonacoSqlLanguage` 调用、补全 provider 注册、只读提示、快捷键命令注册和卸载清理
+- 已新增 `ChartComputedFieldEditor` 入口级 smoke，覆盖 `dql` 语言注册、自定义主题注册、内置函数注入、字段插入、debounce 后表达式回传和函数说明展示
+- 本批次不升级 `monaco-editor`，不改变 SQL 编辑器、计算字段编辑器和 DQL 语法协议
+- 目的仍是为后续 Monaco / TypeScript / React 运行时升级补齐业务入口回归基线
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/SQLEditor.monaco.smoke.test.tsx src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartDataViewPanel/components/ChartComputedFieldEditor/__tests__/ChartComputedFieldEditor.monaco.smoke.test.tsx
+npm run checkTs
+npm run eslint -- src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/SQLEditor.monaco.smoke.test.tsx src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartDataViewPanel/components/ChartComputedFieldEditor/__tests__/ChartComputedFieldEditor.monaco.smoke.test.tsx
+npm exec -- prettier --check src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/SQLEditor.monaco.smoke.test.tsx src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartDataViewPanel/components/ChartComputedFieldEditor/__tests__/ChartComputedFieldEditor.monaco.smoke.test.tsx ../docs/tech-stack-modernization-plan.md
 git diff --check
 ```
 
