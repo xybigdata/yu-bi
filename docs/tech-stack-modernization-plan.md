@@ -2741,6 +2741,26 @@ npm audit --json
 git diff --check
 ```
 
+最新批次：SQL formatter 调用边界收口
+
+- 已新增 `formatSqlScript` helper，集中维护 SQL 编辑器格式化调用和 `sql-formatter` 选项
+- `Toolbar` 的格式化按钮继续保持原有异步加载和失败 console 行为，只改为调用共享 helper
+- 已新增单元测试覆盖：
+  - 格式化时固定透传 `denseOperators=true`、`logicalOperatorNewline='before'`
+  - formatter runtime 加载失败时错误向调用方传播，由 Toolbar 保持原 catch 行为
+- 本批次不升级 `sql-formatter`，不改变 SQL 编辑器对外交互
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/formatSqlScript.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/sqlFormatterRuntime.test.ts
+npm run checkTs
+npm run eslint -- src/app/pages/MainPage/pages/ViewPage/Main/Editor/formatSqlScript.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/formatSqlScript.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/Toolbar.tsx
+npm exec -- prettier --check src/app/pages/MainPage/pages/ViewPage/Main/Editor/formatSqlScript.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/formatSqlScript.test.ts src/app/pages/MainPage/pages/ViewPage/Main/Editor/Toolbar.tsx ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
