@@ -86,6 +86,7 @@ export const createReportOptions = ({
   format: parseReportFormat(env.YU_BI_CHUNK_REPORT_FORMAT),
   onlyOversized: env.YU_BI_CHUNK_REPORT_ONLY_OVERSIZED === '1',
   output: env.YU_BI_CHUNK_REPORT_OUTPUT?.trim() || null,
+  categoryFilter: env.YU_BI_CHUNK_REPORT_CATEGORY_FILTER?.trim() || null,
   gzipThresholdKiB: env.YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB
     ? parsePositiveNumberOption(
         'YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB',
@@ -214,6 +215,25 @@ export function filterItemsByStableId(items, idFilter) {
   );
 }
 
+export function filterItemsByCategory(items, categoryFilter) {
+  if (!categoryFilter) {
+    return items;
+  }
+
+  const expectedCategories = categoryFilter
+    .split(',')
+    .map(category => category.trim())
+    .filter(Boolean);
+
+  if (!expectedCategories.length) {
+    return items;
+  }
+
+  return items.filter(item =>
+    expectedCategories.includes(item.category ?? getBuildItemCategory(item.name)),
+  );
+}
+
 export function getOversizedItems(
   items,
   { thresholdKiB, gzipThresholdKiB },
@@ -277,7 +297,11 @@ export function createReportLines(title, items, options) {
         : `${options.gzipThresholdKiB} KiB`
     }, idFilter=${options.idFilter ?? 'off'}, onlyOversized=${
       options.onlyOversized ? 'on' : 'off'
-    }, files=${items.length}, rawOversized=${rawOversized.length}, gzipOversized=${gzipOversized.length}, oversized=${oversized.length}`,
+    }, categoryFilter=${options.categoryFilter ?? 'off'}, files=${
+      items.length
+    }, rawOversized=${rawOversized.length}, gzipOversized=${
+      gzipOversized.length
+    }, oversized=${oversized.length}`,
   ];
 
   for (const item of reportItems.slice(0, options.limit)) {
@@ -316,18 +340,24 @@ export function createReportLines(title, items, options) {
 
 export async function createBuildReport(options = createReportOptions()) {
   const chunks = rankItems(
-    filterItemsByStableId(
-      [
-        ...(await collectJsChunks(options.appRoot)),
-        ...(await collectTaskBundle(options.appRoot)),
-      ],
-      options.idFilter,
+    filterItemsByCategory(
+      filterItemsByStableId(
+        [
+          ...(await collectJsChunks(options.appRoot)),
+          ...(await collectTaskBundle(options.appRoot)),
+        ],
+        options.idFilter,
+      ),
+      options.categoryFilter,
     ),
   );
   const mediaAssets = rankItems(
-    filterItemsByStableId(
-      await collectMediaAssets(options.appRoot),
-      options.idFilter,
+    filterItemsByCategory(
+      filterItemsByStableId(
+        await collectMediaAssets(options.appRoot),
+        options.idFilter,
+      ),
+      options.categoryFilter,
     ),
   );
   const chunkReport = createReportLines('chunk', chunks, options);

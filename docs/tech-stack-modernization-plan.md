@@ -3298,7 +3298,7 @@ git diff --check
 | --------- | ------------------------------ | ---- | -------------------------------------------------------------------------------------------------------------------- |
 | P2-E-Next | 前端剩余 outdated 复核         | 中   | 暂停重复试装；按 12.1 的触发条件定期复核，当前不为这 7 项强行升级                                                    |
 | P2-E-Next | 前端运行时 smoke 补强          | 中   | 可推进；已补 ECharts 实例、Monaco SQL 语言、富文本 runtime loader 和分享页富文本入口 smoke，继续补其余动态运行时入口 |
-| P2-E-Next | 前端构建产物治理               | 中   | 可推进；JS gzip 超限已清零，构建报告已补 `category` 与 `categoryCounts`，后续优先分析 raw 超限来源                   |
+| P2-E-Next | 前端构建产物治理               | 中   | 可推进；JS gzip 超限已清零，构建报告已补 `category`、`categoryCounts` 和分类过滤，后续优先分析 raw 超限来源          |
 | P2-F      | AntD 6 主版本评估              | 高   | 暂缓；继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路                                               |
 | P2-G      | ECharts 6 主版本评估           | 高   | 已完成；已补真实 ECharts 运行时实例 smoke，后续只在图表主链变化时继续增强浏览器层覆盖                                |
 | P2-H      | ESLint 10 主版本评估           | 中高 | 暂缓；当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级                 |
@@ -3353,6 +3353,7 @@ npm ci --dry-run --ignore-scripts
 - 新增真实富文本 runtime loader smoke，覆盖 `loadRichTextEditorRuntime()` 默认动态导入能返回实际 `RichTextEditorRuntime` 组件导出
 - 新增分享图表页富文本入口 smoke，覆盖 `chartGraphId=react-rich-text` 时从 `ChartManager` 取到富文本图表模型，并把富文本 delta 配置传递给分享容器
 - 构建报告新增 `category` 分类输出和 summary `categoryCounts`，区分 `vendor`、`runtime`、`task`、`geo`、`asset` 等类型；baseline 校验日志同步输出 raw 超限分类汇总，便于继续治理 raw 超限项
+- 构建报告新增 `YU_BI_CHUNK_REPORT_CATEGORY_FILTER`，支持按一个或多个分类过滤报告项，例如 `vendor` 或 `vendor,geo`
 - canvas mock 仅限定在该测试内，避免扩大 jsdom 全局环境
 - 已执行：`npm run test -- src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts`
 - 已执行：`npm run test -- src/app/components/MonacoEditor/__tests__/runtime.test.ts`

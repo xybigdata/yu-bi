@@ -13,6 +13,7 @@ import {
   createOversizedSummary,
   createReportOptions,
   createReportLines,
+  filterItemsByCategory,
   filterItemsByStableId,
   getStableBuildItemId,
   rankItems,
@@ -72,10 +73,10 @@ describe('report-build-chunks', () => {
     const stdout = report.lines.join('\n');
 
     expect(stdout).toContain(
-      'yu-bi build chunk report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=off, files=3, rawOversized=1',
+      'yu-bi build chunk report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=off, categoryFilter=off, files=3, rawOversized=1',
     );
     expect(stdout).toContain(
-      'yu-bi build asset report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=off, files=1, rawOversized=0',
+      'yu-bi build asset report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=off, categoryFilter=off, files=1, rawOversized=0',
     );
     expect(stdout).toContain('build/static/js/antdDesign.D8R05ovR.js');
     expect(stdout).toContain('category=vendor id=antdDesign.js');
@@ -129,13 +130,13 @@ describe('report-build-chunks', () => {
     const stdout = report.lines.join('\n');
 
     expect(stdout).toContain(
-      'yu-bi build chunk report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=on, files=3, rawOversized=1',
+      'yu-bi build chunk report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=on, categoryFilter=off, files=3, rawOversized=1',
     );
     expect(stdout).toContain('id=antdDesign.js');
     expect(stdout).not.toContain('id=react.js');
     expect(stdout).not.toContain('id=task/index.js');
     expect(stdout).toContain(
-      'yu-bi build asset report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=on, files=1, rawOversized=0',
+      'yu-bi build asset report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=on, categoryFilter=off, files=1, rawOversized=0',
     );
     expect(stdout).not.toContain('id=geo-china.map.json');
     expect(report.oversizedCount).toBe(1);
@@ -337,12 +338,33 @@ describe('report-build-chunks', () => {
     const stdout = report.lines.join('\n');
 
     expect(stdout).toContain(
-      'idFilter=antdDesign.js, onlyOversized=off, files=1',
+      'idFilter=antdDesign.js, onlyOversized=off, categoryFilter=off, files=1',
     );
     expect(stdout).toContain('id=antdDesign.js');
     expect(stdout).not.toContain('id=task/index.js');
     expect(stdout).not.toContain('id=geo-china.map.json');
     expect(report.oversizedCount).toBe(1);
+  });
+
+  it('can filter report items by category', async () => {
+    const appRoot = await createTempBuild();
+    const report = await createBuildReport(
+      createReportOptions({
+        cwd: appRoot,
+        env: {
+          YU_BI_CHUNK_REPORT_CATEGORY_FILTER: 'geo',
+          YU_BI_CHUNK_REPORT_LIMIT: '10',
+          YU_BI_CHUNK_REPORT_THRESHOLD_KIB: '1',
+        },
+      }),
+    );
+    const stdout = report.lines.join('\n');
+
+    expect(stdout).toContain('categoryFilter=geo, files=0');
+    expect(stdout).toContain('yu-bi build asset report');
+    expect(stdout).toContain('category=geo id=geo-china.map.json');
+    expect(stdout).not.toContain('id=antdDesign.js');
+    expect(stdout).not.toContain('id=task/index.js');
   });
 
   it('filters arbitrary items by stable id substring', () => {
@@ -356,6 +378,22 @@ describe('report-build-chunks', () => {
         'Design',
       ),
     ).toEqual([{ id: 'antdDesign.js', name: 'antdDesign.D8R05ovR.js' }]);
+  });
+
+  it('filters arbitrary items by category', () => {
+    expect(
+      filterItemsByCategory(
+        [
+          { category: 'vendor', name: 'monacoEditor.CmoqNc9c.js' },
+          { category: 'runtime', name: 'shareChart.js' },
+          { category: 'geo', name: 'geo-china.map.json' },
+        ],
+        'vendor, geo',
+      ),
+    ).toEqual([
+      { category: 'vendor', name: 'monacoEditor.CmoqNc9c.js' },
+      { category: 'geo', name: 'geo-china.map.json' },
+    ]);
   });
 
   it.each([
