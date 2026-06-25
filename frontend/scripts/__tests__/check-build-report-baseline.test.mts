@@ -7,6 +7,7 @@ import { promisify } from 'node:util';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
+  formatCategoryCounts,
   readJsonFile,
   verifyBuildReportBaseline,
 } from '../check-build-report-baseline-core.mjs';
@@ -20,17 +21,25 @@ const tempRoots: string[] = [];
 
 const createReport = ({
   assetRawOversized = ['geo-china.map.json'],
+  assetRawCategoryCounts = { geo: assetRawOversized.length },
   chunkGzipOversized = [],
   chunkRawOversized = ['antdDesign.js'],
+  chunkRawCategoryCounts = { vendor: chunkRawOversized.length },
 } = {}) => ({
   summary: {
     asset: {
+      categoryCounts: {
+        rawOversized: assetRawCategoryCounts,
+      },
       files: 1,
       gzipOversized: [],
       oversized: assetRawOversized,
       rawOversized: assetRawOversized,
     },
     chunk: {
+      categoryCounts: {
+        rawOversized: chunkRawCategoryCounts,
+      },
       files: 1,
       gzipOversized: chunkGzipOversized,
       oversized: [...chunkRawOversized, ...chunkGzipOversized],
@@ -66,7 +75,9 @@ describe('check-build-report-baseline', () => {
         }),
       }),
     ).toEqual({
+      assetRawCategoryCounts: { geo: 1 },
       assetRawOversized: ['geo-china.map.json'],
+      chunkRawCategoryCounts: { vendor: 1 },
       chunkRawOversized: ['antdDesign.js'],
     });
   });
@@ -113,6 +124,9 @@ describe('check-build-report-baseline', () => {
     expect(stdout).toContain(
       'yu-bi build report baseline verified: chunkRawOversized=1, assetRawOversized=1',
     );
+    expect(stdout).toContain(
+      'chunkRawCategories=vendor=1, assetRawCategories=geo=1',
+    );
   });
 
   it('uses the default baseline file when no override is provided', async () => {
@@ -138,5 +152,10 @@ describe('check-build-report-baseline', () => {
     expect(stdout).toContain(
       'yu-bi build report baseline verified: chunkRawOversized=1, assetRawOversized=1',
     );
+  });
+
+  it('formats empty and sorted category counts', () => {
+    expect(formatCategoryCounts()).toBe('none');
+    expect(formatCategoryCounts({ vendor: 2, geo: 1 })).toBe('geo=1,vendor=2');
   });
 });

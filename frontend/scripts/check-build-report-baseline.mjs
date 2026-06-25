@@ -1,4 +1,5 @@
 import {
+  formatCategoryCounts,
   readJsonFile,
   verifyBuildReportBaseline,
 } from './check-build-report-baseline-core.mjs';
@@ -21,5 +22,13 @@ const result = verifyBuildReportBaseline({
 });
 
 console.log(
-  `yu-bi build report baseline verified: chunkRawOversized=${result.chunkRawOversized.length}, assetRawOversized=${result.assetRawOversized.length}`,
+  `yu-bi build report baseline verified: chunkRawOversized=${
+    result.chunkRawOversized.length
+  }, assetRawOversized=${
+    result.assetRawOversized.length
+  }, chunkRawCategories=${formatCategoryCounts(
+    result.chunkRawCategoryCounts,
+  )}, assetRawCategories=${formatCategoryCounts(
+    result.assetRawCategoryCounts,
+  )}`,
 );

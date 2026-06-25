@@ -3352,13 +3352,14 @@ npm ci --dry-run --ignore-scripts
 - 补齐测试环境 `matchMedia` mock 的现代 `addEventListener/removeEventListener` API，兼容 Monaco 等较新浏览器运行时依赖
 - 新增真实富文本 runtime loader smoke，覆盖 `loadRichTextEditorRuntime()` 默认动态导入能返回实际 `RichTextEditorRuntime` 组件导出
 - 新增分享图表页富文本入口 smoke，覆盖 `chartGraphId=react-rich-text` 时从 `ChartManager` 取到富文本图表模型，并把富文本 delta 配置传递给分享容器
-- 构建报告新增 `category` 分类输出和 summary `categoryCounts`，区分 `vendor`、`runtime`、`task`、`geo`、`asset` 等类型，便于继续治理 raw 超限项
+- 构建报告新增 `category` 分类输出和 summary `categoryCounts`，区分 `vendor`、`runtime`、`task`、`geo`、`asset` 等类型；baseline 校验日志同步输出 raw 超限分类汇总，便于继续治理 raw 超限项
 - canvas mock 仅限定在该测试内，避免扩大 jsdom 全局环境
 - 已执行：`npm run test -- src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts`
 - 已执行：`npm run test -- src/app/components/MonacoEditor/__tests__/runtime.test.ts`
 - 已执行：`npm run test -- src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts`
 - 已执行：`npm run test -- src/app/pages/SharePage/Chart/__tests__/ChartPreviewBoardForShare.smoke.test.tsx`
 - 已执行：`npm run test -- scripts/__tests__/report-build-chunks.test.mts`
+- 已执行：`npm run test -- scripts/__tests__/check-build-report-baseline.test.mts`
 
 测试缺口处理：
 

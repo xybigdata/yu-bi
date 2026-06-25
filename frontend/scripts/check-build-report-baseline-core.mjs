@@ -2,6 +2,12 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const uniqueSorted = values => [...new Set(values ?? [])].toSorted();
+const sortObjectKeys = value =>
+  Object.fromEntries(
+    Object.entries(value ?? {}).toSorted(([left], [right]) =>
+      left.localeCompare(right),
+    ),
+  );
 
 const assertListEqual = (name, actual, expected) => {
   const actualList = uniqueSorted(actual);
@@ -20,6 +26,16 @@ const assertListEqual = (name, actual, expected) => {
 
 export async function readJsonFile(appRoot, filePath) {
   return JSON.parse(await readFile(path.resolve(appRoot, filePath), 'utf8'));
+}
+
+export function formatCategoryCounts(counts) {
+  const entries = Object.entries(sortObjectKeys(counts));
+
+  if (!entries.length) {
+    return 'none';
+  }
+
+  return entries.map(([category, count]) => `${category}=${count}`).join(',');
 }
 
 export function verifyBuildReportBaseline({ baseline, report }) {
@@ -45,7 +61,13 @@ export function verifyBuildReportBaseline({ baseline, report }) {
   );
 
   return {
+    assetRawCategoryCounts: sortObjectKeys(
+      report.summary?.asset?.categoryCounts?.rawOversized,
+    ),
     assetRawOversized: uniqueSorted(report.summary?.asset?.rawOversized),
+    chunkRawCategoryCounts: sortObjectKeys(
+      report.summary?.chunk?.categoryCounts?.rawOversized,
+    ),
     chunkRawOversized: uniqueSorted(report.summary?.chunk?.rawOversized),
   };
 }
