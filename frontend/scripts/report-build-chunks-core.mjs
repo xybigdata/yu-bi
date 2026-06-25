@@ -11,6 +11,17 @@ const gzipAsync = promisify(gzip);
 
 export const formatKiB = bytes => `${(bytes / KiB).toFixed(2)} KiB`;
 
+const parsePositiveNumberOption = (name, value, defaultValue) => {
+  const normalizedValue = value || defaultValue;
+  const parsedValue = Number(normalizedValue);
+
+  if (!Number.isFinite(parsedValue) || parsedValue <= 0) {
+    throw new Error(`${name} 必须是大于 0 的数字，当前值: ${normalizedValue}`);
+  }
+
+  return parsedValue;
+};
+
 export const createReportOptions = ({
   cwd = process.cwd(),
   env = process.env,
@@ -18,11 +29,20 @@ export const createReportOptions = ({
   appRoot: cwd,
   failOnOversized: env.YU_BI_CHUNK_REPORT_FAIL_ON_OVERSIZED === '1',
   gzipThresholdKiB: env.YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB
-    ? Number(env.YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB)
+    ? parsePositiveNumberOption(
+        'YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB',
+        env.YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB,
+      )
     : null,
-  limit: Number(env.YU_BI_CHUNK_REPORT_LIMIT || DEFAULT_LIMIT),
-  thresholdKiB: Number(
-    env.YU_BI_CHUNK_REPORT_THRESHOLD_KIB || DEFAULT_THRESHOLD_KIB,
+  limit: parsePositiveNumberOption(
+    'YU_BI_CHUNK_REPORT_LIMIT',
+    env.YU_BI_CHUNK_REPORT_LIMIT,
+    DEFAULT_LIMIT,
+  ),
+  thresholdKiB: parsePositiveNumberOption(
+    'YU_BI_CHUNK_REPORT_THRESHOLD_KIB',
+    env.YU_BI_CHUNK_REPORT_THRESHOLD_KIB,
+    DEFAULT_THRESHOLD_KIB,
   ),
 });
 

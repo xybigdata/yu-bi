@@ -128,6 +128,20 @@ describe('report-build-chunks', () => {
     expect(report.oversizedCount).toBe(1);
   });
 
+  it.each([
+    ['YU_BI_CHUNK_REPORT_THRESHOLD_KIB', 'abc'],
+    ['YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB', '0'],
+    ['YU_BI_CHUNK_REPORT_LIMIT', '-1'],
+  ])('rejects invalid numeric option %s', (name, value) => {
+    expect(() =>
+      createReportOptions({
+        env: {
+          [name]: value,
+        },
+      }),
+    ).toThrow(`${name} 必须是大于 0 的数字`);
+  });
+
   it('prints a clear build prerequisite error when js chunks are missing', async () => {
     const appRoot = await mkdtemp(path.join(os.tmpdir(), 'yu-bi-no-build-'));
     tempRoots.push(appRoot);

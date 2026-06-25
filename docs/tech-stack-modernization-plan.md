@@ -103,8 +103,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 91`，以恢复时重新执行命令为准                           |
-| 最近专题提交               | `9446cda96 test: 补强富文本编辑态字段插入 smoke`           |
+| 当前分支相对 `origin/main` | `0 92`，以恢复时重新执行命令为准                           |
+| 最近专题提交               | `d8880e5ac test: 稳定构建体积报告脚本测试`                 |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -2838,6 +2838,28 @@ npm run build:report
 npm run checkTs
 npm run eslint -- scripts/report-build-chunks.mjs scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts
 npm exec -- prettier --check scripts/report-build-chunks.mjs scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
+
+最新批次：构建体积报告参数校验补强
+
+- 已为 `report-build-chunks` 增加环境变量数值参数校验，避免阈值或 limit 传错时静默生成 `NaN` 报告
+- 校验范围覆盖：
+  - `YU_BI_CHUNK_REPORT_THRESHOLD_KIB`
+  - `YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB`
+  - `YU_BI_CHUNK_REPORT_LIMIT`
+- 非数字、`0`、负数会直接抛出明确错误，提示变量名和当前值
+- 正常默认参数和现有 `build:report` 输出保持不变
+
+本批次验证命令：
+
+```bash
+npm run test -- scripts/__tests__/report-build-chunks.test.mts
+npm run build:report
+npm run checkTs
+npm run eslint -- scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts
+npm exec -- prettier --check scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md
 npm audit --json
 git diff --check
 ```
