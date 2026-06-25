@@ -18,6 +18,43 @@ export function getStableBuildItemId(fileName) {
   );
 }
 
+export function getBuildItemCategory(fileName) {
+  const id = getStableBuildItemId(fileName);
+
+  if (id.startsWith('task/')) {
+    return 'task';
+  }
+  if (id.includes('.map.')) {
+    return 'geo';
+  }
+  if (id.endsWith('.json')) {
+    return 'asset';
+  }
+  if (id.endsWith('.css')) {
+    return 'style';
+  }
+  if (
+    [
+      'antdDesign.js',
+      'antdIcons.js',
+      'antvG.js',
+      'antvG2.js',
+      'antvS2.js',
+      'echarts.js',
+      'monacoBase.js',
+      'monacoEditor.js',
+      'react.js',
+    ].includes(id)
+  ) {
+    return 'vendor';
+  }
+  if (id.endsWith('.js')) {
+    return 'runtime';
+  }
+
+  return 'asset';
+}
+
 const parsePositiveNumberOption = (name, value, defaultValue) => {
   const normalizedValue = value || defaultValue;
   const parsedValue = Number(normalizedValue);
@@ -108,6 +145,7 @@ async function collectDirectoryFiles({
 
       return {
         ...size,
+        category: getBuildItemCategory(entry.name),
         id: getStableBuildItemId(entry.name),
         name: entry.name,
         path: path.relative(appRoot, filePath),
@@ -144,6 +182,7 @@ export async function collectTaskBundle(appRoot) {
   return [
     {
       ...size,
+      category: getBuildItemCategory('task/index.js'),
       id: getStableBuildItemId('task/index.js'),
       name: 'task/index.js',
       path: path.relative(appRoot, taskBundle),
@@ -239,7 +278,9 @@ export function createReportLines(title, items, options) {
         ' ',
       )} flags=${rawOversizedItem ? 'raw' : '-'},${
         gzipOversizedItem ? 'gzip' : '-'
-      } id=${item.id ?? getStableBuildItemId(item.name)} ${item.path}`,
+      } category=${item.category ?? getBuildItemCategory(item.name)} id=${
+        item.id ?? getStableBuildItemId(item.name)
+      } ${item.path}`,
     );
   }
 

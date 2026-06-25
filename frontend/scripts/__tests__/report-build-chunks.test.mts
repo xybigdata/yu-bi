@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   createBuildReport,
+  getBuildItemCategory,
   createOversizedSummary,
   createReportOptions,
   createReportLines,
@@ -76,11 +77,12 @@ describe('report-build-chunks', () => {
       'yu-bi build asset report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=off, files=1, rawOversized=0',
     );
     expect(stdout).toContain('build/static/js/antdDesign.D8R05ovR.js');
+    expect(stdout).toContain('category=vendor id=antdDesign.js');
     expect(stdout).toContain('id=antdDesign.js');
     expect(stdout).toContain('build/static/js/react.BIp4DLJn.js');
-    expect(stdout).toContain('id=task/index.js');
+    expect(stdout).toContain('category=task id=task/index.js');
     expect(stdout).toContain('build/static/media/geo-china.map.json');
-    expect(stdout).toContain('id=geo-china.map.json');
+    expect(stdout).toContain('category=geo id=geo-china.map.json');
     expect(stdout).not.toContain('style.css');
     expect(report.oversizedCount).toBe(1);
     expect(report.summary).toEqual({
@@ -343,6 +345,17 @@ describe('report-build-chunks', () => {
     ['task/index.js', 'task/index.js'],
   ])('creates stable id for build item %s', (name, id) => {
     expect(getStableBuildItemId(name)).toBe(id);
+  });
+
+  it.each([
+    ['antdDesign.D8R05ovR.js', 'vendor'],
+    ['monacoEditor.CmoqNc9c.js', 'vendor'],
+    ['shareChart.js', 'runtime'],
+    ['task/index.js', 'task'],
+    ['geo-china-city.map.DEZmHbjI.json', 'geo'],
+    ['logo.svg', 'asset'],
+  ])('classifies build item %s as %s', (name, category) => {
+    expect(getBuildItemCategory(name)).toBe(category);
   });
 
   it.each([
