@@ -32,6 +32,7 @@ codex/modernization-frontend-security-deps
 | 优先级 | 事项                             | 当前策略                                                                |
 | ------ | -------------------------------- | ----------------------------------------------------------------------- |
 | P0     | 分支纪律和执行文档同步           | 持续保持本文档与最新用户指令一致，避免恢复时误用旧目标文本              |
+| P0     | Node 24 / npm 11 工具链校验      | 已抽成可复用 npm script，后续 CI 和本地恢复都先跑统一脚本               |
 | P1     | 分享页 / 图表运行时 smoke        | 补最小可维护测试，优先覆盖分享页只读图表和富文本展示链路                |
 | P1     | 构建产物治理                     | JS gzip 超限已清零；继续观察 raw 维度的 `monacoEditor`、`antdDesign` 等 |
 | P2     | 前端剩余 outdated 复核           | 暂缓重复试装，只在 peer、audit 或生态条件变化时复核                     |
@@ -103,8 +104,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 98`，以恢复时重新执行命令为准                           |
-| 最近专题提交               | `0b28135b2 chore: 升级 Spring Cloud 补丁线`                |
+| 当前分支相对 `origin/main` | `0 99`，以恢复时重新执行命令为准                           |
+| 最近专题提交               | `b2b3bb14e test: 补强现代 SQL fallback 兼容基线`           |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -179,8 +180,8 @@ codex/modernization-frontend-security-deps
 
 | 技术栈                  | 当前基线                                     | 状态                                                                                                          |
 | ----------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Node                    | `>=24.0.0 <25.0.0`                           | 硬性目标，当前验证基线 `24.16.0`                                                                              |
-| npm                     | `>=11.0.0 <12.0.0`                           | 与 Node 24 配套，当前验证基线 `11.13.0`                                                                       |
+| Node                    | `>=24.0.0 <25.0.0`                           | 硬性目标；`.nvmrc` / `.node-version` 固定项目推荐值 `24.16.0`，运行时按 Node 24 范围校验                      |
+| npm                     | `>=11.0.0 <12.0.0`                           | 与 Node 24 配套；`packageManager` 当前记录 `npm@11.13.0`，运行时按 npm 11 范围校验                            |
 | React                   | `19.2.7`                                     | 已升级到 React 19 稳定线                                                                                      |
 | React Router            | `7.18.0`                                     | 已升级到 React Router 7 稳定线                                                                                |
 | Ant Design              | `5.29.3`                                     | 已收口到 AntD 5 稳定线，并迁移到 v5 theme token API                                                           |
@@ -2975,6 +2976,23 @@ mvn -pl data-providers/data-provider-base -am -Dtest=SqlQueryScriptProcessorTest
 git diff --check
 ```
 
+最新批次：Node 24 / npm 11 工具链校验收口
+
+- 新增 `npm run verify:toolchain`，把 CI 中内联的 Node / npm / `.nvmrc` / `.node-version` / `.npmrc` / `packageManager` 校验抽成可复用脚本
+- 校验语义按现代化目标收口：`.nvmrc` 与 `.node-version` 必须一致；运行时 Node 必须满足 `>=24.0.0 <25.0.0`；运行时 npm 与 `packageManager` 都必须满足 `>=11.0.0 <12.0.0`
+- CI `Verify frontend toolchain` 步骤改为安装 npm 11 后执行 `npm run verify:toolchain`，避免多处维护内联 `node -e` 校验逻辑
+- 已核对 POM 品牌残留：Maven `groupId` / `artifactId` / `name` / `description` / SCM 已收口到 `yubi` / `yu-bi`；`server/pom.xml` 中唯一 `datart.DatartServerApplication` 是 Java 包名内部启动类，本批次按禁止项保留
+
+本批次验证命令：
+
+```bash
+npm run verify:toolchain
+npm run test -- scripts/__tests__/verify-toolchain.test.mts
+npm run eslint -- scripts/verify-toolchain-core.mjs scripts/verify-toolchain.mjs scripts/__tests__/verify-toolchain.test.mts
+npm exec -- prettier --check scripts/verify-toolchain-core.mjs scripts/verify-toolchain.mjs scripts/__tests__/verify-toolchain.test.mts ../.github/workflows/dev-ut-stage.js.yml package.json ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
@@ -3094,6 +3112,7 @@ git rev-list --left-right --count origin/main...HEAD
 git log --oneline --decorate -8
 npm audit --json
 npm outdated --json
+npm run verify:toolchain
 npm ls react-quill react-quill-new quill quill-delta --all
 npm ci --dry-run --ignore-scripts --no-audit --no-fund
 npm run checkTs

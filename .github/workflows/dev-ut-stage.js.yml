@@ -30,13 +30,7 @@ jobs:
       - name: Verify frontend toolchain
         run: |
           npm install -g npm@11.13.0
-          node -v
-          npm -v
-          npm config get engine-strict
-          node -e "const fs=require('fs'); const nvm=fs.readFileSync('.nvmrc','utf8').trim().replace(/^v/,''); const nodeVersion=fs.readFileSync('.node-version','utf8').trim().replace(/^v/,''); const actual=process.version.replace(/^v/,''); if (nvm !== nodeVersion) throw new Error('Node version files mismatch: '+nvm+' !== '+nodeVersion); if (actual !== nodeVersion) throw new Error('Unexpected node version: '+actual+' !== '+nodeVersion)"
-          test "$(npm -v)" = "11.13.0"
-          test "$(npm config get engine-strict)" = "true"
-          node -e "const p=require('./package.json'); if (p.packageManager !== 'npm@11.13.0') throw new Error('Unexpected packageManager: '+p.packageManager)"
+          npm run verify:toolchain
         working-directory: ./frontend
       - run: npm ci
         working-directory: ./frontend
