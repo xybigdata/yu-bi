@@ -104,8 +104,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 102`，以恢复时重新执行命令为准                          |
-| 最近专题提交               | `4008757ea test: 补强 ECharts 事件守卫基线`                |
+| 当前分支相对 `origin/main` | `0 103`，以恢复时重新执行命令为准                          |
+| 最近专题提交               | `290c375a4 test: 补强分享页 ECharts 预加载入口`            |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -3040,6 +3040,20 @@ npm run test -- src/app/pages/SharePage/__tests__/shareLoadableRuntime.test.ts
 npm run checkTs
 npm run eslint -- src/app/pages/SharePage/shareLoadableRuntime.ts src/app/pages/SharePage/__tests__/shareLoadableRuntime.test.ts src/app/pages/SharePage/Chart/Loadable.tsx src/app/pages/SharePage/Dashboard/Loadable.tsx src/app/pages/SharePage/StoryPlayer/Loadable.tsx
 npm exec -- prettier --check src/app/pages/SharePage/shareLoadableRuntime.ts src/app/pages/SharePage/__tests__/shareLoadableRuntime.test.ts src/app/pages/SharePage/Chart/Loadable.tsx src/app/pages/SharePage/Dashboard/Loadable.tsx src/app/pages/SharePage/StoryPlayer/Loadable.tsx ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
+最新批次：JDBC 多方言渲染合同基线补强
+
+- 在 `SqlScriptRenderExamplesTest` 中新增 MySQL / Oracle / Presto 代表性渲染合同测试
+- 锁定同一条查询在不同方言下的 `DATART_VTABLE` 包装、别名引用符和 `AS` 输出差异
+- 本批次不升级 Calcite，不改 JavaCC parser，不改 SQL 方言实现，不触碰 `DATART_*` 稳定别名
+- 该基线用于后续 Calcite / 方言依赖升级前判断 SQL 渲染是否发生行为漂移
+
+本批次验证命令：
+
+```bash
+mvn -pl data-providers/jdbc-data-provider -am -Dtest=SqlScriptRenderExamplesTest -Dsurefire.failIfNoSpecifiedTests=false test
 git diff --check
 ```
 

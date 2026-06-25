@@ -7,6 +7,7 @@ import datart.data.provider.calcite.SqlFragment;
 import datart.data.provider.jdbc.SqlScriptRender;
 import datart.data.provider.script.SqlStringUtils;
 import datart.data.provider.sql.common.ParamFactory;
+import datart.data.provider.sql.common.TestSqlDialects;
 import datart.data.provider.sql.entity.SqlTestEntity;
 import datart.data.provider.sql.examples.FallbackSqlExamples;
 import datart.data.provider.sql.examples.ForbiddenSqlExamples;
@@ -22,6 +23,8 @@ import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.support.StaticMessageSource;
 
 import java.util.List;
@@ -91,6 +94,20 @@ class SqlScriptRenderExamplesTest {
         validateExamples(SpecialSqlExamples.sqlList, true);
     }
 
+    @ParameterizedTest
+    @MethodSource("representativeDialectRenderCases")
+    void shouldKeepRepresentativeDialectRenderContracts(
+            SqlDialect sqlDialect,
+            String expected
+    ) throws SqlParseException {
+        QueryScript queryScript = ParamFactory.getQueryScriptExample(
+                "SELECT id, amount FROM orders WHERE status = 'paid'"
+        );
+        SqlScriptRender render = new SqlScriptRender(queryScript, null, sqlDialect, false);
+
+        assertEquals(expected, cleanup(render.render(false, false, false)));
+    }
+
     private void validateExamples(List<SqlTestEntity> sqlTests, boolean enableSpecialSql) throws SqlParseException {
         for (SqlTestEntity sqlTest : sqlTests) {
             QueryScript queryScript = ParamFactory.getQueryScriptExample(sqlTest.getSql());
@@ -127,6 +144,23 @@ class SqlScriptRenderExamplesTest {
         return sqlTests.stream()
                 .filter(sqlTest -> sqlTest.getSqlDialect() != null)
                 .filter(sqlTest -> "MYSQL".equals(sqlTest.getSqlDialect().getDatabaseProduct().name()));
+    }
+
+    private static Stream<Object[]> representativeDialectRenderCases() {
+        return Stream.of(
+                new Object[]{
+                        TestSqlDialects.MYSQL,
+                        "SELECT * FROM ( SELECT id, amount FROM orders WHERE status = 'paid' ) AS `DATART_VTABLE`"
+                },
+                new Object[]{
+                        TestSqlDialects.ORACLE,
+                        "SELECT * FROM ( SELECT id, amount FROM orders WHERE status = 'paid' ) \"DATART_VTABLE\""
+                },
+                new Object[]{
+                        TestSqlDialects.PRESTO,
+                        "SELECT * FROM ( SELECT id, amount FROM orders WHERE status = 'paid' ) AS \"DATART_VTABLE\""
+                }
+        );
     }
 
     private String wrapExpectedSql(String sql, SqlDialect sqlDialect) {
