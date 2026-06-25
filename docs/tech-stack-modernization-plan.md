@@ -104,8 +104,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 103`，以恢复时重新执行命令为准                          |
-| 最近专题提交               | `290c375a4 test: 补强分享页 ECharts 预加载入口`            |
+| 当前分支相对 `origin/main` | `0 104`，以恢复时重新执行命令为准                          |
+| 最近专题提交               | `6b35f1814 test: 补强 JDBC 多方言渲染合同`                 |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -3054,6 +3054,23 @@ git diff --check
 
 ```bash
 mvn -pl data-providers/jdbc-data-provider -am -Dtest=SqlScriptRenderExamplesTest -Dsurefire.failIfNoSpecifiedTests=false test
+git diff --check
+```
+
+最新批次：构建体积报告稳定 id 过滤
+
+- 新增 `YU_BI_CHUNK_REPORT_ID_FILTER`，可按稳定 `id=` 子串过滤 chunk / asset 报告输出
+- 报告头增加 `idFilter=...`，便于记录当前是全量报告还是聚焦特定稳定 id
+- `build:report` 默认行为保持不变；未设置过滤条件时继续输出全量排序结果
+- 用例覆盖 `antdDesign.js` 过滤和独立 helper，方便后续聚焦 `monacoEditor.js`、`antdDesign.js`、`echarts.js` 等 raw 超限项
+
+本批次验证命令：
+
+```bash
+npm run test -- scripts/__tests__/report-build-chunks.test.mts
+YU_BI_CHUNK_REPORT_ID_FILTER=antdDesign.js npm run build:report
+npm run eslint -- scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts
+npm exec -- prettier --check scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md
 git diff --check
 ```
 

@@ -10,6 +10,7 @@ import {
   createBuildReport,
   createReportOptions,
   createReportLines,
+  filterItemsByStableId,
   getStableBuildItemId,
   rankItems,
 } from '../report-build-chunks-core.mjs';
@@ -68,10 +69,10 @@ describe('report-build-chunks', () => {
     const stdout = report.lines.join('\n');
 
     expect(stdout).toContain(
-      'yu-bi build chunk report: rawThreshold=1 KiB, gzipThreshold=off, files=3, rawOversized=1',
+      'yu-bi build chunk report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, files=3, rawOversized=1',
     );
     expect(stdout).toContain(
-      'yu-bi build asset report: rawThreshold=1 KiB, gzipThreshold=off, files=1, rawOversized=0',
+      'yu-bi build asset report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, files=1, rawOversized=0',
     );
     expect(stdout).toContain('build/static/js/antdDesign.D8R05ovR.js');
     expect(stdout).toContain('id=antdDesign.js');
@@ -129,6 +130,40 @@ describe('report-build-chunks', () => {
     expect(stdout).toContain('rawOversized=0, gzipOversized=1');
     expect(stdout).toContain('flags=-,gzip');
     expect(report.oversizedCount).toBe(1);
+  });
+
+  it('can filter report items by stable id', async () => {
+    const appRoot = await createTempBuild();
+    const report = await createBuildReport(
+      createReportOptions({
+        cwd: appRoot,
+        env: {
+          YU_BI_CHUNK_REPORT_ID_FILTER: 'antdDesign.js',
+          YU_BI_CHUNK_REPORT_LIMIT: '10',
+          YU_BI_CHUNK_REPORT_THRESHOLD_KIB: '1',
+        },
+      }),
+    );
+    const stdout = report.lines.join('\n');
+
+    expect(stdout).toContain('idFilter=antdDesign.js, files=1');
+    expect(stdout).toContain('id=antdDesign.js');
+    expect(stdout).not.toContain('id=task/index.js');
+    expect(stdout).not.toContain('id=geo-china.map.json');
+    expect(report.oversizedCount).toBe(1);
+  });
+
+  it('filters arbitrary items by stable id substring', () => {
+    expect(
+      filterItemsByStableId(
+        [
+          { name: 'monacoEditor.CmoqNc9c.js' },
+          { id: 'antdDesign.js', name: 'antdDesign.D8R05ovR.js' },
+          { name: 'geo-china.map.json' },
+        ],
+        'Design',
+      ),
+    ).toEqual([{ id: 'antdDesign.js', name: 'antdDesign.D8R05ovR.js' }]);
   });
 
   it.each([

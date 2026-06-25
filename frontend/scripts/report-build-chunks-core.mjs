@@ -46,6 +46,7 @@ export const createReportOptions = ({
     env.YU_BI_CHUNK_REPORT_LIMIT,
     DEFAULT_LIMIT,
   ),
+  idFilter: env.YU_BI_CHUNK_REPORT_ID_FILTER?.trim() || null,
   thresholdKiB: parsePositiveNumberOption(
     'YU_BI_CHUNK_REPORT_THRESHOLD_KIB',
     env.YU_BI_CHUNK_REPORT_THRESHOLD_KIB,
@@ -150,6 +151,16 @@ export function rankItems(items) {
     .map((item, index) => ({ ...item, rank: index + 1 }));
 }
 
+export function filterItemsByStableId(items, idFilter) {
+  if (!idFilter) {
+    return items;
+  }
+
+  return items.filter(item =>
+    (item.id ?? getStableBuildItemId(item.name)).includes(idFilter),
+  );
+}
+
 export function getOversizedItems(
   items,
   { thresholdKiB, gzipThresholdKiB },
@@ -178,7 +189,7 @@ export function createReportLines(title, items, options) {
       options.gzipThresholdKiB === null
         ? 'off'
         : `${options.gzipThresholdKiB} KiB`
-    }, files=${items.length}, rawOversized=${rawOversized.length}, gzipOversized=${gzipOversized.length}, oversized=${oversized.length}`,
+    }, idFilter=${options.idFilter ?? 'off'}, files=${items.length}, rawOversized=${rawOversized.length}, gzipOversized=${gzipOversized.length}, oversized=${oversized.length}`,
   ];
 
   for (const item of items.slice(0, options.limit)) {
@@ -210,11 +221,21 @@ export function createReportLines(title, items, options) {
 }
 
 export async function createBuildReport(options = createReportOptions()) {
-  const chunks = rankItems([
-    ...(await collectJsChunks(options.appRoot)),
-    ...(await collectTaskBundle(options.appRoot)),
-  ]);
-  const mediaAssets = rankItems(await collectMediaAssets(options.appRoot));
+  const chunks = rankItems(
+    filterItemsByStableId(
+      [
+        ...(await collectJsChunks(options.appRoot)),
+        ...(await collectTaskBundle(options.appRoot)),
+      ],
+      options.idFilter,
+    ),
+  );
+  const mediaAssets = rankItems(
+    filterItemsByStableId(
+      await collectMediaAssets(options.appRoot),
+      options.idFilter,
+    ),
+  );
   const chunkReport = createReportLines('chunk', chunks, options);
   const assetReport = createReportLines('asset', mediaAssets, options);
 
