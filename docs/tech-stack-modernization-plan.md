@@ -104,8 +104,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 111`，以恢复时重新执行命令为准                          |
-| 最近专题提交               | `ca116f8f9 chore: 支持构建报告 JSON 输出`                  |
+| 当前分支相对 `origin/main` | `0 112`，以恢复时重新执行命令为准                          |
+| 最近专题提交               | `8f6e6b208 chore: 支持构建报告写入文件`                    |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -3185,6 +3185,25 @@ node -e "const fs=require('fs'); const report=JSON.parse(fs.readFileSync('../.tm
 npm run checkTs
 npm run eslint -- scripts/report-build-chunks-core.mjs scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts
 npm exec -- prettier --check scripts/report-build-chunks-core.mjs scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
+最新批次：构建体积报告基线校验入口
+
+- 新增 `npm run build:report:check`，包装 `scripts/check-build-report-baseline.mjs`
+- 新增 `check-build-report-baseline-core.mjs`，对比 report JSON 与 baseline JSON 中 `summary` 的 `chunk` / `asset` raw、gzip 超限稳定 id 列表
+- 校验失败时输出 missing / extra 稳定 id，便于判断是体积治理进步、回退，还是基线需要更新
+- 当前只提供可选校验入口，不接入 CI 强制门禁；后续可在基线稳定后把报告型步骤升级为门禁型步骤
+- 已用 `.tmp/build-report.json` 和 `.tmp/build-report-baseline.json` 验证脚本串联，输出 `chunkRawOversized=7, assetRawOversized=2`
+
+本批次验证命令：
+
+```bash
+npm run test -- scripts/__tests__/check-build-report-baseline.test.mts scripts/__tests__/report-build-chunks.test.mts
+YU_BI_CHUNK_REPORT_BASELINE_REPORT=../.tmp/build-report.json YU_BI_CHUNK_REPORT_BASELINE_FILE=../.tmp/build-report-baseline.json npm run build:report:check
+npm run checkTs
+npm run eslint -- scripts/check-build-report-baseline-core.mjs scripts/check-build-report-baseline.mjs scripts/__tests__/check-build-report-baseline.test.mts
+npm exec -- prettier --check scripts/check-build-report-baseline-core.mjs scripts/check-build-report-baseline.mjs scripts/__tests__/check-build-report-baseline.test.mts package.json ../docs/tech-stack-modernization-plan.md
 git diff --check
 ```
 
