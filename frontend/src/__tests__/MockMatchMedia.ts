@@ -25,11 +25,17 @@ const mockFn =
 
 global.matchMedia =
   global.matchMedia ||
-  function () {
+  function (query: string) {
     return {
+      addEventListener: mockFn(),
       addListener: mockFn(),
+      dispatchEvent: mockFn(() => true),
+      matches: false,
+      media: query,
+      onchange: null,
+      removeEventListener: mockFn(),
       removeListener: mockFn(),
-    };
+    } as unknown as MediaQueryList;
   };
 
 export {};

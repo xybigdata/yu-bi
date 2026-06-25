@@ -86,8 +86,28 @@ describe('ensureMonacoSqlLanguage', () => {
     await expect(ensureMonacoSqlLanguage(monacoModule)).rejects.toThrow(
       'load failed',
     );
-    await expect(ensureMonacoSqlLanguage(monacoModule)).resolves.toBeUndefined();
+    await expect(
+      ensureMonacoSqlLanguage(monacoModule),
+    ).resolves.toBeUndefined();
     expect(loader).toHaveBeenCalledTimes(2);
+  });
+
+  test('should register actual SQL language runtime', async () => {
+    const monacoModule = createMonacoModule();
+
+    await expect(
+      ensureMonacoSqlLanguage(monacoModule),
+    ).resolves.toBeUndefined();
+
+    expect(monacoModule.languages.register).toHaveBeenCalledWith({ id: 'sql' });
+    expect(
+      monacoModule.languages.setMonarchTokensProvider,
+    ).toHaveBeenCalledWith(
+      'sql',
+      expect.objectContaining({
+        tokenizer: expect.any(Object),
+      }),
+    );
   });
 });
 

@@ -24,6 +24,7 @@ codex/modernization-frontend-security-deps
 - 不主动合并 `main`，也不因为 `main` 落后较多就自动合并
 - 专题分支可以阶段性 push 保存进度
 - 只有当前专题累计到一批可验收成果，并且用户明确要求阶段合并时，才准备合入 `main`
+- 当前阶段优先在同一条专题分支持续完成现代化改造，减少分支创建、`main` 合并和 `main` 推送频率
 - 推送 `main` 前必须完整门禁；日常开发按风险分层执行相关门禁
 - 提交节奏按“一组相关改动”提交，避免单文件小改动频繁提交
 
@@ -104,8 +105,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 114`，以恢复时重新执行命令为准                          |
-| 最近专题提交               | `dc7e15ca1 chore: 固化构建报告观察基线`                    |
+| 当前分支相对 `origin/main` | `0 115`，以恢复时重新执行命令为准                          |
+| 最近专题提交               | `1f34905aa ci: 上传前端构建体积报告`                       |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -122,6 +123,7 @@ git log --oneline --decorate -8
 - 除非用户明确要求阶段合并，否则专题分支只推送远端，不主动 merge 回 `main`
 - 目标模式中的“专题完成后 push 再 merge 到 main”按最新执行口径理解为：专题分支可持续 push 保存进度，但 `main` 合并要尽量少，只在一批可验收成果完成且用户明确要求时统一处理
 - 最新用户指令优先级高于目标旧文本：不要因为分支领先 `main` 很多就主动合并；当前阶段默认继续在一个分支上干活
+- 即使 `main` 分支落后较多，也不作为自动合并理由；先持续完成当前专题分支上的改造批次
 - 当前分支已经累计较多现代化提交，后续仍优先继续在本分支补齐前端安全、运行时、构建产物治理和必要的后端补丁线复核；不要为了“分支领先太多”主动切分支或合并主线
 
 ## 3. 分支与合并规则
@@ -3295,10 +3297,10 @@ git diff --check
 | 阶段      | 事项                           | 风险 | 执行策略                                                                                                                  |
 | --------- | ------------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------- |
 | P2-E-Next | 前端剩余 outdated 复核         | 中   | 暂停重复试装；按 12.1 的触发条件定期复核，当前不为这 7 项强行升级                                                         |
-| P2-E-Next | 前端运行时 smoke 补强          | 中   | 可推进；优先补 Monaco、Quill、ECharts、分享页等动态运行时入口的最小回归                                                   |
+| P2-E-Next | 前端运行时 smoke 补强          | 中   | 可推进；已补 ECharts 实例和 Monaco SQL 语言运行时 smoke，继续补 Quill、分享页等动态运行时入口的最小回归                   |
 | P2-E-Next | 前端构建产物治理               | 中   | 可推进；JS gzip 超限已清零，ECharts 按需拆分试验暂不保留，后续优先分析 raw 维度的 `monacoEditor`、`antdDesign` 和地图资源 |
 | P2-F      | AntD 6 主版本评估              | 高   | 暂缓；继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路                                                    |
-| P2-G      | ECharts 6 主版本评估           | 高   | 已完成；后续可增强浏览器层图表 smoke                                                                                      |
+| P2-G      | ECharts 6 主版本评估           | 高   | 已完成；已补真实 ECharts 运行时实例 smoke，后续只在图表主链变化时继续增强浏览器层覆盖                                     |
 | P2-H      | ESLint 10 主版本评估           | 中高 | 暂缓；当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级                      |
 | P2-I      | 数据源 provider / 方言依赖审计 | 高   | 评估；继续补 SQL parser / 方言 fallback / driver metadata 回归基线，不做大规模重构                                        |
 | P2-J      | 富文本编辑器运行时 smoke       | 中   | 可推进；已补 jsdom 层运行时和 Dashboard Widget smoke，后续补分享页展示和浏览器入口                                        |
@@ -3340,6 +3342,17 @@ scripts/check-demo-health.sh
 npm install --package-lock-only --dry-run --ignore-scripts
 npm ci --dry-run --ignore-scripts
 ```
+
+### 13.1 当前批次验证记录
+
+本批次聚焦运行时 smoke 补强，暂不触碰 AntD 6、ESLint 10、Quill 2.0.3 等仍有生态或 audit 阻塞的升级项。
+
+- 新增真实 ECharts 运行时实例 smoke，覆盖 `loadEChartsRuntime()` 加载实际 `echarts` 模块后，使用 SVG renderer 完成 `init`、`setOption`、`resize`、`dispose`
+- 新增真实 Monaco SQL 语言运行时 smoke，覆盖 `ensureMonacoSqlLanguage()` 加载实际 SQL language module 后注册语言和 token provider
+- 补齐测试环境 `matchMedia` mock 的现代 `addEventListener/removeEventListener` API，兼容 Monaco 等较新浏览器运行时依赖
+- canvas mock 仅限定在该测试内，避免扩大 jsdom 全局环境
+- 已执行：`npm run test -- src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts`
+- 已执行：`npm run test -- src/app/components/MonacoEditor/__tests__/runtime.test.ts`
 
 测试缺口处理：
 
