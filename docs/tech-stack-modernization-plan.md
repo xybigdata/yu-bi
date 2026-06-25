@@ -104,8 +104,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 109`，以恢复时重新执行命令为准                          |
-| 最近专题提交               | `db317db4e chore: 支持构建报告聚焦超限项`                  |
+| 当前分支相对 `origin/main` | `0 110`，以恢复时重新执行命令为准                          |
+| 最近专题提交               | `306f33f70 chore: 增加构建报告超限摘要`                    |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -3144,6 +3144,26 @@ npm run test -- scripts/__tests__/report-build-chunks.test.mts
 npm run checkTs
 npm run eslint -- scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts
 npm exec -- prettier --check scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
+最新批次：构建体积报告 JSON 输出
+
+- 新增 `YU_BI_CHUNK_REPORT_FORMAT=json`，用于让 `build:report` 输出可机器消费的 JSON 结果
+- 默认 `text` 输出保持不变；非法格式会明确报错，只支持 `text` / `json`
+- JSON 输出包含 `lines`、`oversizedCount` 和 `summary`，可直接用于后续 CI 体积回归对比或基线文件生成
+- `YU_BI_CHUNK_REPORT_FAIL_ON_OVERSIZED=1` 在 JSON 模式下仍保留退出码行为，便于后续把报告型步骤升级为门禁型步骤
+- 当前 `YU_BI_CHUNK_REPORT_FORMAT=json YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 npm run build:report` 输出 `oversizedCount=9`，其中 JS 7 个、asset 2 个
+- 本批次不改变构建产物、不改变默认文本输出，只把前一批 summary 能力暴露给 CLI
+
+本批次验证命令：
+
+```bash
+npm run test -- scripts/__tests__/report-build-chunks.test.mts
+YU_BI_CHUNK_REPORT_FORMAT=json YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 npm run build:report
+npm run checkTs
+npm run eslint -- scripts/report-build-chunks-core.mjs scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts
+npm exec -- prettier --check scripts/report-build-chunks-core.mjs scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md
 git diff --check
 ```
 

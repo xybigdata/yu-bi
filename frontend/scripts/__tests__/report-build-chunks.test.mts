@@ -147,6 +147,56 @@ describe('report-build-chunks', () => {
     });
   });
 
+  it('can print JSON report from the CLI', async () => {
+    const appRoot = await createTempBuild();
+    const { stdout } = await execFileAsync(process.execPath, [reportScript], {
+      cwd: appRoot,
+      env: {
+        ...process.env,
+        YU_BI_CHUNK_REPORT_FORMAT: 'json',
+        YU_BI_CHUNK_REPORT_LIMIT: '10',
+        YU_BI_CHUNK_REPORT_THRESHOLD_KIB: '1',
+      },
+    });
+    const report = JSON.parse(stdout);
+
+    expect(report).toMatchObject({
+      oversizedCount: 1,
+      summary: {
+        asset: {
+          files: 1,
+          oversized: [],
+        },
+        chunk: {
+          files: 3,
+          oversized: ['antdDesign.js'],
+          rawOversized: ['antdDesign.js'],
+        },
+      },
+    });
+    expect(report.lines.join('\n')).toContain('id=antdDesign.js');
+  });
+
+  it('keeps fail-on-oversized exit code in JSON mode', async () => {
+    const appRoot = await createTempBuild();
+
+    await expect(
+      execFileAsync(process.execPath, [reportScript], {
+        cwd: appRoot,
+        env: {
+          ...process.env,
+          YU_BI_CHUNK_REPORT_FAIL_ON_OVERSIZED: '1',
+          YU_BI_CHUNK_REPORT_FORMAT: 'json',
+          YU_BI_CHUNK_REPORT_LIMIT: '10',
+          YU_BI_CHUNK_REPORT_THRESHOLD_KIB: '1',
+        },
+      }),
+    ).rejects.toMatchObject({
+      code: 1,
+      stdout: expect.stringContaining('"oversizedCount": 1'),
+    });
+  });
+
   it('can report gzip threshold independently', () => {
     const report = createReportLines(
       'chunk',
@@ -256,17 +306,16 @@ describe('report-build-chunks', () => {
   });
 
   it.each([
+    ['YU_BI_CHUNK_REPORT_FORMAT', 'xml'],
     ['YU_BI_CHUNK_REPORT_THRESHOLD_KIB', 'abc'],
     ['YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB', '0'],
     ['YU_BI_CHUNK_REPORT_LIMIT', '-1'],
-  ])('rejects invalid numeric option %s', (name, value) => {
-    expect(() =>
-      createReportOptions({
-        env: {
-          [name]: value,
-        },
-      }),
-    ).toThrow(`${name} 必须是大于 0 的数字`);
+  ])('rejects invalid option %s', (name, value) => {
+    expect(() => createReportOptions({ env: { [name]: value } })).toThrow(
+      name === 'YU_BI_CHUNK_REPORT_FORMAT'
+        ? 'YU_BI_CHUNK_REPORT_FORMAT 只支持 text 或 json'
+        : `${name} 必须是大于 0 的数字`,
+    );
   });
 
   it('prints a clear build prerequisite error when js chunks are missing', async () => {

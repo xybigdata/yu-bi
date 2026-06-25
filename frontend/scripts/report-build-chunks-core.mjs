@@ -29,12 +29,24 @@ const parsePositiveNumberOption = (name, value, defaultValue) => {
   return parsedValue;
 };
 
+const parseReportFormat = value => {
+  const format = value?.trim() || 'text';
+  if (format !== 'text' && format !== 'json') {
+    throw new Error(
+      `YU_BI_CHUNK_REPORT_FORMAT 只支持 text 或 json，当前值: ${format}`,
+    );
+  }
+
+  return format;
+};
+
 export const createReportOptions = ({
   cwd = process.cwd(),
   env = process.env,
 } = {}) => ({
   appRoot: cwd,
   failOnOversized: env.YU_BI_CHUNK_REPORT_FAIL_ON_OVERSIZED === '1',
+  format: parseReportFormat(env.YU_BI_CHUNK_REPORT_FORMAT),
   onlyOversized: env.YU_BI_CHUNK_REPORT_ONLY_OVERSIZED === '1',
   gzipThresholdKiB: env.YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB
     ? parsePositiveNumberOption(
