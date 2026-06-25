@@ -41,8 +41,8 @@ git log --oneline --decorate -8
 | 远端                       | `git@github.com:xybigdata/yu-bi.git`                       |
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
-| 当前分支相对 `origin/main` | `0 121`                                                    |
-| 最近专题提交               | `c7f58442f chore: 支持构建报告分类过滤`                    |
+| 当前分支相对 `origin/main` | 以恢复命令输出为准；本轮复盘前为 `0 122`                   |
+| 最近专题提交               | 以 `git log -1 --oneline` 输出为准                         |
 | 当前工作区                 | 干净                                                       |
 
 分支纪律：
@@ -87,6 +87,7 @@ git log --oneline --decorate -8
 - react-window：升级到 2.x，虚拟表格迁移到新 `Grid` API
 - Monaco、ECharts、Quill、Reveal、Split、DnD、SQL formatter 等动态运行时入口已补最小 smoke
 - 构建体积治理：地图 JSON 已迁出 JS chunk，Monaco / AntV / AntD vendor 分包已细化，gzip 维度 JS 超限清零
+- 构建报告治理：vendor 分类已覆盖当前所有手工 vendor chunk，分类过滤可用于完整观察第三方包体积上下文
 
 ### 3.3 已验证但未收口的问题
 
@@ -273,6 +274,8 @@ npm ls --all
 - `YU_BI_CHUNK_REPORT_CATEGORY_FILTER=vendor`：按分类过滤
 - `npm run build:report:check`：按观察基线校验稳定 id 清单
 
+`vendor` 分类应覆盖 `vite.shared.mts#createVendorManualChunks` 中当前所有手工第三方分包，避免构建报告和实际分包规则漂移。
+
 当前观察对象：
 
 | 类型      | raw 超限稳定 id                                                                                         | gzip 超限稳定 id          |
@@ -286,6 +289,7 @@ npm ls --all
 2. 对 raw 超限项只做有收益的拆分；无收益的按需加载试验不保留。
 3. 地图资源继续走 asset 方向治理，优先评估按层级、按省份、服务端资源或压缩策略。
 4. 每次构建体积治理后同步更新基线文件或记录不更新原因。
+5. 生成 `build/build-report.json` 后再顺序执行 `build:report:check`，不要并行执行，避免校验脚本读取旧报告文件。
 
 ## 9. 提交与推送
 

@@ -6,6 +6,24 @@ import { promisify } from 'node:util';
 export const KiB = 1024;
 export const DEFAULT_THRESHOLD_KIB = 500;
 export const DEFAULT_LIMIT = 20;
+export const VENDOR_BUILD_ITEM_IDS = new Set([
+  'antdDesign.js',
+  'antdIcons.js',
+  'antdPro.js',
+  'antv.js',
+  'antvG.js',
+  'antvG2.js',
+  'antvS2.js',
+  'echarts.js',
+  'flexlayout.js',
+  'monacoBase.js',
+  'monacoEditor.js',
+  'monacoPlatform.js',
+  'quill.js',
+  'react.js',
+  'reactGridLayout.js',
+  'reveal.js',
+]);
 
 const gzipAsync = promisify(gzip);
 
@@ -33,19 +51,7 @@ export function getBuildItemCategory(fileName) {
   if (id.endsWith('.css')) {
     return 'style';
   }
-  if (
-    [
-      'antdDesign.js',
-      'antdIcons.js',
-      'antvG.js',
-      'antvG2.js',
-      'antvS2.js',
-      'echarts.js',
-      'monacoBase.js',
-      'monacoEditor.js',
-      'react.js',
-    ].includes(id)
-  ) {
+  if (VENDOR_BUILD_ITEM_IDS.has(id)) {
     return 'vendor';
   }
   if (id.endsWith('.js')) {
@@ -276,7 +282,9 @@ export function createOversizedSummary(items, options) {
       rawOversized: countItemsByCategory(rawOversized),
     },
     files: items.length,
-    rawOversized: rawOversized.map(item => item.id ?? getStableBuildItemId(item.name)),
+    rawOversized: rawOversized.map(
+      item => item.id ?? getStableBuildItemId(item.name),
+    ),
     gzipOversized: gzipOversized.map(
       item => item.id ?? getStableBuildItemId(item.name),
     ),

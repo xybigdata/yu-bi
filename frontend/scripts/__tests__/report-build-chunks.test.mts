@@ -407,7 +407,15 @@ describe('report-build-chunks', () => {
 
   it.each([
     ['antdDesign.D8R05ovR.js', 'vendor'],
+    ['antdPro.D8R05ovR.js', 'vendor'],
+    ['antdIcons.D8R05ovR.js', 'vendor'],
+    ['antv.D8R05ovR.js', 'vendor'],
+    ['flexlayout.D8R05ovR.js', 'vendor'],
     ['monacoEditor.CmoqNc9c.js', 'vendor'],
+    ['monacoPlatform.CmoqNc9c.js', 'vendor'],
+    ['quill.CmoqNc9c.js', 'vendor'],
+    ['reactGridLayout.CmoqNc9c.js', 'vendor'],
+    ['reveal.CmoqNc9c.js', 'vendor'],
     ['shareChart.js', 'runtime'],
     ['task/index.js', 'task'],
     ['geo-china-city.map.DEZmHbjI.json', 'geo'],
