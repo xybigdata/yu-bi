@@ -35,6 +35,7 @@ export const createReportOptions = ({
 } = {}) => ({
   appRoot: cwd,
   failOnOversized: env.YU_BI_CHUNK_REPORT_FAIL_ON_OVERSIZED === '1',
+  onlyOversized: env.YU_BI_CHUNK_REPORT_ONLY_OVERSIZED === '1',
   gzipThresholdKiB: env.YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB
     ? parsePositiveNumberOption(
         'YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB',
@@ -184,15 +185,18 @@ export function createReportLines(title, items, options) {
     items,
     options,
   );
+  const reportItems = options.onlyOversized ? oversized : items;
   const lines = [
     `yu-bi build ${title} report: rawThreshold=${options.thresholdKiB} KiB, gzipThreshold=${
       options.gzipThresholdKiB === null
         ? 'off'
         : `${options.gzipThresholdKiB} KiB`
-    }, idFilter=${options.idFilter ?? 'off'}, files=${items.length}, rawOversized=${rawOversized.length}, gzipOversized=${gzipOversized.length}, oversized=${oversized.length}`,
+    }, idFilter=${options.idFilter ?? 'off'}, onlyOversized=${
+      options.onlyOversized ? 'on' : 'off'
+    }, files=${items.length}, rawOversized=${rawOversized.length}, gzipOversized=${gzipOversized.length}, oversized=${oversized.length}`,
   ];
 
-  for (const item of items.slice(0, options.limit)) {
+  for (const item of reportItems.slice(0, options.limit)) {
     const rawOversizedItem = item.bytes > options.thresholdKiB * KiB;
     const gzipOversizedItem =
       options.gzipThresholdKiB !== null &&
@@ -210,8 +214,12 @@ export function createReportLines(title, items, options) {
     );
   }
 
-  if (oversized.length > options.limit) {
-    lines.push(`... ${oversized.length - options.limit} more oversized ${title} omitted`);
+  if (reportItems.length > options.limit) {
+    lines.push(
+      `... ${reportItems.length - options.limit} more ${
+        options.onlyOversized ? 'oversized ' : ''
+      }${title} omitted`,
+    );
   }
 
   return {

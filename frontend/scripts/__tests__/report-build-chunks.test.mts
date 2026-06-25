@@ -69,10 +69,10 @@ describe('report-build-chunks', () => {
     const stdout = report.lines.join('\n');
 
     expect(stdout).toContain(
-      'yu-bi build chunk report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, files=3, rawOversized=1',
+      'yu-bi build chunk report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=off, files=3, rawOversized=1',
     );
     expect(stdout).toContain(
-      'yu-bi build asset report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, files=1, rawOversized=0',
+      'yu-bi build asset report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=off, files=1, rawOversized=0',
     );
     expect(stdout).toContain('build/static/js/antdDesign.D8R05ovR.js');
     expect(stdout).toContain('id=antdDesign.js');
@@ -81,6 +81,33 @@ describe('report-build-chunks', () => {
     expect(stdout).toContain('build/static/media/geo-china.map.json');
     expect(stdout).toContain('id=geo-china.map.json');
     expect(stdout).not.toContain('style.css');
+    expect(report.oversizedCount).toBe(1);
+  });
+
+  it('can report only oversized items while keeping full report counters', async () => {
+    const appRoot = await createTempBuild();
+    const report = await createBuildReport(
+      createReportOptions({
+        cwd: appRoot,
+        env: {
+          YU_BI_CHUNK_REPORT_LIMIT: '10',
+          YU_BI_CHUNK_REPORT_ONLY_OVERSIZED: '1',
+          YU_BI_CHUNK_REPORT_THRESHOLD_KIB: '1',
+        },
+      }),
+    );
+    const stdout = report.lines.join('\n');
+
+    expect(stdout).toContain(
+      'yu-bi build chunk report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=on, files=3, rawOversized=1',
+    );
+    expect(stdout).toContain('id=antdDesign.js');
+    expect(stdout).not.toContain('id=react.js');
+    expect(stdout).not.toContain('id=task/index.js');
+    expect(stdout).toContain(
+      'yu-bi build asset report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=on, files=1, rawOversized=0',
+    );
+    expect(stdout).not.toContain('id=geo-china.map.json');
     expect(report.oversizedCount).toBe(1);
   });
 
@@ -146,7 +173,9 @@ describe('report-build-chunks', () => {
     );
     const stdout = report.lines.join('\n');
 
-    expect(stdout).toContain('idFilter=antdDesign.js, files=1');
+    expect(stdout).toContain(
+      'idFilter=antdDesign.js, onlyOversized=off, files=1',
+    );
     expect(stdout).toContain('id=antdDesign.js');
     expect(stdout).not.toContain('id=task/index.js');
     expect(stdout).not.toContain('id=geo-china.map.json');

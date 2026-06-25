@@ -104,8 +104,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 107`，以恢复时重新执行命令为准                          |
-| 最近专题提交               | `e3525b3d1 test: 补强分享仪表盘运行时基线`                 |
+| 当前分支相对 `origin/main` | `0 108`，以恢复时重新执行命令为准                          |
+| 最近专题提交               | `b26180f4a test: 补强富文本只读运行时基线`                 |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -3107,6 +3107,26 @@ npm run test -- src/app/components/ChartGraph/BasicRichText/__tests__/ChartRichT
 npm run checkTs
 npm run eslint -- src/app/components/ChartGraph/BasicRichText/__tests__/ChartRichTextAdapter.readonly.test.tsx src/app/components/ChartGraph/BasicRichText/__tests__/BasicRichText.test.ts
 npm exec -- prettier --check src/app/components/ChartGraph/BasicRichText/__tests__/ChartRichTextAdapter.readonly.test.tsx src/app/components/ChartGraph/BasicRichText/__tests__/BasicRichText.test.ts ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
+最新批次：构建体积报告超限项聚焦输出
+
+- 新增 `YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1`，开启后 `build:report` 只列出 raw / gzip 超限项，同时报告头仍保留全量 `files`、`rawOversized`、`gzipOversized` 和 `oversized` 计数
+- 默认输出保持不变；未设置该变量时继续按体积排序输出前 `YU_BI_CHUNK_REPORT_LIMIT` 个文件
+- 报告头新增 `onlyOversized=on/off`，便于恢复记录时区分全量报告和聚焦超限项报告
+- 当前聚焦输出显示 JS raw 超限 7 个：`monacoEditor.js`、`antdDesign.js`、`echarts.js`、`monacoBase.js`、`antvG2.js`、`antvS2.js`、`antvG.js`
+- 当前聚焦输出显示 asset raw 超限 2 个：`geo-china-city.map.json`、`geo-china.map.json`
+- 本批次不改变构建产物、不调整分包策略，只降低后续 raw 超限治理时的定位成本
+
+本批次验证命令：
+
+```bash
+npm run test -- scripts/__tests__/report-build-chunks.test.mts
+YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 npm run build:report
+npm run checkTs
+npm run eslint -- scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts
+npm exec -- prettier --check scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md
 git diff --check
 ```
 
