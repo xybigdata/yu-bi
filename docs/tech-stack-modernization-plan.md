@@ -2402,6 +2402,36 @@ git diff --check
 - `npm audit --json` 仍为 0 vulnerabilities
 - `build:report` 基线保持不变：JS chunk raw 超限 4 个，asset raw 超限 2 个
 
+最新批次：富文本图表只读协议 smoke 补强
+
+- 已新增 `BasicRichText` 模型层 smoke，覆盖分享页 / 图表预览只读环境下的富文本配置协议
+- 测试模拟富文本图表的数据集、分组字段、聚合字段和 Delta 配置，确认 `getOptions` 能为 `ChartRichTextAdapter` 产出：
+  - `isEditing: false`
+  - 稳定的 `initContent`
+  - 可替换计算字段的 `dataList`
+  - `openQuillMarkdown` 配置透传
+- 已补编辑环境边界断言：仅当 `widgetSpecialConfig.env` 存在时，富文本图表才进入编辑模式
+- 现有 `RichTextEditorRuntime.smoke.test.tsx` 已覆盖 Quill 2 实际运行时和 `ChartRichTextAdapter` 只读展示，本批次补的是图表模型到适配器之间的协议边界
+- 本批次不改业务代码、不改富文本内容格式，只补分享页相关只读链路回归证据
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/components/ChartGraph/BasicRichText/__tests__/BasicRichText.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/RichTextEditorRuntime.smoke.test.tsx src/app/components/ChartGraph/BasicRichText/__tests__/runtimeHelpers.test.ts src/app/components/ChartGraph/BasicRichText/__tests__/content.test.ts
+npm run eslint -- src/app/components/ChartGraph/BasicRichText/__tests__/BasicRichText.test.ts
+npm exec -- prettier --check src/app/components/ChartGraph/BasicRichText/__tests__/BasicRichText.test.ts
+npm run checkTs
+npm audit --json
+git diff --check
+```
+
+验证说明：
+
+- 富文本相关 4 个测试文件、20 个用例通过
+- 新增测试文件 ESLint 和 Prettier 检查通过
+- `npm run checkTs` 已通过
+- `npm audit --json` 仍为 0 vulnerabilities
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
