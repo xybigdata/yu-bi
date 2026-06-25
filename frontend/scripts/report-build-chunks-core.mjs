@@ -48,6 +48,7 @@ export const createReportOptions = ({
   failOnOversized: env.YU_BI_CHUNK_REPORT_FAIL_ON_OVERSIZED === '1',
   format: parseReportFormat(env.YU_BI_CHUNK_REPORT_FORMAT),
   onlyOversized: env.YU_BI_CHUNK_REPORT_ONLY_OVERSIZED === '1',
+  output: env.YU_BI_CHUNK_REPORT_OUTPUT?.trim() || null,
   gzipThresholdKiB: env.YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB
     ? parsePositiveNumberOption(
         'YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB',

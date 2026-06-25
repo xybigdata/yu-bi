@@ -104,8 +104,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 110`，以恢复时重新执行命令为准                          |
-| 最近专题提交               | `306f33f70 chore: 增加构建报告超限摘要`                    |
+| 当前分支相对 `origin/main` | `0 111`，以恢复时重新执行命令为准                          |
+| 最近专题提交               | `ca116f8f9 chore: 支持构建报告 JSON 输出`                  |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -3161,6 +3161,27 @@ git diff --check
 ```bash
 npm run test -- scripts/__tests__/report-build-chunks.test.mts
 YU_BI_CHUNK_REPORT_FORMAT=json YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 npm run build:report
+npm run checkTs
+npm run eslint -- scripts/report-build-chunks-core.mjs scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts
+npm exec -- prettier --check scripts/report-build-chunks-core.mjs scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
+最新批次：构建体积报告文件输出
+
+- 新增 `YU_BI_CHUNK_REPORT_OUTPUT`，可把 `build:report` 输出写入指定文件，路径按前端 appRoot 解析，并自动创建父目录
+- 该选项同时支持默认文本输出和 `YU_BI_CHUNK_REPORT_FORMAT=json`；未设置时继续输出到 stdout
+- 测试覆盖 JSON 文件输出、文本文件输出，以及文件输出时 stdout 为空
+- 已用 `YU_BI_CHUNK_REPORT_FORMAT=json YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 YU_BI_CHUNK_REPORT_OUTPUT=../.tmp/build-report.json npm run build:report` 生成本地报告文件
+- 生成的 `.tmp/build-report.json` 显示 `oversizedCount=9`，稳定 id 清单保持为 JS 7 个、asset 2 个
+- 本批次不改变构建产物、不改变默认文本输出，只为后续 CI artifact、基线文件和自动化对比提供直接落盘能力
+
+本批次验证命令：
+
+```bash
+npm run test -- scripts/__tests__/report-build-chunks.test.mts
+YU_BI_CHUNK_REPORT_FORMAT=json YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 YU_BI_CHUNK_REPORT_OUTPUT=../.tmp/build-report.json npm run build:report
+node -e "const fs=require('fs'); const report=JSON.parse(fs.readFileSync('../.tmp/build-report.json','utf8')); console.log(JSON.stringify({oversizedCount:report.oversizedCount, chunk:report.summary.chunk.oversized, asset:report.summary.asset.oversized}, null, 2));"
 npm run checkTs
 npm run eslint -- scripts/report-build-chunks-core.mjs scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts
 npm exec -- prettier --check scripts/report-build-chunks-core.mjs scripts/report-build-chunks.mjs scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md

@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
@@ -175,6 +175,46 @@ describe('report-build-chunks', () => {
       },
     });
     expect(report.lines.join('\n')).toContain('id=antdDesign.js');
+  });
+
+  it('can write JSON report to a file from the CLI', async () => {
+    const appRoot = await createTempBuild();
+    const { stdout } = await execFileAsync(process.execPath, [reportScript], {
+      cwd: appRoot,
+      env: {
+        ...process.env,
+        YU_BI_CHUNK_REPORT_FORMAT: 'json',
+        YU_BI_CHUNK_REPORT_OUTPUT: 'reports/build-report.json',
+        YU_BI_CHUNK_REPORT_THRESHOLD_KIB: '1',
+      },
+    });
+    const report = JSON.parse(
+      await readFile(path.join(appRoot, 'reports/build-report.json'), 'utf8'),
+    );
+
+    expect(stdout).toBe('');
+    expect(report.summary.chunk.rawOversized).toEqual(['antdDesign.js']);
+    expect(report.oversizedCount).toBe(1);
+  });
+
+  it('can write text report to a file from the CLI', async () => {
+    const appRoot = await createTempBuild();
+    const { stdout } = await execFileAsync(process.execPath, [reportScript], {
+      cwd: appRoot,
+      env: {
+        ...process.env,
+        YU_BI_CHUNK_REPORT_OUTPUT: 'reports/build-report.txt',
+        YU_BI_CHUNK_REPORT_THRESHOLD_KIB: '1',
+      },
+    });
+    const report = await readFile(
+      path.join(appRoot, 'reports/build-report.txt'),
+      'utf8',
+    );
+
+    expect(stdout).toBe('');
+    expect(report).toContain('yu-bi build chunk report');
+    expect(report).toContain('id=antdDesign.js');
   });
 
   it('keeps fail-on-oversized exit code in JSON mode', async () => {
