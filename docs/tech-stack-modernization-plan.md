@@ -2993,6 +2993,22 @@ npm exec -- prettier --check scripts/verify-toolchain-core.mjs scripts/verify-to
 git diff --check
 ```
 
+最新批次：Husky Node 24 路径兜底
+
+- 新增 `frontend/.husky/yu-bi-node-path.sh`，在 hook 的非交互 shell 环境中优先使用现有 PATH；找不到 Node/npm 时再尝试常见 Node 24 安装路径
+- `pre-push`、`pre-commit`、`commit-msg` 统一加载该脚本，避免 Codex 子进程或精简 PATH 下出现 `npm: command not found`
+- 兜底路径只影响 hook 进程的 PATH，不改变项目运行时、不改依赖版本、不绕过门禁
+- 若仍找不到 Node/npm，hook 会明确提示需要安装 Node 24 并加入 PATH
+
+本批次验证命令：
+
+```bash
+PATH=/usr/bin:/bin:/usr/sbin:/sbin frontend/.husky/pre-push
+PATH=/usr/bin:/bin:/usr/sbin:/sbin frontend/.husky/pre-commit
+PATH=/usr/bin:/bin:/usr/sbin:/sbin frontend/.husky/commit-msg /tmp/yu-bi-commit-msg
+git diff --check
+```
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。

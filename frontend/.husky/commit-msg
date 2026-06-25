@@ -1,1 +1,7 @@
+#!/usr/bin/env sh
+set -eu
+
+script_dir="$(dirname "$0")"
+. "$script_dir/yu-bi-node-path.sh"
+
 npm exec --prefix frontend -- commitlint --edit "$1" --config frontend/commitlint.config.mjs

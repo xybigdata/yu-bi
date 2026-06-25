@@ -1,2 +1,8 @@
+#!/usr/bin/env sh
+set -eu
+
+script_dir="$(dirname "$0")"
+. "$script_dir/yu-bi-node-path.sh"
+
 cd frontend
 npm exec -- lint-staged
