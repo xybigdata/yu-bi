@@ -103,8 +103,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 96`，以恢复时重新执行命令为准                           |
-| 最近专题提交               | `f5cdae3b7 test: 补强分享故事播放器入口 smoke`             |
+| 当前分支相对 `origin/main` | `0 97`，以恢复时重新执行命令为准                           |
+| 最近专题提交               | `34b847628 chore: 稳定构建体积报告条目标识`                |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -156,7 +156,7 @@ codex/modernization-frontend-security-deps
 | Maven               | `>=3.9`                              | 已由 Enforcer 约束                                             |
 | JavaCC Maven Plugin | `3.2.0`                              | 已验证 SQL parser clean 重生成链路                             |
 | Spring Boot         | `3.5.15`                             | Boot 3.5 补丁线，继续保持 Spring Framework 6 / Security 6 主链 |
-| Spring Cloud        | `2025.0.1`                           | 与 Boot 3.5 配套                                               |
+| Spring Cloud        | `2025.0.3`                           | 与 Boot 3.5 配套，当前项目无实际 Spring Cloud 编译依赖         |
 | Spring Security     | `6.5.11`                             | 由 Boot 3.5.15 管理，暂不跳 Spring Security 7                  |
 | MyBatis Spring Boot | `3.0.5`                              | 已适配 Boot 3                                                  |
 | MyBatis Generator   | `1.4.2`                              | 继续保留 1.x 线，插件 profile 依赖版本已补齐                   |
@@ -2941,25 +2941,42 @@ npm audit --json
 git diff --check
 ```
 
+最新批次：Spring Cloud 2025.0 补丁线收口
+
+- 已将父 POM 的 `spring.cloud.version` 从 `2025.0.1` 升级到 `2025.0.3`
+- 该升级保持在 Spring Cloud `2025.0.x` release train 内，不触碰 Spring Boot 3.5 主链和内部稳定标识
+- `mvn dependency:tree -Dincludes=org.springframework.cloud -Dscope=compile` 显示当前项目没有实际 Spring Cloud 编译依赖输出，本次主要是 dependencyManagement 补丁线收口
+- `mvn package -DskipTests` 已通过，覆盖 JDK / Maven Enforcer、后端编译、前端 `npm ci`、Vite build、task build 和 server 安装包 assembly
+
+本批次验证命令：
+
+```bash
+mvn versions:display-property-updates -DallowMajorUpdates=false -DallowMinorUpdates=false -DgenerateBackupPoms=false
+mvn help:evaluate -Dexpression=spring.cloud.version -q -DforceStdout
+mvn dependency:tree -Dincludes=org.springframework.cloud -Dscope=compile
+mvn package -DskipTests
+git diff --check
+```
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
 
 ### 12.1 当前 npm outdated 复核
 
-复核时间：2026-06-24
+复核时间：2026-06-25
 
 当前 `npm outdated --json` 剩余 7 项，`npm audit --json` 仍为 0 vulnerabilities。处理原则是：能在 Node 24 / npm 11 / React 19 / Vite 8 / AntD 5 主链内安全升级的继续推进；会破坏 audit 清零、peer 合约或当前稳定生态的暂缓。
 
-| 依赖                   | 当前版本  | 最新版本 | 当前决策 | 依据                                                                                                          |
-| ---------------------- | --------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------- |
-| `@types/node`          | `24.13.2` | `26.0.0` | 暂缓     | 硬性目标是 Node 24，不切到 Node 26 类型线；24.x 当前已是最新                                                  |
-| `@vitejs/plugin-react` | `5.2.0`   | `6.0.3`  | 暂缓     | 5.2.0 已支持 Vite 8；6.x 仍需继续复核 optional Babel / Rolldown peer 链，避免 npm 11 安装解析风险             |
-| `antd`                 | `5.29.3`  | `6.4.5`  | 暂缓     | 当前稳定 `@ant-design/pro-components 2.8.10` peer 仍只支持 AntD 4/5；不采用 Pro Components 3.x 预发布链路     |
-| `eslint`               | `9.39.4`  | `10.5.0` | 暂缓     | ESLint 10 本体满足 Node 24，但 `eslint-plugin-react`、`eslint-plugin-import` 最新稳定版尚未声明支持 ESLint 10 |
-| `monaco-editor`        | `0.52.2`  | `0.55.1` | 暂缓     | 0.55.1 依赖 `dompurify 3.2.7`，此前临时试装会引入 npm audit 风险                                              |
-| `quill`                | `2.0.2`   | `2.0.3`  | 暂缓     | 与 `react-quill-new 3.8.3` 组合会触发 `GHSA-v3m3-f69x-jf25` 低危 XSS advisory                                 |
-| `react-quill-new`      | `3.7.0`   | `3.8.3`  | 暂缓     | 3.8.3 依赖 `quill ~2.0.3`，会破坏当前 audit 清零状态                                                          |
+| 依赖                   | 当前版本  | 最新版本 | 当前决策 | 依据                                                                                                                              |
+| ---------------------- | --------- | -------- | -------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `@types/node`          | `24.13.2` | `26.0.1` | 暂缓     | 硬性目标是 Node 24，不切到 Node 26 类型线；24.x 当前已是最新                                                                      |
+| `@vitejs/plugin-react` | `5.2.0`   | `6.0.3`  | 暂缓     | 6.0.3 支持 Vite 8，但 `npm install --package-lock-only --dry-run` 仍因 optional Babel / Rolldown peer 解析到 Babel 8 相关冲突     |
+| `antd`                 | `5.29.3`  | `6.4.5`  | 暂缓     | 当前稳定 `@ant-design/pro-components 2.8.10` peer 仍只支持 AntD 4/5；不采用 Pro Components 3.x 预发布链路                         |
+| `eslint`               | `9.39.4`  | `10.5.0` | 暂缓     | ESLint 10 本体满足 Node 24，但 `eslint-plugin-react@7.37.5`、`eslint-plugin-import@2.32.0` 最新稳定版 peer 仍未声明支持 ESLint 10 |
+| `monaco-editor`        | `0.52.2`  | `0.55.1` | 暂缓     | 0.55.1 依赖 `dompurify 3.2.7`，此前临时试装会引入 npm audit 风险                                                                  |
+| `quill`                | `2.0.2`   | `2.0.3`  | 暂缓     | 与 `react-quill-new 3.8.3` 组合会触发 `GHSA-v3m3-f69x-jf25` 低危 XSS advisory                                                     |
+| `react-quill-new`      | `3.7.0`   | `3.8.3`  | 暂缓     | 3.8.3 依赖 `quill ~2.0.3`，会破坏当前 audit 清零状态                                                                              |
 
 下一步不要重复做无结果试装。只有出现以下变化时再重新评估对应依赖：
 
