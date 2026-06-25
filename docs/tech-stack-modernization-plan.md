@@ -103,8 +103,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 92`，以恢复时重新执行命令为准                           |
-| 最近专题提交               | `d8880e5ac test: 稳定构建体积报告脚本测试`                 |
+| 当前分支相对 `origin/main` | `0 93`，以恢复时重新执行命令为准                           |
+| 最近专题提交               | `b4c784132 test: 补强构建体积报告参数校验`                 |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -2860,6 +2860,26 @@ npm run build:report
 npm run checkTs
 npm run eslint -- scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts
 npm exec -- prettier --check scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
+
+最新批次：Dashboard mock 数据 Monaco 入口 smoke 补强
+
+- 已新增 `MockDataEditor` 组件级 smoke，覆盖 Dashboard mock 数据编辑器的 Monaco 调用边界
+- 测试验证组件会按当前主题传入 `vs-dark`/`vs-light` Monaco theme，并保留 javascript language、自动布局和可编辑选项
+- 测试验证挂载前会调用 `ensureMonacoJavascriptLanguage`
+- 测试验证编辑器挂载后会执行 format document、重置当前值并 focus
+- 测试验证合法 JSON 数组经 debounce 后回传 `onDataChange`，对象或非法 JSON 不会误写入 mock 数据
+- 本批次不升级 `monaco-editor`，不改变 mock 数据协议
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/pages/DashBoardPage/components/MockDataPanel/__tests__/MockDataEditor.smoke.test.tsx
+npm run checkTs
+npm run eslint -- src/app/pages/DashBoardPage/components/MockDataPanel/__tests__/MockDataEditor.smoke.test.tsx
+npm exec -- prettier --check src/app/pages/DashBoardPage/components/MockDataPanel/__tests__/MockDataEditor.smoke.test.tsx ../docs/tech-stack-modernization-plan.md
 npm audit --json
 git diff --check
 ```
