@@ -103,8 +103,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 90`，以恢复时重新执行命令为准                           |
-| 最近专题提交               | `d78b09ab2 test: 补强分享页图表预览入口 smoke`             |
+| 当前分支相对 `origin/main` | `0 91`，以恢复时重新执行命令为准                           |
+| 最近专题提交               | `9446cda96 test: 补强富文本编辑态字段插入 smoke`           |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -2814,6 +2814,30 @@ npm run test -- src/app/components/ChartGraph/BasicRichText/__tests__/ChartRichT
 npm run checkTs
 npm run eslint -- src/app/components/ChartGraph/BasicRichText/__tests__/ChartRichTextAdapter.edit.test.tsx
 npm exec -- prettier --check src/app/components/ChartGraph/BasicRichText/__tests__/ChartRichTextAdapter.edit.test.tsx ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
+
+最新批次：构建体积报告脚本测试稳定性收口
+
+- 已将 `report-build-chunks` 的文件收集、排序、阈值判断和输出行生成拆到 `report-build-chunks-core.mjs`
+- CLI 入口 `report-build-chunks.mjs` 继续保留原命令和输出格式，只负责读取环境变量、打印报告和设置退出码
+- 已将报告脚本测试改为临时 build fixture，不再依赖当前 `frontend/build` 的真实文件数量和 hash
+- 新测试覆盖：
+  - JS chunk / task bundle / media asset 收集与排序
+  - raw / gzip 阈值独立判断
+  - `FAIL_ON_OVERSIZED` CLI 退出码
+  - 缺少 `build/static/js` 时的明确构建前置错误
+- 本批次不改变 Vite 分包配置和构建产物，只降低后续构建治理测试的脆弱性
+
+本批次验证命令：
+
+```bash
+npm run test -- scripts/__tests__/report-build-chunks.test.mts
+npm run build:report
+npm run checkTs
+npm run eslint -- scripts/report-build-chunks.mjs scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts
+npm exec -- prettier --check scripts/report-build-chunks.mjs scripts/report-build-chunks-core.mjs scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md
 npm audit --json
 git diff --check
 ```
