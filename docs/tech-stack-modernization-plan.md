@@ -103,8 +103,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 89`，以恢复时重新执行命令为准                           |
-| 最近专题提交               | `14729bac0 test: 补强基础图表 ECharts 生命周期 smoke`      |
+| 当前分支相对 `origin/main` | `0 90`，以恢复时重新执行命令为准                           |
+| 最近专题提交               | `d78b09ab2 test: 补强分享页图表预览入口 smoke`             |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -2795,6 +2795,25 @@ npm run test -- src/app/pages/SharePage/Chart/__tests__/ChartPreviewBoardForShar
 npm run checkTs
 npm run eslint -- src/app/pages/SharePage/Chart/__tests__/ChartPreviewBoardForShare.smoke.test.tsx
 npm exec -- prettier --check src/app/pages/SharePage/Chart/__tests__/ChartPreviewBoardForShare.smoke.test.tsx ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
+
+最新批次：富文本编辑态字段插入 smoke 补强
+
+- 已新增 `ChartRichTextAdapter` 编辑态组件 smoke，覆盖 Quill 2 迁移后的引用字段插入交互边界
+- 测试通过 mock `RichTextEditor` runtime handle，验证字段菜单选择后会调用 `insertCalcFieldItem`
+- 测试验证编辑态变更会归一化为 calcfield delta，并经 debounce 后透传 `onChange`
+- 该测试与现有只读展示 smoke 互补：只读链路验证 calcfield 展示，编辑链路验证 calcfield 写入和回传
+- 本批次不升级 `quill` / `react-quill-new`，不改变富文本内容协议
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/components/ChartGraph/BasicRichText/__tests__/ChartRichTextAdapter.edit.test.tsx
+npm run checkTs
+npm run eslint -- src/app/components/ChartGraph/BasicRichText/__tests__/ChartRichTextAdapter.edit.test.tsx
+npm exec -- prettier --check src/app/components/ChartGraph/BasicRichText/__tests__/ChartRichTextAdapter.edit.test.tsx ../docs/tech-stack-modernization-plan.md
 npm audit --json
 git diff --check
 ```
