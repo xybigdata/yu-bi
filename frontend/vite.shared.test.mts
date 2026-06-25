@@ -49,6 +49,12 @@ describe('vite shared config', () => {
     ['node_modules/@ant-design/pro-table/es/index.js', 'antdPro'],
     ['node_modules/@ant-design/icons/es/index.js', 'antdIcons'],
     ['node_modules/@ant-design/icons-svg/es/asn/PlusOutlined.js', 'antdIcons'],
+    ['node_modules/monaco-editor/esm/vs/base/common/event.js', 'monacoBase'],
+    [
+      'node_modules/monaco-editor/esm/vs/platform/contextkey/common/contextkey.js',
+      'monacoPlatform',
+    ],
+    ['node_modules/monaco-editor/esm/vs/editor/editor.api.js', 'monacoEditor'],
     ['node_modules/@antv/s2/esm/index.js', 'antvS2'],
     ['node_modules/@antv/s2-react/esm/index.js', 'antvS2'],
     ['node_modules/@antv/g/esm/index.js', 'antvG'],

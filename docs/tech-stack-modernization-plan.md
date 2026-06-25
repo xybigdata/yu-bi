@@ -62,16 +62,16 @@ git log --oneline --decorate -8
 
 当前状态：
 
-| 项目                       | 状态                                                       |
-| -------------------------- | ---------------------------------------------------------- |
-| 工作目录                   | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
-| 远端                       | `git@github.com:xybigdata/yu-bi.git`                       |
-| 主线分支                   | `main`                                                     |
-| 当前专题分支               | `codex/modernization-frontend-security-deps`               |
-| 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 78`，不落后、领先 78 个提交                             |
-| 最近专题提交               | 以恢复时 `git log --oneline -8` 为准                       |
-| 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
+| 项目                       | 状态                                                                 |
+| -------------------------- | -------------------------------------------------------------------- |
+| 工作目录                   | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi`           |
+| 远端                       | `git@github.com:xybigdata/yu-bi.git`                                 |
+| 主线分支                   | `main`                                                               |
+| 当前专题分支               | `codex/modernization-frontend-security-deps`                         |
+| 当前专题                   | P2-E 前端安全依赖与运行时治理                                        |
+| 当前分支相对 `origin/main` | 以恢复时 `git rev-list --left-right --count origin/main...HEAD` 为准 |
+| 最近专题提交               | 以恢复时 `git log --oneline -8` 为准                                 |
+| 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`                     |
 
 已确认的自动化权限和偏好：
 
@@ -2504,6 +2504,47 @@ git diff --check
 - asset report 保持 `files=6`、`rawOversized=2`，设置 gzip `500 KiB` 阈值后 `gzipOversized=1`
 - 后续构建产物治理优先继续观察 `editor.api`、`antdDesign`、`echarts` 和地图资源，不把 AntV 拆分后的 raw 统计增加误判为压缩传输体积回退
 
+最新批次：Monaco editor vendor 分包细化
+
+- 已将 `monaco-editor/esm/vs` 内部模块按稳定目录分成 `monacoBase`、`monacoPlatform`、`monacoEditor`
+- `MonacoEditor/runtime.ts#loadMonaco()` 仍保持原有动态加载入口，不改变业务组件调用协议
+- SQL 编辑器、计算字段编辑器和 Mock Data 编辑器继续复用同一份 Monaco runtime promise
+- 原 `editor.api` chunk 约 `2,207.29 KiB / gzip 559.72 KiB`
+- 拆分后主要 Monaco chunk：
+  - `monacoEditor` 约 `1,552.74 KiB / gzip 379.31 KiB`
+  - `monacoBase` 约 `659.98 KiB / gzip 183.22 KiB`
+  - `monacoPlatform` 体积较小，未进入默认 Top 20 报告
+- JS gzip `500 KiB` 阈值下超限对象从 `editor.api` 1 个降到 0 个
+- JS raw 超限从 `6` 增加到 `7`，这是 Monaco 拆细后的统计口径变化；传输体积维度已经解除 JS 超限
+- 曾进一步尝试按 `base/browser`、`base/common`、`editor/contrib`、`editor/standalone`、`editor/browser`、`editor/common` 细拆，但未继续降低最大 `monacoEditor` raw 体积，最终保留更克制的三段分包
+- 本批次不升级 `monaco-editor` 版本，不引入 `monaco-editor 0.55.x`，避免重新触发此前 `dompurify` audit 风险
+
+本批次验证命令：
+
+```bash
+npm run test -- vite.shared.test.mts src/app/components/MonacoEditor/__tests__/runtime.test.ts src/app/components/MonacoEditor/__tests__/index.test.tsx src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/completionRuntime.test.ts
+npm run build
+npm run build:task
+npm run build:report
+YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB=500 npm run build:report
+npm run test -- scripts/__tests__/report-build-chunks.test.mts
+npm run eslint -- vite.shared.mts vite.shared.test.mts scripts/__tests__/report-build-chunks.test.mts
+npm exec -- prettier --check vite.shared.mts vite.shared.test.mts scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md
+npm run checkTs
+npm audit --json
+git diff --check
+```
+
+验证说明：
+
+- Monaco runtime / Vite shared 相关 4 个测试文件、45 个用例通过
+- `report-build-chunks` 3 个用例通过
+- 主构建和 task bundle 构建通过
+- `build:report` 当前输出 JS chunk `files=102`、`rawOversized=7`
+- 设置 gzip `500 KiB` 阈值后，JS chunk `gzipOversized=0`
+- asset report 保持 `files=6`、`rawOversized=2`，设置 gzip `500 KiB` 阈值后 `gzipOversized=1`
+- 后续构建产物治理优先继续观察 raw 维度的 `monacoEditor`、`antdDesign`、`echarts`、地图资源，以及是否有可验证的 Monaco feature 级懒加载边界
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
@@ -2534,17 +2575,17 @@ git diff --check
 
 ### 12.2 当前可推进事项
 
-| 阶段      | 事项                           | 风险 | 执行策略                                                                                                   |
-| --------- | ------------------------------ | ---- | ---------------------------------------------------------------------------------------------------------- |
-| P2-E-Next | 前端剩余 outdated 复核         | 中   | 暂停重复试装；按 12.1 的触发条件定期复核，当前不为这 7 项强行升级                                          |
-| P2-E-Next | 前端运行时 smoke 补强          | 中   | 可推进；优先补 Monaco、Quill、ECharts、分享页等动态运行时入口的最小回归                                    |
-| P2-E-Next | 前端构建产物治理               | 中   | 可推进；优先分析 `editor.api` 和地图 JSON gzip 超限对象，先补可重复报告和懒加载边界，不盲目拆 ECharts core |
-| P2-F      | AntD 6 主版本评估              | 高   | 暂缓；继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路                                     |
-| P2-G      | ECharts 6 主版本评估           | 高   | 已完成；后续可增强浏览器层图表 smoke                                                                       |
-| P2-H      | ESLint 10 主版本评估           | 中高 | 暂缓；当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级       |
-| P2-I      | 数据源 provider / 方言依赖审计 | 高   | 评估；先盘点依赖树和驱动兼容，不做大规模重构                                                               |
-| P2-J      | 富文本编辑器运行时 smoke       | 中   | 可推进；已补 jsdom 层运行时和 Dashboard Widget smoke，后续补分享页展示和浏览器入口                         |
-| P2-K      | 后端依赖补丁线滚动收口         | 中   | 可推进；继续优先处理补丁级、同生态线、可被现有测试覆盖的升级；主版本跳跃单独评估                           |
+| 阶段      | 事项                           | 风险 | 执行策略                                                                                               |
+| --------- | ------------------------------ | ---- | ------------------------------------------------------------------------------------------------------ |
+| P2-E-Next | 前端剩余 outdated 复核         | 中   | 暂停重复试装；按 12.1 的触发条件定期复核，当前不为这 7 项强行升级                                      |
+| P2-E-Next | 前端运行时 smoke 补强          | 中   | 可推进；优先补 Monaco、Quill、ECharts、分享页等动态运行时入口的最小回归                                |
+| P2-E-Next | 前端构建产物治理               | 中   | 可推进；JS gzip 超限已清零，后续优先分析 raw 维度的 `monacoEditor`、`antdDesign`、`echarts` 和地图资源 |
+| P2-F      | AntD 6 主版本评估              | 高   | 暂缓；继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路                                 |
+| P2-G      | ECharts 6 主版本评估           | 高   | 已完成；后续可增强浏览器层图表 smoke                                                                   |
+| P2-H      | ESLint 10 主版本评估           | 中高 | 暂缓；当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级   |
+| P2-I      | 数据源 provider / 方言依赖审计 | 高   | 评估；先盘点依赖树和驱动兼容，不做大规模重构                                                           |
+| P2-J      | 富文本编辑器运行时 smoke       | 中   | 可推进；已补 jsdom 层运行时和 Dashboard Widget smoke，后续补分享页展示和浏览器入口                     |
+| P2-K      | 后端依赖补丁线滚动收口         | 中   | 可推进；继续优先处理补丁级、同生态线、可被现有测试覆盖的升级；主版本跳跃单独评估                       |
 
 ## 13. 门禁策略
 

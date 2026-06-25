@@ -23,12 +23,13 @@ describe('report-build-chunks', () => {
     expect(stdout).toContain('yu-bi build chunk report: rawThreshold=500 KiB');
     expect(stdout).toContain('yu-bi build asset report: rawThreshold=500 KiB');
     expect(stdout).toContain('gzipThreshold=off');
-    expect(stdout).toContain('files=101, rawOversized=6');
+    expect(stdout).toContain('files=102, rawOversized=7');
     expect(stdout).toContain('files=6, rawOversized=2');
     expect(stdout).toContain('raw=');
     expect(stdout).toContain('gzip=');
     expect(stdout).toContain('flags=raw,-');
-    expect(stdout).toContain('build/static/js/editor.api.');
+    expect(stdout).toContain('build/static/js/monacoEditor.');
+    expect(stdout).toContain('build/static/js/monacoBase.');
     expect(stdout).toContain('build/static/js/antvG2.');
     expect(stdout).toContain('build/static/js/antvS2.');
     expect(stdout).toContain('build/static/js/antvG.');
@@ -70,8 +71,9 @@ describe('report-build-chunks', () => {
     );
 
     expect(stdout).toContain('gzipThreshold=500 KiB');
-    expect(stdout).toContain('files=101, rawOversized=6, gzipOversized=1');
+    expect(stdout).toContain('files=102, rawOversized=7, gzipOversized=0');
     expect(stdout).toContain('files=6, rawOversized=2, gzipOversized=1');
-    expect(stdout).toContain('flags=raw,gzip');
+    expect(stdout).toContain('flags=raw,-');
+    expect(stdout).toContain('build/static/media/geo-china-city.map.');
   });
 });

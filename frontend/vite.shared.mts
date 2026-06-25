@@ -15,6 +15,9 @@ const isAntDesignProModule = (id: string) =>
 const isAntVModule = (id: string, packageName: string) =>
   isNodeModule(id, `@antv/${packageName}`);
 
+const isMonacoEditorModule = (id: string, segment: string) =>
+  id.includes(`/node_modules/monaco-editor/esm/vs/${segment}/`);
+
 export const createReactPlugin = () =>
   react({
     babel: createReactBabelOptions(),
@@ -66,6 +69,18 @@ export const createVendorManualChunks = (id: string) => {
 
   if (isNodeModule(id, 'antd')) {
     return 'antdDesign';
+  }
+
+  if (isMonacoEditorModule(id, 'base')) {
+    return 'monacoBase';
+  }
+
+  if (isMonacoEditorModule(id, 'platform')) {
+    return 'monacoPlatform';
+  }
+
+  if (isMonacoEditorModule(id, 'editor')) {
+    return 'monacoEditor';
   }
 
   if (isAntVModule(id, 's2') || isAntVModule(id, 's2-react')) {
