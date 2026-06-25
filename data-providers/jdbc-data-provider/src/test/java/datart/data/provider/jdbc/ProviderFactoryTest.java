@@ -19,10 +19,12 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
 
+import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -31,6 +33,42 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ProviderFactoryTest {
+
+    private static final Set<String> CUSTOM_DIALECT_FALLBACK_DB_TYPES = Set.of(
+            "ACCESS",
+            "BIG_QUERY",
+            "CALCITE",
+            "DB2",
+            "DERBY",
+            "DM",
+            "FIREBIRD",
+            "HSQLDB",
+            "INFOBRIGHT",
+            "INFORMIX",
+            "INGRES",
+            "INTERBASE",
+            "JETHRO",
+            "LUCIDDB",
+            "NEOVIEW",
+            "NETEZZA",
+            "PHOENIX",
+            "PRESTO",
+            "SPARK",
+            "SQLSTREAM",
+            "SYBASE",
+            "TERADATA",
+            "VERTICA"
+    );
+
+    private static final Set<String> EXPLICIT_OR_STANDARD_DIALECT_DB_TYPES = Set.of(
+            "CLICKHOUSE",
+            "H2",
+            "HIVE",
+            "MSSQL",
+            "MYSQL",
+            "ORACLE",
+            "POSTGRESQL"
+    );
 
     @Test
     void shouldCreateMysqlDefaultAdapterAndDialectWithoutInitializingDatasource() {
@@ -95,6 +133,28 @@ class ProviderFactoryTest {
         assertTrue(driverInfos.stream().allMatch(JdbcDriverInfo::getQuoteIdentifiers));
     }
 
+    @Test
+    void shouldKeepBuiltInDialectFallbackBoundaryExplicit() {
+        Set<String> dbTypes = builtInDbTypes().collect(toSet());
+        assertEquals(
+                dbTypes,
+                union(CUSTOM_DIALECT_FALLBACK_DB_TYPES, EXPLICIT_OR_STANDARD_DIALECT_DB_TYPES)
+        );
+
+        for (String dbType : dbTypes) {
+            JdbcDataProviderAdapter adapter = createAdapter(dbType);
+            boolean usesCustomFallback = adapter.getSqlDialect()
+                    .getClass()
+                    .equals(CustomSqlDialect.class);
+
+            assertEquals(
+                    CUSTOM_DIALECT_FALLBACK_DB_TYPES.contains(dbType),
+                    usesCustomFallback,
+                    dbType + " 方言 fallback 分类发生变化"
+            );
+        }
+    }
+
     @TestFactory
     Stream<DynamicTest> shouldCreateAdapterAndDialectForEveryBuiltInDriver() {
         return builtInDbTypes()
@@ -138,5 +198,9 @@ class ProviderFactoryTest {
         } catch (Exception e) {
             throw new AssertionError("failed to load built-in jdbc driver metadata", e);
         }
+    }
+
+    private Set<String> union(Set<String> left, Set<String> right) {
+        return Stream.concat(left.stream(), right.stream()).collect(toSet());
     }
 }
