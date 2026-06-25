@@ -103,8 +103,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 97`，以恢复时重新执行命令为准                           |
-| 最近专题提交               | `34b847628 chore: 稳定构建体积报告条目标识`                |
+| 当前分支相对 `origin/main` | `0 98`，以恢复时重新执行命令为准                           |
+| 最近专题提交               | `0b28135b2 chore: 升级 Spring Cloud 补丁线`                |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -2958,6 +2958,23 @@ mvn package -DskipTests
 git diff --check
 ```
 
+最新批次：现代 SQL fallback 兼容基线补强
+
+- 已在 `SqlQueryScriptProcessorTest` 中补充现代 SQL fallback 兼容样例，为后续 Calcite / 方言依赖升级提供更贴近真实查询的回归基线
+- 覆盖 CTE、窗口函数、JSON 路径操作符、`TABLESAMPLE` 等高风险语法，这些语法在当前解析器不能完整解析时仍应通过 `validateQuery(String, false)` 保持查询类 SQL fallback 能力
+- 测试验证这些 SQL 会被包装成 `DATART_VTABLE` 子查询，并保持默认表前缀，不改变现有 SQL 清洗和包装合同
+- 本批次不升级 Calcite，不改 JavaCC parser，不改 SQL 方言常量，不触碰 Java 包名 `datart.*`、配置前缀、`DATART_*` 或迁移稳定标识
+- 后端版本复核显示：当前 Maven 属性补丁线已无更多稳定 patch 候选；插件候选仅有 `maven-surefire-plugin 3.6.0-M1`、`maven-compiler-plugin 4.x beta` 和 MyBatis Generator 2 主版本，均暂不推进
+
+本批次验证命令：
+
+```bash
+mvn versions:display-property-updates -DallowMajorUpdates=false -DallowMinorUpdates=false -DgenerateBackupPoms=false
+mvn versions:display-plugin-updates -DallowMajorUpdates=false -DallowMinorUpdates=false -DgenerateBackupPoms=false
+mvn -pl data-providers/data-provider-base -am -Dtest=SqlQueryScriptProcessorTest -Dsurefire.failIfNoSpecifiedTests=false test
+git diff --check
+```
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
@@ -2996,9 +3013,9 @@ git diff --check
 | P2-F      | AntD 6 主版本评估              | 高   | 暂缓；继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路                                                    |
 | P2-G      | ECharts 6 主版本评估           | 高   | 已完成；后续可增强浏览器层图表 smoke                                                                                      |
 | P2-H      | ESLint 10 主版本评估           | 中高 | 暂缓；当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级                      |
-| P2-I      | 数据源 provider / 方言依赖审计 | 高   | 评估；先盘点依赖树和驱动兼容，不做大规模重构                                                                              |
+| P2-I      | 数据源 provider / 方言依赖审计 | 高   | 评估；继续补 SQL parser / 方言 fallback / driver metadata 回归基线，不做大规模重构                                        |
 | P2-J      | 富文本编辑器运行时 smoke       | 中   | 可推进；已补 jsdom 层运行时和 Dashboard Widget smoke，后续补分享页展示和浏览器入口                                        |
-| P2-K      | 后端依赖补丁线滚动收口         | 中   | 可推进；继续优先处理补丁级、同生态线、可被现有测试覆盖的升级；主版本跳跃单独评估                                          |
+| P2-K      | 后端依赖补丁线滚动收口         | 中   | 当前属性补丁线已收口；仅定期复核稳定 patch，milestone、beta 或主版本跳跃暂不推进                                          |
 
 ## 13. 门禁策略
 
