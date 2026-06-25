@@ -3074,6 +3074,24 @@ npm exec -- prettier --check scripts/report-build-chunks-core.mjs scripts/__test
 git diff --check
 ```
 
+最新批次：分享仪表盘运行时 smoke 补强
+
+- 新增 `DashboardForShare` 组件级 smoke，覆盖分享仪表盘的 DnD provider、`BoardInitProvider` 只读参数、自动 / 自由看板分支、标题下载区、全屏面板和 headless 渲染标记
+- 新增 `ShareDashboardPage` 页面入口 smoke，覆盖分享插件预加载后发起 `fetchShareVizInfo`、`eager=true` 下的 `schedule` 渲染模式、页面标题保存、分享仪表盘渲染，以及 CODE 鉴权已有 session 密码复用
+- 修复 `ShareDashboardPage` 在渲染期间通过 `useMemo` 调用 `setShareClientId` 的 React 19 重渲染风险，改为 `useState` lazy initializer 读取或创建 `StorageKeys.ShareClientId`
+- 同步修正新建 client id 时生成两次 UUID 的细节问题，保证写入 localStorage 和组件状态使用同一个 id
+- 本批次不升级 React、AntD 或看板运行时依赖，不改变分享仪表盘协议，只补运行时基线并修复测试捕获到的真实边界问题
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/pages/SharePage/Dashboard/__tests__/DashboardForShare.smoke.test.tsx src/app/pages/SharePage/Dashboard/__tests__/ShareDashboardPage.smoke.test.tsx
+npm run checkTs
+npm run eslint -- src/app/pages/SharePage/Dashboard/ShareDashboardPage.tsx src/app/pages/SharePage/Dashboard/__tests__/DashboardForShare.smoke.test.tsx src/app/pages/SharePage/Dashboard/__tests__/ShareDashboardPage.smoke.test.tsx
+npm exec -- prettier --check src/app/pages/SharePage/Dashboard/ShareDashboardPage.tsx src/app/pages/SharePage/Dashboard/__tests__/DashboardForShare.smoke.test.tsx src/app/pages/SharePage/Dashboard/__tests__/ShareDashboardPage.smoke.test.tsx ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
