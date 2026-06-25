@@ -2545,6 +2545,42 @@ git diff --check
 - asset report 保持 `files=6`、`rawOversized=2`，设置 gzip `500 KiB` 阈值后 `gzipOversized=1`
 - 后续构建产物治理优先继续观察 raw 维度的 `monacoEditor`、`antdDesign`、`echarts`、地图资源，以及是否有可验证的 Monaco feature 级懒加载边界
 
+最新批次：ECharts runtime 入口复核与词云复用收口
+
+- 已复核当前 ECharts 图表类型，源码实际使用的主要 series 为 `line`、`bar`、`pie`、`scatter`、`map`、`funnel`、`gauge`、`radar`、`custom` 和词云扩展
+- 已尝试用 Vite `manualChunks` 将 `zrender`、`echarts/charts`、`echarts/components` 从统一 `echarts` chunk 拆出；构建结果未生成有意义的独立 chunk，未保留该规则
+- 已尝试将 `loadEChartsRuntime()` 从 `import('echarts')` 改为 `echarts/core` + 当前图表和组件显式注册；无论通过 `echarts/charts` barrel named imports，还是通过 `echarts/lib/*/install.js` direct imports，构建后 `echarts` chunk 基本仍保持约 `1,128 KiB / gzip 374 KiB`
+- 上述按需拆分试验没有达到当前构建治理收益标准，因此不保留 ECharts 主 runtime 行为变更，避免扩大图表注册风险
+- 本批次保留低风险运行时入口收口：`WordCloudChart/runtime.ts` 不再单独 `import('echarts')`，改为复用 `loadEChartsRuntime()`，确保词云扩展和普通图表共享同一份 ECharts runtime promise
+- 已新增词云 runtime 测试注入点，证明默认词云加载路径复用基础 ECharts runtime loader，并对并发请求只注册一次词云扩展
+- 构建报告维持 Monaco 分包后的基线：JS chunk `files=102`、`rawOversized=7`，设置 gzip `500 KiB` 阈值后 JS `gzipOversized=0`
+- 本批次不升级 ECharts，不改变图表组件调用方式，不改变 `loadEChartsRuntime()` 对外协议
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts src/app/utils/__tests__/echartsThemeRuntime.test.ts
+npm run checkTs
+npm run build
+npm run build:task
+npm run build:report
+YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB=500 npm run build:report
+npm run eslint -- src/app/components/ChartGraph/WordCloudChart/runtime.ts src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts
+npm exec -- prettier --check src/app/components/ChartGraph/WordCloudChart/runtime.ts src/app/components/ChartGraph/WordCloudChart/__tests__/runtime.test.ts ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
+
+验证说明：
+
+- ECharts / 词云 runtime 相关 3 个测试文件、10 个用例通过
+- `npm run checkTs` 已通过
+- 主构建和 task bundle 构建通过
+- `build:report` 当前输出 JS chunk `files=102`、`rawOversized=7`
+- 设置 gzip `500 KiB` 阈值后，JS chunk `gzipOversized=0`
+- asset report 保持 `files=6`、`rawOversized=2`，设置 gzip `500 KiB` 阈值后 `gzipOversized=1`
+- 测试日志中的 jsdom canvas `getContext` warning 是当前词云 smoke 的测试环境噪声，不影响断言结果
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
@@ -2575,17 +2611,17 @@ git diff --check
 
 ### 12.2 当前可推进事项
 
-| 阶段      | 事项                           | 风险 | 执行策略                                                                                               |
-| --------- | ------------------------------ | ---- | ------------------------------------------------------------------------------------------------------ |
-| P2-E-Next | 前端剩余 outdated 复核         | 中   | 暂停重复试装；按 12.1 的触发条件定期复核，当前不为这 7 项强行升级                                      |
-| P2-E-Next | 前端运行时 smoke 补强          | 中   | 可推进；优先补 Monaco、Quill、ECharts、分享页等动态运行时入口的最小回归                                |
-| P2-E-Next | 前端构建产物治理               | 中   | 可推进；JS gzip 超限已清零，后续优先分析 raw 维度的 `monacoEditor`、`antdDesign`、`echarts` 和地图资源 |
-| P2-F      | AntD 6 主版本评估              | 高   | 暂缓；继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路                                 |
-| P2-G      | ECharts 6 主版本评估           | 高   | 已完成；后续可增强浏览器层图表 smoke                                                                   |
-| P2-H      | ESLint 10 主版本评估           | 中高 | 暂缓；当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级   |
-| P2-I      | 数据源 provider / 方言依赖审计 | 高   | 评估；先盘点依赖树和驱动兼容，不做大规模重构                                                           |
-| P2-J      | 富文本编辑器运行时 smoke       | 中   | 可推进；已补 jsdom 层运行时和 Dashboard Widget smoke，后续补分享页展示和浏览器入口                     |
-| P2-K      | 后端依赖补丁线滚动收口         | 中   | 可推进；继续优先处理补丁级、同生态线、可被现有测试覆盖的升级；主版本跳跃单独评估                       |
+| 阶段      | 事项                           | 风险 | 执行策略                                                                                                                  |
+| --------- | ------------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------- |
+| P2-E-Next | 前端剩余 outdated 复核         | 中   | 暂停重复试装；按 12.1 的触发条件定期复核，当前不为这 7 项强行升级                                                         |
+| P2-E-Next | 前端运行时 smoke 补强          | 中   | 可推进；优先补 Monaco、Quill、ECharts、分享页等动态运行时入口的最小回归                                                   |
+| P2-E-Next | 前端构建产物治理               | 中   | 可推进；JS gzip 超限已清零，ECharts 按需拆分试验暂不保留，后续优先分析 raw 维度的 `monacoEditor`、`antdDesign` 和地图资源 |
+| P2-F      | AntD 6 主版本评估              | 高   | 暂缓；继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路                                                    |
+| P2-G      | ECharts 6 主版本评估           | 高   | 已完成；后续可增强浏览器层图表 smoke                                                                                      |
+| P2-H      | ESLint 10 主版本评估           | 中高 | 暂缓；当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级                      |
+| P2-I      | 数据源 provider / 方言依赖审计 | 高   | 评估；先盘点依赖树和驱动兼容，不做大规模重构                                                                              |
+| P2-J      | 富文本编辑器运行时 smoke       | 中   | 可推进；已补 jsdom 层运行时和 Dashboard Widget smoke，后续补分享页展示和浏览器入口                                        |
+| P2-K      | 后端依赖补丁线滚动收口         | 中   | 可推进；继续优先处理补丁级、同生态线、可被现有测试覆盖的升级；主版本跳跃单独评估                                          |
 
 ## 13. 门禁策略
 

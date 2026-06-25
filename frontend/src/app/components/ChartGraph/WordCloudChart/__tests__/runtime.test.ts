@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import {
   __resetWordCloudRuntimeLoaderForTest,
+  __setBaseEChartsRuntimeLoaderForTest,
   __setWordCloudRuntimeLoaderForTest,
   loadWordCloudRuntime,
 } from '../runtime';
@@ -42,6 +43,23 @@ describe('loadWordCloudRuntime', () => {
     await expect(loadWordCloudRuntime()).rejects.toThrow('load failed');
     await expect(loadWordCloudRuntime()).resolves.toBe(runtimeModule);
     expect(loader).toHaveBeenCalledTimes(2);
+  });
+
+  test('should share the base ECharts runtime loader in default path', async () => {
+    const runtimeModule = {
+      ...createRuntimeModule(),
+      use: vi.fn(),
+    };
+    const loader = vi.fn().mockResolvedValue(runtimeModule);
+    __setBaseEChartsRuntimeLoaderForTest(loader);
+
+    const first = loadWordCloudRuntime();
+    const second = loadWordCloudRuntime();
+
+    await expect(first).resolves.toBe(runtimeModule);
+    await expect(second).resolves.toBe(runtimeModule);
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(runtimeModule.use).toHaveBeenCalledTimes(1);
   });
 
   test('should load actual ECharts runtime with wordcloud extension', async () => {
