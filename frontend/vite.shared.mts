@@ -12,6 +12,9 @@ const isNodeModule = (id: string, packageName: string) =>
 const isAntDesignProModule = (id: string) =>
   /\/node_modules\/@ant-design\/pro-[^/]+\//.test(id);
 
+const isAntVModule = (id: string, packageName: string) =>
+  isNodeModule(id, `@antv/${packageName}`);
+
 export const createReactPlugin = () =>
   react({
     babel: createReactBabelOptions(),
@@ -63,6 +66,29 @@ export const createVendorManualChunks = (id: string) => {
 
   if (isNodeModule(id, 'antd')) {
     return 'antdDesign';
+  }
+
+  if (isAntVModule(id, 's2') || isAntVModule(id, 's2-react')) {
+    return 'antvS2';
+  }
+
+  if (
+    isAntVModule(id, 'g') ||
+    isAntVModule(id, 'g-lite') ||
+    isAntVModule(id, 'g-canvas') ||
+    isAntVModule(id, 'g-math') ||
+    isAntVModule(id, 'g-plugin-dragndrop')
+  ) {
+    return 'antvG';
+  }
+
+  if (
+    isAntVModule(id, 'g2') ||
+    isAntVModule(id, 'component') ||
+    isAntVModule(id, 'coord') ||
+    isAntVModule(id, 'scale')
+  ) {
+    return 'antvG2';
   }
 
   if (isNodeModule(id, '@antv')) {

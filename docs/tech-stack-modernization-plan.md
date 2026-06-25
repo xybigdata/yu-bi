@@ -2,7 +2,7 @@
 
 本文档是 yu-bi 现代化改造的恢复入口、阶段复盘和后续执行清单。恢复工作时优先读本页，再按“当前短期目标”继续推进。
 
-复盘时间：2026-06-24
+复盘时间：2026-06-25
 
 ## 0. 当前执行口径
 
@@ -69,8 +69,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 74`，不落后、领先 74 个提交                             |
-| 最近专题提交               | `5df0dacf2 chore: 补强构建体积 gzip 阈值报告`              |
+| 当前分支相对 `origin/main` | `0 78`，不落后、领先 78 个提交                             |
+| 最近专题提交               | 以恢复时 `git log --oneline -8` 为准                       |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -2466,6 +2466,43 @@ git diff --check
 - `npm run checkTs` 已通过
 - 主构建和 task bundle 构建通过
 - `npm audit --json` 仍为 0 vulnerabilities
+
+最新批次：AntV vendor 分包细化
+
+- 已将原统一的 `antv` vendor chunk 继续细分为 `antvG2`、`antvS2`、`antvG` 和 fallback `antv`
+- `@antv/s2`、`@antv/s2-react` 进入 `antvS2`
+- `@antv/g`、`@antv/g-lite`、`@antv/g-canvas`、`@antv/g-math`、`@antv/g-plugin-dragndrop` 进入 `antvG`
+- `@antv/g2`、`@antv/component`、`@antv/coord`、`@antv/scale` 进入 `antvG2`
+- 其他 `@antv/*` 继续进入 fallback `antv`，例如 `@antv/util`
+- 原 `antv` 单包约 `1,676.65 KiB / gzip 485.72 KiB`
+- 拆分后主要 AntV chunk：
+  - `antvG2` 约 `598.40 KiB / gzip 177.87 KiB`
+  - `antvS2` 约 `517.45 KiB / gzip 152.29 KiB`
+  - `antvG` 约 `508.72 KiB / gzip 134.40 KiB`
+  - fallback `antv` 约 `52.57 KiB / gzip 20.70 KiB`
+- JS 文件数从 `98` 增加到 `101`，JS raw 超限从 `4` 增加到 `6`，这是 AntV 包拆细后的统计口径变化
+- 设置 gzip `500 KiB` 阈值后，JS gzip 超限仍仅 `editor.api`，AntV 拆分后的每个 gzip 体积均低于 `500 KiB`
+- 本批次不升级 AntV 依赖版本、不改 PivotSheet 业务加载入口、不改变浏览器运行时协议
+
+本批次验证命令：
+
+```bash
+npm run build:report
+YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB=500 npm run build:report
+npm run test -- scripts/__tests__/report-build-chunks.test.mts vite.shared.test.mts src/app/components/ChartGraph/PivotSheetChart/__tests__/runtime.test.ts src/app/components/ChartGraph/PivotSheetChart/__tests__/PivotSheetChart.test.jsx
+npm run eslint -- vite.shared.mts vite.shared.test.mts scripts/__tests__/report-build-chunks.test.mts
+npm exec -- prettier --check vite.shared.mts vite.shared.test.mts scripts/__tests__/report-build-chunks.test.mts ../docs/tech-stack-modernization-plan.md
+npm run checkTs
+npm audit --json
+git diff --check
+```
+
+验证说明：
+
+- `build:report` 当前输出 JS chunk `files=101`、`rawOversized=6`
+- 设置 gzip `500 KiB` 阈值后，JS chunk `gzipOversized=1`
+- asset report 保持 `files=6`、`rawOversized=2`，设置 gzip `500 KiB` 阈值后 `gzipOversized=1`
+- 后续构建产物治理优先继续观察 `editor.api`、`antdDesign`、`echarts` 和地图资源，不把 AntV 拆分后的 raw 统计增加误判为压缩传输体积回退
 
 ## 12. 后续队列
 
