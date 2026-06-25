@@ -16,13 +16,10 @@
  * limitations under the License.
  */
 
-import { ensureEChartsDefaultTheme } from 'app/utils/echartsThemeRuntime';
 import { defaultLazyLoad } from 'utils/loadable';
+import { loadSharePageWithEChartsTheme } from '../shareLoadableRuntime';
 
 export const LazyShareChart = defaultLazyLoad(
-  () =>
-    ensureEChartsDefaultTheme().then(() => {
-      return import('./ShareChartPage');
-    }),
+  () => loadSharePageWithEChartsTheme(() => import('./ShareChartPage')),
   module => module.default,
 );

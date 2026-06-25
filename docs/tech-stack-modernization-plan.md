@@ -104,8 +104,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 99`，以恢复时重新执行命令为准                           |
-| 最近专题提交               | `b2b3bb14e test: 补强现代 SQL fallback 兼容基线`           |
+| 当前分支相对 `origin/main` | `0 102`，以恢复时重新执行命令为准                          |
+| 最近专题提交               | `4008757ea test: 补强 ECharts 事件守卫基线`                |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -3023,6 +3023,23 @@ npm run test -- src/app/components/ChartGraph/__tests__/echartsRuntimeGuards.tes
 npm run checkTs
 npm run eslint -- src/app/components/ChartGraph/__tests__/echartsRuntimeGuards.test.ts
 npm exec -- prettier --check src/app/components/ChartGraph/__tests__/echartsRuntimeGuards.test.ts ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
+最新批次：分享页 ECharts theme 预加载入口 smoke
+
+- 新增 `loadSharePageWithEChartsTheme`，把分享图表、分享仪表盘、分享故事播放页三个入口的“先注册 ECharts default theme，再加载页面模块”逻辑收口为可测试 helper
+- 三个 `SharePage/*/Loadable.tsx` 继续保持原有行为，只去掉重复的 `ensureEChartsDefaultTheme().then(import...)` 写法
+- 新增 `shareLoadableRuntime.test.ts`，验证 theme ready 之后才加载页面模块，且 theme 失败时不会继续 import 页面模块
+- 本批次不改路由、不改页面组件、不改 ECharts 版本，只补分享页真实入口的运行时合同
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/pages/SharePage/__tests__/shareLoadableRuntime.test.ts
+npm run checkTs
+npm run eslint -- src/app/pages/SharePage/shareLoadableRuntime.ts src/app/pages/SharePage/__tests__/shareLoadableRuntime.test.ts src/app/pages/SharePage/Chart/Loadable.tsx src/app/pages/SharePage/Dashboard/Loadable.tsx src/app/pages/SharePage/StoryPlayer/Loadable.tsx
+npm exec -- prettier --check src/app/pages/SharePage/shareLoadableRuntime.ts src/app/pages/SharePage/__tests__/shareLoadableRuntime.test.ts src/app/pages/SharePage/Chart/Loadable.tsx src/app/pages/SharePage/Dashboard/Loadable.tsx src/app/pages/SharePage/StoryPlayer/Loadable.tsx ../docs/tech-stack-modernization-plan.md
 git diff --check
 ```
 
