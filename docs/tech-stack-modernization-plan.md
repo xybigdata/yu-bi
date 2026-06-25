@@ -2432,6 +2432,41 @@ git diff --check
 - `npm run checkTs` 已通过
 - `npm audit --json` 仍为 0 vulnerabilities
 
+最新批次：地图 JSON 静态资源无损压缩
+
+- 已对 `geo-china.map.json` 和 `geo-china-city.map.json` 做 JSON parse 后再 `JSON.stringify` 的无损 minify，只移除格式化空白，不改变地图结构和坐标数据
+- 源文件大小变化：
+  - `geo-china.map.json`：`1,003,241 bytes -> 581,646 bytes`
+  - `geo-china-city.map.json`：`1,311,291 bytes -> 1,207,908 bytes`
+- JSON 结构复核通过：`geo-china.map.json` 仍为 `FeatureCollection` 且 `features.length = 35`，`geo-china-city.map.json` 仍为 `FeatureCollection` 且 `features.length = 367`
+- 主构建后 asset report 中地图资源 raw 体积下降：
+  - `geo-china.map`：约 `979.73 KiB -> 568.01 KiB`，gzip 约 `224.64 KiB -> 194.23 KiB`
+  - `geo-china-city.map`：约 `1280.56 KiB -> 1179.60 KiB`，gzip 约 `698.68 KiB -> 693.80 KiB`
+- JS chunk 报告保持不变：raw 超限仍为 4 个，gzip `500 KiB` 阈值下 JS 超限仍仅 `editor.api`
+- 地图静态资源仍在 asset report 中可见；后续若继续治理地市地图 gzip 超限，需要评估地图数据拆分、按省懒加载或服务端资源策略
+
+本批次验证命令：
+
+```bash
+node -e "const fs=require('fs'); for (const f of ['frontend/src/app/components/ChartGraph/BasicOutlineMapChart/geo-china.map.json','frontend/src/app/components/ChartGraph/BasicOutlineMapChart/geo-china-city.map.json']) { const data=JSON.parse(fs.readFileSync(f,'utf8')); console.log(f, data.type, Array.isArray(data.features), data.features.length); }"
+npm run test -- src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/geoMapRuntime.test.ts src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/BasicOutlineMapChart.test.jsx
+npm run checkTs
+npm run build
+npm run build:task
+npm run build:report
+YU_BI_CHUNK_REPORT_GZIP_THRESHOLD_KIB=500 npm run build:report
+npm run test -- scripts/__tests__/report-build-chunks.test.mts src/app/components/ChartGraph/BasicOutlineMapChart/__tests__/geoMapRuntime.test.ts
+npm audit --json
+git diff --check
+```
+
+验证说明：
+
+- 地图 runtime 与构建报告相关 2 个测试文件、6 个用例通过
+- `npm run checkTs` 已通过
+- 主构建和 task bundle 构建通过
+- `npm audit --json` 仍为 0 vulnerabilities
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
