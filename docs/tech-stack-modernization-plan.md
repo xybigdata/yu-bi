@@ -96,16 +96,16 @@ git log --oneline --decorate -8
 
 当前状态：
 
-| 项目                       | 状态                                                         |
-| -------------------------- | ------------------------------------------------------------ |
-| 工作目录                   | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi`   |
-| 远端                       | `git@github.com:xybigdata/yu-bi.git`                         |
-| 主线分支                   | `main`                                                       |
-| 当前专题分支               | `codex/modernization-frontend-security-deps`                 |
-| 当前专题                   | P2-E 前端安全依赖与运行时治理                                |
-| 当前分支相对 `origin/main` | `0 94`，以恢复时重新执行命令为准                             |
-| 最近专题提交               | `3de2d0340 test: 补强 Dashboard mock 数据 Monaco 入口 smoke` |
-| 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`             |
+| 项目                       | 状态                                                       |
+| -------------------------- | ---------------------------------------------------------- |
+| 工作目录                   | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
+| 远端                       | `git@github.com:xybigdata/yu-bi.git`                       |
+| 主线分支                   | `main`                                                     |
+| 当前专题分支               | `codex/modernization-frontend-security-deps`               |
+| 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
+| 当前分支相对 `origin/main` | `0 95`，以恢复时重新执行命令为准                           |
+| 最近专题提交               | `bddd37cdb test: 补强 Monaco 业务入口 smoke`               |
+| 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
 
@@ -2898,6 +2898,24 @@ npm run test -- src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/SQLE
 npm run checkTs
 npm run eslint -- src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/SQLEditor.monaco.smoke.test.tsx src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartDataViewPanel/components/ChartComputedFieldEditor/__tests__/ChartComputedFieldEditor.monaco.smoke.test.tsx
 npm exec -- prettier --check src/app/pages/MainPage/pages/ViewPage/Main/Editor/__tests__/SQLEditor.monaco.smoke.test.tsx src/app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartDataViewPanel/components/ChartComputedFieldEditor/__tests__/ChartComputedFieldEditor.monaco.smoke.test.tsx ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
+最新批次：分享 Story 播放器入口 smoke 补强
+
+- 已新增 `StoryPlayerForShare` 组件级 smoke，覆盖分享故事页按页码排序渲染、Reveal runtime 初始化、自动播放间隔换算、初始页面选中和卸载清理
+- 测试验证带 `subVizTokenMap` 的分享页会通过 `getPageContentDetail` 加载首屏 Dashboard 内容，并传递 `shareToken` 与对应子 viz token
+- 测试验证 Reveal `slidechanged` 回调会切换选中页面，并加载新页面对应的 Dashboard 内容
+- 本批次不升级 `reveal.js`，不改变故事页分享协议和 Dashboard 子页面加载协议
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/pages/SharePage/StoryPlayer/StoryPlayerForShare/__tests__/StoryPlayerForShare.smoke.test.tsx
+npm run checkTs
+npm run eslint -- src/app/pages/SharePage/StoryPlayer/StoryPlayerForShare/__tests__/StoryPlayerForShare.smoke.test.tsx
+npm exec -- prettier --check src/app/pages/SharePage/StoryPlayer/StoryPlayerForShare/__tests__/StoryPlayerForShare.smoke.test.tsx ../docs/tech-stack-modernization-plan.md
+npm audit --json
 git diff --check
 ```
 
