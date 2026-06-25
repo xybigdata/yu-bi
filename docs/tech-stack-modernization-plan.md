@@ -2639,6 +2639,27 @@ npm audit --json
 git diff --check
 ```
 
+最新批次：图表 iframe 生命周期 smoke 补强
+
+- 已新增 `ChartIFrameLifecycleAdapter` 组件级 smoke，覆盖 mounted、updated、resize、unmount 生命周期从 React adapter 到 chart lifecycle 的真实调用路径
+- 测试通过 mock 资源加载器避免引入外部脚本，保留真实 adapter、event broker、React effect 路径
+- 测试发现并修复 unmount 生命周期使用旧 `dataset` / context 的问题：
+  - mount effect 依赖保持不变，避免数据更新时重新挂载图表
+  - cleanup 改用 ref 保存的最新 `BrokerOption` 和 `BrokerContext`
+  - 图表卸载清理时可以拿到最近一次 dataset、尺寸和上下文
+- 本批次不改变 `ChartIFrameContainer` 对外协议，不改 iframe / 非 iframe 分支结构
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/components/ChartIFrameContainer/__tests__/ChartIFrameLifecycleAdapter.smoke.test.tsx src/app/components/ChartIFrameContainer/__tests__/ChartIFrameEventBroker.test.jsx
+npm run checkTs
+npm run eslint -- src/app/components/ChartIFrameContainer/ChartIFrameLifecycleAdapter.tsx src/app/components/ChartIFrameContainer/__tests__/ChartIFrameLifecycleAdapter.smoke.test.tsx
+npm exec -- prettier --check src/app/components/ChartIFrameContainer/ChartIFrameLifecycleAdapter.tsx src/app/components/ChartIFrameContainer/__tests__/ChartIFrameLifecycleAdapter.smoke.test.tsx ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
