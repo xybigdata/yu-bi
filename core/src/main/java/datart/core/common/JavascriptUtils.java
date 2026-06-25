@@ -43,8 +43,7 @@ public class JavascriptUtils {
             "graal.js",
             "js",
             "JavaScript",
-            "javascript",
-            "nashorn"
+            "javascript"
     );
 
     public static Object invoke(Invocable invocable, String functionName, Object... args) throws Exception {
@@ -94,13 +93,13 @@ public class JavascriptUtils {
         }
 
         Exceptions.base(String.format(
-                "未找到可用的 JavaScript 脚本引擎，请安装 Nashorn 或 GraalJS。当前可用引擎：%s",
+                "未找到可用的 JavaScript 脚本引擎，请安装 GraalJS。当前可用引擎：%s",
                 availableEngines.isEmpty() ? "无" : availableEngines
         ));
         return null;
     }
 
-    private static Set<String> resolveCandidateEngineNames(String configuredEngineName) {
+    static Set<String> resolveCandidateEngineNames(String configuredEngineName) {
         LinkedHashSet<String> engineNames = new LinkedHashSet<>();
         if (configuredEngineName != null) {
             engineNames.add(configuredEngineName);

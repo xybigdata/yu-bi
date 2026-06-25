@@ -40,9 +40,20 @@ import {
 import { EChartsInstance } from '../echartsRuntime';
 import Config from './config';
 import { loadWordCloudRuntime } from './runtime';
-import { WordCloudConfig, WordCloudLabelConfig } from './types';
+import {
+  WordCloudConfig,
+  WordCloudLabelConfig,
+  WordCloudSeriesDataItem,
+} from './types';
 
-// NOTE: wordcloud chart is echarts extension, more detail please check https://github.com/ecomfe/echarts-wordcloud
+type WordCloudEChartsClickParams = {
+  componentIndex: string | number;
+  componentType?: string;
+  dataIndex: string | number;
+  data?: unknown;
+};
+
+// NOTE: wordcloud chart is ECharts custom series, more detail please check https://github.com/apache/echarts-custom-series/tree/main/custom-series/wordCloud
 class WordCloudChart extends Chart {
   chart: EChartsInstance | null = null;
   config = Config;
@@ -134,6 +145,27 @@ class WordCloudChart extends Chart {
     this.chart?.setOption(Object.assign({}, newOptions), true);
   }
 
+  private handleWordCloudClick = (params: WordCloudEChartsClickParams) => {
+    this.selectionManager?.echartsClickEventHandler({
+      ...params,
+      data: this.normalizeWordCloudEventData(params.data),
+    });
+  };
+
+  private normalizeWordCloudEventData(data: unknown) {
+    if (!Array.isArray(data)) {
+      return data;
+    }
+
+    const [name, value, rowData, textStyle] = data as WordCloudSeriesDataItem;
+    return {
+      name,
+      value,
+      ...rowData,
+      textStyle,
+    };
+  }
+
   private loadRuntimeAndReplay() {
     const token = ++this.runtimeLoadToken;
 
@@ -155,7 +187,7 @@ class WordCloudChart extends Chart {
             latestMountPayload.context.window,
           );
           this.selectionManager.attachZRenderListeners(this.chart);
-          this.selectionManager.attachEChartsListeners(this.chart);
+          this.chart.on('click', this.handleWordCloudClick);
         }
 
         const latestRenderPayload = this.latestRenderPayload;
@@ -212,10 +244,15 @@ class WordCloudChart extends Chart {
     return {
       series: [
         {
-          type: 'wordCloud',
+          type: 'custom',
+          coordinateSystem: 'none',
+          renderItem: 'wordCloud',
           layoutAnimation: false,
-          ...wordCloud,
-          ...label,
+          itemPayload: {
+            ...wordCloud,
+            ...label,
+          },
+          data: label.data,
         },
       ],
     };
@@ -293,11 +330,11 @@ class WordCloudChart extends Chart {
         },
       },
       data: chartDataSet?.map((dc, dIndex) => {
-        return {
-          name: String(dc.getCell(groupConfigs[0]) ?? ''),
-          value: String(dc.getCell(aggregateConfigs[0]) ?? ''),
-          ...getExtraSeriesRowData(dc),
-          textStyle: getSelectedItemStyles(0, dIndex, selectedItems || [], {
+        return [
+          String(dc.getCell(groupConfigs[0]) ?? ''),
+          String(dc.getCell(aggregateConfigs[0]) ?? ''),
+          getExtraSeriesRowData(dc),
+          getSelectedItemStyles(0, dIndex, selectedItems || [], {
             fontFamily,
             fontWeight,
             color:
@@ -305,7 +342,7 @@ class WordCloudChart extends Chart {
                 dIndex % (getDefaultThemeColor().length - 1)
               ],
           }).itemStyle,
-        };
+        ];
       }),
     };
   }

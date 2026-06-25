@@ -1,0 +1,10 @@
+{
+  "name": "intersection-observer",
+  "version": "0.12.2",
+  "private": true,
+  "description": "No-op compatibility package for yu-bi's modern browser baseline.",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "sideEffects": false,
+  "license": "Apache-2.0"
+}

@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.12</version>
+        <version>3.5.15</version>
         <relativePath/>
     </parent>
 
@@ -15,15 +15,34 @@
         <java.version>21</java.version>
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <lombok.version>1.18.46</lombok.version>
-        <graalvm.version>25.0.1</graalvm.version>
-        <bouncycastle.version>1.81.1</bouncycastle.version>
-        <spring.cloud.version>2025.0.1</spring.cloud.version>
-        <mybatis.spring.boot.version>3.0.4</mybatis.spring.boot.version>
-        <shiro.version>2.0.5</shiro.version>
+        <commons-lang3.version>3.20.0</commons-lang3.version>
+        <commons-csv.version>1.14.1</commons-csv.version>
+        <graalvm.version>25.0.3</graalvm.version>
+        <bouncycastle.version>1.84</bouncycastle.version>
+        <spring.cloud.version>2025.0.3</spring.cloud.version>
+        <mybatis.spring.boot.version>3.0.5</mybatis.spring.boot.version>
+        <mybatis.generator.version>1.4.2</mybatis.generator.version>
+        <shiro.version>2.0.6</shiro.version>
         <druid.version>1.2.28</druid.version>
         <springdoc.version>2.8.17</springdoc.version>
         <h2.version>2.4.240</h2.version>
-        <selenium.version>4.31.0</selenium.version>
+        <hibernate-validator.version>8.0.4.Final</hibernate-validator.version>
+        <mysql.version>9.7.0</mysql.version>
+        <hikaricp.version>7.1.0</hikaricp.version>
+        <selenium.version>4.45.0</selenium.version>
+        <json-path.version>3.0.0</json-path.version>
+        <jjwt.version>0.13.0</jjwt.version>
+        <jose4j.version>0.9.6</jose4j.version>
+        <dingtalk.version>1.1.100</dingtalk.version>
+        <httpclient5.version>5.6.1</httpclient5.version>
+        <poi.version>5.5.1</poi.version>
+        <pdfbox.version>3.0.7</pdfbox.version>
+        <thumbnailator.version>0.4.21</thumbnailator.version>
+        <javassist.version>3.32.0-GA</javassist.version>
+        <aspectjweaver.version>1.9.25.1</aspectjweaver.version>
+        <calcite.version>1.26.0</calcite.version>
+        <sql-formatter.version>2.0.5</sql-formatter.version>
+        <javacc-maven-plugin.version>3.2.0</javacc-maven-plugin.version>
     </properties>
 
     <groupId>yubi</groupId>
@@ -60,7 +79,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.20.0</version>
+            <version>${commons-lang3.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -75,14 +94,6 @@
         <module>data-providers</module>
         <module>server</module>
     </modules>
-
-    <repositories>
-        <repository>
-            <id>spring-milestones</id>
-            <name>Spring Milestones</name>
-            <url>https://repo.spring.io/milestone</url>
-        </repository>
-    </repositories>
 
     <dependencyManagement>
         <dependencies>
@@ -108,13 +119,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>com.alibaba.cloud</groupId>-->
-<!--                <artifactId>spring-cloud-alibaba-dependencies</artifactId>-->
-<!--                <version>${spring.cloud.alibaba.version}</version>-->
-<!--                <type>pom</type>-->
-<!--                <scope>import</scope>-->
-<!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
 
@@ -123,7 +127,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.14.1</version>
+                    <version>3.15.0</version>
                     <configuration>
                         <release>${maven.compiler.release}</release>
                         <parameters>true</parameters>
@@ -154,7 +158,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.6.2</version>
+                    <version>3.6.3</version>
                     <executions>
                         <execution>
                             <id>enforce-build-runtime</id>

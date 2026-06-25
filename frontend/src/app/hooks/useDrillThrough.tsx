@@ -93,7 +93,7 @@ const useDrillThrough = () => {
       bodyStyle: defaultBodyStyle,
       content: (
         <iframe
-          title="Datart Iframe Window"
+          title="yu-bi Iframe Window"
           height={600}
           width="100%"
           frameBorder="none"

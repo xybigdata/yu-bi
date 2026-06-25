@@ -2,7 +2,7 @@ import type { QuillInstance } from '../quillCompat';
 
 /**
  * 本地维护的图片拖拽/粘贴模块，用来替代低活跃度的 quill-image-drop-module。
- * 当前行为与既有插件保持一致，方便后续切换到 Quill 2 时只在这里集中适配。
+ * 当前行为与既有插件保持一致，Quill 2 相关兼容点集中在这里维护。
  */
 export class ImageDropModule {
   private quill: QuillInstance;

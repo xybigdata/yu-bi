@@ -11,8 +11,8 @@ import {
 export function Brand() {
   return (
     <Header>
-      <img src={logo} alt="logo" />
-      <h1>datart</h1>
+      <img src={logo} alt="yu-bi logo" />
+      <h1>yu-bi</h1>
     </Header>
   );
 }

@@ -43,7 +43,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
   const orgId = useSelector(selectOrgId);
   const isOwner = useSelector(selectIsOrgOwner);
   const permissionMap = useSelector(selectPermissionMap);
-  const formRef = useRef<FormInstance>();
+  const formRef = useRef<FormInstance | undefined>(undefined);
   const t = useI18NPrefix('viz.saveForm');
   const tg = useI18NPrefix('global');
 

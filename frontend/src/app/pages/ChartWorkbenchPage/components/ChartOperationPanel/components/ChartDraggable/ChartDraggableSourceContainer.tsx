@@ -36,7 +36,7 @@ import { ColumnRole } from 'app/pages/MainPage/pages/ViewPage/slice/types';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { buildDragItem } from 'app/utils/internalChartHelper';
 import { CHART_DRAG_ELEMENT_TYPE } from 'globalConstants';
-import { FC, memo, useEffect, useMemo } from 'react';
+import { FC, memo, useCallback, useEffect, useMemo } from 'react';
 import { useDrag } from 'react-dnd';
 import styled from 'styled-components';
 import {
@@ -114,6 +114,12 @@ export const ChartDraggableSourceContainer: FC<
       end: onClearCheckedList,
     }),
     [selectedItems],
+  );
+  const dragRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      drag(node);
+    },
+    [drag],
   );
 
   const styleClasses: Array<string> = useMemo(() => {
@@ -237,7 +243,7 @@ export const ChartDraggableSourceContainer: FC<
             <Panel
               key={colName}
               header={
-                <div ref={drag}>
+                <div ref={dragRef}>
                   <IW fontSize={FONT_SIZE_TITLE}>{icon}</IW>
                   <p>
                     {!folderRole || folderRole === ColumnRole.Hierarchy
@@ -302,7 +308,7 @@ export const ChartDraggableSourceContainer: FC<
     }
   }, [
     t,
-    drag,
+    dragRef,
     role,
     type,
     category,
@@ -375,7 +381,7 @@ export const ChartDraggableSourceContainer: FC<
         }
         onSelectionChange?.(colName, e.metaKey || e.ctrlKey, e.shiftKey);
       }}
-      ref={type === 'DATE' && category === 'field' ? null : drag}
+      ref={type === 'DATE' && category === 'field' ? null : dragRef}
       className={
         type === 'DATE' && category === 'field' ? '' : styleClasses.join(' ')
       }

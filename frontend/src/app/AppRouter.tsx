@@ -22,8 +22,9 @@ import { antdLocales } from 'locales/i18n';
 import { useEffect, useLayoutEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import { useAppDispatch } from 'app/hooks/useRedux';
+import { BrowserRouter } from 'app/routerCompat';
 import { GlobalStyles } from 'styles/globalStyles';
 import { getToken } from 'utils/auth';
 import useI18NPrefix from './hooks/useI18NPrefix';
@@ -63,11 +64,14 @@ export function AppRouter() {
     <ConfigProvider locale={antdLocales[i18n.language]}>
       <BrowserRouter basename={PUBLIC_URL}>
         <Helmet
-          titleTemplate="%s - Datart"
-          defaultTitle="Datart"
+          titleTemplate="%s - yu-bi"
+          defaultTitle="yu-bi"
           htmlAttributes={{ lang: i18n.language }}
         >
-          <meta name="description" content="Data Art" />
+          <meta
+            name="description"
+            content="yu-bi business intelligence platform"
+          />
         </Helmet>
         <Routes>
           <Route path="/setup" element={<LazySetupPage />} />

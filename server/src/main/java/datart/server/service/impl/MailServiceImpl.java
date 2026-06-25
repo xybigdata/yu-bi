@@ -93,7 +93,7 @@ public class MailServiceImpl extends BaseService implements MailService {
     @Value("${spring.mail.username:null}")
     private String username;
 
-    @Value("${spring.mail.senderName:Datart}")
+    @Value("${spring.mail.senderName:yu-bi}")
     private String senderName;
 
     @Value("${datart.user.active.expire-hours:48}")

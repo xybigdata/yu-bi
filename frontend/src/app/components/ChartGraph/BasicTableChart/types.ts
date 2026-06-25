@@ -6,8 +6,8 @@ import {
   ChartDataSetCellValue,
   IChartDataSetRow,
 } from 'app/types/ChartDataSet';
-import { CSSProperties, ReactNode } from 'react';
-import { ResizableProps } from 'react-resizable';
+import { CSSProperties, JSX as ReactJSX, ReactNode } from 'react';
+import type { Props as ResizableProps } from 'react-resizable';
 
 export type BasicTableDataValue = ChartDataSetCellValue;
 export type BasicTableRowData = Record<string, BasicTableDataValue>;
@@ -84,7 +84,7 @@ export interface TableColumnsList {
   isGroup?: boolean;
   sorter?: boolean;
   showSorterTooltip?: boolean;
-  title?: JSX.Element | string | undefined;
+  title?: ReactJSX.Element | string | undefined;
   dataIndex?: number;
   key?: string;
   aggregate?: AggregateFieldActionType | undefined;
@@ -120,11 +120,11 @@ export type TableHeaderConfig = {
 } & ChartDataSectionField;
 
 export interface TableComponentConfig {
-  header: { cell: (props: BasicTableHeaderCellProps) => JSX.Element };
+  header: { cell: (props: BasicTableHeaderCellProps) => ReactJSX.Element };
   body: {
-    cell: (props: BasicTableBodyCellProps) => JSX.Element;
-    row: (props: BasicTableBodyRowProps) => JSX.Element;
-    wrapper: (props: BasicTableBodyWrapperProps) => JSX.Element;
+    cell: (props: BasicTableBodyCellProps) => ReactJSX.Element;
+    row: (props: BasicTableBodyRowProps) => ReactJSX.Element;
+    wrapper: (props: BasicTableBodyWrapperProps) => ReactJSX.Element;
   };
 }
 

@@ -15,9 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Quill } from '../quillCompat';
+import { importQuillBlot } from '../quillCompat';
 
-const Embed = Quill.import('blots/embed');
+const Embed = importQuillBlot('blots/embed');
 
 type CalcFieldEvent = Event & {
   value?: CalcFieldData;
@@ -34,7 +34,8 @@ class CalcFieldBlot extends Embed {
   static tagName = 'span';
   static className = 'calcfield';
 
-  static create(data: CalcFieldData): HTMLElement {
+  static create(value?: unknown): HTMLElement {
+    const data = (value ?? {}) as CalcFieldData;
     const node = super.create();
     node.addEventListener(
       'click',

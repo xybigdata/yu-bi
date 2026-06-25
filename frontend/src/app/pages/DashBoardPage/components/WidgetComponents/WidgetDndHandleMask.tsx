@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 import { CONTAINER_TAB } from 'app/pages/DashBoardPage/constants';
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { useDrag } from 'react-dnd';
 import { LEVEL_10 } from 'styles/StyleConstants';
 export interface WidgetDndHandleMaskProps {
@@ -42,10 +42,22 @@ export const WidgetDndHandleMask: React.FC<WidgetDndHandleMaskProps> = memo(
     const ssp = e => {
       e.stopPropagation();
     };
+    const dragPreviewRef = useCallback(
+      (node: HTMLDivElement | null) => {
+        dragPreview(node);
+      },
+      [dragPreview],
+    );
+    const dragSourceRef = useCallback(
+      (node: HTMLDivElement | null) => {
+        dragRef(node);
+      },
+      [dragRef],
+    );
     return (
       <>
         <div
-          ref={dragPreview}
+          ref={dragPreviewRef}
           className="dragRef2"
           onClick={ssp}
           onDragStart={ssp}
@@ -58,7 +70,7 @@ export const WidgetDndHandleMask: React.FC<WidgetDndHandleMaskProps> = memo(
           }}
         ></div>
         <div
-          ref={dragRef}
+          ref={dragSourceRef}
           // onDragStart={ssp}
           onClick={ssp}
           className="dragRef1"

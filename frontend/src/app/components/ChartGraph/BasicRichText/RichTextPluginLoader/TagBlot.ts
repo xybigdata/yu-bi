@@ -1,6 +1,6 @@
-import { Quill } from '../quillCompat';
+import { importQuillBlot } from '../quillCompat';
 
-const Embed = Quill.import('blots/embed');
+const Embed = importQuillBlot('blots/embed');
 
 type TagBlotData = {
   name?: string | null;
@@ -13,7 +13,8 @@ class TagBlot extends Embed {
   static tagName = 'span';
   static className = 'tag-container';
 
-  static create(data: TagBlotData): HTMLElement {
+  static create(value?: unknown): HTMLElement {
+    const data = (value ?? {}) as TagBlotData;
     const node = super.create(data);
 
     const { name, background, color } = data;

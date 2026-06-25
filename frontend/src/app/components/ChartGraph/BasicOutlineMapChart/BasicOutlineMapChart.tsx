@@ -50,6 +50,12 @@ import {
 } from '../echartsRuntime';
 import Config from './config';
 import {
+  GeoMapData,
+  GeoMapLevel,
+  getCachedGeoMap,
+  loadGeoMap,
+} from './geoMapRuntime';
+import {
   GeoInfo,
   GeoSeries,
   GeoVisualMapStyle,
@@ -57,54 +63,11 @@ import {
   MetricAndSizeSeriesStyle,
 } from './types';
 
-type GeoMapLevel = 'china' | 'china-city';
-type GeoMapData = {
-  features: Array<{
-    properties: {
-      name?: string;
-      cp?: number[];
-      center?: number[];
-    };
-  }>;
-};
 type GeoOptionState = {
   geo?: Array<Pick<GeoInfo, 'center' | 'zoom'>>;
 };
 
-const geoMapLoaders: Record<
-  GeoMapLevel,
-  () => Promise<{ default: GeoMapData }>
-> = {
-  china: () => import('./geo-china.map.json'),
-  'china-city': () => import('./geo-china-city.map.json'),
-};
-
-const geoMapDataCache = new Map<GeoMapLevel, GeoMapData>();
-const geoMapPromiseCache = new Map<GeoMapLevel, Promise<GeoMapData>>();
 const registeredGeoMaps = new Set<GeoMapLevel>();
-
-const loadGeoMap = async (level: GeoMapLevel): Promise<GeoMapData> => {
-  const cached = geoMapDataCache.get(level);
-  if (cached) {
-    return cached;
-  }
-
-  const pending = geoMapPromiseCache.get(level);
-  if (pending) {
-    return pending;
-  }
-
-  const promise = geoMapLoaders[level]().then(module => {
-    const data = module.default;
-    geoMapDataCache.set(level, data);
-    geoMapPromiseCache.delete(level);
-
-    return data;
-  });
-
-  geoMapPromiseCache.set(level, promise);
-  return promise;
-};
 
 class BasicOutlineMapChart extends Chart {
   config = Config;
@@ -222,7 +185,7 @@ class BasicOutlineMapChart extends Chart {
   }
 
   private hasLoadedGeoMap(level: GeoMapLevel) {
-    const geoMap = geoMapDataCache.get(level);
+    const geoMap = getCachedGeoMap(level);
     if (!geoMap) {
       return false;
     }

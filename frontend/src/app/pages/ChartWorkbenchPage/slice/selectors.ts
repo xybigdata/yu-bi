@@ -19,6 +19,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { ResourceTypes } from 'app/pages/MainPage/pages/PermissionPage/constants';
 import ChartDataView from 'app/types/ChartDataView';
+import { selectDatasetByViewBinding } from 'app/utils/chartPreviewDataset';
 import { RootState } from 'types';
 import { listToTree } from 'utils/utils';
 import { initState } from '.';
@@ -46,12 +47,13 @@ export const currentDataViewSelector = createSelector(
   wb => wb.currentDataView,
 );
 
-export const datasetsSelector = createSelector(workbenchSelector, wb => {
-  if (!wb.currentDataView?.id && wb.backendChart?.config.sampleData) {
-    return wb.backendChart?.config.sampleData;
-  }
-  return wb.dataset;
-});
+export const datasetsSelector = createSelector(workbenchSelector, wb =>
+  selectDatasetByViewBinding({
+    hasView: Boolean(wb.currentDataView?.id),
+    sampleData: wb.backendChart?.config.sampleData,
+    dataset: wb.dataset,
+  }),
+);
 
 export const languageSelector = createSelector(
   workbenchSelector,

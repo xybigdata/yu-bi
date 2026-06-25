@@ -43,7 +43,11 @@ import {
   useRef,
   useState,
 } from 'react';
-import RGL, { LayoutItem, WidthProvider } from 'react-grid-layout/legacy';
+import RGL, {
+  type Layout,
+  type LayoutItem,
+  WidthProvider,
+} from 'react-grid-layout/legacy';
 import 'react-grid-layout/css/styles.css';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -63,6 +67,9 @@ import { selectEditingWidgetIds } from '../slice/selectors';
 import { WidgetOfAutoEditor } from './WidgetOfAutoEditor';
 
 const ReactGridLayout = WidthProvider(RGL);
+
+const toMutableLayout = (layout: Layout): LayoutItem[] =>
+  layout.map(item => ({ ...item }));
 
 export const AutoBoardEditor: React.FC<{}> = memo(() => {
   const dispatch = useAppDispatch();
@@ -93,23 +100,24 @@ export const AutoBoardEditor: React.FC<{}> = memo(() => {
   const sortedLayoutWidgets = useEditAutoLayoutMap(boardId);
   const layoutMap = useGridLayoutMap(sortedLayoutWidgets);
 
-  const changeWidgetLayouts = debounce((layouts: LayoutItem[]) => {
+  const changeWidgetLayouts = debounce((layouts: Layout) => {
     dispatch(
       editBoardStackActions.changeAutoBoardWidgetsRect({
-        layouts,
+        layouts: toMutableLayout(layouts),
         deviceType: deviceType,
       }),
     );
   }, 300);
 
-  const onLayoutChange = (layouts: LayoutItem[]) => {
-    currentLayout.current = layouts;
+  const onLayoutChange = (layouts: Layout) => {
+    const nextLayouts = toMutableLayout(layouts);
+    currentLayout.current = nextLayouts;
     thEmitScroll();
     // ignore isDraggable item from out
     if (layouts.find(item => item.isDraggable === true)) {
       return;
     }
-    dispatch(editDashBoardInfoActions.adjustDashLayouts(layouts));
+    dispatch(editDashBoardInfoActions.adjustDashLayouts(nextLayouts));
   };
 
   const { deviceClassName } = useMemo(() => {

@@ -97,7 +97,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
   );
   const currentEditingView = useSelector(selectCurrentEditingView);
   const orgId = useSelector(selectOrgId);
-  const formRef = useRef<FormInstance>();
+  const formRef = useRef<FormInstance | undefined>(undefined);
   const t = useI18NPrefix('view.saveForm');
   const tg = useI18NPrefix('global');
 

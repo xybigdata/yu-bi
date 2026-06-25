@@ -38,6 +38,7 @@ import {
   pivotTableDrillEventListener,
   tablePagingAndSortEventListener,
 } from 'app/utils/ChartEventListenerHelper';
+import { selectChartPreviewDataset } from 'app/utils/chartPreviewDataset';
 import { getChartDrillOption } from 'app/utils/internalChartHelper';
 import { FC, memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -73,7 +74,7 @@ const ChartPreviewBoardForShare: FC<{
 }> = memo(
   ({ chartPreview, orgId, filterSearchParams, availableSourceFunctions }) => {
     const dispatch = useAppDispatch();
-    const drillOptionRef = useRef<IChartDrillOption>();
+    const drillOptionRef = useRef<IChartDrillOption | undefined>(undefined);
     const [chart] = useState<IChart | undefined>(() => {
       const currentChart = ChartManager.instance().getById(
         chartPreview?.backendChart?.config?.chartGraphId,
@@ -349,19 +350,10 @@ const ChartPreviewBoardForShare: FC<{
         }),
       );
     };
-    const dataset = useMemo(() => {
-      if (
-        !chartPreview?.backendChart?.viewId &&
-        chartPreview?.backendChart?.config.sampleData
-      ) {
-        return chartPreview?.backendChart?.config.sampleData;
-      }
-      return chartPreview?.dataset;
-    }, [
-      chartPreview?.backendChart?.config.sampleData,
-      chartPreview?.backendChart?.viewId,
-      chartPreview?.dataset,
-    ]);
+    const dataset = useMemo(
+      () => selectChartPreviewDataset(chartPreview),
+      [chartPreview],
+    );
 
     return (
       <StyledChartPreviewBoardForShare>

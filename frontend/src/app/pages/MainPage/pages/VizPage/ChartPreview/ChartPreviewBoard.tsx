@@ -50,6 +50,7 @@ import {
   pivotTableDrillEventListener,
   tablePagingAndSortEventListener,
 } from 'app/utils/ChartEventListenerHelper';
+import { selectChartPreviewDataset } from 'app/utils/chartPreviewDataset';
 import { generateShareLinkAsync, makeDownloadDataTask } from 'app/utils/fetch';
 import { ShareLinkCreateParams } from 'app/components/VizOperationMenu/components/slice/type';
 import { getChartDrillOption } from 'app/utils/internalChartHelper';
@@ -136,7 +137,7 @@ const ChartPreviewBoard: FC<{
     const chartConfigRef = useRef(chartPreview?.chartConfig);
     const [chart, setChart] = useState<IChart>();
     const [loadingStatus, setLoadingStatus] = useState<boolean>(false);
-    const drillOptionRef = useRef<IChartDrillOption>();
+    const drillOptionRef = useRef<IChartDrillOption | undefined>(undefined);
     const t = useI18NPrefix('viz.main');
     const tg = useI18NPrefix('global');
     const saveAsViz = useSaveAsViz();
@@ -634,19 +635,10 @@ const ChartPreviewBoard: FC<{
       );
     };
 
-    const dataset = useMemo(() => {
-      if (
-        !chartPreview?.backendChart?.viewId &&
-        chartPreview?.backendChart?.config.sampleData
-      ) {
-        return chartPreview?.backendChart?.config.sampleData;
-      }
-      return chartPreview?.dataset;
-    }, [
-      chartPreview?.backendChart?.config.sampleData,
-      chartPreview?.backendChart?.viewId,
-      chartPreview?.dataset,
-    ]);
+    const dataset = useMemo(
+      () => selectChartPreviewDataset(chartPreview),
+      [chartPreview],
+    );
 
     return (
       <StyledChartPreviewBoard>

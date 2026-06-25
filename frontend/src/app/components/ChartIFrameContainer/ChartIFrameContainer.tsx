@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-import { ReactComponent as Loading } from 'app/assets/images/loading.svg';
+import Loading from 'app/assets/images/loading.svg?react';
 import {
   Frame,
   FrameContextConsumer,

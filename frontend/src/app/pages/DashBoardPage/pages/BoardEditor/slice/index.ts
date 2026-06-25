@@ -364,7 +364,7 @@ const filterActions = [
   editBoardStackActions.changeFreeWidgetRect,
   editBoardStackActions.dropWidgetLayer,
 ].map(ele => ele.toString());
-const editBoardStackReducer = undoable(editBoardStackSlice.reducer, {
+export const editBoardStackReducer = undoable(editBoardStackSlice.reducer, {
   undoType: BOARD_UNDO.undo,
   redoType: BOARD_UNDO.redo,
   ignoreInitialState: true,

@@ -1,6 +1,5 @@
 import classnames from 'classnames';
 import {
-  cloneElement,
   memo,
   ReactElement,
   useCallback,
@@ -18,6 +17,7 @@ import {
   SPACE_MD,
   SPACE_XS,
 } from 'styles/StyleConstants';
+import { cloneElementWithClassName } from 'utils/reactCompat';
 
 interface ListSwitchProps {
   titles: Array<{ key: string; icon?: ReactElement; text: string }>;
@@ -55,7 +55,7 @@ export const ListSwitch = memo(
             className={classnames({ selected: key === selectedKey })}
             onClick={itemSelect(key)}
           >
-            {icon && cloneElement(icon, { className: 'icon' })}
+            {icon && cloneElementWithClassName(icon, 'icon')}
             {text}
           </li>
         ))}

@@ -20,7 +20,7 @@ import type { SelectProps } from 'antd';
 import { ControllerFacadeTypes, TimeFilterValueCategory } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ControllerWidgetContent } from 'app/pages/DashBoardPage/pages/Board/slice/types';
-import produce from 'immer';
+import { produce } from 'immer';
 import React, { useCallback } from 'react';
 import {
   DateName,

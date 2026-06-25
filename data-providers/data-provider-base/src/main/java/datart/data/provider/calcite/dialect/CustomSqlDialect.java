@@ -29,6 +29,10 @@ import org.apache.calcite.sql.validate.SqlConformanceEnum;
 
 public class CustomSqlDialect extends SqlDialect {
 
+    private static final String DEFAULT_LITERAL_QUOTE = "'";
+
+    private static final String DEFAULT_IDENTIFIER_QUOTE = "\"";
+
     private JdbcDriverInfo driverInfo;
 
     private CustomSqlDialect(Context context) {
@@ -41,6 +45,7 @@ public class CustomSqlDialect extends SqlDialect {
     }
 
     private static Context createContext(JdbcDriverInfo driverInfo) {
+        applyDefaultQuotes(driverInfo);
         BeanUtils.validate(driverInfo);
         return SqlDialect.EMPTY_CONTEXT
                 .withDatabaseProductName(driverInfo.getName())
@@ -50,6 +55,15 @@ public class CustomSqlDialect extends SqlDialect {
                 .withLiteralQuoteString(driverInfo.getLiteralQuote())
                 .withUnquotedCasing(Casing.UNCHANGED)
                 .withNullCollation(NullCollation.LOW);
+    }
+
+    private static void applyDefaultQuotes(JdbcDriverInfo driverInfo) {
+        if (driverInfo.getIdentifierQuote() == null || driverInfo.getIdentifierQuote().isBlank()) {
+            driverInfo.setIdentifierQuote(DEFAULT_IDENTIFIER_QUOTE);
+        }
+        if (driverInfo.getLiteralQuote() == null || driverInfo.getLiteralQuote().isBlank()) {
+            driverInfo.setLiteralQuote(DEFAULT_LITERAL_QUOTE);
+        }
     }
 
     @Override

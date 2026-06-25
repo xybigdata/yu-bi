@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import javax.script.Invocable;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -38,5 +39,11 @@ class JavascriptUtilsTest {
                 System.setProperty(JavascriptUtils.SCRIPT_ENGINE_PROPERTY, previousEngineName);
             }
         }
+    }
+
+    @Test
+    void shouldUseGraalJsCompatibleEngineCandidatesByDefault() {
+        assertFalse(JavascriptUtils.resolveCandidateEngineNames(null).contains("nashorn"));
+        assertTrue(JavascriptUtils.resolveCandidateEngineNames(null).contains("graal.js"));
     }
 }

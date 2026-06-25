@@ -1,32 +1,27 @@
-# yu-bi 现代化改造执行板
+# yu-bi 现代化改造执行计划
 
-本文档是 yu-bi 现代化改造的恢复入口、阶段复盘和后续执行清单。恢复工作时优先读本页，再按“当前短期目标”继续推进。
+复盘时间：2026-06-25
 
-复盘时间：2026-06-22
+本文档是 yu-bi 现代化改造的恢复入口和执行看板。后续恢复工作时优先阅读本文档，不再从历史流水记录里反推当前策略。
 
-## 1. 改造目标
+## 1. 当前目标
 
-在保证业务兼容、数据兼容、发布链稳定、结果正确的前提下，分阶段把前后端核心技术栈收口到较新的稳定版本。
+现代化改造不是追逐所有技术栈的最新版本，而是在兼容、正确、可验证、可回滚的前提下，将前后端核心技术栈收口到较新的稳定版。
 
-“现代化”不等于追最新版本。版本选择遵循：
+硬性基线：
 
-- 优先较新的稳定版
-- 优先生态兼容明确的版本
-- 优先能被当前测试和 smoke test 验证的升级
-- 高风险链路先补验证，再小步替换
-
-硬性兼容目标：
-
-- 后端必须兼容 `JDK 21`
-- 前端必须兼容 `Node 24`
-- 前端 npm 基线按 `npm >= 11` 维护
+- 后端兼容 `JDK 21`
+- 前端兼容 `Node 24`
+- 前端包管理兼容 `npm 11`
+- 不采用预发布、alpha、beta、milestone 作为默认升级目标
+- 中高风险任务可以推进，但必须先满足准入规则
 
 固定禁止项：
 
 - 不贸然改 Java 包名 `datart.*`
 - 不贸然改配置前缀 `datart.*`
 - 不贸然改 `DATART_*` 等内部技术符号
-- 不贸然改数据迁移相关稳定常量、后缀和内部标识
+- 不贸然改数据迁移相关常量、后缀和内部稳定标识
 
 ## 2. 当前快照
 
@@ -40,456 +35,212 @@ git log --oneline --decorate -8
 
 当前状态：
 
-| 项目 | 状态 |
-| --- | --- |
-| 工作目录 | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
-| 远端 | `git@github.com:xybigdata/yu-bi.git` |
-| 主线分支 | `main` |
-| 当前专题分支 | `codex/modernization-presto-driver-metadata` |
-| 当前专题 | P2-H PRESTO JDBC driver 元数据治理 |
-| 当前分支相对 `origin/main` | 以恢复命令输出为准 |
-| 最近专题提交 | 以 `git log --oneline --decorate -8` 为准 |
-| 最近主线提交 | `bf6eee2e2 chore: 合入 SQL 变量替换行为修复` |
+| 项目                       | 状态                                                       |
+| -------------------------- | ---------------------------------------------------------- |
+| 工作目录                   | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
+| 远端                       | `git@github.com:xybigdata/yu-bi.git`                       |
+| 主线分支                   | `main`                                                     |
+| 当前专题分支               | `codex/modernization-frontend-security-deps`               |
+| 当前分支相对 `origin/main` | 以恢复命令输出为准；本轮复盘前为 `0 122`                   |
+| 最近专题提交               | 以 `git log -1 --oneline` 输出为准                         |
+| 当前工作区                 | 干净                                                       |
 
-已确认的自动化权限和偏好：
-
-- 可以自动执行 `git add`
-- 可以自动执行 `git commit --no-verify -m "..."`
-- 可以自动执行 `git push origin <branch>`
-- `npm view ...` 查询已授权，后续不再单独询问
-- `mvn -pl security ...` 命令已授权，后续不再单独询问
-- 同一专题内尽量累计一组相关改动后再提交，避免过频繁提交
-- 当前专题继续在同一分支推进，不因为小批次改动立即合入 `main`
-
-## 3. 分支与合并规则
-
-固定规则：
+分支纪律：
 
 - 不直接在 `main` 开发
-- 按专题使用 `codex/*` 分支
-- 专题分支可以推送远端
-- 专题完成后再 `--no-ff` merge 回 `main`
-- 推送 `main` 前必须完整门禁
+- 当前阶段继续在 `codex/modernization-frontend-security-deps` 上累计改造
+- 不因为单个小批次完成就新建分支
+- 不因为分支领先较多就主动合并 `main`
+- 专题分支可以阶段性 push 保存进度
+- 只有用户明确要求阶段合并时，才准备 `main` 合并和完整门禁
+- 尽量累计一组相关改动后提交，避免过频繁 commit
 
-当前专题分支：
+## 3. 阶段性复盘
 
-```bash
-codex/modernization-presto-driver-metadata
-```
-
-当前专题收口前不要创建新分支。P2-H 聚焦 PRESTO JDBC driver 元数据缺口：补齐现有 `CustomSqlDialect` fallback 所需 quote 元数据，恢复 PRESTO 测试侧自动初始化，不升级 Calcite 主版本，不扩大数据源方言重构范围。
-
-## 4. 技术栈基线
-
-### 4.1 后端
-
-| 技术栈 | 当前基线 | 状态 |
-| --- | --- | --- |
-| Java | `21` | 已达硬性目标 |
-| Maven | `>=3.9` | 已由 Enforcer 约束 |
-| Spring Boot | `3.5.12` | 当前主链 |
-| Spring Cloud | `2025.0.1` | 与 Boot 3.5 配套 |
-| MyBatis Spring Boot | `3.0.4` | 已适配 Boot 3 |
-| GraalJS | `25.0.1` | 已替代 Nashorn 主链 |
-| BouncyCastle | `1.81.1` | 已统一到 `jdk18on` 组件线 |
-| Springdoc | `2.8.17` | 已适配 Boot 3 |
-| H2 | `2.4.240` | 已升级 |
-| Selenium | `4.31.0` | 已升级 |
-| Shiro | `2.0.5` | 高风险，只做认证授权边界审计和小步修复 |
-| Druid | `1.2.28` | 中风险，暂不优先 |
-| Calcite | 现网主链 | 高风险，先补 SQL 解析兼容样例 |
-
-### 4.2 前端
-
-| 技术栈 | 当前基线 | 状态 |
-| --- | --- | --- |
-| Node | `>=24.0.0` | 硬性目标 |
-| npm | `>=11.0.0` | 与 Node 24 配套 |
-| React | `18.3.1` | 当前稳定主链 |
-| React Router | `6.30.1` | 已完成主升级 |
-| Ant Design | `5.26.2` | 已完成主升级 |
-| Redux Toolkit | `2.12.0` | 已完成主升级 |
-| React Redux | `9.3.0` | 已完成主升级 |
-| TypeScript | `5.9.3` | 当前稳定主链 |
-| Vite | `6.4.3` | 已替代 CRA 主工作流 |
-| Vitest | `4.1.9` | 当前主测试栈 |
-| styled-components | `6.1.19` | 已完成主升级 |
-| react-quill | `2.0.0` | 已升级，保留兼容层 |
-| monaco-editor | `0.52.2` | 已补真实运行时加载边界 |
-| reveal.js | `6.0.1` | 已补真实运行时加载边界 |
-| ECharts | `5.6.0` | 已升级到 ECharts 5 稳定线 |
-| AntV S2 | `2.7.2 / 2.3.1` | 已确认当前稳定线 |
-| react-grid-layout | `2.2.3` | 已通过 legacy 入口升级 |
-| flexlayout-react | `0.9.1` | 已升级并改用命名导出 |
-| react-window | `1.8.11` | 保持 1.x 兼容线，2.x 独立评估 |
-| react-draggable | `4.7.0` | 已升级 |
-| react-resizable | `3.2.0` | 已升级 |
-| @hello-pangea/dnd | `18.0.1` | 已确认当前稳定线 |
-| react-dnd | `16.0.1` | 已确认当前稳定线 |
-| react-dnd-html5-backend | `16.0.1` | 已确认当前稳定线 |
-
-## 5. 阶段复盘
-
-### 5.1 已完成主线成果
+### 3.1 已完成主线成果
 
 - yu-bi 已从 datart 独立，仓库、默认分支、远端已切换完成
 - README、README_zh、NOTICE、SECURITY、ROADMAP、CHANGELOG、MAINTAINERS、issue template 已收口为独立开源项目表述
-- 后端已建立 `JDK 21 + Spring Boot 3.5.x + Spring Cloud 2025.0.x` 主链
-- 前端已建立 `Node 24 + React 18 + Ant Design 5 + Vite 6 + Vitest 4` 主链
-- CRA / CRACO、IE11 主兼容链、Nashorn、PhantomJS 等历史主链已退出
 - `.tmp/`、`logs/` 已加入 `.gitignore`
+- Maven 坐标、POM 名称、描述、SCM 已收口到 yu-bi；内部启动类 `datart.DatartServerApplication` 保留
+- 后端已建立 `JDK 21 + Spring Boot 3.5.x + Spring Cloud 2025.0.x` 主链
+- 前端已建立 `Node 24 + npm 11 + React 19 + Ant Design 5 + Vite 8 + TypeScript 6 + Vitest 4` 主链
+- CRA / CRACO、IE11 主兼容链、Nashorn 默认链路、PhantomJS 等历史主链已退出或不再作为默认路径
+- 前端 `npm audit` 当前保持 0 漏洞
+- 构建体积报告已具备文本、JSON、文件输出、观察基线、稳定 id、分类汇总和分类过滤能力
 
-### 5.2 已合入批次
+### 3.2 当前专题成果
 
-| 批次 | 结果 |
-| --- | --- |
-| 独立开源治理与 yu-bi 基础品牌 | 已合入 `main` |
-| 后端 JDK 21 / Spring Boot 3 主链 | 已合入 `main` |
-| 前端 React 18 / AntD 5 / Vite 6 主链 | 已合入 `main` |
-| Dashboard widget 内容协议边界 | 已合入 `main` |
-| 图表运行时类型边界 | 已合入 `main` |
-| 现代化兼容边界 | 已合入并推送 `origin/main` |
-| 图表运行时现代化 | 已合入并推送 `origin/main` |
-| 前端运行时现代化批次 | 已合入并推送 `origin/main`，主线提交 `77217676b` |
-| 构建与安装包链路现代化 | 已合入并推送 `origin/main`，主线提交 `2c691916b` |
-| Shiro 认证授权健康度审计 | 已合入并推送 `origin/main`，主线提交 `99336814e` |
-| Calcite SQL 解析健康度审计 | 已合入并推送 `origin/main`，主线提交 `065e4d007` |
-| SQL 变量替换行为修复 | 已合入并推送 `origin/main`，主线提交 `bf6eee2e2` |
+当前专题：P2-E 前端安全依赖与运行时治理。
 
-### 5.3 前端运行时专题复盘
+已完成的核心改造：
 
-分支：`codex/modernization-frontend-runtime-next`
+- Node / npm 基线：`.nvmrc`、`.node-version`、`packageManager`、`engine-strict`、`verify:toolchain`
+- npm lockfile：收口到 npm 11 原生 lockfile v3
+- 依赖声明：前端直接依赖固定到 lockfile 已验证版本，降低漂移风险
+- 安全治理：通过直接升级、overrides 和本地兼容包清理安全风险与废弃传递依赖
+- 富文本：从 `react-quill -> quill@1.3.7` 迁移到 `react-quill-new 3.7.0 / quill 2.0.2`
+- React 主链：升级到 React 19，并补齐类型、ref、cloneElement、DnD connector 等兼容边界
+- Vite / TypeScript：升级到 Vite 8、TypeScript 6，并将模块解析收口到 bundler 模型
+- ECharts：升级到 ECharts 6，词云迁移到 `@echarts-x/custom-word-cloud`
+- React Router：升级到 7.x，入口通过 `routerCompat` 管理
+- react-window：升级到 2.x，虚拟表格迁移到新 `Grid` API
+- Monaco、ECharts、Quill、Reveal、Split、DnD、SQL formatter 等动态运行时入口已补最小 smoke
+- 构建体积治理：地图 JSON 已迁出 JS chunk，Monaco / AntV / AntD vendor 分包已细化，gzip 维度 JS 超限清零
+- 构建报告治理：vendor 分类已覆盖当前所有手工 vendor chunk，分类过滤可用于完整观察第三方包体积上下文
+- 构建基线治理：baseline 校验已覆盖 raw 超限稳定 id 和 raw 超限分类计数，能发现分包分类漂移
+- 后端方言基线：内置 JDBC driver 已固化 CustomSqlDialect fallback 与显式 / 标准方言边界，支撑后续 Calcite 和 driver 元数据评估
+- 后端 render 基线：CustomSqlDialect fallback driver 已覆盖基础 SQL 包装渲染合同，确认默认引号和 `DATART_VTABLE` 包装稳定
 
-已完成并合入：
+### 3.3 已验证但未收口的问题
 
-- `react-grid-layout` `^1.3.4 -> ^2.2.3`，通过 `react-grid-layout/legacy` 保持旧布局 props 兼容
-- `flexlayout-react` `^0.5.21 -> ^0.9.1`，入口改为命名导出，布局配置迁移到 `weight`
-- `react-window` `^1.8.6 -> ^1.8.11`，暂不升级 2.x
-- `react-draggable` `^4.4.3 -> ^4.7.0`
-- `react-resizable` `^3.0.4 -> ^3.2.0`
-- 移除过时的 `@types/react-grid-layout`
-- Node 24 / React 18 类型边界对齐：`@types/node` `24.13.2`、`@types/react` `18.3.31`、`@types/react-dom` `18.3.7`
-- 补丁线升级：`vitest` `4.1.9`、`less` `4.6.6`、`lint-staged` `17.0.8`
-- Dashboard widget content 统一读取 helper 已落地，避免组件散落结构判断
-- 旧依赖 `react-beautiful-dnd`、`react-sortable-hoc`、`react-virtualized` 等确认无源码和依赖树残留
+- JS raw 超限仍存在 7 个稳定 id：`monacoEditor.js`、`antdDesign.js`、`echarts.js`、`monacoBase.js`、`antvG2.js`、`antvS2.js`、`antvG.js`
+- asset raw 超限仍存在 2 个稳定 id：`geo-china-city.map.json`、`geo-china.map.json`
+- gzip 维度 JS 当前已无超限；asset gzip 仍主要来自 `geo-china-city.map.json`
+- AntD 6、ESLint 10、Monaco 最新线、Quill 最新线仍有明确 peer 或 audit 阻塞
+- Calcite、Shiro、Druid、数据源方言、调度实例名等属于中高风险链路，后续可以改造，但必须先补专项基线
 
-已通过完整前端门禁：
+## 4. 当前技术栈基线
 
-```bash
-npm run checkTs
-npm run test:ci
-npm run lint:css
-npm run lint:style
-```
+### 4.1 后端
 
-## 6. 已完成短期目标：P2-A 构建与安装包链路
+| 技术栈              | 当前基线      | 当前判断                                                  |
+| ------------------- | ------------- | --------------------------------------------------------- |
+| Java                | `21`          | 硬性目标已满足                                            |
+| Maven               | `>=3.9`       | 已由 Enforcer 约束                                        |
+| Spring Boot         | `3.5.15`      | 保持 Boot 3.5 稳定线，不跳 Boot 4                         |
+| Spring Cloud        | `2025.0.3`    | 当前项目无实际 Spring Cloud 编译依赖，保留 BOM 补丁线     |
+| Spring Security     | `6.5.11`      | 随 Boot 3.5 管理，暂不跳 Spring Security 7                |
+| Shiro               | `2.0.6`       | 中高风险，继续补认证授权基线后小步推进                    |
+| MyBatis Boot        | `3.0.5`       | 已适配 Boot 3                                             |
+| MyBatis Generator   | `1.4.2`       | 保持 1.x，2.x 需单独评估生成差异                          |
+| GraalJS             | `25.0.3`      | 默认 JavaScript 引擎链路已从 Nashorn 转向 GraalJS         |
+| BouncyCastle        | `1.84`        | 已统一到 `jdk18on` 组件线                                 |
+| Springdoc           | `2.8.17`      | 适配 Boot 3；3.x 属 Boot 4 / Spring 7 生态，暂不推进      |
+| H2                  | `2.4.240`     | 已升级                                                    |
+| Hibernate Validator | `8.0.4.Final` | 保持 Jakarta Validation 3 线                              |
+| MySQL Connector/J   | `9.7.0`       | 已通过 BOM 属性覆盖                                       |
+| HikariCP            | `7.1.0`       | 已补配置映射测试后升级                                    |
+| Selenium            | `4.45.0`      | 已升级                                                    |
+| JsonPath            | `3.0.0`       | 已补 OAuth 属性映射测试后升级                             |
+| Druid               | `1.2.28`      | 中风险，需补连接池与监控链路验证                          |
+| Calcite             | `1.26.0`      | 高风险，已有 SQL parser / render 基线，后续可专项推进评估 |
 
-分支：`codex/modernization-build-package`
+### 4.2 前端
 
-目标：把 Maven、Docker、安装包、启动脚本、部署文档收口到 yu-bi 当前发布形态，并确保 JDK 21 安装包启动链路可验证。
+| 技术栈                  | 当前基线           | 当前判断                                            |
+| ----------------------- | ------------------ | --------------------------------------------------- |
+| Node                    | `>=24.0.0 <25.0.0` | 硬性目标                                            |
+| npm                     | `>=11.0.0 <12.0.0` | 与 Node 24 配套                                     |
+| React                   | `19.2.7`           | 已升级并补类型边界                                  |
+| React Router            | `7.18.0`           | 已升级                                              |
+| Ant Design              | `5.29.3`           | 稳定主链；AntD 6 被 Pro Components 稳定版 peer 阻塞 |
+| Pro Components          | `2.8.10`           | 稳定版仍只支持 AntD 4/5                             |
+| TypeScript              | `6.0.3`            | 已升级并移除 `baseUrl`                              |
+| Vite                    | `8.1.0`            | 已升级                                              |
+| Vitest                  | `4.1.9`            | 当前测试主链                                        |
+| ECharts                 | `6.1.0`            | 已升级，词云扩展已替换                              |
+| monaco-editor           | `0.52.2`           | 最新线仍有 audit 风险，暂不升级                     |
+| react-quill-new / quill | `3.7.0 / 2.0.2`    | 保持 audit 清零组合                                 |
+| AntV S2                 | `2.7.2 / 2.3.1`    | 当前稳定线                                          |
+| styled-components       | `6.4.3`            | 已升级                                              |
+| react-window            | `2.2.7`            | 已完成 API 迁移                                     |
+| react-grid-layout       | `2.2.3`            | 继续使用官方 legacy 入口                            |
+| react-hotkeys-hook      | `5.3.2`            | 已升级                                              |
+| sql-formatter           | `15.8.2`           | 已补 runtime smoke                                  |
+| @testing-library/react  | `16.3.2`           | 适配 React 19                                       |
+| ESLint                  | `9.39.4`           | ESLint 10 被插件 peer 阻塞                          |
 
-已完成：
+## 5. 中高风险任务准入规则
 
-- 清理 `server/pom.xml` 中已注释的旧 `frontend-maven-plugin` Node 14 / npm 6 配置块
-- 将 Maven 前端 bootstrap registry 从废弃 `registry.npm.taobao.org` 切到 `registry.npmmirror.com`
-- Linux / Windows 安装包启动脚本补齐 JDK 21 运行参数：`--add-opens=java.base/java.lang=ALL-UNNAMED`
-- Linux / Windows 安装包启动脚本用户可见文案收口为 `yu-bi`
-- Dockerfile 已将旧个人 label 收口为 OCI image labels
-- Dockerfile 已增加基于 `/api/v1/sys/info` 的 `HEALTHCHECK`
-- Deployment.md 安装包示例已从旧 beta 表述更新到当前 `1.0.0-rc.3`
-- 保留内部启动类 `datart.DatartServerApplication`，不触碰 Java 包名和稳定内部标识
+后续中高风险任务可以进入改造，但不能直接“大版本替换后再看”。每个中高风险项在动版本或行为前必须先写清：
 
-已通过验证：
+| 准入项       | 要求                                                                         |
+| ------------ | ---------------------------------------------------------------------------- |
+| 当前阻塞点   | 明确是 peer、audit、API 变更、数据兼容、运行时协议还是测试缺口               |
+| 生态兼容证据 | 优先用官方 release、npm peer、Maven dependency tree、实际 dry-run 或试装证明 |
+| 最小验证门禁 | 先补一组能暴露风险的定向测试，再升级或替换                                   |
+| 回滚策略     | 版本回退、配置开关、兼容 helper 或保持旧路径的方式必须明确                   |
+| 影响面       | 列出涉及模块、用户可见行为、数据格式、部署链路或性能体积变化                 |
 
-```bash
-bash -n bin/yu-bi-server.sh scripts/check-demo-health.sh
-java -version
-mvn -version
-npm run checkTs
-npm run test:ci
-npm run lint:css
-npm run lint:style
-mvn package -DskipTests
-scripts/check-demo-health.sh
-git diff --check
-```
+可以推进的中高风险任务类型：
 
-验证说明：
+- 已有专项 smoke 或可补专项 smoke 的运行时依赖升级
+- 有明确 peer 支持、audit 不回退、构建可验证的主版本升级
+- 先建立基线、再替换实现的后端方言、认证、数据源、调度链路治理
+- 构建体积治理中有可观测收益且不改变业务协议的拆分或资源策略调整
 
-- `mvn package -DskipTests` 在普通沙箱下因无法写入 `~/.m2` resolver 状态文件失败；提权后通过
-- `scripts/check-demo-health.sh` 在普通沙箱下因本地端口绑定受限失败；提权后通过
-- Maven 打包已重新生成 `yu-bi-server-1.0.0-rc.3-install.zip`，构建产物未产生需要提交的跟踪文件变更
-- 本批次再次运行 `mvn package -DskipTests` 已通过，确认 Dockerfile 依赖的安装包可生成
-- 合入 `main` 前完整前端门禁已通过：`checkTs`、`test:ci`、`lint:css`、`lint:style`
-- `scripts/check-demo-health.sh` 普通沙箱下无法连上本地 8080；提权后健康检查通过
-- 当前本机无 `docker` 命令，无法本地执行 Docker build；本批次只完成 Dockerfile 静态复扫
+暂不推进的情况：
 
-P2-A 本批次完成状态：
+- 只为追最新而引入预发布链路
+- 试装会破坏当前 `npm audit` 清零状态
+- peer 依赖明确不支持当前主链
+- 会触碰 `datart.*`、`DATART_*`、迁移标识或持久化调度标识，但没有迁移设计和回滚方案
 
-| 事项 | 风险 | 状态 |
-| --- | --- | --- |
-| Dockerfile 元数据 | 低 | 已将旧个人 label 改为 OCI labels |
-| Docker 健康检查 | 中 | 已增加 `HEALTHCHECK`；最终镜像保留 `curl` 用于健康探测 |
-| Deployment.md 安装包示例 | 低 | 已更新为当前 `1.0.0-rc.3` 示例 |
-| Deployment.md 品牌文案 | 低 | 仅收口用户可见安装包示例，不改 `datart.conf` 和 `datart.*` 配置前缀 |
-| Docker build 验证 | 受环境限制 | 当前本机无 `docker` 命令，记录为验证缺口 |
+## 6. 后续队列
 
-P2-A 后续缺口：
+### 6.1 立即推进
 
-- 后续具备 Docker 环境后补 `docker build` 和容器健康检查验证
+| 优先级 | 事项                       | 风险 | 下一步                                                                                   |
+| ------ | -------------------------- | ---- | ---------------------------------------------------------------------------------------- |
+| P0     | 执行文档瘦身和恢复入口维护 | 低   | 本轮完成；后续只记录阶段结论，不再堆叠长流水                                             |
+| P1     | 构建体积 raw 超限治理      | 中   | 用 `build:report` 的 `category`、`idFilter` 和 JSON baseline 聚焦 `monaco`、`antd`、地图 |
+| P1     | 前端动态运行时入口补强     | 中   | 继续补真实入口 smoke，优先覆盖分享页、图表 iframe、编辑器、地图和看板只读链路            |
+| P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback 边界和基础 render 合同；继续补更多 driver metadata 合同    |
+| P2     | Shiro / Security 边界治理  | 中高 | 不整体替换 Shiro；继续补认证、授权、token、异常边界测试后做小步修复                      |
 
-## 7. 已完成短期目标：P2-B Shiro 认证授权健康度审计
+### 6.2 条件满足后推进
 
-分支：`codex/modernization-shiro-health`
+| 事项                    | 当前状态       | 触发条件                                                                     |
+| ----------------------- | -------------- | ---------------------------------------------------------------------------- |
+| AntD 6                  | 暂缓           | Pro Components 稳定版明确支持 AntD 6，不采用 beta / prerelease               |
+| ESLint 10               | 暂缓           | `eslint-plugin-react`、`eslint-plugin-import` 稳定版 peer 明确支持 ESLint 10 |
+| Monaco 最新线           | 暂缓           | 最新版本不再引入当前 `dompurify` / `marked` audit 风险                       |
+| Quill / react-quill-new | 暂缓           | 最新组合不再触发 `GHSA-v3m3-f69x-jf25`，并通过富文本 smoke                   |
+| @vitejs/plugin-react 6  | 暂缓           | npm 11 下可干净安装，不再触发 Babel 8 peer 解析风险                          |
+| @types/node 26          | 不推进         | 当前目标是 Node 24；除非目标基线调整，否则不切 Node 26 类型线                |
+| Spring Boot 4           | 暂不作为本阶段 | 需要 Spring 7、Springdoc 3、Security 7 等整体生态评估                        |
+| Calcite 新版本          | 可专项评估     | SQL parser、render、变量替换、多方言、driver metadata 基线足够后再试         |
+| Druid 新版本或替换      | 可专项评估     | 需要连接池配置、监控、连接生命周期和生产兼容验证                             |
 
-目标：不整体替换 Shiro，只补认证授权关键边界用例，并修复能被测试证明的授权正确性问题。
+### 6.3 当前 npm outdated 复核口径
 
-本批次已完成：
+当前剩余 outdated 不要重复无效试装。只有以下信息发生变化时再复核：
 
-- 审计 `security` 模块 Shiro 适配层：`ShiroSecurityManager`、`ShiroSubjectFacade`、`ShiroAuthenticationTokenAdapter`
-- 新增 `ShiroSecurityManagerTest`，覆盖 `requireAllPermissions` 的权限缓存边界
-- 修复 `requireAllPermissions` 在已缓存允许权限时提前返回的问题；现在会继续检查后续权限
-- 新增 `ShiroAuthenticationTokenAdapterTest`，覆盖密码 token、合法 bearer token、非法 bearer token 边界
-- `ShiroAuthenticationTokenAdapter` 对非法 bearer token 返回稳定认证失败结果，不再向后传递空指针风险
-- 排除钉钉 SDK 传入的旧 `bcpkix-jdk15on` / `bcprov-jdk15on` `1.65`
-- 将 security 模块 BouncyCastle 组件统一到 `jdk18on` `1.81.1`
-- 修复 EC PEM / JWK 测试里的 BouncyCastle `NoSuchMethodError`
-- 确认本批次不触碰 Java 包名 `datart.*`、配置前缀 `datart.*`、`DATART_*` 和迁移稳定标识
+- `@vitejs/plugin-react` 6.x peer 链在 npm 11 下可干净安装
+- Pro Components 稳定版支持 AntD 6
+- ESLint React / import 插件稳定版支持 ESLint 10
+- Monaco 最新线不再引入 audit 风险
+- Quill 最新组合不再触发 XSS advisory
 
-已通过验证：
-
-```bash
-mvn -pl security -am -Dtest=datart.security.manager.shiro.ShiroSecurityManagerTest -Dsurefire.failIfNoSpecifiedTests=false test
-mvn -pl security -am test
-mvn -pl security -am dependency:tree '-Dincludes=org.bouncycastle:*' -Dscope=test
-git diff --check
-npm run checkTs
-npm run test:ci
-npm run lint:css
-npm run lint:style
-```
-
-验证说明：
-
-- 普通沙箱运行 Maven 仍会因写 `~/.m2` 被拦截失败；提权后定向 Shiro 测试通过
-- `mvn -pl security -am test` 已通过，覆盖 core 3 个测试、security 12 个测试
-- BouncyCastle 依赖树已确认只保留 `bcpkix-jdk18on`、`bcutil-jdk18on`、`bcprov-jdk18on` `1.81.1`
-- 合入 `main` 前完整前端门禁已通过：`checkTs`、`test:ci`、`lint:css`、`lint:style`
-- `npm run test:ci` 已通过 132 个测试文件、919 个测试，4 个跳过
-- Maven 解析阿里云仓库 metadata 时出现过缺 checksum warning，但构建和测试通过
-
-P2-B 完成状态：
-
-- 已提交并推送专题分支
-- 已使用 `--no-ff` 合入 `main` 并推送主线
-
-## 8. 已完成短期目标：P2-C Calcite SQL 解析健康度审计
-
-分支：`codex/modernization-calcite-health`
-
-目标：不直接升级或替换 Calcite，先为 SQL 解析、变量解析和方言输出建立可重复的 JDK 21 健康度基线，为后续 Calcite 版本评估提供回归证据。
-
-本批次已完成：
-
-- 盘点 Calcite 主要使用点：自定义 JavaCC parser、`SqlParserUtils`、`SqlQueryScriptProcessor`、`SqlParserVariableResolver`、`SqlNodeUtils` 和各数据库方言 `unparse`
-- 确认 `data-provider-base` 原先缺少启用状态的 Calcite parser 单元测试
-- 新增 `SqlParserUtilsTest`，覆盖：
-  - 常见 snippet 表达式解析
-  - MySQL 反引号标识符解析和 SQL 输出
-  - yu-bi 自定义 `AGG_DATE_MONTH` 在 MySQL 方言下的输出合约
-  - 非法 snippet 的明确解析失败边界
-  - `$status$` 查询变量通过 parser visitor 识别，并将多值等值条件替换为 `IN`
-- 新增 `SqlQueryScriptProcessorTest`，覆盖：
-  - 注释清理后的单查询脚本处理
-  - 多查询脚本拒绝边界
-  - parser 无法识别但字符串校验仍属于查询时的 fallback 包装行为
-- 新增 `SqlScriptRenderTest`，覆盖：
-  - SQL render 默认包装为 `SELECT * FROM (...) AS DATART_VTABLE`
-  - render 阶段的查询变量多值等值条件替换为 `IN`
-- 新增 `ProviderFactoryTest`，覆盖：
-  - `init=false` 时不初始化数据源也能完成 adapter 和 dialect 发现
-  - MySQL、H2、Oracle、ClickHouse 的 adapter / dialect 映射
-  - 小写 `dbType` 自动归一为大写
-  - 未知 `dbType` 的错误边界
-- 新增 `SqlScriptRenderExamplesTest`，从历史禁用的 `SqlScriptRenderTest` 中拆出一批无需 Spring Boot 上下文、无需真实数据库连接的稳定样例，覆盖：
-  - normal SQL、变量 SQL、fallback SQL 的代表性渲染路径
-  - forbidden SQL 的拒绝边界
-  - `enableSpecialSql=true` 时特殊 SQL 可放行的边界
-- 调整测试侧 `TestSqlDialects`：
-  - 复用 `init=false` adapter 创建路径获取 dialect，避免仅为测试初始化数据源
-  - `PRESTO` 暂不纳入自动初始化集合；当前内置 driver 元数据缺少 `identifierQuote` / `literalQuote`，需要后续单独治理
-- 修复 JDBC provider 默认加载边界：
-  - `config/jdbc-driver-ext.yml` 不存在时回退为空扩展配置，不阻断内置驱动加载
-  - `init=false` 创建 adapter 时同步设置 `JdbcProperties` 和 `JdbcDriverInfo`，让方言发现和分页能力判断可用
-- 父 POM 为 Surefire 增加 `-Djava.awt.headless=true`，修复 JDK 21 / macOS 下 `POIUtilsTest` fork JVM `Abort trap: 6`
-- 确认本批次不触碰 Calcite 版本、不改 Java 包名 `datart.*`、配置前缀 `datart.*`、`DATART_*` 和迁移稳定标识
-
-已通过验证：
+复核命令优先使用：
 
 ```bash
-mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.calcite.SqlParserUtilsTest -Dsurefire.failIfNoSpecifiedTests=false test
-mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.calcite.SqlParserUtilsTest,datart.data.provider.calcite.SqlQueryScriptProcessorTest -Dsurefire.failIfNoSpecifiedTests=false test
-mvn -pl core -Dtest=datart.core.common.POIUtilsTest test
-mvn -pl data-providers/data-provider-base -am test
-mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.jdbc.ProviderFactoryTest -Dsurefire.failIfNoSpecifiedTests=false test
-mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.sql.SqlScriptRenderExamplesTest -Dsurefire.failIfNoSpecifiedTests=false test
-mvn -pl data-providers/jdbc-data-provider -am test
-npm run checkTs
-npm run test:ci
-npm run lint:css
-npm run lint:style
+npm audit --json
+npm outdated --json --registry=https://registry.npmmirror.com
+npm ls @types/node @vitejs/plugin-react antd eslint monaco-editor quill react-quill-new --depth=0 --json
+npm run verify:toolchain
 ```
 
-验证说明：
+## 7. 门禁策略
 
-- 定向测试覆盖 core、data-provider 聚合模块和 data-provider-base，`SqlParserUtilsTest` 5 个用例通过
-- P2-C 两个新增测试类共 8 个用例通过
-- `SqlScriptRenderTest` 2 个轻量渲染用例通过
-- `mvn -pl data-providers/data-provider-base -am test` 已通过，覆盖 core 3 个测试、data-provider-base 8 个测试，共 11 个测试
-- `ProviderFactoryTest` 4 个用例通过
-- `SqlScriptRenderExamplesTest` 6 个用例通过
-- `mvn -pl data-providers/jdbc-data-provider -am test` 已通过，覆盖 core 3 个测试、data-provider-base 8 个测试、jdbc-data-provider 11 个启用测试，旧 `SqlScriptRenderTest` 仍跳过 6 个历史用例
-- 合入主线前完整前端门禁已通过：
-  - `npm run checkTs`
-  - `npm run test:ci`：132 个测试文件通过，919 个用例通过，4 个跳过
-  - `npm run lint:css`
-  - `npm run lint:style`
-- 历史 SQL render 样例中发现 `ORDER BY $部门$` 当前不会被变量替换，暂不纳入本批次绿色基线，后续作为 SQL 变量替换行为专项处理
-- JavaCC 生成代码在 JDK 21 编译下仍有 deprecated annotation warning，暂不阻塞
-- `POIUtilsTest` 在默认 fork JVM 下曾稳定出现 `Abort trap: 6`；加入 `-Djava.awt.headless=true` 后定向和完整 data-provider-base 门禁均通过
-- 本批次只建立健康度基线，不做 Calcite 主版本升级
+开发期按风险分层验证，不为每个小改动跑完整门禁。准备合入 `main` 或推送 `main` 前再执行完整门禁。
 
-P2-C 合入状态：
-
-- 已具备合入 `main` 条件
-- 保留 `ORDER BY $变量$` 行为差异和 PRESTO driver 元数据缺口为后续独立专题，避免在本批次扩大行为变更面
-
-## 9. 已完成短期目标：P2-G SQL 变量替换行为专项
-
-分支：`codex/modernization-sql-variable-render`
-
-目标：补齐 P2-C 中发现的 SQL 变量替换行为差异，优先恢复历史样例中 `ORDER BY $变量$` 等简单变量重复出现时的替换行为，并用 JDK 21 可重复测试证明修复。
-
-本批次已完成：
-
-- 复现并定位 `SELECT $部门$ ... ORDER BY $部门$` 只替换第一处变量的问题
-- 确认根因：
-  - parser visitor 能为普通位置变量生成 `SimpleVariablePlaceholder`
-  - render 阶段对每个 placeholder 使用单次 `replaceIgnoreCase`
-  - 同一个简单变量在 SQL 中重复出现时，只会替换第一处，后续同名变量残留
-- 修复 `SimpleVariablePlaceholder` 替换路径：
-  - 表达式级 placeholder 仍保持单次替换，避免误伤结构化 SQL 片段
-  - 简单变量 placeholder 改为大小写无关的全量替换，覆盖同名变量多次出现
-  - 使用 `Pattern.quote` 与 `Matcher.quoteReplacement`，避免变量名或替换值包含正则特殊字符时出现误替换
-- 扩展 `SqlScriptRenderExamplesTest`，恢复历史样例中 `order by $部门$` 的断言
-- 扩展 `SqlScriptRenderTest`，新增窄用例覆盖同一个简单变量在 SELECT 和 ORDER BY 中重复出现时都应被替换
-- 补充大小写不一致变量占位和正则敏感替换值边界，确认全量替换不会受 `$`、`\` 等字符影响
-
-已通过验证：
-
-```bash
-mvn -pl data-providers/data-provider-base -am -Dtest=datart.data.provider.jdbc.SqlScriptRenderTest -Dsurefire.failIfNoSpecifiedTests=false test
-mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.sql.SqlScriptRenderExamplesTest -Dsurefire.failIfNoSpecifiedTests=false test
-mvn -pl data-providers/jdbc-data-provider -am test
-git diff --check
-npm run checkTs
-npm run test:ci
-npm run lint:css
-npm run lint:style
-```
-
-验证说明：
-
-- `SqlScriptRenderExamplesTest` 6 个用例通过，已恢复 `ORDER BY $变量$` 历史样例
-- `SqlScriptRenderTest` 5 个用例通过，新增重复简单变量替换、大小写不一致和正则敏感替换值窄用例
-- `mvn -pl data-providers/jdbc-data-provider -am test` 已通过，覆盖 core 3 个测试、data-provider-base 12 个测试、jdbc-data-provider 11 个启用测试，旧 `SqlScriptRenderTest` 仍跳过 6 个历史用例
-- 曾并行执行两个 Maven 测试命令，定向 `data-provider-base` 测试出现一次 `SqlScriptRender$1` 类加载缺失；单独复跑 base 定向测试后通过，判断为并行 target 目录竞争
-- 合入主线前完整前端门禁已通过：
-  - `npm run checkTs`
-  - `npm run test:ci`：132 个测试文件通过，919 个用例通过，4 个跳过
-  - `npm run lint:css`
-  - `npm run lint:style`
-
-P2-G 合入状态：
-
-- 已合入并推送 `origin/main`，主线提交 `bf6eee2e2`
-- 本批次不处理 PRESTO driver 元数据缺口，保留为 P2-H 独立专题
-
-## 10. 当前短期目标：P2-H PRESTO JDBC driver 元数据治理
-
-分支：`codex/modernization-presto-driver-metadata`
-
-目标：补齐 PRESTO 内置 JDBC driver 的 quote 元数据，让 PRESTO 在无 Calcite 内置 `DatabaseProduct` 映射时仍可稳定走现有 `CustomSqlDialect` fallback，并恢复测试侧 `TestSqlDialects.PRESTO` 自动初始化。
-
-本批次已完成：
-
-- 为 `jdbc-driver.yml` 中的 `PRESTO` 增加：
-  - `literal-quote: "'"`
-  - `identifier-quote: "\""`
-- 新增 `ProviderFactoryTest` 覆盖：
-  - `PRESTO` 创建 `PrestoDataProviderAdapter`
-  - `init=false` 下不初始化数据源
-  - dialect fallback 为 `CustomSqlDialect`
-  - quote 元数据正确加载
-  - PRESTO 当前 `supportPaging=false` 行为保持不变
-- 恢复 `TestSqlDialects.PRESTO` 自动初始化，不再在测试初始化集合中跳过 PRESTO
-- 确认本批次不触碰 Java 包名 `datart.*`、配置前缀 `datart.*`、`DATART_*` 和迁移稳定标识
-
-已通过验证：
-
-```bash
-mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.jdbc.ProviderFactoryTest -Dsurefire.failIfNoSpecifiedTests=false test
-mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.sql.SqlScriptRenderExamplesTest -Dsurefire.failIfNoSpecifiedTests=false test
-mvn -pl data-providers/jdbc-data-provider -am test
-git diff --check
-npm run checkTs
-npm run test:ci
-npm run lint:css
-npm run lint:style
-```
-
-验证说明：
-
-- `ProviderFactoryTest` 5 个用例通过
-- `SqlScriptRenderExamplesTest` 6 个用例通过，PRESTO 已重新纳入历史 SQL render 样例 dialect 初始化
-- `mvn -pl data-providers/jdbc-data-provider -am test` 已通过，覆盖 core 3 个测试、data-provider-base 14 个测试、jdbc-data-provider 12 个启用测试，旧 `SqlScriptRenderTest` 仍跳过 6 个历史用例
-- 测试日志中 `DBType PRESTO mismatched, use custom sql dialect` 是当前预期 fallback 路径，不代表失败
-- 合入主线前完整前端门禁已通过：
-  - `npm run checkTs`
-  - `npm run test:ci`：132 个测试文件通过，919 个用例通过，4 个跳过
-  - `npm run lint:css`
-  - `npm run lint:style`
-
-P2-H 合入状态：
-
-- 已具备合入 `main` 条件
-
-## 11. 后续队列
-
-| 阶段 | 事项 | 风险 | 执行策略 |
-| --- | --- | --- | --- |
-| P2-D | `react-window` 2.x 可行性评估 | 中高 | 独立专题，先验证 `VariableSizeGrid` 替换路径 |
-| P2-E | 前端安全依赖治理 | 中高 | 单独专题处理 Dependabot 类问题，避免混入运行时改造 |
-| P2-F | React 19、AntD 6、Vite 8、TypeScript 6 主版本评估 | 高 | 独立专题，先建立兼容矩阵和关键页面 smoke test |
-| P2-I | 数据源 provider / 方言依赖审计 | 高 | 先盘点依赖树和驱动兼容，不做大规模重构 |
-
-## 12. 门禁策略
-
-开发期按风险分层验证，不为每个小改动跑完整门禁。提交前做本批次相关门禁；准备合入 `main` 或推送 `main` 前做完整门禁。
-
-| 场景 | 最低门禁 |
-| --- | --- |
-| 文档或纯元数据 | `git diff --check` |
-| 前端类型边界、小范围组件迁移 | `npm run checkTs` + 相关测试 |
-| helper、模型、共享协议变化 | `npm run checkTs` + 相关模型 / helper 测试 |
+| 场景                           | 最低门禁                                                         |
+| ------------------------------ | ---------------------------------------------------------------- |
+| 文档或纯元数据                 | `git diff --check`，必要时 `prettier --check`                    |
+| 前端类型边界、小范围组件迁移   | `npm run checkTs` + 相关测试                                     |
+| helper、模型、共享协议变化     | `npm run checkTs` + 相关模型 / helper 测试                       |
 | 依赖、构建配置、运行时加载变化 | `npm run checkTs` + 相关运行时测试；专题收尾补 `npm run test:ci` |
-| Maven、Docker、安装包链路变化 | `mvn package -DskipTests`，必要时补 demo smoke |
-| 准备 merge 回 `main` | 前端完整门禁，必要时补后端门禁 |
-| 推送 `main` | 不跳过完整门禁 |
+| 构建体积治理                   | `npm run build` + `npm run build:task` + `npm run build:report`  |
+| Maven、Docker、安装包链路变化  | `mvn package -DskipTests`，必要时补 demo smoke                   |
+| 准备 merge 回 `main`           | 前端完整门禁，必要时补后端门禁                                   |
+| 推送 `main`                    | 不跳过完整门禁                                                   |
 
 完整前端门禁：
 
 ```bash
+npm run verify:toolchain
 npm run checkTs
 npm run test:ci
 npm run lint:css
@@ -499,6 +250,9 @@ npm run lint:style
 构建与安装包门禁：
 
 ```bash
+npm run build
+npm run build:task
+npm run build:report
 mvn package -DskipTests
 scripts/check-demo-health.sh
 ```
@@ -506,49 +260,93 @@ scripts/check-demo-health.sh
 依赖链路补充门禁：
 
 ```bash
-npm install --package-lock-only --dry-run --ignore-scripts
-npm ci --dry-run --ignore-scripts
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+npm audit --json
+npm ls --all
 ```
 
-测试缺口处理：
+## 8. 构建体积观察基线
 
-- 找不到现成相关测试时，必须记录缺口
-- 优先补 helper、协议、运行时最小用例
-- 不为了覆盖率硬造低价值快照测试
-- 本机缺少外部工具时记录原因，例如当前无 `docker` 命令，不能本地验证 Docker build
+当前构建报告能力：
 
-## 13. 提交节奏
+- `npm run build:report`：输出文本报告
+- `YU_BI_CHUNK_REPORT_FORMAT=json`：输出 JSON 报告
+- `YU_BI_CHUNK_REPORT_OUTPUT=build/build-report.json`：写入文件
+- `YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1`：只输出超限项
+- `YU_BI_CHUNK_REPORT_ID_FILTER=antdDesign.js`：按稳定 id 过滤
+- `YU_BI_CHUNK_REPORT_CATEGORY_FILTER=vendor`：按分类过滤
+- `npm run build:report:check`：按观察基线校验稳定 id 清单
 
-同一专题内累计一组相关改动后再提交，减少主线合并和完整回归次数。
+`vendor` 分类应覆盖 `vite.shared.mts#createVendorManualChunks` 中当前所有手工第三方分包，避免构建报告和实际分包规则漂移。
 
-建议粒度：
+`build:report:check` 会校验 raw / gzip 超限稳定 id，并校验 raw 超限分类计数。当前分类基线为 JS `vendor=7`、asset `geo=2`。
 
-| 类型 | 粒度 |
-| --- | --- |
-| 低风险类型边界 | 累计 3 到 10 个相关文件后提交 |
-| 中风险运行时链路 | 每条可验证链路独立提交 |
-| 依赖和构建链路 | 独立提交，但尽量包含完整链路文档和验证记录 |
-| 阶段复盘 | 跟随当前批次提交，必要时可单独文档提交 |
+当前观察对象：
 
-不要因为单个小文件改动立刻提交。当前 P2-H 应围绕 PRESTO driver 元数据治理累计代码、测试和文档记录后再提交。
+| 类型      | raw 超限稳定 id                                                                                         | gzip 超限稳定 id          |
+| --------- | ------------------------------------------------------------------------------------------------------- | ------------------------- |
+| JS / task | `monacoEditor.js`、`antdDesign.js`、`echarts.js`、`monacoBase.js`、`antvG2.js`、`antvS2.js`、`antvG.js` | 无                        |
+| asset     | `geo-china-city.map.json`、`geo-china.map.json`                                                         | `geo-china-city.map.json` |
 
-## 14. 恢复命令
+后续治理顺序：
 
-继续 P2-H：
+1. 先看 gzip 维度，避免把 raw 拆分后的统计变化误判为用户传输体积回退。
+2. 对 raw 超限项只做有收益的拆分；无收益的按需加载试验不保留。
+3. 地图资源继续走 asset 方向治理，优先评估按层级、按省份、服务端资源或压缩策略。
+4. 每次构建体积治理后同步更新基线文件或记录不更新原因。
+5. 生成 `build/build-report.json` 后再顺序执行 `build:report:check`，不要并行执行，避免校验脚本读取旧报告文件。
+
+## 9. 提交与推送
+
+当前执行偏好：
+
+- `git add`、`git commit --no-verify -m "..."`、`git push origin codex/modernization-frontend-security-deps` 可以自动执行
+- 同一专题内累计一组相关改动后再提交
+- 文档复盘可以单独提交，但后续小型文档修正优先并入相关改造提交
+- 专题分支可 push；不主动 merge `main`
+- 用户明确要求阶段合并时，再准备完整门禁、`--no-ff` 合并和 `main` 推送
+
+建议提交粒度：
+
+| 类型             | 粒度                          |
+| ---------------- | ----------------------------- |
+| 低风险类型边界   | 累计 3 到 10 个相关文件后提交 |
+| 中风险运行时链路 | 每条可验证链路独立提交        |
+| 依赖和构建链路   | 独立提交，但包含验证记录      |
+| 阶段复盘         | 可单独提交，作为后续恢复入口  |
+
+## 10. 恢复命令
+
+继续当前专题：
 
 ```bash
 git status --short --branch
 git rev-list --left-right --count origin/main...HEAD
-sed -n '150,175p' data-providers/jdbc-data-provider/src/main/resources/jdbc-driver.yml
-mvn -pl data-providers/jdbc-data-provider -am -Dtest=datart.data.provider.jdbc.ProviderFactoryTest -Dsurefire.failIfNoSpecifiedTests=false test
-mvn -pl data-providers/jdbc-data-provider -am test
+git log --oneline --decorate -8
+cd frontend
+npm run verify:toolchain
+npm audit --json
+npm outdated --json --registry=https://registry.npmmirror.com
+npm ci --dry-run --ignore-scripts --no-audit --no-fund
+npm run checkTs
 ```
 
-追溯历史：
+构建体积聚焦：
 
 ```bash
-git log --oneline -- docs/tech-stack-modernization-plan.md
-git log --oneline -- Dockerfile Deployment.md server/pom.xml bin/yu-bi-server.sh bin/yu-bi-server.cmd
-git log --oneline -- security/src/main/java/datart/security/manager/shiro security/src/test/java/datart/security
-git log --oneline -- frontend/package.json frontend/package-lock.json
+cd frontend
+npm run build
+npm run build:task
+YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 npm run build:report
+YU_BI_CHUNK_REPORT_CATEGORY_FILTER=vendor YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 npm run build:report
+YU_BI_CHUNK_REPORT_FORMAT=json YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 YU_BI_CHUNK_REPORT_OUTPUT=build/build-report.json npm run build:report
+YU_BI_CHUNK_REPORT_BASELINE_REPORT=build/build-report.json npm run build:report:check
+```
+
+后端专项恢复：
+
+```bash
+mvn -pl security -am test
+mvn -pl data-providers/jdbc-data-provider -am test
+mvn -pl server -am -DskipTests package
 ```

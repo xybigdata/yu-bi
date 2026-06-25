@@ -66,7 +66,16 @@ function ShareDashboardPage() {
   const { token: shareToken } = useShareRouteParams('dashboard');
   const search = location.search;
 
-  const [shareClientId, setShareClientId] = useState('');
+  const [shareClientId] = useState(() => {
+    const clientId = localStorage.getItem(StorageKeys.ShareClientId);
+    if (clientId) {
+      return clientId;
+    }
+
+    const nextClientId = uuidv4();
+    localStorage.setItem(StorageKeys.ShareClientId, nextClientId);
+    return nextClientId;
+  });
   const executeTokenMap = useSelector(selectShareExecuteTokenMap);
   const needVerify = useSelector(selectNeedVerify);
   const sharePassword = useSelector(selectSharePassword);
@@ -140,14 +149,6 @@ function ShareDashboardPage() {
   );
 
   const onLoadShareTask = useMemo(() => {
-    const clientId = localStorage.getItem(StorageKeys.ShareClientId);
-    if (clientId) {
-      setShareClientId(clientId);
-    } else {
-      const id = uuidv4();
-      setShareClientId(id);
-      localStorage.setItem(StorageKeys.ShareClientId, uuidv4());
-    }
     const executeToken = Object.values(executeTokenMap)[0]?.authorizedToken;
     return () =>
       loadShareTask({

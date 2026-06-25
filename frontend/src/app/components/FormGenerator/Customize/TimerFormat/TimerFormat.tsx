@@ -74,7 +74,7 @@ export const TimerFormat: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
     const { value } = data;
 
     const gt = useI18NPrefix(`viz.board.setting`);
-    const valRef = useRef<ITimeDefault>();
+    const valRef = useRef<ITimeDefault | undefined>(undefined);
     const selectRef = useRef<RefSelectProps>(null);
     useEffect(() => {
       valRef.current = value;

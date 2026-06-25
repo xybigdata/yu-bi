@@ -33,7 +33,7 @@ export const WidgetBorder: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
     const { value, options } = data;
     const gt = useI18NPrefix(`viz.board.setting`);
     const tLine = useI18NPrefix(`viz.lineOptions`);
-    const valRef = useRef<BorderConfig>();
+    const valRef = useRef<BorderConfig | undefined>(undefined);
     useEffect(() => {
       valRef.current = value;
     }, [value]);

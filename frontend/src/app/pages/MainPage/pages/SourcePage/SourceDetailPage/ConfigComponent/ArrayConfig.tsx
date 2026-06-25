@@ -75,7 +75,7 @@ export function ArrayConfig({
   const [schemaDataSource, setSchemaDataSource] = useState<
     QueryResultDataSourceRow[]
   >([]);
-  const formRef = useRef<FormInstance<SourceFormModel>>();
+  const formRef = useRef<FormInstance<SourceFormModel> | undefined>(undefined);
   const t = useI18NPrefix('source');
   const tg = useI18NPrefix('global');
 

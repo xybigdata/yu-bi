@@ -3,6 +3,9 @@ set -eu
 
 current_branch="$(git branch --show-current 2>/dev/null || true)"
 full_gate="${YU_BI_FULL_GATE:-}"
+script_dir="$(dirname "$0")"
+
+. "$script_dir/yu-bi-node-path.sh"
 
 cd frontend
 

@@ -16,13 +16,10 @@
  * limitations under the License.
  */
 
-import { ensureEChartsDefaultTheme } from 'app/utils/echartsThemeRuntime';
 import { defaultLazyLoad } from 'utils/loadable';
+import { loadSharePageWithEChartsTheme } from '../shareLoadableRuntime';
 
 export const LazyShareStoryPlayer = defaultLazyLoad(
-  () =>
-    ensureEChartsDefaultTheme().then(() => {
-      return import('./ShareStoryPlayerPage');
-    }),
+  () => loadSharePageWithEChartsTheme(() => import('./ShareStoryPlayerPage')),
   module => module.default,
 );

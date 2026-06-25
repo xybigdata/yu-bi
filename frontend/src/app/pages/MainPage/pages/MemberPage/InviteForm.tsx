@@ -34,7 +34,7 @@ interface ValueType {
 export const InviteForm = memo(
   ({ formProps, afterClose, ...modalProps }: ModalFormProps) => {
     const [options, setOptions] = useState<ValueType[]>([]);
-    const formRef = useRef<FormInstance>();
+    const formRef = useRef<FormInstance | undefined>(undefined);
     const t = useI18NPrefix('member.form');
     const tgv = useI18NPrefix('global.validation');
 

@@ -39,4 +39,10 @@ describe('loadRichTextEditorRuntime', () => {
     await expect(loadRichTextEditorRuntime()).resolves.toBe(runtimeModule);
     expect(loader).toHaveBeenCalledTimes(2);
   });
+
+  test('should load actual rich text editor runtime module', async () => {
+    const runtimeModule = await loadRichTextEditorRuntime();
+
+    expect(runtimeModule.default).toEqual(expect.any(Object));
+  });
 });

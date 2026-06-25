@@ -1,14 +1,11 @@
 import echartsDefaultTheme from 'app/assets/theme/echarts_default_theme.json';
-
-type EChartsThemeRuntimeModule = Pick<typeof import('echarts'), 'registerTheme'>;
+import { loadEChartsRuntime } from 'app/components/ChartGraph/echartsRuntime';
 
 let defaultThemePromise: Promise<void> | null = null;
-let defaultThemeLoader: () => Promise<EChartsThemeRuntimeModule> = () =>
-  import('echarts');
 
 export function ensureEChartsDefaultTheme(): Promise<void> {
   if (!defaultThemePromise) {
-    defaultThemePromise = defaultThemeLoader()
+    defaultThemePromise = loadEChartsRuntime()
       .then(({ registerTheme }) => {
         registerTheme('default', echartsDefaultTheme);
       })
@@ -21,14 +18,6 @@ export function ensureEChartsDefaultTheme(): Promise<void> {
   return defaultThemePromise;
 }
 
-export function __setEChartsDefaultThemeLoaderForTest(
-  loader: () => Promise<EChartsThemeRuntimeModule>,
-) {
-  defaultThemeLoader = loader;
-  defaultThemePromise = null;
-}
-
 export function __resetEChartsDefaultThemeLoaderForTest() {
-  defaultThemeLoader = () => import('echarts');
   defaultThemePromise = null;
 }

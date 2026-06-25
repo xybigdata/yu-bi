@@ -2,7 +2,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import React, { ReactNode } from 'react';
 import { Resizable } from 'react-resizable';
-import { ResizableProps } from 'react-resizable';
+import type { Props as ResizableProps } from 'react-resizable';
 import styled, { css } from 'styled-components';
 import { BLUE, LEVEL_1 } from 'styles/StyleConstants';
 

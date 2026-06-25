@@ -25,7 +25,7 @@ export const CLIENT_RECT_DEBOUNCE_INTERVAL = 200;
 function useClientRect<T extends HTMLElement>(
   debounceInterval: number = CLIENT_RECT_DEBOUNCE_INTERVAL,
   realtime: boolean = false,
-): [DOMRect, RefObject<T>] {
+): [DOMRect, RefObject<T | null>] {
   const ref = useRef<T>(null);
   const [rect, setRect] = useState<DOMRect>(new DOMRect());
 

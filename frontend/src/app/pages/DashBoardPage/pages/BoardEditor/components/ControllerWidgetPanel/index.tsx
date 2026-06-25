@@ -39,7 +39,7 @@ import {
   convertToWidgetMap,
   getOtherStringControlWidgets,
 } from 'app/pages/DashBoardPage/utils/widget';
-import produce from 'immer';
+import { produce } from 'immer';
 import React, {
   memo,
   useCallback,

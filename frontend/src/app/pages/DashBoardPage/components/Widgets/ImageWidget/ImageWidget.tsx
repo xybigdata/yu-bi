@@ -55,7 +55,7 @@ export const ImageWidget: React.FC<{ hideTitle: boolean }> = memo(
     );
     const showBackground =
       !background.image && background.color === 'transparent';
-    const uploaderRef = useRef<HiddenUploaderRef>();
+    const uploaderRef = useRef<HiddenUploaderRef | undefined>(undefined);
 
     useEffect(() => {
       if (widgetInfo.editing) {

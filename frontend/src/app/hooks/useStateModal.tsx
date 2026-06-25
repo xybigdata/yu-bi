@@ -65,8 +65,8 @@ type StateModalProps = {
 function useStateModal({ initState }: { initState?: unknown }) {
   const [form] = Form.useForm();
   const [modal, contextHolder] = Modal.useModal();
-  const okCallbackRef = useRef<StateModalOnOk>();
-  const cancelCallbackRef = useRef<StateModalOnCancel>();
+  const okCallbackRef = useRef<StateModalOnOk | undefined>(undefined);
+  const cancelCallbackRef = useRef<StateModalOnCancel | undefined>(undefined);
   const stateRef = useRef<unknown[]>(initState ? [initState] : []);
 
   const handleSaveCacheValue: StateModalCacheOnChange = (...args) => {

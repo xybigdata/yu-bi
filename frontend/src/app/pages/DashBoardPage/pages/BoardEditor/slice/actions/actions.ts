@@ -48,7 +48,7 @@ import {
 import { Variable } from 'app/pages/MainPage/pages/VariablePage/slice/types';
 import ChartDataView from 'app/types/ChartDataView';
 import { BOARD_SELF_CHART_PREFIX } from 'globalConstants';
-import produce from 'immer';
+import { produce } from 'immer';
 import { ActionCreators } from 'redux-undo';
 import { RootState } from 'types';
 import { uuidv4 } from 'utils/utils';

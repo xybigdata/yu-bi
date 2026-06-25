@@ -62,7 +62,7 @@ import {
 } from '../../slice/selectors';
 import { saveView } from '../../slice/thunks';
 import { isNewView } from '../../utils';
-import { loadSqlFormatter } from './sqlFormatterRuntime';
+import { formatSqlScript } from './formatSqlScript';
 
 type ToolbarLocationState = {
   sourcesId?: string;
@@ -127,14 +127,9 @@ export const Toolbar = memo(
 
     const formatSQL = useCallback(async () => {
       try {
-        const { format } = await loadSqlFormatter();
-
         dispatch(
           actions.changeCurrentEditingView({
-            script: format(script, {
-              denseOperators: true,
-              logicalOperatorNewline: 'before',
-            }),
+            script: await formatSqlScript(script),
           }),
         );
       } catch (error) {

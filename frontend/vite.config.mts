@@ -1,11 +1,15 @@
-import react from '@vitejs/plugin-react';
 import fs from 'fs';
 import path from 'path';
 import { defineConfig, type Plugin } from 'vite';
 import svgr from 'vite-plugin-svgr';
 
+import {
+  createReactPlugin,
+  createVendorManualChunks,
+  createViteAliases,
+} from './vite.shared.mts';
+
 const appRoot = __dirname;
-const srcRoot = path.resolve(appRoot, 'src');
 const publicUrl = process.env.PUBLIC_URL || '';
 
 const htmlInputs = {
@@ -16,7 +20,7 @@ const htmlInputs = {
 };
 
 const customChartPluginsMiddleware = (): Plugin => ({
-  name: 'datart-custom-chart-plugins',
+  name: 'yu-bi-custom-chart-plugins',
   configureServer(server) {
     server.middlewares.use('/api/v1/plugins/custom/charts', (req, res) => {
       const pluginPath = 'custom-chart-plugins';
@@ -38,7 +42,7 @@ const customChartPluginsMiddleware = (): Plugin => ({
 });
 
 const shareHtmlFallback = (): Plugin => ({
-  name: 'datart-share-html-fallback',
+  name: 'yu-bi-share-html-fallback',
   configureServer(server) {
     server.middlewares.use(async (req, res, next) => {
       const url = req.url || '';
@@ -62,111 +66,16 @@ const shareHtmlFallback = (): Plugin => ({
   },
 });
 
-const lessTildeImportCompat = (): Plugin => ({
-  name: 'datart-less-tilde-import-compat',
-  enforce: 'pre',
-  transform(code, id) {
-    if (!id.endsWith('.less')) {
-      return null;
-    }
-
-    return code.replace(/@import\s+(['"])~/g, '@import $1');
-  },
-});
-
-const craSvgReactComponentCompat = (): Plugin => ({
-  name: 'datart-cra-svg-react-component-compat',
-  enforce: 'pre',
-  transform(code, id) {
-    if (!/\.[jt]sx?$/.test(id)) {
-      return null;
-    }
-
-    return code.replace(
-      /import\s+\{\s*ReactComponent\s+as\s+([A-Za-z_$][\w$]*)\s*\}\s+from\s+(['"])([^'"]+\.svg)\2;?/g,
-      'import $1 from $2$3?react$2;',
-    );
-  },
-});
-
-const vendorManualChunks = (id: string) => {
-  if (!id.includes('node_modules')) {
-    return undefined;
-  }
-
-  if (id.includes('/node_modules/antd/') || id.includes('/node_modules/@ant-design/')) {
-    return 'antdDesign';
-  }
-
-  if (id.includes('/node_modules/echarts/') || id.includes('/node_modules/zrender/')) {
-    return 'echarts';
-  }
-
-  if (id.includes('/node_modules/quill/')) {
-    return 'quill';
-  }
-
-  if (
-    id.includes('/node_modules/react/') ||
-    id.includes('/node_modules/react-dom/') ||
-    id.includes('/node_modules/scheduler/')
-  ) {
-    return 'react';
-  }
-
-  if (id.includes('/node_modules/react-grid-layout/')) {
-    return 'reactGridLayout';
-  }
-
-  if (id.includes('/node_modules/reveal.js/')) {
-    return 'reveal';
-  }
-
-  if (id.includes('/node_modules/flexlayout-react/')) {
-    return 'flexlayout';
-  }
-
-  return undefined;
-};
-
 export default defineConfig(({ mode }) => ({
   publicDir: 'public',
   plugins: [
-    react({
-      babel: {
-        plugins: ['babel-plugin-styled-components'],
-      },
-    }),
+    createReactPlugin(),
     svgr(),
-    lessTildeImportCompat(),
-    craSvgReactComponentCompat(),
     customChartPluginsMiddleware(),
     shareHtmlFallback(),
   ],
   resolve: {
-    alias: [
-      { find: 'app', replacement: path.resolve(srcRoot, 'app') },
-      {
-        find: 'core-js',
-        replacement: path.resolve(appRoot, 'node_modules/core-js'),
-      },
-      {
-        find: 'entryPointFactory',
-        replacement: path.resolve(srcRoot, 'entryPointFactory.tsx'),
-      },
-      {
-        find: 'globalConstants',
-        replacement: path.resolve(srcRoot, 'globalConstants.ts'),
-      },
-      { find: 'locales', replacement: path.resolve(srcRoot, 'locales') },
-      {
-        find: /^redux\/(.+)/,
-        replacement: path.resolve(srcRoot, 'redux/$1'),
-      },
-      { find: 'styles', replacement: path.resolve(srcRoot, 'styles') },
-      { find: 'types', replacement: path.resolve(srcRoot, 'types') },
-      { find: 'utils', replacement: path.resolve(srcRoot, 'utils') },
-    ],
+    alias: createViteAliases(appRoot),
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify(mode),
@@ -185,53 +94,10 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  css: {
-    preprocessorOptions: {
-      less: {
-        javascriptEnabled: true,
-        rewriteUrls: 'all',
-        plugins: [
-          {
-            install(less, pluginManager) {
-              const FileManager = less.FileManager;
-              class TildeFileManager extends FileManager {
-                supports(filename) {
-                  return filename.startsWith('~');
-                }
-
-                supportsSync(filename) {
-                  return this.supports(filename);
-                }
-
-                loadFile(filename, currentDirectory, options, environment) {
-                  return super.loadFile(
-                    path.resolve(appRoot, 'node_modules', filename.slice(1)),
-                    '',
-                    options,
-                    environment,
-                  );
-                }
-
-                loadFileSync(filename, currentDirectory, options, environment) {
-                  return super.loadFileSync(
-                    path.resolve(appRoot, 'node_modules', filename.slice(1)),
-                    '',
-                    options,
-                    environment,
-                  );
-                }
-              }
-
-              pluginManager.addFileManager(new TildeFileManager());
-            },
-          },
-        ],
-      },
-    },
-  },
   build: {
     outDir: 'build',
     sourcemap: false,
+    target: 'es2020',
     rollupOptions: {
       input: htmlInputs,
       output: {
@@ -243,7 +109,7 @@ export default defineConfig(({ mode }) => ({
             ? 'static/css/[name].[hash][extname]'
             : 'static/media/[name].[hash][extname]';
         },
-        manualChunks: vendorManualChunks,
+        manualChunks: createVendorManualChunks,
       },
     },
   },

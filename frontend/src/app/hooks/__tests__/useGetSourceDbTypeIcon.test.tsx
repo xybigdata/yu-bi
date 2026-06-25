@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { ReactElement } from 'react';
+import { ReactElement, ReactNode } from 'react';
 import useGetSourceDbTypeIcon from '../useGetSourceDbTypeIcon';
 
 const createSource = (overrides = {}) => ({
@@ -25,7 +25,7 @@ describe('useGetSourceDbTypeIcon Test', () => {
 
     const icon = result.current(
       createSource({ config: '{invalid-json}' }),
-    ) as ReactElement;
+    ) as ReactElement<{ children?: ReactNode }>;
     expect(icon.props.children).toBe('');
   });
 
@@ -34,7 +34,7 @@ describe('useGetSourceDbTypeIcon Test', () => {
 
     const icon = result.current(
       createSource({ config: 'true' }),
-    ) as ReactElement;
+    ) as ReactElement<{ children?: ReactNode }>;
 
     expect(icon.props.children).toBe('');
   });

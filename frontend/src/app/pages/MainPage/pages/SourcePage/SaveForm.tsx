@@ -67,7 +67,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
     selectSourceFolderTree(state, { id: initialValues?.id, getDisabled }),
   );
   const orgId = useSelector(selectOrgId);
-  const formRef = useRef<FormInstance>();
+  const formRef = useRef<FormInstance | undefined>(undefined);
   const t = useI18NPrefix('source.saveForm');
   const tg = useI18NPrefix('global');
 

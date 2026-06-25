@@ -5,6 +5,7 @@ import { Provider } from 'react-redux';
 import { configureAppStore } from 'redux/configureStore';
 import { DefaultTheme, useTheme } from 'styled-components';
 import { RootState } from 'types';
+import { afterEach, vi } from 'vitest';
 import { selectTheme } from '../slice/selectors';
 import { ThemeProvider } from '../ThemeProvider';
 
@@ -19,6 +20,10 @@ const renderThemeProvider = (store: Store, Child: React.FunctionComponent) =>
 
 describe('<ThemeProvider />', () => {
   let store: ReturnType<typeof configureAppStore>;
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   beforeEach(() => {
     store = configureAppStore();
@@ -40,5 +45,18 @@ describe('<ThemeProvider />', () => {
     };
     renderThemeProvider(store, children);
     expect(theme).toBe(selectTheme(store.getState() as RootState));
+  });
+
+  it('should not use deprecated AntD global theme config', () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+    const children = () => <h1>theme</h1>;
+
+    renderThemeProvider(store, children);
+
+    expect(consoleErrorSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining('[antd: ConfigProvider] `config`'),
+    );
   });
 });

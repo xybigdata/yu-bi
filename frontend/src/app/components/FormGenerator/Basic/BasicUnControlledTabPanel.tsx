@@ -24,7 +24,7 @@ import {
   ChartStyleSectionGroup,
 } from 'app/types/ChartConfig';
 import { addByKey, updateByAction } from 'app/utils/mutation';
-import produce from 'immer';
+import { produce } from 'immer';
 import { FC, memo, useReducer, useState } from 'react';
 import styled from 'styled-components';
 import {

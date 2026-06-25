@@ -56,6 +56,27 @@ class SqlQueryScriptProcessorTest {
         );
     }
 
+    @Test
+    void shouldKeepModernQueryFallbackCompatibility() {
+        List<String> queries = List.of(
+                "WITH latest_orders AS (SELECT * FROM orders WHERE created_at >= DATE '2026-01-01') SELECT * FROM latest_orders",
+                "SELECT customer_id, ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY created_at DESC) AS row_num FROM orders",
+                "SELECT payload->>'$.status' AS status FROM order_events",
+                "SELECT * FROM orders TABLESAMPLE SYSTEM (10)"
+        );
+
+        for (String query : queries) {
+            QueryScriptProcessResult result = processor(false).process(queryScript(query));
+
+            assertEquals(
+                    "( " + query + " ) AS DATART_VTABLE",
+                    cleanup(SqlNodeUtils.toSql(result.getFrom(), mysqlDialect, false))
+            );
+            assertEquals("DATART_VTABLE", result.getTablePrefix());
+            assertTrue(result.isWithDefaultPrefix());
+        }
+    }
+
     private SqlQueryScriptProcessor processor(boolean enableSpecialSql) {
         return new SqlQueryScriptProcessor(enableSpecialSql, mysqlDialect);
     }

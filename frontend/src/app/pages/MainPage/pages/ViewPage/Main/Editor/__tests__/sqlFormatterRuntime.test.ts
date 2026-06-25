@@ -41,4 +41,19 @@ describe('loadSqlFormatter', () => {
     await expect(loadSqlFormatter()).resolves.toBe(runtimeModule);
     expect(loader).toHaveBeenCalledTimes(2);
   });
+
+  test('should load actual formatter runtime and format basic sql', async () => {
+    const runtimeModule = await loadSqlFormatter();
+
+    const formattedSql = runtimeModule.format(
+      'select id from users where id = 1',
+      {
+        denseOperators: true,
+        logicalOperatorNewline: 'before',
+      },
+    );
+
+    expect(formattedSql).toContain('\n');
+    expect(formattedSql).toContain('id=1');
+  });
 });

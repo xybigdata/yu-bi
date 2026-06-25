@@ -1,10 +1,12 @@
 import { FONT_FAMILIES, FONT_SIZES } from 'globalConstants';
 import { ImageDropModule } from '../modules/ImageDropModule';
 import {
-  Quill,
+  importQuillAttributor,
   QuillInstance,
   QuillWithContainerAndKeyboard,
   RangeStatic,
+  registerQuillDefinition,
+  registerQuillPath,
 } from '../quillCompat';
 import CalcFieldBlot from './CalcFieldBlot';
 import TagBlot from './TagBlot';
@@ -16,17 +18,17 @@ function registerRichTextPlugins() {
     return;
   }
 
-  Quill.register(CalcFieldBlot);
-  Quill.register('modules/imageDrop', ImageDropModule);
-  Quill.register('formats/tag', TagBlot);
+  registerQuillDefinition(CalcFieldBlot);
+  registerQuillPath('modules/imageDrop', ImageDropModule);
+  registerQuillPath('formats/tag', TagBlot);
 
-  const size = Quill.import('attributors/style/size');
+  const size = importQuillAttributor('attributors/style/size');
   size.whitelist = FONT_SIZES.map(fontSize => `${fontSize}px`);
-  Quill.register(size, true);
+  registerQuillDefinition(size, true);
 
-  const font = Quill.import('attributors/style/font');
+  const font = importQuillAttributor('attributors/style/font');
   font.whitelist = FONT_FAMILIES.map(font => font.value);
-  Quill.register(font, true);
+  registerQuillDefinition(font, true);
 
   pluginsRegistered = true;
 }
@@ -330,5 +332,5 @@ class CalcField {
   };
 }
 
-Quill.register('modules/calcfield', CalcField);
+registerQuillPath('modules/calcfield', CalcField);
 export default CalcField;

@@ -69,6 +69,8 @@ const ChartIFrameLifecycleAdapter: FC<{
 }) => {
   const [chartResourceLoader] = useState(() => new ChartIFrameResourceLoader());
   const eventBrokerRef = useRef<ChartIFrameEventBroker | null>(null);
+  const latestBrokerOptionRef = useRef<BrokerOption | undefined>(undefined);
+  const latestBrokerContextRef = useRef<BrokerContext | undefined>(undefined);
   const [containerStatus, setContainerStatus] = useState(ContainerStatus.INIT);
   const { document, window } = useFrame();
   const [containerId] = useState(() => `datart-${uuidv4()}`);
@@ -123,6 +125,9 @@ const ChartIFrameLifecycleAdapter: FC<{
     window,
   ]);
 
+  latestBrokerOptionRef.current = buildBrokerOption();
+  latestBrokerContextRef.current = buildBrokerContext();
+
   /**
    * Chart Mount Event
    * Dependency: 'chart?.meta?.id', 'isShown'
@@ -164,8 +169,8 @@ const ChartIFrameLifecycleAdapter: FC<{
       setContainerStatus(ContainerStatus.INIT);
       eventBrokerRef?.current?.publish(
         ChartLifecycle.UnMount,
-        buildBrokerOption(),
-        buildBrokerContext(),
+        latestBrokerOptionRef.current || buildBrokerOption(),
+        latestBrokerContextRef.current || buildBrokerContext(),
       );
       eventBrokerRef?.current?.dispose();
     };

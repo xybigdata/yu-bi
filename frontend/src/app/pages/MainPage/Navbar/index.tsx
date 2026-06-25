@@ -70,7 +70,7 @@ import {
 import themeSlice from 'styles/theme/slice';
 import { selectThemeKey } from 'styles/theme/slice/selectors';
 import { ThemeKeyType } from 'styles/theme/slice/types';
-import { changeAntdTheme, saveTheme } from 'styles/theme/utils';
+import { saveTheme } from 'styles/theme/utils';
 import { Access } from '../Access';
 import {
   PermissionLevels,
@@ -278,7 +278,6 @@ export function Navbar() {
     (theme: ThemeKeyType) => {
       if (themeKey !== theme) {
         dispatch(themeSlice.actions.changeTheme(theme));
-        changeAntdTheme(theme);
         saveTheme(theme);
       }
     },

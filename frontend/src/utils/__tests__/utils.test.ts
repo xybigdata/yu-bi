@@ -4,6 +4,7 @@ import {
   getErrorMessage,
   listToTree,
   modelListFormsTreeByTableName,
+  newIssueUrl,
   rejectHandle,
   universalUUID,
   uuidv4,
@@ -272,5 +273,32 @@ describe('utils error helpers', () => {
       ),
     ).toBe('server message');
     expect(rejectWithValue).toHaveBeenCalledWith('server message');
+  });
+});
+
+describe('utils issue url', () => {
+  it('should create GitHub issue url for yu-bi repository', () => {
+    const url = newIssueUrl({
+      type: 'github',
+      title: 'SQL parse failed',
+      body: 'select * from demo',
+      labels: ['bug', 'sql'],
+    });
+
+    expect(url).toBe(
+      'https://github.com/xybigdata/yu-bi/issues/new?body=select+*+from+demo&title=SQL+parse+failed&labels=bug%2Csql',
+    );
+  });
+
+  it('should create Gitee issue url for yu-bi repository', () => {
+    const url = newIssueUrl({
+      type: 'gitee',
+      title: 'SQL parse failed',
+      description: 'select * from demo',
+    });
+
+    expect(url).toBe(
+      'https://gitee.com/xybigdata/yu-bi/issues/new?description=select+*+from+demo&title=SQL+parse+failed',
+    );
   });
 });

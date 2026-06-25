@@ -32,6 +32,14 @@ public class DataSourceFactoryHikariImpl implements DataSourceFactory<HikariData
 
     @Override
     public HikariDataSource createDataSource(JdbcProperties jdbcProperties) {
+        HikariConfig config = createConfig(jdbcProperties);
+
+        HikariDataSource dataSource = new HikariDataSource(config);
+        log.info("hikari data source created ({})", dataSource.getPoolName());
+        return dataSource;
+    }
+
+    HikariConfig createConfig(JdbcProperties jdbcProperties) {
         HikariConfig config = new HikariConfig();
         config.setDriverClassName(jdbcProperties.getDriverClass());
         config.setJdbcUrl(jdbcProperties.getUrl());
@@ -54,9 +62,7 @@ public class DataSourceFactoryHikariImpl implements DataSourceFactory<HikariData
             }
         }
 
-        HikariDataSource dataSource = new HikariDataSource(config);
-        log.info("hikari data source created ({})", dataSource.getPoolName());
-        return dataSource;
+        return config;
     }
 
     @Override

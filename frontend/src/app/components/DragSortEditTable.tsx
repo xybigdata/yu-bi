@@ -40,9 +40,7 @@ interface EditableRowProps {
   index: number;
 }
 export interface DragEditTableProps extends TableProps<RelationFilterValue> {
-  onMoveRowEnd?: (
-    row: TableProps<RelationFilterValue>['dataSource'],
-  ) => void;
+  onMoveRowEnd?: (row: TableProps<RelationFilterValue>['dataSource']) => void;
 }
 export const DragSortEditTable: React.FC<DragEditTableProps> = ({
   components,

@@ -17,7 +17,7 @@
  */
 import { Form, Select } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import produce from 'immer';
+import { produce } from 'immer';
 import React, {
   memo,
   useCallback,
