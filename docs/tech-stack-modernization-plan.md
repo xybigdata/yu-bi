@@ -104,8 +104,8 @@ git log --oneline --decorate -8
 | 主线分支                   | `main`                                                     |
 | 当前专题分支               | `codex/modernization-frontend-security-deps`               |
 | 当前专题                   | P2-E 前端安全依赖与运行时治理                              |
-| 当前分支相对 `origin/main` | `0 113`，以恢复时重新执行命令为准                          |
-| 最近专题提交               | `970a7f31a chore: 增加构建报告基线校验`                    |
+| 当前分支相对 `origin/main` | `0 114`，以恢复时重新执行命令为准                          |
+| 最近专题提交               | `dc7e15ca1 chore: 固化构建报告观察基线`                    |
 | 最近主线提交               | `f1739f621 chore: 合入 PRESTO driver 元数据治理`           |
 
 已确认的自动化权限和偏好：
@@ -3223,6 +3223,26 @@ YU_BI_CHUNK_REPORT_BASELINE_REPORT=../.tmp/build-report.json npm run build:repor
 npm run checkTs
 npm run eslint -- scripts/check-build-report-baseline-core.mjs scripts/check-build-report-baseline.mjs scripts/__tests__/check-build-report-baseline.test.mts
 npm exec -- prettier --check scripts/check-build-report-baseline-core.mjs scripts/check-build-report-baseline.mjs scripts/__tests__/check-build-report-baseline.test.mts scripts/baselines/build-report-baseline.json package.json ../docs/tech-stack-modernization-plan.md
+git diff --check
+```
+
+最新批次：CI 构建体积报告 artifact 与观察基线
+
+- `.github/workflows/dev-ut-stage.js.yml` 中的前端构建报告步骤改为命名步骤 `Report frontend build size`
+- CI 仍先执行默认文本 `npm run build:report`，保留日志可读性
+- 额外生成 `frontend/build/build-report.json`，使用 `YU_BI_CHUNK_REPORT_FORMAT=json`、`YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1` 和 `YU_BI_CHUNK_REPORT_OUTPUT`
+- CI 随后执行 `npm run build:report:check`，使用仓库内观察基线比对稳定 id 清单
+- 新增 `actions/upload-artifact@v4` 上传 `frontend-build-report`，便于后续查看 JSON summary 和排查包体变化
+- 当前仍不设置 fail-on-oversized 阈值；失败只来自稳定 id 清单偏离观察基线，后续需要更新基线或处理包体回退时再推进
+
+本批次验证命令：
+
+```bash
+npm run test -- scripts/__tests__/check-build-report-baseline.test.mts scripts/__tests__/report-build-chunks.test.mts
+YU_BI_CHUNK_REPORT_FORMAT=json YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 YU_BI_CHUNK_REPORT_OUTPUT=build/build-report.json npm run build:report
+YU_BI_CHUNK_REPORT_BASELINE_REPORT=build/build-report.json npm run build:report:check
+npm run checkTs
+npm exec -- prettier --check ../.github/workflows/dev-ut-stage.js.yml ../docs/tech-stack-modernization-plan.md
 git diff --check
 ```
 
