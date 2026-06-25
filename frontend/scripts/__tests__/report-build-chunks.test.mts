@@ -7,6 +7,7 @@ import { promisify } from 'node:util';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
+  countItemsByCategory,
   createBuildReport,
   getBuildItemCategory,
   createOversizedSummary,
@@ -87,12 +88,24 @@ describe('report-build-chunks', () => {
     expect(report.oversizedCount).toBe(1);
     expect(report.summary).toEqual({
       asset: {
+        categoryCounts: {
+          all: { geo: 1 },
+          gzipOversized: {},
+          oversized: {},
+          rawOversized: {},
+        },
         files: 1,
         gzipOversized: [],
         oversized: [],
         rawOversized: [],
       },
       chunk: {
+        categoryCounts: {
+          all: { task: 1, vendor: 2 },
+          gzipOversized: {},
+          oversized: { vendor: 1 },
+          rawOversized: { vendor: 1 },
+        },
         files: 3,
         gzipOversized: [],
         oversized: ['antdDesign.js'],
@@ -277,6 +290,7 @@ describe('report-build-chunks', () => {
           },
           {
             bytes: 900,
+            category: 'runtime',
             gzipBytes: 1300,
             id: 'gzip-heavy.js',
             name: 'gzip-heavy.CAFEBABE.js',
@@ -295,6 +309,12 @@ describe('report-build-chunks', () => {
         }),
       ),
     ).toEqual({
+      categoryCounts: {
+        all: { runtime: 1, vendor: 2 },
+        gzipOversized: { runtime: 1 },
+        oversized: { runtime: 1, vendor: 1 },
+        rawOversized: { vendor: 1 },
+      },
       files: 3,
       gzipOversized: ['gzip-heavy.js'],
       oversized: ['antdDesign.js', 'gzip-heavy.js'],
@@ -356,6 +376,21 @@ describe('report-build-chunks', () => {
     ['logo.svg', 'asset'],
   ])('classifies build item %s as %s', (name, category) => {
     expect(getBuildItemCategory(name)).toBe(category);
+  });
+
+  it('counts build items by category deterministically', () => {
+    expect(
+      countItemsByCategory([
+        { category: 'vendor', name: 'antdDesign.js' },
+        { name: 'shareChart.js' },
+        { name: 'geo-china.map.json' },
+        { category: 'vendor', name: 'monacoEditor.js' },
+      ]),
+    ).toEqual({
+      geo: 1,
+      runtime: 1,
+      vendor: 2,
+    });
   });
 
   it.each([

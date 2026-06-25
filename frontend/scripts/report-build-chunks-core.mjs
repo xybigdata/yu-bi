@@ -232,6 +232,16 @@ export function getOversizedItems(
   };
 }
 
+export function countItemsByCategory(items) {
+  return items
+    .map(item => item.category ?? getBuildItemCategory(item.name))
+    .toSorted()
+    .reduce((counts, category) => {
+      counts[category] = (counts[category] ?? 0) + 1;
+      return counts;
+    }, {});
+}
+
 export function createOversizedSummary(items, options) {
   const { rawOversized, gzipOversized, oversized } = getOversizedItems(
     items,
@@ -239,6 +249,12 @@ export function createOversizedSummary(items, options) {
   );
 
   return {
+    categoryCounts: {
+      all: countItemsByCategory(items),
+      gzipOversized: countItemsByCategory(gzipOversized),
+      oversized: countItemsByCategory(oversized),
+      rawOversized: countItemsByCategory(rawOversized),
+    },
     files: items.length,
     rawOversized: rawOversized.map(item => item.id ?? getStableBuildItemId(item.name)),
     gzipOversized: gzipOversized.map(
