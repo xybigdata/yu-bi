@@ -39,14 +39,19 @@ import {
 
 type VirtualTableRecord = object;
 
-type VirtualTableColumn = NonNullable<TableProps<VirtualTableRecord>['columns']>[number];
+type VirtualTableColumn = NonNullable<
+  TableProps<VirtualTableRecord>['columns']
+>[number];
 
 type DataIndex<RecordType> = TableColumnType<RecordType>['dataIndex'];
 
 interface VirtualScrollBodyInfo {
   scrollbarSize: number;
   ref: React.Ref<VirtualScrollBodyRef>;
-  onScroll: (info: { currentTarget?: HTMLElement; scrollLeft?: number }) => void;
+  onScroll: (info: {
+    currentTarget?: HTMLElement;
+    scrollLeft?: number;
+  }) => void;
 }
 
 type CustomizeScrollBody<RecordType> = (
@@ -127,21 +132,23 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
     });
     return obj;
   });
-  const [Grid, setGrid] = useState<Awaited<
-    ReturnType<typeof loadVirtualTableRuntime>
-  >['Grid'] | null>(null);
+  const [Grid, setGrid] = useState<
+    Awaited<ReturnType<typeof loadVirtualTableRuntime>>['Grid'] | null
+  >(null);
   isFull.current = boxWidth > scroll.x;
 
   useEffect(() => {
     let cancelled = false;
 
-    loadVirtualTableRuntime().then(module => {
-      if (!cancelled) {
-        setGrid(() => module.Grid);
-      }
-    }).catch(error => {
-      console.error('Load virtual table runtime failed', error);
-    });
+    loadVirtualTableRuntime()
+      .then(module => {
+        if (!cancelled) {
+          setGrid(() => module.Grid);
+        }
+      })
+      .catch(error => {
+        console.error('Load virtual table runtime failed', error);
+      });
 
     return () => {
       cancelled = true;
@@ -164,14 +171,17 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
       const normalizedWidth = widthColumns[i]?.width;
       return {
         ...column,
-        width: typeof column.width === 'number'
-          ? normalizedWidth
-          : Math.floor(boxWidth / widthColumnCount),
+        width:
+          typeof column.width === 'number'
+            ? normalizedWidth
+            : Math.floor(boxWidth / widthColumnCount),
       };
     });
   }, [boxWidth, typedColumns, widthColumnCount, widthColumns]);
 
-  const renderVirtualList = useCallback<CustomizeScrollBody<VirtualTableRecord>>(
+  const renderVirtualList = useCallback<
+    CustomizeScrollBody<VirtualTableRecord>
+  >(
     (rawData, { scrollbarSize, ref, onScroll }) => {
       if (typeof ref === 'function') {
         ref(connectObject);
@@ -221,7 +231,7 @@ export const VirtualTable = memo((props: VirtualTableProps) => {
         />
       );
     },
-    [mergedColumns, boxWidth, connectObject, dataSource, scroll],
+    [Grid, mergedColumns, boxWidth, connectObject, dataSource, scroll],
   );
 
   return (

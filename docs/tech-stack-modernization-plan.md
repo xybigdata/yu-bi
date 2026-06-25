@@ -2685,6 +2685,25 @@ npm audit --json
 git diff --check
 ```
 
+最新批次：VirtualTable 异步 runtime 渲染边界补强
+
+- 已修复 `VirtualTable` 的 `renderVirtualList` memo 依赖，补入异步加载后的 `Grid`
+- 该修复确保 `react-window` runtime 加载完成后，body renderer 能从 placeholder 切换到真实虚拟表格 Grid，不继续使用旧闭包
+- 已新增组件测试覆盖 runtime resolve 后 mock Grid 渲染单元格内容
+- 相关测试仍覆盖 runtime 加载失败时保持 placeholder、以及列宽不向 Grid 传入负数
+- 本批次不升级 `react-window`，不改变 `VirtualTable` 对外 props 协议
+
+本批次验证命令：
+
+```bash
+npm run test -- src/app/components/__tests__/VirtualTable.test.tsx src/app/components/__tests__/virtualTableRuntime.test.ts
+npm run checkTs
+npm run eslint -- src/app/components/VirtualTable.tsx src/app/components/__tests__/VirtualTable.test.tsx
+npm exec -- prettier --check src/app/components/VirtualTable.tsx src/app/components/__tests__/VirtualTable.test.tsx ../docs/tech-stack-modernization-plan.md
+npm audit --json
+git diff --check
+```
+
 ## 12. 后续队列
 
 当前队列按“继续在当前专题分支累计”的方式推进。状态为“评估”的事项可以先补测试和调查结论；状态为“可推进”的事项可以直接进入实现和相关门禁。不要因为队列中的单项完成就新建分支或合入 `main`。
