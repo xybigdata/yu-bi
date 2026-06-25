@@ -3297,13 +3297,13 @@ git diff --check
 | 阶段      | 事项                           | 风险 | 执行策略                                                                                                                  |
 | --------- | ------------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------- |
 | P2-E-Next | 前端剩余 outdated 复核         | 中   | 暂停重复试装；按 12.1 的触发条件定期复核，当前不为这 7 项强行升级                                                         |
-| P2-E-Next | 前端运行时 smoke 补强          | 中   | 可推进；已补 ECharts 实例和 Monaco SQL 语言运行时 smoke，继续补 Quill、分享页等动态运行时入口的最小回归                   |
+| P2-E-Next | 前端运行时 smoke 补强          | 中   | 可推进；已补 ECharts 实例、Monaco SQL 语言、富文本 runtime loader 和分享页富文本入口 smoke，继续补其余动态运行时入口      |
 | P2-E-Next | 前端构建产物治理               | 中   | 可推进；JS gzip 超限已清零，ECharts 按需拆分试验暂不保留，后续优先分析 raw 维度的 `monacoEditor`、`antdDesign` 和地图资源 |
 | P2-F      | AntD 6 主版本评估              | 高   | 暂缓；继续等待 Pro Components 稳定版支持 AntD 6，不采用预发布 3.x 链路                                                    |
 | P2-G      | ECharts 6 主版本评估           | 高   | 已完成；已补真实 ECharts 运行时实例 smoke，后续只在图表主链变化时继续增强浏览器层覆盖                                     |
 | P2-H      | ESLint 10 主版本评估           | 中高 | 暂缓；当前被 `eslint-plugin-react` / `eslint-plugin-import` 最新稳定 peer 阻塞，等待生态支持后再升级                      |
 | P2-I      | 数据源 provider / 方言依赖审计 | 高   | 评估；继续补 SQL parser / 方言 fallback / driver metadata 回归基线，不做大规模重构                                        |
-| P2-J      | 富文本编辑器运行时 smoke       | 中   | 可推进；已补 jsdom 层运行时和 Dashboard Widget smoke，后续补分享页展示和浏览器入口                                        |
+| P2-J      | 富文本编辑器运行时 smoke       | 中   | 可推进；已补 runtime loader、jsdom 层运行时、Dashboard Widget smoke 和分享图表富文本入口 smoke，后续按需补浏览器入口      |
 | P2-K      | 后端依赖补丁线滚动收口         | 中   | 当前属性补丁线已收口；仅定期复核稳定 patch，milestone、beta 或主版本跳跃暂不推进                                          |
 
 ## 13. 门禁策略
@@ -3350,9 +3350,13 @@ npm ci --dry-run --ignore-scripts
 - 新增真实 ECharts 运行时实例 smoke，覆盖 `loadEChartsRuntime()` 加载实际 `echarts` 模块后，使用 SVG renderer 完成 `init`、`setOption`、`resize`、`dispose`
 - 新增真实 Monaco SQL 语言运行时 smoke，覆盖 `ensureMonacoSqlLanguage()` 加载实际 SQL language module 后注册语言和 token provider
 - 补齐测试环境 `matchMedia` mock 的现代 `addEventListener/removeEventListener` API，兼容 Monaco 等较新浏览器运行时依赖
+- 新增真实富文本 runtime loader smoke，覆盖 `loadRichTextEditorRuntime()` 默认动态导入能返回实际 `RichTextEditorRuntime` 组件导出
+- 新增分享图表页富文本入口 smoke，覆盖 `chartGraphId=react-rich-text` 时从 `ChartManager` 取到富文本图表模型，并把富文本 delta 配置传递给分享容器
 - canvas mock 仅限定在该测试内，避免扩大 jsdom 全局环境
 - 已执行：`npm run test -- src/app/components/ChartGraph/__tests__/echartsRuntime.test.ts`
 - 已执行：`npm run test -- src/app/components/MonacoEditor/__tests__/runtime.test.ts`
+- 已执行：`npm run test -- src/app/components/ChartGraph/BasicRichText/__tests__/runtime.test.ts`
+- 已执行：`npm run test -- src/app/pages/SharePage/Chart/__tests__/ChartPreviewBoardForShare.smoke.test.tsx`
 
 测试缺口处理：
 

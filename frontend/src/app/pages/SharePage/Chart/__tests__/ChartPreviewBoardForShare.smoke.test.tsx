@@ -4,7 +4,10 @@ import { useSelector } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 import { describe, expect, test, vi } from 'vitest';
 
-import { ChartInteractionEvent } from 'app/constants';
+import {
+  ChartInteractionEvent,
+  ChartStyleSectionComponentType,
+} from 'app/constants';
 import useResizeObserver from 'app/hooks/useResizeObserver';
 import type { IChart } from 'app/types/Chart';
 import type ChartDataSetDTO from 'app/types/ChartDataSet';
@@ -16,6 +19,16 @@ import ChartPreviewBoardForShare from '../ChartPreviewBoardForShare';
 const dispatchMock = vi.fn();
 const registerMouseEventsMock = vi.fn();
 const iframePropsMock = vi.fn();
+const getChartByIdMock = vi.fn(
+  (chartGraphId?: string) =>
+    ({
+      meta: {
+        id: chartGraphId,
+        name: chartGraphId || '',
+      },
+      registerMouseEvents: registerMouseEventsMock,
+    }) as Partial<IChart>,
+);
 
 vi.mock('react-redux', () => ({
   useSelector: vi.fn(),
@@ -36,10 +49,7 @@ vi.mock('app/hooks/useDebouncedLoadingStatus', () => ({
 vi.mock('app/models/ChartManager', () => ({
   default: {
     instance: () => ({
-      getById: () =>
-        ({
-          registerMouseEvents: registerMouseEventsMock,
-        }) as Partial<IChart>,
+      getById: getChartByIdMock,
     }),
   },
 }));
@@ -131,8 +141,12 @@ const fetchedDataset: ChartDataSetDTO = {
 };
 
 const createChartPreview = ({
+  chartConfig,
+  chartGraphId = 'basic-line-chart',
   viewId,
 }: {
+  chartConfig?: ChartPreview['chartConfig'];
+  chartGraphId?: string;
   viewId?: string;
 } = {}): ChartPreview =>
   ({
@@ -140,7 +154,7 @@ const createChartPreview = ({
       config: {
         aggregation: true,
         chartConfig: {},
-        chartGraphId: 'basic-line-chart',
+        chartGraphId,
         computedFields: [],
         sampleData,
       },
@@ -159,6 +173,7 @@ const createChartPreview = ({
       datas: [],
       interactions: [],
       styles: [],
+      ...chartConfig,
     },
     dataset: fetchedDataset,
     isLoadingData: false,
@@ -176,6 +191,7 @@ describe('ChartPreviewBoardForShare smoke', () => {
     dispatchMock.mockClear();
     registerMouseEventsMock.mockClear();
     iframePropsMock.mockClear();
+    getChartByIdMock.mockClear();
     vi.mocked(useSelector).mockImplementation(selector =>
       selector({
         share: {
@@ -245,6 +261,62 @@ describe('ChartPreviewBoardForShare smoke', () => {
       expect.objectContaining({
         payload: [{ index: '0,0', data: { name: 'sample' } }],
         type: 'share/changeSelectedItems',
+      }),
+    );
+  });
+
+  test('should pass rich text chart model and content to share container', async () => {
+    const serializedDelta = JSON.stringify({
+      ops: [{ insert: 'share rich text' }, { insert: '\n' }],
+    });
+    const richTextPreview = createChartPreview({
+      chartConfig: {
+        datas: [],
+        interactions: [],
+        styles: [
+          {
+            comType: ChartStyleSectionComponentType.GROUP,
+            key: 'delta',
+            label: 'delta',
+            rows: [
+              {
+                comType: ChartStyleSectionComponentType.INPUT,
+                key: 'richText',
+                label: 'richText',
+                value: serializedDelta,
+              },
+            ],
+          },
+        ],
+      } as ChartPreview['chartConfig'],
+      chartGraphId: 'react-rich-text',
+    });
+
+    renderBoard(richTextPreview);
+
+    await screen.findByTestId('chart-iframe-container');
+
+    expect(getChartByIdMock).toHaveBeenCalledWith('react-rich-text');
+    expect(iframePropsMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chart: expect.objectContaining({
+          meta: expect.objectContaining({
+            id: 'react-rich-text',
+          }),
+        }),
+        config: expect.objectContaining({
+          styles: expect.arrayContaining([
+            expect.objectContaining({
+              key: 'delta',
+              rows: expect.arrayContaining([
+                expect.objectContaining({
+                  key: 'richText',
+                  value: serializedDelta,
+                }),
+              ]),
+            }),
+          ]),
+        }),
       }),
     );
   });
