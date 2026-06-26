@@ -110,6 +110,7 @@ git log --oneline --decorate -8
 - gzip 维度 JS 当前已无超限；asset gzip 仍主要来自 `geo-china-city.map.json`
 - 路由级页面 Loadable 已补集中 smoke，覆盖顶层页面、MainPage 子页、分享页和看板子页懒加载入口
 - React 入口工厂已补 smoke，覆盖主应用和分享页共同使用的 `createRoot` 装配路径，以及生产环境 React DevTools hook 关闭逻辑
+- 看板只读入口已补 smoke，覆盖 read 模式 BoardProvider 装配、auto/free 看板分支、数据拉取、可见性派发和卸载清理
 - AntD 6、ESLint 10、Monaco 最新线、Quill 最新线仍有明确 peer 或 audit 阻塞
 - Calcite、Shiro、Druid、数据源方言、调度实例名等属于中高风险链路，后续可以改造，但必须先补专项基线
 
@@ -197,7 +198,7 @@ git log --oneline --decorate -8
 | 优先级 | 事项                       | 风险 | 下一步                                                                                   |
 | ------ | -------------------------- | ---- | ---------------------------------------------------------------------------------------- |
 | P0     | 执行文档瘦身和恢复入口维护 | 低   | 本轮完成；后续只记录阶段结论，不再堆叠长流水                                             |
-| P1     | 前端动态运行时入口补强     | 中   | 已补路由级 Loadable smoke；继续补图表 iframe、地图和看板只读链路真实入口                 |
+| P1     | 前端动态运行时入口补强     | 中   | 已补路由级 Loadable、入口工厂和看板只读 smoke；继续补图表 iframe、地图真实入口           |
 | P1     | 构建体积 raw 超限治理      | 中   | 已补分类体积预算校验；后续用 `build:report` 聚焦 `monaco`、`antd`、地图                  |
 | P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback 边界和基础 render 合同；继续补更多 driver metadata 合同    |
 | P2     | Shiro / Security 边界治理  | 中高 | 不整体替换 Shiro；继续补认证、授权、token、异常边界测试后做小步修复                      |
