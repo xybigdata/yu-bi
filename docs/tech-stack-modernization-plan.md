@@ -40,7 +40,7 @@ git log --oneline --decorate -8
 | 工作目录                   | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
 | 远端                       | `git@github.com:xybigdata/yu-bi.git`                       |
 | 主线分支                   | `main`                                                     |
-| 当前专题分支               | `codex/modernization-runtime-smoke-baselines`              |
+| 当前专题分支               | `codex/modernization-iframe-smoke-baseline`                |
 | 当前分支相对 `origin/main` | 以恢复命令输出为准                                         |
 | 最近专题提交               | 以 `git log -1 --oneline` 输出为准                         |
 | 当前工作区                 | 干净                                                       |
@@ -48,7 +48,7 @@ git log --oneline --decorate -8
 分支纪律：
 
 - 不直接在 `main` 开发
-- 当前阶段继续在 `codex/modernization-runtime-smoke-baselines` 上累计运行时 smoke 基线补强
+- 当前阶段继续在 `codex/modernization-iframe-smoke-baseline` 上累计图表 iframe 运行时 smoke 基线补强
 - 不因为单个小批次完成就新建分支
 - 不因为分支领先较多就主动合并 `main`
 - 专题分支可以阶段性 push 保存进度
@@ -94,11 +94,11 @@ git log --oneline --decorate -8
 
 ### 3.3 当前专题
 
-当前专题：P1 前端动态运行时入口 smoke 基线补强。
+当前专题：P1 图表 iframe 运行时入口 smoke 基线补强。
 
 推进原则：
 
-- 优先覆盖路由级 Loadable、分享页、图表 iframe、编辑器、地图和看板只读链路
+- 优先覆盖图表 iframe / 非 iframe 双路径、styled-components iframe head 注入、loading 遮罩、右键坐标转发和 dispatcher 到生命周期适配器的装配合同
 - smoke 测试只证明运行时入口能按当前 React / Vite / Router 组合装配，不替代业务细节测试
 - 每次补基线后，后续中高风险升级必须复用这些门禁作为回归证据
 - 本专题不改变业务协议、路由协议和持久化数据结构
@@ -112,6 +112,7 @@ git log --oneline --decorate -8
 - React 入口工厂已补 smoke，覆盖主应用和分享页共同使用的 `createRoot` 装配路径，以及生产环境 React DevTools hook 关闭逻辑
 - 看板只读入口已补 smoke，覆盖 read 模式 BoardProvider 装配、auto/free 看板分支、数据拉取、可见性派发和卸载清理
 - 地图图表真实入口已补 smoke，覆盖 `loadGeoMap`、ECharts `registerMap` 和最新渲染重放到 `setOption` 的主路径
+- 图表 iframe 真实入口已补 smoke，覆盖 iframe / 非 iframe 双路径、非法尺寸归零、loading 遮罩、iframe runtime context、右键坐标按 scale 转发，以及 dispatcher 向 `ChartIFrameContainer` 传递 visibility、尺寸、loading、选中项、下钻项和 workbench 环境
 - AntD 6、ESLint 10、Monaco 最新线、Quill 最新线仍有明确 peer 或 audit 阻塞
 - Calcite、Shiro、Druid、数据源方言、调度实例名等属于中高风险链路，后续可以改造，但必须先补专项基线
 
@@ -199,7 +200,7 @@ git log --oneline --decorate -8
 | 优先级 | 事项                       | 风险 | 下一步                                                                                   |
 | ------ | -------------------------- | ---- | ---------------------------------------------------------------------------------------- |
 | P0     | 执行文档瘦身和恢复入口维护 | 低   | 本轮完成；后续只记录阶段结论，不再堆叠长流水                                             |
-| P1     | 前端动态运行时入口补强     | 中   | 已补路由级 Loadable、入口工厂、看板只读和地图图表 smoke；继续补图表 iframe 真实入口      |
+| P1     | 前端动态运行时入口补强     | 中   | 路由级 Loadable、入口工厂、看板只读、地图图表和图表 iframe smoke 已补；本专题收尾跑 `checkTs` 后提交 |
 | P1     | 构建体积 raw 超限治理      | 中   | 已补分类体积预算校验；后续用 `build:report` 聚焦 `monaco`、`antd`、地图                  |
 | P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback 边界和基础 render 合同；继续补更多 driver metadata 合同    |
 | P2     | Shiro / Security 边界治理  | 中高 | 不整体替换 Shiro；继续补认证、授权、token、异常边界测试后做小步修复                      |
@@ -333,7 +334,7 @@ npm ls --all
 
 当前执行偏好：
 
-- `git add`、`git commit --no-verify -m "..."`、`git push origin codex/modernization-build-size-governance` 可以自动执行
+- `git add`、`git commit --no-verify -m "..."`、`git push origin <当前专题分支>` 可以自动执行
 - 同一专题内累计一组相关改动后再提交
 - 文档复盘可以单独提交，但后续小型文档修正优先并入相关改造提交
 - 专题分支可 push；不主动 merge `main`
@@ -357,10 +358,7 @@ git status --short --branch
 git rev-list --left-right --count origin/main...HEAD
 git log --oneline --decorate -8
 cd frontend
-npm run verify:toolchain
-npm audit --json
-npm outdated --json --registry=https://registry.npmmirror.com
-npm ci --dry-run --ignore-scripts --no-audit --no-fund
+npm run test -- src/app/components/ChartIFrameContainer/__tests__/ChartIFrameContainer.test.jsx src/app/components/ChartIFrameContainer/__tests__/ChartIFrameContainerDispatcher.test.jsx src/app/components/ChartIFrameContainer/__tests__/ChartIFrameLifecycleAdapter.smoke.test.tsx
 npm run checkTs
 ```
 

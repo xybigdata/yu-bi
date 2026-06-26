@@ -18,7 +18,24 @@
 
 import ChartIFrameContainerDispatcher from '../ChartIFrameContainerDispatcher';
 
+vi.mock('app/components/ChartIFrameContainer', () => ({
+  ChartIFrameContainer: props => (
+    <div
+      data-testid={`chart-container-${props.containerId}`}
+      data-height={String(props.height)}
+      data-loading={String(props.isLoadingData)}
+      data-shown={String(props.isShown)}
+      data-widget-env={props.widgetSpecialConfig?.env}
+      data-width={String(props.width)}
+    />
+  ),
+}));
+
 describe('ChartIFrameContainerDispatcher Test', () => {
+  afterEach(() => {
+    ChartIFrameContainerDispatcher.dispose();
+  });
+
   test('should get new instance if not init', () => {
     const instance = ChartIFrameContainerDispatcher.instance();
     expect(instance).not.toBeNull();
@@ -66,6 +83,60 @@ describe('ChartIFrameContainerDispatcher Test', () => {
     expect(containers[1].props.style).toEqual({
       transform: 'none',
       position: 'relative',
+    });
+  });
+
+  test('should pass visibility, size, loading state and workbench env to containers', () => {
+    const instance = ChartIFrameContainerDispatcher.instance();
+    const chart = { useIFrame: true };
+    const dataset = { rows: [['杭州']] };
+    const config = { datas: [] };
+    const style = { width: 320, height: 180 };
+    const drillOption = { id: 'drill-a' };
+    const selectedItems = [{ index: '0,0' }];
+
+    instance.getContainers(
+      'chart-a',
+      chart,
+      dataset,
+      config,
+      style,
+      drillOption,
+      selectedItems,
+      false,
+    );
+    const containers = instance.getContainers(
+      'chart-b',
+      chart,
+      dataset,
+      config,
+      style,
+      drillOption,
+      selectedItems,
+      true,
+    );
+
+    expect(containers).toHaveLength(2);
+    expect(containers[0].props.children.props).toMatchObject({
+      containerId: 'chart-a',
+      dataset,
+      chart,
+      config,
+      drillOption,
+      selectedItems,
+      width: 320,
+      height: 180,
+      widgetSpecialConfig: { env: 'workbench' },
+      isShown: false,
+      isLoadingData: false,
+    });
+    expect(containers[1].props.children.props).toMatchObject({
+      containerId: 'chart-b',
+      width: 320,
+      height: 180,
+      widgetSpecialConfig: { env: 'workbench' },
+      isShown: true,
+      isLoadingData: true,
     });
   });
 });
