@@ -169,10 +169,10 @@ const ChartIFrameContainer: FC<{
 
   return (
     <ChartI18NContext.Provider value={{ i18NConfigs: props?.config?.i18ns }}>
-      <StyledDataLoadingContainer isLoading={props.isLoadingData}>
+      <StyledDataLoadingContainer $isLoading={props.isLoadingData}>
         {props.isLoadingData && <Loading />}
       </StyledDataLoadingContainer>
-      <StyledChartRendererContainer isLoading={props.isLoadingData}>
+      <StyledChartRendererContainer $isLoading={props.isLoadingData}>
         {render()}
       </StyledChartRendererContainer>
     </ChartI18NContext.Provider>
@@ -181,18 +181,18 @@ const ChartIFrameContainer: FC<{
 
 export default ChartIFrameContainer;
 
-const StyledDataLoadingContainer = styled.div<{ isLoading?: boolean }>`
+const StyledDataLoadingContainer = styled.div<{ $isLoading?: boolean }>`
   position: absolute;
   z-index: ${LEVEL_1000};
-  display: ${p => (p.isLoading ? 'flex' : 'none')};
+  display: ${p => (p.$isLoading ? 'flex' : 'none')};
   width: 100%;
   height: 100%;
   pointer-events: none;
   user-select: none;
 `;
 
-const StyledChartRendererContainer = styled.div<{ isLoading?: boolean }>`
+const StyledChartRendererContainer = styled.div<{ $isLoading?: boolean }>`
   width: 100%;
   height: 100%;
-  opacity: ${p => (p.isLoading ? 0.3 : 1)};
+  opacity: ${p => (p.$isLoading ? 0.3 : 1)};
 `;

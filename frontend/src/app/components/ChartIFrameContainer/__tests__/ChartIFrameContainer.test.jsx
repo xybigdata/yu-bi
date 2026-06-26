@@ -97,6 +97,10 @@ describe('ChartIFrameContainer Test', () => {
   });
 
   test('should render loading overlay and normalize unsafe dimensions', () => {
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+
     render(
       <ChartIFrameContainer
         dataset={[]}
@@ -122,6 +126,9 @@ describe('ChartIFrameContainer Test', () => {
         isLoadingData: true,
         style: { width: 0, height: 0 },
       }),
+    );
+    expect(consoleErrorSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining('React does not recognize the `isLoading` prop'),
     );
   });
 
