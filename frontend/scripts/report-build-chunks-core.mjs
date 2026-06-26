@@ -282,6 +282,36 @@ export function createSizeSummary(items) {
   };
 }
 
+const mergeSizeItem = (current, item) => {
+  current.bytes += item.bytes;
+  current.files += 1;
+  current.gzipBytes += item.gzipBytes;
+  return current;
+};
+
+const finalizeSizeItem = item => ({
+  ...item,
+  gzipRatio: Number((item.bytes > 0 ? item.gzipBytes / item.bytes : 0).toFixed(4)),
+  gzipSavingsBytes: item.bytes - item.gzipBytes,
+});
+
+export function createCategorySizeSummary(items) {
+  return Object.fromEntries(
+    Object.entries(
+      items.reduce((sizes, item) => {
+        const category = item.category ?? getBuildItemCategory(item.name);
+        sizes[category] = mergeSizeItem(
+          sizes[category] ?? { bytes: 0, files: 0, gzipBytes: 0 },
+          item,
+        );
+        return sizes;
+      }, {}),
+    )
+      .toSorted(([left], [right]) => left.localeCompare(right))
+      .map(([category, size]) => [category, finalizeSizeItem(size)]),
+  );
+}
+
 export function createOversizedSummary(items, options) {
   const { rawOversized, gzipOversized, oversized } = getOversizedItems(
     items,
@@ -303,8 +333,26 @@ export function createOversizedSummary(items, options) {
       item => item.id ?? getStableBuildItemId(item.name),
     ),
     oversized: oversized.map(item => item.id ?? getStableBuildItemId(item.name)),
+    categorySizes: createCategorySizeSummary(items),
     size: createSizeSummary(items),
   };
+}
+
+export function formatCategorySizeSummary(categorySizes) {
+  const entries = Object.entries(categorySizes);
+
+  if (!entries.length) {
+    return 'none';
+  }
+
+  return entries
+    .map(
+      ([category, size]) =>
+        `${category}:files=${size.files},raw=${formatKiB(
+          size.bytes,
+        )},gzip=${formatKiB(size.gzipBytes)}`,
+    )
+    .join('; ');
 }
 
 export function createReportLines(title, items, options) {
@@ -325,6 +373,9 @@ export function createReportLines(title, items, options) {
     }, rawOversized=${rawOversized.length}, gzipOversized=${
       gzipOversized.length
     }, oversized=${oversized.length}`,
+    `yu-bi build ${title} categories: ${formatCategorySizeSummary(
+      createCategorySizeSummary(items),
+    )}`,
   ];
 
   for (const item of reportItems.slice(0, options.limit)) {

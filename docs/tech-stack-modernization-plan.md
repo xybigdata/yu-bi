@@ -288,6 +288,7 @@ npm ls --all
 - `YU_BI_CHUNK_REPORT_CATEGORY_FILTER=vendor`：按分类过滤
 - 文本报告每项输出 `gzipRatio`
 - JSON 报告 `summary.chunk.size` / `summary.asset.size` 输出 raw、gzip、压缩率和 gzip 节省字节
+- 文本报告输出分类体积摘要；JSON 报告 `summary.*.categorySizes` 输出分类文件数、raw、gzip、压缩率和节省字节
 - `npm run build:report:check`：按观察基线校验稳定 id 清单
 - `npm run build:report:gzip`：生成 gzip 预算报告 `build/build-report-gzip.json`
 - `npm run build:report:gzip:check`：按 gzip 预算基线校验 raw / gzip 超限稳定 id 与分类计数
@@ -308,6 +309,8 @@ npm ls --all
 本轮真实报告观察：
 
 - JS vendor 超限项 gzip 压缩率约 `24.4%` 到 `32.9%`
+- 当前分类体积：JS `vendor` gzip 约 `2170.60 KiB`，JS `runtime` gzip 约 `630.00 KiB`
+- 当前分类体积：asset `geo` gzip 约 `888.03 KiB`，其他 asset gzip 约 `78.40 KiB`
 - `geo-china.map.json` gzip 压缩率约 `34.2%`
 - `geo-china-city.map.json` gzip 压缩率约 `58.8%`，gzip 后仍约 `693.80 KiB`
 - 地图 city 资源后续优先评估资源粒度和加载策略，不优先做 JS 分包式治理

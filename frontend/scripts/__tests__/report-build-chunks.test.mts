@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   countItemsByCategory,
   createBuildReport,
+  createCategorySizeSummary,
   getBuildItemCategory,
   createOversizedSummary,
   createReportOptions,
@@ -80,6 +81,8 @@ describe('report-build-chunks', () => {
     expect(stdout).toContain(
       'yu-bi build chunk report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=off, categoryFilter=off, files=3, rawOversized=1',
     );
+    expect(stdout).toContain('yu-bi build chunk categories:');
+    expect(stdout).toContain('vendor:files=2');
     expect(stdout).toContain(
       'yu-bi build asset report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=off, categoryFilter=off, files=1, rawOversized=0',
     );
@@ -101,6 +104,15 @@ describe('report-build-chunks', () => {
           oversized: {},
           rawOversized: {},
         },
+        categorySizes: {
+          geo: {
+            bytes: 900,
+            files: 1,
+            gzipBytes: expect.any(Number),
+            gzipRatio: expect.any(Number),
+            gzipSavingsBytes: expect.any(Number),
+          },
+        },
         files: 1,
         gzipOversized: [],
         oversized: [],
@@ -118,6 +130,22 @@ describe('report-build-chunks', () => {
           gzipOversized: {},
           oversized: { vendor: 1 },
           rawOversized: { vendor: 1 },
+        },
+        categorySizes: {
+          task: {
+            bytes: 700,
+            files: 1,
+            gzipBytes: expect.any(Number),
+            gzipRatio: expect.any(Number),
+            gzipSavingsBytes: expect.any(Number),
+          },
+          vendor: {
+            bytes: 1900,
+            files: 2,
+            gzipBytes: expect.any(Number),
+            gzipRatio: expect.any(Number),
+            gzipSavingsBytes: expect.any(Number),
+          },
         },
         files: 3,
         gzipOversized: [],
@@ -350,6 +378,22 @@ describe('report-build-chunks', () => {
         oversized: { runtime: 1, vendor: 1 },
         rawOversized: { vendor: 1 },
       },
+      categorySizes: {
+        runtime: {
+          bytes: 900,
+          files: 1,
+          gzipBytes: 1300,
+          gzipRatio: 1.4444,
+          gzipSavingsBytes: -400,
+        },
+        vendor: {
+          bytes: 1600,
+          files: 2,
+          gzipBytes: 500,
+          gzipRatio: 0.3125,
+          gzipSavingsBytes: 1100,
+        },
+      },
       files: 3,
       gzipOversized: ['gzip-heavy.js'],
       oversized: ['antdDesign.js', 'gzip-heavy.js'],
@@ -359,6 +403,31 @@ describe('report-build-chunks', () => {
         gzipBytes: 1800,
         gzipRatio: 0.72,
         gzipSavingsBytes: 700,
+      },
+    });
+  });
+
+  it('creates aggregate size summary by category', () => {
+    expect(
+      createCategorySizeSummary([
+        { bytes: 1000, category: 'vendor', gzipBytes: 250, name: 'a.js' },
+        { bytes: 3000, category: 'vendor', gzipBytes: 750, name: 'b.js' },
+        { bytes: 500, gzipBytes: 100, name: 'map.json' },
+      ]),
+    ).toEqual({
+      asset: {
+        bytes: 500,
+        files: 1,
+        gzipBytes: 100,
+        gzipRatio: 0.2,
+        gzipSavingsBytes: 400,
+      },
+      vendor: {
+        bytes: 4000,
+        files: 2,
+        gzipBytes: 1000,
+        gzipRatio: 0.25,
+        gzipSavingsBytes: 3000,
       },
     });
   });
