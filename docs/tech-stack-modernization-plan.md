@@ -40,7 +40,7 @@ git log --oneline --decorate -8
 | 工作目录                   | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
 | 远端                       | `git@github.com:xybigdata/yu-bi.git`                       |
 | 主线分支                   | `main`                                                     |
-| 当前专题分支               | `codex/modernization-build-size-governance`                |
+| 当前专题分支               | `codex/modernization-runtime-smoke-baselines`              |
 | 当前分支相对 `origin/main` | 以恢复命令输出为准                                         |
 | 最近专题提交               | 以 `git log -1 --oneline` 输出为准                         |
 | 当前工作区                 | 干净                                                       |
@@ -48,7 +48,7 @@ git log --oneline --decorate -8
 分支纪律：
 
 - 不直接在 `main` 开发
-- 当前阶段继续在 `codex/modernization-build-size-governance` 上累计构建体积治理
+- 当前阶段继续在 `codex/modernization-runtime-smoke-baselines` 上累计运行时 smoke 基线补强
 - 不因为单个小批次完成就新建分支
 - 不因为分支领先较多就主动合并 `main`
 - 专题分支可以阶段性 push 保存进度
@@ -67,7 +67,7 @@ git log --oneline --decorate -8
 - 前端已建立 `Node 24 + npm 11 + React 19 + Ant Design 5 + Vite 8 + TypeScript 6 + Vitest 4` 主链
 - CRA / CRACO、IE11 主兼容链、Nashorn 默认链路、PhantomJS 等历史主链已退出或不再作为默认路径
 - 前端 `npm audit` 当前保持 0 漏洞
-- 构建体积报告已具备文本、JSON、文件输出、观察基线、稳定 id、分类汇总和分类过滤能力
+- 构建体积报告已具备文本、JSON、文件输出、观察基线、稳定 id、分类汇总、分类过滤和分类体积预算校验能力
 
 ### 3.2 已完成专题成果
 
@@ -88,26 +88,28 @@ git log --oneline --decorate -8
 - Monaco、ECharts、Quill、Reveal、Split、DnD、SQL formatter 等动态运行时入口已补最小 smoke
 - 构建体积治理：地图 JSON 已迁出 JS chunk，Monaco / AntV / AntD vendor 分包已细化，gzip 维度 JS 超限清零
 - 构建报告治理：vendor 分类已覆盖当前所有手工 vendor chunk，分类过滤可用于完整观察第三方包体积上下文
-- 构建基线治理：baseline 校验已覆盖 raw 超限稳定 id 和 raw 超限分类计数，能发现分包分类漂移
+- 构建基线治理：baseline 校验已覆盖 raw / gzip 超限稳定 id、分类计数、分类集合、分类体积和总体积，能发现分包分类和体积预算漂移
 - 后端方言基线：内置 JDBC driver 已固化 CustomSqlDialect fallback 与显式 / 标准方言边界，支撑后续 Calcite 和 driver 元数据评估
 - 后端 render 基线：CustomSqlDialect fallback driver 已覆盖基础 SQL 包装渲染合同，确认默认引号和 `DATART_VTABLE` 包装稳定
 
 ### 3.3 当前专题
 
-当前专题：P1 构建体积治理与报告可观测性。
+当前专题：P1 前端动态运行时入口 smoke 基线补强。
 
 推进原则：
 
-- 不为降低 raw 数字做无收益拆包
-- 优先补强可观测性，再决定是否拆分地图、Monaco、AntD、AntV 等重资产
-- 构建报告应能同时说明 raw、gzip、压缩率和超限分类，支撑后续取舍
-- 本专题不改变业务协议和地图数据语义
+- 优先覆盖路由级 Loadable、分享页、图表 iframe、编辑器、地图和看板只读链路
+- smoke 测试只证明运行时入口能按当前 React / Vite / Router 组合装配，不替代业务细节测试
+- 每次补基线后，后续中高风险升级必须复用这些门禁作为回归证据
+- 本专题不改变业务协议、路由协议和持久化数据结构
 
 ### 3.4 已验证但未收口的问题
 
 - JS raw 超限仍存在 7 个稳定 id：`monacoEditor.js`、`antdDesign.js`、`echarts.js`、`monacoBase.js`、`antvG2.js`、`antvS2.js`、`antvG.js`
 - asset raw 超限仍存在 2 个稳定 id：`geo-china-city.map.json`、`geo-china.map.json`
 - gzip 维度 JS 当前已无超限；asset gzip 仍主要来自 `geo-china-city.map.json`
+- 路由级页面 Loadable 已补集中 smoke，覆盖顶层页面、MainPage 子页、分享页和看板子页懒加载入口
+- React 入口工厂已补 smoke，覆盖主应用和分享页共同使用的 `createRoot` 装配路径，以及生产环境 React DevTools hook 关闭逻辑
 - AntD 6、ESLint 10、Monaco 最新线、Quill 最新线仍有明确 peer 或 audit 阻塞
 - Calcite、Shiro、Druid、数据源方言、调度实例名等属于中高风险链路，后续可以改造，但必须先补专项基线
 
@@ -195,8 +197,8 @@ git log --oneline --decorate -8
 | 优先级 | 事项                       | 风险 | 下一步                                                                                   |
 | ------ | -------------------------- | ---- | ---------------------------------------------------------------------------------------- |
 | P0     | 执行文档瘦身和恢复入口维护 | 低   | 本轮完成；后续只记录阶段结论，不再堆叠长流水                                             |
-| P1     | 构建体积 raw 超限治理      | 中   | 用 `build:report` 的 `category`、`idFilter` 和 JSON baseline 聚焦 `monaco`、`antd`、地图 |
-| P1     | 前端动态运行时入口补强     | 中   | 继续补真实入口 smoke，优先覆盖分享页、图表 iframe、编辑器、地图和看板只读链路            |
+| P1     | 前端动态运行时入口补强     | 中   | 已补路由级 Loadable smoke；继续补图表 iframe、地图和看板只读链路真实入口                 |
+| P1     | 构建体积 raw 超限治理      | 中   | 已补分类体积预算校验；后续用 `build:report` 聚焦 `monaco`、`antd`、地图                  |
 | P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback 边界和基础 render 合同；继续补更多 driver metadata 合同    |
 | P2     | Shiro / Security 边界治理  | 中高 | 不整体替换 Shiro；继续补认证、授权、token、异常边界测试后做小步修复                      |
 
