@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   formatCategoryCounts,
+  formatSizeSummary,
   readJsonFile,
   verifyBuildReportBaseline,
 } from '../check-build-report-baseline-core.mjs';
@@ -24,12 +25,24 @@ const createReport = ({
   assetGzipCategoryCounts = assetGzipOversized.length
     ? { geo: assetGzipOversized.length }
     : {},
+  assetSize = {
+    bytes: 900,
+    gzipBytes: 300,
+    gzipRatio: 0.3333,
+    gzipSavingsBytes: 600,
+  },
   assetRawOversized = ['geo-china.map.json'],
   assetRawCategoryCounts = { geo: assetRawOversized.length },
   chunkGzipOversized = [],
   chunkGzipCategoryCounts = chunkGzipOversized.length
     ? { vendor: chunkGzipOversized.length }
     : {},
+  chunkSize = {
+    bytes: 1200,
+    gzipBytes: 400,
+    gzipRatio: 0.3333,
+    gzipSavingsBytes: 800,
+  },
   chunkRawOversized = ['antdDesign.js'],
   chunkRawCategoryCounts = { vendor: chunkRawOversized.length },
 } = {}) => ({
@@ -43,6 +56,7 @@ const createReport = ({
       gzipOversized: assetGzipOversized,
       oversized: [...assetRawOversized, ...assetGzipOversized],
       rawOversized: assetRawOversized,
+      size: assetSize,
     },
     chunk: {
       categoryCounts: {
@@ -53,6 +67,7 @@ const createReport = ({
       gzipOversized: chunkGzipOversized,
       oversized: [...chunkRawOversized, ...chunkGzipOversized],
       rawOversized: chunkRawOversized,
+      size: chunkSize,
     },
   },
 });
@@ -94,6 +109,20 @@ describe('check-build-report-baseline', () => {
       chunkGzipOversized: ['gzip-heavy.js'],
       chunkRawCategoryCounts: { vendor: 1 },
       chunkRawOversized: ['antdDesign.js'],
+      size: {
+        asset: {
+          bytes: 900,
+          gzipBytes: 300,
+          gzipRatio: 0.3333,
+          gzipSavingsBytes: 600,
+        },
+        chunk: {
+          bytes: 1200,
+          gzipBytes: 400,
+          gzipRatio: 0.3333,
+          gzipSavingsBytes: 800,
+        },
+      },
     });
   });
 
@@ -146,6 +175,19 @@ describe('check-build-report-baseline', () => {
     );
   });
 
+  it('reports size budget regression', () => {
+    expect(() =>
+      verifyBuildReportBaseline({
+        baseline: createReport({
+          chunkSize: { bytes: 1200, gzipBytes: 400 },
+        }),
+        report: createReport({
+          chunkSize: { bytes: 1201, gzipBytes: 400 },
+        }),
+      }),
+    ).toThrow('chunk size raw bytes 超出基线: expected<=1200, actual=1201');
+  });
+
   it('reads report and baseline JSON files from the CLI', async () => {
     const appRoot = await createTempRoot();
     await writeFile(
@@ -179,6 +221,9 @@ describe('check-build-report-baseline', () => {
     expect(stdout).toContain(
       'chunkGzipCategories=none, assetGzipCategories=none',
     );
+    expect(stdout).toContain(
+      'chunkSize=raw=1200,gzip=400, assetSize=raw=900,gzip=300',
+    );
   });
 
   it('uses the default baseline file when no override is provided', async () => {
@@ -209,5 +254,12 @@ describe('check-build-report-baseline', () => {
   it('formats empty and sorted category counts', () => {
     expect(formatCategoryCounts()).toBe('none');
     expect(formatCategoryCounts({ vendor: 2, geo: 1 })).toBe('geo=1,vendor=2');
+  });
+
+  it('formats size summary for logs', () => {
+    expect(formatSizeSummary()).toBe('none');
+    expect(formatSizeSummary({ bytes: 10, gzipBytes: 4 })).toBe(
+      'raw=10,gzip=4',
+    );
   });
 });

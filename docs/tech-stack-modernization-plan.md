@@ -291,10 +291,11 @@ npm ls --all
 - `npm run build:report:check`：按观察基线校验稳定 id 清单
 - `npm run build:report:gzip`：生成 gzip 预算报告 `build/build-report-gzip.json`
 - `npm run build:report:gzip:check`：按 gzip 预算基线校验 raw / gzip 超限稳定 id 与分类计数
+- baseline 校验同时检查 `summary.*.size.bytes` 和 `summary.*.size.gzipBytes`，防止超限名单不变但总体积回退
 
 `vendor` 分类应覆盖 `vite.shared.mts#createVendorManualChunks` 中当前所有手工第三方分包，避免构建报告和实际分包规则漂移。
 
-`build:report:check` 会校验 raw / gzip 超限稳定 id，并校验 raw / gzip 超限分类计数。当前 raw 分类基线为 JS `vendor=7`、asset `geo=2`。gzip 预算基线为 gzip 阈值 `500 KiB`，当前只有 asset `geo=1` 超限。
+`build:report:check` 会校验 raw / gzip 超限稳定 id、raw / gzip 超限分类计数，以及总 raw / gzip 体积预算。当前 raw 分类基线为 JS `vendor=7`、asset `geo=2`。gzip 预算基线为 gzip 阈值 `500 KiB`，当前只有 asset `geo=1` 超限。
 
 当前观察对象：
 

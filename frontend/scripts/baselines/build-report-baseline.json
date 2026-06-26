@@ -25,7 +25,13 @@
         "antvG2.js",
         "antvS2.js",
         "antvG.js"
-      ]
+      ],
+      "size": {
+        "bytes": 9915358,
+        "gzipBytes": 2867811,
+        "gzipRatio": 0.2892,
+        "gzipSavingsBytes": 7047547
+      }
     },
     "asset": {
       "categoryCounts": {
@@ -42,7 +48,13 @@
       "oversized": [
         "geo-china-city.map.json",
         "geo-china.map.json"
-      ]
+      ],
+      "size": {
+        "bytes": 1891617,
+        "gzipBytes": 989624,
+        "gzipRatio": 0.5232,
+        "gzipSavingsBytes": 901993
+      }
     }
   }
 }

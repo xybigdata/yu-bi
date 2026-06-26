@@ -1,5 +1,6 @@
 import {
   formatCategoryCounts,
+  formatSizeSummary,
   readJsonFile,
   verifyBuildReportBaseline,
 } from './check-build-report-baseline-core.mjs';
@@ -38,5 +39,9 @@ console.log(
     result.chunkGzipCategoryCounts,
   )}, assetGzipCategories=${formatCategoryCounts(
     result.assetGzipCategoryCounts,
+  )}, chunkSize=${formatSizeSummary(
+    result.size.chunk,
+  )}, assetSize=${formatSizeSummary(
+    result.size.asset,
   )}`,
 );
