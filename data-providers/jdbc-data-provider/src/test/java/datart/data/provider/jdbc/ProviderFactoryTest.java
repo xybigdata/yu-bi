@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
@@ -136,6 +137,44 @@ class ProviderFactoryTest {
         assertTrue(driverInfos.stream().allMatch(JdbcDriverInfo::getQuoteIdentifiers));
     }
 
+    @TestFactory
+    Stream<DynamicTest> shouldKeepCustomDialectFallbackMetadataExplicit() {
+        return CUSTOM_DIALECT_FALLBACK_DB_TYPES.stream()
+                .sorted()
+                .map(dbType -> DynamicTest.dynamicTest(dbType, () -> {
+                    JdbcDataProviderAdapter adapter = createAdapter(dbType);
+                    JdbcDriverInfo driverInfo = adapter.getDriverInfo();
+
+                    assertTrue(driverInfo.getQuoteIdentifiers(), dbType + " 应默认开启标识符 quote");
+                    assertFalse(driverInfo.supportSqlLimit(), dbType + " fallback 分页能力必须显式声明");
+                    assertInstanceOf(CustomSqlDialect.class, adapter.getSqlDialect());
+                    assertEquals("'", driverInfo.getLiteralQuote(), dbType + " literal quote 默认值发生变化");
+                    assertEquals("\"", driverInfo.getIdentifierQuote(), dbType + " identifier quote 默认值发生变化");
+                    assertFalse(adapter.supportPaging(), dbType + " fallback driver 默认不应声明源端分页");
+                }));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> shouldKeepExplicitOrStandardDialectMetadataStable() {
+        return Stream.of(
+                dialectMetadataCase("MYSQL", MysqlSqlStdOperatorSupport.class, true, this::assertQuoteMetadataCanBeDialectDefault),
+                dialectMetadataCase("H2", H2Dialect.class, true, this::assertQuoteMetadataCanBeDialectDefault),
+                dialectMetadataCase("CLICKHOUSE", ClickHouseSqlDialectSupport.class, true, this::assertQuoteMetadataCanBeDialectDefault),
+                dialectMetadataCase("ORACLE", OracleSqlStdOperatorSupport.class, false, this::assertQuoteMetadataCanBeDialectDefault),
+                dialectMetadataCase("HIVE", SqlDialect.class, true, driverInfo -> assertEquals("`", driverInfo.getIdentifierQuote())),
+                dialectMetadataCase("MSSQL", SqlDialect.class, false, this::assertQuoteMetadataCanBeDialectDefault),
+                dialectMetadataCase("POSTGRESQL", SqlDialect.class, true, this::assertQuoteMetadataCanBeDialectDefault)
+        ).map(testCase -> DynamicTest.dynamicTest(testCase.dbType, () -> {
+            JdbcDataProviderAdapter adapter = createAdapter(testCase.dbType);
+            JdbcDriverInfo driverInfo = adapter.getDriverInfo();
+
+            assertTrue(driverInfo.getQuoteIdentifiers(), testCase.dbType + " 应默认开启标识符 quote");
+            assertInstanceOf(testCase.dialectType, adapter.getSqlDialect());
+            assertEquals(testCase.supportPaging, adapter.supportPaging(), testCase.dbType + " 分页能力合同发生变化");
+            testCase.metadataAssertion.accept(driverInfo);
+        }));
+    }
+
     @Test
     void shouldKeepBuiltInDialectFallbackBoundaryExplicit() {
         Set<String> dbTypes = builtInDbTypes().collect(toSet());
@@ -212,6 +251,20 @@ class ProviderFactoryTest {
         return JdbcDataProvider.ProviderFactory.createDataProvider(properties, false);
     }
 
+    private void assertQuoteMetadataCanBeDialectDefault(JdbcDriverInfo driverInfo) {
+        assertEquals(null, driverInfo.getLiteralQuote());
+        assertEquals(null, driverInfo.getIdentifierQuote());
+    }
+
+    private DialectMetadataCase dialectMetadataCase(
+            String dbType,
+            Class<? extends SqlDialect> dialectType,
+            boolean supportPaging,
+            Consumer<JdbcDriverInfo> metadataAssertion
+    ) {
+        return new DialectMetadataCase(dbType, dialectType, supportPaging, metadataAssertion);
+    }
+
     private QueryScript queryScript(String script) {
         QueryScript queryScript = new QueryScript();
         queryScript.setScriptType(ScriptType.SQL);
@@ -237,5 +290,13 @@ class ProviderFactoryTest {
 
     private Set<String> union(Set<String> left, Set<String> right) {
         return Stream.concat(left.stream(), right.stream()).collect(toSet());
+    }
+
+    private record DialectMetadataCase(
+            String dbType,
+            Class<? extends SqlDialect> dialectType,
+            boolean supportPaging,
+            Consumer<JdbcDriverInfo> metadataAssertion
+    ) {
     }
 }
