@@ -9,10 +9,12 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   countItemsByCategory,
   createBuildReport,
+  createCategorySizeSummary,
   getBuildItemCategory,
   createOversizedSummary,
   createReportOptions,
   createReportLines,
+  createSizeSummary,
   filterItemsByCategory,
   filterItemsByStableId,
   getStableBuildItemId,
@@ -20,6 +22,10 @@ import {
 } from '../report-build-chunks-core.mjs';
 
 const execFileAsync = promisify(execFile);
+const gzipReportScript = path.resolve(
+  process.cwd(),
+  'scripts/build-report-gzip.mjs',
+);
 const reportScript = path.resolve(process.cwd(), 'scripts/report-build-chunks.mjs');
 const tempRoots: string[] = [];
 
@@ -75,11 +81,14 @@ describe('report-build-chunks', () => {
     expect(stdout).toContain(
       'yu-bi build chunk report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=off, categoryFilter=off, files=3, rawOversized=1',
     );
+    expect(stdout).toContain('yu-bi build chunk categories:');
+    expect(stdout).toContain('vendor:files=2');
     expect(stdout).toContain(
       'yu-bi build asset report: rawThreshold=1 KiB, gzipThreshold=off, idFilter=off, onlyOversized=off, categoryFilter=off, files=1, rawOversized=0',
     );
     expect(stdout).toContain('build/static/js/antdDesign.D8R05ovR.js');
     expect(stdout).toContain('category=vendor id=antdDesign.js');
+    expect(stdout).toContain('gzipRatio=');
     expect(stdout).toContain('id=antdDesign.js');
     expect(stdout).toContain('build/static/js/react.BIp4DLJn.js');
     expect(stdout).toContain('category=task id=task/index.js');
@@ -95,10 +104,25 @@ describe('report-build-chunks', () => {
           oversized: {},
           rawOversized: {},
         },
+        categorySizes: {
+          geo: {
+            bytes: 900,
+            files: 1,
+            gzipBytes: expect.any(Number),
+            gzipRatio: expect.any(Number),
+            gzipSavingsBytes: expect.any(Number),
+          },
+        },
         files: 1,
         gzipOversized: [],
         oversized: [],
         rawOversized: [],
+        size: {
+          bytes: 900,
+          gzipBytes: expect.any(Number),
+          gzipRatio: expect.any(Number),
+          gzipSavingsBytes: expect.any(Number),
+        },
       },
       chunk: {
         categoryCounts: {
@@ -107,10 +131,32 @@ describe('report-build-chunks', () => {
           oversized: { vendor: 1 },
           rawOversized: { vendor: 1 },
         },
+        categorySizes: {
+          task: {
+            bytes: 700,
+            files: 1,
+            gzipBytes: expect.any(Number),
+            gzipRatio: expect.any(Number),
+            gzipSavingsBytes: expect.any(Number),
+          },
+          vendor: {
+            bytes: 1900,
+            files: 2,
+            gzipBytes: expect.any(Number),
+            gzipRatio: expect.any(Number),
+            gzipSavingsBytes: expect.any(Number),
+          },
+        },
         files: 3,
         gzipOversized: [],
         oversized: ['antdDesign.js'],
         rawOversized: ['antdDesign.js'],
+        size: {
+          bytes: 2600,
+          gzipBytes: expect.any(Number),
+          gzipRatio: expect.any(Number),
+          gzipSavingsBytes: expect.any(Number),
+        },
       },
     });
   });
@@ -211,6 +257,22 @@ describe('report-build-chunks', () => {
     expect(stdout).toBe('');
     expect(report.summary.chunk.rawOversized).toEqual(['antdDesign.js']);
     expect(report.oversizedCount).toBe(1);
+  });
+
+  it('can write gzip budget report from the dedicated CLI wrapper', async () => {
+    const appRoot = await createTempBuild();
+    const { stdout } = await execFileAsync(process.execPath, [gzipReportScript], {
+      cwd: appRoot,
+      env: process.env,
+    });
+    const report = JSON.parse(
+      await readFile(path.join(appRoot, 'build/build-report-gzip.json'), 'utf8'),
+    );
+
+    expect(stdout).toBe('');
+    expect(report.summary.chunk.gzipOversized).toEqual([]);
+    expect(report.summary.asset.gzipOversized).toEqual([]);
+    expect(report.lines.join('\n')).toContain('gzipThreshold=500 KiB');
   });
 
   it('can write text report to a file from the CLI', async () => {
@@ -316,10 +378,71 @@ describe('report-build-chunks', () => {
         oversized: { runtime: 1, vendor: 1 },
         rawOversized: { vendor: 1 },
       },
+      categorySizes: {
+        runtime: {
+          bytes: 900,
+          files: 1,
+          gzipBytes: 1300,
+          gzipRatio: 1.4444,
+          gzipSavingsBytes: -400,
+        },
+        vendor: {
+          bytes: 1600,
+          files: 2,
+          gzipBytes: 500,
+          gzipRatio: 0.3125,
+          gzipSavingsBytes: 1100,
+        },
+      },
       files: 3,
       gzipOversized: ['gzip-heavy.js'],
       oversized: ['antdDesign.js', 'gzip-heavy.js'],
       rawOversized: ['antdDesign.js'],
+      size: {
+        bytes: 2500,
+        gzipBytes: 1800,
+        gzipRatio: 0.72,
+        gzipSavingsBytes: 700,
+      },
+    });
+  });
+
+  it('creates aggregate size summary by category', () => {
+    expect(
+      createCategorySizeSummary([
+        { bytes: 1000, category: 'vendor', gzipBytes: 250, name: 'a.js' },
+        { bytes: 3000, category: 'vendor', gzipBytes: 750, name: 'b.js' },
+        { bytes: 500, gzipBytes: 100, name: 'map.json' },
+      ]),
+    ).toEqual({
+      asset: {
+        bytes: 500,
+        files: 1,
+        gzipBytes: 100,
+        gzipRatio: 0.2,
+        gzipSavingsBytes: 400,
+      },
+      vendor: {
+        bytes: 4000,
+        files: 2,
+        gzipBytes: 1000,
+        gzipRatio: 0.25,
+        gzipSavingsBytes: 3000,
+      },
+    });
+  });
+
+  it('creates aggregate size summary for compression observability', () => {
+    expect(
+      createSizeSummary([
+        { bytes: 1000, gzipBytes: 250 },
+        { bytes: 3000, gzipBytes: 750 },
+      ]),
+    ).toEqual({
+      bytes: 4000,
+      gzipBytes: 1000,
+      gzipRatio: 0.25,
+      gzipSavingsBytes: 3000,
     });
   });
 

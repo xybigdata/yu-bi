@@ -28,6 +28,7 @@ export const VENDOR_BUILD_ITEM_IDS = new Set([
 const gzipAsync = promisify(gzip);
 
 export const formatKiB = bytes => `${(bytes / KiB).toFixed(2)} KiB`;
+export const formatPercent = value => `${(value * 100).toFixed(1)}%`;
 
 export function getStableBuildItemId(fileName) {
   return fileName.replace(
@@ -268,6 +269,49 @@ export function countItemsByCategory(items) {
     }, {});
 }
 
+export function createSizeSummary(items) {
+  const bytes = items.reduce((total, item) => total + item.bytes, 0);
+  const gzipBytes = items.reduce((total, item) => total + item.gzipBytes, 0);
+  const gzipRatio = bytes > 0 ? gzipBytes / bytes : 0;
+
+  return {
+    bytes,
+    gzipBytes,
+    gzipRatio: Number(gzipRatio.toFixed(4)),
+    gzipSavingsBytes: bytes - gzipBytes,
+  };
+}
+
+const mergeSizeItem = (current, item) => {
+  current.bytes += item.bytes;
+  current.files += 1;
+  current.gzipBytes += item.gzipBytes;
+  return current;
+};
+
+const finalizeSizeItem = item => ({
+  ...item,
+  gzipRatio: Number((item.bytes > 0 ? item.gzipBytes / item.bytes : 0).toFixed(4)),
+  gzipSavingsBytes: item.bytes - item.gzipBytes,
+});
+
+export function createCategorySizeSummary(items) {
+  return Object.fromEntries(
+    Object.entries(
+      items.reduce((sizes, item) => {
+        const category = item.category ?? getBuildItemCategory(item.name);
+        sizes[category] = mergeSizeItem(
+          sizes[category] ?? { bytes: 0, files: 0, gzipBytes: 0 },
+          item,
+        );
+        return sizes;
+      }, {}),
+    )
+      .toSorted(([left], [right]) => left.localeCompare(right))
+      .map(([category, size]) => [category, finalizeSizeItem(size)]),
+  );
+}
+
 export function createOversizedSummary(items, options) {
   const { rawOversized, gzipOversized, oversized } = getOversizedItems(
     items,
@@ -289,7 +333,26 @@ export function createOversizedSummary(items, options) {
       item => item.id ?? getStableBuildItemId(item.name),
     ),
     oversized: oversized.map(item => item.id ?? getStableBuildItemId(item.name)),
+    categorySizes: createCategorySizeSummary(items),
+    size: createSizeSummary(items),
   };
+}
+
+export function formatCategorySizeSummary(categorySizes) {
+  const entries = Object.entries(categorySizes);
+
+  if (!entries.length) {
+    return 'none';
+  }
+
+  return entries
+    .map(
+      ([category, size]) =>
+        `${category}:files=${size.files},raw=${formatKiB(
+          size.bytes,
+        )},gzip=${formatKiB(size.gzipBytes)}`,
+    )
+    .join('; ');
 }
 
 export function createReportLines(title, items, options) {
@@ -310,6 +373,9 @@ export function createReportLines(title, items, options) {
     }, rawOversized=${rawOversized.length}, gzipOversized=${
       gzipOversized.length
     }, oversized=${oversized.length}`,
+    `yu-bi build ${title} categories: ${formatCategorySizeSummary(
+      createCategorySizeSummary(items),
+    )}`,
   ];
 
   for (const item of reportItems.slice(0, options.limit)) {
@@ -317,6 +383,7 @@ export function createReportLines(title, items, options) {
     const gzipOversizedItem =
       options.gzipThresholdKiB !== null &&
       item.gzipBytes > options.gzipThresholdKiB * KiB;
+    const gzipRatio = item.bytes > 0 ? item.gzipBytes / item.bytes : 0;
     const mark = rawOversizedItem || gzipOversizedItem ? '!' : ' ';
     lines.push(
       `${mark} #${String(item.rank).padStart(2, '0')} raw=${formatKiB(
@@ -324,7 +391,9 @@ export function createReportLines(title, items, options) {
       ).padStart(12, ' ')} gzip=${formatKiB(item.gzipBytes).padStart(
         12,
         ' ',
-      )} flags=${rawOversizedItem ? 'raw' : '-'},${
+      )} gzipRatio=${formatPercent(gzipRatio).padStart(6, ' ')} flags=${
+        rawOversizedItem ? 'raw' : '-'
+      },${
         gzipOversizedItem ? 'gzip' : '-'
       } category=${item.category ?? getBuildItemCategory(item.name)} id=${
         item.id ?? getStableBuildItemId(item.name)

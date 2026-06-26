@@ -4,7 +4,8 @@
       "categoryCounts": {
         "rawOversized": {
           "vendor": 7
-        }
+        },
+        "gzipOversized": {}
       },
       "files": 101,
       "rawOversized": [
@@ -53,6 +54,9 @@
       "categoryCounts": {
         "rawOversized": {
           "geo": 2
+        },
+        "gzipOversized": {
+          "geo": 1
         }
       },
       "files": 6,
@@ -60,7 +64,9 @@
         "geo-china-city.map.json",
         "geo-china.map.json"
       ],
-      "gzipOversized": [],
+      "gzipOversized": [
+        "geo-china-city.map.json"
+      ],
       "oversized": [
         "geo-china-city.map.json",
         "geo-china.map.json"

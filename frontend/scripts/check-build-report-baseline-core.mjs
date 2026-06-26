@@ -37,6 +37,55 @@ const assertObjectEqual = (name, actual, expected) => {
   }
 };
 
+const getSizeValue = (summary, key) => summary?.size?.[key];
+
+const assertSizeNotExceeded = (name, actual, expected) => {
+  if (expected === undefined || expected === null) {
+    return;
+  }
+
+  if (actual === undefined || actual === null) {
+    throw new Error(`${name} 缺失: expected<=${expected}`);
+  }
+
+  if (actual > expected) {
+    throw new Error(`${name} 超出基线: expected<=${expected}, actual=${actual}`);
+  }
+};
+
+const verifySizeBaseline = (name, actualSummary, expectedSummary) => {
+  assertSizeNotExceeded(
+    `${name} raw bytes`,
+    getSizeValue(actualSummary, 'bytes'),
+    getSizeValue(expectedSummary, 'bytes'),
+  );
+  assertSizeNotExceeded(
+    `${name} gzip bytes`,
+    getSizeValue(actualSummary, 'gzipBytes'),
+    getSizeValue(expectedSummary, 'gzipBytes'),
+  );
+};
+
+const verifyCategorySizeBaseline = (name, actualSizes = {}, expectedSizes = {}) => {
+  const actualCategories = Object.keys(actualSizes).toSorted();
+  const expectedCategories = Object.keys(expectedSizes).toSorted();
+
+  assertListEqual(`${name} categories`, actualCategories, expectedCategories);
+
+  for (const category of expectedCategories) {
+    assertSizeNotExceeded(
+      `${name} ${category} raw bytes`,
+      actualSizes[category]?.bytes,
+      expectedSizes[category]?.bytes,
+    );
+    assertSizeNotExceeded(
+      `${name} ${category} gzip bytes`,
+      actualSizes[category]?.gzipBytes,
+      expectedSizes[category]?.gzipBytes,
+    );
+  }
+};
+
 export async function readJsonFile(appRoot, filePath) {
   return JSON.parse(await readFile(path.resolve(appRoot, filePath), 'utf8'));
 }
@@ -49,6 +98,14 @@ export function formatCategoryCounts(counts) {
   }
 
   return entries.map(([category, count]) => `${category}=${count}`).join(',');
+}
+
+export function formatSizeSummary(size) {
+  if (!size) {
+    return 'none';
+  }
+
+  return `raw=${size.bytes ?? 0},gzip=${size.gzipBytes ?? 0}`;
 }
 
 export function verifyBuildReportBaseline({ baseline, report }) {
@@ -82,15 +139,61 @@ export function verifyBuildReportBaseline({ baseline, report }) {
     report.summary?.asset?.categoryCounts?.rawOversized,
     baseline.summary?.asset?.categoryCounts?.rawOversized,
   );
+  assertObjectEqual(
+    'chunk gzip categoryCounts',
+    report.summary?.chunk?.categoryCounts?.gzipOversized,
+    baseline.summary?.chunk?.categoryCounts?.gzipOversized,
+  );
+  assertObjectEqual(
+    'asset gzip categoryCounts',
+    report.summary?.asset?.categoryCounts?.gzipOversized,
+    baseline.summary?.asset?.categoryCounts?.gzipOversized,
+  );
+  verifySizeBaseline(
+    'chunk size',
+    report.summary?.chunk,
+    baseline.summary?.chunk,
+  );
+  verifySizeBaseline(
+    'asset size',
+    report.summary?.asset,
+    baseline.summary?.asset,
+  );
+  verifyCategorySizeBaseline(
+    'chunk categorySizes',
+    report.summary?.chunk?.categorySizes,
+    baseline.summary?.chunk?.categorySizes,
+  );
+  verifyCategorySizeBaseline(
+    'asset categorySizes',
+    report.summary?.asset?.categorySizes,
+    baseline.summary?.asset?.categorySizes,
+  );
 
   return {
+    assetGzipCategoryCounts: sortObjectKeys(
+      report.summary?.asset?.categoryCounts?.gzipOversized,
+    ),
+    assetGzipOversized: uniqueSorted(report.summary?.asset?.gzipOversized),
     assetRawCategoryCounts: sortObjectKeys(
       report.summary?.asset?.categoryCounts?.rawOversized,
     ),
     assetRawOversized: uniqueSorted(report.summary?.asset?.rawOversized),
+    chunkGzipCategoryCounts: sortObjectKeys(
+      report.summary?.chunk?.categoryCounts?.gzipOversized,
+    ),
+    chunkGzipOversized: uniqueSorted(report.summary?.chunk?.gzipOversized),
     chunkRawCategoryCounts: sortObjectKeys(
       report.summary?.chunk?.categoryCounts?.rawOversized,
     ),
     chunkRawOversized: uniqueSorted(report.summary?.chunk?.rawOversized),
+    categorySizes: {
+      asset: sortObjectKeys(report.summary?.asset?.categorySizes),
+      chunk: sortObjectKeys(report.summary?.chunk?.categorySizes),
+    },
+    size: {
+      asset: report.summary?.asset?.size,
+      chunk: report.summary?.chunk?.size,
+    },
   };
 }
