@@ -43,6 +43,22 @@ const createReport = ({
     gzipRatio: 0.3333,
     gzipSavingsBytes: 600,
   },
+  assetCategorySizes = {
+    asset: {
+      bytes: 100,
+      files: 1,
+      gzipBytes: 70,
+      gzipRatio: 0.7,
+      gzipSavingsBytes: 30,
+    },
+    geo: {
+      bytes: 800,
+      files: 1,
+      gzipBytes: 230,
+      gzipRatio: 0.2875,
+      gzipSavingsBytes: 570,
+    },
+  },
   assetRawOversized = ['geo-china.map.json'],
   assetRawCategoryCounts = { geo: assetRawOversized.length },
   chunkGzipOversized = [],
@@ -54,6 +70,22 @@ const createReport = ({
     gzipBytes: 400,
     gzipRatio: 0.3333,
     gzipSavingsBytes: 800,
+  },
+  chunkCategorySizes = {
+    runtime: {
+      bytes: 300,
+      files: 2,
+      gzipBytes: 90,
+      gzipRatio: 0.3,
+      gzipSavingsBytes: 210,
+    },
+    vendor: {
+      bytes: 900,
+      files: 1,
+      gzipBytes: 310,
+      gzipRatio: 0.3444,
+      gzipSavingsBytes: 590,
+    },
   },
   chunkRawOversized = ['antdDesign.js'],
   chunkRawCategoryCounts = { vendor: chunkRawOversized.length },
@@ -68,6 +100,7 @@ const createReport = ({
       gzipOversized: assetGzipOversized,
       oversized: [...assetRawOversized, ...assetGzipOversized],
       rawOversized: assetRawOversized,
+      categorySizes: assetCategorySizes,
       size: assetSize,
     },
     chunk: {
@@ -79,6 +112,7 @@ const createReport = ({
       gzipOversized: chunkGzipOversized,
       oversized: [...chunkRawOversized, ...chunkGzipOversized],
       rawOversized: chunkRawOversized,
+      categorySizes: chunkCategorySizes,
       size: chunkSize,
     },
   },
@@ -142,6 +176,40 @@ describe('check-build-report-baseline', () => {
       chunkGzipOversized: ['gzip-heavy.js'],
       chunkRawCategoryCounts: { vendor: 1 },
       chunkRawOversized: ['antdDesign.js'],
+      categorySizes: {
+        asset: {
+          asset: {
+            bytes: 100,
+            files: 1,
+            gzipBytes: 70,
+            gzipRatio: 0.7,
+            gzipSavingsBytes: 30,
+          },
+          geo: {
+            bytes: 800,
+            files: 1,
+            gzipBytes: 230,
+            gzipRatio: 0.2875,
+            gzipSavingsBytes: 570,
+          },
+        },
+        chunk: {
+          runtime: {
+            bytes: 300,
+            files: 2,
+            gzipBytes: 90,
+            gzipRatio: 0.3,
+            gzipSavingsBytes: 210,
+          },
+          vendor: {
+            bytes: 900,
+            files: 1,
+            gzipBytes: 310,
+            gzipRatio: 0.3444,
+            gzipSavingsBytes: 590,
+          },
+        },
+      },
       size: {
         asset: {
           bytes: 900,
@@ -219,6 +287,69 @@ describe('check-build-report-baseline', () => {
         }),
       }),
     ).toThrow('chunk size raw bytes 超出基线: expected<=1200, actual=1201');
+  });
+
+  it('reports category size set drift', () => {
+    expect(() =>
+      verifyBuildReportBaseline({
+        baseline: createReport({
+          chunkCategorySizes: {
+            runtime: { bytes: 300, gzipBytes: 90 },
+            vendor: { bytes: 900, gzipBytes: 310 },
+          },
+        }),
+        report: createReport({
+          chunkCategorySizes: {
+            runtime: { bytes: 300, gzipBytes: 90 },
+            shared: { bytes: 900, gzipBytes: 310 },
+          },
+        }),
+      }),
+    ).toThrow(
+      'chunk categorySizes categories 不匹配: missing=[vendor], extra=[shared]',
+    );
+  });
+
+  it('reports category size budget regression', () => {
+    expect(() =>
+      verifyBuildReportBaseline({
+        baseline: createReport({
+          assetCategorySizes: {
+            asset: { bytes: 100, gzipBytes: 70 },
+            geo: { bytes: 800, gzipBytes: 230 },
+          },
+        }),
+        report: createReport({
+          assetCategorySizes: {
+            asset: { bytes: 100, gzipBytes: 70 },
+            geo: { bytes: 801, gzipBytes: 230 },
+          },
+        }),
+      }),
+    ).toThrow(
+      'asset categorySizes geo raw bytes 超出基线: expected<=800, actual=801',
+    );
+  });
+
+  it('reports category gzip size budget regression', () => {
+    expect(() =>
+      verifyBuildReportBaseline({
+        baseline: createReport({
+          chunkCategorySizes: {
+            runtime: { bytes: 300, gzipBytes: 90 },
+            vendor: { bytes: 900, gzipBytes: 310 },
+          },
+        }),
+        report: createReport({
+          chunkCategorySizes: {
+            runtime: { bytes: 300, gzipBytes: 91 },
+            vendor: { bytes: 900, gzipBytes: 310 },
+          },
+        }),
+      }),
+    ).toThrow(
+      'chunk categorySizes runtime gzip bytes 超出基线: expected<=90, actual=91',
+    );
   });
 
   it('reads report and baseline JSON files from the CLI', async () => {
@@ -300,6 +431,12 @@ describe('check-build-report-baseline', () => {
               gzipOversized: {},
               rawOversized: {},
             },
+            categorySizes: {
+              geo: {
+                bytes: 900,
+                gzipBytes: 900,
+              },
+            },
             gzipOversized: [],
             rawOversized: [],
             size: {
@@ -311,6 +448,16 @@ describe('check-build-report-baseline', () => {
             categoryCounts: {
               gzipOversized: {},
               rawOversized: {},
+            },
+            categorySizes: {
+              task: {
+                bytes: 700,
+                gzipBytes: 700,
+              },
+              vendor: {
+                bytes: 1900,
+                gzipBytes: 1900,
+              },
             },
             gzipOversized: [],
             rawOversized: [],
@@ -377,6 +524,12 @@ describe('check-build-report-baseline', () => {
               gzipOversized: {},
               rawOversized: {},
             },
+            categorySizes: {
+              geo: {
+                bytes: 900,
+                gzipBytes: 900,
+              },
+            },
             gzipOversized: [],
             rawOversized: [],
             size: {
@@ -388,6 +541,16 @@ describe('check-build-report-baseline', () => {
             categoryCounts: {
               gzipOversized: {},
               rawOversized: {},
+            },
+            categorySizes: {
+              task: {
+                bytes: 700,
+                gzipBytes: 700,
+              },
+              vendor: {
+                bytes: 1900,
+                gzipBytes: 1900,
+              },
             },
             gzipOversized: [],
             rawOversized: [],

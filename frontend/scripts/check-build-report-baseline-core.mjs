@@ -66,6 +66,26 @@ const verifySizeBaseline = (name, actualSummary, expectedSummary) => {
   );
 };
 
+const verifyCategorySizeBaseline = (name, actualSizes = {}, expectedSizes = {}) => {
+  const actualCategories = Object.keys(actualSizes).toSorted();
+  const expectedCategories = Object.keys(expectedSizes).toSorted();
+
+  assertListEqual(`${name} categories`, actualCategories, expectedCategories);
+
+  for (const category of expectedCategories) {
+    assertSizeNotExceeded(
+      `${name} ${category} raw bytes`,
+      actualSizes[category]?.bytes,
+      expectedSizes[category]?.bytes,
+    );
+    assertSizeNotExceeded(
+      `${name} ${category} gzip bytes`,
+      actualSizes[category]?.gzipBytes,
+      expectedSizes[category]?.gzipBytes,
+    );
+  }
+};
+
 export async function readJsonFile(appRoot, filePath) {
   return JSON.parse(await readFile(path.resolve(appRoot, filePath), 'utf8'));
 }
@@ -139,6 +159,16 @@ export function verifyBuildReportBaseline({ baseline, report }) {
     report.summary?.asset,
     baseline.summary?.asset,
   );
+  verifyCategorySizeBaseline(
+    'chunk categorySizes',
+    report.summary?.chunk?.categorySizes,
+    baseline.summary?.chunk?.categorySizes,
+  );
+  verifyCategorySizeBaseline(
+    'asset categorySizes',
+    report.summary?.asset?.categorySizes,
+    baseline.summary?.asset?.categorySizes,
+  );
 
   return {
     assetGzipCategoryCounts: sortObjectKeys(
@@ -157,6 +187,10 @@ export function verifyBuildReportBaseline({ baseline, report }) {
       report.summary?.chunk?.categoryCounts?.rawOversized,
     ),
     chunkRawOversized: uniqueSorted(report.summary?.chunk?.rawOversized),
+    categorySizes: {
+      asset: sortObjectKeys(report.summary?.asset?.categorySizes),
+      chunk: sortObjectKeys(report.summary?.chunk?.categorySizes),
+    },
     size: {
       asset: report.summary?.asset?.size,
       chunk: report.summary?.chunk?.size,

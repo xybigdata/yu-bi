@@ -26,6 +26,22 @@
         "antvS2.js",
         "antvG.js"
       ],
+      "categorySizes": {
+        "runtime": {
+          "bytes": 2154755,
+          "files": 87,
+          "gzipBytes": 645115,
+          "gzipRatio": 0.2994,
+          "gzipSavingsBytes": 1509640
+        },
+        "vendor": {
+          "bytes": 7760603,
+          "files": 14,
+          "gzipBytes": 2222696,
+          "gzipRatio": 0.2864,
+          "gzipSavingsBytes": 5537907
+        }
+      },
       "size": {
         "bytes": 9915358,
         "gzipBytes": 2867811,
@@ -49,6 +65,22 @@
         "geo-china-city.map.json",
         "geo-china.map.json"
       ],
+      "categorySizes": {
+        "asset": {
+          "bytes": 102063,
+          "files": 4,
+          "gzipBytes": 80285,
+          "gzipRatio": 0.7866,
+          "gzipSavingsBytes": 21778
+        },
+        "geo": {
+          "bytes": 1789554,
+          "files": 2,
+          "gzipBytes": 909339,
+          "gzipRatio": 0.5081,
+          "gzipSavingsBytes": 880215
+        }
+      },
       "size": {
         "bytes": 1891617,
         "gzipBytes": 989624,
