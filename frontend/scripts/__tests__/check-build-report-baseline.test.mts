@@ -18,6 +18,14 @@ const baselineScript = path.resolve(
   process.cwd(),
   'scripts/check-build-report-baseline.mjs',
 );
+const currentBaselineScript = path.resolve(
+  process.cwd(),
+  'scripts/check-build-report-current.mjs',
+);
+const gzipCurrentBaselineScript = path.resolve(
+  process.cwd(),
+  'scripts/check-build-report-gzip-current.mjs',
+);
 const gzipBaselineScript = path.resolve(
   process.cwd(),
   'scripts/check-build-report-gzip-baseline.mjs',
@@ -80,6 +88,27 @@ const createTempRoot = async () => {
   const appRoot = await mkdtemp(path.join(os.tmpdir(), 'yu-bi-report-baseline-'));
   tempRoots.push(appRoot);
   await mkdir(path.join(appRoot, 'reports'), { recursive: true });
+  return appRoot;
+};
+
+const createTempBuild = async () => {
+  const appRoot = await createTempRoot();
+  await mkdir(path.join(appRoot, 'build/static/js'), { recursive: true });
+  await mkdir(path.join(appRoot, 'build/static/media'), { recursive: true });
+  await mkdir(path.join(appRoot, 'build/task'), { recursive: true });
+  await writeFile(
+    path.join(appRoot, 'build/static/js/antdDesign.D8R05ovR.js'),
+    'a'.repeat(1300),
+  );
+  await writeFile(
+    path.join(appRoot, 'build/static/js/react.BIp4DLJn.js'),
+    'r'.repeat(600),
+  );
+  await writeFile(
+    path.join(appRoot, 'build/static/media/geo-china.map.json'),
+    'm'.repeat(900),
+  );
+  await writeFile(path.join(appRoot, 'build/task/index.js'), 't'.repeat(700));
   return appRoot;
 };
 
@@ -255,6 +284,60 @@ describe('check-build-report-baseline', () => {
     );
   });
 
+  it('generates current report before default baseline check', async () => {
+    const appRoot = await createTempBuild();
+    await mkdir(path.join(appRoot, 'scripts/baselines'), { recursive: true });
+    await writeFile(
+      path.join(appRoot, 'build/build-report.json'),
+      JSON.stringify({ stale: true }),
+    );
+    await writeFile(
+      path.join(appRoot, 'scripts/baselines/build-report-baseline.json'),
+      JSON.stringify({
+        summary: {
+          asset: {
+            categoryCounts: {
+              gzipOversized: {},
+              rawOversized: {},
+            },
+            gzipOversized: [],
+            rawOversized: [],
+            size: {
+              bytes: 900,
+              gzipBytes: 900,
+            },
+          },
+          chunk: {
+            categoryCounts: {
+              gzipOversized: {},
+              rawOversized: {},
+            },
+            gzipOversized: [],
+            rawOversized: [],
+            size: {
+              bytes: 2600,
+              gzipBytes: 2600,
+            },
+          },
+        },
+      }),
+    );
+
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      [currentBaselineScript],
+      {
+        cwd: appRoot,
+        env: process.env,
+      },
+    );
+    const report = await readJsonFile(appRoot, 'build/build-report.json');
+
+    expect(stdout).toContain('chunkRawOversized=0, assetRawOversized=0');
+    expect(report.stale).toBeUndefined();
+    expect(report.summary.chunk.rawOversized).toEqual([]);
+  });
+
   it('uses the gzip baseline wrapper defaults', async () => {
     const appRoot = await createTempRoot();
     await mkdir(path.join(appRoot, 'build'), { recursive: true });
@@ -276,6 +359,60 @@ describe('check-build-report-baseline', () => {
     expect(stdout).toContain(
       'yu-bi build report baseline verified: chunkRawOversized=1, assetRawOversized=1',
     );
+  });
+
+  it('generates current gzip report before gzip baseline check', async () => {
+    const appRoot = await createTempBuild();
+    await mkdir(path.join(appRoot, 'scripts/baselines'), { recursive: true });
+    await writeFile(
+      path.join(appRoot, 'build/build-report-gzip.json'),
+      JSON.stringify({ stale: true }),
+    );
+    await writeFile(
+      path.join(appRoot, 'scripts/baselines/build-report-gzip-baseline.json'),
+      JSON.stringify({
+        summary: {
+          asset: {
+            categoryCounts: {
+              gzipOversized: {},
+              rawOversized: {},
+            },
+            gzipOversized: [],
+            rawOversized: [],
+            size: {
+              bytes: 900,
+              gzipBytes: 900,
+            },
+          },
+          chunk: {
+            categoryCounts: {
+              gzipOversized: {},
+              rawOversized: {},
+            },
+            gzipOversized: [],
+            rawOversized: [],
+            size: {
+              bytes: 2600,
+              gzipBytes: 2600,
+            },
+          },
+        },
+      }),
+    );
+
+    const { stdout } = await execFileAsync(
+      process.execPath,
+      [gzipCurrentBaselineScript],
+      {
+        cwd: appRoot,
+        env: process.env,
+      },
+    );
+    const report = await readJsonFile(appRoot, 'build/build-report-gzip.json');
+
+    expect(stdout).toContain('chunkRawOversized=0, assetRawOversized=0');
+    expect(report.stale).toBeUndefined();
+    expect(report.lines.join('\n')).toContain('gzipThreshold=500 KiB');
   });
 
   it('formats empty and sorted category counts', () => {

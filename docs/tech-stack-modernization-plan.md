@@ -290,8 +290,10 @@ npm ls --all
 - JSON 报告 `summary.chunk.size` / `summary.asset.size` 输出 raw、gzip、压缩率和 gzip 节省字节
 - 文本报告输出分类体积摘要；JSON 报告 `summary.*.categorySizes` 输出分类文件数、raw、gzip、压缩率和节省字节
 - `npm run build:report:check`：按观察基线校验稳定 id 清单
+- `npm run build:report:check:current`：先生成当前 JSON 报告，再校验默认观察基线
 - `npm run build:report:gzip`：生成 gzip 预算报告 `build/build-report-gzip.json`
 - `npm run build:report:gzip:check`：按 gzip 预算基线校验 raw / gzip 超限稳定 id 与分类计数
+- `npm run build:report:gzip:check:current`：先生成当前 gzip 预算报告，再校验 gzip 预算基线
 - baseline 校验同时检查 `summary.*.size.bytes` 和 `summary.*.size.gzipBytes`，防止超限名单不变但总体积回退
 - gzip 预算脚本使用 Node wrapper 设置报告参数，避免依赖 Unix shell 内联环境变量
 
@@ -365,11 +367,9 @@ cd frontend
 npm run build
 npm run build:task
 YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 npm run build:report
-npm run build:report:gzip
-npm run build:report:gzip:check
+npm run build:report:check:current
+npm run build:report:gzip:check:current
 YU_BI_CHUNK_REPORT_CATEGORY_FILTER=vendor YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 npm run build:report
-YU_BI_CHUNK_REPORT_FORMAT=json YU_BI_CHUNK_REPORT_ONLY_OVERSIZED=1 YU_BI_CHUNK_REPORT_OUTPUT=build/build-report.json npm run build:report
-YU_BI_CHUNK_REPORT_BASELINE_REPORT=build/build-report.json npm run build:report:check
 ```
 
 后端专项恢复：
