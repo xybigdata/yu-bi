@@ -21,6 +21,10 @@ import {
 } from '../report-build-chunks-core.mjs';
 
 const execFileAsync = promisify(execFile);
+const gzipReportScript = path.resolve(
+  process.cwd(),
+  'scripts/build-report-gzip.mjs',
+);
 const reportScript = path.resolve(process.cwd(), 'scripts/report-build-chunks.mjs');
 const tempRoots: string[] = [];
 
@@ -225,6 +229,22 @@ describe('report-build-chunks', () => {
     expect(stdout).toBe('');
     expect(report.summary.chunk.rawOversized).toEqual(['antdDesign.js']);
     expect(report.oversizedCount).toBe(1);
+  });
+
+  it('can write gzip budget report from the dedicated CLI wrapper', async () => {
+    const appRoot = await createTempBuild();
+    const { stdout } = await execFileAsync(process.execPath, [gzipReportScript], {
+      cwd: appRoot,
+      env: process.env,
+    });
+    const report = JSON.parse(
+      await readFile(path.join(appRoot, 'build/build-report-gzip.json'), 'utf8'),
+    );
+
+    expect(stdout).toBe('');
+    expect(report.summary.chunk.gzipOversized).toEqual([]);
+    expect(report.summary.asset.gzipOversized).toEqual([]);
+    expect(report.lines.join('\n')).toContain('gzipThreshold=500 KiB');
   });
 
   it('can write text report to a file from the CLI', async () => {

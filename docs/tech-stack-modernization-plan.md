@@ -292,6 +292,7 @@ npm ls --all
 - `npm run build:report:gzip`：生成 gzip 预算报告 `build/build-report-gzip.json`
 - `npm run build:report:gzip:check`：按 gzip 预算基线校验 raw / gzip 超限稳定 id 与分类计数
 - baseline 校验同时检查 `summary.*.size.bytes` 和 `summary.*.size.gzipBytes`，防止超限名单不变但总体积回退
+- gzip 预算脚本使用 Node wrapper 设置报告参数，避免依赖 Unix shell 内联环境变量
 
 `vendor` 分类应覆盖 `vite.shared.mts#createVendorManualChunks` 中当前所有手工第三方分包，避免构建报告和实际分包规则漂移。
 

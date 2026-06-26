@@ -18,6 +18,10 @@ const baselineScript = path.resolve(
   process.cwd(),
   'scripts/check-build-report-baseline.mjs',
 );
+const gzipBaselineScript = path.resolve(
+  process.cwd(),
+  'scripts/check-build-report-gzip-baseline.mjs',
+);
 const tempRoots: string[] = [];
 
 const createReport = ({
@@ -244,6 +248,29 @@ describe('check-build-report-baseline', () => {
         ...process.env,
         YU_BI_CHUNK_REPORT_BASELINE_REPORT: 'reports/report.json',
       },
+    });
+
+    expect(stdout).toContain(
+      'yu-bi build report baseline verified: chunkRawOversized=1, assetRawOversized=1',
+    );
+  });
+
+  it('uses the gzip baseline wrapper defaults', async () => {
+    const appRoot = await createTempRoot();
+    await mkdir(path.join(appRoot, 'build'), { recursive: true });
+    await mkdir(path.join(appRoot, 'scripts/baselines'), { recursive: true });
+    await writeFile(
+      path.join(appRoot, 'build/build-report-gzip.json'),
+      JSON.stringify(createReport()),
+    );
+    await writeFile(
+      path.join(appRoot, 'scripts/baselines/build-report-gzip-baseline.json'),
+      JSON.stringify(createReport()),
+    );
+
+    const { stdout } = await execFileAsync(process.execPath, [gzipBaselineScript], {
+      cwd: appRoot,
+      env: process.env,
     });
 
     expect(stdout).toContain(
