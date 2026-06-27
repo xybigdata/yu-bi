@@ -99,7 +99,7 @@ const GroupLayout: FC<FormGeneratorLayoutProps<ChartStyleConfig>> = memo(
 
       return (
         <Collapse
-          expandIconPosition="right"
+          expandIconPosition="end"
           defaultActiveKey={expand ? '1' : undefined}
         >
           <Panel

@@ -48,7 +48,7 @@ const BasicLine: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
           <Group>
             <Select
               className="datart-ant-select"
-              dropdownMatchSelectWidth
+              popupMatchSelectWidth
               placeholder={t('select')}
               value={data.value?.type}
               onChange={handleSettingChange('type')}

@@ -79,7 +79,7 @@ const BasicSelector: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       <BW label={!hideLabel ? t(row.label, true) : ''}>
         <Select
           className="datart-ant-select"
-          dropdownMatchSelectWidth
+          popupMatchSelectWidth
           {...selectOptions}
           value={row.value}
           disabled={row.disabled}

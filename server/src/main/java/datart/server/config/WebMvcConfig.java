@@ -18,19 +18,16 @@
 
 package datart.server.config;
 
-import com.fasterxml.jackson.databind.SerializationFeature;
 import datart.server.config.interceptor.BasicValidRequestInterceptor;
-import datart.server.config.interceptor.LoginInterceptor;
 import datart.server.controller.BaseController;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import tools.jackson.databind.cfg.EnumFeature;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -38,15 +35,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Value("${datart.server.path-prefix}")
     private String pathPrefix;
 
-    private final LoginInterceptor loginInterceptor;
-
-    public WebMvcConfig(LoginInterceptor loginInterceptor) {
-        this.loginInterceptor = loginInterceptor;
-    }
-
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(loginInterceptor).addPathPatterns(getPathPrefix() + "/**");
         //i18n locale interceptor
         registry.addInterceptor(new BasicValidRequestInterceptor()).addPathPatterns("/**");
     }
@@ -65,8 +55,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public Jackson2ObjectMapperBuilderCustomizer datartJacksonCustomizer() {
-        return (Jackson2ObjectMapperBuilder builder) ->
-                builder.featuresToEnable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
+    public JsonMapperBuilderCustomizer datartJacksonCustomizer() {
+        return builder -> builder.enable(EnumFeature.WRITE_ENUMS_USING_TO_STRING);
     }
 }

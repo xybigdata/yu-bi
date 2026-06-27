@@ -5,7 +5,7 @@ import { forwardRef, ReactNode, useCallback, useImperativeHandle } from 'react';
 
 type FormOnFinishValues = Parameters<NonNullable<FormProps['onFinish']>>[0];
 
-export interface ModalFormProps extends Omit<ModalProps, 'visible'> {
+export interface ModalFormProps extends ModalProps {
   type?: CommonFormTypes;
   formProps?: FormProps;
   onSave: (values: FormOnFinishValues) => void;

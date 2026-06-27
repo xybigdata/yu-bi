@@ -11,9 +11,6 @@ HEALTH_URL="${DATART_DEMO_HEALTH_URL:-http://127.0.0.1:${PORT}/api/v1/sys/info}"
 STARTUP_TIMEOUT_SECONDS="${DATART_DEMO_TIMEOUT_SECONDS:-180}"
 SPRING_PROFILE="${DATART_DEMO_PROFILE:-demo}"
 START_CLASS="${DATART_DEMO_START_CLASS:-datart.DatartServerApplication}"
-JAVA_OPENS_ARGS=(
-  "--add-opens=java.base/java.lang=ALL-UNNAMED"
-)
 
 mkdir -p "${LOG_DIR}"
 rm -f "${LOG_FILE}"
@@ -53,7 +50,6 @@ unzip -q "${INSTALL_ZIP}" -d "${RUNTIME_DIR}"
 cd "${RUNTIME_DIR}"
 
 java \
-  "${JAVA_OPENS_ARGS[@]}" \
   -Dspring.profiles.active="${SPRING_PROFILE}" \
   -Dserver.port="${PORT}" \
   -Dfile.encoding=UTF-8 \

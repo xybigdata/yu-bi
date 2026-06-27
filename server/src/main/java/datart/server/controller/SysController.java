@@ -18,7 +18,6 @@
 
 package datart.server.controller;
 
-import datart.core.base.annotations.SkipLogin;
 import datart.server.base.dto.ResponseData;
 import datart.server.base.dto.SystemInfo;
 import datart.server.base.params.SetupParams;
@@ -40,14 +39,12 @@ public class SysController extends BaseController {
         this.sysService = sysService;
     }
 
-    @SkipLogin
     @Operation(summary = "get system info")
     @GetMapping("/info")
     public ResponseData<SystemInfo> getSysInfo() {
         return ResponseData.success(sysService.getSysInfo());
     }
 
-    @SkipLogin
     @Operation(summary = "initialized user info")
     @PostMapping("/setup")
     public ResponseData<Boolean> setup(@Validated @RequestBody SetupParams setupParams) throws MessagingException, UnsupportedEncodingException {

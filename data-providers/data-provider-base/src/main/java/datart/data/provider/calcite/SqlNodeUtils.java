@@ -24,6 +24,7 @@ import datart.data.provider.calcite.custom.SqlSimpleStringLiteral;
 import org.apache.calcite.sql.*;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParserPos;
+import org.apache.calcite.sql.pretty.SqlPrettyWriter;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.Arrays;
@@ -136,13 +137,16 @@ public class SqlNodeUtils {
      * 但是在oracle数据库中，加上引号的字段小写会导致列名无法识别的问题，此时需要用户SQL中使用大写列名，或者可在jdbc-driver文件中配置为默认不加引号。
      */
     public static String toSql(SqlNode sqlNode, SqlDialect dialect, boolean quoteIdentifiers) {
-        return sqlNode.toSqlString(
-                config -> config.withDialect(dialect)
-                        .withQuoteAllIdentifiers(quoteIdentifiers)
-                        .withAlwaysUseParentheses(false)
-                        .withSelectListItemsOnSeparateLines(false)
-                        .withUpdateSetListNewline(false)
-                        .withIndentation(0)).getSql();
+        SqlWriterConfig config = SqlPrettyWriter.config()
+                .withDialect(dialect)
+                .withQuoteAllIdentifiers(quoteIdentifiers)
+                .withAlwaysUseParentheses(false)
+                .withSelectListItemsOnSeparateLines(false)
+                .withUpdateSetListNewline(false)
+                .withIndentation(0);
+        DatartSqlPrettyWriter writer = new DatartSqlPrettyWriter(config);
+        sqlNode.unparse(writer, 0, 0);
+        return writer.toSqlString().getSql();
     }
 
 }

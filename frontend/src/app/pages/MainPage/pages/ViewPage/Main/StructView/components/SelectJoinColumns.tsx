@@ -153,7 +153,7 @@ const SelectJoinColumns = memo(
           }
         >
           <ColumnSelect
-            dropdownMatchSelectWidth={false}
+            popupMatchSelectWidth={false}
             allowClear
             placeholder={t('selectField')}
             treeDefaultExpandAll={true}
@@ -174,7 +174,7 @@ const SelectJoinColumns = memo(
           }
         >
           <ColumnSelect
-            dropdownMatchSelectWidth={false}
+            popupMatchSelectWidth={false}
             allowClear
             placeholder={t('selectField')}
             treeDefaultExpandAll={true}

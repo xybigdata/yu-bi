@@ -18,9 +18,10 @@
 
 package datart.core.data.provider;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import datart.core.base.AutoCloseBean;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,11 +31,9 @@ import java.util.Set;
 
 public abstract class DataProvider extends AutoCloseBean {
 
-    static ObjectMapper MAPPER = new ObjectMapper();
-
-    static {
-        MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
+    static ObjectMapper MAPPER = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
 
     public DataProviderInfo getBaseInfo() throws IOException {
         DataProviderConfigTemplate template = getConfigTemplate();

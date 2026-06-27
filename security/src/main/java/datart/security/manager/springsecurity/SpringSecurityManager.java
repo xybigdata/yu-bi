@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package datart.security.manager.shiro;
+package datart.security.manager.springsecurity;
 
 import datart.core.base.consts.Const;
 import datart.core.base.exception.BaseException;
@@ -37,7 +37,6 @@ import datart.security.manager.SecurityAuthorizationException;
 import datart.security.manager.SecuritySubjectFacade;
 import datart.security.util.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.util.ThreadContext;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
@@ -45,10 +44,16 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 
-
+/**
+ * Spring Security implementation of {@link DatartSecurityManager}.
+ * <p>
+ * Replaces the Shiro-based {@code ShiroSecurityManager} by delegating
+ * authentication and authorization checks to {@link SpringSecuritySubjectFacade}
+ * which uses Spring Security's {@link org.springframework.security.core.context.SecurityContextHolder}.
+ */
 @Slf4j
 @Component(value = "datartSecurityManager")
-public class ShiroSecurityManager implements DatartSecurityManager {
+public class SpringSecurityManager implements DatartSecurityManager {
 
     final MessageResolver messageResolver;
 
@@ -58,10 +63,10 @@ public class ShiroSecurityManager implements DatartSecurityManager {
 
     private final SecuritySubjectFacade securitySubjectFacade;
 
-    public ShiroSecurityManager(MessageResolver messageResolver,
-                                UserMapperExt userMapper,
-                                PermissionDataCache permissionDataCache,
-                                SecuritySubjectFacade securitySubjectFacade) {
+    public SpringSecurityManager(MessageResolver messageResolver,
+                                 UserMapperExt userMapper,
+                                 PermissionDataCache permissionDataCache,
+                                 SecuritySubjectFacade securitySubjectFacade) {
         this.messageResolver = messageResolver;
         this.userMapper = userMapper;
         this.permissionDataCache = permissionDataCache;

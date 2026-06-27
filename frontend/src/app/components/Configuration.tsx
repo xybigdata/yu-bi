@@ -4,7 +4,7 @@ import { createGlobalStyle } from 'styled-components';
 import { uuidv4 } from 'utils/utils';
 
 const ConfigurationTableStyle = createGlobalStyle`
-  .configuration-table .ant-card-body {
+  .configuration-table .ant-pro-card-body {
     padding: 0;
   }
 `;

@@ -1,4 +1,4 @@
-package datart.security.manager.shiro;
+package datart.security.manager.springsecurity;
 
 import datart.core.base.exception.BaseException;
 import datart.core.common.MessageResolver;
@@ -17,19 +17,19 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class ShiroSecurityManagerTest {
+class SpringSecurityManagerTest {
 
     private PermissionDataCache permissionDataCache;
 
     private SecuritySubjectFacade securitySubjectFacade;
 
-    private ShiroSecurityManager securityManager;
+    private SpringSecurityManager securityManager;
 
     @BeforeEach
     void setUp() {
         permissionDataCache = mock(PermissionDataCache.class);
         securitySubjectFacade = mock(SecuritySubjectFacade.class);
-        securityManager = new ShiroSecurityManager(
+        securityManager = new SpringSecurityManager(
                 mock(MessageResolver.class),
                 mock(UserMapperExt.class),
                 permissionDataCache,

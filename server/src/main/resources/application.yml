@@ -63,10 +63,6 @@ logging:
       data.provider.jdbc: info
   config: config/logback.xml
 
-shiro:
-  web:
-    enabled: false
-
 datart:
   migration:
     enable: true

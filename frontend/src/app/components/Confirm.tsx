@@ -8,7 +8,7 @@ import {
 } from 'styles/StyleConstants';
 import { cloneElementWithClassName } from 'utils/reactCompat';
 
-export interface ConfirmProps extends Omit<ModalProps, 'visible'> {
+export interface ConfirmProps extends ModalProps {
   icon?: ReactElement;
   title?: ReactNode;
   content?: ReactNode;

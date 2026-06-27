@@ -18,7 +18,6 @@
 
 package datart.server.controller;
 
-import datart.core.base.annotations.SkipLogin;
 import datart.core.common.FileUtils;
 import datart.core.data.provider.Dataframe;
 import datart.core.data.provider.StdSqlOperator;
@@ -82,7 +81,6 @@ public class ShareController extends BaseController {
 
     @Operation(summary = "get viz detail")
     @PostMapping("{shareId}/viz")
-    @SkipLogin
     public ResponseData<ShareVizDetail> vizDetail(@PathVariable String shareId,
                                                   @RequestBody ShareToken shareToken) {
         shareToken.setId(shareId);
@@ -92,7 +90,6 @@ public class ShareController extends BaseController {
 
     @Operation(summary = "support std functions")
     @PostMapping("/function/support/{sourceId}")
-    @SkipLogin
     public ResponseData<Set<StdSqlOperator>> supportFunctions(@PathVariable String sourceId,
                                                               @RequestBody ShareToken executeToken) {
         return ResponseData.success(shareService.supportedStdFunctions(executeToken, sourceId));
@@ -100,7 +97,6 @@ public class ShareController extends BaseController {
 
     @Operation(summary = "execute with share token")
     @PostMapping("/execute")
-    @SkipLogin
     public ResponseData<Dataframe> execute(@RequestParam String executeToken,
                                            @RequestBody ViewExecuteParam executeParam) throws Exception {
         return ResponseData.success(shareService.execute(ShareToken.create(executeToken), executeParam));
@@ -108,7 +104,6 @@ public class ShareController extends BaseController {
 
     @Operation(summary = "create a download task")
     @PostMapping("/download")
-    @SkipLogin
     public ResponseData<Download> createDownload(@RequestParam(required = false) String password,
                                                  @RequestParam String clientId,
                                                  @RequestBody ShareDownloadParam downloadCreateParam) {
@@ -117,7 +112,6 @@ public class ShareController extends BaseController {
 
     @Operation(summary = "get download task")
     @GetMapping("/download/task")
-    @SkipLogin
     public ResponseData<List<Download>> downloadList(@RequestParam String shareToken,
                                                      @RequestParam String clientId) {
         return ResponseData.success(shareService.listDownloadTask(ShareToken.create(shareToken), clientId));
@@ -125,7 +119,6 @@ public class ShareController extends BaseController {
 
     @Operation(summary = "download file")
     @GetMapping("/download")
-    @SkipLogin
     public void downloadFile(@RequestParam String shareToken,
                              @RequestParam String downloadId,
                              HttpServletResponse response) throws IOException {

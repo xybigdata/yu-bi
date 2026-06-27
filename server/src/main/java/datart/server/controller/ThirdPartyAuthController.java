@@ -1,6 +1,5 @@
 package datart.server.controller;
 
-import datart.core.base.annotations.SkipLogin;
 import datart.server.base.dto.ResponseData;
 import datart.server.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,7 +36,6 @@ public class ThirdPartyAuthController extends BaseController {
 
     @Operation(summary = "Get Oauth2 clents")
     @GetMapping(value = "getOauth2Clients", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @SkipLogin
     public ResponseData<List<HashMap<String, String>>> getOauth2Clients(HttpServletRequest request) {
         if (clientRegistrationRepository == null) {
             return ResponseData.success(Collections.emptyList());

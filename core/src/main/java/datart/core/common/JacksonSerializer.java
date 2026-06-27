@@ -18,19 +18,17 @@
 
 package datart.core.common;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import org.springframework.boot.jackson.JsonComponent;
+import org.springframework.boot.jackson.JacksonComponent;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
-import java.io.IOException;
-
-@JsonComponent
+@JacksonComponent
 public class JacksonSerializer {
 
-    public static class ExceptionSerialize extends JsonSerializer<Exception> {
+    public static class ExceptionSerialize extends ValueSerializer<Exception> {
         @Override
-        public void serialize(Exception value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        public void serialize(Exception value, JsonGenerator gen, SerializationContext serializers) {
             gen.writeString(value.toString());
         }
     }
