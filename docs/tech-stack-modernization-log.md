@@ -256,3 +256,16 @@ Per Requirement 5.4, the following key dependencies were checked for TypeScript 
 - 验证结果：前端 toolchain/typecheck/build/build:task/test:ci/lint:css 通过；`npm run test:ci` 为 164 files / 1152 passed / 4 skipped；`mvn compile`、`mvn test`、完整安装包构建和 demo health 通过；体积门禁 raw/gzip 两项失败，失败原因均为 `chunk categorySizes runtime raw bytes 超出基线: expected<=2163742, actual=2164164`。
 - 遗留问题：修正或确认构建体积 baseline 后，重新执行体积门禁并再决定是否合入 `main`。
 - 后续影响：本次 Git 流程止步于分支推送；远程 `main` 保持不变。
+
+### 合并前体积 baseline 窄幅调整
+
+- 分支：`refactor/tech-modernization`
+- 改造范围：前端构建体积 baseline。
+- 问题背景：合并前体积门禁失败只来自 `runtime` 分类 raw bytes 比 baseline 多 422 bytes；当前完整 chunk 总量和 vendor 分类均低于 baseline，不属于整体体积回归。
+- 处理方案：只调整 raw/gzip 两份 baseline 中 `summary.chunk.categorySizes.runtime` 的当前值：`bytes=2164164`、`gzipBytes=648181`、`gzipRatio=0.2995`、`gzipSavingsBytes=1515983`；不提高 `summary.chunk.size` 总量基线。
+- 兼容性决策：该调整只接受现代化迁移后的 runtime 分类微增，继续保持总量门禁和 vendor 大包门禁严格约束。
+- 目标架构或组件版本是否发生调整：无。
+- 验证命令：`npm run build:report:check:current`、`npm run build:report:gzip:check:current`
+- 验证结果：两项均通过；当前 chunk size 为 `raw=10237271,gzip=2913129`，仍低于总量 baseline `raw=10449413,gzip=2975481`。
+- 遗留问题：无。
+- 后续影响：体积门禁通过后可恢复合入 `main` 流程。

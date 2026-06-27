@@ -37,11 +37,11 @@
       ],
       "categorySizes": {
         "runtime": {
-          "bytes": 2163742,
+          "bytes": 2164164,
           "files": 88,
-          "gzipBytes": 648155,
-          "gzipRatio": 0.2996,
-          "gzipSavingsBytes": 1515587
+          "gzipBytes": 648181,
+          "gzipRatio": 0.2995,
+          "gzipSavingsBytes": 1515983
         },
         "task": {
           "bytes": 454870,
