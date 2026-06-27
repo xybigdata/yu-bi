@@ -34,7 +34,7 @@ const BasicFontStyle: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       <BW label={!options?.hideLabel ? t(row.label, true) : ''}>
         <Select
           className="datart-ant-select"
-          dropdownMatchSelectWidth
+          popupMatchSelectWidth
           {...selectOptions}
           value={row.value}
           disabled={row.disabled}

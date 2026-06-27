@@ -267,16 +267,38 @@
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>clean-frontend-static</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <configuration>
+                            <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                            <filesets>
+                                <fileset>
+                                    <directory>${project.build.directory}/frontend-static</directory>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>copy-resource</id>
-                        <phase>package</phase>
+                        <id>copy-frontend-static</id>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.parent.basedir}/static</outputDirectory>
+                            <outputDirectory>${project.build.directory}/frontend-static</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.parent.basedir}/frontend/build</directory>
@@ -293,14 +315,14 @@
                 <version>1.0.1</version>
                 <executions>
                     <execution>
-                        <id>rename-file</id>
-                        <phase>package</phase>
+                        <id>copy-task-parser</id>
+                        <phase>prepare-package</phase>
                         <goals>
-                            <goal>rename</goal>
+                            <goal>copy</goal>
                         </goals>
                         <configuration>
                             <sourceFile>${project.parent.basedir}/frontend/build/task/index.js</sourceFile>
-                            <destinationFile>${project.basedir}/src/main/resources/javascript/parser.js
+                            <destinationFile>${project.build.outputDirectory}/javascript/parser.js
                             </destinationFile>
                         </configuration>
                     </execution>

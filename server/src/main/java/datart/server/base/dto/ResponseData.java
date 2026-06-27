@@ -19,7 +19,7 @@
 package datart.server.base.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import tools.jackson.databind.annotation.JsonSerialize;
 import datart.core.base.PageInfo;
 import datart.core.common.JacksonSerializer;
 import lombok.AllArgsConstructor;

@@ -235,7 +235,7 @@ export const ChartDraggableSourceContainer: FC<
           <CollapseWrapper
             defaultActiveKey={[colName]}
             ghost
-            expandIconPosition="right"
+            expandIconPosition="end"
             expandIcon={({ isActive }) => {
               return <DownOutlined rotate={isActive ? -180 : 0} />;
             }}

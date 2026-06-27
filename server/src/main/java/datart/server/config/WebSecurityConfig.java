@@ -1,19 +1,24 @@
 package datart.server.config;
 
+import datart.security.manager.AuthenticationAssembler;
+import datart.security.manager.springsecurity.DatartAuthenticationProvider;
 import datart.security.oauth2.ClientRegistrationRepositoryImpl;
 import datart.security.oauth2.CustomOAuth2AuthorizationRequestRedirectFilter;
 import datart.security.oauth2.CustomOauth2AuthenticationFilter;
 import datart.server.config.filter.JwtRequestAuthenticationFilter;
+import datart.server.config.security.DatartAccessDeniedHandler;
+import datart.server.config.security.DatartAuthenticationEntryPoint;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
@@ -35,15 +40,32 @@ public class WebSecurityConfig {
 
     private JwtRequestAuthenticationFilter jwtRequestAuthenticationFilter;
 
+    private DatartAuthenticationEntryPoint datartAuthenticationEntryPoint;
+
+    private DatartAccessDeniedHandler datartAccessDeniedHandler;
+
+    private AuthenticationAssembler authenticationAssembler;
+
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return web -> web.ignoring().requestMatchers(getApiPrefix() + "/tpa");
+    public AuthenticationProvider datartAuthenticationProvider() {
+        return new DatartAuthenticationProvider(authenticationAssembler);
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
         http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+        http.authenticationProvider(datartAuthenticationProvider());
+        http.authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(getApiPrefix() + "/tpa/**").permitAll()
+                .requestMatchers(getApiPrefix() + "/sys/info", getApiPrefix() + "/sys/setup").permitAll()
+                .requestMatchers(getApiPrefix() + "/users/register", getApiPrefix() + "/users/active").permitAll()
+                .requestMatchers(getApiPrefix() + "/users/sendmail", getApiPrefix() + "/users/reset/password").permitAll()
+                .requestMatchers(getApiPrefix() + "/shares/**").permitAll()
+                .requestMatchers("/shareChart/**", "/shareDashboard/**", "/shareStoryPlayer/**").permitAll()
+                .requestMatchers("/**/*.html", "/**/*.js", "/**/*.css", "/**/*.ico", "/**/*.png", "/**/*.svg", "/**/*.json").permitAll()
+                .anyRequest().authenticated());
         http.addFilterBefore(jwtRequestAuthenticationFilter, OAuth2AuthorizationRequestRedirectFilter.class);
         if (this.oAuth2ClientProperties != null) {
             http.addFilterBefore(new CustomOAuth2AuthorizationRequestRedirectFilter(clientRegistrations), OAuth2AuthorizationRequestRedirectFilter.class);
@@ -53,10 +75,11 @@ public class WebSecurityConfig {
                     .clientRegistrationRepository(clientRegistrations)
                     .successHandler(authenticationSuccessHandler)
                     .loginPage("/"));
-            http.authorizeHttpRequests(authorize -> authorize
-                    .requestMatchers(getApiPrefix() + "/tpa").permitAll());
             http.logout(logout -> logout.logoutUrl("/tpa/oauth2/logout").permitAll());
         }
+        http.exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint(datartAuthenticationEntryPoint)
+                .accessDeniedHandler(datartAccessDeniedHandler));
         return http.build();
     }
 
@@ -83,5 +106,20 @@ public class WebSecurityConfig {
     @Autowired
     public void setJwtRequestAuthenticationFilter(JwtRequestAuthenticationFilter jwtRequestAuthenticationFilter) {
         this.jwtRequestAuthenticationFilter = jwtRequestAuthenticationFilter;
+    }
+
+    @Autowired
+    public void setDatartAuthenticationEntryPoint(DatartAuthenticationEntryPoint datartAuthenticationEntryPoint) {
+        this.datartAuthenticationEntryPoint = datartAuthenticationEntryPoint;
+    }
+
+    @Autowired
+    public void setDatartAccessDeniedHandler(DatartAccessDeniedHandler datartAccessDeniedHandler) {
+        this.datartAccessDeniedHandler = datartAccessDeniedHandler;
+    }
+
+    @Autowired
+    public void setAuthenticationAssembler(AuthenticationAssembler authenticationAssembler) {
+        this.authenticationAssembler = authenticationAssembler;
     }
 }

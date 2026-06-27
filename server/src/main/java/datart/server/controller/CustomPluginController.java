@@ -18,7 +18,6 @@
 
 package datart.server.controller;
 
-import datart.core.base.annotations.SkipLogin;
 import datart.server.base.dto.ResponseData;
 import datart.server.service.CustomPluginService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -41,7 +40,6 @@ public class CustomPluginController extends BaseController {
         this.customPluginService = customPluginService;
     }
 
-    @SkipLogin
     @Operation(summary = "scan custom chart plugins")
     @GetMapping(value = "/custom/charts")
     public ResponseData<Set<String>> scanCustomCharts() throws MalformedURLException {

@@ -18,7 +18,6 @@
 
 package datart.server.controller;
 
-import datart.core.base.annotations.SkipLogin;
 import datart.core.base.consts.Const;
 import datart.core.base.consts.TenantManagementMode;
 import datart.core.base.consts.UserIdentityType;
@@ -56,7 +55,6 @@ public class UserController extends BaseController {
         this.userService = userService;
     }
 
-    @SkipLogin
     @Operation(summary = "User registration")
     @PostMapping("/register")
     public ResponseData<Boolean> register(@Validated @RequestBody UserRegisterParam user) throws MessagingException, UnsupportedEncodingException {
@@ -78,7 +76,6 @@ public class UserController extends BaseController {
         return ResponseData.success(userService.getUserProfile());
     }
 
-    @SkipLogin
     @Operation(summary = "Activate the user")
     @GetMapping(value = "/active")
     public ResponseData<String> activate(@RequestParam("token") String activeToken) {
@@ -89,7 +86,6 @@ public class UserController extends BaseController {
 
     @Operation(summary = "send email")
     @PostMapping(value = "/sendmail")
-    @SkipLogin
     public ResponseData<Boolean> sendEmail(String usernameOrEmail) throws UnsupportedEncodingException, MessagingException {
         return ResponseData.success(userService.sendActiveMail(usernameOrEmail));
     }
@@ -109,12 +105,10 @@ public class UserController extends BaseController {
 
     @Operation(summary = "forget password")
     @PutMapping("/reset/password")
-    @SkipLogin
     public ResponseData<Boolean> resetPassword(@Validated @RequestBody UserResetPasswordParam passwordParam) {
         return ResponseData.success(userService.resetPassword(passwordParam));
     }
 
-    @SkipLogin
     @Operation(summary = "User Login")
     @PostMapping(value = "/login")
     public ResponseData<UserBaseInfo> login(@RequestBody UserLoginParam loginParam,
@@ -130,7 +124,6 @@ public class UserController extends BaseController {
 
     @Operation(summary = "User Login")
     @PostMapping(value = "/forget/password")
-    @SkipLogin
     public ResponseData<String> forgetPassword(@RequestParam(required = false) UserIdentityType type,
                                                @RequestParam(required = false) String principal) {
         return ResponseData.success(userService.forgetPassword(type, principal));

@@ -34,9 +34,6 @@ import datart.data.provider.jdbc.JdbcDriverInfo;
 import datart.data.provider.jdbc.JdbcProperties;
 import datart.data.provider.jdbc.SqlScriptRender;
 import datart.data.provider.local.LocalDB;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtMethod;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -334,12 +331,12 @@ public class JdbcDataProviderAdapter implements Closeable {
             }
         }
         if (sqlDialect == null) {
-            try {
-                sqlDialect = getDefaultSqlDialect(driverInfo);
-            } catch (Exception ignored) {
-                log.warn("DBType " + driverInfo.getDbType() + " mismatched, use custom sql dialect");
-                sqlDialect = new CustomSqlDialect(driverInfo);
-            }
+            // No explicit sql-dialect configured — use CustomSqlDialect which provides
+            // consistent quoting behavior (double-quote identifiers by default).
+            // Previously, getDefaultSqlDialect tried DatabaseProduct.valueOf() but
+            // Calcite 1.42+ resolves many more built-in dialects that break quoting
+            // compatibility for databases without explicit dialect configuration.
+            sqlDialect = new CustomSqlDialect(driverInfo);
         }
         configSqlDialect(sqlDialect, driverInfo);
         return sqlDialect;
@@ -372,23 +369,6 @@ public class JdbcDataProviderAdapter implements Closeable {
         } catch (Exception e) {
             log.warn("sql dialect config error for " + driverInfo.getSqlDialect());
         }
-    }
-
-    protected SqlDialect getDefaultSqlDialect(JdbcDriverInfo driverInfo) throws Exception {
-        sqlDialect = SqlDialect.DatabaseProduct.valueOf(driverInfo.getDbType().toUpperCase()).getDialect();
-        Class<? extends SqlDialect> dialectClass = sqlDialect.getClass();
-        ClassPool classPool = ClassPool.getDefault();
-        CtClass superClass = classPool.get(dialectClass.getName());
-        CtClass ctClass = classPool.makeClass(dialectClass.getName().toLowerCase(Locale.ROOT) + ".Proxy", superClass);
-        if (driverInfo.supportSqlLimit()) {
-            ctClass.addMethod(CtMethod.make("    public void unparseOffsetFetch(org.apache.calcite.sql.SqlWriter writer, org.apache.calcite.sql.SqlNode offset, org.apache.calcite.sql.SqlNode fetch) {\n" +
-                    "        unparseFetchUsingLimit(writer, offset, fetch);\n" +
-                    "    }", ctClass));
-        }
-        Class<?> aClass = ctClass.toClass();
-        Constructor<?> constructor = aClass.getConstructor(SqlDialect.Context.class);
-        SqlDialect.Context context = ReflectUtils.getFieldValue(dialectClass, "DEFAULT_CONTEXT");
-        return (SqlDialect) constructor.newInstance(context);
     }
 
     protected Dataframe parseResultSet(ResultSet rs) throws SQLException {

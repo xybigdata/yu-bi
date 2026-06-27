@@ -35,12 +35,12 @@
 ## 当前技术基线
 
 - Java：`21`
-- Spring Boot：`3.5.12`
-- Spring Cloud：`2025.0.1`
+- Spring Boot：`3.5.15`
+- Spring Cloud：`2025.0.3`
 - Node.js：`24.x`
 - npm：`11.x`
-- 前端构建：`Vite 8`
-- React：`19.x`
+- 前端构建：`Vite 8.1.0`
+- React：`19.2.7`
 
 ## 本地开发
 
@@ -51,7 +51,10 @@
 常用命令：
 
 ```bash
-mvn -pl server -am -DskipTests compile
+# 仅验证后端 Java 编译，跳过 server 模块绑定的前端 npm 构建。
+mvn -pl server -am -DskipTests -Dexec.skip=true compile
+
+# 完整发布包构建，会执行前端 npm 安装、前端构建和安装包 assembly。
 mvn -pl server -am -DskipTests package
 ```
 
@@ -61,15 +64,20 @@ mvn -pl server -am -DskipTests package
 cd frontend
 # 使用 frontend/.nvmrc 或 frontend/.node-version 选择受支持的 Node 运行时。
 npm ci
+npm run verify:toolchain
 npm run checkTs
+npm run build:task
 npm run build
+npm run build:report:check:current
+npm run build:report:gzip:check:current
 npm run test:ci
 ```
 
 ## 文档入口
 
 - 部署说明：[Deployment.md](./Deployment.md)
-- 技术栈现代化计划：[docs/tech-stack-modernization-plan.md](./docs/tech-stack-modernization-plan.md)
+- 技术栈现代化进度看板：[docs/tech-stack-modernization-progress.md](./docs/tech-stack-modernization-progress.md)
+- 技术栈现代化改造日志：[docs/tech-stack-modernization-log.md](./docs/tech-stack-modernization-log.md)
 - 安全策略：[SECURITY.md](./SECURITY.md)
 - 维护者说明：[MAINTAINERS.md](./MAINTAINERS.md)
 - 路线图：[ROADMAP.md](./ROADMAP.md)

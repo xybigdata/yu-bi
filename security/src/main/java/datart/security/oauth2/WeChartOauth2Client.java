@@ -19,8 +19,9 @@
 package datart.security.oauth2;
 
 import com.aliyun.teaopenapi.models.Config;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import datart.core.base.exception.Exceptions;
 import datart.core.common.Application;
 import datart.security.util.AESUtil;
@@ -33,7 +34,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
@@ -46,7 +47,7 @@ public class WeChartOauth2Client implements CustomOauth2Client {
 
     private static final CloseableHttpClient httpClient;
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder().build();
 
     static {
         httpClient = HttpClients.createDefault();

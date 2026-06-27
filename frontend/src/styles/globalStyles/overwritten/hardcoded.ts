@@ -34,7 +34,7 @@ export const Hardcoded = createGlobalStyle`
       }
     }
 
-    .ant-popover-inner {
+    .ant-popover-container {
       box-shadow: ${p => p.theme.shadow3};
     }
     .ant-popover.ant-popconfirm {

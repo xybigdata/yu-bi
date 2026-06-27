@@ -28,7 +28,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import type { Reference as RcTableReference } from 'rc-table';
+import type { Reference as RcTableReference } from '@rc-component/table';
 import styled from 'styled-components';
 import { SPACE_TIMES } from 'styles/StyleConstants';
 import {

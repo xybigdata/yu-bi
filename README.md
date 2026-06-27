@@ -35,12 +35,12 @@ The current maintenance line is focused on:
 ## Current Baseline
 
 - Java: `21`
-- Spring Boot: `3.5.12`
-- Spring Cloud: `2025.0.1`
+- Spring Boot: `3.5.15`
+- Spring Cloud: `2025.0.3`
 - Node.js: `24.x`
 - npm: `11.x`
-- Frontend build: `Vite 8`
-- React: `19.x`
+- Frontend build: `Vite 8.1.0`
+- React: `19.2.7`
 
 ## Local Development
 
@@ -51,7 +51,10 @@ See [Deployment.md](./Deployment.md) for deployment notes.
 Common commands:
 
 ```bash
-mvn -pl server -am -DskipTests compile
+# Verify backend Java compilation only and skip frontend npm builds bound to the server module.
+mvn -pl server -am -DskipTests -Dexec.skip=true compile
+
+# Build the full release package. This runs frontend npm install, frontend build, and assembly.
 mvn -pl server -am -DskipTests package
 ```
 
@@ -61,15 +64,20 @@ mvn -pl server -am -DskipTests package
 cd frontend
 # Use frontend/.nvmrc or frontend/.node-version to select the supported Node runtime.
 npm ci
+npm run verify:toolchain
 npm run checkTs
+npm run build:task
 npm run build
+npm run build:report:check:current
+npm run build:report:gzip:check:current
 npm run test:ci
 ```
 
 ## Documentation
 
 - Deployment guide: [Deployment.md](./Deployment.md)
-- Modernization plan: [docs/tech-stack-modernization-plan.md](./docs/tech-stack-modernization-plan.md)
+- Modernization progress board: [docs/tech-stack-modernization-progress.md](./docs/tech-stack-modernization-progress.md)
+- Modernization log: [docs/tech-stack-modernization-log.md](./docs/tech-stack-modernization-log.md)
 - Security policy: [SECURITY.md](./SECURITY.md)
 - Maintainers: [MAINTAINERS.md](./MAINTAINERS.md)
 - Roadmap: [ROADMAP.md](./ROADMAP.md)

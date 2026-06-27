@@ -10,7 +10,7 @@ import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import { deleteOrganization } from '../../slice/thunks';
 
-type DeleteConfirmProps = Omit<ModalProps, 'visible'>;
+type DeleteConfirmProps = ModalProps;
 
 export const DeleteConfirm = ({ open, ...props }: DeleteConfirmProps) => {
   const [inputValue, setInputValue] = useState('');
@@ -40,7 +40,7 @@ export const DeleteConfirm = ({ open, ...props }: DeleteConfirmProps) => {
       {...props}
       open={open}
       footer={[
-        <Button key="cancel" onClick={props.onCancel}>
+        <Button key="cancel" onClick={e => props.onCancel?.(e as any)}>
           {t('cancel')}
         </Button>,
         <Button

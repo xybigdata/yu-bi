@@ -2,15 +2,23 @@
   "summary": {
     "chunk": {
       "categoryCounts": {
-        "rawOversized": {
+        "all": {
+          "runtime": 88,
+          "task": 1,
+          "vendor": 14
+        },
+        "gzipOversized": {},
+        "oversized": {
           "vendor": 7
         },
-        "gzipOversized": {}
+        "rawOversized": {
+          "vendor": 7
+        }
       },
-      "files": 101,
+      "files": 103,
       "rawOversized": [
-        "monacoEditor.js",
         "antdDesign.js",
+        "monacoEditor.js",
         "echarts.js",
         "monacoBase.js",
         "antvG2.js",
@@ -19,8 +27,8 @@
       ],
       "gzipOversized": [],
       "oversized": [
-        "monacoEditor.js",
         "antdDesign.js",
+        "monacoEditor.js",
         "echarts.js",
         "monacoBase.js",
         "antvG2.js",
@@ -29,34 +37,48 @@
       ],
       "categorySizes": {
         "runtime": {
-          "bytes": 2154755,
-          "files": 87,
-          "gzipBytes": 645115,
-          "gzipRatio": 0.2994,
-          "gzipSavingsBytes": 1509640
+          "bytes": 2164164,
+          "files": 88,
+          "gzipBytes": 648181,
+          "gzipRatio": 0.2995,
+          "gzipSavingsBytes": 1515983
+        },
+        "task": {
+          "bytes": 454870,
+          "files": 1,
+          "gzipBytes": 85849,
+          "gzipRatio": 0.1887,
+          "gzipSavingsBytes": 369021
         },
         "vendor": {
-          "bytes": 7760603,
+          "bytes": 7830801,
           "files": 14,
-          "gzipBytes": 2222696,
-          "gzipRatio": 0.2864,
-          "gzipSavingsBytes": 5537907
+          "gzipBytes": 2241477,
+          "gzipRatio": 0.2862,
+          "gzipSavingsBytes": 5589324
         }
       },
       "size": {
-        "bytes": 9915358,
-        "gzipBytes": 2867811,
-        "gzipRatio": 0.2892,
-        "gzipSavingsBytes": 7047547
+        "bytes": 10449413,
+        "gzipBytes": 2975481,
+        "gzipRatio": 0.2848,
+        "gzipSavingsBytes": 7473932
       }
     },
     "asset": {
       "categoryCounts": {
-        "rawOversized": {
+        "all": {
+          "asset": 4,
           "geo": 2
         },
         "gzipOversized": {
           "geo": 1
+        },
+        "oversized": {
+          "geo": 2
+        },
+        "rawOversized": {
+          "geo": 2
         }
       },
       "files": 6,

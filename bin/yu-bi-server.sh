@@ -25,9 +25,6 @@ cd "${BASE_DIR}"
 CLASS_PATH="${BASE_DIR}/lib/*"
 
 START_CLASS="datart.DatartServerApplication"
-JAVA_OPENS_ARGS=(
-    "--add-opens=java.base/java.lang=ALL-UNNAMED"
-)
 
 datart_status(){
     result=`ps -ef | grep -v grep | grep "${BASE_DIR}/lib" | grep 'DatartServerApplication' | awk {'print $2'} | wc -l`
@@ -44,7 +41,7 @@ datart_start(){
     datart_status >/dev/null 2>&1
     if [[ $? -eq 0 ]]; then
 
-        nohup  java -server -Xms2G -Xmx2G "${JAVA_OPENS_ARGS[@]}" -Dspring.profiles.active=config -Dfile.encoding=UTF-8 -cp "${CLASS_PATH}" "${START_CLASS}" &
+        nohup  java -server -Xms2G -Xmx2G -Dspring.profiles.active=config -Dfile.encoding=UTF-8 -cp "${CLASS_PATH}" "${START_CLASS}" &
 
     else
         echo ""

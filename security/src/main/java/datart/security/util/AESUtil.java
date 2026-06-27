@@ -18,8 +18,9 @@
 
 package datart.security.util;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import datart.core.base.exception.Exceptions;
 import datart.core.common.Application;
 import lombok.extern.slf4j.Slf4j;
@@ -35,11 +36,9 @@ import java.security.SecureRandom;
 @Slf4j
 public class AESUtil {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    static {
-        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
 
     public static String encrypt(String src, String securityKey) {
         try {

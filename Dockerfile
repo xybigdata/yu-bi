@@ -23,4 +23,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
     CMD curl --fail --silent http://127.0.0.1:8080/api/v1/sys/info | grep -q '"success":true' || exit 1
 
-ENTRYPOINT ["java", "-server", "-Xms2G", "-Xmx2G", "--add-opens=java.base/java.lang=ALL-UNNAMED", "-Dspring.profiles.active=config", "-Dfile.encoding=UTF-8", "-cp", "lib/*", "datart.DatartServerApplication"]
+ENTRYPOINT ["java", "-server", "-Xms2G", "-Xmx2G", "-Dspring.profiles.active=config", "-Dfile.encoding=UTF-8", "-cp", "lib/*", "datart.DatartServerApplication"]

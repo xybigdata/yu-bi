@@ -36,7 +36,7 @@ export const GlobalOverlays = createGlobalStyle`
     .ant-popover-arrow {
       display: none;
     }
-    .ant-popover-inner-content {
+    .ant-popover-content {
       padding: 0;
     }
     .ant-dropdown-menu {
