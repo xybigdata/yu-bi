@@ -6,6 +6,7 @@ import datart.core.data.provider.ScriptVariable;
 import datart.data.provider.calcite.dialect.MsSqlStdOperatorSupport;
 import datart.data.provider.calcite.dialect.MysqlSqlStdOperatorSupport;
 import datart.data.provider.calcite.dialect.OracleSqlStdOperatorSupport;
+import datart.data.provider.jdbc.RegexVariableResolver;
 import datart.data.provider.jdbc.SqlParserVariableResolver;
 import datart.data.provider.script.ReplacementPair;
 import datart.data.provider.script.VariablePlaceholder;
@@ -146,5 +147,94 @@ class SqlParserUtilsTest {
         ReplacementPair replacementPair = placeholders.get(0).replacementPair();
         assertEquals("`status` = $status$", replacementPair.getPattern());
         assertEquals("`status` IN ('paid', 'refunded')", replacementPair.getReplacement());
+    }
+
+    @Test
+    void shouldReduceQueryVariableRangeWithParserVisitor() throws SqlParseException {
+        ScriptVariable minAmount = new ScriptVariable(
+                "$minAmount$",
+                VariableTypeEnum.QUERY,
+                ValueType.NUMERIC,
+                new LinkedHashSet<>(List.of("100", "50", "300")),
+                false
+        );
+
+        List<VariablePlaceholder> placeholders = SqlParserVariableResolver.resolve(
+                mysqlDialect,
+                "SELECT * FROM `orders` WHERE `amount` >= $minAmount$",
+                Map.of(minAmount.getName(), minAmount)
+        );
+
+        assertEquals(1, placeholders.size());
+        ReplacementPair replacementPair = placeholders.get(0).replacementPair();
+        assertEquals("`amount` >= $minAmount$", replacementPair.getPattern());
+        assertEquals("`amount` >= 50.0", replacementPair.getReplacement());
+    }
+
+    @Test
+    void shouldReplaceEmptyQueryVariableExpressionAsIsNull() throws SqlParseException {
+        ScriptVariable status = new ScriptVariable(
+                "$status$",
+                VariableTypeEnum.QUERY,
+                ValueType.STRING,
+                new LinkedHashSet<>(),
+                false
+        );
+
+        List<VariablePlaceholder> placeholders = SqlParserVariableResolver.resolve(
+                mysqlDialect,
+                "SELECT * FROM `orders` WHERE `status` = $status$",
+                Map.of(status.getName(), status)
+        );
+
+        assertEquals(1, placeholders.size());
+        ReplacementPair replacementPair = placeholders.get(0).replacementPair();
+        assertEquals("`status` = $status$", replacementPair.getPattern());
+        assertEquals("`status` IS NULL", replacementPair.getReplacement());
+    }
+
+    @Test
+    void shouldReplaceDisabledPermissionVariableAsTrueCondition() throws SqlParseException {
+        ScriptVariable orgId = new ScriptVariable(
+                "$orgId$",
+                VariableTypeEnum.PERMISSION,
+                ValueType.NUMERIC,
+                new LinkedHashSet<>(List.of("10", "20")),
+                false
+        );
+        orgId.setDisabled(true);
+
+        List<VariablePlaceholder> placeholders = SqlParserVariableResolver.resolve(
+                mysqlDialect,
+                "SELECT * FROM `orders` WHERE `org_id` = $orgId$",
+                Map.of(orgId.getName(), orgId)
+        );
+
+        assertEquals(1, placeholders.size());
+        ReplacementPair replacementPair = placeholders.get(0).replacementPair();
+        assertEquals("`org_id` = $orgId$", replacementPair.getPattern());
+        assertEquals("1=1", replacementPair.getReplacement());
+    }
+
+    @Test
+    void shouldResolveVariableWithRegexFallbackWhenParserCannotParseSql() {
+        ScriptVariable status = new ScriptVariable(
+                "$status$",
+                VariableTypeEnum.QUERY,
+                ValueType.STRING,
+                new LinkedHashSet<>(List.of("paid", "refunded")),
+                false
+        );
+
+        List<VariablePlaceholder> placeholders = RegexVariableResolver.resolve(
+                mysqlDialect,
+                "SELECT * FROM orders TABLESAMPLE SYSTEM (10) WHERE status = $status$",
+                Map.of(status.getName(), status)
+        );
+
+        assertEquals(1, placeholders.size());
+        ReplacementPair replacementPair = placeholders.get(0).replacementPair();
+        assertEquals("status = $status$", replacementPair.getPattern());
+        assertEquals("status IN ('paid', 'refunded')", replacementPair.getReplacement());
     }
 }
