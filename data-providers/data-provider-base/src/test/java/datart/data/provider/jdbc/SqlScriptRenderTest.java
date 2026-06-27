@@ -176,9 +176,43 @@ class SqlScriptRenderTest {
         );
     }
 
+    @Test
+    void shouldRenderStructScriptJoin() throws SqlParseException {
+        SqlScriptRender render = new SqlScriptRender(
+                queryScript(
+                        ScriptType.STRUCT,
+                        """
+                                {
+                                  "table": ["orders"],
+                                  "joins": [
+                                    {
+                                      "table": ["customers"],
+                                      "joinType": "INNER",
+                                      "conditions": [
+                                        { "left": ["orders", "customer_id"], "right": ["customers", "id"] }
+                                      ]
+                                    }
+                                  ]
+                                }
+                                """
+                ),
+                null,
+                mysqlDialect
+        );
+
+        assertEquals(
+                "SELECT * FROM `orders` INNER JOIN `customers` ON `orders`.`customer_id` = `customers`.`id`",
+                cleanup(render.render(false, false, false))
+        );
+    }
+
     private QueryScript queryScript(String script, ScriptVariable... variables) {
+        return queryScript(ScriptType.SQL, script, variables);
+    }
+
+    private QueryScript queryScript(ScriptType scriptType, String script, ScriptVariable... variables) {
         QueryScript queryScript = new QueryScript();
-        queryScript.setScriptType(ScriptType.SQL);
+        queryScript.setScriptType(scriptType);
         queryScript.setScript(script);
         queryScript.setVariables(List.of(variables));
         return queryScript;

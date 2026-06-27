@@ -99,7 +99,7 @@ git log --oneline --decorate -8
 推进原则：
 
 - 优先固化 JDBC datasource metadata 读取中的 catalog/schema、table、column、foreign key 边界
-- 同步固化 SQL parser 多方言 quoting、query script 过滤与 fallback、SQL builder 生成、注释清理、片段变量和 snippet 变量替换边界
+- 同步固化 SQL parser 多方言 quoting、query script 过滤与 fallback、struct script JOIN、SQL validate、SQL builder 生成、注释清理、片段变量和 snippet 变量替换边界
 - 优先补测试，不改运行时行为；后续 Calcite、driver、数据源链路升级必须复用这些门禁作为回归证据
 - 本专题不改变业务协议、路由协议和持久化数据结构
 - 当前用户要求是同一专题分支多累计相关改动后再合并 `main`，不要小批量频繁合并主线
@@ -122,6 +122,7 @@ git log --oneline --decorate -8
 - SQL render / 字符串基线继续扩展：`SqlScriptRenderTest` 覆盖 query/simple/fragment/snippet 变量替换；`SqlStringUtilsTest` 覆盖多方言注释清理、末尾分号清理、fragment 变量单值约束
 - SQL builder 基线继续扩展：`SqlBuilderTest` 覆盖 select/group/aggregate/filter/order/page、function column、HAVING、关闭 quoteIdentifiers 的生成合同，并修复聚合过滤 HAVING 生成双 `DATART_VTABLE` 前缀的问题
 - SQL 变量解析基线继续扩展：`SqlParserUtilsTest` 覆盖 query 变量多值 IN、范围变量 min/max 收敛、空 query 变量转 `IS NULL`、禁用 permission 变量转 `1=1`，以及 parser 失败后的 regex fallback
+- Struct script / SQL validate 基线继续扩展：`StructScriptProcessorTest` 覆盖无 join、连续 join、多条件 join、非法 join 条件跳过和空 table 异常；`SqlScriptRenderTest` 覆盖 STRUCT 端到端渲染；`SqlValidateUtilsTest` 覆盖 SELECT/WITH、DDL/DML 禁止、special SQL 开关和 parsed DML 禁止
 - AntD 6、ESLint 10、Monaco 最新线、Quill 最新线仍有明确 peer 或 audit 阻塞
 - Calcite、Shiro、Druid、数据源方言、调度实例名等属于中高风险链路，后续可以改造，但必须先补专项基线
 
@@ -212,7 +213,7 @@ git log --oneline --decorate -8
 | P1     | React 19 DOM prop 兼容治理 | 低   | 已完成并合入 `main`：图表 iframe loading 样式状态改为 transient prop                              |
 | P1     | 前端动态运行时入口补强     | 中   | 路由级 Loadable、入口工厂、看板只读、地图图表和图表 iframe smoke 已补；后续继续观察其他 runtime warning |
 | P1     | 构建体积 raw 超限治理      | 中   | 已补分类体积预算校验；后续用 `build:report` 聚焦 `monaco`、`antd`、地图                  |
-| P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback、基础 render、driver metadata、datasource metadata、SQL parser、query script、SQL builder、变量替换和 SQL 字符串工具合同；继续补 Calcite 升级前的边界基线 |
+| P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback、基础 render、driver metadata、datasource metadata、SQL parser、query script、struct script、SQL validate、SQL builder、变量替换和 SQL 字符串工具合同；继续补 Calcite 升级前的边界基线 |
 | P2     | Shiro / Security 边界治理  | 中高 | 不整体替换 Shiro；继续补认证、授权、token、异常边界测试后做小步修复                      |
 
 ### 6.2 条件满足后推进
@@ -368,7 +369,7 @@ git status --short --branch
 git rev-list --left-right --count origin/main...HEAD
 git log --oneline --decorate -8
 mvn -pl data-providers/jdbc-data-provider -am -Dtest=ProviderFactoryTest,JdbcDataProviderAdapterMetadataTest -Dsurefire.failIfNoSpecifiedTests=false test
-mvn -pl data-providers/data-provider-base -am -Dtest=SqlBuilderTest,SqlParserUtilsTest,SqlQueryScriptProcessorTest,SqlScriptRenderTest,SqlStringUtilsTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/data-provider-base -am -Dtest=SqlBuilderTest,SqlParserUtilsTest,SqlQueryScriptProcessorTest,SqlScriptRenderTest,SqlStringUtilsTest,StructScriptProcessorTest,SqlValidateUtilsTest -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
 构建体积聚焦：
