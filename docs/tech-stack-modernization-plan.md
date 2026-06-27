@@ -124,6 +124,7 @@ git log --oneline --decorate -8
 - SQL 变量解析基线继续扩展：`SqlParserUtilsTest` 覆盖 query 变量多值 IN、范围变量 min/max 收敛、空 query 变量转 `IS NULL`、禁用 permission 变量转 `1=1`，以及 parser 失败后的 regex fallback
 - Struct script / SQL validate 基线继续扩展：`StructScriptProcessorTest` 覆盖无 join、连续 join、多条件 join、非法 join 条件跳过和空 table 异常；`SqlScriptRenderTest` 覆盖 STRUCT 端到端渲染；`SqlValidateUtilsTest` 覆盖 SELECT/WITH、DDL/DML 禁止、special SQL 开关和 parsed DML 禁止
 - Calcite 已从 `1.26.0` 升级到 `1.42.0`：已适配自定义 JavaCC parser 的 `SqlAbstractParserImpl#parseArray()`、`SqlBasicCall` 构造器、`SqlOperator#createCall` varargs 类型和已移除的 `CalciteResource` 方法；base SQL/parser 45 个基线和 JDBC provider 96 个基线已通过
+- Calcite 后续方言回归已补第一批代表分页合同：`ProviderFactoryTest` 通过真实 `jdbc-driver.yml` 创建 MySQL、ClickHouse、PostgreSQL adapter/dialect，固化 `withPage=true` 后的分页 SQL 输出；JDBC 专项扩展到 99 个基线
 - AntD 6、ESLint 10、Monaco 最新线、Quill 最新线仍有明确 peer 或 audit 阻塞
 - Shiro、Druid、数据源真实方言、调度实例名等属于中高风险链路，后续可以改造，但必须先补专项基线
 
@@ -151,7 +152,7 @@ git log --oneline --decorate -8
 | Selenium            | `4.45.0`      | 已升级                                                    |
 | JsonPath            | `3.0.0`       | 已补 OAuth 属性映射测试后升级                             |
 | Druid               | `1.2.28`      | 中风险，需补连接池与监控链路验证                          |
-| Calcite             | `1.42.0`      | 已完成 parser/API 适配；后续继续补真实数据库方言回归      |
+| Calcite             | `1.42.0`      | 已完成 parser/API 适配；已补代表分页方言回归              |
 
 ### 4.2 前端
 
@@ -214,7 +215,7 @@ git log --oneline --decorate -8
 | P1     | React 19 DOM prop 兼容治理 | 低   | 已完成并合入 `main`：图表 iframe loading 样式状态改为 transient prop                              |
 | P1     | 前端动态运行时入口补强     | 中   | 路由级 Loadable、入口工厂、看板只读、地图图表和图表 iframe smoke 已补；后续继续观察其他 runtime warning |
 | P1     | 构建体积 raw 超限治理      | 中   | 已补分类体积预算校验；后续用 `build:report` 聚焦 `monaco`、`antd`、地图                  |
-| P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback、基础 render、driver metadata、datasource metadata、SQL parser、query script、struct script、SQL validate、SQL builder、变量替换和 SQL 字符串工具合同；Calcite 已升至 `1.42.0` 并通过专项基线 |
+| P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback、基础 render、driver metadata、datasource metadata、SQL parser、query script、struct script、SQL validate、SQL builder、变量替换、SQL 字符串工具和代表分页方言合同；Calcite 已升至 `1.42.0` 并通过专项基线 |
 | P2     | Shiro / Security 边界治理  | 中高 | 不整体替换 Shiro；继续补认证、授权、token、异常边界测试后做小步修复                      |
 
 ### 6.2 条件满足后推进
@@ -228,7 +229,7 @@ git log --oneline --decorate -8
 | @vitejs/plugin-react 6  | 暂缓           | npm 11 下可干净安装，不再触发 Babel 8 peer 解析风险                          |
 | @types/node 26          | 不推进         | 当前目标是 Node 24；除非目标基线调整，否则不切 Node 26 类型线                |
 | Spring Boot 4           | 暂不作为本阶段 | 需要 Spring 7、Springdoc 3、Security 7 等整体生态评估                        |
-| Calcite 后续方言回归    | 持续推进       | 已升到 `1.42.0`；后续按真实数据库、分页、quote、特殊函数和 metadata 继续补回归 |
+| Calcite 后续方言回归    | 持续推进       | 已补 MySQL / ClickHouse / PostgreSQL 分页合同；后续按 quote、特殊函数、metadata 和更多真实数据库继续补回归 |
 | Druid 新版本或替换      | 可专项评估     | 需要连接池配置、监控、连接生命周期和生产兼容验证                             |
 
 ### 6.3 当前 npm outdated 复核口径

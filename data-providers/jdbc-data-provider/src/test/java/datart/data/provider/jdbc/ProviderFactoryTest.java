@@ -1,6 +1,8 @@
 package datart.data.provider.jdbc;
 
+import datart.core.base.PageInfo;
 import datart.core.base.exception.BaseException;
+import datart.core.data.provider.ExecuteParam;
 import datart.core.data.provider.QueryScript;
 import datart.core.data.provider.ScriptType;
 import datart.data.provider.JdbcDataProvider;
@@ -229,6 +231,33 @@ class ProviderFactoryTest {
                 }));
     }
 
+    @TestFactory
+    Stream<DynamicTest> shouldRenderPagedSqlForRepresentativePagingDialects() {
+        Map<String, String> expectedSqlByDbType = Map.of(
+                "MYSQL",
+                "SELECT * FROM ( SELECT id, amount FROM orders ) AS `DATART_VTABLE` LIMIT 20 OFFSET 20",
+                "CLICKHOUSE",
+                "SELECT * FROM ( SELECT id, amount FROM orders ) AS `DATART_VTABLE` LIMIT 20, 20",
+                "POSTGRESQL",
+                "SELECT * FROM ( SELECT id, amount FROM orders ) AS \"DATART_VTABLE\" OFFSET 20 ROWS FETCH NEXT 20 ROWS ONLY"
+        );
+
+        return expectedSqlByDbType.entrySet().stream()
+                .map(entry -> DynamicTest.dynamicTest(entry.getKey(), () -> {
+                    JdbcDataProviderAdapter adapter = createAdapter(entry.getKey());
+                    SqlScriptRender render = new SqlScriptRender(
+                            queryScript("SELECT id, amount FROM orders"),
+                            pageParam(2, 20),
+                            adapter.getSqlDialect(),
+                            false,
+                            adapter.getDriverInfo().getQuoteIdentifiers()
+                    );
+
+                    assertTrue(adapter.supportPaging(), entry.getKey() + " 应声明源端分页能力");
+                    assertEquals(entry.getValue(), cleanup(render.render(true, true, false)));
+                }));
+    }
+
     private void assertAdapter(
             String dbType,
             Class<? extends JdbcDataProviderAdapter> adapterType,
@@ -271,6 +300,15 @@ class ProviderFactoryTest {
         queryScript.setScript(script);
         queryScript.setVariables(List.of());
         return queryScript;
+    }
+
+    private ExecuteParam pageParam(long pageNo, long pageSize) {
+        ExecuteParam executeParam = new ExecuteParam();
+        executeParam.setPageInfo(PageInfo.builder()
+                .pageNo(pageNo)
+                .pageSize(pageSize)
+                .build());
+        return executeParam;
     }
 
     private String cleanup(String sql) {
