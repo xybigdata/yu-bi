@@ -1,6 +1,6 @@
 # yu-bi 现代化改造执行计划
 
-复盘时间：2026-06-25
+复盘时间：2026-06-27
 
 本文档是 yu-bi 现代化改造的恢复入口和执行看板。后续恢复工作时优先阅读本文档，不再从历史流水记录里反推当前策略。
 
@@ -23,6 +23,11 @@
 - 不贸然改 `DATART_*` 等内部技术符号
 - 不贸然改数据迁移相关常量、后缀和内部稳定标识
 
+固定改造原则：
+
+- 遇到兼容性问题，必须优先改旧代码适配现代化目标版本，不通过降低目标版本规避适配
+- 例如 Calcite 升级后的 parser、dialect、SQL unparse 差异，优先改 yu-bi 自定义 parser / dialect / SQL builder 代码并补回归基线
+
 ## 2. 当前快照
 
 恢复时先执行：
@@ -40,15 +45,15 @@ git log --oneline --decorate -8
 | 工作目录                   | `/Users/chencongyu/WorkHome/VSProjects/open-project/yu-bi` |
 | 远端                       | `git@github.com:xybigdata/yu-bi.git`                       |
 | 主线分支                   | `main`                                                     |
-| 当前专题分支               | `codex/modernization-jdbc-dialect-baselines`               |
+| 当前专题分支               | `codex/modernization-datasource-metadata-baselines`        |
 | 当前分支相对 `origin/main` | 以恢复命令输出为准                                         |
 | 最近专题提交               | 以 `git log -1 --oneline` 输出为准                         |
-| 当前工作区                 | 干净                                                       |
+| 当前工作区                 | 以 `git status --short --branch` 输出为准                 |
 
 分支纪律：
 
 - 不直接在 `main` 开发
-- 当前阶段在 `codex/modernization-jdbc-dialect-baselines` 上扩展 JDBC 方言 metadata / render 合同基线
+- 当前阶段在 `codex/modernization-datasource-metadata-baselines` 上扩展后端 datasource metadata、SQL parser、query script 和变量替换合同基线
 - 不因为单个小批次完成就新建分支
 - 不因为分支领先较多就主动合并 `main`
 - 专题分支可以阶段性 push 保存进度
@@ -94,13 +99,15 @@ git log --oneline --decorate -8
 
 ### 3.3 当前专题
 
-当前专题：P1 后端 JDBC 方言 / SQL 基线扩展。
+当前专题：P1 后端 datasource metadata 与 SQL/query 基线扩展。
 
 推进原则：
 
-- 优先固化内置 JDBC driver 的 adapter、dialect、quote metadata、分页能力和 fallback 边界
+- 优先固化 JDBC datasource metadata 读取中的 catalog/schema、table、column、foreign key 边界
+- 同步固化 SQL parser 多方言 quoting、query script 过滤与 fallback、struct script JOIN、SQL validate、SQL builder 生成、注释清理、片段变量和 snippet 变量替换边界
 - 优先补测试，不改运行时行为；后续 Calcite、driver、数据源链路升级必须复用这些门禁作为回归证据
 - 本专题不改变业务协议、路由协议和持久化数据结构
+- 当前用户要求是同一专题分支多累计相关改动后再合并 `main`，不要小批量频繁合并主线
 
 ### 3.4 已验证但未收口的问题
 
@@ -114,8 +121,19 @@ git log --oneline --decorate -8
 - 图表 iframe 真实入口已补 smoke，覆盖 iframe / 非 iframe 双路径、非法尺寸归零、loading 遮罩、iframe runtime context、右键坐标按 scale 转发，以及 dispatcher 向 `ChartIFrameContainer` 传递 visibility、尺寸、loading、选中项、下钻项和 workbench 环境
 - 图表 iframe loading 样式状态已改为 styled-components transient prop，避免 React 19 将 `isLoading` 透传到 DOM 并输出 unknown prop warning
 - JDBC 方言基线继续扩展：`ProviderFactoryTest` 已覆盖全部 30 个内置 driver 的 adapter / dialect 装配、CustomSqlDialect fallback 分类、fallback quote 默认值、quoteIdentifiers 默认开启、显式 / 标准方言分页能力，以及 fallback 基础 render 合同
+- JDBC datasource metadata 基线已补：`JdbcDataProviderAdapterMetadataTest` 覆盖 catalog 优先、schema fallback、按 catalog/schema 读取表、`TABLE/VIEW` 过滤参数、列类型映射、外键挂载，以及 driver 不支持 imported keys metadata 时的容错
+- SQL parser / query 基线继续扩展：`SqlParserUtilsTest` 覆盖 MySQL backtick、Oracle double quote、MSSQL bracket quoting，以及 snippet bracket quoting 与运行时 dialect 解耦
+- Query script 基线继续扩展：`SqlQueryScriptProcessorTest` 覆盖多语句拒绝、parser fallback、现代 SQL fallback、特殊 SQL 禁止/放行和 special SQL + query 混合时只选 query 的合同
+- SQL render / 字符串基线继续扩展：`SqlScriptRenderTest` 覆盖 query/simple/fragment/snippet 变量替换；`SqlStringUtilsTest` 覆盖多方言注释清理、末尾分号清理、fragment 变量单值约束
+- SQL builder 基线继续扩展：`SqlBuilderTest` 覆盖 select/group/aggregate/filter/order/page、function column、HAVING、关闭 quoteIdentifiers 的生成合同，并修复聚合过滤 HAVING 生成双 `DATART_VTABLE` 前缀的问题
+- SQL 变量解析基线继续扩展：`SqlParserUtilsTest` 覆盖 query 变量多值 IN、范围变量 min/max 收敛、空 query 变量转 `IS NULL`、禁用 permission 变量转 `1=1`，以及 parser 失败后的 regex fallback
+- Struct script / SQL validate 基线继续扩展：`StructScriptProcessorTest` 覆盖无 join、连续 join、多条件 join、非法 join 条件跳过和空 table 异常；`SqlScriptRenderTest` 覆盖 STRUCT 端到端渲染；`SqlValidateUtilsTest` 覆盖 SELECT/WITH、DDL/DML 禁止、special SQL 开关和 parsed DML 禁止
+- Calcite 已从 `1.26.0` 升级到 `1.42.0`：已适配自定义 JavaCC parser 的 `SqlAbstractParserImpl#parseArray()`、`SqlBasicCall` 构造器、`SqlOperator#createCall` varargs 类型和已移除的 `CalciteResource` 方法；base SQL/parser 45 个基线和 JDBC provider 96 个基线已通过
+- Calcite 后续方言回归已补第一批代表分页合同：`ProviderFactoryTest` 通过真实 `jdbc-driver.yml` 创建 MySQL、ClickHouse、PostgreSQL adapter/dialect，固化 `withPage=true` 后的分页 SQL 输出；JDBC 专项扩展到 99 个基线
+- Calcite 后续方言回归继续扩展：`ProviderFactoryTest` 通过真实 adapter/dialect 固化 MySQL、Oracle、MSSQL 的 `AGG_DATE_MONTH` 输出，以及 Oracle `NOW()` 到 `SYSDATE` 的自定义函数合同；JDBC 专项扩展到 103 个基线
+- Calcite 1.42 Oracle 方言适配已收窄到自定义标准函数操作数渲染：保留 Oracle 显式双引号标识符解析合同，同时恢复 `AGG_DATE_*` 输出不额外 quote 小写字段的旧合同；已通过 base SQL/parser 45 个基线和 JDBC provider 103 个基线
 - AntD 6、ESLint 10、Monaco 最新线、Quill 最新线仍有明确 peer 或 audit 阻塞
-- Calcite、Shiro、Druid、数据源方言、调度实例名等属于中高风险链路，后续可以改造，但必须先补专项基线
+- Shiro、Druid、数据源真实方言、调度实例名等属于中高风险链路，后续可以改造，但必须先补专项基线
 
 ## 4. 当前技术栈基线
 
@@ -141,7 +159,7 @@ git log --oneline --decorate -8
 | Selenium            | `4.45.0`      | 已升级                                                    |
 | JsonPath            | `3.0.0`       | 已补 OAuth 属性映射测试后升级                             |
 | Druid               | `1.2.28`      | 中风险，需补连接池与监控链路验证                          |
-| Calcite             | `1.26.0`      | 高风险，已有 SQL parser / render 基线，后续可专项推进评估 |
+| Calcite             | `1.42.0`      | 已完成 parser/API 和 Oracle 标准函数 quote 适配；已补代表分页和函数方言回归 |
 
 ### 4.2 前端
 
@@ -204,7 +222,7 @@ git log --oneline --decorate -8
 | P1     | React 19 DOM prop 兼容治理 | 低   | 已完成并合入 `main`：图表 iframe loading 样式状态改为 transient prop                              |
 | P1     | 前端动态运行时入口补强     | 中   | 路由级 Loadable、入口工厂、看板只读、地图图表和图表 iframe smoke 已补；后续继续观察其他 runtime warning |
 | P1     | 构建体积 raw 超限治理      | 中   | 已补分类体积预算校验；后续用 `build:report` 聚焦 `monaco`、`antd`、地图                  |
-| P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback、基础 render 和 metadata 合同；继续补 datasource metadata / SQL parser 合同 |
+| P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback、基础 render、driver metadata、datasource metadata、SQL parser、query script、struct script、SQL validate、SQL builder、变量替换、SQL 字符串工具、代表分页、函数方言和 Oracle quote 合同；Calcite 已升至 `1.42.0` 并通过专项基线 |
 | P2     | Shiro / Security 边界治理  | 中高 | 不整体替换 Shiro；继续补认证、授权、token、异常边界测试后做小步修复                      |
 
 ### 6.2 条件满足后推进
@@ -218,7 +236,7 @@ git log --oneline --decorate -8
 | @vitejs/plugin-react 6  | 暂缓           | npm 11 下可干净安装，不再触发 Babel 8 peer 解析风险                          |
 | @types/node 26          | 不推进         | 当前目标是 Node 24；除非目标基线调整，否则不切 Node 26 类型线                |
 | Spring Boot 4           | 暂不作为本阶段 | 需要 Spring 7、Springdoc 3、Security 7 等整体生态评估                        |
-| Calcite 新版本          | 可专项评估     | SQL parser、render、变量替换、多方言、driver metadata 基线足够后再试         |
+| Calcite 后续方言回归    | 持续推进       | 已补 MySQL / ClickHouse / PostgreSQL 分页合同，以及 MySQL / Oracle / MSSQL 日期聚合和 Oracle `NOW()` 合同；后续按 quote、metadata 和更多真实数据库继续补回归 |
 | Druid 新版本或替换      | 可专项评估     | 需要连接池配置、监控、连接生命周期和生产兼容验证                             |
 
 ### 6.3 当前 npm outdated 复核口径
@@ -359,7 +377,8 @@ npm ls --all
 git status --short --branch
 git rev-list --left-right --count origin/main...HEAD
 git log --oneline --decorate -8
-mvn -pl data-providers/jdbc-data-provider -am -Dtest=ProviderFactoryTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/jdbc-data-provider -am -Dtest=ProviderFactoryTest,JdbcDataProviderAdapterMetadataTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/data-provider-base -am -Dtest=SqlBuilderTest,SqlParserUtilsTest,SqlQueryScriptProcessorTest,SqlScriptRenderTest,SqlStringUtilsTest,StructScriptProcessorTest,SqlValidateUtilsTest -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
 构建体积聚焦：

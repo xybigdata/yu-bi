@@ -40,7 +40,7 @@
         <thumbnailator.version>0.4.21</thumbnailator.version>
         <javassist.version>3.32.0-GA</javassist.version>
         <aspectjweaver.version>1.9.25.1</aspectjweaver.version>
-        <calcite.version>1.26.0</calcite.version>
+        <calcite.version>1.42.0</calcite.version>
         <sql-formatter.version>2.0.5</sql-formatter.version>
         <javacc-maven-plugin.version>3.2.0</javacc-maven-plugin.version>
     </properties>

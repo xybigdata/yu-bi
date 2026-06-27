@@ -279,7 +279,7 @@ public class SqlBuilder {
         if (operator.getAggOperator() != null) {
             AggregateOperator agg = new AggregateOperator();
             agg.setSqlOperator(operator.getAggOperator());
-            agg.setColumn(operator.getColumnNames(withNamePrefix, namePrefix));
+            agg.setColumn(operator.getColumnNames(false, null));
             column = createAggNode(agg);
         } else {
             if (functionColumnMap.containsKey(operator.getColumnKey())) {

@@ -45,7 +45,6 @@ public class SqlNodeUtils {
                                                   SqlLiteral functionQualifier) {
         return new SqlBasicCall(sqlOperator, sqlNodes.toArray(new SqlNode[0]),
                 SqlParserPos.ZERO,
-                false,
                 functionQualifier);
     }
 

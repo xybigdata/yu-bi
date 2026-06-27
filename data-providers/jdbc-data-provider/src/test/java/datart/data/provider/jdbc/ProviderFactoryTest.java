@@ -1,9 +1,12 @@
 package datart.data.provider.jdbc;
 
+import datart.core.base.PageInfo;
 import datart.core.base.exception.BaseException;
+import datart.core.data.provider.ExecuteParam;
 import datart.core.data.provider.QueryScript;
 import datart.core.data.provider.ScriptType;
 import datart.data.provider.JdbcDataProvider;
+import datart.data.provider.calcite.SqlNodeUtils;
 import datart.data.provider.calcite.dialect.CustomSqlDialect;
 import datart.data.provider.calcite.dialect.ClickHouseSqlDialectSupport;
 import datart.data.provider.calcite.dialect.H2Dialect;
@@ -14,7 +17,12 @@ import datart.data.provider.jdbc.adapters.JdbcDataProviderAdapter;
 import datart.data.provider.jdbc.adapters.OracleDataProviderAdapter;
 import datart.data.provider.jdbc.adapters.PrestoDataProviderAdapter;
 import datart.data.provider.script.SqlStringUtils;
+import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlDialect;
+import org.apache.calcite.sql.SqlFunction;
+import org.apache.calcite.sql.SqlFunctionCategory;
+import org.apache.calcite.sql.SqlIdentifier;
+import org.apache.calcite.sql.parser.SqlParserPos;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -229,6 +237,65 @@ class ProviderFactoryTest {
                 }));
     }
 
+    @TestFactory
+    Stream<DynamicTest> shouldRenderPagedSqlForRepresentativePagingDialects() {
+        Map<String, String> expectedSqlByDbType = Map.of(
+                "MYSQL",
+                "SELECT * FROM ( SELECT id, amount FROM orders ) AS `DATART_VTABLE` LIMIT 20 OFFSET 20",
+                "CLICKHOUSE",
+                "SELECT * FROM ( SELECT id, amount FROM orders ) AS `DATART_VTABLE` LIMIT 20, 20",
+                "POSTGRESQL",
+                "SELECT * FROM ( SELECT id, amount FROM orders ) AS \"DATART_VTABLE\" OFFSET 20 ROWS FETCH NEXT 20 ROWS ONLY"
+        );
+
+        return expectedSqlByDbType.entrySet().stream()
+                .map(entry -> DynamicTest.dynamicTest(entry.getKey(), () -> {
+                    JdbcDataProviderAdapter adapter = createAdapter(entry.getKey());
+                    SqlScriptRender render = new SqlScriptRender(
+                            queryScript("SELECT id, amount FROM orders"),
+                            pageParam(2, 20),
+                            adapter.getSqlDialect(),
+                            false,
+                            adapter.getDriverInfo().getQuoteIdentifiers()
+                    );
+
+                    assertTrue(adapter.supportPaging(), entry.getKey() + " 应声明源端分页能力");
+                    assertEquals(entry.getValue(), cleanup(render.render(true, true, false)));
+                }));
+    }
+
+    @TestFactory
+    Stream<DynamicTest> shouldRenderDateAggregateFunctionsForRepresentativeStdDialects() {
+        Map<String, String> expectedSqlByDbType = Map.of(
+                "MYSQL",
+                "DATE_FORMAT(`created_at`,'%Y-%m')",
+                "ORACLE",
+                "TO_CHAR(created_at,'YYYY-MM')",
+                "MSSQL",
+                "CONCAT(YEAR([created_at]), '-', MONTH([created_at]))"
+        );
+
+        return expectedSqlByDbType.entrySet().stream()
+                .map(entry -> DynamicTest.dynamicTest(entry.getKey(), () -> {
+                    JdbcDataProviderAdapter adapter = createAdapter(entry.getKey());
+
+                    assertEquals(
+                            entry.getValue(),
+                            functionCall("AGG_DATE_MONTH").toSqlString(adapter.getSqlDialect()).getSql()
+                    );
+                }));
+    }
+
+    @Test
+    void shouldRenderOracleNowFunctionAsSysdate() {
+        JdbcDataProviderAdapter adapter = createAdapter("ORACLE");
+
+        assertEquals(
+                "SYSDATE",
+                functionCall("NOW").toSqlString(adapter.getSqlDialect()).getSql()
+        );
+    }
+
     private void assertAdapter(
             String dbType,
             Class<? extends JdbcDataProviderAdapter> adapterType,
@@ -271,6 +338,29 @@ class ProviderFactoryTest {
         queryScript.setScript(script);
         queryScript.setVariables(List.of());
         return queryScript;
+    }
+
+    private ExecuteParam pageParam(long pageNo, long pageSize) {
+        ExecuteParam executeParam = new ExecuteParam();
+        executeParam.setPageInfo(PageInfo.builder()
+                .pageNo(pageNo)
+                .pageSize(pageSize)
+                .build());
+        return executeParam;
+    }
+
+    private SqlCall functionCall(String functionName) {
+        return SqlNodeUtils.createSqlBasicCall(
+                new SqlFunction(
+                        new SqlIdentifier(functionName, SqlParserPos.ZERO),
+                        null,
+                        null,
+                        null,
+                        null,
+                        SqlFunctionCategory.USER_DEFINED_FUNCTION
+                ),
+                List.of(SqlNodeUtils.createSqlIdentifier("created_at"))
+        );
     }
 
     private String cleanup(String sql) {
