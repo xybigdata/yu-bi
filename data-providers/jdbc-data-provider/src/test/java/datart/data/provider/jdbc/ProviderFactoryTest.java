@@ -270,7 +270,7 @@ class ProviderFactoryTest {
                 "MYSQL",
                 "DATE_FORMAT(`created_at`,'%Y-%m')",
                 "ORACLE",
-                "TO_CHAR(\"created_at\",'YYYY-MM')",
+                "TO_CHAR(created_at,'YYYY-MM')",
                 "MSSQL",
                 "CONCAT(YEAR([created_at]), '-', MONTH([created_at]))"
         );

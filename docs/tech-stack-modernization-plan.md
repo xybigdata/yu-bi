@@ -23,6 +23,11 @@
 - 不贸然改 `DATART_*` 等内部技术符号
 - 不贸然改数据迁移相关常量、后缀和内部稳定标识
 
+固定改造原则：
+
+- 遇到兼容性问题，必须优先改旧代码适配现代化目标版本，不通过降低目标版本规避适配
+- 例如 Calcite 升级后的 parser、dialect、SQL unparse 差异，优先改 yu-bi 自定义 parser / dialect / SQL builder 代码并补回归基线
+
 ## 2. 当前快照
 
 恢复时先执行：
@@ -126,6 +131,7 @@ git log --oneline --decorate -8
 - Calcite 已从 `1.26.0` 升级到 `1.42.0`：已适配自定义 JavaCC parser 的 `SqlAbstractParserImpl#parseArray()`、`SqlBasicCall` 构造器、`SqlOperator#createCall` varargs 类型和已移除的 `CalciteResource` 方法；base SQL/parser 45 个基线和 JDBC provider 96 个基线已通过
 - Calcite 后续方言回归已补第一批代表分页合同：`ProviderFactoryTest` 通过真实 `jdbc-driver.yml` 创建 MySQL、ClickHouse、PostgreSQL adapter/dialect，固化 `withPage=true` 后的分页 SQL 输出；JDBC 专项扩展到 99 个基线
 - Calcite 后续方言回归继续扩展：`ProviderFactoryTest` 通过真实 adapter/dialect 固化 MySQL、Oracle、MSSQL 的 `AGG_DATE_MONTH` 输出，以及 Oracle `NOW()` 到 `SYSDATE` 的自定义函数合同；JDBC 专项扩展到 103 个基线
+- Calcite 1.42 Oracle 方言适配已收窄到自定义标准函数操作数渲染：保留 Oracle 显式双引号标识符解析合同，同时恢复 `AGG_DATE_*` 输出不额外 quote 小写字段的旧合同；已通过 base SQL/parser 45 个基线和 JDBC provider 103 个基线
 - AntD 6、ESLint 10、Monaco 最新线、Quill 最新线仍有明确 peer 或 audit 阻塞
 - Shiro、Druid、数据源真实方言、调度实例名等属于中高风险链路，后续可以改造，但必须先补专项基线
 
@@ -153,7 +159,7 @@ git log --oneline --decorate -8
 | Selenium            | `4.45.0`      | 已升级                                                    |
 | JsonPath            | `3.0.0`       | 已补 OAuth 属性映射测试后升级                             |
 | Druid               | `1.2.28`      | 中风险，需补连接池与监控链路验证                          |
-| Calcite             | `1.42.0`      | 已完成 parser/API 适配；已补代表分页和函数方言回归        |
+| Calcite             | `1.42.0`      | 已完成 parser/API 和 Oracle 标准函数 quote 适配；已补代表分页和函数方言回归 |
 
 ### 4.2 前端
 
@@ -216,7 +222,7 @@ git log --oneline --decorate -8
 | P1     | React 19 DOM prop 兼容治理 | 低   | 已完成并合入 `main`：图表 iframe loading 样式状态改为 transient prop                              |
 | P1     | 前端动态运行时入口补强     | 中   | 路由级 Loadable、入口工厂、看板只读、地图图表和图表 iframe smoke 已补；后续继续观察其他 runtime warning |
 | P1     | 构建体积 raw 超限治理      | 中   | 已补分类体积预算校验；后续用 `build:report` 聚焦 `monaco`、`antd`、地图                  |
-| P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback、基础 render、driver metadata、datasource metadata、SQL parser、query script、struct script、SQL validate、SQL builder、变量替换、SQL 字符串工具、代表分页和函数方言合同；Calcite 已升至 `1.42.0` 并通过专项基线 |
+| P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback、基础 render、driver metadata、datasource metadata、SQL parser、query script、struct script、SQL validate、SQL builder、变量替换、SQL 字符串工具、代表分页、函数方言和 Oracle quote 合同；Calcite 已升至 `1.42.0` 并通过专项基线 |
 | P2     | Shiro / Security 边界治理  | 中高 | 不整体替换 Shiro；继续补认证、授权、token、异常边界测试后做小步修复                      |
 
 ### 6.2 条件满足后推进

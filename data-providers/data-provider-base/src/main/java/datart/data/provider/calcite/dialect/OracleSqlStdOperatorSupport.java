@@ -19,6 +19,7 @@ package datart.data.provider.calcite.dialect;
 
 import datart.core.data.provider.StdSqlOperator;
 import org.apache.calcite.sql.SqlCall;
+import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlWriter;
 import org.apache.calcite.sql.dialect.OracleSqlDialect;
 
@@ -68,24 +69,34 @@ public class OracleSqlStdOperatorSupport extends OracleSqlDialect implements Sql
                 writer.print("SYSDATE");
                 return true;
             case AGG_DATE_YEAR:
-                writer.print("TO_CHAR(" + call.getOperandList().get(0).toSqlString(this).getSql() + ",'YYYY')");
+                writer.print("TO_CHAR(" + toStdFunctionOperandSql(call.getOperandList().get(0)) + ",'YYYY')");
                 return true;
             case AGG_DATE_QUARTER:
-                writer.print("TO_CHAR(" + call.getOperandList().get(0).toSqlString(this).getSql() + ",'YYYY-Q')");
+                writer.print("TO_CHAR(" + toStdFunctionOperandSql(call.getOperandList().get(0)) + ",'YYYY-Q')");
                 return true;
             case AGG_DATE_MONTH:
-                writer.print("TO_CHAR(" + call.getOperandList().get(0).toSqlString(this).getSql() + ",'YYYY-MM')");
+                writer.print("TO_CHAR(" + toStdFunctionOperandSql(call.getOperandList().get(0)) + ",'YYYY-MM')");
                 return true;
             case AGG_DATE_WEEK:
-                writer.print("TO_CHAR(" + call.getOperandList().get(0).toSqlString(this).getSql() + ",'IYYY-IW')");
+                writer.print("TO_CHAR(" + toStdFunctionOperandSql(call.getOperandList().get(0)) + ",'IYYY-IW')");
                 return true;
             case AGG_DATE_DAY:
-                writer.print("TO_CHAR(" + call.getOperandList().get(0).toSqlString(this).getSql() + ",'YYYY-MM-DD')");
+                writer.print("TO_CHAR(" + toStdFunctionOperandSql(call.getOperandList().get(0)) + ",'YYYY-MM-DD')");
                 return true;
             default:
                 break;
         }
         return false;
+    }
+
+    private String toStdFunctionOperandSql(SqlNode operand) {
+        return operand.toSqlString(
+                config -> config.withDialect(this)
+                        .withQuoteAllIdentifiers(false)
+                        .withAlwaysUseParentheses(false)
+                        .withSelectListItemsOnSeparateLines(false)
+                        .withUpdateSetListNewline(false)
+                        .withIndentation(0)).getSql();
     }
 
     @Override
