@@ -32,6 +32,8 @@ class JdbcDataProviderAdapterMetadataTest {
         TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection());
 
         assertEquals(Set.of("current_catalog"), adapter.readAllDatabases());
+        assertEquals(1, fixture.closeCount("catalogs"));
+        assertEquals(0, fixture.closeCount("schemas"));
     }
 
     @Test
@@ -43,6 +45,8 @@ class JdbcDataProviderAdapterMetadataTest {
         TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection());
 
         assertEquals(Set.of("public", "analytics"), adapter.readAllDatabases());
+        assertEquals(1, fixture.closeCount("catalogs"));
+        assertEquals(1, fixture.closeCount("schemas"));
     }
 
     @Test
@@ -76,6 +80,8 @@ class JdbcDataProviderAdapterMetadataTest {
     @Test
     void shouldReadColumnsAndAttachImportedForeignKeys() throws Exception {
         MetadataFixture fixture = new MetadataFixture()
+                .withCatalogs(row("TABLE_CAT", "sales"))
+                .withSchema("public")
                 .withImportedKeys(row(
                         "FKCOLUMN_NAME", "customer_id",
                         "PKTABLE_CAT", "crm",
@@ -105,6 +111,30 @@ class JdbcDataProviderAdapterMetadataTest {
         assertEquals("crm", foreignKey.getDatabase());
         assertEquals("customers", foreignKey.getTable());
         assertEquals("id", foreignKey.getColumn());
+        assertEquals("sales", fixture.lastGetColumnsArgs[0]);
+        assertEquals("public", fixture.lastGetColumnsArgs[1]);
+        assertEquals("orders", fixture.lastGetColumnsArgs[2]);
+        assertEquals("sales", fixture.lastGetImportedKeysArgs[0]);
+        assertEquals("public", fixture.lastGetImportedKeysArgs[1]);
+        assertEquals("orders", fixture.lastGetImportedKeysArgs[2]);
+    }
+
+    @Test
+    void shouldReadColumnsFromSchemaWhenCatalogMetadataIsEmpty() throws Exception {
+        MetadataFixture fixture = new MetadataFixture()
+                .withColumns(row("COLUMN_NAME", "id", "DATA_TYPE", Types.BIGINT));
+
+        TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection());
+        Column idColumn = findColumn(adapter.readTableColumn("analytics", "orders"), "id");
+
+        assertEquals(ValueType.NUMERIC, idColumn.getType());
+        assertNull(fixture.lastGetColumnsArgs[0]);
+        assertEquals("analytics", fixture.lastGetColumnsArgs[1]);
+        assertEquals("orders", fixture.lastGetColumnsArgs[2]);
+        assertNull(fixture.lastGetColumnsArgs[3]);
+        assertNull(fixture.lastGetImportedKeysArgs[0]);
+        assertEquals("analytics", fixture.lastGetImportedKeysArgs[1]);
+        assertEquals("orders", fixture.lastGetImportedKeysArgs[2]);
     }
 
     @Test
@@ -157,6 +187,9 @@ class JdbcDataProviderAdapterMetadataTest {
         private String catalog;
         private String schema;
         private Object[] lastGetTablesArgs;
+        private Object[] lastGetColumnsArgs;
+        private Object[] lastGetImportedKeysArgs;
+        private final Map<String, Integer> closeCounts = new java.util.HashMap<>();
 
         private MetadataFixture withCatalogs(Map<String, Object>... rows) {
             this.catalogs = List.of(rows);
@@ -200,18 +233,22 @@ class JdbcDataProviderAdapterMetadataTest {
 
         private Connection connection() {
             DatabaseMetaData metadata = proxy(DatabaseMetaData.class, (proxy, method, args) -> switch (method.getName()) {
-                case "getCatalogs" -> resultSet(catalogs);
-                case "getSchemas" -> resultSet(schemas);
+                case "getCatalogs" -> resultSet("catalogs", catalogs, closeCounts);
+                case "getSchemas" -> resultSet("schemas", schemas, closeCounts);
                 case "getTables" -> {
                     lastGetTablesArgs = args;
-                    yield resultSet(tables);
+                    yield resultSet("tables", tables, closeCounts);
                 }
-                case "getColumns" -> resultSet(columns);
+                case "getColumns" -> {
+                    lastGetColumnsArgs = args;
+                    yield resultSet("columns", columns, closeCounts);
+                }
                 case "getImportedKeys" -> {
+                    lastGetImportedKeysArgs = args;
                     if (importedKeysUnsupported) {
                         throw new SQLFeatureNotSupportedException("imported keys metadata unsupported");
                     }
-                    yield resultSet(importedKeys);
+                    yield resultSet("importedKeys", importedKeys, closeCounts);
                 }
                 default -> defaultValue(method.getReturnType());
             });
@@ -224,9 +261,13 @@ class JdbcDataProviderAdapterMetadataTest {
                 default -> defaultValue(method.getReturnType());
             });
         }
+
+        private int closeCount(String resultSetName) {
+            return closeCounts.getOrDefault(resultSetName, 0);
+        }
     }
 
-    private static ResultSet resultSet(List<Map<String, Object>> rows) {
+    private static ResultSet resultSet(String name, List<Map<String, Object>> rows, Map<String, Integer> closeCounts) {
         class Cursor {
             int index = -1;
         }
@@ -235,7 +276,10 @@ class JdbcDataProviderAdapterMetadataTest {
             case "next" -> ++cursor.index < rows.size();
             case "getString" -> String.valueOf(getValue(rows.get(cursor.index), args[0]));
             case "getInt" -> ((Number) getValue(rows.get(cursor.index), args[0])).intValue();
-            case "close" -> null;
+            case "close" -> {
+                closeCounts.merge(name, 1, Integer::sum);
+                yield null;
+            }
             default -> defaultValue(method.getReturnType());
         });
     }

@@ -105,8 +105,8 @@ public class JdbcDataProviderAdapter implements Closeable {
             log.error(errMsg, e);
             Exceptions.e(e);
         }
-        try {
-            DriverManager.getConnection(properties.getUrl(), properties.getUser(), properties.getPassword());
+        try (Connection ignored = DriverManager.getConnection(properties.getUrl(), properties.getUser(), properties.getPassword())) {
+            // 测试连接只验证连接可建立；连接对象必须立即释放。
         } catch (SQLException sqlException) {
             Exceptions.e(sqlException);
         }
@@ -118,22 +118,19 @@ public class JdbcDataProviderAdapter implements Closeable {
         try (Connection conn = getConn()) {
             DatabaseMetaData metaData = conn.getMetaData();
             boolean isCatalog = isReadFromCatalog(conn);
-            ResultSet rs = null;
-            if (isCatalog) {
-                rs = metaData.getCatalogs();
-            } else {
-                rs = metaData.getSchemas();
-                log.info("Database 'catalogs' is empty, get databases with 'schemas'");
-            }
-
             String currDatabase = readCurrDatabase(conn, isCatalog);
             if (StringUtils.isNotBlank(currDatabase)) {
                 return Collections.singleton(currDatabase);
             }
 
-            while (rs.next()) {
-                String database = rs.getString(1);
-                databases.add(database);
+            if (!isCatalog) {
+                log.info("Database 'catalogs' is empty, get databases with 'schemas'");
+            }
+            try (ResultSet rs = isCatalog ? metaData.getCatalogs() : metaData.getSchemas()) {
+                while (rs.next()) {
+                    String database = rs.getString(1);
+                    databases.add(database);
+                }
             }
             return databases;
         }
@@ -147,15 +144,8 @@ public class JdbcDataProviderAdapter implements Closeable {
         try (Connection conn = getConn()) {
             Set<String> tables = new HashSet<>();
             DatabaseMetaData metadata = conn.getMetaData();
-            String catalog = null;
-            String schema = null;
-            if (isReadFromCatalog(conn)) {
-                catalog = database;
-                schema = conn.getSchema();
-            } else {
-                schema = database;
-            }
-            try (ResultSet rs = metadata.getTables(catalog, schema, "%", new String[]{"TABLE", "VIEW"})) {
+            DatabaseScope databaseScope = databaseScope(conn, database);
+            try (ResultSet rs = metadata.getTables(databaseScope.catalog(), databaseScope.schema(), "%", new String[]{"TABLE", "VIEW"})) {
                 while (rs.next()) {
                     String tableName = rs.getString(3);
                     tables.add(tableName);
@@ -166,15 +156,18 @@ public class JdbcDataProviderAdapter implements Closeable {
     }
 
     protected boolean isReadFromCatalog(Connection conn) throws SQLException {
-        return conn.getMetaData().getCatalogs().next();
+        try (ResultSet catalogs = conn.getMetaData().getCatalogs()) {
+            return catalogs.next();
+        }
     }
 
     public Set<Column> readTableColumn(String database, String table) throws SQLException {
         try (Connection conn = getConn()) {
             Set<Column> columnSet = new HashSet<>();
             DatabaseMetaData metadata = conn.getMetaData();
-            Map<String, List<ForeignKey>> importedKeys = getImportedKeys(metadata, database, table);
-            try (ResultSet columns = metadata.getColumns(database, null, table, null)) {
+            DatabaseScope databaseScope = databaseScope(conn, database);
+            Map<String, List<ForeignKey>> importedKeys = getImportedKeys(metadata, databaseScope, table);
+            try (ResultSet columns = metadata.getColumns(databaseScope.catalog(), databaseScope.schema(), table, null)) {
                 while (columns.next()) {
                     Column column = readTableColumn(columns);
                     column.setForeignKeys(importedKeys.get(column.columnKey()));
@@ -209,12 +202,23 @@ public class JdbcDataProviderAdapter implements Closeable {
         return column;
     }
 
+    protected DatabaseScope databaseScope(Connection conn, String database) throws SQLException {
+        if (isReadFromCatalog(conn)) {
+            return new DatabaseScope(database, conn.getSchema());
+        }
+        return new DatabaseScope(null, database);
+    }
+
     /**
      * 获取表的外键关系
      */
     protected Map<String, List<ForeignKey>> getImportedKeys(DatabaseMetaData metadata, String database, String table) throws SQLException {
+        return getImportedKeys(metadata, new DatabaseScope(database, null), table);
+    }
+
+    protected Map<String, List<ForeignKey>> getImportedKeys(DatabaseMetaData metadata, DatabaseScope databaseScope, String table) throws SQLException {
         HashMap<String, List<ForeignKey>> keyMap = new HashMap<>();
-        try (ResultSet importedKeys = metadata.getImportedKeys(database, null, table)) {
+        try (ResultSet importedKeys = metadata.getImportedKeys(databaseScope.catalog(), databaseScope.schema(), table)) {
             while (importedKeys.next()) {
                 ForeignKey foreignKey = new ForeignKey();
                 foreignKey.setDatabase(importedKeys.getString(PKTABLE_CAT));
@@ -226,6 +230,9 @@ public class JdbcDataProviderAdapter implements Closeable {
             log.warn(e.getMessage());
         }
         return keyMap;
+    }
+
+    protected record DatabaseScope(String catalog, String schema) {
     }
 
     /**
@@ -282,10 +289,12 @@ public class JdbcDataProviderAdapter implements Closeable {
      */
     public int executeCountSql(String sql) throws SQLException {
         try (Connection connection = getConn()) {
-            PreparedStatement preparedStatement = connection.prepareStatement(String.format(COUNT_SQL, sql));
-            ResultSet resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            return resultSet.getInt(1);
+            try (PreparedStatement preparedStatement = connection.prepareStatement(String.format(COUNT_SQL, sql))) {
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    resultSet.next();
+                    return resultSet.getInt(1);
+                }
+            }
         }
     }
 

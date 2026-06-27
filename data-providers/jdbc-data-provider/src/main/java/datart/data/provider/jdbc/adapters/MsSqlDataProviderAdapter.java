@@ -25,10 +25,12 @@ public class MsSqlDataProviderAdapter extends JdbcDataProviderAdapter {
     @Override
     public int executeCountSql(String sql) throws SQLException {
         try (Connection connection = getConn()) {
-            Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-            ResultSet resultSet = statement.executeQuery(sql);
-            resultSet.last();
-            return resultSet.getRow();
+            try (Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+                try (ResultSet resultSet = statement.executeQuery(sql)) {
+                    resultSet.last();
+                    return resultSet.getRow();
+                }
+            }
         }
     }
 

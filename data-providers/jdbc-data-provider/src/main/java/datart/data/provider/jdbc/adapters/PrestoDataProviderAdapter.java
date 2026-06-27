@@ -32,4 +32,9 @@ public class PrestoDataProviderAdapter extends JdbcDataProviderAdapter {
     protected Map<String, List<ForeignKey>> getImportedKeys(DatabaseMetaData metadata, String database, String table) throws SQLException {
         return new HashMap<>();
     }
+
+    @Override
+    protected Map<String, List<ForeignKey>> getImportedKeys(DatabaseMetaData metadata, DatabaseScope databaseScope, String table) throws SQLException {
+        return new HashMap<>();
+    }
 }
