@@ -1,6 +1,6 @@
 # yu-bi 现代化改造执行计划
 
-复盘时间：2026-06-25
+复盘时间：2026-06-27
 
 本文档是 yu-bi 现代化改造的恢复入口和执行看板。后续恢复工作时优先阅读本文档，不再从历史流水记录里反推当前策略。
 
@@ -43,12 +43,12 @@ git log --oneline --decorate -8
 | 当前专题分支               | `codex/modernization-datasource-metadata-baselines`        |
 | 当前分支相对 `origin/main` | 以恢复命令输出为准                                         |
 | 最近专题提交               | 以 `git log -1 --oneline` 输出为准                         |
-| 当前工作区                 | 干净                                                       |
+| 当前工作区                 | 以 `git status --short --branch` 输出为准                 |
 
 分支纪律：
 
 - 不直接在 `main` 开发
-- 当前阶段在 `codex/modernization-datasource-metadata-baselines` 上扩展 JDBC datasource metadata 读取合同基线
+- 当前阶段在 `codex/modernization-datasource-metadata-baselines` 上扩展后端 datasource metadata、SQL parser、query script 和变量替换合同基线
 - 不因为单个小批次完成就新建分支
 - 不因为分支领先较多就主动合并 `main`
 - 专题分支可以阶段性 push 保存进度
@@ -94,13 +94,15 @@ git log --oneline --decorate -8
 
 ### 3.3 当前专题
 
-当前专题：P1 后端 JDBC datasource metadata 基线扩展。
+当前专题：P1 后端 datasource metadata 与 SQL/query 基线扩展。
 
 推进原则：
 
 - 优先固化 JDBC datasource metadata 读取中的 catalog/schema、table、column、foreign key 边界
+- 同步固化 SQL parser 多方言 quoting、query script 过滤与 fallback、注释清理、片段变量和 snippet 变量替换边界
 - 优先补测试，不改运行时行为；后续 Calcite、driver、数据源链路升级必须复用这些门禁作为回归证据
 - 本专题不改变业务协议、路由协议和持久化数据结构
+- 当前用户要求是同一专题分支多累计相关改动后再合并 `main`，不要小批量频繁合并主线
 
 ### 3.4 已验证但未收口的问题
 
@@ -115,6 +117,9 @@ git log --oneline --decorate -8
 - 图表 iframe loading 样式状态已改为 styled-components transient prop，避免 React 19 将 `isLoading` 透传到 DOM 并输出 unknown prop warning
 - JDBC 方言基线继续扩展：`ProviderFactoryTest` 已覆盖全部 30 个内置 driver 的 adapter / dialect 装配、CustomSqlDialect fallback 分类、fallback quote 默认值、quoteIdentifiers 默认开启、显式 / 标准方言分页能力，以及 fallback 基础 render 合同
 - JDBC datasource metadata 基线已补：`JdbcDataProviderAdapterMetadataTest` 覆盖 catalog 优先、schema fallback、按 catalog/schema 读取表、`TABLE/VIEW` 过滤参数、列类型映射、外键挂载，以及 driver 不支持 imported keys metadata 时的容错
+- SQL parser / query 基线继续扩展：`SqlParserUtilsTest` 覆盖 MySQL backtick、Oracle double quote、MSSQL bracket quoting，以及 snippet bracket quoting 与运行时 dialect 解耦
+- Query script 基线继续扩展：`SqlQueryScriptProcessorTest` 覆盖多语句拒绝、parser fallback、现代 SQL fallback、特殊 SQL 禁止/放行和 special SQL + query 混合时只选 query 的合同
+- SQL render / 字符串基线继续扩展：`SqlScriptRenderTest` 覆盖 query/simple/fragment/snippet 变量替换；`SqlStringUtilsTest` 覆盖多方言注释清理、末尾分号清理、fragment 变量单值约束
 - AntD 6、ESLint 10、Monaco 最新线、Quill 最新线仍有明确 peer 或 audit 阻塞
 - Calcite、Shiro、Druid、数据源方言、调度实例名等属于中高风险链路，后续可以改造，但必须先补专项基线
 
@@ -205,7 +210,7 @@ git log --oneline --decorate -8
 | P1     | React 19 DOM prop 兼容治理 | 低   | 已完成并合入 `main`：图表 iframe loading 样式状态改为 transient prop                              |
 | P1     | 前端动态运行时入口补强     | 中   | 路由级 Loadable、入口工厂、看板只读、地图图表和图表 iframe smoke 已补；后续继续观察其他 runtime warning |
 | P1     | 构建体积 raw 超限治理      | 中   | 已补分类体积预算校验；后续用 `build:report` 聚焦 `monaco`、`antd`、地图                  |
-| P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback、基础 render、driver metadata 和 datasource metadata 合同；继续补 SQL parser 合同 |
+| P1     | 后端方言 / SQL 基线扩展    | 中高 | 已补内置 driver 方言 fallback、基础 render、driver metadata、datasource metadata、SQL parser、query script、变量替换和 SQL 字符串工具合同；继续补 Calcite 升级前的边界基线 |
 | P2     | Shiro / Security 边界治理  | 中高 | 不整体替换 Shiro；继续补认证、授权、token、异常边界测试后做小步修复                      |
 
 ### 6.2 条件满足后推进
@@ -361,6 +366,7 @@ git status --short --branch
 git rev-list --left-right --count origin/main...HEAD
 git log --oneline --decorate -8
 mvn -pl data-providers/jdbc-data-provider -am -Dtest=ProviderFactoryTest,JdbcDataProviderAdapterMetadataTest -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -pl data-providers/data-provider-base -am -Dtest=SqlParserUtilsTest,SqlQueryScriptProcessorTest,SqlScriptRenderTest,SqlStringUtilsTest -Dsurefire.failIfNoSpecifiedTests=false test
 ```
 
 构建体积聚焦：

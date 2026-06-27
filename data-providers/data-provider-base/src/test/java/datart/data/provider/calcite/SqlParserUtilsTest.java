@@ -3,10 +3,13 @@ package datart.data.provider.calcite;
 import datart.core.base.consts.ValueType;
 import datart.core.base.consts.VariableTypeEnum;
 import datart.core.data.provider.ScriptVariable;
+import datart.data.provider.calcite.dialect.MsSqlStdOperatorSupport;
 import datart.data.provider.calcite.dialect.MysqlSqlStdOperatorSupport;
+import datart.data.provider.calcite.dialect.OracleSqlStdOperatorSupport;
 import datart.data.provider.jdbc.SqlParserVariableResolver;
 import datart.data.provider.script.ReplacementPair;
 import datart.data.provider.script.VariablePlaceholder;
+import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlFunction;
 import org.apache.calcite.sql.SqlFunctionCategory;
@@ -26,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class SqlParserUtilsTest {
 
     private final MysqlSqlStdOperatorSupport mysqlDialect = new MysqlSqlStdOperatorSupport();
+    private final SqlDialect oracleDialect = new OracleSqlStdOperatorSupport();
+    private final SqlDialect msSqlDialect = new MsSqlStdOperatorSupport();
 
     @Test
     void shouldParseCommonSnippetExpressions() throws SqlParseException {
@@ -52,6 +57,42 @@ class SqlParserUtilsTest {
         assertEquals(
                 "SELECT `order amount`, SUM(`sales`)\nFROM `orders`\nGROUP BY `order amount`",
                 SqlNodeUtils.toSql(sqlNode, mysqlDialect, false)
+        );
+    }
+
+    @Test
+    void shouldParseOracleQueryWithDoubleQuotedIdentifiers() throws SqlParseException {
+        SqlNode sqlNode = SqlParserUtils.createParser(
+                "SELECT \"ORDER AMOUNT\", SUM(\"SALES\") FROM \"ORDERS\" GROUP BY \"ORDER AMOUNT\"",
+                oracleDialect
+        ).parseQuery();
+
+        assertEquals(
+                "SELECT \"ORDER AMOUNT\", SUM(\"SALES\")\nFROM \"ORDERS\"\nGROUP BY \"ORDER AMOUNT\"",
+                SqlNodeUtils.toSql(sqlNode, oracleDialect, false)
+        );
+    }
+
+    @Test
+    void shouldParseMsSqlQueryWithBracketQuotedIdentifiers() throws SqlParseException {
+        SqlNode sqlNode = SqlParserUtils.createParser(
+                "SELECT [order amount], SUM([sales]) FROM [orders] GROUP BY [order amount]",
+                msSqlDialect
+        ).parseQuery();
+
+        assertEquals(
+                "SELECT [order amount], SUM([sales])\nFROM [orders]\nGROUP BY [order amount]",
+                SqlNodeUtils.toSql(sqlNode, msSqlDialect, false)
+        );
+    }
+
+    @Test
+    void shouldKeepSnippetBracketQuotingIndependentFromRuntimeDialect() throws SqlParseException {
+        SqlNode sqlNode = SqlParserUtils.parseSnippet("[order amount] + [tax amount]");
+
+        assertEquals(
+                "SELECT [order amount] + [tax amount]\nFROM DATART_VTABLE",
+                SqlNodeUtils.toSql(sqlNode, msSqlDialect, false)
         );
     }
 

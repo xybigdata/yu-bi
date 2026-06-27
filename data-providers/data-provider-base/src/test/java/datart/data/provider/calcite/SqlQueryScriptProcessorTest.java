@@ -77,6 +77,42 @@ class SqlQueryScriptProcessorTest {
         }
     }
 
+    @Test
+    void shouldRejectNonQueryStatementWhenSpecialSqlDisabled() {
+        BaseException exception = assertThrows(
+                BaseException.class,
+                () -> processor(false).process(queryScript("SHOW TABLES"))
+        );
+
+        assertEquals("message.sql.op.forbidden", exception.getMessage());
+    }
+
+    @Test
+    void shouldFallbackToLastStatementWhenSpecialSqlEnabledAndNoQueryExists() {
+        QueryScriptProcessResult result = processor(true).process(queryScript("SHOW TABLES"));
+
+        assertEquals(
+                "( SHOW TABLES ) AS DATART_VTABLE",
+                cleanup(SqlNodeUtils.toSql(result.getFrom(), mysqlDialect, false))
+        );
+        assertEquals("DATART_VTABLE", result.getTablePrefix());
+        assertTrue(result.isWithDefaultPrefix());
+    }
+
+    @Test
+    void shouldUseOnlyQueryStatementWhenSpecialSqlPrecedesQuery() {
+        QueryScriptProcessResult result = processor(true).process(queryScript(
+                "SHOW TABLES; SELECT * FROM `orders`"
+        ));
+
+        assertEquals(
+                "( SELECT * FROM `orders` ) AS DATART_VTABLE",
+                cleanup(SqlNodeUtils.toSql(result.getFrom(), mysqlDialect, false))
+        );
+        assertEquals("DATART_VTABLE", result.getTablePrefix());
+        assertTrue(result.isWithDefaultPrefix());
+    }
+
     private SqlQueryScriptProcessor processor(boolean enableSpecialSql) {
         return new SqlQueryScriptProcessor(enableSpecialSql, mysqlDialect);
     }
