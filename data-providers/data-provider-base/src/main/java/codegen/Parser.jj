@@ -219,6 +219,17 @@ public class SqlParserImpl extends SqlAbstractParserImpl
         return SqlStmtList();
     }
 
+    public SqlNode parseArray() throws SqlParseException {
+        switchTo(LexicalState.BQID);
+        try {
+            return ArrayConstructor();
+        } catch (ParseException ex) {
+            throw normalizeException(ex);
+        } catch (TokenMgrError ex) {
+            throw normalizeException(ex);
+        }
+    }
+
     private SqlNode extend(SqlNode table, SqlNodeList extendList) {
         return SqlStdOperatorTable.EXTEND.createCall(
             Span.of(table, extendList).pos(), table, extendList);
@@ -627,7 +638,7 @@ SqlNode OrderedQueryOrExpr(ExprContext exprContext) :
             start = UnsignedNumericLiteralOrParam()
             <COMMA> count = UnsignedNumericLiteralOrParam() {
                 if (!this.conformance.isLimitStartCountAllowed()) {
-                    throw SqlUtil.newContextException(getPos(), RESOURCE.limitStartCountNotAllowed());
+                    throw SqlUtil.newContextException(getPos(), RESOURCE.limitStartCountOrAllNotAllowed("count"));
                 }
             }
         |
@@ -2127,7 +2138,7 @@ SqlNode TableRef2(boolean lateral) :
             }
         ]
         {
-            tableRef = unnestOp.createCall(s.end(this), args.toArray());
+            tableRef = unnestOp.createCall(s.end(this), args.toArray(new SqlNode[0]));
         }
     |
         [<LATERAL> { lateral = true; } ]
@@ -2428,7 +2439,7 @@ SqlNode RowConstructor() :
         // sub-queries inside of ROW and row sub-queries?  The standard does,
         // but the distinction seems to be purely syntactic.
         return SqlStdOperatorTable.ROW.createCall(s.end(valueList),
-            valueList.toArray());
+            valueList.toArray(new SqlNode[0]));
     }
 }
 
@@ -3635,7 +3646,7 @@ SqlNode Expression3(ExprContext exprContext) :
         if (rowSpan != null) {
             // interpret as row constructor
             return SqlStdOperatorTable.ROW.createCall(rowSpan.end(list1),
-                list1.toArray());
+                list1.toArray(new SqlNode[0]));
         }
     }
     [
@@ -3656,7 +3667,7 @@ SqlNode Expression3(ExprContext exprContext) :
                 }
                 return op.createCall(
                     list1.getParserPosition().plus(list2.getParserPosition()),
-                    list1.toArray());
+                    list1.toArray(new SqlNode[0]));
             }
         )
     |
@@ -3689,7 +3700,7 @@ SqlNode Expression3(ExprContext exprContext) :
         } else {
             // interpret as row constructor
             return SqlStdOperatorTable.ROW.createCall(span().end(list1),
-                list1.toArray());
+                list1.toArray(new SqlNode[0]));
         }
     }
 }
@@ -5656,7 +5667,7 @@ SqlNode BuiltinFunctionCall() :
                 <FROM> {
                     if (null == flag && null == trimChars) {
                         throw SqlUtil.newContextException(getPos(),
-                            RESOURCE.illegalFromEmpty());
+                            RESOURCE.illegalLiteral("FROM", "TRIM", getToken(0).image));
                     }
                 }
             |
