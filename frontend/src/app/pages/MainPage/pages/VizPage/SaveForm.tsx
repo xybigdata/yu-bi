@@ -6,7 +6,7 @@ import { fetchCheckName } from 'app/utils/fetch';
 import { debouncePromise } from 'utils/debouncePromise';
 import {
   CommonFormTypes,
-  DatartFileSuffixes,
+  YuBiFileSuffixes,
   DEFAULT_DEBOUNCE_WAIT,
 } from 'globalConstants';
 import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
@@ -182,7 +182,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
           label={t('template.label')}
         >
           <FileUpload
-            suffix={DatartFileSuffixes.Template}
+            suffix={YuBiFileSuffixes.Template}
             uploadText={t('template.upload')}
           />
         </Form.Item>

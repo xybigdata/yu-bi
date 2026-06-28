@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +23,7 @@ import {
   DataViewFieldType,
   TimeFilterValueCategory,
 } from 'app/constants';
-import { datartDayjs } from 'app/utils/date';
+import { yubiDayjs } from 'app/utils/date';
 import {
   DataChart,
   RelatedView,
@@ -824,9 +825,7 @@ describe('getTheWidgetFiltersAndParams', () => {
       },
     };
     expect(
-      getTheWidgetFiltersAndParams(
-        asLegacyWidgetFiltersAndParamsArgs(obj),
-      ),
+      getTheWidgetFiltersAndParams(asLegacyWidgetFiltersAndParamsArgs(obj)),
     ).toEqual(res);
   });
 
@@ -962,9 +961,7 @@ describe('getTheWidgetFiltersAndParams', () => {
       variableParams: {},
     };
     expect(
-      getTheWidgetFiltersAndParams(
-        asLegacyWidgetFiltersAndParamsArgs(obj),
-      ),
+      getTheWidgetFiltersAndParams(asLegacyWidgetFiltersAndParamsArgs(obj)),
     ).toEqual(res);
   });
 });
@@ -1114,7 +1111,7 @@ describe('getControllerDateValues', () => {
       },
       execute: true,
     } as Params;
-    const time = datartDayjs()
+    const time = yubiDayjs()
       .add(-1, 'd')
       .startOf('d')
       .format(dateFormatObj[obj.filterDate.pickerType]);
@@ -1165,7 +1162,7 @@ describe('getControllerDateValues', () => {
       },
       execute: true,
     } as Params;
-    const time = datartDayjs()
+    const time = yubiDayjs()
       .add(-1, 'd')
       .add(1, 'd')
       .startOf('d')

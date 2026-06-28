@@ -1,0 +1,225 @@
+package yubi.server.config;
+
+import yubi.core.base.exception.Exceptions;
+import yubi.core.common.FileUtils;
+import yubi.core.common.UrlUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertiesPropertySource;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.StandardEnvironment;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.util.*;
+
+public class CustomPropertiesValidate implements EnvironmentPostProcessor {
+
+    private static final String CONFIG_HOME = "config/yubi.conf";
+
+    private static final String DATABASE_URL = "spring.datasource.url";
+
+    private static final String CONFIG_DATABASE_URL = "datasource.ip";
+
+    private static final String DEFAULT_APPLICATION_CONFIG = "config/profiles/application-config.yml";
+
+    @Override
+    public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
+        MutablePropertySources propertySources = environment.getPropertySources();
+        Properties properties = loadCustomProperties();
+        //this.validateConfig(properties);
+        addYuBiConfigPropertySource(propertySources, new PropertiesPropertySource("yubiConfig", properties));
+        switchProfile(environment);
+        String jdbcUrl = processDBUrl(environment);
+        if (StringUtils.isNotBlank(jdbcUrl)) {
+            properties.setProperty(DATABASE_URL, jdbcUrl);
+            addYuBiConfigPropertySource(propertySources, new PropertiesPropertySource("yubiConfig", properties));
+        }
+    }
+
+    private Properties loadCustomProperties() {
+        Properties properties = new Properties();
+        File file = new File(FileUtils.concatPath(System.getProperty("user.dir"), CONFIG_HOME));
+        try (InputStream inputStream = new FileInputStream(file)) {
+            properties.load(inputStream);
+        } catch (Exception e) {
+            System.err.println("Failed to load the yubi configuration (config/yubi.conf), use application-config.yml");
+            return new Properties();
+        }
+        List<Object> removeKeys = new ArrayList<>();
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+            String val = String.valueOf(entry.getValue()).trim();
+            if (StringUtils.isBlank(val)) {
+                removeKeys.add(entry.getKey());
+            }
+            entry.setValue(val);
+        }
+        for (Object key : removeKeys) {
+            properties.remove(key);
+        }
+        return properties;
+    }
+
+    private void validateConfig(Properties properties) {
+        CustomConfigValidateBean customConfigValidateBean = toValidateBean(properties);
+        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+        Set<ConstraintViolation<CustomConfigValidateBean>> validate = validator.validate(customConfigValidateBean);
+        LinkedList<String> errorMessages = new LinkedList<>();
+        for (ConstraintViolation<CustomConfigValidateBean> violation : validate) {
+            String configName = getConfigName(violation.getPropertyPath().toString());
+            errorMessages.add(configName + violation.getMessage());
+        }
+        if (errorMessages.size() > 0) {
+            String msg = "Failed to get the necessary parameters, please check the configuration in the file(config/yubi.conf)\nThe reasons: ";
+            msg = msg + errorMessages.getFirst();
+            errorMessages.removeFirst();
+            errorMessages.addFirst(msg);
+            Exceptions.msg(StringUtils.join(errorMessages, ", "));
+        }
+    }
+
+    private CustomConfigValidateBean toValidateBean(Properties properties) {
+        CustomConfigValidateBean validateBean = new CustomConfigValidateBean();
+        validateBean.setDatasourceIp(properties.getProperty(CustomConfigValidateBean.DATASOURCE_IP));
+        validateBean.setDatasourcePort(properties.getProperty(CustomConfigValidateBean.DATASOURCE_PORT));
+        validateBean.setDatasourceDatabase(properties.getProperty(CustomConfigValidateBean.DATASOURCE_DATABASE));
+        validateBean.setDatasourceUsername(properties.getProperty(CustomConfigValidateBean.DATASOURCE_USERNAME));
+        validateBean.setDatasourcePassword(properties.getProperty(CustomConfigValidateBean.DATASOURCE_PASSWORD));
+        return validateBean;
+    }
+
+    private String getConfigName(String fieldName) {
+        switch (fieldName) {
+            case "datasourceIp":
+                return CustomConfigValidateBean.DATASOURCE_IP;
+            case "datasourcePort":
+                return CustomConfigValidateBean.DATASOURCE_PORT;
+            case "datasourceDatabase":
+                return CustomConfigValidateBean.DATASOURCE_DATABASE;
+            case "datasourceUsername":
+                return CustomConfigValidateBean.DATASOURCE_USERNAME;
+            case "datasourcePassword":
+                return CustomConfigValidateBean.DATASOURCE_PASSWORD;
+            default:
+                return fieldName;
+        }
+    }
+
+    private void switchProfile(ConfigurableEnvironment environment) {
+        try {
+            String url = getDefaultDBUrl(environment);
+            if (url == null || (url.contains("null") && environment.getProperty(CONFIG_DATABASE_URL) == null)) {
+                environment.setActiveProfiles("demo");
+                // remove default config propertySource
+                String defaultConfig = null;
+                for (PropertySource<?> propertySource : environment.getPropertySources()) {
+                    if (propertySource.getName().contains("application-config")) {
+                        defaultConfig = propertySource.getName();
+                    }
+                }
+                if (defaultConfig != null) {
+                    environment.getPropertySources().remove(defaultConfig);
+                }
+                // add demo propertySource
+                List<PropertySource<?>> propertySources = new YamlPropertySourceLoader().load("demo", new ClassPathResource("application-demo.yml"));
+                if (propertySources != null && propertySources.size() > 0) {
+                    for (PropertySource<?> propertySource : propertySources) {
+                        addDemoPropertySource(environment.getPropertySources(), propertySource);
+                    }
+                }
+                System.err.println("【********* Invalid database configuration. YuBi is running in demo mode *********】");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void addYuBiConfigPropertySource(MutablePropertySources propertySources, PropertySource<?> propertySource) {
+        if (propertySources.contains(propertySource.getName())) {
+            propertySources.replace(propertySource.getName(), propertySource);
+            return;
+        }
+        if (propertySources.contains(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
+            propertySources.addAfter(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, propertySource);
+            return;
+        }
+        propertySources.addFirst(propertySource);
+    }
+
+    private void addDemoPropertySource(MutablePropertySources propertySources, PropertySource<?> propertySource) {
+        if (propertySources.contains(propertySource.getName())) {
+            propertySources.replace(propertySource.getName(), propertySource);
+            return;
+        }
+        if (propertySources.contains("yubiConfig")) {
+            propertySources.addAfter("yubiConfig", propertySource);
+            return;
+        }
+        if (propertySources.contains(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME)) {
+            propertySources.addAfter(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME, propertySource);
+            return;
+        }
+        propertySources.addFirst(propertySource);
+    }
+
+    private String processDBUrl(ConfigurableEnvironment environment) {
+        String jdbcUrl = environment.getProperty(DATABASE_URL);
+        if (!jdbcUrl.startsWith("jdbc:mysql")) {
+            return "";
+        }
+        Boolean isModify = false;
+        String[] split = StringUtils.split(jdbcUrl, "?");
+        if (split.length > 1) {
+            Map<String, Object> urlParams = UrlUtils.getParamsMap(split[1]);
+            if (!"true".equals(urlParams.getOrDefault("allowMultiQueries", "false"))) {
+                isModify = true;
+                urlParams.put("allowMultiQueries", "true");
+            }
+            if (!urlParams.containsKey("characterEncoding")) {
+                isModify = true;
+                urlParams.put("characterEncoding", "utf-8");
+            }
+            jdbcUrl = split[0] + "?" + UrlUtils.covertMapToUrlParams(urlParams);
+        } else {
+            isModify = true;
+            jdbcUrl = jdbcUrl + "?allowMultiQueries=true&characterEncoding=utf-8";
+        }
+        if (isModify) {
+            return jdbcUrl;
+        }
+        return "";
+    }
+
+    private String getDefaultDBUrl(ConfigurableEnvironment environment) {
+        List<String> activeProfiles = Arrays.asList(environment.getActiveProfiles());
+        if (activeProfiles.size() > 0 && !Arrays.asList("demo", "config").containsAll(activeProfiles)) {
+            // running other profiles
+            return "";
+        }
+        try {
+            List<PropertySource<?>> propertySources = new YamlPropertySourceLoader().load(DEFAULT_APPLICATION_CONFIG, new FileSystemResource(DEFAULT_APPLICATION_CONFIG));
+            if (CollectionUtils.isEmpty(propertySources)) {
+                System.err.println("Default config application-config not found ");
+                return null;
+            }
+            return environment.getProperty(DATABASE_URL);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Default config application-config not found ");
+        }
+        return null;
+    }
+
+}

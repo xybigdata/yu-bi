@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +19,14 @@
 
 import { FONT_FAMILY } from 'styles/StyleConstants';
 
-export const DATARTSEPERATOR = '@datart@';
+export const YUBISEPERATOR = '@yubi@';
 export const CHARTCONFIG_FIELD_PLACEHOLDER_UID = '@placeholder@';
-export const DATART_TRANSLATE_HOLDER = '@global@';
+export const YUBI_TRANSLATE_HOLDER = '@global@';
 export const EVENT_ACTION_DELAY_MS = 200;
 export const RUNTIME_FILTER_KEY = Symbol('@filters@');
 export const BOARD_COPY_CHART_SUFFIX = '_copy';
 export const BOARD_SELF_CHART_PREFIX = 'widget_';
-export const TABLE_DATA_INDEX = '@datartTableIndex@';
+export const TABLE_DATA_INDEX = '@yubiTableIndex@';
 export const DATE_LEVEL_DELIMITER = '@date_level_delimiter@';
 
 export enum StorageKeys {
@@ -230,11 +231,11 @@ export const KEYBOARD_EVENT_NAME = {
   COMMAND: 'Meta',
 };
 
-// .drt = datart template file
-// .drr = datart resources file
-export enum DatartFileSuffixes {
-  Template = '.drt',
-  Resource = '.drr',
+// .ybt = yubi template file
+// .ybr = yubi resources file
+export enum YuBiFileSuffixes {
+  Template = '.ybt',
+  Resource = '.ybr',
 }
 
 export enum CalculationType {

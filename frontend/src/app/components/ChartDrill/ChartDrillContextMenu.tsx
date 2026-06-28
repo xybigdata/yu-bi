@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +35,7 @@ import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { getRuntimeDateLevelFields } from 'app/utils/chartHelper';
 import { updateBy } from 'app/utils/mutation';
 import classnames from 'classnames';
-import { DATARTSEPERATOR } from 'globalConstants';
+import { YUBISEPERATOR } from 'globalConstants';
 import { FC, ReactNode, memo, useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 import { FONT_WEIGHT_MEDIUM, SPACE_SM } from 'styles/StyleConstants';
@@ -158,7 +159,7 @@ const ChartDrillContextMenu: FC<{
               key: 'drillThrough',
               label: t('drillThrough'),
               children: (drillThroughRules || []).map(rule => ({
-                key: `drillThrough${DATARTSEPERATOR}${rule.id}`,
+                key: `drillThrough${YUBISEPERATOR}${rule.id}`,
                 label: rule?.name || rule.id,
               })),
             },
@@ -273,7 +274,7 @@ const ChartDrillContextMenu: FC<{
         drillOption?.rollUp();
         onDrillOptionChange?.(drillOption);
       } else if (String(key).includes('drillThrough')) {
-        onDrillThroughChange?.(String(key).split(DATARTSEPERATOR)?.[1]);
+        onDrillThroughChange?.(String(key).split(YUBISEPERATOR)?.[1]);
       } else if (key === 'viewData') {
         onViewDataChange?.();
       } else if (key === 'crossFiltering') {

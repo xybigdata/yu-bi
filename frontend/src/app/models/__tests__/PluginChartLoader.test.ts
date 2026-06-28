@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +76,7 @@ describe('PluginChartLoader Tests', () => {
   test('should convert pure js plugin definition to chart model', async () => {
     const loader = new PluginChartLoader();
     const plugins = await loader.loadPluginDefinitions(['b-chart.js']);
-    const chart = loader.convertToDatartChartModel(plugins[0]!);
+    const chart = loader.convertToYuBiChartModel(plugins[0]!);
 
     expect(chart.meta).toEqual({
       id: 1,
@@ -106,7 +107,7 @@ describe('PluginChartLoader Tests', () => {
   test('should convert iife js plugin definition to chart model', async () => {
     const loader = new PluginChartLoader();
     const plugins = await loader.loadPluginDefinitions(['a-chart.iife.js']);
-    const chart = loader.convertToDatartChartModel(plugins[0]!);
+    const chart = loader.convertToYuBiChartModel(plugins[0]!);
 
     expect(chart.meta).toEqual({
       id: 1,

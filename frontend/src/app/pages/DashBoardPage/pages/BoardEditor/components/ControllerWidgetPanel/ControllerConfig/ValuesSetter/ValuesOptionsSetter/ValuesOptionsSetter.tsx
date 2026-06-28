@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +79,9 @@ const normalizeTreeTargetKey = (value: unknown): string | undefined => {
   return undefined;
 };
 
-const isTreeCheckedValueObject = (value: unknown): value is { value?: unknown } => {
+const isTreeCheckedValueObject = (
+  value: unknown,
+): value is { value?: unknown } => {
   return typeof value === 'object' && value !== null;
 };
 
@@ -175,14 +178,12 @@ const ValuesOptionsSetter: FC<{
       ) || [];
 
     if (!meta) return { option: [], dataView: undefined };
-    const option: SelectOption[] = meta
-      .concat(viewComputedField)
-      .map(item => {
-        return {
-          value: item.name,
-          label: item.name,
-        };
-      });
+    const option: SelectOption[] = meta.concat(viewComputedField).map(item => {
+      return {
+        value: item.name,
+        label: item.name,
+      };
+    });
 
     return {
       option,

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { datartDayjs } from 'app/utils/date';
+import { yubiDayjs } from 'app/utils/date';
 import {
   getDefaultExactTime,
   getRecommendRangeTimeValue,
@@ -39,7 +39,7 @@ describe('ChartTimeSelector utils', () => {
   });
 
   test('should fallback to provided current time for empty range value', () => {
-    const fallback = datartDayjs('2024-01-02 03:04:05');
+    const fallback = yubiDayjs('2024-01-02 03:04:05');
 
     expect(toRangeTimeValue(undefined, fallback).toISOString()).toBe(
       fallback.toISOString(),

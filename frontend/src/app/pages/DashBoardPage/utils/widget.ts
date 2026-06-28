@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +33,7 @@ import {
   filterCurrentUsedComputedFields,
   mergeChartAndViewComputedField,
 } from 'app/utils/chartHelper';
-import { formatDatartDateTime, getDatartNowMillis } from 'app/utils/date';
+import { formatYuBiDateTime, getYuBiNowMillis } from 'app/utils/date';
 import { transformToHierarchyModel } from 'app/utils/internalChartHelper';
 import { updateBy } from 'app/utils/mutation';
 import { BOARD_COPY_CHART_SUFFIX, FilterSqlOperator } from 'globalConstants';
@@ -625,7 +626,7 @@ export const getWidgetMap = (
                   } as Pick<ControllerDate, 'pickerType'>)),
                 startTime: {
                   relativeOrExact: TimeFilterValueCategory.Exact,
-                  exactValue: formatDatartDateTime(_value?.[0]),
+                  exactValue: formatYuBiDateTime(_value?.[0]),
                 },
               };
               break;
@@ -801,7 +802,7 @@ export function cloneWidgets(args: {
       let dataChart = dashboardDataChartMap[newWidget.datachartId];
       const newDataChart: DataChart = CloneValueDeep({
         ...dataChart,
-        id: dataChart.id + getDatartNowMillis() + BOARD_COPY_CHART_SUFFIX,
+        id: dataChart.id + getYuBiNowMillis() + BOARD_COPY_CHART_SUFFIX,
       });
       newWidget.config.originalType = ORIGINAL_TYPE_MAP.ownedChart;
       newWidget.datachartId = newDataChart.id;

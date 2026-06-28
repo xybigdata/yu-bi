@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,10 +69,10 @@ export function updateByKey<T1, T2>(
   });
 }
 
-export function updateCollectionByAction<T, TValue extends ChartConfigNode = T & ChartConfigNode>(
-  base: T[],
-  action: Action<TValue>,
-) {
+export function updateCollectionByAction<
+  T,
+  TValue extends ChartConfigNode = T & ChartConfigNode,
+>(base: T[], action: Action<TValue>) {
   const value = action.value;
   const keys = (action?.ancestors && [...action.ancestors]) || [];
   const nextState = produce(base, draft => {
@@ -88,10 +89,10 @@ export function updateCollectionByAction<T, TValue extends ChartConfigNode = T &
   return nextState;
 }
 
-export function updateByAction<T extends RowContainer, TValue extends ChartConfigNode = T & ChartConfigNode>(
-  base: T,
-  action: Action<TValue>,
-) {
+export function updateByAction<
+  T extends RowContainer,
+  TValue extends ChartConfigNode = T & ChartConfigNode,
+>(base: T, action: Action<TValue>) {
   const value = action.value;
   const keys = (action?.ancestors && [...action.ancestors]) || [];
 

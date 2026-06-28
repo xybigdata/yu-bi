@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +26,7 @@ import {
   ITimeDefault,
   Widget,
 } from 'app/pages/DashBoardPage/types/widgetTypes';
-import { getDatartNowMillis } from 'app/utils/date';
+import { getYuBiNowMillis } from 'app/utils/date';
 import { IFontDefault } from 'types';
 import widgetManagerInstance from '../../../pages/DashBoardPage/components/WidgetManager';
 import { RectConfig } from '../../../pages/DashBoardPage/pages/Board/slice/types';
@@ -206,7 +207,7 @@ export const convertContainerWidgetToBeta4 = (widget: WidgetBeta3) => {
     const itemMap = newWidget.config.content?.itemMap;
     if (!itemMap) return newWidget;
     const tabItems = Object.values(itemMap) as ContainerItem[];
-    let newIndex = getDatartNowMillis();
+    let newIndex = getYuBiNowMillis();
     tabItems.forEach(item => {
       item.index = newIndex;
       newIndex++;

@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +19,7 @@
 
 import { DataViewFieldType } from 'app/constants';
 import { ChartDataRequestFilter } from 'app/types/ChartDataRequest';
-import {
-  DatartDayjs,
-  formatDatartDateTime,
-  getDatartNow,
-} from 'app/utils/date';
+import { YuBiDayjs, formatYuBiDateTime, getYuBiNow } from 'app/utils/date';
 import { FilterSqlOperator, RECOMMEND_TIME } from 'globalConstants';
 import { ManipulateType, OpUnitType, QUnitType } from 'dayjs';
 
@@ -89,7 +86,7 @@ const normalizeOpUnit = (unitTime?: LegacyOpUnit): OpUnitType | QUnitType => {
 };
 
 const addByUnit = (
-  dayValue: DatartDayjs,
+  dayValue: YuBiDayjs,
   amount: number,
   unit?: ManipulateType | QUnitType,
 ) => {
@@ -98,11 +95,11 @@ const addByUnit = (
     : dayValue.add(amount);
 };
 
-const startOfUnit = (dayValue: DatartDayjs, unit: OpUnitType | QUnitType) => {
+const startOfUnit = (dayValue: YuBiDayjs, unit: OpUnitType | QUnitType) => {
   return dayValue.startOf(unit as OpUnitType);
 };
 
-const endOfUnit = (dayValue: DatartDayjs, unit: OpUnitType | QUnitType) => {
+const endOfUnit = (dayValue: YuBiDayjs, unit: OpUnitType | QUnitType) => {
   return dayValue.endOf(unit as OpUnitType);
 };
 
@@ -111,7 +108,7 @@ export function getTimeRange(
   unit?: LegacyManipulateUnit,
 ): (unitTime: LegacyOpUnit, dateFormat?) => [string, string] {
   return (timeUnit, dateFormat?) => {
-    const now = getDatartNow();
+    const now = getYuBiNow();
     const normalizedUnit = normalizeManipulateUnit(unit);
     const normalizedTimeUnit = normalizeOpUnit(timeUnit);
     const startTime = startOfUnit(
@@ -123,10 +120,8 @@ export function getTimeRange(
       normalizedTimeUnit,
     );
     return [
-      dateFormat
-        ? startTime.format(dateFormat)
-        : formatDatartDateTime(startTime),
-      dateFormat ? endTime.format(dateFormat) : formatDatartDateTime(endTime),
+      dateFormat ? startTime.format(dateFormat) : formatYuBiDateTime(startTime),
+      dateFormat ? endTime.format(dateFormat) : formatYuBiDateTime(endTime),
     ];
   };
 }
@@ -134,9 +129,9 @@ export function getTimeRange(
 export function getTime(
   amount?: number | string,
   unit?: LegacyManipulateUnit,
-): (unitTime: LegacyOpUnit, isStart?: boolean) => DatartDayjs {
+): (unitTime: LegacyOpUnit, isStart?: boolean) => YuBiDayjs {
   return (timeUnit, isStart?: boolean) => {
-    const now = getDatartNow();
+    const now = getYuBiNow();
     const amountValue = Number(amount ?? 0);
     const normalizedUnit = normalizeManipulateUnit(unit);
     const normalizedTimeUnit = normalizeOpUnit(timeUnit);

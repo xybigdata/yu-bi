@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +22,7 @@ import { LEVEL_10, SPACE_TIMES } from 'styles/StyleConstants';
 
 export const ReactSplit = createGlobalStyle`
   /* react-split */
-  .datart-split {
+  .yubi-split {
     min-width: 0;
     min-height: 0;
 

@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +30,7 @@ import { WidgetInfo } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import type { MediaWidgetContent } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { editBoardStackActions } from 'app/pages/DashBoardPage/pages/BoardEditor/slice';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
-import { getDatartNowMillis } from 'app/utils/date';
+import { getYuBiNowMillis } from 'app/utils/date';
 import { produce } from 'immer';
 import React, {
   useCallback,
@@ -95,7 +96,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
     useState<RichTextColorType>('color');
   const [contentSavable, setContentSavable] = useState(false);
   const containerId = useMemo(
-    () => getRichTextContainerId(`${widgetInfo.id}-${getDatartNowMillis()}`),
+    () => getRichTextContainerId(`${widgetInfo.id}-${getYuBiNowMillis()}`),
     [widgetInfo.id],
   );
   const quillColorHandlers = useMemo(
@@ -133,13 +134,10 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
         return;
       }
       if (JSON.stringify(contents) !== JSON.stringify(initContent)) {
-        const nextMediaWidgetContent = produce(
-          widgetContent,
-          draft => {
-            draft.type = 'richText';
-            draft.richText = { content: contents };
-          },
-        );
+        const nextMediaWidgetContent = produce(widgetContent, draft => {
+          draft.type = 'richText';
+          draft.richText = { content: contents };
+        });
 
         dispatch(
           editBoardStackActions.changeMediaWidgetConfig({

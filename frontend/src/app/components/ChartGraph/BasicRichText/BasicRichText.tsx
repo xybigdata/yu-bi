@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,20 +155,23 @@ class BasicRichText extends ReactChart {
   getOnChange():
     | { onChange?: (delta: string | undefined) => void }
     | undefined {
-    return this.mouseEvents?.reduce((acc, cur) => {
-      if (cur.name === 'click') {
-        Object.assign(acc, {
-          onChange: delta =>
-            cur.callback?.({
-              type: 'change',
-              chartType: 'rich-text',
-              interactionType: ChartInteractionEvent.ChangeContext,
-              value: delta,
-            } as RichTextChangeContext),
-        });
-      }
-      return acc;
-    }, {} as { onChange?: (delta: string | undefined) => void });
+    return this.mouseEvents?.reduce(
+      (acc, cur) => {
+        if (cur.name === 'click') {
+          Object.assign(acc, {
+            onChange: delta =>
+              cur.callback?.({
+                type: 'change',
+                chartType: 'rich-text',
+                interactionType: ChartInteractionEvent.ChangeContext,
+                value: delta,
+              } as RichTextChangeContext),
+          });
+        }
+        return acc;
+      },
+      {} as { onChange?: (delta: string | undefined) => void },
+    );
   }
 }
 

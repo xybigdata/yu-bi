@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +74,7 @@ const ChartIFrameLifecycleAdapter: FC<{
   const latestBrokerContextRef = useRef<BrokerContext | undefined>(undefined);
   const [containerStatus, setContainerStatus] = useState(ContainerStatus.INIT);
   const { document, window } = useFrame();
-  const [containerId] = useState(() => `datart-${uuidv4()}`);
+  const [containerId] = useState(() => `yubi-${uuidv4()}`);
   const translator = usePrefixI18N();
 
   const normalizeDimension = useCallback(

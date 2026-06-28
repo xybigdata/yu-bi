@@ -162,13 +162,13 @@ Per Requirement 5.4, the following key dependencies were checked for TypeScript 
 
 | 改造项 | 方案 | 关键文件 |
 |--------|------|---------|
-| Javassist 消除 | `DatartSqlPrettyWriter` 子类覆盖 `keyword()` 方法，使用 `print(s)` 绕过 private 字段 | `data-provider-base/.../DatartSqlPrettyWriter.java` |
+| Javassist 消除 | `YuBiSqlPrettyWriter` 子类覆盖 `keyword()` 方法，使用 `print(s)` 绕过 private 字段 | `data-provider-base/.../YuBiSqlPrettyWriter.java` |
 | --add-opens 移除 | 从 `bin/yu-bi-server.sh`、`bin/yu-bi-server.cmd`、`Dockerfile`、`scripts/check-demo-health.sh` 移除 | 4 files |
 | Spring Boot 4.0.0 | POM parent + Spring Cloud 2025.1.0 + MyBatis 4.0.0 + Springdoc 3.0.0 | root `pom.xml` |
 | Jackson 3 迁移 | `com.fasterxml.jackson.*` → `tools.jackson.*`，`@JsonComponent` → `@JacksonComponent`，`ObjectMapper` → `JsonMapper.builder()` | core + security + server modules |
 | OAuth2 class 重定位 | `spring-boot-autoconfigure` → `spring-boot-security-oauth2-client-autoconfigure` | security + server |
 | Shiro 移除 | 删除 5 个 Shiro 实现类 + SecurityConfiguration + shiro-spring-boot-web-starter 依赖 | security module |
-| Spring Security 实现 | `SpringSecurityManager`(@Component "datartSecurityManager") + `SpringSecuritySubjectFacade`(@Component) + `DatartAuthenticationProvider` + `SpringAuthenticationTokenAdapter` | `security/.../springsecurity/` |
+| Spring Security 实现 | `SpringSecurityManager`(@Component "yubiSecurityManager") + `SpringSecuritySubjectFacade`(@Component) + `YuBiAuthenticationProvider` + `SpringAuthenticationTokenAdapter` | `security/.../springsecurity/` |
 | SecurityFilterChain | `SessionCreationPolicy.STATELESS` + `authorizeHttpRequests` (permitAll for public, authenticated for rest) + `exceptionHandling` | `server/.../WebSecurityConfig.java` |
 | JWT Filter 重写 | 直接 `SecurityContextHolder.setAuthentication()`，移除 Shiro Subject.login() 委托 | `server/.../JwtRequestAuthenticationFilter.java` |
 | LoginInterceptor 删除 | 移除 `@SkipLogin` 注解（7 个 controller）+ 删除 LoginInterceptor + 更新 WebMvcConfig | server module |

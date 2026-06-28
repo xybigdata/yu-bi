@@ -9,7 +9,7 @@
         <property name="autoDelimitKeywords" value="true"/>
         <property name="beginningDelimiter" value="`"/>
         <property name="endingDelimiter" value="`"/>
-        <plugin type="datart.core.common.MybatisGeneratorPlugin">
+        <plugin type="yubi.core.common.MybatisGeneratorPlugin">
         </plugin>
 
         <commentGenerator>
@@ -17,26 +17,26 @@
         </commentGenerator>
 
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
-                        connectionURL="jdbc:mysql://127.0.0.1:3306/datart" userId="root"
+                        connectionURL="jdbc:mysql://127.0.0.1:3306/yubi" userId="root"
                         password="">
             <property name="nullCatalogMeansCurrent" value="true"/>
             <property name="useInformationSchema" value="true"/>
         </jdbcConnection>
 
-        <javaModelGenerator targetPackage="datart.core.entity"
+        <javaModelGenerator targetPackage="yubi.core.entity"
                             targetProject="./src/main/java">
             <property name="enableSubPackages" value="false"/>
             <property name="trimStrings" value="true"/>
-            <property name="rootClass" value="datart.core.entity.BaseEntity"/>
+            <property name="rootClass" value="yubi.core.entity.BaseEntity"/>
         </javaModelGenerator>
 
 
-        <javaClientGenerator targetPackage="datart.core.mappers"
+        <javaClientGenerator targetPackage="yubi.core.mappers"
                              targetProject="./src/main/java"
                              type="ANNOTATEDMAPPER">
             <property name="enableSubPackages" value="false"/>
             <property name="useLegacyBuilder" value="false"/>
-            <property name="rootInterface" value="datart.core.mappers.ext.CRUDMapper"/>
+            <property name="rootInterface" value="yubi.core.mappers.ext.CRUDMapper"/>
         </javaClientGenerator>
 
         <table tableName="access_log"

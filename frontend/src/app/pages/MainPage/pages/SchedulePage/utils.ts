@@ -1,8 +1,8 @@
 import { TIME_FORMATTER } from 'globalConstants';
 import {
-  datartDayjs,
-  formatDatartDateRange,
-  toDatartDayjsRange,
+  yubiDayjs,
+  formatYuBiDateRange,
+  toYuBiDayjsRange,
 } from 'app/utils/date';
 import { PermissionLevels, ResourceTypes } from '../PermissionPage/constants';
 import { FileTypes, JobTypes, TimeModes, VizTypes } from './constants';
@@ -126,7 +126,7 @@ export const toScheduleSubmitParams = (
     parentId,
     index,
   } = values;
-  const [startDate, endDate] = formatDatartDateRange(dateRange, TIME_FORMATTER);
+  const [startDate, endDate] = formatYuBiDateRange(dateRange, TIME_FORMATTER);
   const jobConfig = {
       subject,
       vizContents: folderContent,
@@ -180,7 +180,7 @@ export const toEchoFormValues = ({
     dateRange:
       startDate && endDate
         ? (() => {
-            const range = toDatartDayjsRange([startDate, endDate]);
+            const range = toYuBiDayjsRange([startDate, endDate]);
             return range?.[0] && range?.[1] ? [range[0], range[1]] : undefined;
           })()
         : undefined,

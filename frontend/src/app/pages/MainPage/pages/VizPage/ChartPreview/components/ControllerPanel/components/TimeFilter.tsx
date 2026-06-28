@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +19,7 @@
 
 import { DatePicker } from 'antd';
 import { updateBy } from 'app/utils/mutation';
-import { DatartDateLike, toDatartDayjs } from 'app/utils/date';
+import { YuBiDateLike, toYuBiDayjs } from 'app/utils/date';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo, useState } from 'react';
 import { PresentControllerFilterProps } from '.';
@@ -33,7 +34,7 @@ const TimeFilter: FC<PresentControllerFilterProps> = memo(
       getSingleTimeFilterValue(condition),
     );
 
-    function onChange(time: DatartDateLike | null) {
+    function onChange(time: YuBiDateLike | null) {
       const newCondition = updateBy(condition!, draft => {
         draft.value = serializeSingleTimeFilterValue(time);
       });
@@ -44,7 +45,7 @@ const TimeFilter: FC<PresentControllerFilterProps> = memo(
       <DatePicker
         showTime
         format={TIME_FORMATTER}
-        value={toDatartDayjs(stringTime)}
+        value={toYuBiDayjs(stringTime)}
         onChange={onChange}
       />
     );

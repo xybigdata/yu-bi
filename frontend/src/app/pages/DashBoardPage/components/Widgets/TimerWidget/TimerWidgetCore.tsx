@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +17,7 @@
  * limitations under the License.
  */
 
-import { formatCurrentDatartDate } from 'app/utils/date';
+import { formatCurrentYuBiDate } from 'app/utils/date';
 import { TIME_FORMATTER } from 'globalConstants';
 import { memo, useContext, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -31,12 +32,12 @@ export const TimerWidgetCore: React.FC = memo(() => {
   );
   const timeFormat = time?.format || TIME_FORMATTER;
   const [currentTime, setCurrentTime] = useState(
-    formatCurrentDatartDate(timeFormat),
+    formatCurrentYuBiDate(timeFormat),
   );
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentTime(formatCurrentDatartDate(timeFormat));
+      setCurrentTime(formatCurrentYuBiDate(timeFormat));
     }, time?.duration);
     return () => {
       clearInterval(timer);

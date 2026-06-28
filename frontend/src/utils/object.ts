@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,7 +141,9 @@ export function ArrayToObject<T extends object>(arr?: T[]): Partial<T> {
   }, {});
 }
 
-export function ObjectToArray<T extends object>(o?: T | null): Array<T[keyof T]> {
+export function ObjectToArray<T extends object>(
+  o?: T | null,
+): Array<T[keyof T]> {
   if (!o) return [];
 
   return Object.values(o);
@@ -166,7 +169,10 @@ export function ToLowerCase(str?: string) {
   return lowerCase(str);
 }
 
-export function AssignDeep<T extends object>(target: T, ...source: object[]): T {
+export function AssignDeep<T extends object>(
+  target: T,
+  ...source: object[]
+): T {
   return Object.assign({}, target, ...source);
 }
 
@@ -201,9 +207,7 @@ export function meanValue(value?: number[]) {
   return mean(value);
 }
 
-export function isConfigRow(
-  value: unknown,
-): value is ChartStyleConfig {
+export function isConfigRow(value: unknown): value is ChartStyleConfig {
   return isObject(value) && 'comType' in value;
 }
 

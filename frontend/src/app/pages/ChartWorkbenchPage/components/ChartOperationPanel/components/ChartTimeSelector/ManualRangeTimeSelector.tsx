@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +23,10 @@ import { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import ChartFilterCondition, {
   ConditionBuilder,
 } from 'app/models/ChartFilterCondition';
-import { FilterCondition, TimeFilterConditionValue } from 'app/types/ChartConfig';
+import {
+  FilterCondition,
+  TimeFilterConditionValue,
+} from 'app/types/ChartConfig';
 import { FC, memo, useState } from 'react';
 import CurrentRangeTime from './CurrentRangeTime';
 import ManualSingleTimeSelector, {
@@ -30,7 +34,10 @@ import ManualSingleTimeSelector, {
 } from './ManualSingleTimeSelector';
 import { serializeManualTimeValue } from './utils';
 
-type RangeTimeValue = [ManualTimeValue | undefined, ManualTimeValue | undefined];
+type RangeTimeValue = [
+  ManualTimeValue | undefined,
+  ManualTimeValue | undefined,
+];
 
 const ManualRangeTimeSelector: FC<
   {
@@ -42,21 +49,25 @@ const ManualRangeTimeSelector: FC<
     if (condition?.type === FilterConditionType.RangeTime) {
       const startTime = condition?.value?.[0];
       const endTime = condition?.value?.[1];
-      return [startTime as ManualTimeValue | undefined, endTime as ManualTimeValue | undefined];
+      return [
+        startTime as ManualTimeValue | undefined,
+        endTime as ManualTimeValue | undefined,
+      ];
     }
     return [undefined, undefined];
   });
 
-  const handleTimeChange = (index: number) => (time: ManualTimeValue | null) => {
-    const nextRangeTimes: RangeTimeValue = [...rangeTimes];
-    nextRangeTimes[index] = time || undefined;
-    setRangeTimes(nextRangeTimes);
+  const handleTimeChange =
+    (index: number) => (time: ManualTimeValue | null) => {
+      const nextRangeTimes: RangeTimeValue = [...rangeTimes];
+      nextRangeTimes[index] = time || undefined;
+      setRangeTimes(nextRangeTimes);
 
-    const filterRow = new ConditionBuilder(condition)
-      .setValue(nextRangeTimes || [])
-      .asRangeTime();
-    onConditionChange?.(filterRow);
-  };
+      const filterRow = new ConditionBuilder(condition)
+        .setValue(nextRangeTimes || [])
+        .asRangeTime();
+      onConditionChange?.(filterRow);
+    };
 
   const getRangeStringTimes = () => {
     return rangeTimes.map(time => serializeManualTimeValue(time)) as [

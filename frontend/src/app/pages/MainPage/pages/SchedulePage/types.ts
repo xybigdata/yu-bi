@@ -1,4 +1,4 @@
-import { DatartDateLike } from 'app/utils/date';
+import { YuBiDateLike } from 'app/utils/date';
 import { FileTypes, JobTypes, TimeModes } from './constants';
 import { VizContentsItem } from './slice/types';
 
@@ -17,7 +17,7 @@ export interface FormValues {
   cronExpression?: string;
   webHookUrl?: string;
   textContent: string;
-  dateRange?: DatartDateLike[];
+  dateRange?: YuBiDateLike[];
   subject?: string;
   to?: string;
   cc?: string;

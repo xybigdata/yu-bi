@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +18,7 @@
  */
 import { Button, Card, Form, message, Select } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { DatartFileSuffixes } from 'globalConstants';
+import { YuBiFileSuffixes } from 'globalConstants';
 import { FC, memo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -80,7 +81,7 @@ export const ImportPage: FC<{}> = memo(() => {
             rules={[{ required: true }]}
           >
             <FileUpload
-              suffix={DatartFileSuffixes.Resource}
+              suffix={YuBiFileSuffixes.Resource}
               uploadText={t('import.upload')}
             />
           </Form.Item>

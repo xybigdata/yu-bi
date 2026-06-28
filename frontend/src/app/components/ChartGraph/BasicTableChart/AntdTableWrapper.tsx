@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,13 +113,13 @@ const StyledTable = styled(Table)<{ tableStyleConfig?: TableStyleConfigProps }>`
       p?.tableStyleConfig?.summaryStyle?.backgroundColor};
   }
 
-  .ant-table .ant-table-container .ant-table-body .datart-basic-table-odd {
+  .ant-table .ant-table-container .ant-table-body .yubi-basic-table-odd {
     color: ${p => p?.tableStyleConfig?.odd?.color || 'inherit'};
     background: ${p =>
       p?.tableStyleConfig?.odd?.backgroundColor || 'transparent'};
   }
 
-  .ant-table .ant-table-container .ant-table-body .datart-basic-table-even {
+  .ant-table .ant-table-container .ant-table-body .yubi-basic-table-even {
     color: ${p => p?.tableStyleConfig?.even?.color || 'inherit'};
     background: ${p =>
       p?.tableStyleConfig?.even?.backgroundColor || 'transparent'};

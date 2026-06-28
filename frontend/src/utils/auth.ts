@@ -2,7 +2,7 @@ import {
   DEFAULT_AUTHORIZATION_TOKEN_EXPIRATION,
   StorageKeys,
 } from 'globalConstants';
-import { getDatartDateAfter } from 'app/utils/date';
+import { getYuBiDateAfter } from 'app/utils/date';
 
 let tokenExpiration = DEFAULT_AUTHORIZATION_TOKEN_EXPIRATION;
 
@@ -49,7 +49,7 @@ export function setToken(token: string) {
   setCookie(
     StorageKeys.AuthorizationToken,
     token,
-    getDatartDateAfter(tokenExpiration),
+    getYuBiDateAfter(tokenExpiration),
   );
 }
 

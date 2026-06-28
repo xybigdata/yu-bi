@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,10 +34,10 @@ export const BorderSet: FC<{
       </Form.Item> */}
 
       <Form.Item label={t('width')} name={['border', 'width']}>
-        <InputNumber className="datart-ant-input-number" />
+        <InputNumber className="yubi-ant-input-number" />
       </Form.Item>
       <Form.Item label={t('style')} name={['border', 'style']}>
-        <Select className="datart-ant-select">
+        <Select className="yubi-ant-select">
           {BORDER_STYLES.map(item => (
             <Select.Option key={item} value={item}>
               {tLine(item)}
@@ -45,7 +46,7 @@ export const BorderSet: FC<{
         </Select>
       </Form.Item>
       <Form.Item label={t('radius')} name={['border', 'radius']}>
-        <InputNumber className="datart-ant-input-number" />
+        <InputNumber className="yubi-ant-input-number" />
       </Form.Item>
     </>
   );

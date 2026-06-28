@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,7 +67,7 @@ export const WidgetBorder: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
           <Group>
             <InputNumber
               value={data.value?.width}
-              className="datart-ant-input-number"
+              className="yubi-ant-input-number"
               onChange={changeW}
             />
           </Group>
@@ -75,7 +76,7 @@ export const WidgetBorder: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
           <Group>
             <InputNumber
               value={data.value?.radius}
-              className="datart-ant-input-number"
+              className="yubi-ant-input-number"
               onChange={changeR}
             />
           </Group>
@@ -83,7 +84,7 @@ export const WidgetBorder: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
         <BW label={gt('style')}>
           <Group>
             <Select
-              className="datart-ant-select"
+              className="yubi-ant-select"
               value={data.value?.style}
               onChange={changeS}
             >
@@ -108,10 +109,10 @@ const Wrap = styled.div`
     display: block;
     width: 60px;
   }
-  .datart-ant-select {
+  .yubi-ant-select {
     flex: 1;
   }
-  .datart-ant-input-number {
+  .yubi-ant-input-number {
     flex: 1;
   }
 `;

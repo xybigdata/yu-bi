@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,10 +92,13 @@ class ChartManager {
   }
 
   public getAllChartIcons() {
-    return this._getAllPaletteSeeds().reduce((acc, cur) => {
-      acc[cur.meta.id] = cur.meta.icon;
-      return acc;
-    }, {} as Record<string, string | undefined>);
+    return this._getAllPaletteSeeds().reduce(
+      (acc, cur) => {
+        acc[cur.meta.id] = cur.meta.icon;
+        return acc;
+      },
+      {} as Record<string, string | undefined>,
+    );
   }
 
   public getById(id?: string) {
@@ -162,7 +166,7 @@ class ChartManager {
       return;
     }
 
-    const chart = this._loader.convertToDatartChartModel(pluginDefinition);
+    const chart = this._loader.convertToYuBiChartModel(pluginDefinition);
     this._customChartInstanceMap.set(chartId, chart);
     return CloneValueDeep(chart);
   }

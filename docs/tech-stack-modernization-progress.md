@@ -12,7 +12,7 @@
 
 | 改造项 | 状态 | 说明 |
 |--------|------|------|
-| Javassist 消除 | ✅ 已验证 | `DatartSqlPrettyWriter` 子类覆盖，移除 `--add-opens` |
+| Javassist 消除 | ✅ 已验证 | `YuBiSqlPrettyWriter` 子类覆盖，移除 `--add-opens` |
 | Spring Boot 4.0.0 | ✅ 已验证 | 含 Spring Cloud 2025.1.0 + MyBatis 4.0.0 + Springdoc 3.0.0 |
 | Shiro → Spring Security | ✅ 已验证 | 完全移除 Shiro，使用 Spring Security 7 (via Boot 4) |
 | Ant Design 6 | ✅ 已验证 | AntD 6.4.5 + pro-components 3.1.12-0 |
@@ -52,13 +52,13 @@
 
 ### ✅ 阶段 A：后端现代化
 
-- [x] Javassist 消除：`DatartSqlPrettyWriter` 子类覆盖 `keyword()` 方法
+- [x] Javassist 消除：`YuBiSqlPrettyWriter` 子类覆盖 `keyword()` 方法
 - [x] `--add-opens` 移除：启动脚本、CMD、Dockerfile、health check 脚本
 - [x] Spring Boot 4.0.0 升级 + Spring Cloud 2025.1.0 + MyBatis 4.0.0 + Springdoc 3.0.0
 - [x] Jackson 3 迁移：`com.fasterxml.jackson.*` → `tools.jackson.*`
 - [x] OAuth2 class 重定位适配
 - [x] Shiro 完全移除（5 个实现类 + SecurityConfiguration + starter 依赖）
-- [x] Spring Security 实现：`SpringSecurityManager` + `SpringSecuritySubjectFacade` + `DatartAuthenticationProvider`
+- [x] Spring Security 实现：`SpringSecurityManager` + `SpringSecuritySubjectFacade` + `YuBiAuthenticationProvider`
 - [x] SecurityFilterChain 配置：stateless + permitAll/authenticated 分层
 - [x] JWT Filter 重写：直接 SecurityContextHolder
 - [x] LoginInterceptor 删除 + `@SkipLogin` 注解清理

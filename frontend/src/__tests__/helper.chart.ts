@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,15 +36,15 @@ const isChartModelImpl = (chart: IChart) => {
 };
 
 expect.extend({
-  toBeDatartChartModel(chart) {
+  toBeYuBiChartModel(chart) {
     if (isChartModelImpl(chart)) {
       return {
-        message: () => `expected ${chart} to be Datart Chart Model`,
+        message: () => `expected ${chart} to be YuBi Chart Model`,
         pass: true,
       };
     } else {
       return {
-        message: () => `expected ${chart} not to be Datart Chart Model`,
+        message: () => `expected ${chart} not to be YuBi Chart Model`,
         pass: false,
       };
     }

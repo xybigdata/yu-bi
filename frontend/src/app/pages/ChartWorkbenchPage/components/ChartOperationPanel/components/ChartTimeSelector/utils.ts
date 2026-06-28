@@ -1,10 +1,10 @@
 import {
-  type DatartDateLike,
-  formatCurrentDatartDateTime,
-  formatDatartDateTime,
-  type DatartDayjs,
-  getDatartNow,
-  toDatartDayjs,
+  type YuBiDateLike,
+  formatCurrentYuBiDateTime,
+  formatYuBiDateTime,
+  type YuBiDayjs,
+  getYuBiNow,
+  toYuBiDayjs,
 } from 'app/utils/date';
 import { getTime, recommendTimeRangeConverter } from 'app/utils/time';
 import type { RelativeTimeUnit } from 'globalConstants';
@@ -19,18 +19,18 @@ export const isRelativeTimeValue = (
 };
 
 export const getDefaultExactTime = () => {
-  return formatCurrentDatartDateTime();
+  return formatCurrentYuBiDateTime();
 };
 
-export const serializeExactTime = (time: DatartDateLike | null) => {
-  return formatDatartDateTime(time);
+export const serializeExactTime = (time: YuBiDateLike | null) => {
+  return formatYuBiDateTime(time);
 };
 
 export const serializeRelativeTime = (
   time: RelativeTimeValue,
   fallbackDirection = '-',
 ) => {
-  return formatDatartDateTime(
+  return formatYuBiDateTime(
     getTime(+`${time.direction || fallbackDirection}${time.amount}`, time.unit)(
       time.unit,
       time.isStart,
@@ -82,8 +82,8 @@ export const normalizeManualRangeTimeValue = (
 
 export const toRangeTimeValue = (
   time: ManualTimeValue | null | undefined,
-  fallbackNow: DatartDayjs,
-): DatartDayjs => {
+  fallbackNow: YuBiDayjs,
+): YuBiDayjs => {
   if (!time) {
     return fallbackNow;
   }
@@ -95,14 +95,14 @@ export const toRangeTimeValue = (
     );
   }
 
-  return toDatartDayjs(time) || fallbackNow;
+  return toYuBiDayjs(time) || fallbackNow;
 };
 
 export const getCurrentRangeTimeValue = (
   time?: ManualTimeValue | null,
-  fallbackNow?: DatartDayjs,
+  fallbackNow?: YuBiDayjs,
 ) => {
-  return toRangeTimeValue(time, fallbackNow || getDatartNow());
+  return toRangeTimeValue(time, fallbackNow || getYuBiNow());
 };
 
 export const getRecommendRangeTimeValue = (recommend?: string) => {

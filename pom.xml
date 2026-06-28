@@ -48,7 +48,7 @@
     <groupId>yubi</groupId>
     <artifactId>yu-bi-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0-rc.3</version>
+    <version>2.0.0</version>
     <name>yu-bi Parent</name>
     <description>yu-bi 独立开源项目的父级构建与版本管理模块</description>
     <url>https://github.com/xybigdata/yu-bi</url>

@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +64,7 @@ export const RectSet: FC<{ wid: string; rect: RectConfig }> = memo(
     const changeW = useCallback(val => changeRect('width', val), [changeRect]);
     const changeH = useCallback(val => changeRect('height', val), [changeRect]);
     return (
-      <Collapse className="datart-config-panel" ghost>
+      <Collapse className="yubi-config-panel" ghost>
         <Panel
           header={t('position') + '&' + t('size')}
           key="position"
@@ -76,7 +77,7 @@ export const RectSet: FC<{ wid: string; rect: RectConfig }> = memo(
                   <label>X</label>
                   <InputNumber
                     value={rectVal.x?.toFixed(1)}
-                    className="datart-ant-input-number"
+                    className="yubi-ant-input-number"
                     onChange={changeX}
                   />
                 </StyledPadding>
@@ -85,7 +86,7 @@ export const RectSet: FC<{ wid: string; rect: RectConfig }> = memo(
                   <label>Y</label>
                   <InputNumber
                     value={rectVal.y?.toFixed(1)}
-                    className="datart-ant-input-number"
+                    className="yubi-ant-input-number"
                     onChange={changeY}
                   />
                 </StyledPadding>
@@ -100,7 +101,7 @@ export const RectSet: FC<{ wid: string; rect: RectConfig }> = memo(
                   <label>W</label>
                   <InputNumber
                     value={rectVal.width?.toFixed(1)}
-                    className="datart-ant-input-number"
+                    className="yubi-ant-input-number"
                     onChange={changeW}
                   />
                 </StyledPadding>
@@ -109,7 +110,7 @@ export const RectSet: FC<{ wid: string; rect: RectConfig }> = memo(
                     <label>H</label>
                     <InputNumber
                       value={rectVal?.height?.toFixed(1)}
-                      className="datart-ant-input-number"
+                      className="yubi-ant-input-number"
                       onChange={changeH}
                     />
                   </StyledPadding>

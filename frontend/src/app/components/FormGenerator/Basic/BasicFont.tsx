@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +54,7 @@ const BasicFont: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       <BW label={!options?.hideLabel ? t(data.label, true) : ''}>
         <Group>
           <Select
-            className="datart-ant-select"
+            className="yubi-ant-select"
             placeholder={t('select')}
             value={data.value?.fontFamily}
             popupMatchSelectWidth={false}
@@ -69,7 +70,7 @@ const BasicFont: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
             ))}
           </Select>
           <Select
-            className="datart-ant-select"
+            className="yubi-ant-select"
             placeholder={t('select')}
             value={data.value?.fontWeight}
             onChange={handleSettingChange('fontWeight')}
@@ -85,7 +86,7 @@ const BasicFont: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
           <Group>
             {(isUndefined(options?.showFontSize) || options?.showFontSize) && (
               <Select
-                className="datart-ant-select"
+                className="yubi-ant-select"
                 placeholder={t('select')}
                 value={data.value?.fontSize}
                 onChange={handleSettingChange('fontSize')}
@@ -99,7 +100,7 @@ const BasicFont: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
             )}
             {options?.showLineHeight && (
               <Select
-                className="datart-ant-select"
+                className="yubi-ant-select"
                 placeholder={t('select')}
                 value={data.value?.lineHeight}
                 onChange={handleSettingChange('lineHeight')}
@@ -117,7 +118,7 @@ const BasicFont: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
             {(isUndefined(options?.showFontStyle) ||
               options?.showFontStyle) && (
               <Select
-                className="datart-ant-select"
+                className="yubi-ant-select"
                 placeholder={t('select')}
                 value={data.value?.fontStyle}
                 onChange={handleSettingChange('fontStyle')}

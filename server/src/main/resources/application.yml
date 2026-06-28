@@ -12,7 +12,7 @@ spring:
 
   web:
     resources:
-      static-locations: file:${datart.env.file-path}
+      static-locations: file:${yubi.env.file-path}
       cache:
         cachecontrol:
           cache-public: true
@@ -20,7 +20,7 @@ spring:
           no-store: false
 
   messages:
-    basename: i18n.datart_i18n
+    basename: i18n.yubi_i18n
 
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
@@ -31,12 +31,12 @@ spring:
 
   quartz:
     job-store-type: jdbc
-    scheduler-name: DatartScheduleCluster
+    scheduler-name: YuBiScheduleCluster
     properties:
       org:
         quartz:
           scheduler:
-            instanceName: DatartScheduleCluster
+            instanceName: YuBiScheduleCluster
             instanceId: AUTO
           jobStore:
             driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
@@ -50,20 +50,20 @@ spring:
             threadPriority: 5
 
 mybatis:
-  type-aliases-package: datart.core.entity
+  type-aliases-package: yubi.core.entity
   configuration:
     use-generated-keys: true
     map-underscore-to-camel-case: true
 
 logging:
   level:
-    datart:
+    yubi:
       core:
         mappers: info
       data.provider.jdbc: info
   config: config/logback.xml
 
-datart:
+yubi:
   migration:
     enable: true
 

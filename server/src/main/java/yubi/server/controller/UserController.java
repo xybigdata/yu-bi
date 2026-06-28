@@ -1,0 +1,169 @@
+/*
+ * YuBi
+ * <p>
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package yubi.server.controller;
+
+import yubi.core.base.consts.Const;
+import yubi.core.base.consts.TenantManagementMode;
+import yubi.core.base.consts.UserIdentityType;
+import yubi.core.base.exception.Exceptions;
+import yubi.core.common.Application;
+import yubi.core.entity.User;
+import yubi.core.entity.ext.UserBaseInfo;
+import yubi.security.base.PasswordToken;
+import yubi.security.exception.PermissionDeniedException;
+import yubi.server.base.dto.ResponseData;
+import yubi.server.base.dto.UserProfile;
+import yubi.server.base.params.*;
+import yubi.server.service.UserService;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+
+
+@Tag(name = "UserController")
+@Slf4j
+@RestController
+@RequestMapping(value = "/users")
+public class UserController extends BaseController {
+
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @Operation(summary = "User registration")
+    @PostMapping("/register")
+    public ResponseData<Boolean> register(@Validated @RequestBody UserRegisterParam user) throws MessagingException, UnsupportedEncodingException {
+        if (!Application.canRegister()) {
+            Exceptions.tr(PermissionDeniedException.class, "message.provider.execute.operation.denied");
+        }
+        return ResponseData.success(userService.register(user));
+    }
+
+    @Operation(summary = "Search users by keyword")
+    @GetMapping("/search")
+    public ResponseData<List<UserBaseInfo>> listUsersByKeyword(@RequestParam("keyword") String keyword) {
+        return ResponseData.success(userService.listUsersByKeyword(keyword));
+    }
+
+    @Operation(summary = "get user detail")
+    @GetMapping
+    public ResponseData<UserProfile> getUserProfile() {
+        return ResponseData.success(userService.getUserProfile());
+    }
+
+    @Operation(summary = "Activate the user")
+    @GetMapping(value = "/active")
+    public ResponseData<String> activate(@RequestParam("token") String activeToken) {
+        checkBlank(activeToken, "activeToken");
+        return ResponseData.success(userService.activeUser(activeToken));
+    }
+
+
+    @Operation(summary = "send email")
+    @PostMapping(value = "/sendmail")
+    public ResponseData<Boolean> sendEmail(String usernameOrEmail) throws UnsupportedEncodingException, MessagingException {
+        return ResponseData.success(userService.sendActiveMail(usernameOrEmail));
+    }
+
+    @Operation(summary = "update user info")
+    @PutMapping
+    public ResponseData<Boolean> updateUser(@Validated @RequestBody UserUpdateParam userUpdateParam) {
+        return ResponseData.success(userService.update(userUpdateParam));
+    }
+
+    @Operation(summary = "change user password")
+    @PutMapping("/change/password")
+    public ResponseData<Boolean> changePassword(@Validated @RequestBody ChangeUserPasswordParam userPassword) {
+        return ResponseData.success(userService.changeUserPassword(userPassword));
+    }
+
+
+    @Operation(summary = "forget password")
+    @PutMapping("/reset/password")
+    public ResponseData<Boolean> resetPassword(@Validated @RequestBody UserResetPasswordParam passwordParam) {
+        return ResponseData.success(userService.resetPassword(passwordParam));
+    }
+
+    @Operation(summary = "User Login")
+    @PostMapping(value = "/login")
+    public ResponseData<UserBaseInfo> login(@RequestBody UserLoginParam loginParam,
+                                            HttpServletResponse response) {
+        PasswordToken passwordToken = new PasswordToken(loginParam.getUsername(),
+                loginParam.getPassword(),
+                System.currentTimeMillis());
+        String token = userService.login(passwordToken);
+        response.setHeader(Const.TOKEN, token);
+        return ResponseData.success(new UserBaseInfo(securityManager.getCurrentUser()));
+
+    }
+
+    @Operation(summary = "User Login")
+    @PostMapping(value = "/forget/password")
+    public ResponseData<String> forgetPassword(@RequestParam(required = false) UserIdentityType type,
+                                               @RequestParam(required = false) String principal) {
+        return ResponseData.success(userService.forgetPassword(type, principal));
+    }
+
+    @Operation(summary = "add User to organization")
+    @PostMapping("/{orgId}/addUser")
+    public ResponseData<User> addUser(@PathVariable String orgId, @Validated @RequestBody UserAddParam userAddParam) throws MessagingException, UnsupportedEncodingException {
+        if (!Application.getCurrMode().equals(TenantManagementMode.TEAM)) {
+            Exceptions.tr(PermissionDeniedException.class, "message.provider.execute.operation.denied");
+        }
+        return ResponseData.success(userService.addUserToOrg(userAddParam, orgId));
+    }
+
+    @Operation(summary = "add User to organization")
+    @GetMapping("/{orgId}/getUser/{userId}")
+    public ResponseData<UserUpdateByIdParam> selectUserByIdFromOrg(@PathVariable String orgId, @PathVariable String userId) throws MessagingException, UnsupportedEncodingException {
+        if (!Application.getCurrMode().equals(TenantManagementMode.TEAM)) {
+            Exceptions.tr(PermissionDeniedException.class, "message.provider.execute.operation.denied");
+        }
+        return ResponseData.success(userService.selectUserById(userId, orgId));
+    }
+
+    @Operation(summary = "update user from organization")
+    @PutMapping(value = "/{orgId}/updateUser")
+    public ResponseData<Boolean> updateUserFromOrg(@PathVariable String orgId, @Validated @RequestBody UserUpdateByIdParam userUpdateParam) {
+        if (!Application.getCurrMode().equals(TenantManagementMode.TEAM)) {
+            Exceptions.tr(PermissionDeniedException.class, "message.provider.execute.operation.denied");
+        }
+        return ResponseData.success(userService.updateUserFromOrg(userUpdateParam, orgId));
+    }
+
+    @Operation(summary = "User Delete from organization")
+    @DeleteMapping(value = "/{orgId}/deleteUser")
+    public ResponseData<Boolean> deleteUserFromOrg(@PathVariable String orgId, @RequestParam String userId) {
+        if (!Application.getCurrMode().equals(TenantManagementMode.TEAM)) {
+            Exceptions.tr(PermissionDeniedException.class, "message.provider.execute.operation.denied");
+        }
+        return ResponseData.success(userService.deleteUserFromOrg(orgId, userId));
+    }
+
+}

@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,32 +88,29 @@ export const fetchDataSetAction = createAsyncThunk<
   ChartDataSetDTO,
   ChartDataRequest,
   { rejectValue: WorkbenchDatasetRejectPayload }
->(
-  'workbench/fetchDataSetAction',
-  async (arg: ChartDataRequest, thunkAPI) => {
-    let errorData: AxiosResponse | undefined;
-    const response = await request2(
-      {
-        method: 'POST',
-        url: `data-provider/execute`,
-        data: arg,
+>('workbench/fetchDataSetAction', async (arg: ChartDataRequest, thunkAPI) => {
+  let errorData: AxiosResponse | undefined;
+  const response = await request2(
+    {
+      method: 'POST',
+      url: `data-provider/execute`,
+      data: arg,
+    },
+    {},
+    {
+      onRejected: error => {
+        errorData = (error as { response?: AxiosResponse }).response;
       },
-      {},
-      {
-        onRejected: error => {
-          errorData = (error as { response?: AxiosResponse }).response;
-        },
-      },
+    },
+  );
+  if (errorData) {
+    return thunkAPI.rejectWithValue(
+      errorData.data as WorkbenchDatasetRejectPayload,
     );
-    if (errorData) {
-      return thunkAPI.rejectWithValue(
-        errorData.data as WorkbenchDatasetRejectPayload,
-      );
-    } else {
-      return filterSqlOperatorName(arg, response.data);
-    }
-  },
-);
+  } else {
+    return filterSqlOperatorName(arg, response.data);
+  }
+});
 
 export const fetchDataViewsAction = createAsyncThunk(
   'workbench/fetchDataViewsAction',

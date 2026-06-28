@@ -6,7 +6,7 @@ import type {
   VariableViewModel,
 } from './slice/types';
 import type { VariableFormModel } from './types';
-import { formatDatartDate } from 'app/utils/date';
+import { formatYuBiDate } from 'app/utils/date';
 
 const parseVariableValueArray = (
   value: string,
@@ -27,7 +27,7 @@ export const serializeVariableDefaultValue = (
   }
 
   return values.defaultValue.map(value =>
-    formatDatartDate(value, values.dateFormat),
+    formatYuBiDate(value, values.dateFormat),
   );
 };
 
@@ -39,7 +39,7 @@ export const serializeVariableRelationValue = (
     return value;
   }
 
-  return value.map(item => formatDatartDate(item, variable.dateFormat));
+  return value.map(item => formatYuBiDate(item, variable.dateFormat));
 };
 
 export const parseVariableRelationValue = (

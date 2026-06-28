@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,11 +48,13 @@ const isMatchedTheCondition = (
       break;
     case OperatorTypes.In:
       matchTheCondition =
-        Array.isArray(conditionValues) && conditionValues.includes(value as ConditionalValue);
+        Array.isArray(conditionValues) &&
+        conditionValues.includes(value as ConditionalValue);
       break;
     case OperatorTypes.NotIn:
       matchTheCondition =
-        !Array.isArray(conditionValues) || !conditionValues.includes(value as ConditionalValue);
+        !Array.isArray(conditionValues) ||
+        !conditionValues.includes(value as ConditionalValue);
       break;
     case OperatorTypes.Between:
       const [min, max] = conditionValues as number[];
@@ -93,10 +96,7 @@ const isMatchedTheCondition = (
   return matchTheCondition;
 };
 
-const getTheSameRange = (
-  list: ConditionalStyleFormValues[],
-  type: string,
-) =>
+const getTheSameRange = (list: ConditionalStyleFormValues[], type: string) =>
   list?.filter(item => item?.range === type);
 
 const deleteUndefinedProps = (props: CSSProperties): CSSProperties => {

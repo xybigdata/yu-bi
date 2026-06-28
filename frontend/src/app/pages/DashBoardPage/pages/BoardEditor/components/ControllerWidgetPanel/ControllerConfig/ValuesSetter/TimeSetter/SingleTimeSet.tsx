@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +17,12 @@
  * limitations under the License.
  */
 import { DatePicker } from 'antd';
-import { DatartDayjs, toDatartDayjs } from 'app/utils/date';
+import { YuBiDayjs, toYuBiDayjs } from 'app/utils/date';
 import React, { memo } from 'react';
 import { PickerType } from '../../../types';
 import { formatDateByPickType } from '../../../utils';
 
-type SingleTimeValue = DatartDayjs | null;
+type SingleTimeValue = YuBiDayjs | null;
 
 export interface SingleTimeSetProps {
   pickerType: PickerType;
@@ -37,27 +38,27 @@ const isDateTimePickerType = (
 
 export const SingleTimeSet: React.FC<SingleTimeSetProps> = memo(
   ({ pickerType, value, onChange }) => {
-    function handleTimeChange(date: DatartDayjs | null) {
+    function handleTimeChange(date: YuBiDayjs | null) {
       if (!date) {
         onChange?.(date);
         return;
       }
       const nextValue = formatDateByPickType(pickerType, date);
 
-      onChange?.(toDatartDayjs(nextValue));
+      onChange?.(toYuBiDayjs(nextValue));
     }
     return (
       <>
         {isDateTimePickerType(pickerType) ? (
           <DatePicker
-            value={toDatartDayjs(value)}
+            value={toYuBiDayjs(value)}
             allowClear={true}
             showTime
             onChange={handleTimeChange}
           />
         ) : (
           <DatePicker
-            value={toDatartDayjs(value)}
+            value={toYuBiDayjs(value)}
             allowClear={true}
             onChange={handleTimeChange}
             picker={pickerType}

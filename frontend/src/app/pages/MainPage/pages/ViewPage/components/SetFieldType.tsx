@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +48,7 @@ const SetFieldType = memo(
           return {
             key: type,
             label: tg(`columnType.${type.toLowerCase()}`),
-            popupClassName: 'datart-schema-table-header-menu',
+            popupClassName: 'yubi-schema-table-header-menu',
             children: Object.values(DateFormat).map(format => ({
               key: format,
               label: format,
@@ -67,7 +68,7 @@ const SetFieldType = memo(
             {
               key: 'categories',
               label: t('category'),
-              popupClassName: 'datart-schema-table-header-menu',
+              popupClassName: 'yubi-schema-table-header-menu',
               children: Object.values(ColumnCategories).map(category => ({
                 key: `category-${category}`,
                 label: tg(`columnCategory.${category.toLowerCase()}`),
@@ -86,7 +87,7 @@ const SetFieldType = memo(
             `category-${field.category}`,
             field.dateFormat || '',
           ],
-          className: 'datart-schema-table-header-menu',
+          className: 'yubi-schema-table-header-menu',
           onClick: ({ keyPath }) => onChange(keyPath, field?.name),
           items: menuItems,
         }}

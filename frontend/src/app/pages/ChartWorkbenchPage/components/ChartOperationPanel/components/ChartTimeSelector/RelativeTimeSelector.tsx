@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +38,8 @@ const RelativeTimeSelector: FC<
   const [amount, setAmount] = useState(() =>
     typeof time === 'object' && time ? time.amount : 1,
   );
-  const [unit, setUnit] = useState<RelativeTimeUnit>(
-    () => (typeof time === 'object' && time ? time.unit : 'd'),
+  const [unit, setUnit] = useState<RelativeTimeUnit>(() =>
+    typeof time === 'object' && time ? time.unit : 'd',
   );
   const [direction, setDirection] = useState(
     () => (typeof time === 'object' && time ? time.direction : '-') || '-',

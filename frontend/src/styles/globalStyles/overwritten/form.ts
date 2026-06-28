@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +21,7 @@ import { createGlobalStyle } from 'styled-components';
 import { BORDER_RADIUS } from 'styles/StyleConstants';
 
 export const Form = createGlobalStyle`
-  .datart-ant-input {
+  .yubi-ant-input {
     &.ant-input {
       color: ${p => p.theme.textColorSnd};
       background-color: ${p => p.theme.bodyBackground};
@@ -39,7 +40,7 @@ export const Form = createGlobalStyle`
     }
   }
 
-  .datart-ant-select {
+  .yubi-ant-select {
     &.ant-select {
       color: ${p => p.theme.textColorSnd};
     }
@@ -52,7 +53,7 @@ export const Form = createGlobalStyle`
     }
   }
 
-  .datart-ant-input-number {
+  .yubi-ant-input-number {
     &.ant-input-number {
       width: 100%;
       background-color: ${p => p.theme.bodyBackground};
@@ -84,7 +85,7 @@ export const Form = createGlobalStyle`
     }
   }
 
-  .datart-ant-upload {
+  .yubi-ant-upload {
     &.ant-upload.ant-upload-drag {
       background-color: ${p => p.theme.bodyBackground} !important;
       border-color: transparent !important;
@@ -92,7 +93,7 @@ export const Form = createGlobalStyle`
     }
   }
 
-  .datart-modal-button {
+  .yubi-modal-button {
     &.ant-btn {
       color: ${p => p.theme.textColorSnd};
       background-color: ${p => p.theme.bodyBackground};

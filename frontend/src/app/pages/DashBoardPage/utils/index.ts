@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +39,10 @@ import ChartDataView from 'app/types/ChartDataView';
 import { convertToChartConfigDTO } from 'app/utils/ChartDtoHelper';
 import { findPathByNameInMeta, getStyles } from 'app/utils/chartHelper';
 import {
-  datartDayjs,
-  formatDatartDate,
-  formatDatartDateTime,
-  toDatartDayjs,
+  yubiDayjs,
+  formatYuBiDate,
+  formatYuBiDateTime,
+  toYuBiDayjs,
 } from 'app/utils/date';
 import { getTime, splitRangerDateFilters } from 'app/utils/time';
 import {
@@ -351,7 +352,7 @@ export const getControllerDateValues = (obj: {
   } else {
     const { amount, unit, direction } = startTime.relativeValue!;
     const time = getTime(+(direction + amount), unit)(unit, true);
-    timeValues[0] = formatDatartDateTime(time);
+    timeValues[0] = formatYuBiDateTime(time);
   }
   if (endTime) {
     //end 精确时间
@@ -370,13 +371,13 @@ export const getControllerDateValues = (obj: {
       const { amount, unit, direction } = endTime.relativeValue!;
       const isStart = !obj.execute;
       const time = getTime(+(direction + amount), unit)(unit, isStart);
-      timeValues[1] = formatDatartDateTime(time);
+      timeValues[1] = formatYuBiDateTime(time);
     }
   }
 
   if (obj.execute) {
     timeValues.forEach((v, i) => {
-      timeValues[i] = v ? formatDatartDate(v, dateFormatObj[pickerType])! : v;
+      timeValues[i] = v ? formatYuBiDate(v, dateFormatObj[pickerType])! : v;
     });
   }
 
@@ -389,9 +390,9 @@ export const adjustRangeDataEndValue = (
   if (!timeValue) {
     return timeValue;
   }
-  const parsedTime = toDatartDayjs(timeValue);
+  const parsedTime = toYuBiDayjs(timeValue);
   if (!parsedTime) {
-    return formatDatartDateTime(timeValue);
+    return formatYuBiDateTime(timeValue);
   }
   let adjustTime = parsedTime;
   switch (pickerType) {
@@ -416,7 +417,7 @@ export const adjustRangeDataEndValue = (
     default:
       break;
   }
-  return formatDatartDateTime(adjustTime);
+  return formatYuBiDateTime(adjustTime);
 };
 export const getChartWidgetRequestParams = (obj: {
   widgetId: string;

@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +33,7 @@ import {
 } from 'react';
 import styled from 'styled-components';
 import ChartComputedFieldEditorDarkTheme from './ChartComputedFieldEditorDarkTheme';
-import DatartQueryLanguageSpecification from './DatartQueryLanguageSpecification';
+import YuBiQueryLanguageSpecification from './YuBiQueryLanguageSpecification';
 
 const ChartComputedFieldEditor: ForwardRefRenderFunction<
   ChartComputedFieldHandle,
@@ -84,7 +85,7 @@ const ChartComputedFieldEditor: ForwardRefRenderFunction<
   const handleEdtiorWillMount = monacoEditor => {
     monacoEditor.languages.register({ id: 'dql' });
     monacoEditor.languages.setMonarchTokensProvider('dql', {
-      ...DatartQueryLanguageSpecification,
+      ...YuBiQueryLanguageSpecification,
       builtinFunctions: (props?.functionDescriptions || []).map(f => f.name),
     });
     monacoEditor.editor.defineTheme(

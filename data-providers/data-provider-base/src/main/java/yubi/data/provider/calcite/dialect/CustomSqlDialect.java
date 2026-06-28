@@ -1,0 +1,78 @@
+/*
+ * YuBi
+ * <p>
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package yubi.data.provider.calcite.dialect;
+
+import yubi.core.common.BeanUtils;
+import yubi.data.provider.jdbc.JdbcDriverInfo;
+import org.apache.calcite.avatica.util.Casing;
+import org.apache.calcite.config.NullCollation;
+import org.apache.calcite.sql.SqlDialect;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlWriter;
+import org.apache.calcite.sql.validate.SqlConformanceEnum;
+
+public class CustomSqlDialect extends SqlDialect {
+
+    private static final String DEFAULT_LITERAL_QUOTE = "'";
+
+    private static final String DEFAULT_IDENTIFIER_QUOTE = "\"";
+
+    private JdbcDriverInfo driverInfo;
+
+    private CustomSqlDialect(Context context) {
+        super(context);
+    }
+
+    public CustomSqlDialect(JdbcDriverInfo driverInfo) {
+        this(createContext(driverInfo));
+        this.driverInfo = driverInfo;
+    }
+
+    private static Context createContext(JdbcDriverInfo driverInfo) {
+        applyDefaultQuotes(driverInfo);
+        BeanUtils.validate(driverInfo);
+        return SqlDialect.EMPTY_CONTEXT
+                .withDatabaseProductName(driverInfo.getName())
+                .withDatabaseVersion(driverInfo.getVersion())
+                .withConformance(SqlConformanceEnum.LENIENT)
+                .withIdentifierQuoteString(driverInfo.getIdentifierQuote())
+                .withLiteralQuoteString(driverInfo.getLiteralQuote())
+                .withUnquotedCasing(Casing.UNCHANGED)
+                .withNullCollation(NullCollation.LOW);
+    }
+
+    private static void applyDefaultQuotes(JdbcDriverInfo driverInfo) {
+        if (driverInfo.getIdentifierQuote() == null || driverInfo.getIdentifierQuote().isBlank()) {
+            driverInfo.setIdentifierQuote(DEFAULT_IDENTIFIER_QUOTE);
+        }
+        if (driverInfo.getLiteralQuote() == null || driverInfo.getLiteralQuote().isBlank()) {
+            driverInfo.setLiteralQuote(DEFAULT_LITERAL_QUOTE);
+        }
+    }
+
+    @Override
+    public void unparseOffsetFetch(SqlWriter writer, SqlNode offset, SqlNode fetch) {
+        if (driverInfo.getSupportSqlLimit() != null && driverInfo.getSupportSqlLimit()) {
+            unparseFetchUsingLimit(writer, offset, fetch);
+        } else {
+            super.unparseOffsetFetch(writer, offset, fetch);
+        }
+    }
+}
