@@ -52,7 +52,7 @@ public class JwtUtils {
 
     private static final String PASSWORD_HASH = "password";
 
-    private static final String LEGACY_SECRET_COMPAT_SALT = "datart-jjwt-hs256-compat";
+    private static final String SECRET_COMPAT_SALT = "yubi-jjwt-hs256-compat";
 
     public static final int VERIFY_CODE_TIMEOUT_MIN = 10 * 60 * 1000;
 
@@ -170,7 +170,7 @@ public class JwtUtils {
     private static byte[] sha256(byte[] input) {
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-            messageDigest.update(LEGACY_SECRET_COMPAT_SALT.getBytes(StandardCharsets.UTF_8));
+            messageDigest.update(SECRET_COMPAT_SALT.getBytes(StandardCharsets.UTF_8));
             return messageDigest.digest(input);
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 algorithm unavailable", e);

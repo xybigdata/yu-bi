@@ -226,3 +226,17 @@ ${YUBI_HOME}/bin/yu-bi-server.sh (start|stop|status|restart)
 ```base
 http://youip:youport/login
 ```
+
+## 3. 品牌迁移说明（datart → yu-bi 2.0.0）
+
+### 已知兼容保留项
+
+无。本项目为全新部署，无需保留任何旧版本兼容 salt 或 token。
+
+### 需要注意的运行时行为变更
+
+- **SQL 虚拟表别名**：生成的 SQL 中子查询别名从 `DATART_VTABLE` 变更为 `YUBI_VTABLE`。这不影响查询结果，但如果有外部系统解析生成的 SQL 字符串，需同步适配。
+- **文件扩展名**：模板文件 `.drt` → `.ybt`，资源文件 `.drr` → `.ybr`。已有的 `.drt`/`.drr` 文件需手动重命名后才能被新版本导入。
+- **配置文件名**：`datart.conf` → `yubi.conf`。升级时需重命名外部配置文件。
+- **环境变量前缀**：`DATART_*` → `YUBI_*`。升级后需更新部署脚本中的环境变量。
+- **数据库名**：默认数据库名从 `datart` 变为 `yubi`。升级时可保留原数据库名，只需在配置中指定 `datasource.database=原数据库名`。
