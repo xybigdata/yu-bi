@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +24,9 @@ import styled from 'styled-components';
 export const FileUpload: FC<{
   suffix: string;
   value?: UploadFile;
-  onChange?: (file: Parameters<NonNullable<UploadProps['beforeUpload']>>[0]) => void;
+  onChange?: (
+    file: Parameters<NonNullable<UploadProps['beforeUpload']>>[0],
+  ) => void;
   uploadText?: string;
 }> = memo(({ suffix, value, onChange, uploadText }) => {
   const [fileName, setFileName] = useState<string | undefined>(value?.name);

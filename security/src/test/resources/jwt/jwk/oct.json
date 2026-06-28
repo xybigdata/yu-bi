@@ -3,7 +3,7 @@
     {
       "kty": "oct",
       "use": "enc",
-      "kid": "datart_oct",
+      "kid": "yubi_oct",
       "k": "ZEBhJHQlYV5yJmEqdA==",
       "alg": "HS256"
     }

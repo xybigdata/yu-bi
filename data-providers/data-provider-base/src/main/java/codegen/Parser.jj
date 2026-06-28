@@ -8,7 +8,7 @@ options {
 
 PARSER_BEGIN(SqlParserImpl)
 
-package datart.data.provider.calcite.parser.impl;
+package yubi.data.provider.calcite.parser.impl;
 
 
 import org.apache.calcite.avatica.util.Casing;
@@ -102,7 +102,7 @@ import org.apache.calcite.util.Pair;
 import org.apache.calcite.util.SourceStringReader;
 import org.apache.calcite.util.Util;
 import org.apache.calcite.util.trace.CalciteTrace;
-import datart.data.provider.calcite.custom.SqlSimpleStringLiteral;
+import yubi.data.provider.calcite.custom.SqlSimpleStringLiteral;
 import org.apache.calcite.sql.fun.SqlMonotonicBinaryOperator;
 import org.apache.calcite.sql.type.OperandTypes;
 import org.apache.calcite.sql.type.ReturnTypes;
@@ -2087,7 +2087,7 @@ SqlNode TableRef2(boolean lateral) :
 }
 {
     (
-        // datart: function as table
+        // yubi: function as table
         LOOKAHEAD(256,TableFunctionCall(getPos()))
         tableRef = TableFunctionCall(getPos())
     |
@@ -4355,7 +4355,7 @@ SqlNode ArrayConstructor() :
         LOOKAHEAD(1)
         <LPAREN>
         // by sub query "MULTISET(SELECT * FROM T)"
-        e = LeafQueryOrExpr(ExprContext.ACCEPT_ALL) // [datart]
+        e = LeafQueryOrExpr(ExprContext.ACCEPT_ALL) // [yubi]
         <RPAREN>
         {
             return SqlStdOperatorTable.ARRAY_QUERY.createCall(
@@ -6044,7 +6044,7 @@ List<SqlNode> JsonNameAndValue() :
                 throw SqlUtil.newContextException(getPos(), RESOURCE.illegalColon());
             }
         }
-    // [datart] support   JSON_OBJECT('id', 87, 'name', 'carrot');
+    // [yubi] support   JSON_OBJECT('id', 87, 'name', 'carrot');
     | <COMMA>
     )
     e = Expression(ExprContext.ACCEPT_NON_QUERY) {
@@ -6613,7 +6613,7 @@ SqlIdentifier FunctionName() :
     |
         qualifiedName = ReservedFunctionName()
 
-    |   qualifiedName = FunctionNameSupport()  // [datart]  function name support
+    |   qualifiedName = FunctionNameSupport()  // [yubi]  function name support
 
     )
     {
@@ -6621,7 +6621,7 @@ SqlIdentifier FunctionName() :
     }
 }
 
-// [datart]  function name support
+// [yubi]  function name support
 SqlIdentifier FunctionNameSupport():
 {
 }
@@ -6635,7 +6635,7 @@ SqlIdentifier FunctionNameSupport():
         return new SqlIdentifier(unquotedIdentifier(), getPos());
     }
 }
-// [datart]  function name support
+// [yubi]  function name support
 String KeywordFunctionNameSupport() :
 {
 }
@@ -6948,7 +6948,7 @@ SqlBinaryOperator BinaryRowOperator() :
 |   LOOKAHEAD(2) <IMMEDIATELY> <PRECEDES> { return SqlStdOperatorTable.IMMEDIATELY_PRECEDES; }
 |   <IMMEDIATELY> <SUCCEEDS> { return SqlStdOperatorTable.IMMEDIATELY_SUCCEEDS; }
 |   op = BinaryMultisetOperator() { return op; }
-//[datart] support sql &
+//[yubi] support sql &
 |  <BIT_AND> {   return  new SqlMonotonicBinaryOperator(
          "&",
          SqlKind.BIT_AND,
@@ -8178,7 +8178,7 @@ void NonReservedKeyWord2of3() :
 |   < VERTICAL_BAR: "|" >
 |   < CARET: "^" >
 |   < DOLLAR: "$" >
-|   < BIT_AND: "&" > // [datart]
+|   < BIT_AND: "&" > // [yubi]
 }
 
 
@@ -8372,7 +8372,7 @@ MORE :
         "\u3400"-"\u3d2d",
         "\u4e00"-"\u9fff",
         "\uf900"-"\ufaff",
-        "@" //[datart] support for sql variable
+        "@" //[yubi] support for sql variable
     ]
     >
 |

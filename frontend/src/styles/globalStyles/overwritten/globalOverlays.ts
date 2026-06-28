@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +27,7 @@ import {
 
 export const GlobalOverlays = createGlobalStyle`
   /* app/components/Popup */
-  .datart-popup {
+  .yubi-popup {
     z-index: ${LEVEL_1000 - 1};
 
     &.on-modal {
@@ -51,7 +52,7 @@ export const GlobalOverlays = createGlobalStyle`
   
 
   /* schema table header action dropdown menu */
-  .datart-schema-table-header-menu {
+  .yubi-schema-table-header-menu {
     min-width: ${SPACE_TIMES(40)};
 
     .ant-dropdown-menu-submenu-selected {
@@ -62,7 +63,7 @@ export const GlobalOverlays = createGlobalStyle`
   }
 
   /* config panel */
-  .datart-config-panel {
+  .yubi-config-panel {
     &.ant-collapse >
     .ant-collapse-item >
     .ant-collapse-header {
@@ -81,12 +82,12 @@ export const GlobalOverlays = createGlobalStyle`
   }
 
   /* data config section dropdown */
-  .datart-data-section-dropdown {
+  .yubi-data-section-dropdown {
     z-index: ${LEVEL_1000 - 1};
   }
 
   /* color popover */
-  .datart-aggregation-colorpopover{
+  .yubi-aggregation-colorpopover{
     .ant-popover-arrow{
       display:none;
     }

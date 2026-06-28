@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +94,7 @@ export interface IChartLifecycle {
    * @abstract
    * @param {BrokerOption} options
    * @param {BrokerContext} context
-   * @memberof DatartChartBase
+   * @memberof YuBiChartBase
    */
   onMount(options: BrokerOption, context: BrokerContext): void;
 
@@ -103,7 +104,7 @@ export interface IChartLifecycle {
    * @abstract
    * @param {BrokerOption} options
    * @param {BrokerContext} context
-   * @memberof DatartChartBase
+   * @memberof YuBiChartBase
    */
   onUpdated(options: BrokerOption, context: BrokerContext): void;
 
@@ -113,7 +114,7 @@ export interface IChartLifecycle {
    * @abstract
    * @param {BrokerOption} options
    * @param {BrokerContext} context
-   * @memberof DatartChartBase
+   * @memberof YuBiChartBase
    */
   onUnMount(options: BrokerOption, context: BrokerContext): void;
 
@@ -123,7 +124,7 @@ export interface IChartLifecycle {
    * @abstract
    * @param {BrokerOption} options
    * @param {BrokerContext} context
-   * @memberof DatartChartBase
+   * @memberof YuBiChartBase
    */
   onResize(options: BrokerOption, context: BrokerContext): void;
 }

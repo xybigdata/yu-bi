@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -179,7 +180,7 @@ const ChartDraggableElementField: FC<{
         disabled={!config?.actions}
         {...dropdownDestroyOnHiddenProps}
         {...dropdownPopupRenderProps}
-        overlayClassName="datart-data-section-dropdown"
+        overlayClassName="yubi-data-section-dropdown"
         trigger={['click']}
       >
         <StyledWrapper className={classnames({ replace: showReplaceMenu })}>

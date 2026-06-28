@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,65 +33,64 @@ export type MockDataRows = NonNullable<ChartDataSetDTO['rows']>;
 export const MockDataEditor: FC<{
   originalData?: MockDataRows;
   onDataChange: (value: MockDataRows) => void;
-}> =
-  memo(({ originalData, onDataChange }) => {
-    const theme = useSelector(selectThemeKey);
-    //   const formatter = new JSONFormatter(jsonVal);
-    const editorValue = JSON.stringify(originalData, null, 4);
+}> = memo(({ originalData, onDataChange }) => {
+  const theme = useSelector(selectThemeKey);
+  //   const formatter = new JSONFormatter(jsonVal);
+  const editorValue = JSON.stringify(originalData, null, 4);
 
-    const editorWillMount = useCallback(async () => {
-      await ensureMonacoJavascriptLanguage();
-    }, []);
+  const editorWillMount = useCallback(async () => {
+    await ensureMonacoJavascriptLanguage();
+  }, []);
 
-    const editorDidMount = useCallback(
-      (editor: Monaco.editor.IStandaloneCodeEditor) => {
-        // Removing the tooltip on the read-only editor
-        // https://github.com/microsoft/monaco-editor/issues/1742
+  const editorDidMount = useCallback(
+    (editor: Monaco.editor.IStandaloneCodeEditor) => {
+      // Removing the tooltip on the read-only editor
+      // https://github.com/microsoft/monaco-editor/issues/1742
 
-        editor.getAction('editor.action.formatDocument')?.run(); //格式化
-        editor.setValue(editor.getValue());
-        editor.focus();
-      },
-      [],
-    );
-    const debouncedEditorChange = useMemo(() => {
-      const editorChange = (val: string) => {
-        try {
-          let nextVal = JSON.parse(val);
-          if (Array.isArray(nextVal)) {
-            onDataChange(nextVal as MockDataRows);
-          }
-        } catch (error) {
-          console.warn('error on', error);
+      editor.getAction('editor.action.formatDocument')?.run(); //格式化
+      editor.setValue(editor.getValue());
+      editor.focus();
+    },
+    [],
+  );
+  const debouncedEditorChange = useMemo(() => {
+    const editorChange = (val: string) => {
+      try {
+        let nextVal = JSON.parse(val);
+        if (Array.isArray(nextVal)) {
+          onDataChange(nextVal as MockDataRows);
         }
-      };
-      return debounce(editorChange, 500);
-    }, [onDataChange]);
-    return (
-      <StyledWrapper>
-        <MonacoEditor
-          value={editorValue}
-          language="javascript"
-          theme={`vs-${theme}`}
-          options={{
-            selectOnLineNumbers: true,
-            automaticLayout: true,
-            wordWrap: 'wordWrapColumn',
-            wrappingStrategy: 'simple',
-            wordWrapBreakBeforeCharacters: ',',
-            wordWrapBreakAfterCharacters: ',',
-            // disableLayerHinting: true,
-            fontSize: FONT_SIZE_BASE * 0.875,
-            minimap: { enabled: true },
-            readOnly: false,
-          }}
-          onChange={debouncedEditorChange}
-          editorWillMount={editorWillMount}
-          editorDidMount={editorDidMount}
-        />
-      </StyledWrapper>
-    );
-  });
+      } catch (error) {
+        console.warn('error on', error);
+      }
+    };
+    return debounce(editorChange, 500);
+  }, [onDataChange]);
+  return (
+    <StyledWrapper>
+      <MonacoEditor
+        value={editorValue}
+        language="javascript"
+        theme={`vs-${theme}`}
+        options={{
+          selectOnLineNumbers: true,
+          automaticLayout: true,
+          wordWrap: 'wordWrapColumn',
+          wrappingStrategy: 'simple',
+          wordWrapBreakBeforeCharacters: ',',
+          wordWrapBreakAfterCharacters: ',',
+          // disableLayerHinting: true,
+          fontSize: FONT_SIZE_BASE * 0.875,
+          minimap: { enabled: true },
+          readOnly: false,
+        }}
+        onChange={debouncedEditorChange}
+        editorWillMount={editorWillMount}
+        editorDidMount={editorDidMount}
+      />
+    </StyledWrapper>
+  );
+});
 const StyledWrapper = styled.div`
   flex: 1;
   height: 100%;

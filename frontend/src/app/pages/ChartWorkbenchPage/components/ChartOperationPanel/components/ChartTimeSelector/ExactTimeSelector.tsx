@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +19,7 @@
 
 import { DatePicker } from 'antd';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
-import { toDatartDayjs } from 'app/utils/date';
+import { toYuBiDayjs } from 'app/utils/date';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo } from 'react';
 import type { ManualTimeValue } from './ManualSingleTimeSelector';
@@ -40,7 +41,7 @@ const ExactTimeSelector: FC<
     <DatePicker
       showTime
       format={TIME_FORMATTER}
-      value={typeof time === 'string' ? toDatartDayjs(time) : null}
+      value={typeof time === 'string' ? toYuBiDayjs(time) : null}
       onChange={handleTimeChange}
       placeholder={t('select')}
     />

@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +20,7 @@
 import { DatePicker } from 'antd';
 import { FilterConditionType } from 'app/constants';
 import { ConditionBuilder } from 'app/models/ChartFilterCondition';
-import { DatartDayjs, getDatartNow } from 'app/utils/date';
+import { YuBiDayjs, getYuBiNow } from 'app/utils/date';
 import { TIME_FORMATTER } from 'globalConstants';
 import { FC, memo, useMemo } from 'react';
 import {
@@ -39,8 +40,8 @@ const RangeTimePickerFilter: FC<PresentControllerFilterProps> = memo(
       onConditionChange?.(filterRow);
     };
 
-    const rangeTimes = useMemo<[DatartDayjs, DatartDayjs]>(() => {
-      const now = getDatartNow();
+    const rangeTimes = useMemo<[YuBiDayjs, YuBiDayjs]>(() => {
+      const now = getYuBiNow();
       const conditionValue = condition?.value;
       if (condition?.type === FilterConditionType.RangeTime) {
         const rangeValue = Array.isArray(conditionValue) ? conditionValue : [];

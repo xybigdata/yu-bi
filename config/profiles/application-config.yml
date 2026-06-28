@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${datasource.ip:null}:${datasource.port:3306}/${datasource.database:datart}?&allowMultiQueries=true&characterEncoding=utf-8
+    url: jdbc:mysql://${datasource.ip:null}:${datasource.port:3306}/${datasource.database:yubi}?&allowMultiQueries=true&characterEncoding=utf-8
     username: ${datasource.username:root}
     password: ${datasource.password:123456}
 
@@ -78,11 +78,11 @@ server:
     keyStoreType: PKCS12
     keyAlias: tomcat
 
-datart:
+yubi:
   migration:
     enable: true # 是否开启数据库自动升级
   server:
-    address: ${datart.address:http://127.0.0.1:8080}
+    address: ${yubi.address:http://127.0.0.1:8080}
 
   # 租户管理模式：platform-平台(默认)，team-团队
   tenant-management-mode: platform
@@ -90,10 +90,10 @@ datart:
   user:
     register: true # 是否允许注册
     active:
-      send-mail: ${datart.send-mail:false}  # 注册用户时是否需要邮件验证激活
-      expire-hours: ${datart.register.expire-hours:48} # 注册邮件有效期/小时
+      send-mail: ${yubi.send-mail:false}  # 注册用户时是否需要邮件验证激活
+      expire-hours: ${yubi.register.expire-hours:48} # 注册邮件有效期/小时
     invite:
-      expire-hours: ${datart.invite.expire-hours:48} # 邀请邮件有效期/小时
+      expire-hours: ${yubi.invite.expire-hours:48} # 邀请邮件有效期/小时
 
   security:
     token:
@@ -106,4 +106,4 @@ datart:
   screenshot:
     timeout-seconds: 60
     webdriver-type: CHROME
-    webdriver-path: ${datart.webdriver-path:}
+    webdriver-path: ${yubi.webdriver-path:}

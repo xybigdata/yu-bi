@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +74,7 @@ export function Container() {
       gutterSize={0}
       onDragStart={siderDragStart}
       onDragEnd={siderDragEnd}
-      className="datart-split"
+      className="yubi-split"
       sliderVisible={sliderVisible}
     >
       <Sidebar

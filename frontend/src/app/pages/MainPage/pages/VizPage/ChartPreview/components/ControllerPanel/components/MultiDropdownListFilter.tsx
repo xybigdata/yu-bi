@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,22 +44,20 @@ const MultiDropdownListFilter: FC<PresentControllerFilterProps> = memo(
       executeToken,
     );
 
-    const handleSelectedChange: NonNullable<TreeSelectProps['onChange']> =
-      keys => {
-        if (
-          !Array.isArray(keys) ||
-          keys.some(key => typeof key !== 'string')
-        ) {
-          return;
-        }
+    const handleSelectedChange: NonNullable<
+      TreeSelectProps['onChange']
+    > = keys => {
+      if (!Array.isArray(keys) || keys.some(key => typeof key !== 'string')) {
+        return;
+      }
 
-        const normalizedKeys = keys as string[];
+      const normalizedKeys = keys as string[];
 
-        const newCondition = updateBy(condition!, draft => {
-          draft.value = normalizedKeys;
-        });
-        onConditionChange(newCondition);
-      };
+      const newCondition = updateBy(condition!, draft => {
+        draft.value = normalizedKeys;
+      });
+      onConditionChange(newCondition);
+    };
     const selectedNodes = useMemo(() => {
       return getSelectedRelationKeys(condition?.value);
     }, [condition]);

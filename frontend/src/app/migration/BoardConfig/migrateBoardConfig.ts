@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,15 +42,13 @@ const isBoardType = (value: unknown): value is (typeof BoardTypes)[number] => {
 const isBoardConfig = (config: unknown): config is BoardConfig => {
   return Boolean(
     config &&
-      typeof config === 'object' &&
-      isBoardType((config as BoardConfig).type) &&
-      (config as BoardConfig).jsonConfig,
+    typeof config === 'object' &&
+    isBoardType((config as BoardConfig).type) &&
+    (config as BoardConfig).jsonConfig,
   );
 };
 
-const hasMigrationSourceFields = (
-  config: DashboardConfigBeta3,
-): boolean => {
+const hasMigrationSourceFields = (config: DashboardConfigBeta3): boolean => {
   return (
     Boolean(config.background) ||
     typeof config.initialQuery === 'boolean' ||
@@ -64,7 +63,9 @@ const hasMigrationSourceFields = (
   );
 };
 
-export const parseBoardConfig = (boardConfig: string): BoardConfigMigrationTarget => {
+export const parseBoardConfig = (
+  boardConfig: string,
+): BoardConfigMigrationTarget => {
   try {
     const nextConfig = JSON.parse(boardConfig) as BoardConfigMigrationTarget;
     if (!isBoardType(nextConfig?.type)) {

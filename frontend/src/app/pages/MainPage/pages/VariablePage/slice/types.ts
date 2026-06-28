@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +17,12 @@
  * limitations under the License.
  */
 
-import { DatartDayjs } from 'app/utils/date';
+import { YuBiDayjs } from 'app/utils/date';
 import { DateFormat } from 'app/constants';
 import { SubjectTypes } from '../../PermissionPage/constants';
 import { VariableTypes, VariableValueTypes } from '../constants';
 
-export type VariableDefaultValueItem = string | number | DatartDayjs;
+export type VariableDefaultValueItem = string | number | YuBiDayjs;
 
 export interface VariableState {
   variables: VariableViewModel[];

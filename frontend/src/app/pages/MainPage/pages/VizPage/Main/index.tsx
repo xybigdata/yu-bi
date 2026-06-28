@@ -152,7 +152,10 @@ export function Main({ sliderVisible }: { sliderVisible: boolean }) {
     [dispatch, navigate, orgId, tabs],
   );
 
-  const handleClickMenu = (e: Parameters<NonNullable<MenuProps['onClick']>>[0], id: string) => {
+  const handleClickMenu = (
+    e: Parameters<NonNullable<MenuProps['onClick']>>[0],
+    id: string,
+  ) => {
     e.domEvent.stopPropagation();
     if (e.key === 'CLOSE_ALL') {
       dispatch(
@@ -206,7 +209,7 @@ export function Main({ sliderVisible }: { sliderVisible: boolean }) {
   );
 
   return (
-    <Wrapper className={sliderVisible ? 'close datart-viz' : 'datart-viz'}>
+    <Wrapper className={sliderVisible ? 'close yubi-viz' : 'yubi-viz'}>
       <TabsWrapper>
         <Tabs
           hideAdd

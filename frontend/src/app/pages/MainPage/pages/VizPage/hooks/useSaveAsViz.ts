@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,12 +94,16 @@ export function useSaveAsViz() {
           let index = getInsertedNodeIndex(values, vizsData);
 
           if (type === 'DATACHART') {
-            const requestData: AddVizParams['viz'] = Object.assign({}, vizData, {
-              ...values,
-              parentId: values.parentId || null,
-              index,
-              avatar: chartConfig?.chartGraphId,
-            });
+            const requestData: AddVizParams['viz'] = Object.assign(
+              {},
+              vizData,
+              {
+                ...values,
+                parentId: values.parentId || null,
+                index,
+                avatar: chartConfig?.chartGraphId,
+              },
+            );
 
             await dispatch(
               addViz({

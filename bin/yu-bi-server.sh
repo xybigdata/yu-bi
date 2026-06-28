@@ -24,10 +24,10 @@ cd "${BASE_DIR}"
 
 CLASS_PATH="${BASE_DIR}/lib/*"
 
-START_CLASS="datart.DatartServerApplication"
+START_CLASS="yubi.YuBiServerApplication"
 
-datart_status(){
-    result=`ps -ef | grep -v grep | grep "${BASE_DIR}/lib" | grep 'DatartServerApplication' | awk {'print $2'} | wc -l`
+yubi_status(){
+    result=`ps -ef | grep -v grep | grep "${BASE_DIR}/lib" | grep 'YuBiServerApplication' | awk {'print $2'} | wc -l`
 
     if [[ $result -eq 0 ]]; then
         return 0
@@ -36,29 +36,29 @@ datart_status(){
     fi
     }
 
-datart_start(){
+yubi_start(){
     source ~/.bashrc
-    datart_status >/dev/null 2>&1
+    yubi_status >/dev/null 2>&1
     if [[ $? -eq 0 ]]; then
 
         nohup  java -server -Xms2G -Xmx2G -Dspring.profiles.active=config -Dfile.encoding=UTF-8 -cp "${CLASS_PATH}" "${START_CLASS}" &
 
     else
         echo ""
-        PID=`ps -ef | grep -v grep | grep "${BASE_DIR}/lib" | grep 'DatartServerApplication' | awk {'print $2'}`
+        PID=`ps -ef | grep -v grep | grep "${BASE_DIR}/lib" | grep 'YuBiServerApplication' | awk {'print $2'}`
         echo "yu-bi is running now. PID is ${PID} "
     fi
 }
 
 
-datart_stop(){
-    datart_status >/dev/null 2>&1
+yubi_stop(){
+    yubi_status >/dev/null 2>&1
     if [[ $? -eq 0 ]]; then
         echo ""
         echo "yu-bi is not running."
         echo ""
     else
-         ps -ef | grep -v grep | grep "$BASE_DIR/lib" | grep 'DatartServerApplication' | awk {'print $2'} | xargs kill -9
+         ps -ef | grep -v grep | grep "$BASE_DIR/lib" | grep 'YuBiServerApplication' | awk {'print $2'} | xargs kill -9
 
     fi
 }
@@ -69,7 +69,7 @@ case $1 in
         echo ""
         echo "yu-bi starting..."
         echo ""
-        datart_start
+        yubi_start
     ;;
 
     stop )
@@ -78,27 +78,27 @@ case $1 in
         echo "yu-bi stopping..."
 
         echo ""
-        datart_stop
+        yubi_stop
     ;;
 
     restart )
         echo "yu-bi restarting..."
-        datart_stop
+        yubi_stop
         echo ""
-        datart_start
+        yubi_start
         echo "yu-bi is starting..."
 
     ;;
 
     status )
-        datart_status>/dev/null 2>&1
+        yubi_status>/dev/null 2>&1
         if [[ $? -eq 0 ]]; then
             echo ""
             echo "yu-bi is not running."
             echo ""
         else
             echo ""
-            PID=`ps -ef | grep -v grep | grep "${BASE_DIR}/lib" | grep 'DatartServerApplication' | awk {'print $2'}`
+            PID=`ps -ef | grep -v grep | grep "${BASE_DIR}/lib" | grep 'YuBiServerApplication' | awk {'print $2'}`
             echo "yu-bi is running. PID is ${PID}"
             echo ""
         fi

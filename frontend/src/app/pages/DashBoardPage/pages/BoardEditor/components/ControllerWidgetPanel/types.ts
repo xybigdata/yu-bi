@@ -4,7 +4,7 @@ import {
   ControllerVisibleType,
   ValueOptionType,
 } from 'app/pages/DashBoardPage/constants';
-import { DatartDateLike } from 'app/utils/date';
+import { YuBiDateLike } from 'app/utils/date';
 import { RelationFilterValue } from 'app/types/ChartConfig';
 import { FilterSqlOperator, RelativeTimeUnit } from 'globalConstants';
 import i18next from 'i18next';
@@ -97,7 +97,7 @@ export const PickerTypeOptions = [
 export interface ControllerDateType {
   relativeOrExact: TimeFilterValueCategory;
   relativeValue?: RelativeDate;
-  exactValue?: DatartDateLike | null;
+  exactValue?: YuBiDateLike | null;
 }
 
 export interface RelativeDate {

@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,46 +162,42 @@ export const fetchShareDataSetByPreviewChartAction = createAsyncThunk<
     drillOption?: IChartDrillOption;
     filterSearchParams?: FilterSearchParams;
   }
->(
-  'share/fetchDataSetByPreviewChartAction',
-  async (args, thunkAPI) => {
-    const state = thunkAPI.getState() as RootState;
-    const shareState = state.share;
-    if (!args.preview?.backendChart?.view.id) {
-      return;
-    }
-    const builder = new ChartDataRequestBuilder(
-      {
-        id: args.preview?.backendChart?.view.id || '',
-        config: args.preview?.backendChart?.view.config || {},
-        meta: args?.preview?.backendChart?.view?.meta,
-        computedFields:
-          args.preview?.backendChart?.config?.computedFields || [],
-        type: args.preview?.backendChart?.view.type || 'SQL',
-      },
-      args.preview?.chartConfig?.datas,
-      args.preview?.chartConfig?.settings,
-      args.pageInfo,
-      false,
-      args.preview?.backendChart?.config?.aggregation,
-    );
-    const executeParam = builder
-      .addExtraSorters(args?.sorter ? [args.sorter] : [])
-      .addDrillOption(args?.drillOption)
-      .build();
+>('share/fetchDataSetByPreviewChartAction', async (args, thunkAPI) => {
+  const state = thunkAPI.getState() as RootState;
+  const shareState = state.share;
+  if (!args.preview?.backendChart?.view.id) {
+    return;
+  }
+  const builder = new ChartDataRequestBuilder(
+    {
+      id: args.preview?.backendChart?.view.id || '',
+      config: args.preview?.backendChart?.view.config || {},
+      meta: args?.preview?.backendChart?.view?.meta,
+      computedFields: args.preview?.backendChart?.config?.computedFields || [],
+      type: args.preview?.backendChart?.view.type || 'SQL',
+    },
+    args.preview?.chartConfig?.datas,
+    args.preview?.chartConfig?.settings,
+    args.pageInfo,
+    false,
+    args.preview?.backendChart?.config?.aggregation,
+  );
+  const executeParam = builder
+    .addExtraSorters(args?.sorter ? [args.sorter] : [])
+    .addDrillOption(args?.drillOption)
+    .build();
 
-    const response = await request2<ChartDataSetDTO>({
-      method: 'POST',
-      url: `shares/execute`,
-      params: {
-        executeToken:
-          shareState?.shareToken[executeParam.viewId]['authorizedToken'],
-      },
-      data: executeParam,
-    });
-    return response.data;
-  },
-);
+  const response = await request2<ChartDataSetDTO>({
+    method: 'POST',
+    url: `shares/execute`,
+    params: {
+      executeToken:
+        shareState?.shareToken[executeParam.viewId]['authorizedToken'],
+    },
+    data: executeParam,
+  });
+  return response.data;
+});
 
 export const updateFilterAndFetchDatasetForShare = createAsyncThunk(
   'share/updateFilterAndFetchDatasetForShare',

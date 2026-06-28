@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +18,7 @@
  */
 
 import ChartI18NContext from 'app/pages/ChartWorkbenchPage/contexts/Chart18NContext';
-import { DATART_TRANSLATE_HOLDER } from 'globalConstants';
+import { YUBI_TRANSLATE_HOLDER } from 'globalConstants';
 import i18n from 'i18next';
 import get from 'lodash/get';
 import { useCallback, useContext } from 'react';
@@ -50,13 +51,13 @@ function usePrefixI18N(prefix?: string) {
     ) => {
       let translationKey = key;
       const usePrefix =
-        !disablePrefix && !translationKey.includes(DATART_TRANSLATE_HOLDER);
+        !disablePrefix && !translationKey.includes(YUBI_TRANSLATE_HOLDER);
       if (usePrefix && prefix) {
         translationKey = `${prefix}.${translationKey}`;
       }
-      if (translationKey.includes(DATART_TRANSLATE_HOLDER)) {
+      if (translationKey.includes(YUBI_TRANSLATE_HOLDER)) {
         translationKey = translationKey.replace(
-          `${DATART_TRANSLATE_HOLDER}.`,
+          `${YUBI_TRANSLATE_HOLDER}.`,
           '',
         );
       }

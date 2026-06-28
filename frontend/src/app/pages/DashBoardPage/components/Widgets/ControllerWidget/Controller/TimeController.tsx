@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +19,7 @@
 import { DatePicker, Form } from 'antd';
 import { PickerType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import { formatDateByPickType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/utils';
-import { DatartDayjs, toDatartDayjs } from 'app/utils/date';
+import { YuBiDayjs, toYuBiDayjs } from 'app/utils/date';
 import React, { memo } from 'react';
 import styled from 'styled-components';
 
@@ -63,7 +64,7 @@ const isDateTimePickerType = (
 
 export const TimeController: React.FC<SingleTimeSetProps> = memo(
   ({ pickerType, value, onChange }) => {
-    const handleTimeChange = (time: DatartDayjs | null) => {
+    const handleTimeChange = (time: YuBiDayjs | null) => {
       if (!time) {
         return onChange?.(null);
       }
@@ -72,7 +73,7 @@ export const TimeController: React.FC<SingleTimeSetProps> = memo(
       onChange?.(newValues);
     };
 
-    const pickerValue = toDatartDayjs(value);
+    const pickerValue = toYuBiDayjs(value);
 
     return (
       <StyledWrap>

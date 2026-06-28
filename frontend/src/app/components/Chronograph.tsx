@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +19,7 @@
 
 import { Badge, BadgeProps } from 'antd';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { datartDayjs, getDatartNowMillis } from 'app/utils/date';
+import { yubiDayjs, getYuBiNowMillis } from 'app/utils/date';
 import styled from 'styled-components';
 import { FONT_SIZE_LABEL } from 'styles/StyleConstants';
 
@@ -38,7 +39,7 @@ export function Chronograph({ running, status }: ChronographProps) {
       2,
       '0',
     );
-    return `${datartDayjs.utc(elapsed).format('HH:mm:ss')}.${centiseconds}`;
+    return `${yubiDayjs.utc(elapsed).format('HH:mm:ss')}.${centiseconds}`;
   }, []);
 
   const clear = useCallback(() => {
@@ -50,9 +51,9 @@ export function Chronograph({ running, status }: ChronographProps) {
 
   useEffect(() => {
     if (running) {
-      const start = getDatartNowMillis();
+      const start = getYuBiNowMillis();
       intervalRef.current = setInterval(() => {
-        const current = getDatartNowMillis();
+        const current = getYuBiNowMillis();
         setLabel(formatElapsed(current - start));
       }, 10);
     } else {

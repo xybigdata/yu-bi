@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +72,7 @@ describe('MigrationEventDispatcher Tests', () => {
     expect(dispatcher.process(originalInputValue)).toEqual(originalInputValue);
   });
 
-  test('should do not do event sourcing when event version is not semantic version in datart', () => {
+  test('should do not do event sourcing when event version is not semantic version in yubi', () => {
     const originalInputValue = createFixture({
       version: APP_CURRENT_VERSION,
     });

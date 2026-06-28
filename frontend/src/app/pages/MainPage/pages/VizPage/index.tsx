@@ -59,7 +59,7 @@ export function VizPage() {
         gutterSize={0}
         onDragStart={siderDragStart}
         onDragEnd={siderDragEnd}
-        className="datart-split"
+        className="yubi-split"
         sliderVisible={sliderVisible}
       >
         <Sidebar

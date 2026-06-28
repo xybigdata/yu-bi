@@ -1,10 +1,5 @@
 import { Popover, PopoverProps } from 'antd';
-import React, {
-  isValidElement,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react';
+import React, { isValidElement, useCallback, useMemo, useState } from 'react';
 import { cloneElementWithProps } from 'utils/reactCompat';
 import { mergeClassNames } from 'utils/utils';
 
@@ -36,7 +31,7 @@ export function Popup({
     [content, onClose],
   );
 
-  const className = mergeClassNames(overlayClassName, 'datart-popup');
+  const className = mergeClassNames(overlayClassName, 'yubi-popup');
   return (
     <Popover
       {...rest}

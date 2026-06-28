@@ -1,4 +1,4 @@
-import { DatartDateLike, formatDatartDateTimeIfValid } from 'app/utils/date';
+import { YuBiDateLike, formatYuBiDateTimeIfValid } from 'app/utils/date';
 import type { FilterCondition } from 'app/types/ChartConfig';
 import type { ManualTimeValue } from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/ManualSingleTimeSelector';
 import {
@@ -6,11 +6,11 @@ import {
   normalizeManualTimeValue,
 } from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartTimeSelector/utils';
 
-export const serializeSingleTimeFilterValue = (time: DatartDateLike | null) => {
+export const serializeSingleTimeFilterValue = (time: YuBiDateLike | null) => {
   if (!time) {
     return '';
   }
-  return formatDatartDateTimeIfValid(time) || '';
+  return formatYuBiDateTimeIfValid(time) || '';
 };
 
 export const getSingleTimeFilterValue = (

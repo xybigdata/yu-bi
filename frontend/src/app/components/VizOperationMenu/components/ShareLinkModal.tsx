@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +21,9 @@ import { DatePicker, Form, Modal, Radio, Select, Space } from 'antd';
 import { FormItemEx } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
-  formatDatartDateTime,
-  isDatartDayBeforeTodayEnd,
-  toDatartDayjs,
+  formatYuBiDateTime,
+  isYuBiDayBeforeTodayEnd,
+  toYuBiDayjs,
 } from 'app/utils/date';
 import { useMemberSlice } from 'app/pages/MainPage/pages/MemberPage/slice';
 import {
@@ -48,10 +49,10 @@ const normalizeExpiryDate = (value?: string | Date | null) => {
     return '';
   }
 
-  return formatDatartDateTime(value);
+  return formatYuBiDateTime(value);
 };
 
-const isExpiredDateDisabled = isDatartDayBeforeTodayEnd;
+const isExpiredDateDisabled = isYuBiDayBeforeTodayEnd;
 
 const ShareLinkModal: FC<{
   orgId: string;
@@ -181,7 +182,7 @@ const ShareLinkModal: FC<{
       >
         <FormItemEx label={t('share.expireDate')}>
           <DatePicker
-            value={toDatartDayjs(expiryDate)}
+            value={toYuBiDayjs(expiryDate)}
             showTime
             format={TIME_FORMATTER}
             disabledDate={isExpiredDateDisabled}

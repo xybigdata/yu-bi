@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +20,7 @@
 import Chart from 'app/models/Chart';
 import { ChartConfig, ChartI18NSectionConfig } from 'app/types/ChartConfig';
 import ChartMetadata from 'app/types/ChartMetadata';
-import * as datartChartHelper from 'app/utils/chartHelper';
+import * as yubiChartHelper from 'app/utils/chartHelper';
 import { fetchPluginChart } from 'app/utils/fetch';
 import { CloneValueDeep, Omit } from 'utils/object';
 
@@ -44,7 +45,7 @@ type PluginChartLoaderInput = {
 };
 
 type PluginChartRuntimeContext = {
-  dHelper: typeof datartChartHelper;
+  dHelper: typeof yubiChartHelper;
 };
 
 type PluginChartFactory = (
@@ -62,7 +63,7 @@ const loadPurePluginDefinition = ({
     `"use strict"; return (${result})`,
   )() as PluginChartFactory;
   return factory({
-    dHelper: { ...datartChartHelper },
+    dHelper: { ...yubiChartHelper },
   });
 };
 
@@ -77,7 +78,7 @@ const loadIifePluginDefinition = ({
     `"use strict"; return ${result}`,
   )() as PluginChartFactory;
   return factory({
-    dHelper: { ...datartChartHelper },
+    dHelper: { ...yubiChartHelper },
   });
 };
 
@@ -119,7 +120,7 @@ class PluginChartLoader {
     };
   }
 
-  convertToDatartChartModel(customPlugin: PluginChartDefinition): Chart {
+  convertToYuBiChartModel(customPlugin: PluginChartDefinition): Chart {
     const chart = new Chart(
       customPlugin.meta.id,
       customPlugin.meta.name,

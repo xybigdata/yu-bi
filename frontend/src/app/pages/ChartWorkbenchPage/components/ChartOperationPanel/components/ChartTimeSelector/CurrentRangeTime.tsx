@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,21 +18,15 @@
  */
 
 import { DatePicker } from 'antd';
-import { toDatartDayjsRange } from 'app/utils/date';
+import { toYuBiDayjsRange } from 'app/utils/date';
 import { FC, memo } from 'react';
 const { RangePicker } = DatePicker;
 
 const CurrentRangeTime: FC<{ times?: [string, string]; disabled?: boolean }> =
   memo(({ times, disabled = true }) => {
-    const rangeValue = toDatartDayjsRange(times);
+    const rangeValue = toYuBiDayjsRange(times);
 
-    return (
-      <RangePicker
-        showTime
-        disabled={disabled}
-        value={rangeValue}
-      />
-    );
+    return <RangePicker showTime disabled={disabled} value={rangeValue} />;
   });
 
 export default CurrentRangeTime;

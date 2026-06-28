@@ -19,7 +19,7 @@ docker run -p 8080:8080 yubi/yu-bi
 ## 1.1. 配置外部数据库
 在没有外部数据库配置的情况下，yu-bi 使用 H2 作为应用程序数据库。强烈建议您将自己的 Mysql 数据库配置为应用程序数据库。
 
-创建空文件 `datart.conf`，将以下内容写入。
+创建空文件 `yubi.conf`，将以下内容写入。
 
 ```shell
 # 数据库连接配置
@@ -33,13 +33,13 @@ datasource.password=
 server.port=8080
 server.address=0.0.0.0
 
-# yu-bi config
-datart.address=http://127.0.0.1
-datart.send-mail=false
-datart.webdriver-path=http://127.0.0.1:4444/wd/hub
+# yubi config
+yubi.address=http://127.0.0.1
+yubi.send-mail=false
+yubi.webdriver-path=http://127.0.0.1:4444/wd/hub
 ```
 
-运行 `docker run -d --name yu-bi -v your_path/datart.conf:/yu-bi/config/datart.conf -p 8080:8080 yubi/yu-bi`
+运行 `docker run -d --name yu-bi -v your_path/yubi.conf:/yu-bi/config/yubi.conf -p 8080:8080 yubi/yu-bi`
 
 ## 1.2. 将用户文件挂载到外部
 
@@ -47,7 +47,7 @@ datart.webdriver-path=http://127.0.0.1:4444/wd/hub
 
 在命令中增加参数 `-v your_path/files:/yu-bi/files` 即可。以下是完整命令：
 
-`docker run -d --name yu-bi -v your_path/datart.conf:/yu-bi/config/datart.conf -v your_path/files:/yu-bi/files -p 8080:8080 yubi/yu-bi`
+`docker run -d --name yu-bi -v your_path/yubi.conf:/yu-bi/config/yubi.conf -v your_path/files:/yu-bi/files -p 8080:8080 yubi/yu-bi`
 
 ***更多配置请以当前仓库文档与配置文件示例为准。***
 
@@ -56,7 +56,7 @@ datart.webdriver-path=http://127.0.0.1:4444/wd/hub
 
 - JDK 21+
 - MySql5.7+
-- yu-bi 安装包（例如 `yu-bi-server-1.0.0-rc.3-install.zip`）
+- yu-bi 安装包（例如 `yu-bi-server-2.0.0-install.zip`）
 - Mail Server （可选）
 - [ChromeWebDriver](https://chromedriver.chromium.org/) （可选）
 - Redis （可选）
@@ -64,7 +64,7 @@ datart.webdriver-path=http://127.0.0.1:4444/wd/hub
 方式1 :解压安装包 (官方提供的包)
 
 ```bash
-unzip yu-bi-server-1.0.0-rc.3-install.zip
+unzip yu-bi-server-2.0.0-install.zip
 ```
 
 方式2 :自行编译
@@ -76,11 +76,11 @@ cd yu-bi
 
 mvn clean package -Dmaven.test.skip=true
 
-cp ./yu-bi-server-1.0.0-rc.3-install.zip  ${deployment_basedir}
+cp ./yu-bi-server-2.0.0-install.zip  ${deployment_basedir}
 
 cd ${deployment_basedir}
 
-unzip yu-bi-server-1.0.0-rc.3-install.zip
+unzip yu-bi-server-2.0.0-install.zip
 
 ```
 
@@ -95,14 +95,14 @@ unzip yu-bi-server-1.0.0-rc.3-install.zip
 - 创建数据库，指定数据库编码为utf8
 
 ```bash
-mysql> CREATE DATABASE `datart` CHARACTER SET 'utf8' COLLATE 'utf8_general_ci';
+mysql> CREATE DATABASE `yubi` CHARACTER SET 'utf8' COLLATE 'utf8_general_ci';
 ```
 
 ***注意：较老历史版本曾需要额外初始化脚本；当前维护线下，创建好数据库即可，在初次连接时会自动初始化数据库。***
 
 ***首次连接数据库(或者版本升级)时,建议使用一个权限较高的数据库账号登录(如root账号)。因为首次连接会执行数据库初始化脚本，如果使用的数据库账号权限太低，会导致数据库初始化失败***
 
-- 基础配置：配置文件位于 config/datart.conf
+- 基础配置：配置文件位于 config/yubi.conf
 
 ```bash
    数据库配置(必填):
@@ -115,9 +115,9 @@ mysql> CREATE DATABASE `datart` CHARACTER SET 'utf8' COLLATE 'utf8_general_ci';
    其它配置(选填):
     1. server.port(应用绑定端口地址,默认8080)
     2. server.address(应用绑定IP地址,默认 0.0.0.0)
-    3. datart.address(datart 外部可访问地址,默认http://127.0.0.1)
-    4. datart.send-mail(用户注册是否使用邮件激活,默认 false )
-    5. datart.webdriver-path(截图驱动)
+    3. yubi.address(yubi 外部可访问地址,默认http://127.0.0.1)
+    4. yubi.send-mail(用户注册是否使用邮件激活,默认 false )
+    5. yubi.webdriver-path(截图驱动)
 ```
 
 ## 2.4. 高级配置 (可选) : 配置文件位于 config/profiles/application-config.yml
@@ -133,9 +133,9 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://localhost:3306/datart?&allowMultiQueries=true
-    username: datart
-    password: datart123
+    url: jdbc:mysql://localhost:3306/yubi?&allowMultiQueries=true
+    username: yubi
+    password: yubi123
 
   # mail config  is a aliyum email example 
   mail:
@@ -174,7 +174,7 @@ server:
     mime-types: application/javascript,application/json,application/xml,text/html,text/xml,text/plain,text/css,image/*
 
 # 配置服务端访问地址，创建分享，激活/邀请用户时，将使用这个地址作为服务端访问地址。 对外有域名的情况下可使用域名 
-datart:
+yubi:
   server:
     address: http://youip:youport
 
@@ -185,7 +185,7 @@ datart:
 
   security:
     token:
-      secret: "d@a$t%a^r&a*t" #加密密钥
+      secret: "y@u$b%i^s&e*c" #加密密钥
       timeout-min: 30  # 登录会话有效时长，单位：分钟。
 
   env:

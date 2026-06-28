@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +57,10 @@ import { TreeControllerForm } from './Controller/TreeController';
 
 type ControllerSubmitScalar = ControllerValue | undefined;
 type ControllerSubmitRange = [ControllerSubmitScalar?, ControllerSubmitScalar?];
-type ControllerSubmitValue = ControllerSubmitScalar | ControllerValues | ControllerSubmitRange;
+type ControllerSubmitValue =
+  | ControllerSubmitScalar
+  | ControllerValues
+  | ControllerSubmitRange;
 type ControllerSubmitForm = {
   value?: ControllerSubmitValue;
 };

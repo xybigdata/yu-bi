@@ -5,11 +5,11 @@
 #  identifier-quote: "`"
 #  driver-class: "com.example.jdbc.Driver" # optional
 #  url-prefix: "jdbc:example://" # optional
-#  sql-dialect: "datart.data.provider.calcite.dialect.ExampleSqlDialectSupport"  # optional
+#  sql-dialect: "yubi.data.provider.calcite.dialect.ExampleSqlDialectSupport"  # optional
 #  identifier-end-quote: "`"  # optional
 #  literal-end-quote: "'"  # optional
 #  identifier-escaped-quote: "`"  # optional
-#  adapter-class: 'datart.data.provider.jdbc.adapters.ExampleDataProviderAdapter'  # optional
+#  adapter-class: 'yubi.data.provider.jdbc.adapters.ExampleDataProviderAdapter'  # optional
 #  quote-identifiers: true  # optional
 #  support-sql-limit: true  # optional
 #
@@ -20,9 +20,9 @@ IMPALA:
   driver-class: "com.cloudera.impala.jdbc41.Driver"
   literal-quote: "'"
   identifier-quote: "`"
-  adapter-class: "datart.data.provider.jdbc.adapters.ImpalaDataProviderAdapter"
+  adapter-class: "yubi.data.provider.jdbc.adapters.ImpalaDataProviderAdapter"
   url-prefix: "jdbc:impala://"
-  sql-dialect: "datart.data.provider.calcite.dialect.ImpalaSqlDialectSupport"
+  sql-dialect: "yubi.data.provider.calcite.dialect.ImpalaSqlDialectSupport"
 
 
 ORACLE:
@@ -34,7 +34,7 @@ DORIS:
   driver-class: "com.mysql.cj.jdbc.Driver"
   literal-quote: "'"
   identifier-quote: "`"
-  adapter-class: "datart.data.provider.jdbc.adapters.DorisDataProviderAdapter"
+  adapter-class: "yubi.data.provider.jdbc.adapters.DorisDataProviderAdapter"
   url-prefix: "jdbc:mysql://"
 
 STARROCKS:
@@ -43,7 +43,7 @@ STARROCKS:
   driver-class: "com.mysql.cj.jdbc.Driver"
   literal-quote: "'"
   identifier-quote: "`"
-  adapter-class: "datart.data.provider.jdbc.adapters.StarRocksDataProviderAdapter"
+  adapter-class: "yubi.data.provider.jdbc.adapters.StarRocksDataProviderAdapter"
   url-prefix: "jdbc:mysql://"
 
 

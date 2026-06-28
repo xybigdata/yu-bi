@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +42,7 @@ import {
   transformToDataSet,
 } from 'app/utils/chartHelper';
 import { precisionCalculation } from 'app/utils/number';
-import { CalculationType, DATARTSEPERATOR } from 'globalConstants';
+import { CalculationType, YUBISEPERATOR } from 'globalConstants';
 import { darken, getLuminance, lighten } from 'polished';
 import { SyntheticEvent } from 'react';
 import { Debugger } from 'utils/debugger';
@@ -99,14 +100,14 @@ class BasicTableChart extends ReactChart {
   config = Config;
   selectionManager?: ChartSelectionManager;
 
-  protected rowNumberUniqKey = `@datart@rowNumberKey`;
+  protected rowNumberUniqKey = `@yubi@rowNumberKey`;
 
   private utilCanvas;
   private dataColumnWidths: DataColumnWidthMap = {};
   private tablePadding = 16;
   private tableCellBorder = 1;
   private cachedAntTableOptions?: BasicTableOptions;
-  private cachedDatartConfig: ChartConfig = {};
+  private cachedYuBiConfig: ChartConfig = {};
   private cacheContext: BrokerContext | null = null;
   private showSummaryRow = false;
   private totalWidth = 0;
@@ -168,7 +169,7 @@ class BasicTableChart extends ReactChart {
           // this.cachedAntTableOptions = Omit(tableOptions, ['dataSource']);
           this.cachedAntTableOptions = { ...tableOptions };
         }
-        this.cachedDatartConfig = options.config!;
+        this.cachedYuBiConfig = options.config!;
         this.cacheContext = context;
         this.adapter?.updated(tableOptions, context);
       },
@@ -178,7 +179,7 @@ class BasicTableChart extends ReactChart {
 
   public onUnMount(options: BrokerOption, context: BrokerContext) {
     this.cachedAntTableOptions = undefined;
-    this.cachedDatartConfig = {};
+    this.cachedYuBiConfig = {};
     this.cacheContext = null;
     this.selectionManager?.removeWindowListeners(context.window);
   }
@@ -197,8 +198,8 @@ class BasicTableChart extends ReactChart {
       this.cachedAntTableOptions,
       {
         ...this.getAntdTableStyleOptions(
-          this.cachedDatartConfig?.styles,
-          this.cachedDatartConfig?.settings!,
+          this.cachedYuBiConfig?.styles,
+          this.cachedYuBiConfig?.settings!,
           context,
         ),
       },
@@ -293,8 +294,8 @@ class BasicTableChart extends ReactChart {
       },
       rowClassName: (_, index) => {
         return index % 2 === 0
-          ? 'datart-basic-table-odd'
-          : 'datart-basic-table-even';
+          ? 'yubi-basic-table-odd'
+          : 'yubi-basic-table-even';
       },
       tableStyleConfig: this.getTableStyle(styleConfigs, settingConfigs),
     };
@@ -435,7 +436,7 @@ class BasicTableChart extends ReactChart {
                 )
               );
             }
-            if (k === `${DATARTSEPERATOR}id` || !index) {
+            if (k === `${YUBISEPERATOR}id` || !index) {
               return context?.translator?.('viz.palette.graph.summary');
             }
             return null;
@@ -869,7 +870,7 @@ class BasicTableChart extends ReactChart {
     const rowNumbers: TableColumnsList[] = enableRowNumber
       ? [
           {
-            key: `${DATARTSEPERATOR}id`,
+            key: `${YUBISEPERATOR}id`,
             title: context?.translator?.('viz.palette.graph.number'),
             width:
               this.dataColumnWidths?.[this.rowNumberUniqKey]

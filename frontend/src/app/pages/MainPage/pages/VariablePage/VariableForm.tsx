@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +21,7 @@ import { Checkbox, Form, FormInstance, Input, Radio } from 'antd';
 import { ModalForm, ModalFormProps } from 'app/components';
 import { DateFormat } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { toDatartDayjsList } from 'app/utils/date';
+import { toYuBiDayjsList } from 'app/utils/date';
 import { fetchCheckName } from 'app/utils/fetch';
 import { debouncePromise } from 'utils/debouncePromise';
 import { DEFAULT_DEBOUNCE_WAIT } from 'globalConstants';
@@ -78,7 +79,7 @@ export const VariableForm = memo(
             editingVariable.defaultValue,
           );
           if (valueType === VariableValueTypes.Date && !expression) {
-            defaultValue = toDatartDayjsList(defaultValue);
+            defaultValue = toYuBiDayjsList(defaultValue);
           }
           setType(type);
           setValueType(valueType);

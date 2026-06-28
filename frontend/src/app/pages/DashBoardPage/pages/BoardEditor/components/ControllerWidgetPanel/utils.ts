@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +29,7 @@ import {
 } from 'app/pages/DashBoardPage/constants';
 import { VariableValueTypes } from 'app/pages/MainPage/pages/VariablePage/constants';
 import { RelationFilterValue } from 'app/types/ChartConfig';
-import {
-  DatartDateLike,
-  formatDatartDate,
-  toDatartDayjs,
-} from 'app/utils/date';
+import { YuBiDateLike, formatYuBiDate, toYuBiDayjs } from 'app/utils/date';
 import { FilterSqlOperator, TIME_FORMATTER } from 'globalConstants';
 import i18next from 'i18next';
 import { CloneValueDeep } from 'utils/object';
@@ -64,12 +61,12 @@ const toRangeNumber = (value: NumberValue | undefined) => {
   return undefined;
 };
 
-type FormattableDateValue = Exclude<DatartDateLike, string | Date> & {
+type FormattableDateValue = Exclude<YuBiDateLike, string | Date> & {
   format: (template?: string) => string;
 };
 
 const isFormattableDateValue = (
-  value: DatartDateLike | null | undefined,
+  value: YuBiDateLike | null | undefined,
 ): value is FormattableDateValue => {
   return !!value && typeof value === 'object' && 'format' in value;
 };
@@ -162,14 +159,14 @@ export const formatControlDateToDayjs = (config: ControllerConfig) => {
     const filterDate = config.controllerDate;
     if (filterDate.startTime && filterDate.startTime.exactValue) {
       if (typeof filterDate.startTime.exactValue === 'string') {
-        config.controllerDate.startTime.exactValue = toDatartDayjs(
+        config.controllerDate.startTime.exactValue = toYuBiDayjs(
           filterDate.startTime.exactValue,
         );
       }
     }
     if (filterDate.endTime && filterDate.endTime.exactValue) {
       if (typeof filterDate.endTime.exactValue === 'string') {
-        config.controllerDate.endTime!.exactValue = toDatartDayjs(
+        config.controllerDate.endTime!.exactValue = toYuBiDayjs(
           filterDate.endTime.exactValue,
         );
       }
@@ -183,7 +180,7 @@ export const formatControlDateToStr = (config: ControllerConfig) => {
     const filterDate = config.controllerDate;
     if (filterDate.startTime && filterDate.startTime.exactValue) {
       if (isFormattableDateValue(filterDate.startTime.exactValue)) {
-        config.controllerDate.startTime.exactValue = formatDatartDate(
+        config.controllerDate.startTime.exactValue = formatYuBiDate(
           filterDate.startTime.exactValue,
           TIME_FORMATTER,
         );
@@ -191,7 +188,7 @@ export const formatControlDateToStr = (config: ControllerConfig) => {
     }
     if (filterDate.endTime && filterDate.endTime.exactValue) {
       if (isFormattableDateValue(filterDate.endTime.exactValue)) {
-        config.controllerDate.endTime!.exactValue = formatDatartDate(
+        config.controllerDate.endTime!.exactValue = formatYuBiDate(
           filterDate.endTime.exactValue,
           TIME_FORMATTER,
         );
@@ -353,14 +350,14 @@ export const filterValueTypeByControl = (
 
 export const formatDateByPickType = (
   pickerType: PickerType,
-  dateTime: DatartDateLike | null | undefined,
+  dateTime: YuBiDateLike | null | undefined,
 ) => {
   const formatTemp = TIME_FORMATTER;
   if (!dateTime) {
     return null;
   }
 
-  const dateValue = toDatartDayjs(dateTime);
+  const dateValue = toYuBiDayjs(dateTime);
   if (!dateValue) {
     return null;
   }

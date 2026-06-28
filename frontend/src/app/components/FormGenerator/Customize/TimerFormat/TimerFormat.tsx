@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +107,7 @@ export const TimerFormat: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
             <Select
               ref={selectRef}
               mode="tags"
-              className="datart-ant-select"
+              className="yubi-ant-select"
               maxTagCount={1}
               value={value.format}
               onChange={changeF}
@@ -123,7 +124,7 @@ export const TimerFormat: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
           <Group>
             <InputNumber
               value={value.duration}
-              className="datart-ant-input-number"
+              className="yubi-ant-input-number"
               onChange={changeD}
             />
           </Group>
@@ -135,10 +136,10 @@ export const TimerFormat: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
 const Wrap = styled.div`
   display: block;
 
-  .datart-ant-select {
+  .yubi-ant-select {
     flex: 1;
   }
-  .datart-ant-input-number {
+  .yubi-ant-input-number {
     flex: 1;
   }
 `;

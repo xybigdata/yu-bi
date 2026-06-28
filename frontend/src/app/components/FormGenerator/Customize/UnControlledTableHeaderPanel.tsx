@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +33,7 @@ import {
   getColumnRenderName,
   getUnusedHeaderRows,
 } from 'app/utils/chartHelper';
-import { DATARTSEPERATOR } from 'globalConstants';
+import { YUBISEPERATOR } from 'globalConstants';
 import { FC, memo, useState } from 'react';
 import styled from 'styled-components';
 import { CloneValueDeep } from 'utils/object';
@@ -98,10 +99,10 @@ const UnControlledTableHeaderPanel: FC<ItemLayoutProps<ChartStyleConfig>> =
 
       const mergeSameLineageAncesterRows = lineageRowUids => {
         const allRowKeys = lineageRowUids.map((lr: string[]) =>
-          lr.join(DATARTSEPERATOR),
+          lr.join(YUBISEPERATOR),
         );
         return lineageRowUids.reduce((acc, next) => {
-          const key = next.join(DATARTSEPERATOR);
+          const key = next.join(YUBISEPERATOR);
           if (
             allRowKeys.some(k => k.includes(key) && k.length !== key.length)
           ) {
@@ -128,8 +129,8 @@ const UnControlledTableHeaderPanel: FC<ItemLayoutProps<ChartStyleConfig>> =
         return rowAncestors
           .map(ra => ra.slice(0, ancestorGeneration + 1))
           .reduce((acc, next) => {
-            const key = next.join(DATARTSEPERATOR);
-            const allRowKeys = acc.map(lr => lr.join(DATARTSEPERATOR));
+            const key = next.join(YUBISEPERATOR);
+            const allRowKeys = acc.map(lr => lr.join(YUBISEPERATOR));
             if (allRowKeys.includes(key)) {
               return acc;
             }
@@ -174,7 +175,7 @@ const UnControlledTableHeaderPanel: FC<ItemLayoutProps<ChartStyleConfig>> =
         const selectedRows = rows.filter(r => mergeKeys.includes(r.uid!));
         const restRows = rows.filter(r => !mergeKeys.includes(r.uid!));
         const insertIndex = rows.findIndex(r => r.uid === mergeKeys[0]);
-        const groupRowUid = selectedRows.map(d => d.uid).join(DATARTSEPERATOR);
+        const groupRowUid = selectedRows.map(d => d.uid).join(YUBISEPERATOR);
         const groupRow = {
           uid: groupRowUid,
           colName: groupRowUid,

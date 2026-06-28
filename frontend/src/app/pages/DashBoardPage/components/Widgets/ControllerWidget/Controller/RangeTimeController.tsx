@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +19,7 @@
 import { DatePicker, Form } from 'antd';
 import { PickerType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import { formatDateByPickType } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/utils';
-import { DatartDayjs, toDatartDayjsRange } from 'app/utils/date';
+import { YuBiDayjs, toYuBiDayjsRange } from 'app/utils/date';
 import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 const { RangePicker } = DatePicker;
@@ -66,7 +67,7 @@ const isDateTimePickerType = (
 export const RangeTimeController: React.FC<TimeSetProps> = memo(
   ({ pickerType, value, onChange }) => {
     const handleRangeChange = (
-      times: [DatartDayjs | null, DatartDayjs | null] | null,
+      times: [YuBiDayjs | null, YuBiDayjs | null] | null,
     ) => {
       if (!times) {
         onChange?.(null);
@@ -78,15 +79,14 @@ export const RangeTimeController: React.FC<TimeSetProps> = memo(
       ];
       onChange?.(newValues);
     };
-    const rangeValues = useMemo<[DatartDayjs | null, DatartDayjs | null] | null>(
-      () => {
-        if (!value || !Array.isArray(value)) {
-          return null;
-        }
-        return toDatartDayjsRange([value[0] ?? undefined, value[1] ?? undefined]);
-      },
-      [value],
-    );
+    const rangeValues = useMemo<
+      [YuBiDayjs | null, YuBiDayjs | null] | null
+    >(() => {
+      if (!value || !Array.isArray(value)) {
+        return null;
+      }
+      return toYuBiDayjsRange([value[0] ?? undefined, value[1] ?? undefined]);
+    }, [value]);
     return (
       <StyledWrap>
         {isDateTimePickerType(pickerType) ? (

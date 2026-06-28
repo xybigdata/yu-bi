@@ -125,7 +125,7 @@ describe('ChartManager Tests', () => {
     );
     const convertSpy = vi.spyOn(
       PluginChartLoader.prototype,
-      'convertToDatartChartModel',
+      'convertToYuBiChartModel',
     );
 
     definitionSpy.mockResolvedValueOnce([createPluginDefinition()]);
@@ -148,7 +148,7 @@ describe('ChartManager Tests', () => {
     );
     const convertSpy = vi.spyOn(
       PluginChartLoader.prototype,
-      'convertToDatartChartModel',
+      'convertToYuBiChartModel',
     );
 
     definitionSpy.mockResolvedValueOnce([
@@ -183,7 +183,7 @@ describe('ChartManager Tests', () => {
     );
     const convertSpy = vi.spyOn(
       PluginChartLoader.prototype,
-      'convertToDatartChartModel',
+      'convertToYuBiChartModel',
     );
 
     definitionSpy.mockResolvedValueOnce([
@@ -210,7 +210,7 @@ describe('ChartManager Tests', () => {
     );
     const convertSpy = vi.spyOn(
       PluginChartLoader.prototype,
-      'convertToDatartChartModel',
+      'convertToYuBiChartModel',
     );
 
     definitionSpy.mockResolvedValueOnce([

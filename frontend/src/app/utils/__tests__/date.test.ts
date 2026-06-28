@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +18,24 @@
  */
 
 import {
-  datartDayjs,
-  formatDatartDateRange,
-  formatDatartDateTime,
-  formatDatartDateTimeIfValid,
-  formatCurrentDatartDate,
-  formatCurrentDatartDateTime,
-  formatDatartDateIfValid,
-  getDatartDateAfter,
-  isDatartDayBeforeTodayEnd,
-  getDatartNow,
-  getDatartNowMillis,
-  toDatartDayjsList,
-  toDatartDayjsRange,
+  yubiDayjs,
+  formatYuBiDateRange,
+  formatYuBiDateTime,
+  formatYuBiDateTimeIfValid,
+  formatCurrentYuBiDate,
+  formatCurrentYuBiDateTime,
+  formatYuBiDateIfValid,
+  getYuBiDateAfter,
+  isYuBiDayBeforeTodayEnd,
+  getYuBiNow,
+  getYuBiNowMillis,
+  toYuBiDayjsList,
+  toYuBiDayjsRange,
 } from '../date';
 
-describe('toDatartDayjsRange', () => {
+describe('toYuBiDayjsRange', () => {
   test('should convert range values to dayjs tuple', () => {
-    const range = toDatartDayjsRange([
+    const range = toYuBiDayjsRange([
       '2024-01-01 00:00:00',
       '2024-01-02 00:00:00',
     ]);
@@ -48,7 +49,7 @@ describe('toDatartDayjsRange', () => {
   });
 
   test('should keep invalid entries as null', () => {
-    const range = toDatartDayjsRange(['invalid-date', '2024-01-02 00:00:00']);
+    const range = toYuBiDayjsRange(['invalid-date', '2024-01-02 00:00:00']);
 
     expect(range).toEqual([null, expect.anything()]);
     expect(range?.[1]?.format('YYYY-MM-DD HH:mm:ss')).toEqual(
@@ -57,17 +58,17 @@ describe('toDatartDayjsRange', () => {
   });
 
   test('should return null for empty input', () => {
-    expect(toDatartDayjsRange()).toBeNull();
-    expect(toDatartDayjsRange(null)).toBeNull();
+    expect(toYuBiDayjsRange()).toBeNull();
+    expect(toYuBiDayjsRange(null)).toBeNull();
   });
 
   test('should preserve dayjs inputs without reparsing string output', () => {
     const utcRange = [
-      datartDayjs.utc('2024-01-01 08:00:00'),
-      datartDayjs.utc('2024-01-02 08:00:00'),
+      yubiDayjs.utc('2024-01-01 08:00:00'),
+      yubiDayjs.utc('2024-01-02 08:00:00'),
     ] as const;
 
-    const range = toDatartDayjsRange(utcRange);
+    const range = toYuBiDayjsRange(utcRange);
 
     expect(range?.[0]?.toISOString()).toBe(utcRange[0].toISOString());
     expect(range?.[1]?.toISOString()).toBe(utcRange[1].toISOString());
@@ -75,9 +76,9 @@ describe('toDatartDayjsRange', () => {
   });
 });
 
-describe('toDatartDayjsList', () => {
+describe('toYuBiDayjsList', () => {
   test('should convert valid values and filter invalid values', () => {
-    const values = toDatartDayjsList([
+    const values = toYuBiDayjsList([
       '2024-01-01 00:00:00',
       'invalid-date',
       '2024-01-02 00:00:00',
@@ -90,15 +91,15 @@ describe('toDatartDayjsList', () => {
   });
 
   test('should return empty list for empty input', () => {
-    expect(toDatartDayjsList()).toEqual([]);
-    expect(toDatartDayjsList(null)).toEqual([]);
+    expect(toYuBiDayjsList()).toEqual([]);
+    expect(toYuBiDayjsList(null)).toEqual([]);
   });
 
   test('should preserve valid dayjs and date inputs', () => {
-    const utcValue = datartDayjs.utc('2024-01-01 08:00:00');
-    const nativeDate = datartDayjs.utc('2024-01-03T08:00:00.000Z').toDate();
+    const utcValue = yubiDayjs.utc('2024-01-01 08:00:00');
+    const nativeDate = yubiDayjs.utc('2024-01-03T08:00:00.000Z').toDate();
 
-    const values = toDatartDayjsList([utcValue, nativeDate]);
+    const values = toYuBiDayjsList([utcValue, nativeDate]);
 
     expect(values).toHaveLength(2);
     expect(values[0].toISOString()).toBe(utcValue.toISOString());
@@ -107,43 +108,43 @@ describe('toDatartDayjsList', () => {
   });
 });
 
-describe('formatDatartDateIfValid', () => {
+describe('formatYuBiDateIfValid', () => {
   test('should format valid values', () => {
     expect(
-      formatDatartDateIfValid('2024-01-01 00:00:00', 'YYYY-MM-DD HH:mm:ss'),
+      formatYuBiDateIfValid('2024-01-01 00:00:00', 'YYYY-MM-DD HH:mm:ss'),
     ).toEqual('2024-01-01 00:00:00');
   });
 
   test('should return undefined for invalid values', () => {
     expect(
-      formatDatartDateIfValid('invalid-date', 'YYYY-MM-DD HH:mm:ss'),
+      formatYuBiDateIfValid('invalid-date', 'YYYY-MM-DD HH:mm:ss'),
     ).toBeUndefined();
-    expect(formatDatartDateIfValid()).toBeUndefined();
+    expect(formatYuBiDateIfValid()).toBeUndefined();
   });
 });
 
 describe('standard datetime helpers', () => {
   test('should format value with standard datetime template', () => {
-    expect(formatDatartDateTime('2024-01-01 00:00:00')).toEqual(
+    expect(formatYuBiDateTime('2024-01-01 00:00:00')).toEqual(
       '2024-01-01 00:00:00',
     );
   });
 
   test('should format current value with standard datetime template', () => {
-    expect(formatCurrentDatartDateTime()).toMatch(
+    expect(formatCurrentYuBiDateTime()).toMatch(
       /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
     );
   });
 
   test('should return undefined for invalid standard datetime values', () => {
-    expect(formatDatartDateTimeIfValid('invalid-date')).toBeUndefined();
+    expect(formatYuBiDateTimeIfValid('invalid-date')).toBeUndefined();
   });
 });
 
-describe('formatDatartDateRange', () => {
+describe('formatYuBiDateRange', () => {
   test('should format range values and keep empty entries undefined', () => {
     expect(
-      formatDatartDateRange(
+      formatYuBiDateRange(
         ['2024-01-01 00:00:00', undefined],
         'YYYY-MM-DD HH:mm:ss',
       ),
@@ -151,28 +152,26 @@ describe('formatDatartDateRange', () => {
   });
 
   test('should return undefined tuple for empty input', () => {
-    expect(formatDatartDateRange()).toEqual([undefined, undefined]);
-    expect(formatDatartDateRange(null)).toEqual([undefined, undefined]);
+    expect(formatYuBiDateRange()).toEqual([undefined, undefined]);
+    expect(formatYuBiDateRange(null)).toEqual([undefined, undefined]);
   });
 });
 
-describe('isDatartDayBeforeTodayEnd', () => {
+describe('isYuBiDayBeforeTodayEnd', () => {
   test('should detect dates before end of today', () => {
-    expect(isDatartDayBeforeTodayEnd(getDatartNow().subtract(1, 'day'))).toBe(
-      true,
-    );
+    expect(isYuBiDayBeforeTodayEnd(getYuBiNow().subtract(1, 'day'))).toBe(true);
   });
 
   test('should ignore dates after today and invalid inputs', () => {
-    expect(isDatartDayBeforeTodayEnd(getDatartNow().add(1, 'day'))).toBe(false);
-    expect(isDatartDayBeforeTodayEnd('invalid-date')).toBe(false);
+    expect(isYuBiDayBeforeTodayEnd(getYuBiNow().add(1, 'day'))).toBe(false);
+    expect(isYuBiDayBeforeTodayEnd('invalid-date')).toBe(false);
   });
 });
 
-describe('current datart time helpers', () => {
+describe('current yubi time helpers', () => {
   test('should return current dayjs and milliseconds consistently', () => {
-    const now = getDatartNow();
-    const nowMillis = getDatartNowMillis();
+    const now = getYuBiNow();
+    const nowMillis = getYuBiNowMillis();
 
     expect(typeof nowMillis).toBe('number');
     expect(now.isValid()).toBe(true);
@@ -180,18 +179,18 @@ describe('current datart time helpers', () => {
   });
 
   test('should format current time with template', () => {
-    expect(formatCurrentDatartDate('YYYY-MM-DD HH:mm:ss')).toMatch(
+    expect(formatCurrentYuBiDate('YYYY-MM-DD HH:mm:ss')).toMatch(
       /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
     );
   });
 
   test('should create date after current time offset', () => {
-    const nowMillis = getDatartNowMillis();
-    const expiresAt = getDatartDateAfter(1500);
+    const nowMillis = getYuBiNowMillis();
+    const expiresAt = getYuBiDateAfter(1500);
 
     expect(expiresAt).toBeInstanceOf(Date);
     expect(
-      Math.abs(datartDayjs(expiresAt).valueOf() - (nowMillis + 1500)),
+      Math.abs(yubiDayjs(expiresAt).valueOf() - (nowMillis + 1500)),
     ).toBeLessThan(1000);
   });
 });

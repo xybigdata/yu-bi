@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +29,7 @@ import { ChartDataConfig, ChartDataSectionField } from 'app/types/ChartConfig';
 import { ChartDataRequest } from 'app/types/ChartDataRequest';
 import ChartDataView from 'app/types/ChartDataView';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
-import { datartDayjs } from 'app/utils/date';
+import { yubiDayjs } from 'app/utils/date';
 import { getChartDrillOption } from 'app/utils/internalChartHelper';
 import { FilterSqlOperator, RECOMMEND_TIME } from 'globalConstants';
 import { ChartDataRequestBuilder } from '../ChartDataRequestBuilder';
@@ -853,7 +854,7 @@ describe('ChartDataRequestBuild Test', () => {
     const pageInfo = {};
     const enableScript = false;
     const enableAggregation = true;
-    const today = datartDayjs().format('YYYY-MM-DD');
+    const today = yubiDayjs().format('YYYY-MM-DD');
 
     const builder = new ChartDataRequestBuilder(
       dataView,
@@ -1154,7 +1155,7 @@ describe('ChartDataRequestBuild Test', () => {
     const pageInfo = {};
     const enableScript = false;
     const enableAggregation = true;
-    const today = datartDayjs().format('YYYY-MM-DD');
+    const today = yubiDayjs().format('YYYY-MM-DD');
 
     const builder = new ChartDataRequestBuilder(
       dataView,

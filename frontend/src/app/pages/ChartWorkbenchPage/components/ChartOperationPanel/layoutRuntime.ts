@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +33,11 @@ type LayoutModelLike = {
 };
 
 const normalizeLayoutSize = (value: unknown) => {
-  if (typeof value !== 'number' || Number.isNaN(value) || !Number.isFinite(value)) {
+  if (
+    typeof value !== 'number' ||
+    Number.isNaN(value) ||
+    !Number.isFinite(value)
+  ) {
     return 0;
   }
 

@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +23,7 @@ import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import ChartFilterCondition, {
   ConditionBuilder,
 } from 'app/models/ChartFilterCondition';
-import { formatCurrentDatartDateTime } from 'app/utils/date';
+import { formatCurrentYuBiDateTime } from 'app/utils/date';
 import { FilterSqlOperator, RECOMMEND_TIME } from 'globalConstants';
 import {
   forwardRef,
@@ -74,7 +75,7 @@ const DateConditionConfiguration: ForwardRefRenderFunction<
         .asRecommendTime();
       onConditionChange?.(filter);
     } else if (conditionType === FilterConditionType.RangeTime) {
-      const currentTime = formatCurrentDatartDateTime();
+      const currentTime = formatCurrentYuBiDateTime();
       const filterRow = new ConditionBuilder(condition)
         .setValue([currentTime, currentTime])
         .asRangeTime();

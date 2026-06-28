@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,7 +208,9 @@ export const RC0 = (widget?: Widget) => {
   }
   const dataChartConfig = widget.config.content?.dataChart?.config;
   const configVersion =
-    typeof dataChartConfig === 'string' ? dataChartConfig : dataChartConfig?.version;
+    typeof dataChartConfig === 'string'
+      ? dataChartConfig
+      : dataChartConfig?.version;
   if (!versionCanDo(APP_VERSION_RC_0, configVersion)) {
     return widget;
   }

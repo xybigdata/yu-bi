@@ -1,8 +1,10 @@
-# Welcome👏
+# Welcome
 
-**This folder host plugins charts, you can put plugin-charts here, then it will auto detect.**
+**This folder hosts plugin charts, you can put plugin-charts here, then it will auto detect.**
 
-## Resouce
+## Resource
+
+Plugin charts originally from the datart project by running-elephant:
 
 [Github Plugin Charts Repository] <https://github.com/running-elephant/datart-extension-charts>
 

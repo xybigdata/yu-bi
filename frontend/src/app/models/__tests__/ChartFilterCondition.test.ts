@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -281,9 +282,7 @@ describe('ChartFilterCondition value helpers', () => {
   });
 
   test('should recognize relation filter value arrays', () => {
-    expect(
-      isRelationFilterValues([{ key: 'key', label: 'label' }]),
-    ).toBe(true);
+    expect(isRelationFilterValues([{ key: 'key', label: 'label' }])).toBe(true);
     expect(isRelationFilterValues([{ key: 'key' }])).toBe(false);
   });
 
@@ -291,9 +290,7 @@ describe('ChartFilterCondition value helpers', () => {
     expect(isFilterConditionValue(null)).toBe(true);
     expect(isFilterConditionValue('value')).toBe(true);
     expect(isFilterConditionValue([1, null])).toBe(true);
-    expect(
-      isFilterConditionValue([{ key: 'key', label: 'label' }]),
-    ).toBe(true);
+    expect(isFilterConditionValue([{ key: 'key', label: 'label' }])).toBe(true);
     expect(isFilterConditionValue([{ unit: 'd', amount: 1 }])).toBe(true);
     expect(isFilterConditionValue({ filter: 'name', value: 'a' })).toBe(true);
     expect(isFilterConditionValue({ unexpected: true })).toBe(false);

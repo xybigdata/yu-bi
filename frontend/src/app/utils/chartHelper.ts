@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +69,7 @@ import {
   NumberUnitKey,
   NumericUnitDescriptions,
 } from 'globalConstants';
-import { formatDatartDate } from './date';
+import { formatYuBiDate } from './date';
 import { Debugger } from 'utils/debugger';
 import {
   CloneValueDeep,
@@ -343,7 +344,7 @@ function dateFormater(value, config?: FormatFieldAction[FieldFormatType.Date]) {
     return value;
   }
 
-  return formatDatartDate(value, config?.format);
+  return formatYuBiDate(value, config?.format);
 }
 
 /**
@@ -1479,9 +1480,7 @@ export function isMatchRequirement(
 }
 
 // 获取是否展示刻度
-export const getIntervalShow = (
-  interval?: number | string | null,
-): boolean =>
+export const getIntervalShow = (interval?: number | string | null): boolean =>
   interval !== 'auto' && interval !== null;
 
 // 判断overflow 条件是否已生效

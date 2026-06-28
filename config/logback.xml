@@ -9,7 +9,7 @@
             <charset>UTF-8</charset>
         </encoder>
     </appender>
-    <appender name="error_db_appender" class="datart.core.log.AccessLogAppender">
+    <appender name="error_db_appender" class="yubi.core.log.AccessLogAppender">
     </appender>
 
     <appender name="root" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -39,10 +39,10 @@
         <appender-ref ref="root" />
     </root>
 
-    <logger name="datart.data.provider.jdbc.adapters" level="${SQL_LEVEL}" addtivity="false">
+    <logger name="yubi.data.provider.jdbc.adapters" level="${SQL_LEVEL}" addtivity="false">
         <appender-ref ref="sql"/>
     </logger>
-    <logger name="datart.data.provider.local.LocalDB" level="${SQL_LEVEL}" addtivity="false">
+    <logger name="yubi.data.provider.local.LocalDB" level="${SQL_LEVEL}" addtivity="false">
         <appender-ref ref="sql"/>
     </logger>
 

@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,7 +115,10 @@ const ChartPresentPanel: FC<{
     const renderReusableChartContainer = () => {
       const style = {
         width: containerWidth,
-        height: getStableContainerSize(containerHeight, CHART_TYPE_SELECTOR_HEIGHT_OFFSET + CHART_DRILL_PATH_HEIGHT),
+        height: getStableContainerSize(
+          containerHeight,
+          CHART_TYPE_SELECTOR_HEIGHT_OFFSET + CHART_DRILL_PATH_HEIGHT,
+        ),
       };
 
       const containerId = chart?.isISOContainer

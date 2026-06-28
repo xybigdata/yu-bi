@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +27,7 @@ import type {
   WidgetToolkit,
 } from 'app/pages/DashBoardPage/types/widgetTypes';
 import { getJsonConfigs } from 'app/pages/DashBoardPage/utils';
-import { getDatartNowMillis } from 'app/utils/date';
+import { getYuBiNowMillis } from 'app/utils/date';
 import { WHITE } from 'styles/StyleConstants';
 import { uuidv4 } from 'utils/utils';
 import {
@@ -185,7 +186,7 @@ export const widgetToolkit: TabToolkit = {
     const content: TabWidgetContent = {
       itemMap: {
         [newTabId]: {
-          index: getDatartNowMillis(),
+          index: getYuBiNowMillis(),
           tabId: newTabId,
           name: 'tab',
           childWidgetId: '',

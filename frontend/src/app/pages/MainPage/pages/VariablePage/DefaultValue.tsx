@@ -1,7 +1,8 @@
 /**
- * Datart
+ * YuBi
  *
- * Copyright 2021
+ * Copyright 2021 (originally Datart by running-elephant)
+ * Copyright 2024-2026 YuBi Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +30,7 @@ import {
 } from 'antd';
 import { DateFormat } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { formatDatartDate, toDatartDayjs } from 'app/utils/date';
+import { formatYuBiDate, toYuBiDayjs } from 'app/utils/date';
 import { ChangeEvent, memo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { SPACE, SPACE_TIMES } from 'styles/StyleConstants';
@@ -96,12 +97,9 @@ export const DefaultValue = memo(
       saveValue(validValue);
     }, [type, inputValue, saveValue]);
 
-    const saveRegular = useCallback(
-      () => {
-        saveCurrentInput();
-      },
-      [saveCurrentInput],
-    );
+    const saveRegular = useCallback(() => {
+      saveCurrentInput();
+    }, [saveCurrentInput]);
 
     const saveSelectedValue = useCallback(
       (selectedValue?: VariableDefaultValueItem | null) => {
@@ -163,7 +161,7 @@ export const DefaultValue = memo(
             format={resolvedDateFormat}
             className="input"
             disabled={!!disabled}
-            value={toDatartDayjs(inputValue)}
+            value={toYuBiDayjs(inputValue)}
             onChange={datePickerConfirm}
             showNow
             showTime={showDateTime}
@@ -202,7 +200,7 @@ export const DefaultValue = memo(
                   const label =
                     type !== VariableValueTypes.Date
                       ? String(val)
-                      : formatDatartDate(val as string, resolvedDateFormat);
+                      : formatYuBiDate(val as string, resolvedDateFormat);
                   return (
                     <Tag
                       key={label}

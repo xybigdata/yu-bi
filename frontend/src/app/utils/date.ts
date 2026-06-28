@@ -13,8 +13,8 @@ dayjs.extend(quarterOfYear);
 dayjs.extend(utc);
 dayjs.extend(weekday);
 
-export type DatartDayjs = Dayjs;
-export type DatartDateLike =
+export type YuBiDayjs = Dayjs;
+export type YuBiDateLike =
   | Dayjs
   | Date
   | number
@@ -24,32 +24,32 @@ export type DatartDateLike =
       toString: () => string;
     };
 
-export const datartDayjs = dayjs;
+export const yubiDayjs = dayjs;
 
-const isDatartDayjs = (value: unknown): value is Dayjs => dayjs.isDayjs(value);
+const isYuBiDayjs = (value: unknown): value is Dayjs => dayjs.isDayjs(value);
 
-export function setDatartDayjsLocale(locale: string) {
+export function setYuBiDayjsLocale(locale: string) {
   dayjs.locale(locale);
 }
 
-export function getDatartNow() {
-  return datartDayjs();
+export function getYuBiNow() {
+  return yubiDayjs();
 }
 
-export function getDatartNowMillis() {
-  return getDatartNow().valueOf();
+export function getYuBiNowMillis() {
+  return getYuBiNow().valueOf();
 }
 
-export function getDatartDateAfter(offsetMillis: number) {
-  return getDatartNow().add(offsetMillis, 'millisecond').toDate();
+export function getYuBiDateAfter(offsetMillis: number) {
+  return getYuBiNow().add(offsetMillis, 'millisecond').toDate();
 }
 
-export function toDatartDayjs(value?: DatartDateLike | null) {
+export function toYuBiDayjs(value?: YuBiDateLike | null) {
   if (!value) {
     return null;
   }
 
-  if (isDatartDayjs(value)) {
+  if (isYuBiDayjs(value)) {
     return value.isValid() ? value.clone() : null;
   }
 
@@ -64,68 +64,59 @@ export function toDatartDayjs(value?: DatartDateLike | null) {
   return dayValue.isValid() ? dayValue : null;
 }
 
-export function toDatartDayjsRange(
-  values?:
-    | readonly [DatartDateLike?, DatartDateLike?]
-    | DatartDateLike[]
-    | null,
-): [DatartDayjs | null, DatartDayjs | null] | null {
+export function toYuBiDayjsRange(
+  values?: readonly [YuBiDateLike?, YuBiDateLike?] | YuBiDateLike[] | null,
+): [YuBiDayjs | null, YuBiDayjs | null] | null {
   if (!values || !Array.isArray(values)) {
     return null;
   }
 
-  return [toDatartDayjs(values[0]), toDatartDayjs(values[1])];
+  return [toYuBiDayjs(values[0]), toYuBiDayjs(values[1])];
 }
 
-export function toDatartDayjsList(
-  values?: readonly DatartDateLike[] | DatartDateLike[] | null,
-): DatartDayjs[] {
+export function toYuBiDayjsList(
+  values?: readonly YuBiDateLike[] | YuBiDateLike[] | null,
+): YuBiDayjs[] {
   if (!values || !Array.isArray(values)) {
     return [];
   }
 
   return values
-    .map(value => toDatartDayjs(value))
-    .filter((value): value is DatartDayjs => value !== null);
+    .map(value => toYuBiDayjs(value))
+    .filter((value): value is YuBiDayjs => value !== null);
 }
 
-export function formatDatartDate(
-  value?: DatartDateLike | null,
-  template?: string,
-) {
-  const dayValue = toDatartDayjs(value);
+export function formatYuBiDate(value?: YuBiDateLike | null, template?: string) {
+  const dayValue = toYuBiDayjs(value);
   return dayValue ? dayValue.format(template) : 'Invalid date';
 }
 
-export function formatCurrentDatartDate(template?: string) {
-  return formatDatartDate(getDatartNow(), template);
+export function formatCurrentYuBiDate(template?: string) {
+  return formatYuBiDate(getYuBiNow(), template);
 }
 
-export function formatDatartDateTime(value?: DatartDateLike | null) {
-  return formatDatartDate(value, TIME_FORMATTER);
+export function formatYuBiDateTime(value?: YuBiDateLike | null) {
+  return formatYuBiDate(value, TIME_FORMATTER);
 }
 
-export function formatCurrentDatartDateTime() {
-  return formatCurrentDatartDate(TIME_FORMATTER);
+export function formatCurrentYuBiDateTime() {
+  return formatCurrentYuBiDate(TIME_FORMATTER);
 }
 
-export function formatDatartDateIfValid(
-  value?: DatartDateLike | null,
+export function formatYuBiDateIfValid(
+  value?: YuBiDateLike | null,
   template?: string,
 ) {
-  const dayValue = toDatartDayjs(value);
+  const dayValue = toYuBiDayjs(value);
   return dayValue ? dayValue.format(template) : undefined;
 }
 
-export function formatDatartDateTimeIfValid(value?: DatartDateLike | null) {
-  return formatDatartDateIfValid(value, TIME_FORMATTER);
+export function formatYuBiDateTimeIfValid(value?: YuBiDateLike | null) {
+  return formatYuBiDateIfValid(value, TIME_FORMATTER);
 }
 
-export function formatDatartDateRange(
-  values?:
-    | readonly [DatartDateLike?, DatartDateLike?]
-    | DatartDateLike[]
-    | null,
+export function formatYuBiDateRange(
+  values?: readonly [YuBiDateLike?, YuBiDateLike?] | YuBiDateLike[] | null,
   template?: string,
 ) {
   if (!values || !Array.isArray(values)) {
@@ -133,12 +124,12 @@ export function formatDatartDateRange(
   }
 
   return [
-    formatDatartDateIfValid(values[0], template),
-    formatDatartDateIfValid(values[1], template),
+    formatYuBiDateIfValid(values[0], template),
+    formatYuBiDateIfValid(values[1], template),
   ] as const;
 }
 
-export function isDatartDayBeforeTodayEnd(value?: DatartDateLike | null) {
-  const dayValue = toDatartDayjs(value);
-  return !!dayValue && dayValue.isBefore(getDatartNow().endOf('day'));
+export function isYuBiDayBeforeTodayEnd(value?: YuBiDateLike | null) {
+  const dayValue = toYuBiDayjs(value);
+  return !!dayValue && dayValue.isBefore(getYuBiNow().endOf('day'));
 }
