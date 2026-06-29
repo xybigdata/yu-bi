@@ -17,28 +17,25 @@
  * limitations under the License.
  */
 
-package yubi.security.manager.shiro;
+package yubi.security.manager;
 
 import yubi.core.entity.RelRoleResource;
 import yubi.core.entity.Role;
 import yubi.core.mappers.ext.RelRoleResourceMapperExt;
 import yubi.core.mappers.ext.RoleMapperExt;
 import yubi.security.base.RoleType;
-import yubi.security.manager.AuthorizationAssembler;
-import yubi.security.manager.AuthorizationCache;
-import yubi.security.manager.PermissionStringCodec;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class ShiroAuthorizationAssembler implements AuthorizationAssembler {
+public class DefaultAuthorizationAssembler implements AuthorizationAssembler {
 
     private final RoleMapperExt roleMapper;
 
     private final RelRoleResourceMapperExt rrrMapper;
 
-    public ShiroAuthorizationAssembler(RoleMapperExt roleMapper, RelRoleResourceMapperExt rrrMapper) {
+    public DefaultAuthorizationAssembler(RoleMapperExt roleMapper, RelRoleResourceMapperExt rrrMapper) {
         this.roleMapper = roleMapper;
         this.rrrMapper = rrrMapper;
     }

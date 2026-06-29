@@ -18,8 +18,9 @@
  */
 package yubi.data.provider;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import yubi.core.base.consts.ValueType;
 import yubi.core.base.exception.BaseException;
 import yubi.core.base.exception.Exceptions;
@@ -43,7 +44,7 @@ public class ResponseJsonParser implements HttpResponseParser {
 
     private static final String PROPERTY_SPLIT = "\\.";
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder().build();
 
     @Override
     public Dataframe parseResponse(String targetPropertyName, ClassicHttpResponse response, List<Column> columns) throws IOException {
@@ -101,7 +102,7 @@ public class ResponseJsonParser implements HttpResponseParser {
         if (jsonObject == null || !jsonObject.isObject()) {
             return columns;
         }
-        jsonObject.fieldNames().forEachRemaining(key -> {
+        jsonObject.propertyNames().forEach(key -> {
             Column column = new Column();
             column.setName(key);
             Object val = nodeToValue(jsonObject.get(key));
@@ -119,7 +120,7 @@ public class ResponseJsonParser implements HttpResponseParser {
         if (valueNode == null || valueNode.isNull() || valueNode.isMissingNode()) {
             return null;
         }
-        if (valueNode.isContainerNode()) {
+        if (valueNode.isArray() || valueNode.isObject()) {
             return valueNode.toString();
         }
         if (valueNode.isTextual()) {

@@ -4,6 +4,7 @@ import { defineConfig, type Plugin } from 'vite';
 import svgr from 'vite-plugin-svgr';
 
 import {
+  createBabelPlugin,
   createReactPlugin,
   createVendorManualChunks,
   createViteAliases,
@@ -70,6 +71,7 @@ export default defineConfig(({ mode }) => ({
   publicDir: 'public',
   plugins: [
     createReactPlugin(),
+    createBabelPlugin(),
     svgr(),
     customChartPluginsMiddleware(),
     shareHtmlFallback(),

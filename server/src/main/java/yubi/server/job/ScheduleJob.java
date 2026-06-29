@@ -1,8 +1,8 @@
 package yubi.server.job;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import yubi.core.base.consts.AttachmentType;
 import yubi.core.base.consts.FileOwner;
 import yubi.core.common.Application;
@@ -48,11 +48,9 @@ public abstract class ScheduleJob implements Job, Closeable {
 
     public static final String SCHEDULE_KEY = "SCHEDULE_KEY";
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    static {
-        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
 
     protected Schedule schedule;
 
@@ -178,7 +176,7 @@ public abstract class ScheduleJob implements Job, Closeable {
 
     public abstract void doSend() throws Exception;
 
-    private ScheduleJobConfig parseConfig(Schedule schedule) throws JsonProcessingException {
+    private ScheduleJobConfig parseConfig(Schedule schedule) {
         if (StringUtils.isBlank(schedule.getConfig())) {
             return null;
         }

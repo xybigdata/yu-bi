@@ -1,8 +1,9 @@
 package yubi.data.provider;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.json.JsonMapper;
 import yubi.core.base.exception.Exceptions;
 import yubi.core.common.FileUtils;
 import yubi.core.common.MessageResolver;
@@ -284,9 +285,10 @@ public class JdbcDataProvider extends DataProvider {
 
         private static List<JdbcDriverInfo> loadDriverInfoFromResource() {
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE);
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            ObjectMapper objectMapper = JsonMapper.builder()
+                    .propertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE)
+                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                    .build();
 
             //Build in database types
             Map<String, Map<String, String>> buildIn = loadYml(JDBC_DRIVER_BUILD_IN);

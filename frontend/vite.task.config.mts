@@ -3,7 +3,11 @@ import path from 'path';
 import { defineConfig, type Plugin } from 'vite';
 import svgr from 'vite-plugin-svgr';
 
-import { createReactPlugin, createViteAliases } from './vite.shared.mts';
+import {
+  createBabelPlugin,
+  createReactPlugin,
+  createViteAliases,
+} from './vite.shared.mts';
 
 const appRoot = __dirname;
 const srcRoot = path.resolve(appRoot, 'src');
@@ -27,7 +31,7 @@ const syncTaskBundle = (): Plugin => ({
 
 export default defineConfig(({ mode }) => ({
   publicDir: false,
-  plugins: [createReactPlugin(), svgr(), syncTaskBundle()],
+  plugins: [createReactPlugin(), createBabelPlugin(), svgr(), syncTaskBundle()],
   resolve: {
     alias: createViteAliases(appRoot),
   },

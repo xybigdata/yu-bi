@@ -26,26 +26,23 @@ const ReactXYPlot = ({
   LineSeries,
   ...rest
 }) => {
-  class ReactXYPlot extends React.Component {
-    static displayName = 'PieDemo';
-
-    render() {
-      return (
-        <XYPlot width={300} height={300}>
-          <HorizontalGridLines />
-          <LineSeries
-            data={[
-              { x: 1, y: 10 },
-              { x: 2, y: 5 },
-              { x: 3, y: 15 },
-            ]}
-          />
-          <XAxis />
-          <YAxis />
-        </XYPlot>
-      );
-    }
+  function ReactXYPlotInner() {
+    return (
+      <XYPlot width={300} height={300}>
+        <HorizontalGridLines />
+        <LineSeries
+          data={[
+            { x: 1, y: 10 },
+            { x: 2, y: 5 },
+            { x: 3, y: 15 },
+          ]}
+        />
+        <XAxis />
+        <YAxis />
+      </XYPlot>
+    );
   }
-  return ReactXYPlot;
+  ReactXYPlotInner.displayName = 'PieDemo';
+  return ReactXYPlotInner;
 };
 export default ReactXYPlot;

@@ -1,8 +1,9 @@
 package yubi.server.common;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import yubi.core.base.exception.Exceptions;
 import yubi.core.common.JavascriptUtils;
 import yubi.server.base.params.DownloadCreateParam;
@@ -14,13 +15,11 @@ public class JsParserUtils {
 
     private static Invocable parser;
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
 
-    static {
-        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
-
-    public static DownloadCreateParam parseExecuteParam(String type, String json) throws ScriptException, NoSuchMethodException, JsonProcessingException {
+    public static DownloadCreateParam parseExecuteParam(String type, String json) throws ScriptException, NoSuchMethodException {
         Invocable parser = getParser();
         if (parser == null) {
             Exceptions.msg("param parser load error");

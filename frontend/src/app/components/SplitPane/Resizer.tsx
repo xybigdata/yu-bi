@@ -1,4 +1,4 @@
-import { Component, CSSProperties, MouseEvent, TouchEvent } from 'react';
+import { CSSProperties, MouseEvent, TouchEvent } from 'react';
 
 export const RESIZER_DEFAULT_CLASSNAME = 'Resizer';
 
@@ -14,52 +14,45 @@ interface ResizerProps {
   resizerClassName?: string;
 }
 
-export class Resizer extends Component<ResizerProps> {
-  static defaultProps = {
-    resizerClassName: RESIZER_DEFAULT_CLASSNAME,
-  };
+export function Resizer({
+  className,
+  onClick,
+  onDoubleClick,
+  onMouseDown,
+  onTouchEnd,
+  onTouchStart,
+  resizerClassName = RESIZER_DEFAULT_CLASSNAME,
+  split,
+  style,
+}: ResizerProps) {
+  const classes = [resizerClassName, split, className];
 
-  render() {
-    const {
-      className,
-      onClick,
-      onDoubleClick,
-      onMouseDown,
-      onTouchEnd,
-      onTouchStart,
-      resizerClassName,
-      split,
-      style,
-    } = this.props;
-    const classes = [resizerClassName, split, className];
-
-    return (
-      <span
-        role="presentation"
-        className={classes.join(' ')}
-        style={style}
-        onMouseDown={event => onMouseDown(event)}
-        onTouchStart={event => {
+  return (
+    <span
+      role="presentation"
+      className={classes.join(' ')}
+      style={style}
+      onMouseDown={event => onMouseDown(event)}
+      onTouchStart={event => {
+        event.preventDefault();
+        onTouchStart(event);
+      }}
+      onTouchEnd={event => {
+        event.preventDefault();
+        onTouchEnd(event);
+      }}
+      onClick={event => {
+        if (onClick) {
           event.preventDefault();
-          onTouchStart(event);
-        }}
-        onTouchEnd={event => {
+          onClick(event);
+        }
+      }}
+      onDoubleClick={event => {
+        if (onDoubleClick) {
           event.preventDefault();
-          onTouchEnd(event);
-        }}
-        onClick={event => {
-          if (onClick) {
-            event.preventDefault();
-            onClick(event);
-          }
-        }}
-        onDoubleClick={event => {
-          if (onDoubleClick) {
-            event.preventDefault();
-            onDoubleClick(event);
-          }
-        }}
-      />
-    );
-  }
+          onDoubleClick(event);
+        }
+      }}
+    />
+  );
 }

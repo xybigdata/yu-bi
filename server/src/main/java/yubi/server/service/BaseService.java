@@ -19,7 +19,8 @@
 
 package yubi.server.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import yubi.core.common.Application;
 import yubi.core.common.MessageResolver;
 import yubi.core.entity.BaseEntity;
@@ -34,7 +35,7 @@ import java.util.Map;
 
 public class BaseService extends MessageResolver {
 
-    protected static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    protected static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder().build();
 
     protected YuBiSecurityManager securityManager;
 

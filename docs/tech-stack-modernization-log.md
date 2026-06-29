@@ -155,7 +155,7 @@ Per Requirement 5.4, the following key dependencies were checked for TypeScript 
 
 - 分支：`refactor/tech-modernization`
 - 改造范围：Javassist 消除、Spring Boot 4.0.0 升级、Shiro → Spring Security 完全迁移、Ant Design 6 升级、pro-components 3.x 升级、TypeScript 7 评估、发布链路验证。
-- 问题背景：Spring Boot 3.5.15 已于 2026-06-30 EOL；Shiro 社区活跃度下降；Javassist 要求 JVM --add-opens 与 JDK 21 强封装冲突；AntD 5 接近 EOL。
+- 问题背景：Spring Boot 3.5.15 预计于 2026-06-30 EOL；Shiro 社区活跃度下降；Javassist 要求 JVM --add-opens 与 JDK 21 强封装冲突；AntD 5 接近 EOL。
 - 处理方案：通过 Kiro spec 工作流生成 39 个必需任务 + 5 个 optional property tests，按 16 波并行调度执行后端和前端改造。
 
 #### 后端改造详情 (Phase A)
@@ -269,3 +269,57 @@ Per Requirement 5.4, the following key dependencies were checked for TypeScript 
 - 验证结果：两项均通过；当前 chunk size 为 `raw=10237271,gzip=2913129`，仍低于总量 baseline `raw=10449413,gzip=2975481`。
 - 遗留问题：无。
 - 后续影响：体积门禁通过后可恢复合入 `main` 流程。
+
+
+### 合入远程 main 并推送
+
+- 分支：`main` (from `refactor/tech-modernization`)
+- 改造范围：分支合并与远程推送。
+- 问题背景：所有验证门禁（编译、测试、类型检查、体积基线、安装包、demo health）通过后，执行最终合入。
+- 处理方案：本地 `git merge --no-ff refactor/tech-modernization` 合入 `main`，`git push origin main` 推送远程。
+- 兼容性决策：合并方式使用 `--no-ff` 保留改造分支历史完整性。
+- 目标架构或组件版本是否发生调整：无。
+- 验证命令：`git log --oneline -5`
+- 验证结果：`main` 分支已包含全部现代化改造提交。
+- 遗留问题：Shiro 命名装配器重命名、Jackson 2 API 残留统一迁移列入后续计划。
+- 后续影响：远程 `main` 已为现代化后状态，后续开发基于此基线。
+
+
+## 2026-06-29
+
+### refactor/tech-modernization-part2 回顾补录
+
+- 分支：`refactor/tech-modernization-part2`
+- 改造范围：Spring Boot patch 升级（4.0.0→4.0.7）、Spring Cloud 2025.1.2、Springdoc 3.0.3；Jackson 3 收敛；前端依赖升级（monaco-editor 0.55.1、@vitejs/plugin-react 6.0.3、fast-check 4.x）；React class component 迁移（8 个文件）。
+- 问题背景：阶段 A+B+C 执行时 Spring Boot 停留在 4.0.0 初始版本，后续 patch 升级和 Jackson 业务代码迁移在 `refactor/tech-modernization-part2` 分支中完成，但日志未同步记录该轮改造内容。
+- 处理方案：
+  - **Boot patch 升级**：pom.xml parent 从 `spring-boot-starter-parent 4.0.0` 升至 `4.0.7`；Spring Cloud 从 `2025.1.0` 升至 `2025.1.2`；Springdoc 从 `3.0.0` 升至 `3.0.3`。
+  - **Jackson 3 收敛**：业务代码全部迁至 `tools.jackson.*`；注解保持 `com.fasterxml.jackson.annotation.*`（Jackson 3 设计如此，注解包路径未变）。
+  - **前端依赖升级**：monaco-editor 0.52.2→0.55.1、@vitejs/plugin-react 5→6.0.3、fast-check 3→4.x。
+  - **React class component 迁移**：8 个文件从 class component 迁移至 function component + hooks。
+- 兼容性决策：API、数据结构、运行配置不变；业务行为兼容；前端构建产物结构不变。
+- 目标架构或组件版本是否发生调整：Boot 目标从 4.0.0 提升至 4.0.7（patch）；Cloud 从 2025.1.0 提升至 2025.1.2；Springdoc 从 3.0.0 提升至 3.0.3。
+- 验证命令：`npm run checkTs`、`npm run test:ci`、`mvn compile`、`mvn test`、`bash ./scripts/check-demo-health.sh`。
+- 验证结果：**该轮验证属于先前实现回合（modernization-round-2 spec）的执行结果**——前端 1156 tests pass（168 files），后端 194 tests pass，demo health pass。本回合（modernization-round-2-fixes）未重新执行完整测试套件，此处引用先前结果作为基线。
+- 遗留问题：文档中版本号未同步更新（Boot 4.0.0→4.0.7 等），在 `modernization-round-2-fixes` 修正。
+- 后续影响：Boot patch 升级获得安全修复；Jackson 3 收敛消除业务代码中的 fasterxml/tools 共存；前端依赖就位为后续 TS 7 升级铺路。
+
+### modernization-round-2-fixes 修正
+
+- 分支：`refactor/tech-modernization-part2`
+- 改造范围：Split.tsx minSize 稳定性修复、SplitPane 死代码移除、文档修正（audit report + progress + log）。
+- 问题背景：代码审查发现三类缺陷——(1) Split.tsx `useEffect` 依赖 `minSize` 使用引用相等，父组件重渲染传入新数组引用（值相同）时触发不必要的 Split.js 实例销毁/重建；(2) 三份文档存在过时版本号和遗漏日志条目；(3) SplitPane/index.tsx 残留 `resizedRef` 死代码（写但从未读取）。
+- 处理方案：
+  - **Split.tsx minSize 稳定性**：引入 `useStableArray` 自定义 hook + `shallowArrayEqual` 工具函数，仅对 `minSize` 进行值级别比较并返回稳定引用；不稳定化 `maxSize` 或其他 props（保持原始 class component 的非对称比较语义）。在 effect 依赖数组和 effect body 中统一使用 `stableMinSize`。
+  - **SplitPane 死代码移除**：删除 `const resizedRef = useRef(false)` 声明及 `resizedRef.current = true` 写入。
+  - **文档修正**：audit report Boot 版本号纠正、已完成包标记、摘要表更新；progress 版本号和 Jackson 状态纠正；log 补录 part2 回顾和本轮条目。
+- 兼容性决策：
+  - `useStableArray` 仅应用于 `minSize`，`maxSize` 和其他 array/object props 继续使用引用相等（与原始 class component `componentDidUpdate` 行为一致）。
+  - 移除 `resizedRef` 不影响拖拽状态跟踪（`activeRef`、`positionRef`、`draggedSizeRef` 保持不变）。
+  - 文档修正不变更项目代码行为。
+- 目标架构或组件版本是否发生调整：无。
+- 验证命令：`git diff --check`、`npm run checkTs`、`npm run test:ci -- src/app/components/__tests__/Split.test.tsx src/app/components/__tests__/Split.minSize.test.tsx src/app/components/__tests__/Split.preservation.test.tsx src/app/components/__tests__/SplitPane.test.tsx`
+- 验证结果：`git diff --check` 通过；`npm run checkTs` 通过（0 errors）；Split/SplitPane 相关测试 4 个测试文件、24 tests passed。
+- 完整测试套件说明：本轮（modernization-round-2-fixes）**未重新执行** 1156 全量前端测试。完整测试套件的通过记录引用先前回合（refactor/tech-modernization-part2）的验证结果。本轮验证范围聚焦于 TypeScript 类型检查、Split/SplitPane 组件测试和空白/冲突检查。
+- 遗留问题：无（所有 scope 内缺陷已修正）。
+- 后续影响：Split.tsx 视觉稳定性改善（父组件重渲染不再导致 gutter 闪烁）；文档准确性恢复，后续开发者可信赖版本号和状态描述。

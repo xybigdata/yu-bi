@@ -1,8 +1,9 @@
 package yubi.server.common;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import yubi.core.base.consts.ValueType;
 import yubi.core.data.provider.Column;
 import yubi.core.data.provider.Dataframe;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PoiConvertUtils {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder().build();
 
     public static POISettings covertToPoiSetting(String chartConfigStr, Dataframe dataframe) {
         ChartConfigDTO chartConfigDTO = parseChartConfig(chartConfigStr);
@@ -149,7 +150,7 @@ public class PoiConvertUtils {
             try {
                 groupColumns = OBJECT_MAPPER.readValue(value, new TypeReference<List<ChartColumn>>() {
                 });
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 log.warn("parse table header group config failed, fallback to flat header.", e);
             }
         }
@@ -267,7 +268,7 @@ public class PoiConvertUtils {
         }
         try {
             return OBJECT_MAPPER.readValue(chartConfigStr, ChartConfigDTO.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("parse chart config failed, fallback to default export settings.", e);
             return new ChartConfigDTO();
         }

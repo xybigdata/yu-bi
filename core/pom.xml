@@ -62,16 +62,14 @@
             <version>${jjwt.version}</version>
             <scope>runtime</scope>
         </dependency>
+        <!-- jjwt-jackson transitively depends on Jackson 2 (com.fasterxml.jackson) at runtime.
+             This is acceptable as it only affects JWT token signing/verification,
+             not business JSON serialization which uses Jackson 3 (tools.jackson). -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
             <version>${jjwt.version}</version>
             <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
         </dependency>
 
 

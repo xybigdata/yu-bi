@@ -1,7 +1,8 @@
 package yubi.server.base.dto.chart;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import yubi.core.entity.poi.format.CurrencyFormat;
 import yubi.core.entity.poi.format.NumericFormat;
 import yubi.core.entity.poi.format.PercentageFormat;
@@ -16,7 +17,7 @@ import java.util.List;
 @Data
 public class ChartColumn {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder().build();
 
     private String uid = "";
 
