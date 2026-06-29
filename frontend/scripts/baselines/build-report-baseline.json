@@ -17,8 +17,8 @@
       },
       "files": 103,
       "rawOversized": [
-        "antdDesign.js",
         "monacoEditor.js",
+        "antdDesign.js",
         "echarts.js",
         "monacoBase.js",
         "antvG2.js",
@@ -27,8 +27,8 @@
       ],
       "gzipOversized": [],
       "oversized": [
-        "antdDesign.js",
         "monacoEditor.js",
+        "antdDesign.js",
         "echarts.js",
         "monacoBase.js",
         "antvG2.js",
@@ -37,38 +37,38 @@
       ],
       "categorySizes": {
         "runtime": {
-          "bytes": 2164164,
+          "bytes": 2160873,
           "files": 88,
-          "gzipBytes": 648181,
-          "gzipRatio": 0.2995,
-          "gzipSavingsBytes": 1515983
+          "gzipBytes": 646908,
+          "gzipRatio": 0.2994,
+          "gzipSavingsBytes": 1513965
         },
         "task": {
-          "bytes": 454870,
+          "bytes": 458604,
           "files": 1,
-          "gzipBytes": 85849,
-          "gzipRatio": 0.1887,
-          "gzipSavingsBytes": 369021
+          "gzipBytes": 86041,
+          "gzipRatio": 0.1876,
+          "gzipSavingsBytes": 372563
         },
         "vendor": {
-          "bytes": 7830801,
+          "bytes": 8990311,
           "files": 14,
-          "gzipBytes": 2241477,
-          "gzipRatio": 0.2862,
-          "gzipSavingsBytes": 5589324
+          "gzipBytes": 2527440,
+          "gzipRatio": 0.2811,
+          "gzipSavingsBytes": 6462871
         }
       },
       "size": {
-        "bytes": 10449413,
-        "gzipBytes": 2975481,
-        "gzipRatio": 0.2848,
-        "gzipSavingsBytes": 7473932
+        "bytes": 11609788,
+        "gzipBytes": 3260389,
+        "gzipRatio": 0.2808,
+        "gzipSavingsBytes": 8349399
       }
     },
     "asset": {
       "categoryCounts": {
         "all": {
-          "asset": 4,
+          "asset": 5,
           "geo": 2
         },
         "gzipOversized": {},
@@ -79,7 +79,7 @@
           "geo": 2
         }
       },
-      "files": 6,
+      "files": 7,
       "rawOversized": [
         "geo-china-city.map.json",
         "geo-china.map.json"
@@ -91,11 +91,11 @@
       ],
       "categorySizes": {
         "asset": {
-          "bytes": 102063,
-          "files": 4,
-          "gzipBytes": 80285,
-          "gzipRatio": 0.7866,
-          "gzipSavingsBytes": 21778
+          "bytes": 224035,
+          "files": 5,
+          "gzipBytes": 139460,
+          "gzipRatio": 0.6225,
+          "gzipSavingsBytes": 84575
         },
         "geo": {
           "bytes": 1789554,
@@ -106,10 +106,10 @@
         }
       },
       "size": {
-        "bytes": 1891617,
-        "gzipBytes": 989624,
-        "gzipRatio": 0.5232,
-        "gzipSavingsBytes": 901993
+        "bytes": 2013589,
+        "gzipBytes": 1048799,
+        "gzipRatio": 0.5209,
+        "gzipSavingsBytes": 964790
       }
     }
   }

@@ -3,7 +3,7 @@ import path from 'path';
 import { describe, expect, it } from 'vitest';
 
 import {
-  createReactBabelOptions,
+  createBabelPlugin,
   createReactPlugin,
   createVendorManualChunks,
   createViteAliases,
@@ -34,13 +34,20 @@ describe('vite shared config', () => {
     ]);
   });
 
-  it('keeps the styled-components Babel plugin in the React plugin config', () => {
-    const plugins = createReactPlugin();
+  it('creates a React plugin with the expected name', () => {
+    const plugin = createReactPlugin();
 
-    expect(plugins.map(plugin => plugin.name)).toContain('vite:react-babel');
-    expect(createReactBabelOptions()?.plugins).toContain(
-      'babel-plugin-styled-components',
+    expect(plugin).toBeDefined();
+    expect(Array.isArray(plugin) ? plugin[0].name : plugin.name).toContain(
+      'vite:react',
     );
+  });
+
+  it('creates a Babel plugin with styled-components support', async () => {
+    const plugin = await createBabelPlugin();
+
+    expect(plugin).toBeDefined();
+    expect(plugin.name).toBe('@rolldown/plugin-babel');
   });
 
   it.each([

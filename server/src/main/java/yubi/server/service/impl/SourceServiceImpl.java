@@ -20,8 +20,8 @@
 package yubi.server.service.impl;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.ObjectNode;
 import yubi.core.base.consts.Const;
 import yubi.core.base.consts.FileOwner;
 import yubi.core.base.exception.Exceptions;

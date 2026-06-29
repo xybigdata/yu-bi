@@ -1,4 +1,4 @@
-import { CSSProperties, LegacyRef, PureComponent, ReactNode } from 'react';
+import { CSSProperties, memo, ReactNode, RefCallback } from 'react';
 
 interface PaneProps {
   className: string;
@@ -6,44 +6,40 @@ interface PaneProps {
   size?: string | number;
   split?: 'vertical' | 'horizontal';
   style?: CSSProperties;
-  eleRef: LegacyRef<HTMLDivElement>;
+  eleRef: RefCallback<HTMLDivElement>;
 }
 
-export class Pane extends PureComponent<PaneProps> {
-  render() {
-    const {
-      children,
-      className,
-      split,
-      style: styleProps,
-      size,
-      eleRef,
-    } = this.props;
+export const Pane = memo(function Pane({
+  children,
+  className,
+  split,
+  style: styleProps,
+  size,
+  eleRef,
+}: PaneProps) {
+  const classes = ['Pane', split, className];
 
-    const classes = ['Pane', split, className];
+  let style: CSSProperties = {
+    flex: 1,
+    position: 'relative',
+    outline: 'none',
+  };
 
-    let style: CSSProperties = {
-      flex: 1,
-      position: 'relative',
-      outline: 'none',
-    };
-
-    if (size !== undefined) {
-      if (split === 'vertical') {
-        style.width = size;
-      } else {
-        style.height = size;
-        style.display = 'flex';
-      }
-      style.flex = 'none';
+  if (size !== undefined) {
+    if (split === 'vertical') {
+      style.width = size;
+    } else {
+      style.height = size;
+      style.display = 'flex';
     }
-
-    style = Object.assign({}, style, styleProps || {});
-
-    return (
-      <div ref={eleRef} className={classes.join(' ')} style={style}>
-        {children}
-      </div>
-    );
+    style.flex = 'none';
   }
-}
+
+  style = Object.assign({}, style, styleProps || {});
+
+  return (
+    <div ref={eleRef} className={classes.join(' ')} style={style}>
+      {children}
+    </div>
+  );
+});

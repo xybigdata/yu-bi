@@ -1,7 +1,7 @@
 package yubi.server.base.dto.chart;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.JsonNodeFactory;
 import lombok.Data;
 
 @Data

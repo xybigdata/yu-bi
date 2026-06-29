@@ -17,20 +17,18 @@
  * limitations under the License.
  */
 
-package yubi.security.manager.shiro;
+package yubi.security.manager;
 
 import yubi.core.entity.User;
 import yubi.core.mappers.ext.UserMapperExt;
-import yubi.security.manager.AuthenticationAssembler;
-import yubi.security.manager.AuthenticationCache;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ShiroAuthenticationAssembler implements AuthenticationAssembler {
+public class DefaultAuthenticationAssembler implements AuthenticationAssembler {
 
     private final UserMapperExt userMapper;
 
-    public ShiroAuthenticationAssembler(UserMapperExt userMapper) {
+    public DefaultAuthenticationAssembler(UserMapperExt userMapper) {
         this.userMapper = userMapper;
     }
 

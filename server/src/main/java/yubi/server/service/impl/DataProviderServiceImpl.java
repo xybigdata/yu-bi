@@ -19,9 +19,11 @@
 
 package yubi.server.service.impl;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import yubi.core.base.PageInfo;
 import yubi.core.base.consts.Const;
 import yubi.core.base.consts.ValueType;
@@ -90,8 +92,9 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
 
     @PostConstruct
     public void init() {
-        objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper = JsonMapper.builder()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .build();
     }
 
     @Override
@@ -480,7 +483,7 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
         return schema;
     }
 
-    private String[] parseColumnNames(JsonNode item, String fallbackName) throws IOException {
+    private String[] parseColumnNames(JsonNode item, String fallbackName) {
         JsonNode nameNode = item.get("name");
         if (nameNode == null || nameNode.isNull()) {
             return new String[]{fallbackName};
@@ -493,7 +496,7 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
                     if (nestedArray.isArray()) {
                         return objectMapper.convertValue(nestedArray, String[].class);
                     }
-                } catch (IOException ignored) {
+                } catch (JacksonException ignored) {
                     // 历史数据里这里既可能是 JSON 数组字符串，也可能只是普通列名。
                 }
                 return new String[]{nameString};

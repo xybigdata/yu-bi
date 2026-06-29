@@ -47,7 +47,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -241,21 +240,11 @@ public class ShareServiceImpl extends BaseService implements ShareService {
     }
 
     private String writeRoles(Set<String> roles) {
-        try {
-            return OBJECT_MAPPER.writeValueAsString(roles);
-        } catch (IOException e) {
-            Exceptions.e(e);
-        }
-        return null;
+        return OBJECT_MAPPER.writeValueAsString(roles);
     }
 
     private List<String> readRoles(String roles) {
-        try {
-            return OBJECT_MAPPER.readerForListOf(String.class).readValue(roles);
-        } catch (IOException e) {
-            Exceptions.e(e);
-        }
-        return Collections.emptyList();
+        return OBJECT_MAPPER.readerForListOf(String.class).readValue(roles);
     }
 
     @Override

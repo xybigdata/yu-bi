@@ -21,17 +21,17 @@ import type * as Monaco from 'monaco-editor';
 
 type MonacoModule = typeof Monaco;
 type MonacoSqlLanguageModule =
-  typeof import('monaco-editor/esm/vs/basic-languages/sql/sql');
+  typeof import('monaco-editor/esm/vs/basic-languages/sql/sql.js');
 
 let monacoPromise: Promise<MonacoModule> | null = null;
 let sqlLanguagePromise: Promise<void> | null = null;
 let javascriptLanguagePromise: Promise<void> | null = null;
 let monacoLoader: () => Promise<MonacoModule> = () =>
-  import('monaco-editor/esm/vs/editor/editor.api');
+  import('monaco-editor/esm/vs/editor/editor.api.js');
 let monacoSqlLanguageLoader: () => Promise<MonacoSqlLanguageModule> = () =>
-  import('monaco-editor/esm/vs/basic-languages/sql/sql');
+  import('monaco-editor/esm/vs/basic-languages/sql/sql.js');
 let monacoJavascriptLanguageLoader: () => Promise<unknown> = () =>
-  import('monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution');
+  import('monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.js');
 
 export const MONACO_COMPLETION_ITEM_KIND_KEYWORD = 17;
 
@@ -92,11 +92,11 @@ export function __setMonacoJavascriptLanguageLoaderForTest(
 }
 
 export function __resetMonacoRuntimeLoadersForTest() {
-  monacoLoader = () => import('monaco-editor/esm/vs/editor/editor.api');
+  monacoLoader = () => import('monaco-editor/esm/vs/editor/editor.api.js');
   monacoSqlLanguageLoader = () =>
-    import('monaco-editor/esm/vs/basic-languages/sql/sql');
+    import('monaco-editor/esm/vs/basic-languages/sql/sql.js');
   monacoJavascriptLanguageLoader = () =>
-    import('monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution');
+    import('monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.js');
   monacoPromise = null;
   sqlLanguagePromise = null;
   javascriptLanguagePromise = null;

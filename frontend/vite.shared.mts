@@ -1,8 +1,7 @@
 import path from 'path';
-import react, {
-  type Options as ReactPluginOptions,
-} from '@vitejs/plugin-react';
-import type { AliasOptions } from 'vite';
+import react from '@vitejs/plugin-react';
+import babel from '@rolldown/plugin-babel';
+import type { AliasOptions, Plugin } from 'vite';
 
 const nodeModulePath = (packageName: string) => `/node_modules/${packageName}/`;
 
@@ -18,14 +17,12 @@ const isAntVModule = (id: string, packageName: string) =>
 const isMonacoEditorModule = (id: string, segment: string) =>
   id.includes(`/node_modules/monaco-editor/esm/vs/${segment}/`);
 
-export const createReactPlugin = () =>
-  react({
-    babel: createReactBabelOptions(),
-  });
+export const createReactPlugin = () => react();
 
-export const createReactBabelOptions = (): ReactPluginOptions['babel'] => ({
-  plugins: ['babel-plugin-styled-components'],
-});
+export const createBabelPlugin = (): Plugin =>
+  babel({
+    plugins: ['babel-plugin-styled-components'],
+  }) as Plugin;
 
 export const createViteAliases = (appRoot: string): AliasOptions => {
   const srcRoot = path.resolve(appRoot, 'src');

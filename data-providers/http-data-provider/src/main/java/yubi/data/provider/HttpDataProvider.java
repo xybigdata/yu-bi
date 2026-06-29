@@ -19,8 +19,9 @@
 
 package yubi.data.provider;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import yubi.core.common.MessageResolver;
 import yubi.core.common.UUIDGenerator;
 import yubi.core.data.provider.*;
@@ -71,12 +72,9 @@ public class HttpDataProvider extends DefaultDataProvider {
 
     private static final String I18N_PREFIX = "config.template.http.";
 
-    private final static ObjectMapper MAPPER;
-
-    static {
-        MAPPER = new ObjectMapper();
-        MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
+    private final static ObjectMapper MAPPER = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
 
     public HttpDataProvider() {
     }

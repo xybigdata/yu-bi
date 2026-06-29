@@ -19,7 +19,8 @@
 
 package yubi.server.job;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import yubi.core.common.Application;
 import yubi.core.common.TransactionHelper;
 import yubi.core.common.UUIDGenerator;
@@ -46,7 +47,7 @@ import java.util.Set;
 @Slf4j
 public class SchemaSyncJob implements Job, Closeable {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder().build();
 
     public static final String SOURCE_ID = "SOURCE_ID";
 

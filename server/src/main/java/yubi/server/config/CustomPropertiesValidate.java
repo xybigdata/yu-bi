@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.*;
 
+// TODO: Migrate from deprecated EnvironmentPostProcessor to ApplicationListener<ApplicationEnvironmentPreparedEvent> (Spring Boot 4.0+)
+@SuppressWarnings("removal")
 public class CustomPropertiesValidate implements EnvironmentPostProcessor {
 
     private static final String CONFIG_HOME = "config/yubi.conf";

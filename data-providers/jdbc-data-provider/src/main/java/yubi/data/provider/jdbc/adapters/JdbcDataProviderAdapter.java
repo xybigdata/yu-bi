@@ -19,8 +19,9 @@
 
 package yubi.data.provider.jdbc.adapters;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import yubi.core.base.PageInfo;
 import yubi.core.base.consts.ValueType;
 import yubi.core.base.exception.Exceptions;
@@ -58,7 +59,7 @@ import java.util.stream.Collectors;
 @Getter
 public class JdbcDataProviderAdapter implements Closeable {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder().build();
 
     private static final String SQL_DIALECT_PACKAGE = "yubi.data.provider.calcite.dialect";
 
@@ -187,7 +188,7 @@ public class JdbcDataProviderAdapter implements Closeable {
     private String writeAsJson(Object value) {
         try {
             return OBJECT_MAPPER.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             Exceptions.e(e);
         }
         return "";

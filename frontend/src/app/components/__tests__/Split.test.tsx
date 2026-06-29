@@ -155,4 +155,163 @@ describe('Split', () => {
     expect(container.textContent).toContain('left');
     expect(container.textContent).toContain('right');
   });
+
+  test('should call collapse when collapsed prop changes', async () => {
+    const splitInstance = {
+      collapse: vi.fn(),
+      destroy: vi.fn(),
+      getSizes: vi.fn(() => [50, 50]),
+      setSizes: vi.fn(),
+    };
+    const splitFactory = vi.fn(() => splitInstance);
+    runtimeMock.loadSplit.mockResolvedValue(splitFactory);
+
+    const { rerender } = render(
+      <Split sizes={[50, 50]} collapsed={0}>
+        <div>left</div>
+        <div>right</div>
+      </Split>,
+    );
+
+    await waitFor(() => {
+      expect(splitFactory).toHaveBeenCalledTimes(1);
+    });
+
+    // Initial collapse called during mount
+    expect(splitInstance.collapse).toHaveBeenCalledWith(0);
+    splitInstance.collapse.mockClear();
+
+    rerender(
+      <Split sizes={[50, 50]} collapsed={1}>
+        <div>left</div>
+        <div>right</div>
+      </Split>,
+    );
+
+    await waitFor(() => {
+      expect(splitInstance.collapse).toHaveBeenCalledWith(1);
+    });
+  });
+
+  test('should call setSizes when sizes prop changes', async () => {
+    const splitInstance = {
+      collapse: vi.fn(),
+      destroy: vi.fn(),
+      getSizes: vi.fn(() => [50, 50]),
+      setSizes: vi.fn(),
+    };
+    const splitFactory = vi.fn(() => splitInstance);
+    runtimeMock.loadSplit.mockResolvedValue(splitFactory);
+
+    const { rerender } = render(
+      <Split sizes={[50, 50]}>
+        <div>left</div>
+        <div>right</div>
+      </Split>,
+    );
+
+    await waitFor(() => {
+      expect(splitFactory).toHaveBeenCalledTimes(1);
+    });
+
+    splitInstance.setSizes.mockClear();
+
+    rerender(
+      <Split sizes={[30, 70]}>
+        <div>left</div>
+        <div>right</div>
+      </Split>,
+    );
+
+    await waitFor(() => {
+      expect(splitInstance.setSizes).toHaveBeenCalledWith([30, 70]);
+    });
+  });
+
+  test('should destroy and recreate split instance when minSize prop changes', async () => {
+    const splitInstance = {
+      collapse: vi.fn(),
+      destroy: vi.fn(),
+      getSizes: vi.fn(() => [50, 50]),
+      setSizes: vi.fn(),
+    };
+    const splitFactory = vi.fn(
+      (_elements: HTMLElement[], _options: Record<string, unknown>) =>
+        splitInstance,
+    );
+    runtimeMock.loadSplit.mockResolvedValue(splitFactory);
+
+    const { rerender } = render(
+      <Split sizes={[50, 50]} minSize={[100, 100]}>
+        <div>left</div>
+        <div>right</div>
+      </Split>,
+    );
+
+    await waitFor(() => {
+      expect(splitFactory).toHaveBeenCalledTimes(1);
+    });
+
+    rerender(
+      <Split sizes={[50, 50]} minSize={[200, 200]}>
+        <div>left</div>
+        <div>right</div>
+      </Split>,
+    );
+
+    await waitFor(() => {
+      expect(splitInstance.destroy).toHaveBeenCalled();
+      expect(splitFactory).toHaveBeenCalledTimes(2);
+    });
+
+    const [, options] = splitFactory.mock.calls[1];
+    expect(options.minSize).toEqual([200, 200]);
+  });
+
+  test('should recreate split instance when onDrag or onDragEnd callbacks change', async () => {
+    const splitInstance = {
+      collapse: vi.fn(),
+      destroy: vi.fn(),
+      getSizes: vi.fn(() => [50, 50]),
+      setSizes: vi.fn(),
+    };
+    const splitFactory = vi.fn(
+      (_elements: HTMLElement[], _options?: Record<string, unknown>) =>
+        splitInstance,
+    );
+    runtimeMock.loadSplit.mockResolvedValue(splitFactory);
+
+    const onDrag1 = vi.fn();
+    const onDragEnd1 = vi.fn();
+
+    const { rerender } = render(
+      <Split sizes={[50, 50]} onDrag={onDrag1} onDragEnd={onDragEnd1}>
+        <div>left</div>
+        <div>right</div>
+      </Split>,
+    );
+
+    await waitFor(() => {
+      expect(splitFactory).toHaveBeenCalledTimes(1);
+    });
+
+    const onDrag2 = vi.fn();
+    const onDragEnd2 = vi.fn();
+
+    rerender(
+      <Split sizes={[50, 50]} onDrag={onDrag2} onDragEnd={onDragEnd2}>
+        <div>left</div>
+        <div>right</div>
+      </Split>,
+    );
+
+    await waitFor(() => {
+      expect(splitInstance.destroy).toHaveBeenCalled();
+      expect(splitFactory).toHaveBeenCalledTimes(2);
+    });
+
+    const [, options] = splitFactory.mock.calls[1];
+    expect(options!.onDrag).toBe(onDrag2);
+    expect(options!.onDragEnd).toBe(onDragEnd2);
+  });
 });
