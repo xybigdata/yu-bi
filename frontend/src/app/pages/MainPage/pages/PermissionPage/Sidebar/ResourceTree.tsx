@@ -84,8 +84,10 @@ export const ResourceTree = memo(
         <Tree
           loading={loading}
           treeData={filteredData}
+          className="resource-tree"
           titleRender={renderTreeTitle}
           expandedKeys={expandedRowKeys}
+          showIcon={false}
           icon={false}
           onSelect={treeSelect}
           onExpand={onExpand}

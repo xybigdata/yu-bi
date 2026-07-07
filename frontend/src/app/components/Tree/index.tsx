@@ -158,6 +158,24 @@ const StyledDirectoryTree = styled(
       margin-top: 0;
     }
 
+    &.resource-tree {
+      .ant-tree-switcher {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: ${SPACE_TIMES(4)};
+        line-height: 38px;
+      }
+
+      .ant-tree-node-content-wrapper {
+        padding-left: ${SPACE};
+      }
+
+      .ant-tree-treenode {
+        padding-left: ${SPACE_XS};
+      }
+    }
+
     &.check-list {
       min-width: ${SPACE_TIMES(40)};
       padding: ${SPACE};

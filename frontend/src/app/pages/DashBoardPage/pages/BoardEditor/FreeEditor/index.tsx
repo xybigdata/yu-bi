@@ -19,6 +19,7 @@
 
 import { SplitPane } from 'app/components/SplitPane';
 import { WidgetActionContext } from 'app/pages/DashBoardPage/components/ActionProvider/WidgetActionProvider';
+import { dispatchResize } from 'app/utils/dispatchResize';
 import { memo, useContext } from 'react';
 import styled from 'styled-components';
 import { BoardToolBar } from '../components/BoardToolBar/BoardToolBar';
@@ -41,6 +42,8 @@ export const FreeEditor: React.FC = memo(() => {
         minSize={200}
         maxSize={400}
         pane2Style={{ minWidth: 0 }}
+        onChange={dispatchResize}
+        onDragFinished={dispatchResize}
       >
         <LayerTreePanel />
         <SplitPane
@@ -49,6 +52,8 @@ export const FreeEditor: React.FC = memo(() => {
           maxSize={400}
           primary="second"
           pane1Style={{ display: 'flex', minWidth: 0 }}
+          onChange={dispatchResize}
+          onDragFinished={dispatchResize}
         >
           <FreeBoardEditor />
           <SlideSetting />

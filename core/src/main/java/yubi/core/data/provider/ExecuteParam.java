@@ -74,7 +74,7 @@ public class ExecuteParam implements Serializable {
 
     public static ExecuteParam empty() {
         ExecuteParam executeParam = new ExecuteParam();
-        executeParam.setPageInfo(PageInfo.builder().pageNo(1).pageSize(Integer.MAX_VALUE).build());
+        executeParam.setPageInfo(PageInfo.builder().pageNo(1L).pageSize((long) Integer.MAX_VALUE).build());
         return executeParam;
     }
 

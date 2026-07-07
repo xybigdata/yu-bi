@@ -18,7 +18,8 @@
  */
 
 import { UploadOutlined } from '@ant-design/icons';
-import { Button, Form, FormInstance, Input, Upload } from 'antd';
+import { Button, Form, FormInstance, Input, message, Upload } from 'antd';
+import type { UploadProps } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { BASE_API_URL } from 'globalConstants';
 import { useCallback, useState } from 'react';
@@ -37,6 +38,19 @@ interface FileUploadProps {
 interface table {
   tableName?: string;
 }
+
+export const getDatasourceFileUploadError = (
+  response?: Partial<APIResponse<string>>,
+) => response?.message || response?.exception;
+
+export const isDatasourceFileUploading = (status?: string) =>
+  status === 'uploading';
+
+export const isDatasourceFileUploadSettled = (status?: string) =>
+  status === 'done' || status === 'error' || status === 'removed';
+
+export const getDatasourceFileUploadAction = (sourceId?: string) =>
+  `${BASE_API_URL}/files/datasource?sourceId=${sourceId || ''}`;
 
 export function FileUpload({
   form,
@@ -66,11 +80,17 @@ export function FileUpload({
     [tg],
   );
 
-  const beforeUpload = useCallback(
+  const beforeUpload: UploadProps['beforeUpload'] = useCallback(
     file => {
+      if (!sourceId) {
+        message.error(t('form.saveSourceBeforeUpload'));
+        setUploadFileLoading(false);
+        return Upload.LIST_IGNORE;
+      }
+
       const tableName = form?.getFieldValue('config')?.tableName;
       if (tableName) {
-        return;
+        return true;
       }
 
       const fileName = file.name.substring(0, file.name.lastIndexOf('.'));
@@ -81,18 +101,25 @@ export function FileUpload({
           tableName: uniqueTableName,
         },
       });
+      return true;
     },
-    [dataTables, form, getUniqueName],
+    [dataTables, form, getUniqueName, sourceId, t],
   );
 
-  const uploadChange = useCallback(
+  const uploadChange: UploadProps['onChange'] = useCallback(
     async ({ file }) => {
+      if (isDatasourceFileUploading(file.status)) {
+        setUploadFileLoading(true);
+        return;
+      }
+
       if (file.status === 'done') {
+        setUploadFileLoading(false);
         const format = file.name
           .substr(file.name.lastIndexOf('.') + 1)
           .toUpperCase();
-        const response = file.response as APIResponse<string>;
-        if (response.success) {
+        const response = file.response as APIResponse<string> | undefined;
+        if (response?.success) {
           form &&
             form.setFieldsValue({
               config: {
@@ -101,13 +128,25 @@ export function FileUpload({
               },
             });
           onTest && onTest();
+        } else {
+          message.error(
+            getDatasourceFileUploadError(response) || t('form.uploadFailed'),
+          );
         }
+        return;
+      }
+
+      if (file.status === 'error') {
         setUploadFileLoading(false);
-      } else {
-        setUploadFileLoading(true);
+        message.error(t('form.uploadFailed'));
+        return;
+      }
+
+      if (isDatasourceFileUploadSettled(file.status)) {
+        setUploadFileLoading(false);
       }
     },
-    [form, onTest],
+    [form, onTest, t],
   );
 
   return (
@@ -120,16 +159,17 @@ export function FileUpload({
         <Upload
           accept=".xlsx,.xls,.csv"
           method="post"
-          action={`${BASE_API_URL}/files/datasource/?sourceId=${sourceId}`}
+          action={getDatasourceFileUploadAction(sourceId)}
           headers={{ authorization: getToken()! }}
           showUploadList={false}
           beforeUpload={beforeUpload}
           onChange={uploadChange}
-          disabled={uploadFileLoading || loading}
+          disabled={loading}
         >
           <Button
             icon={<UploadOutlined />}
             loading={uploadFileLoading || loading}
+            disabled={loading}
           >
             {t('form.selectFile')}
           </Button>

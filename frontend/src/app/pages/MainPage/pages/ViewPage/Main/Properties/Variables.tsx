@@ -409,8 +409,17 @@ export const Variables = memo(() => {
 
 const ListWrapper = styled.div`
   flex: 1;
-  padding-bottom: ${SPACE_MD};
+  padding: 0 ${SPACE_MD} ${SPACE_MD};
   overflow-y: auto;
+
+  .ant-list-item {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .ant-list-item-meta {
+    min-width: 0;
+  }
 
   .query {
     color: ${p => p.theme.info};

@@ -24,7 +24,11 @@ import {
 } from '@ant-design/icons';
 import { Menu, MenuProps, message, Popconfirm, TreeDataNode } from 'antd';
 import { Popup, Tree, TreeTitle } from 'app/components';
-import { MenuItemContent } from 'app/components/Popup/MenuListItem';
+import {
+  MenuItemContent,
+  TREE_MORE_MENU_ITEM_CLASS,
+  TREE_MORE_MENU_POPUP_CLASS,
+} from 'app/components/Popup/MenuListItem';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
@@ -158,7 +162,10 @@ export const Recycle = memo(({ sourceId, list }: RecycleProps) => {
         {
           key: 'reset',
           label: (
-            <MenuItemContent prefix={<ReloadOutlined className="icon" />}>
+            <MenuItemContent
+              className={TREE_MORE_MENU_ITEM_CLASS}
+              prefix={<ReloadOutlined className="icon" />}
+            >
               {t('restore')}
             </MenuItemContent>
           ),
@@ -166,7 +173,10 @@ export const Recycle = memo(({ sourceId, list }: RecycleProps) => {
         {
           key: 'delete',
           label: (
-            <MenuItemContent prefix={<DeleteOutlined className="icon" />}>
+            <MenuItemContent
+              className={TREE_MORE_MENU_ITEM_CLASS}
+              prefix={<DeleteOutlined className="icon" />}
+            >
               <Popconfirm title={t('sureToDelete')} onConfirm={del(key)}>
                 {t('delete')}
               </Popconfirm>
@@ -182,6 +192,7 @@ export const Recycle = memo(({ sourceId, list }: RecycleProps) => {
             <Popup
               trigger={['click']}
               placement="bottomRight"
+              overlayClassName={TREE_MORE_MENU_POPUP_CLASS}
               content={
                 <Menu
                   prefixCls="ant-dropdown-menu"

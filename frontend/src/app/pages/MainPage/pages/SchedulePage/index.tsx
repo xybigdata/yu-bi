@@ -57,7 +57,8 @@ export function SchedulePage() {
         sizes={sizes}
         minSize={[256, 0]}
         maxSize={[768, Infinity]}
-        gutterSize={0}
+        gutterSize={8}
+        onDrag={setSizes}
         onDragStart={siderDragStart}
         onDragEnd={siderDragEnd}
         className="yubi-split"

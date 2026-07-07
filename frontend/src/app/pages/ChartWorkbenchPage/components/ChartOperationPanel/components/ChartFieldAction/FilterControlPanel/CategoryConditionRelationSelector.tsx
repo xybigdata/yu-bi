@@ -26,6 +26,12 @@ import ChartFilterCondition, {
 import { FilterSqlOperator } from 'globalConstants';
 import debounce from 'lodash/debounce';
 import { FC, memo, useCallback, useState } from 'react';
+import styled from 'styled-components';
+import {
+  FILTER_CONDITION_OPERATOR_WIDTH,
+  FILTER_CONDITION_TOTAL_WIDTH,
+  FILTER_CONDITION_VALUE_WIDTH,
+} from './layout';
 
 const CategoryConditionRelationSelector: FC<{
   condition?: ChartFilterCondition;
@@ -53,6 +59,7 @@ const CategoryConditionRelationSelector: FC<{
   const renderRelationSelector = () => {
     return (
       <Select
+        className="filter-condition-operator-select"
         value={condition?.operator}
         onChange={op => {
           setInputValue('');
@@ -90,10 +97,11 @@ const CategoryConditionRelationSelector: FC<{
   };
 
   return (
-    <Space>
+    <StyledCategoryConditionRelationSelector>
       {condition?.operator !== FilterSqlOperator.Null &&
         condition?.operator !== FilterSqlOperator.NotNull && (
           <Input
+            className="filter-condition-input"
             addonBefore={renderRelationSelector()}
             value={inputValue}
             onChange={e => {
@@ -105,8 +113,59 @@ const CategoryConditionRelationSelector: FC<{
       {(condition?.operator === FilterSqlOperator.Null ||
         condition?.operator === FilterSqlOperator.NotNull) &&
         renderRelationSelector()}
-    </Space>
+    </StyledCategoryConditionRelationSelector>
   );
 });
 
 export default CategoryConditionRelationSelector;
+
+const StyledCategoryConditionRelationSelector = styled(Space)`
+  width: ${FILTER_CONDITION_TOTAL_WIDTH}px;
+
+  .filter-condition-input {
+    width: ${FILTER_CONDITION_TOTAL_WIDTH}px;
+
+    .ant-input-group-addon {
+      width: ${FILTER_CONDITION_OPERATOR_WIDTH}px;
+      padding: 0;
+      text-align: left;
+    }
+
+    .ant-input {
+      width: ${FILTER_CONDITION_VALUE_WIDTH}px;
+    }
+  }
+
+  .ant-select {
+    width: ${FILTER_CONDITION_OPERATOR_WIDTH}px;
+  }
+
+  .filter-condition-operator-select {
+    position: relative;
+    text-align: center;
+
+    .ant-select-content {
+      width: 100%;
+      padding-inline: 18px;
+      text-align: center;
+    }
+
+    .ant-select-input {
+      text-align: center;
+    }
+
+    .ant-select-suffix {
+      position: absolute;
+      inset-inline-end: 11px;
+    }
+
+    .ant-select-selector {
+      text-align: center;
+    }
+
+    .ant-select-selection-item {
+      padding-inline-end: 0;
+      text-align: center;
+    }
+  }
+`;

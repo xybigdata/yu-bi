@@ -7,7 +7,13 @@ import {
   MenuUnfoldOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
-import { ListNav, ListPane, ListTitle } from 'app/components';
+import {
+  ListNav,
+  ListPane,
+  ListTitle,
+  SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
+  SIDEBAR_TITLE_MORE_MENU_POPUP_CLASS,
+} from 'app/components';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
@@ -168,6 +174,8 @@ export const Storyboards = memo(
             callback: add,
           },
           more: {
+            overlayClassName: SIDEBAR_TITLE_MORE_MENU_POPUP_CLASS,
+            itemClassName: SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
             items: [
               {
                 key: 'recycle',

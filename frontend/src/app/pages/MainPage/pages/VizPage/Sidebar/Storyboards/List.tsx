@@ -1,7 +1,11 @@
 import { DeleteOutlined, EditOutlined, MoreOutlined } from '@ant-design/icons';
 import { Menu, MenuProps, message, Popconfirm } from 'antd';
 import { Popup, Tree, TreeTitle } from 'app/components';
-import { MenuItemContent } from 'app/components/Popup/MenuListItem';
+import {
+  MenuItemContent,
+  TREE_MORE_MENU_ITEM_CLASS,
+  TREE_MORE_MENU_POPUP_CLASS,
+} from 'app/components/Popup/MenuListItem';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { CascadeAccess } from 'app/pages/MainPage/Access';
@@ -114,7 +118,10 @@ export const List = memo(({ list, selectedId }: StoryboardListProps) => {
         {
           key: 'info',
           label: (
-            <MenuItemContent prefix={<EditOutlined className="icon" />}>
+            <MenuItemContent
+              className={TREE_MORE_MENU_ITEM_CLASS}
+              prefix={<EditOutlined className="icon" />}
+            >
               {tg('button.info')}
             </MenuItemContent>
           ),
@@ -122,7 +129,10 @@ export const List = memo(({ list, selectedId }: StoryboardListProps) => {
         {
           key: 'delete',
           label: (
-            <MenuItemContent prefix={<DeleteOutlined className="icon" />}>
+            <MenuItemContent
+              className={TREE_MORE_MENU_ITEM_CLASS}
+              prefix={<DeleteOutlined className="icon" />}
+            >
               <Popconfirm
                 title={`${
                   isFolder
@@ -149,6 +159,7 @@ export const List = memo(({ list, selectedId }: StoryboardListProps) => {
             <Popup
               trigger={['click']}
               placement="bottom"
+              overlayClassName={TREE_MORE_MENU_POPUP_CLASS}
               content={
                 <Menu
                   prefixCls="ant-dropdown-menu"

@@ -26,7 +26,11 @@ import {
 } from '@ant-design/icons';
 import { Menu, MenuProps, message, Popconfirm, TreeDataNode } from 'antd';
 import { Popup, Tree, TreeTitle } from 'app/components';
-import { MenuItemContent } from 'app/components/Popup/MenuListItem';
+import {
+  MenuItemContent,
+  TREE_MORE_MENU_ITEM_CLASS,
+  TREE_MORE_MENU_POPUP_CLASS,
+} from 'app/components/Popup/MenuListItem';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { getCascadeAccess, useAccess } from 'app/pages/MainPage/Access';
@@ -200,6 +204,7 @@ export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
                           key: 'info',
                           label: (
                             <MenuItemContent
+                              className={TREE_MORE_MENU_ITEM_CLASS}
                               prefix={<EditOutlined className="icon" />}
                             >
                               {tg('button.info')}
@@ -214,6 +219,7 @@ export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
                           key: 'saveAs',
                           label: (
                             <MenuItemContent
+                              className={TREE_MORE_MENU_ITEM_CLASS}
                               prefix={<CopyFilled className="icon" />}
                             >
                               {tg('button.saveAs')}
@@ -228,6 +234,7 @@ export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
                           key: 'startAnalysis',
                           label: (
                             <MenuItemContent
+                              className={TREE_MORE_MENU_ITEM_CLASS}
                               prefix={<MonitorOutlined className="icon" />}
                             >
                               {t('editor.startAnalysis')}
@@ -242,6 +249,7 @@ export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
                           key: 'delete',
                           label: (
                             <MenuItemContent
+                              className={TREE_MORE_MENU_ITEM_CLASS}
                               prefix={<DeleteOutlined className="icon" />}
                             >
                               <Popconfirm
@@ -267,6 +275,7 @@ export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
                   <Popup
                     trigger={['click']}
                     placement="bottom"
+                    overlayClassName={TREE_MORE_MENU_POPUP_CLASS}
                     content={
                       <Menu
                         prefixCls="ant-dropdown-menu"

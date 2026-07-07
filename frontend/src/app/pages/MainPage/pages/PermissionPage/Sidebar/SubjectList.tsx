@@ -24,6 +24,7 @@ import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { memo } from 'react';
 import styled from 'styled-components';
+import { SPACE_MD, SPACE_XS } from 'styles/StyleConstants';
 import { SubjectTypes } from '../constants';
 import { DataSourceViewModel } from '../slice/types';
 import { Searchbar } from './Searchbar';
@@ -54,27 +55,35 @@ export const SubjectList = memo(
     return (
       <>
         <Searchbar placeholder={t('search')} onSearch={debouncedSearch} />
-        <List
-          loading={{
-            spinning: loading,
-            indicator: <LoadingOutlined />,
-          }}
-        >
-          {filteredData?.map(({ id, name, type }) => (
-            <StyledListItem
-              key={id}
-              selected={viewpointId === id && viewpointType === type}
-              onClick={onToDetail(id, type)}
-            >
-              <List.Item.Meta title={name} />
-            </StyledListItem>
-          ))}
-        </List>
+        <ListWrapper>
+          <List
+            loading={{
+              spinning: loading,
+              indicator: <LoadingOutlined />,
+            }}
+          >
+            {filteredData?.map(({ id, name, type }) => (
+              <ListItem
+                key={id}
+                selected={viewpointId === id && viewpointType === type}
+                onClick={onToDetail(id, type)}
+              >
+                <List.Item.Meta title={name} />
+              </ListItem>
+            ))}
+          </List>
+        </ListWrapper>
       </>
     );
   },
 );
 
-const StyledListItem = styled(ListItem)`
-  padding-left: ${14 + 8 + 16}px;
+const ListWrapper = styled.div`
+  .ant-list-item {
+    padding: ${SPACE_XS} ${SPACE_MD} !important;
+  }
+
+  .ant-list-item-meta {
+    min-width: 0;
+  }
 `;

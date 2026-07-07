@@ -27,6 +27,7 @@ import { uuidv4 } from 'utils/utils';
 import { ItemLayoutProps } from '../../types';
 import { itemLayoutComparer } from '../../utils';
 import AddModal from './add';
+import ConditionalColorTag from './ConditionalColorTag';
 import { ConditionalStyleContext, ConditionalStyleFormValues } from './types';
 
 const ConditionalStyle: FC<
@@ -88,12 +89,12 @@ const ConditionalStyle: FC<
         dataIndex: 'value',
         render: (_, { color }) => (
           <>
-            <Tag color={color.background}>
+            <ConditionalColorTag color={color.background}>
               {t('conditionalStyleTable.header.color.background')}
-            </Tag>
-            <Tag color={color.textColor}>
+            </ConditionalColorTag>
+            <ConditionalColorTag color={color.textColor}>
               {t('conditionalStyleTable.header.color.text')}
-            </Tag>
+            </ConditionalColorTag>
           </>
         ),
       },

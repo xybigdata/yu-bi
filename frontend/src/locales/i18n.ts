@@ -24,7 +24,10 @@ convertLanguageJsonToObject(en);
 
 export const changeLang = lang => {
   localStorage.setItem(StorageKeys.Locale, lang);
-  window.location && window.location.reload();
+  requestInstance.defaults.headers['Accept-Language'] =
+    lang === 'zh' ? 'zh-CN' : 'en-US';
+  setYuBiDayjsLocale(lang === 'zh' ? 'zh-cn' : 'en');
+  i18next.changeLanguage(lang);
 };
 
 export const getLang = () => {

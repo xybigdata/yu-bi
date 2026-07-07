@@ -1388,6 +1388,8 @@
       "test": "Test Connection",
       "file": "File",
       "selectFile": "Select File",
+      "uploadFailed": "File upload failed. Select a file again.",
+      "saveSourceBeforeUpload": "Save the source before uploading files.",
       "addProperty": "Add Property",
       "editProperty": "Edit Property",
       "addConfig": "Add Configuration",

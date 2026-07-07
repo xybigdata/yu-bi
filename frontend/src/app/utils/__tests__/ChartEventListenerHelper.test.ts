@@ -75,6 +75,23 @@ describe('ChartEventListenerHelper Tests', () => {
     });
   });
 
+  test('should use first page when table paging event misses pageNo', () => {
+    const mockCallback = vi.fn();
+    const param = {
+      chartType: 'table',
+      interactionType: ChartInteractionEvent.PagingOrSort,
+      seriesName: 'series-name',
+      value: {
+        direction: 'ASC',
+      },
+    };
+    tablePagingAndSortEventListener(param, mockCallback);
+
+    expect(mockCallback.mock.calls[0][0].pageInfo).toEqual({
+      pageNo: 1,
+    });
+  });
+
   test('should not invoke tablePagingAndSortEventListener callback when chartType is not table', () => {
     const mockCallback = vi.fn();
     const param = {

@@ -22,7 +22,10 @@ import { DataViewFieldType, DateFormat } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import useStateModal, { StateModalSize } from 'app/hooks/useStateModal';
 import { APP_CURRENT_VERSION } from 'app/migration/constants';
-import ChartComputedFieldSettingPanel from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartDataViewPanel/components/ChartComputedFieldSettingPanel';
+import ChartComputedFieldSettingPanel, {
+  CHART_COMPUTED_FIELD_MODAL_BODY_STYLE,
+  CHART_COMPUTED_FIELD_MODAL_WIDTH,
+} from 'app/pages/ChartWorkbenchPage/components/ChartOperationPanel/components/ChartDataViewPanel/components/ChartComputedFieldSettingPanel';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { checkComputedFieldAsync } from 'app/utils/fetch';
 import { updateBy, updateByKey } from 'app/utils/mutation';
@@ -621,7 +624,8 @@ const DataModelTree: FC = memo(() => {
     (field?: ChartDataViewMeta) => {
       showModal({
         title: t('model.createComputedFields'),
-        modalSize: StateModalSize.MIDDLE,
+        modalSize: CHART_COMPUTED_FIELD_MODAL_WIDTH,
+        bodyStyle: CHART_COMPUTED_FIELD_MODAL_BODY_STYLE,
         content: onChange => (
           <ChartComputedFieldSettingPanel
             viewType={viewType}

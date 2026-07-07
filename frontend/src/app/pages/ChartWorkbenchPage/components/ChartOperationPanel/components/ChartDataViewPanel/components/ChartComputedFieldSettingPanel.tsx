@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import { Col, Input, Row, Select, Space, Tabs, TreeDataNode } from 'antd';
+import { Input, Select, Space, Tabs, TreeDataNode } from 'antd';
 import { FormItemEx, Tree } from 'app/components';
 import { ChartDataViewFieldCategory, DataViewFieldType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -25,7 +25,7 @@ import { ViewType } from 'app/pages/MainPage/pages/ViewPage/slice/types';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { ChartComputedFieldHandle } from 'app/types/ComputedFieldEditor';
 import { hasAggregationFunction } from 'app/utils/chartHelper';
-import { FC, useCallback, useRef, useState } from 'react';
+import { CSSProperties, FC, useCallback, useRef, useState } from 'react';
 import type { Key } from 'react';
 import styled from 'styled-components';
 import ChartComputedFieldEditor from './ChartComputedFieldEditor/ChartComputedFieldEditor';
@@ -38,6 +38,15 @@ enum TextType {
   Variable = 'variable',
   Function = 'function',
 }
+
+export const CHART_COMPUTED_FIELD_MODAL_WIDTH = 1180;
+export const CHART_COMPUTED_FIELD_TAB_HORIZONTAL_PADDING = 8;
+
+export const CHART_COMPUTED_FIELD_MODAL_BODY_STYLE: CSSProperties = {
+  maxHeight: 760,
+  overflowY: 'auto',
+  overflowX: 'hidden',
+};
 
 const ChartComputedFieldSettingPanel: FC<{
   sourceId?: string;
@@ -207,68 +216,58 @@ const ChartComputedFieldSettingPanel: FC<{
 
   return (
     <StyledChartComputedFieldSettingPanel direction="vertical">
-      <Row gutter={24}>
-        <Col span={12}>
-          <Space>
-            <FormItemEx
-              label={`${t('fieldName')}`}
-              name="fieldName"
-              rules={[{ required: true }]}
-              initialValue={myComputedFieldRef.current?.name}
-            >
-              <Input onChange={e => handleFieldNameChange(e.target.value)} />
-            </FormItemEx>
-          </Space>
-        </Col>
-        <Col span={12}>
-          <Space>
-            <FormItemEx
-              label={`${t('type')}`}
-              name="type"
-              rules={[{ required: true }]}
-              initialValue={myComputedFieldRef.current?.type}
-            >
-              <Select
-                value={myComputedFieldRef.current?.type}
-                options={Object.keys(DataViewFieldType).map(type => {
-                  return {
-                    label: type,
-                    value: DataViewFieldType[type],
-                  };
-                })}
-                onChange={handleFieldTypeChange}
-              ></Select>
-            </FormItemEx>
-          </Space>
-        </Col>
-      </Row>
-      <Row gutter={24}>
-        <Col span={4}>
+      <HeaderRow>
+        <FormItemEx
+          label={`${t('fieldName')}`}
+          name="fieldName"
+          rules={[{ required: true }]}
+          initialValue={myComputedFieldRef.current?.name}
+        >
+          <Input onChange={e => handleFieldNameChange(e.target.value)} />
+        </FormItemEx>
+        <FormItemEx
+          label={`${t('type')}`}
+          name="type"
+          rules={[{ required: true }]}
+          initialValue={myComputedFieldRef.current?.type}
+        >
+          <Select
+            value={myComputedFieldRef.current?.type}
+            options={Object.keys(DataViewFieldType).map(type => {
+              return {
+                label: type,
+                value: DataViewFieldType[type],
+              };
+            })}
+            onChange={handleFieldTypeChange}
+          ></Select>
+        </FormItemEx>
+      </HeaderRow>
+      <EditorLayout>
+        <SidePanel>
           <Tabs defaultActiveKey="field" items={tabItems} onChange={() => {}} />
-        </Col>
-        <Col span={16}>
+        </SidePanel>
+        <EditorPanel>
           <ChartComputedFieldEditor
             ref={editorRef}
             value={myComputedFieldRef.current?.expression}
             functionDescriptions={ComputedFunctionDescriptions}
             onChange={handleExpressionChange}
           />
-        </Col>
-        <Col span={4}>
-          <Space direction="vertical">
-            <span>{`${t('functions')}`}</span>
-            <Select
-              value={selectedFunctionCategory}
-              options={getFunctionCategories()}
-              onChange={handleFunctionCategoryChange}
-            />
-            <ChartSearchableList
-              source={getFunctionList()}
-              onItemSelected={handleFieldFunctionSelected}
-            />
-          </Space>
-        </Col>
-      </Row>
+        </EditorPanel>
+        <FunctionPanel direction="vertical">
+          <span>{`${t('functions')}`}</span>
+          <Select
+            value={selectedFunctionCategory}
+            options={getFunctionCategories()}
+            onChange={handleFunctionCategoryChange}
+          />
+          <ChartSearchableList
+            source={getFunctionList()}
+            onItemSelected={handleFieldFunctionSelected}
+          />
+        </FunctionPanel>
+      </EditorLayout>
     </StyledChartComputedFieldSettingPanel>
   );
 };
@@ -278,6 +277,7 @@ export default ChartComputedFieldSettingPanel;
 const StyledChartComputedFieldSettingPanel = styled(Space)`
   width: 100%;
   margin-top: 10px;
+  overflow: hidden;
 
   .ant-select {
     width: 100%;
@@ -290,11 +290,75 @@ const StyledChartComputedFieldSettingPanel = styled(Space)`
     }
   }
 
-  .ant-form-item-control-input {
-    width: 200px;
+  & .searchable-list-container {
+    height: 320px;
   }
 
-  & .searchable-list-container {
-    height: 300px;
+  .ant-tree {
+    width: 100%;
+  }
+
+  .ant-tree-node-content-wrapper {
+    min-width: 0;
+  }
+
+  .ant-tree-title {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;
+
+const HeaderRow = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  width: 100%;
+
+  .ant-form-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 8px;
+    align-items: center;
+  }
+
+  .ant-form-item-control-input {
+    width: 260px;
+  }
+`;
+
+const EditorLayout = styled.div`
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 180px;
+  gap: 24px;
+  width: 100%;
+  min-width: 0;
+`;
+
+const SidePanel = styled.div`
+  min-width: 0;
+
+  .ant-tabs-nav {
+    margin-bottom: 8px;
+  }
+
+  .ant-tabs-tab {
+    padding: 8px ${CHART_COMPUTED_FIELD_TAB_HORIZONTAL_PADDING}px;
+  }
+`;
+
+const EditorPanel = styled.div`
+  min-width: 0;
+`;
+
+const FunctionPanel = styled(Space)`
+  width: 100%;
+  min-width: 0;
+
+  &.ant-space-vertical,
+  .ant-space-item {
+    width: 100%;
   }
 `;

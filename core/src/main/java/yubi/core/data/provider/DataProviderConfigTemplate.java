@@ -57,6 +57,14 @@ public class DataProviderConfigTemplate implements Serializable {
 
         private List<Attribute> children;
 
+        public void setRequired(Boolean required) {
+            this.required = required != null && required;
+        }
+
+        public void setEncrypt(Boolean encrypt) {
+            this.encrypt = encrypt != null && encrypt;
+        }
+
     }
 
 

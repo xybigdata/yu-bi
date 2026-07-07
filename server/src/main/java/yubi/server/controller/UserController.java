@@ -119,7 +119,7 @@ public class UserController extends BaseController {
                 System.currentTimeMillis());
         String token = userService.login(passwordToken);
         response.setHeader(Const.TOKEN, token);
-        return ResponseData.success(new UserBaseInfo(securityManager.getCurrentUser()));
+        return ResponseData.success(new UserBaseInfo(userService.getUserByName(loginParam.getUsername())));
 
     }
 

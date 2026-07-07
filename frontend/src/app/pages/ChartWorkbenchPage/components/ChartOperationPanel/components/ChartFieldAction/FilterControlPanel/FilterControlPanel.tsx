@@ -41,6 +41,12 @@ import DateConditionConfiguration from './DateConditionConfiguration';
 import FilterAggregateConfiguration from './FilterAggregateConfiguration';
 import FilterFacadeConfiguration from './FilterFacadeConfiguration';
 import FilterVisibilityConfiguration from './FilterVisibilityConfiguration';
+import {
+  FILTER_FORM_CONTROL_WIDTH,
+  FILTER_FORM_ERROR_WIDTH,
+  FILTER_FORM_LABEL_GAP,
+  FILTER_FORM_LABEL_WIDTH,
+} from './layout';
 import ValueConditionConfiguration from './ValueConditionConfiguration';
 
 const FilterControlPanel: FC<
@@ -70,8 +76,10 @@ const FilterControlPanel: FC<
     form,
   }) => {
     const formItemStyles = {
-      labelCol: { span: 4 },
-      wrapperCol: { span: 20 },
+      labelCol: { flex: `${FILTER_FORM_LABEL_WIDTH}px` },
+      wrapperCol: {
+        flex: `0 0 ${FILTER_FORM_CONTROL_WIDTH + FILTER_FORM_ERROR_WIDTH}px`,
+      },
     };
 
     const filterOptionRef = useRef<FilterOptionForwardRef>(null);
@@ -264,6 +272,7 @@ const FilterControlPanel: FC<
             </FormItemEx>
           )}
         <FormItemEx
+          className="filter-option-form-item"
           {...formItemStyles}
           label={t('filterOption')}
           name="filterOption"
@@ -274,6 +283,7 @@ const FilterControlPanel: FC<
           {renderConditionConfigurationByModel()}
         </FormItemEx>
         <FormItemEx
+          className="filter-visibility-form-item"
           {...formItemStyles}
           label={t('filterVisibility')}
           name="filterVisibility"
@@ -331,17 +341,109 @@ const FilterControlPanel: FC<
 export default FilterControlPanel;
 
 const StyledFilterController = styled.div`
-  & > .ant-row {
-    align-items: center;
-    padding: 5px 5px 5px 0;
+  width: 100%;
+  padding: 0 24px 0 56px;
 
-    > .ant-col {
-      padding-left: 40px;
+  & > .ant-form-item {
+    margin-bottom: 14px;
+  }
+
+  & > .ant-form-item:nth-of-type(3) {
+    margin-bottom: 18px;
+  }
+
+  & > .ant-form-item:last-child {
+    margin-bottom: 0;
+  }
+
+  & > .ant-form-item > .ant-form-item-row,
+  & > .ant-row {
+    align-items: flex-start;
+    padding: 4px 0;
+
+    > .ant-form-item-label {
+      flex: 0 0 ${FILTER_FORM_LABEL_WIDTH}px;
+      max-width: ${FILTER_FORM_LABEL_WIDTH}px;
+      padding-right: ${FILTER_FORM_LABEL_GAP}px;
+      text-align: right;
+
+      > label {
+        color: ${p => p.theme.textColorLight};
+      }
+    }
+
+    > .ant-form-item-control {
+      flex: 0 0 ${FILTER_FORM_CONTROL_WIDTH + FILTER_FORM_ERROR_WIDTH}px;
+      min-width: 0;
+      max-width: ${FILTER_FORM_CONTROL_WIDTH + FILTER_FORM_ERROR_WIDTH}px;
+
+      .ant-form-item-control-input {
+        flex: 0 0 ${FILTER_FORM_CONTROL_WIDTH}px;
+        align-items: flex-start;
+        width: ${FILTER_FORM_CONTROL_WIDTH}px;
+      }
+
+      .ant-form-item-control-input-content {
+        width: ${FILTER_FORM_CONTROL_WIDTH}px;
+        min-width: 0;
+      }
+
+      .ant-form-item-explain {
+        flex: 0 0 ${FILTER_FORM_ERROR_WIDTH}px;
+        max-width: ${FILTER_FORM_ERROR_WIDTH}px;
+        padding-left: 10px;
+        word-break: break-all;
+      }
 
       .ant-select,
       input {
-        width: 200px;
+        width: 100%;
+        max-width: 100%;
       }
+    }
+  }
+
+  & > .filter-option-form-item > .ant-form-item-row {
+    > .ant-form-item-label {
+      padding-top: 0;
+    }
+
+    > .ant-form-item-control {
+      align-items: flex-start;
+
+      .ant-form-item-control-input {
+        align-self: flex-start;
+      }
+
+      .ant-form-item-explain {
+        align-self: center;
+      }
+    }
+  }
+
+  & > .filter-visibility-form-item > .ant-form-item-row {
+    align-items: center;
+
+    > .ant-form-item-label {
+      padding-top: 0;
+    }
+
+    > .ant-form-item-control {
+      .ant-form-item-control-input {
+        align-items: center;
+        min-height: 32px;
+      }
+    }
+  }
+
+  .filter-option-form-item {
+    .ant-tabs-nav {
+      margin: 0 0 14px;
+    }
+
+    .ant-tabs-tab {
+      min-height: 32px;
+      padding: 0 0 8px;
     }
   }
 `;

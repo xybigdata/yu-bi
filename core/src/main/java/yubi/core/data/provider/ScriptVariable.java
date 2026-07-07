@@ -41,10 +41,10 @@ public class ScriptVariable extends TypedValue {
 
     private String nameWithQuote;
 
-    private boolean expression;
+    private Boolean expression;
 
     // Permission variable valid flag, which is false when executed by the organization owner
-    private boolean disabled;
+    private Boolean disabled;
 
     private String format;
 
@@ -59,12 +59,28 @@ public class ScriptVariable extends TypedValue {
     public ScriptVariable() {
     }
 
-    public ScriptVariable(String name, VariableTypeEnum type, ValueType valueType, Set<String> values, boolean expression) {
+    public ScriptVariable(String name, VariableTypeEnum type, ValueType valueType, Set<String> values, Boolean expression) {
         this.name = name;
         this.type = type;
         this.values = values;
         this.valueType = valueType;
-        this.expression = expression;
+        this.expression = expression != null && expression;
+    }
+
+    public boolean isExpression() {
+        return expression != null && expression;
+    }
+
+    public void setExpression(Boolean expression) {
+        this.expression = expression != null && expression;
+    }
+
+    public boolean isDisabled() {
+        return disabled != null && disabled;
+    }
+
+    public void setDisabled(Boolean disabled) {
+        this.disabled = disabled != null && disabled;
     }
 
     public String getNameWithQuote() {

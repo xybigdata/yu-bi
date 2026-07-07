@@ -20,6 +20,7 @@ export const ModalForm = forwardRef(
       onSave,
       afterClose,
       children,
+      className,
       open,
       ...rest
     }: ModalFormProps,
@@ -41,6 +42,7 @@ export const ModalForm = forwardRef(
     return (
       <Modal
         {...rest}
+        className={['yubi-plain-modal', className].filter(Boolean).join(' ')}
         open={open}
         title={
           type === CommonFormTypes.SaveAs

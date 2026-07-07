@@ -57,7 +57,9 @@ const ChartSearchableList: FC<{
         dataSource={listItems}
         rowKey={item => item.value}
         renderItem={item => (
-          <p onClick={() => handleListItemClick(item.value)}>{item.label}</p>
+          <p title={item.label} onClick={() => handleListItemClick(item.value)}>
+            {item.label}
+          </p>
         )}
       />
     </StyledChartSearchableList>
@@ -67,11 +69,33 @@ const ChartSearchableList: FC<{
 export default ChartSearchableList;
 
 const StyledChartSearchableList = styled(Space)`
+  width: 100%;
+
+  &.ant-space-vertical,
+  .ant-space-item {
+    width: 100%;
+  }
+
   .ant-list {
     overflow: auto;
   }
 
   .ant-divider {
     margin: 5px;
+  }
+
+  p {
+    padding: 2px 8px;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 22px;
+    white-space: nowrap;
+    cursor: pointer;
+    border-radius: 3px;
+
+    &:hover {
+      background-color: ${p => p.theme.emphasisBackground};
+    }
   }
 `;

@@ -37,6 +37,11 @@ import { selectCurrentEditingViewAttr } from '../../slice/selectors';
 import { ColumnPermission, HierarchyModel } from '../../slice/types';
 import Container from './Container';
 
+export const COLUMN_PERMISSION_TREE_POPUP_CLASS =
+  'yubi-column-permission-tree-popup';
+export const COLUMN_PERMISSION_TREE_CLASS =
+  'check-list medium column-permission-tree';
+
 export const ColumnPermissions = memo(() => {
   const { actions } = useViewSlice();
   const dispatch = useAppDispatch();
@@ -138,9 +143,10 @@ export const ColumnPermissions = memo(() => {
             <Popup
               trigger={['click']}
               placement="bottomRight"
+              overlayClassName={COLUMN_PERMISSION_TREE_POPUP_CLASS}
               content={
                 <Tree
-                  className="check-list medium"
+                  className={COLUMN_PERMISSION_TREE_CLASS}
                   treeData={columnDropdownData}
                   checkedKeys={checkedKeys}
                   loading={false}
@@ -203,6 +209,8 @@ export const ColumnPermissions = memo(() => {
 });
 
 const SearchBar = styled(Row)`
+  padding: 0 ${SPACE_MD};
+
   .input {
     padding-bottom: ${SPACE_XS};
   }
@@ -214,8 +222,17 @@ const SearchBar = styled(Row)`
 
 const ListWrapper = styled.div`
   flex: 1;
-  padding-bottom: ${SPACE_MD};
+  padding: 0 ${SPACE_MD} ${SPACE_MD};
   overflow-y: auto;
+
+  .ant-list-item {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .ant-list-item-meta {
+    min-width: 0;
+  }
 
   .partial {
     color: ${WARNING};

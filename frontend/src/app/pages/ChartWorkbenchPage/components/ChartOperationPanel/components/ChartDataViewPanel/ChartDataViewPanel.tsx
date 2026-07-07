@@ -85,7 +85,10 @@ import {
 import { getPath, modelListFormsTreeByTableName } from 'utils/utils';
 import { getAllFieldsOfEachType } from '../../utils';
 import { ChartDraggableSourceGroupContainer } from '../ChartDraggable';
-import ChartComputedFieldSettingPanel from './components/ChartComputedFieldSettingPanel';
+import ChartComputedFieldSettingPanel, {
+  CHART_COMPUTED_FIELD_MODAL_BODY_STYLE,
+  CHART_COMPUTED_FIELD_MODAL_WIDTH,
+} from './components/ChartComputedFieldSettingPanel';
 
 const ChartDataViewPanel: FC<{
   dataView?: ChartDataView;
@@ -322,7 +325,8 @@ const ChartDataViewPanel: FC<{
     (field?: ChartDataViewMeta) => {
       showModal({
         title: t('createComputedFields'),
-        modalSize: StateModalSize.MIDDLE,
+        modalSize: CHART_COMPUTED_FIELD_MODAL_WIDTH,
+        bodyStyle: CHART_COMPUTED_FIELD_MODAL_BODY_STYLE,
         content: onChange => (
           <ChartComputedFieldSettingPanel
             computedField={field}
@@ -549,6 +553,7 @@ const ChartDataViewPanel: FC<{
             showSearch
             placeholder={t('plsSelectDataView')}
             className="view-selector"
+            popupClassName="yubi-chart-dataview-selector-popup"
             treeData={dataviewTreeData}
             value={dataView?.id}
             onChange={handleDataViewChange}

@@ -26,6 +26,13 @@ import {
   Variable,
 } from './types';
 
+const normalizeVariablePayload = <T extends Partial<Variable>>(
+  variable: T,
+): T => ({
+  ...variable,
+  expression: !!variable.expression,
+});
+
 export const getVariables = createAsyncThunk<Variable[], string>(
   'variable/getVariables',
   async orgId => {
@@ -44,7 +51,7 @@ export const addVariable = createAsyncThunk<Variable, AddVariableParams>(
     const { data } = await request2<Variable>({
       url: '/variables',
       method: 'POST',
-      data: variable,
+      data: normalizeVariablePayload(variable),
     });
     resolve();
     return data;
@@ -57,7 +64,7 @@ export const editVariable = createAsyncThunk<Variable, EditVariableParams>(
     await request2<boolean>({
       url: '/variables',
       method: 'PUT',
-      data: [variable],
+      data: [normalizeVariablePayload(variable)],
     });
     resolve();
     return variable;

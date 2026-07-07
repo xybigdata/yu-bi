@@ -30,6 +30,10 @@ import { SPACE_TIMES, SPACE_XS } from 'styles/StyleConstants';
 import { selectMemberListLoading, selectMembers } from '../../slice/selectors';
 import { getMembers } from '../../slice/thunks';
 
+const MEMBER_FORM_MODAL_WIDTH = 800;
+const MEMBER_TRANSFER_LIST_WIDTH = 360;
+const MEMBER_TRANSFER_LIST_HEIGHT = 320;
+
 interface MemberFormProps extends Omit<ModalProps, 'onCancel'> {
   initialValues: User[];
   onChange: (members: User[]) => void;
@@ -69,16 +73,18 @@ export const MemberForm = memo(
         setTargetKeys(nextTargetKeys.map(String));
       };
 
-    const renderTitle = useCallback(
-      ({ name, username, email }) => (
-        <ItemTitle>
+    const renderTitle = useCallback(({ name, username, email }) => {
+      const title = [name, username ? `(${username})` : '', email]
+        .filter(Boolean)
+        .join(' ');
+      return (
+        <ItemTitle title={title}>
           {name && <span>{name}</span>}
           {username && <span>{` (${username})`}</span>}
           {email && <span className="email">{email}</span>}
         </ItemTitle>
-      ),
-      [],
-    );
+      );
+    }, []);
 
     const filterMemberListOptions = useCallback(
       (inputValue, option: User) =>
@@ -91,6 +97,7 @@ export const MemberForm = memo(
     return (
       <ModalForm
         {...modalProps}
+        width={MEMBER_FORM_MODAL_WIDTH}
         onSave={save}
         onCancel={() => onCancel?.()}
         ref={formRef}
@@ -100,6 +107,12 @@ export const MemberForm = memo(
             <Transfer
               dataSource={dataSource}
               targetKeys={targetKeys}
+              styles={{
+                section: {
+                  width: MEMBER_TRANSFER_LIST_WIDTH,
+                  height: MEMBER_TRANSFER_LIST_HEIGHT,
+                },
+              }}
               render={renderTitle}
               onChange={handleTargetKeysChange}
               filterOption={filterMemberListOptions}
@@ -114,14 +127,39 @@ export const MemberForm = memo(
 
 const TransferWrapper = styled(Form.Item)`
   position: relative;
+  width: 100%;
+  margin-bottom: 0;
 
+  .ant-form-item-control-input {
+    min-height: 0;
+  }
+
+  .ant-form-item-control-input-content {
+    width: 100%;
+  }
+
+  .ant-transfer {
+    display: flex;
+    align-items: center;
+  }
+
+  .ant-transfer-section,
   .ant-transfer-list {
-    flex: 1;
-    height: ${SPACE_TIMES(100)};
+    width: ${MEMBER_TRANSFER_LIST_WIDTH}px;
+    height: ${MEMBER_TRANSFER_LIST_HEIGHT}px;
+  }
+
+  .ant-transfer-operation {
+    margin: 0 ${SPACE_TIMES(2)};
   }
 `;
 
 const ItemTitle = styled.div`
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
   .email {
     margin-left: ${SPACE_XS};
     color: ${p => p.theme.textColorLight};

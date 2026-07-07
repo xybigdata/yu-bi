@@ -91,9 +91,9 @@ public class ParamFactory {
         orderOperators.add(orderOperator);
 
         PageInfo pageInfo = new PageInfo();
-        pageInfo.setPageNo(1);
-        pageInfo.setPageSize(100);
-        pageInfo.setTotal(234);
+        pageInfo.setPageNo(1L);
+        pageInfo.setPageSize(100L);
+        pageInfo.setTotal(234L);
         pageInfo.setCountTotal(false);
 
         return ExecuteParam.builder()

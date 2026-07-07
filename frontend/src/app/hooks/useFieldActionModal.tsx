@@ -106,15 +106,17 @@ function useFieldActionModal({ i18nPrefix }: I18NComponentProps) {
     onConfigChange: FieldActionModalSubmit,
     dataset?: ChartDataSetDTO,
     dataView?: ChartDataView,
-    modalSize?: string | StateModalSize,
+    modalSize?: string | number | StateModalSize,
     aggregation?: boolean,
   ) => {
     const currentConfig = dataConfig.rows?.find(c => c.uid === columnUid);
-    let _modalSize = StateModalSize.MIDDLE;
+    let _modalSize: string | number | StateModalSize = StateModalSize.MIDDLE;
     if (actionType === ChartDataSectionFieldActionType.Colorize) {
       _modalSize = StateModalSize.XSMALL;
     } else if (actionType === ChartDataSectionFieldActionType.ColorizeSingle) {
       _modalSize = StateModalSize.XSMALL;
+    } else if (actionType === ChartDataSectionFieldActionType.Filter) {
+      _modalSize = 980;
     }
     return show({
       title: t(actionType),

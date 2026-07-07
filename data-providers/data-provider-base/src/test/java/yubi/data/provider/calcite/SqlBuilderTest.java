@@ -37,7 +37,7 @@ class SqlBuilderTest {
                 filter(FilterOperator.SqlOperator.BETWEEN, "created_at", value("2026-01-01"), value("2026-01-31"))
         ));
         executeParam.setOrders(List.of(order(OrderOperator.SqlOperator.DESC, AggregateOperator.SqlOperator.SUM, "amount")));
-        executeParam.setPageInfo(PageInfo.builder().pageNo(3).pageSize(20).build());
+        executeParam.setPageInfo(PageInfo.builder().pageNo(3L).pageSize(20L).build());
 
         assertEquals(
                 "SELECT DISTINCT `YUBI_VTABLE`.`status` AS `status_alias`, SUM(`YUBI_VTABLE`.`amount`) AS `total_amount` " +

@@ -79,6 +79,17 @@ type ViewConfigFieldMap = {
   concurrencyControlMode?: string;
   expensiveQuery?: boolean;
 };
+const DEFAULT_VIEW_CONFIG: Required<
+  Pick<
+    ViewConfigFieldMap,
+    'cache' | 'cacheExpires' | 'concurrencyControl' | 'concurrencyControlMode'
+  >
+> = {
+  cache: false,
+  cacheExpires: 0,
+  concurrencyControl: true,
+  concurrencyControlMode: 'DIRTYREAD',
+};
 type DragItemMeta = Pick<
   ChartDataViewMeta,
   'category' | 'dateFormat' | 'subType' | 'type'
@@ -801,16 +812,29 @@ export const transformToViewConfig = (
   viewConfig?: string | object,
 ): ViewConfigFieldMap => {
   const viewConfigMap = parseViewConfig(viewConfig);
+  const cacheExpires =
+    typeof viewConfigMap?.cacheExpires === 'number'
+      ? viewConfigMap.cacheExpires
+      : DEFAULT_VIEW_CONFIG.cacheExpires;
   return {
-    cache: viewConfigMap?.cache as ViewConfigFieldMap['cache'],
-    cacheExpires:
-      viewConfigMap?.cacheExpires as ViewConfigFieldMap['cacheExpires'],
+    cache:
+      typeof viewConfigMap?.cache === 'boolean'
+        ? viewConfigMap.cache
+        : DEFAULT_VIEW_CONFIG.cache,
+    cacheExpires,
     concurrencyControl:
-      viewConfigMap?.concurrencyControl as ViewConfigFieldMap['concurrencyControl'],
+      typeof viewConfigMap?.concurrencyControl === 'boolean'
+        ? viewConfigMap.concurrencyControl
+        : DEFAULT_VIEW_CONFIG.concurrencyControl,
     concurrencyControlMode:
-      viewConfigMap?.concurrencyControlMode as ViewConfigFieldMap['concurrencyControlMode'],
+      typeof viewConfigMap?.concurrencyControlMode === 'string' &&
+      viewConfigMap.concurrencyControlMode
+        ? viewConfigMap.concurrencyControlMode
+        : DEFAULT_VIEW_CONFIG.concurrencyControlMode,
     expensiveQuery:
-      viewConfigMap?.expensiveQuery as ViewConfigFieldMap['expensiveQuery'],
+      typeof viewConfigMap?.expensiveQuery === 'boolean'
+        ? viewConfigMap.expensiveQuery
+        : undefined,
   };
 };
 
@@ -934,8 +958,7 @@ export const getJumpFiltersByInteractionRule = (
         return null;
       }
       const jumpRule = rule?.[rule.category!] as
-        | JumpToDashboardRule
-        | JumpToUrlRule;
+        JumpToDashboardRule | JumpToUrlRule;
       if (isEmpty(jumpRule)) {
         return null;
       }
@@ -1061,8 +1084,7 @@ export const getJumpOperationFiltersByInteractionRule = (
         return acc;
       }
       const jumpRule = rule?.[rule.category!] as
-        | JumpToChartRule
-        | JumpToDashboardRule;
+        JumpToChartRule | JumpToDashboardRule;
       if (isEmpty(jumpRule)) {
         return acc;
       }

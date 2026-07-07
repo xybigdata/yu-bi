@@ -119,6 +119,8 @@ export const makeDownloadDataTask =
   async () => {
     const { downloadParams, fileName, resolve, downloadType, imageWidth } =
       params;
+    const normalizedImageWidth =
+      typeof imageWidth === 'number' && imageWidth > 0 ? imageWidth : 1920;
     const res = await request2<null>({
       url: `download/submit/task`,
       method: 'POST',
@@ -126,7 +128,7 @@ export const makeDownloadDataTask =
         downloadParams: downloadParams,
         fileName: fileName,
         downloadType,
-        imageWidth,
+        imageWidth: normalizedImageWidth,
       },
     });
     if (res?.success) {

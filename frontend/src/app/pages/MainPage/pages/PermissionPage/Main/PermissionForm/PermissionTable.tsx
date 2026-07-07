@@ -19,10 +19,14 @@
 
 import { SearchOutlined } from '@ant-design/icons';
 import { Col, Input, Row, Table, TableColumnProps } from 'antd';
+import { Resizable } from 'react-resizable';
+import type { Props as ResizableProps } from 'react-resizable';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useSearchAndExpand } from 'app/hooks/useSearchAndExpand';
-import { memo, useEffect, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ThHTMLAttributes } from 'react';
 import styled from 'styled-components';
+import { LEVEL_1 } from 'styles/StyleConstants';
 import { listToTree } from 'utils/utils';
 import {
   PermissionLevels,
@@ -38,6 +42,89 @@ import {
 } from '../../slice/types';
 import { PrivilegeSetting } from './PrivilegeSetting';
 import { getPrivilegeSettingWidth, setTreeDataWithPrivilege } from './utils';
+
+export const PERMISSION_RESOURCE_NAME_COLUMN_MIN_WIDTH = 220;
+export const PERMISSION_RESOURCE_NAME_COLUMN_DEFAULT_WIDTH = 510;
+export const PERMISSION_RESOURCE_NAME_COLUMN_MAX_WIDTH = 760;
+
+export const getLimitedPermissionResourceNameColumnWidth = (width: number) =>
+  Math.min(
+    Math.max(width, PERMISSION_RESOURCE_NAME_COLUMN_MIN_WIDTH),
+    PERMISSION_RESOURCE_NAME_COLUMN_MAX_WIDTH,
+  );
+
+export const getPermissionTableLayout = (
+  privilegeColumnWidth: number,
+  resourceNameColumnWidth = PERMISSION_RESOURCE_NAME_COLUMN_DEFAULT_WIDTH,
+  tableWidth?: number,
+) => {
+  const limitedResourceNameColumnWidth =
+    getLimitedPermissionResourceNameColumnWidth(resourceNameColumnWidth);
+  const contentWidth = limitedResourceNameColumnWidth + privilegeColumnWidth;
+  return {
+    resourceNameColumnWidth: limitedResourceNameColumnWidth,
+    privilegeColumnWidth,
+    tableWidth: tableWidth ?? contentWidth,
+  };
+};
+
+export const getResizedPermissionTableWidth = (
+  currentTableWidth: number,
+  currentResourceNameColumnWidth: number,
+  nextResourceNameColumnWidth: number,
+  privilegeColumnWidth: number,
+) => {
+  const currentResourceWidth = getLimitedPermissionResourceNameColumnWidth(
+    currentResourceNameColumnWidth,
+  );
+  const nextResourceWidth = getLimitedPermissionResourceNameColumnWidth(
+    nextResourceNameColumnWidth,
+  );
+  return Math.max(
+    currentTableWidth + nextResourceWidth - currentResourceWidth,
+    nextResourceWidth + privilegeColumnWidth,
+  );
+};
+
+export const getPermissionTableWidth = (
+  privilegeColumnWidth: number,
+  resourceNameColumnWidth = PERMISSION_RESOURCE_NAME_COLUMN_DEFAULT_WIDTH,
+) =>
+  getPermissionTableLayout(privilegeColumnWidth, resourceNameColumnWidth)
+    .tableWidth;
+
+type ResizableHeaderCellProps = ThHTMLAttributes<HTMLTableCellElement> & {
+  width?: number;
+  onResize?: ResizableProps['onResize'];
+};
+
+const ResizableHeaderCell = ({
+  width,
+  onResize,
+  ...restProps
+}: ResizableHeaderCellProps) => {
+  if (!width) {
+    return <th {...restProps} />;
+  }
+
+  return (
+    <Resizable
+      width={width}
+      height={0}
+      handle={
+        <ColumnResizeHandle
+          onClick={event => {
+            event.stopPropagation();
+          }}
+        />
+      }
+      onResize={onResize}
+      draggableOpts={{ enableUserSelectHack: false }}
+    >
+      <th {...restProps} />
+    </Resizable>
+  );
+};
 
 interface PermissionTableProps {
   viewpoint: Viewpoints;
@@ -69,6 +156,12 @@ export const PermissionTable = memo(
     vizSubTypes,
   }: PermissionTableProps) => {
     const t = useI18NPrefix('permission');
+    const [resourceNameColumnWidth, setResourceNameColumnWidth] = useState(
+      PERMISSION_RESOURCE_NAME_COLUMN_DEFAULT_WIDTH,
+    );
+    const [manualTableWidth, setManualTableWidth] = useState<
+      number | undefined
+    >();
 
     const treeData = useMemo(() => {
       if (dataSource && privileges) {
@@ -118,24 +211,70 @@ export const PermissionTable = memo(
       [treeData, onPrivilegeChange],
     );
 
+    const privilegeColumnWidth = useMemo(
+      () =>
+        getPrivilegeSettingWidth(
+          viewpoint,
+          viewpointType,
+          dataSourceType,
+          vizSubTypes,
+        ),
+      [viewpoint, viewpointType, dataSourceType, vizSubTypes],
+    );
+
+    const tableLayout = useMemo(
+      () =>
+        getPermissionTableLayout(
+          privilegeColumnWidth,
+          resourceNameColumnWidth,
+          manualTableWidth,
+        ),
+      [privilegeColumnWidth, resourceNameColumnWidth, manualTableWidth],
+    );
+
+    useEffect(() => {
+      setResourceNameColumnWidth(PERMISSION_RESOURCE_NAME_COLUMN_DEFAULT_WIDTH);
+      setManualTableWidth(undefined);
+    }, [viewpoint, viewpointType, dataSourceType, vizSubTypes]);
+
+    const handleResourceNameColumnResize: ResizableProps['onResize'] =
+      useCallback(
+        (_, { size }) => {
+          const nextResourceNameColumnWidth =
+            getLimitedPermissionResourceNameColumnWidth(size.width);
+          setManualTableWidth(
+            getResizedPermissionTableWidth(
+              tableLayout.tableWidth,
+              tableLayout.resourceNameColumnWidth,
+              nextResourceNameColumnWidth,
+              tableLayout.privilegeColumnWidth,
+            ),
+          );
+          setResourceNameColumnWidth(nextResourceNameColumnWidth);
+        },
+        [tableLayout],
+      );
+
     const columns = useMemo(() => {
       const columns: TableColumnProps<DataSourceTreeNode>[] = [
         {
           dataIndex: 'name',
+          ellipsis: true,
           title:
             viewpoint === Viewpoints.Resource
               ? t('subjectName')
               : t('resourceName'),
+          width: tableLayout.resourceNameColumnWidth,
+          onHeaderCell: () =>
+            ({
+              width: tableLayout.resourceNameColumnWidth,
+              onResize: handleResourceNameColumnResize,
+            }) as ResizableHeaderCellProps,
         },
         {
           title: t('privileges'),
           align: 'center' as const,
-          width: getPrivilegeSettingWidth(
-            viewpoint,
-            viewpointType,
-            dataSourceType,
-            vizSubTypes,
-          ),
+          width: tableLayout.privilegeColumnWidth,
           render: (_, record) => (
             <PrivilegeSetting
               record={record}
@@ -153,6 +292,8 @@ export const PermissionTable = memo(
       viewpoint,
       viewpointType,
       dataSourceType,
+      tableLayout,
+      handleResourceNameColumnResize,
       privilegeChange,
       t,
       vizSubTypes,
@@ -170,19 +311,27 @@ export const PermissionTable = memo(
             />
           </Col>
         </Toolbar>
-        <Table
-          rowKey="id"
-          columns={columns}
-          dataSource={filteredData}
-          loading={resourceLoading}
-          pagination={false}
-          size="middle"
-          expandable={{
-            expandedRowKeys,
-            onExpandedRowsChange: onExpand,
-          }}
-          bordered
-        />
+        <TableWidthWrapper $width={tableLayout.tableWidth}>
+          <Table
+            rowKey="id"
+            columns={columns}
+            dataSource={filteredData}
+            loading={resourceLoading}
+            pagination={false}
+            size="middle"
+            expandable={{
+              expandedRowKeys,
+              onExpandedRowsChange: onExpand,
+            }}
+            tableLayout="fixed"
+            components={{
+              header: {
+                cell: ResizableHeaderCell,
+              },
+            }}
+            bordered
+          />
+        </TableWidthWrapper>
       </>
     );
   },
@@ -192,4 +341,33 @@ const Toolbar = styled(Row)`
   .icon {
     color: ${p => p.theme.textColorLight};
   }
+`;
+
+const ColumnResizeHandle = styled.span`
+  position: absolute;
+  right: -5px;
+  bottom: 0;
+  z-index: ${LEVEL_1};
+  width: 10px;
+  height: 100%;
+  cursor: col-resize;
+
+  &::after {
+    position: absolute;
+    top: 25%;
+    right: 4px;
+    width: 1px;
+    height: 50%;
+    content: '';
+    background-color: ${p => p.theme.borderColorSplit};
+  }
+
+  &:hover::after {
+    background-color: ${p => p.theme.primary};
+  }
+`;
+
+const TableWidthWrapper = styled.div<{ $width: number }>`
+  width: ${p => p.$width}px;
+  max-width: none;
 `;

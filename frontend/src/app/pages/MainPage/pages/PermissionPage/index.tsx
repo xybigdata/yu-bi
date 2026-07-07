@@ -18,7 +18,7 @@
  */
 import { EmptyFiller, Split } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { useLocation, useParams } from 'app/routerCompat';
+import { useParams } from 'app/routerCompat';
 import { useSplitSizes } from 'app/hooks/useSplitSizes';
 import { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -39,18 +39,24 @@ export function PermissionPage() {
   useViewSlice();
   useVizSlice();
   usePermissionSlice();
-  const { viewpoint } = useParams<{ viewpoint: Viewpoints }>();
-  const location = useLocation();
+  const {
+    viewpoint,
+    type: viewpointType,
+    id: viewpointId,
+  } = useParams<{
+    viewpoint: Viewpoints;
+    type?: ResourceTypes | SubjectTypes;
+    id?: string;
+  }>();
   const detailParams = useMemo(() => {
-    const urlArr = location.pathname.split('/');
-    if (urlArr.length < 7 || urlArr[3] !== 'permissions') {
+    if (!viewpointType || !viewpointId) {
       return undefined;
     }
     return {
-      type: urlArr[5] as ResourceTypes | SubjectTypes,
-      id: urlArr[6],
+      type: viewpointType,
+      id: viewpointId,
     };
-  }, [location.pathname]);
+  }, [viewpointType, viewpointId]);
   const t = useI18NPrefix('permission');
   const { sizes, setSizes } = useSplitSizes({
     limitedSide: 0,
@@ -69,7 +75,7 @@ export function PermissionPage() {
       sizes={sizes}
       minSize={[320, 0]}
       maxSize={[768, Infinity]}
-      gutterSize={0}
+      gutterSize={8}
       onDrag={siderDrag}
       className="yubi-split"
     >

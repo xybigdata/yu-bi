@@ -17,4 +17,8 @@ public class DashboardCreateParam extends VizCreateParam {
 
     private String config;
 
+    public void setIndex(Double index) {
+        this.index = index == null ? 0 : index;
+    }
+
 }

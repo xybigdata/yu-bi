@@ -42,6 +42,7 @@ export const AutoEditor: React.FC<{}> = memo(() => {
         minSize={200}
         maxSize={400}
         pane2Style={{ minWidth: 0 }}
+        onChange={dispatchResize}
         onDragFinished={dispatchResize}
       >
         <LayerTreePanel />
@@ -51,6 +52,7 @@ export const AutoEditor: React.FC<{}> = memo(() => {
           maxSize={400}
           primary="second"
           pane1Style={{ display: 'flex', minWidth: 0 }}
+          onChange={dispatchResize}
           onDragFinished={dispatchResize}
         >
           <AutoBoardEditor />

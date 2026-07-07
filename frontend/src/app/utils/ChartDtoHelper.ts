@@ -37,7 +37,7 @@ import {
   transformToHierarchyModel,
   transformHierarchyMeta,
 } from 'app/utils/internalChartHelper';
-import { Omit } from 'utils/object';
+import { CloneValueDeep, Omit } from 'utils/object';
 
 type ParsedChartConfig = ChartConfigDTO & {
   aggregation: boolean | undefined;
@@ -160,26 +160,27 @@ export function mergeToChartConfig(
   if (!target) {
     return undefined;
   }
+  const mergedTarget = CloneValueDeep(target);
   if (!source) {
-    return target;
+    return mergedTarget;
   }
-  target.datas = mergeChartDataConfigs<ChartDataConfig>(
-    target?.datas,
+  mergedTarget.datas = mergeChartDataConfigs<ChartDataConfig>(
+    mergedTarget?.datas,
     source?.chartConfig?.datas,
   ) as ChartDataConfig[];
-  target.styles = mergeChartStyleConfigs(
-    target?.styles,
+  mergedTarget.styles = mergeChartStyleConfigs(
+    mergedTarget?.styles,
     source?.chartConfig?.styles,
   );
-  target.settings = mergeChartStyleConfigs(
-    target?.settings,
+  mergedTarget.settings = mergeChartStyleConfigs(
+    mergedTarget?.settings,
     source?.chartConfig?.settings,
   );
-  target.interactions = mergeChartStyleConfigs(
-    target?.interactions,
+  mergedTarget.interactions = mergeChartStyleConfigs(
+    mergedTarget?.interactions,
     source?.chartConfig?.interactions,
   );
-  return target;
+  return mergedTarget;
 }
 
 export function convertToChartConfigDTO(

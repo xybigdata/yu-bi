@@ -10,7 +10,11 @@ export { IW } from './IconWrapper';
 export { ListItem } from './ListItem';
 export { ListNav, ListPane } from './ListNav';
 export { ListSwitch } from './ListSwitch';
-export { ListTitle } from './ListTitle';
+export {
+  ListTitle,
+  SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
+  SIDEBAR_TITLE_MORE_MENU_POPUP_CLASS,
+} from './ListTitle';
 export type { ListTitleProps } from './ListTitle';
 export { LoadingMask } from './LoadingMask';
 export { ModalForm } from './ModalForm';

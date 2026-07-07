@@ -51,4 +51,8 @@ public class VariableCreateParam extends BaseCreateParam {
 
     private List<RelVariableSubject> relVariableSubjects;
 
+    public void setExpression(Boolean expression) {
+        this.expression = expression != null && expression;
+    }
+
 }

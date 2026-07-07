@@ -30,6 +30,11 @@ export default FormItemEx;
 const StyledFromItemEx = styled(Form.Item)`
   margin: 0 0 0 0;
 
+  .ant-form-item-label > label,
+  .ant-form-item-row > .ant-col > label {
+    color: ${p => p.theme.textColorLight};
+  }
+
   .ant-form-item-control {
     display: flex;
     flex-flow: row;

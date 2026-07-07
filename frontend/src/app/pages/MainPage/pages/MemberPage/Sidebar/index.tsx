@@ -30,6 +30,14 @@ import { SPACE_XS } from 'styles/StyleConstants';
 import { MemberList } from './MemberList';
 import { RoleList } from './RoleList';
 
+export const getMemberSidebarSelectedKey = (pathname: string) => {
+  const [, , orgId, moduleName] = pathname.split('/');
+  if (orgId && (moduleName === 'members' || moduleName === 'roles')) {
+    return moduleName;
+  }
+  return '';
+};
+
 export const Sidebar = memo(() => {
   const [selectedKey, setSelectedKey] = useState('');
   const navigate = useCompatNavigate();
@@ -38,8 +46,7 @@ export const Sidebar = memo(() => {
   const t = useI18NPrefix('member.sidebar');
 
   useEffect(() => {
-    const urlArr = location.pathname.split('/');
-    setSelectedKey(urlArr[urlArr.length - 1]);
+    setSelectedKey(getMemberSidebarSelectedKey(location.pathname));
   }, [location.pathname]);
 
   const titles = useMemo(

@@ -20,16 +20,22 @@
 package yubi.security.manager.springsecurity;
 
 import yubi.core.entity.User;
+import yubi.security.manager.AuthenticationAssembler;
+import yubi.security.manager.AuthenticationCache;
+import yubi.security.manager.AuthorizationAssembler;
+import yubi.security.manager.AuthorizationCache;
+import yubi.security.manager.PermissionDataCache;
 import yubi.security.manager.SecurityAuthorizationException;
 import yubi.security.manager.SecuritySubjectFacade;
+import yubi.security.util.JwtUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Spring Security implementation of {@link SecuritySubjectFacade}.
@@ -41,24 +47,49 @@ import java.util.Collection;
 @Component
 public class SpringSecuritySubjectFacade implements SecuritySubjectFacade {
 
+    private static final String REALM_NAME = "yubi";
+
+    private final PermissionDataCache permissionDataCache;
+
+    private final AuthenticationAssembler authenticationAssembler;
+
+    private final AuthorizationAssembler authorizationAssembler;
+
+    public SpringSecuritySubjectFacade(PermissionDataCache permissionDataCache,
+                                       AuthenticationAssembler authenticationAssembler,
+                                       AuthorizationAssembler authorizationAssembler) {
+        this.permissionDataCache = permissionDataCache;
+        this.authenticationAssembler = authenticationAssembler;
+        this.authorizationAssembler = authorizationAssembler;
+    }
+
     @Override
     public void loginWithPassword(String subject, String password) {
-        // Create an unauthenticated token and set it in the SecurityContext.
-        // Actual credential validation is delegated to the AuthenticationProvider
-        // via the filter chain. This programmatic login is used for service-layer
-        // login flows (e.g., OAuth2 callback, internal user setup).
-        Authentication auth = new UsernamePasswordAuthenticationToken(subject, password);
+        AuthenticationCache cache = authenticationAssembler.assemble(subject, REALM_NAME);
+        if (cache == null) {
+            throw new SecurityAuthorizationException(null);
+        }
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                cache.getPrincipal(),
+                cache.getCredentials(),
+                Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
     @Override
     public void loginWithBearer(String tokenString) {
-        // JWT-based auth: the JwtAuthenticationFilter validates the token and
-        // sets the fully authenticated Authentication in the SecurityContext.
-        // This method is a hook for programmatic bearer login in service code;
-        // the actual token is expected to have been validated upstream.
-        // When called directly, we create a pre-authenticated token.
-        Authentication auth = new UsernamePasswordAuthenticationToken(tokenString, null);
+        var jwtToken = JwtUtils.toJwtToken(tokenString);
+        if (jwtToken == null) {
+            throw new SecurityAuthorizationException(null);
+        }
+        AuthenticationCache cache = authenticationAssembler.assemble(jwtToken.getSubject(), REALM_NAME);
+        if (cache == null) {
+            throw new SecurityAuthorizationException(null);
+        }
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                cache.getPrincipal(),
+                null,
+                Collections.emptyList());
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
@@ -79,9 +110,8 @@ public class SpringSecuritySubjectFacade implements SecuritySubjectFacade {
         if (auth == null) {
             throw new SecurityAuthorizationException(null);
         }
-        Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
         for (String permission : permissions) {
-            if (!authorities.contains(new SimpleGrantedAuthority(permission))) {
+            if (!isPermissionAllowed(permission, auth)) {
                 throw new SecurityAuthorizationException(null);
             }
         }
@@ -89,8 +119,7 @@ public class SpringSecuritySubjectFacade implements SecuritySubjectFacade {
 
     @Override
     public void checkRole(String role) throws SecurityAuthorizationException {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.getAuthorities().contains(new SimpleGrantedAuthority(role))) {
+        if (!hasRole(role)) {
             throw new SecurityAuthorizationException(null);
         }
     }
@@ -98,7 +127,7 @@ public class SpringSecuritySubjectFacade implements SecuritySubjectFacade {
     @Override
     public boolean hasRole(String role) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return auth != null && auth.getAuthorities().contains(new SimpleGrantedAuthority(role));
+        return auth != null && getAuthorization(auth).getRoles().contains(role);
     }
 
     @Override
@@ -122,5 +151,47 @@ public class SpringSecuritySubjectFacade implements SecuritySubjectFacade {
         // No-op: Spring Security uses SecurityContextHolder with a thread-local
         // strategy by default. No global security manager binding is needed
         // unlike Shiro's SecurityUtils.setSecurityManager().
+    }
+
+    private boolean isPermissionAllowed(String permission, Authentication auth) {
+        AuthorizationCache authorization = getAuthorization(auth);
+        if (authorization.getStringPermissions().stream().anyMatch(granted -> permissionMatches(granted, permission))) {
+            return true;
+        }
+        Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
+        return authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(granted -> permissionMatches(granted, permission));
+    }
+
+    private AuthorizationCache getAuthorization(Authentication auth) {
+        AuthorizationCache authorizationCache = permissionDataCache.getAuthorizationCache();
+        if (authorizationCache != null) {
+            return authorizationCache;
+        }
+        User user = auth.getPrincipal() instanceof User principal ? principal : null;
+        if (user == null) {
+            return new AuthorizationCache();
+        }
+        authorizationCache = authorizationAssembler.assemble(permissionDataCache.getCurrentOrg(), user.getId());
+        permissionDataCache.setAuthorizationCache(authorizationCache);
+        return authorizationCache;
+    }
+
+    private boolean permissionMatches(String granted, String required) {
+        if (granted.equals(required)) {
+            return true;
+        }
+        String[] grantedParts = granted.split(":");
+        String[] requiredParts = required.split(":");
+        if (grantedParts.length > requiredParts.length) {
+            return false;
+        }
+        for (int i = 0; i < grantedParts.length; i += 1) {
+            if (!"*".equals(grantedParts[i]) && !grantedParts[i].equals(requiredParts[i])) {
+                return false;
+            }
+        }
+        return true;
     }
 }

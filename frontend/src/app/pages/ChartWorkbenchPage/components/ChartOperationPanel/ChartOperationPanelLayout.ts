@@ -26,6 +26,15 @@ export enum LayoutComponentType {
   CONFIG = 'ChartConfigPanel',
 }
 
+export const CHART_OPERATION_PANEL_LAYOUT = {
+  dataViewMinWidth: 256,
+  dataViewWeight: 256,
+  configMinWidth: 360,
+  configWeight: 360,
+  presentMinWidth: 640,
+  presentWeight: 696,
+} as const;
+
 const layoutConfig: IJsonModel = {
   global: {
     tabEnableClose: false,
@@ -38,7 +47,8 @@ const layoutConfig: IJsonModel = {
       {
         type: 'tabset',
         id: 'model-dragbar',
-        weight: 256,
+        weight: CHART_OPERATION_PANEL_LAYOUT.dataViewWeight,
+        minWidth: CHART_OPERATION_PANEL_LAYOUT.dataViewMinWidth,
         children: [
           {
             type: 'tab',
@@ -50,7 +60,8 @@ const layoutConfig: IJsonModel = {
       {
         type: 'tabset',
         id: 'config',
-        weight: 360,
+        weight: CHART_OPERATION_PANEL_LAYOUT.configWeight,
+        minWidth: CHART_OPERATION_PANEL_LAYOUT.configMinWidth,
         children: [
           {
             type: 'tab',
@@ -62,6 +73,8 @@ const layoutConfig: IJsonModel = {
       {
         type: 'tabset',
         id: 'present',
+        weight: CHART_OPERATION_PANEL_LAYOUT.presentWeight,
+        minWidth: CHART_OPERATION_PANEL_LAYOUT.presentMinWidth,
         children: [
           {
             type: 'tab',

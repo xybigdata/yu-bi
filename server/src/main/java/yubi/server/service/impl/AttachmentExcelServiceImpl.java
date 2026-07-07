@@ -40,7 +40,7 @@ public class AttachmentExcelServiceImpl implements AttachmentService {
         for (int i = 0; i < downloadParams.getDownloadParams().size(); i++) {
             ViewExecuteParam viewExecuteParam = downloadParams.getDownloadParams().get(i);
             View view = viewService.retrieve(viewExecuteParam.getViewId(), false);
-            viewExecuteParam.setPageInfo(PageInfo.builder().pageNo(1).pageSize(orgSettingService.getDownloadRecordLimit(view.getOrgId())).build());
+            viewExecuteParam.setPageInfo(PageInfo.builder().pageNo(1L).pageSize(orgSettingService.getDownloadRecordLimit(view.getOrgId()).longValue()).build());
             Dataframe dataframe = dataProviderService.execute(downloadParams.getDownloadParams().get(i));
             String chartConfigStr = vizService.getChartConfigByVizId(viewExecuteParam.getVizType(), viewExecuteParam.getVizId());
             POISettings poiSettings = PoiConvertUtils.covertToPoiSetting(chartConfigStr, dataframe);

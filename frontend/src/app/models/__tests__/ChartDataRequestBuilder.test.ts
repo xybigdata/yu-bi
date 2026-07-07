@@ -99,16 +99,22 @@ describe('ChartDataRequestBuild Test', () => {
 
     expect(requestParams).toEqual({
       aggregators: [],
+      cache: false,
+      cacheExpires: 0,
       columns: [],
+      concurrencyControl: true,
+      concurrencyControlMode: 'DIRTYREAD',
+      expensiveQuery: undefined,
       filters: [],
       functionColumns: [],
       groups: [],
       orders: [],
       pageInfo: {
         countTotal: false,
-        pageNo: undefined,
+        pageNo: 1,
         pageSize: 1000,
       },
+      params: undefined,
       script: false,
       viewId: 'view-id',
     });
@@ -1610,6 +1616,37 @@ describe('ChartDataRequestBuild Test', () => {
     });
   });
 
+  test('should use first page when pageInfo pageNo is absent', () => {
+    const dataView = createDataView();
+    const builder = new ChartDataRequestBuilder(dataView);
+    const requestParams = builder.build();
+
+    expect(requestParams.pageInfo).toEqual({
+      countTotal: false,
+      pageNo: 1,
+      pageSize: 1000,
+    });
+  });
+
+  test('should use first page when pageInfo pageNo is nullable or invalid', () => {
+    const dataView = createDataView();
+    const builder = new ChartDataRequestBuilder(
+      dataView,
+      [],
+      [],
+      { pageNo: null as unknown as number },
+      false,
+      true,
+    );
+    const requestParams = builder.build();
+
+    expect(requestParams.pageInfo).toEqual({
+      countTotal: false,
+      pageNo: 1,
+      pageSize: 1000,
+    });
+  });
+
   test('should computed functions', () => {
     const dataView = createDataView({
       computedFields: [
@@ -1716,7 +1753,7 @@ describe('ChartDataRequestBuild Test', () => {
     const requestParams = builder.build();
 
     expect(requestParams.cache).toEqual(viewConfig.cache);
-    expect(requestParams.cacheExpires).toEqual(viewConfig.cacheExpires);
+    expect(requestParams.cacheExpires).toEqual(0);
     expect(requestParams.concurrencyControl).toEqual(
       viewConfig.concurrencyControl,
     );
@@ -1754,7 +1791,7 @@ describe('ChartDataRequestBuild Test', () => {
     const requestParams = builder.build();
 
     expect(requestParams.cache).toEqual(viewConfig.cache);
-    expect(requestParams.cacheExpires).toEqual(viewConfig.cacheExpires);
+    expect(requestParams.cacheExpires).toEqual(0);
     expect(requestParams.concurrencyControl).toEqual(
       viewConfig.concurrencyControl,
     );

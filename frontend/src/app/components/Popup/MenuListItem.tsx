@@ -1,17 +1,26 @@
 import { ReactElement, ReactNode } from 'react';
 import styled from 'styled-components';
-import { SPACE, SPACE_XS } from 'styles/StyleConstants';
+import { SPACE, SPACE_MD, SPACE_XS } from 'styles/StyleConstants';
 import { cloneElementWithClassName } from 'utils/reactCompat';
 
 interface ListItemProps {
   prefix?: ReactElement;
   suffix?: ReactElement;
   children?: ReactNode;
+  className?: string;
 }
 
-export function MenuItemContent({ prefix, suffix, children }: ListItemProps) {
+export const TREE_MORE_MENU_POPUP_CLASS = 'yubi-tree-more-menu-popup';
+export const TREE_MORE_MENU_ITEM_CLASS = 'yubi-tree-more-menu-item';
+
+export function MenuItemContent({
+  prefix,
+  suffix,
+  children,
+  className,
+}: ListItemProps) {
   return (
-    <StyledListItem>
+    <StyledListItem className={className}>
       {prefix && cloneElementWithClassName(prefix, 'prefix')}
       {children}
       {suffix && cloneElementWithClassName(suffix, 'suffix')}
@@ -24,8 +33,25 @@ const StyledListItem = styled.div`
   align-items: center;
 
   > .prefix {
+    display: inline-flex;
     flex-shrink: 0;
+    justify-content: center;
+    width: ${SPACE_MD};
     margin-right: ${SPACE_XS};
+  }
+
+  > span:not(.prefix):not(.suffix),
+  > p {
+    display: inline-flex;
+    flex: 1;
+    align-items: center;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1;
+    white-space: nowrap;
   }
 
   > .suffix {
@@ -38,11 +64,5 @@ const StyledListItem = styled.div`
     &.icon {
       color: ${p => p.theme.textColorLight};
     }
-  }
-
-  > p {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 `;

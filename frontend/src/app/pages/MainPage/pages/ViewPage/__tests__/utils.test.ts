@@ -30,6 +30,7 @@ import {
   buildRequestColumns,
   dataModelColumnSorter,
   diffMergeHierarchyModel,
+  getColumnWidthMap,
   handleStringScriptToObject,
   transformQueryResultToModelAndDataSource,
   transformModelToViewModel,
@@ -265,6 +266,56 @@ describe('transformQueryResultToModelAndDataSource test', () => {
       },
     });
     expect(result.dataSource).toEqual([]);
+  });
+});
+
+describe('getColumnWidthMap test', () => {
+  test('should keep long result cell text visible in one-line result cells', () => {
+    const getContextSpy = vi
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockImplementation(
+        () =>
+          ({
+            font: '',
+            measureText: (text: string) => ({
+              width: String(text || '').length * 8,
+            }),
+          }) as unknown as CanvasRenderingContext2D,
+      );
+
+    const widthMap = getColumnWidthMap(
+      {
+        create_time: { type: DataViewFieldType.DATE },
+        english_name: { type: DataViewFieldType.STRING },
+        file_url: { type: DataViewFieldType.STRING },
+      },
+      [
+        {
+          create_time: '2026-04-21 18:35:58.000',
+          english_name:
+            'British Indian Ocean Territory Long Display Name For Preview',
+          file_url:
+            'file:///Users/demo/source/new_country_rows/very/deep/path/source-preview.csv',
+        },
+      ],
+    );
+
+    expect(widthMap.create_time).toBeGreaterThanOrEqual(
+      '2026-04-21 18:35:58.000'.length * 8 + 16,
+    );
+    expect(widthMap.english_name).toBeGreaterThanOrEqual(
+      'British Indian Ocean Territory Long Display Name For Preview'.length *
+        8 +
+        16,
+    );
+    expect(widthMap.file_url).toBeGreaterThanOrEqual(
+      'file:///Users/demo/source/new_country_rows/very/deep/path/source-preview.csv'
+        .length *
+        8 +
+        16,
+    );
+
+    getContextSpy.mockRestore();
   });
 });
 

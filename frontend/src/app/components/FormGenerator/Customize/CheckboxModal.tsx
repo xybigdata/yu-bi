@@ -108,13 +108,35 @@ const CheckboxModal: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
 export default CheckboxModal;
 
 const StyledCheckboxModal = styled.div`
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   width: 100%;
   height: ${SPACE_TIMES(20)};
+  padding: 4px 15px;
+  color: ${p => p.theme.textColor};
+  cursor: pointer;
+  background: ${p => p.theme.componentBackground};
+  border: 1px solid #d9d9d9;
+  border-radius: 2px;
 
-  & > button {
+  & > .ant-btn-link {
+    display: block;
+    padding: 4px 15px;
     margin-right: ${SPACE_TIMES(4)};
-    color: ${p => p.theme.textColor};
+    text-align: center;
+    border-radius: 2px;
+
+    &:not(:disabled) {
+      color: ${p => p.theme.textColor};
+    }
+
+    &:disabled {
+      color: ${p => p.theme.textColorDisabled};
+    }
+
+    > span {
+      display: inline-block;
+    }
   }
 `;

@@ -50,6 +50,12 @@ import { CloneValueDeep, isEmptyArray, Omit } from 'utils/object';
 import { ConditionalStyleFormValues } from '../../FormGenerator/Customize/ConditionalStyle';
 import AntdTableWrapper from './AntdTableWrapper';
 import {
+  BASIC_TABLE_BORDER_WIDTH,
+  BASIC_TABLE_CELL_HORIZONTAL_PADDING,
+  getBasicTableDefaultColumnWidth,
+  isSummaryValue,
+} from './columnWidth';
+import {
   getCustomBodyCellStyle,
   getCustomBodyRowStyle,
 } from './conditionalStyle';
@@ -90,10 +96,6 @@ type ColumnRowSpanState = {
 type TableSortOrder = 'ascend' | 'descend' | undefined;
 type BasicTableChartDataSet = IChartDataSet<ChartDataSetCellValue>;
 
-const isSummaryValue = (
-  value: ChartDataSetCellValue,
-): value is string | number => value !== null && value !== undefined;
-
 class BasicTableChart extends ReactChart {
   useIFrame = false;
   isISOContainer = 'react-table';
@@ -104,8 +106,8 @@ class BasicTableChart extends ReactChart {
 
   private utilCanvas;
   private dataColumnWidths: DataColumnWidthMap = {};
-  private tablePadding = 16;
-  private tableCellBorder = 1;
+  private tablePadding = BASIC_TABLE_CELL_HORIZONTAL_PADDING / 2;
+  private tableCellBorder = BASIC_TABLE_BORDER_WIDTH / 2;
   private cachedAntTableOptions?: BasicTableOptions;
   private cachedYuBiConfig: ChartConfig = {};
   private cacheContext: BrokerContext | null = null;
@@ -271,8 +273,7 @@ class BasicTableChart extends ReactChart {
       onRow: (_, index) => {
         const row = index === undefined ? undefined : chartDataSet?.[index];
         const rowData = row?.convertToCaseSensitiveObject() as
-          | BasicTableRowData
-          | undefined;
+          BasicTableRowData | undefined;
         return { index, rowData };
       },
       components: this.getTableComponents(
@@ -535,55 +536,49 @@ class BasicTableChart extends ReactChart {
         [c.uid!, 'columnStyle'],
         ['columnWidth', 'useColumnWidth'],
       );
-      const datas = chartDataSet?.map(dc => {
+      const contentWidths = chartDataSet?.map(dc => {
         const text = dc.getCell(c);
-        const width = this.getTextWidth(
+        return this.getTextWidth(
           context,
           toFormattedValue(text, c.format),
           fontWeight,
           fontSize,
           fontFamily,
         );
-        const headerWidth = this.getTextWidth(
-          context,
-          header?.label || chartDataSet.getFieldKey(c),
-          headerFont?.fontWeight,
-          headerFont?.fontSize,
-          headerFont?.fontFamily,
-        );
-        const currentSummaryField = aggregateConfigs.find(
-          ac => ac.uid === c.uid,
-        );
-        const total = currentSummaryField
-          ? chartDataSet
-              ?.map(dc => dc.getCell(currentSummaryField))
-              .filter(isSummaryValue)
-          : [];
-        const summaryText = precisionCalculation(CalculationType.ADD, total);
-        const summaryWidth = this.getTextWidth(
-          context,
-          toFormattedValue(summaryText, c.format),
-          summaryFont?.fontWeight,
-          summaryFont?.fontSize,
-          summaryFont?.fontFamily,
-        );
-        const sorterIconWidth = 12;
-        return Math.max(
-          width,
-          headerWidth +
-            sorterIconWidth +
-            (c?.alias?.desc ? headerFont?.fontSize || 12 : 0),
-          summaryWidth + sorterIconWidth,
-        );
       });
+      const headerWidth = this.getTextWidth(
+        context,
+        header?.label || chartDataSet.getFieldKey(c),
+        headerFont?.fontWeight,
+        headerFont?.fontSize,
+        headerFont?.fontFamily,
+      );
+      const currentSummaryField = aggregateConfigs.find(ac => ac.uid === c.uid);
+      const total = currentSummaryField
+        ? chartDataSet
+            ?.map(dc => dc.getCell(currentSummaryField))
+            .filter(isSummaryValue)
+        : [];
+      const summaryText = precisionCalculation(CalculationType.ADD, total);
+      const summaryWidth = this.getTextWidth(
+        context,
+        toFormattedValue(summaryText, c.format),
+        summaryFont?.fontWeight,
+        summaryFont?.fontSize,
+        summaryFont?.fontFamily,
+      );
 
       return {
         [rowUniqKey]: {
-          columnWidthValue: getUseColumnWidth
-            ? columnWidth || 100
-            : (datas.length ? Math.max(...datas) : 0) +
-              this.tablePadding * 2 +
-              this.tableCellBorder * 2,
+          columnWidthValue: getBasicTableDefaultColumnWidth({
+            contentWidths,
+            headerWidth,
+            summaryWidth,
+            hasDescription: !!c?.alias?.desc,
+            headerFontSize: headerFont?.fontSize || 12,
+            configuredWidth: columnWidth,
+            useConfiguredWidth: getUseColumnWidth,
+          }),
           getUseColumnWidth,
         },
       };
@@ -828,8 +823,7 @@ class BasicTableChart extends ReactChart {
       ? sorter[0] || {}
       : sorter;
     const column = currentSorter.column as
-      | BasicTableSortState['column']
-      | undefined;
+      BasicTableSortState['column'] | undefined;
     return {
       column,
       order: currentSorter.order || undefined,

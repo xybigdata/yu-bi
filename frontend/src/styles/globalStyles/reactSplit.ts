@@ -27,6 +27,8 @@ export const ReactSplit = createGlobalStyle`
     min-height: 0;
 
     .gutter-horizontal {
+      cursor: ew-resize;
+
       &:before {
         width: 2px;
         height: 100%;
@@ -41,6 +43,8 @@ export const ReactSplit = createGlobalStyle`
     }
 
     .gutter-vertical {
+      cursor: ns-resize;
+
       &:before {
         width: 100%;
         height: 2px;

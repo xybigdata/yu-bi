@@ -1,10 +1,22 @@
 import { describe, expect, test } from 'vitest';
+import type { IJsonTabSetNode } from 'flexlayout-react';
 import {
   getLayoutNodeRectSize,
   getStableContainerSize,
   normalizeLayoutComponentType,
 } from '../layoutRuntime';
-import { LayoutComponentType } from '../ChartOperationPanelLayout';
+import layoutConfig, {
+  CHART_OPERATION_PANEL_LAYOUT,
+  LayoutComponentType,
+} from '../ChartOperationPanelLayout';
+
+const findTabSetById = (id: string) => {
+  const children = layoutConfig.layout.children || [];
+  return children.find(
+    (child): child is IJsonTabSetNode =>
+      child.type === 'tabset' && child.id === id,
+  );
+};
 
 describe('getLayoutNodeRectSize', () => {
   test('should fallback to zero when layout node is missing', () => {
@@ -94,9 +106,9 @@ describe('getStableContainerSize', () => {
 
 describe('normalizeLayoutComponentType', () => {
   test('should keep known layout component type', () => {
-    expect(
-      normalizeLayoutComponentType(LayoutComponentType.PRESENT),
-    ).toBe(LayoutComponentType.PRESENT);
+    expect(normalizeLayoutComponentType(LayoutComponentType.PRESENT)).toBe(
+      LayoutComponentType.PRESENT,
+    );
   });
 
   test('should reject unknown layout component type', () => {
@@ -119,5 +131,34 @@ describe('layout package runtime', () => {
 
     expect(runtimeModule.default).toEqual(expect.any(Function));
     expect(runtimeModule.WidthProvider).toEqual(expect.any(Function));
+  });
+});
+
+describe('chart operation panel layout', () => {
+  test('should keep chart canvas as the dominant workspace area', () => {
+    const dataView = findTabSetById('model-dragbar');
+    const config = findTabSetById('config');
+    const present = findTabSetById('present');
+
+    expect(dataView?.weight).toBe(CHART_OPERATION_PANEL_LAYOUT.dataViewWeight);
+    expect(dataView?.minWidth).toBe(
+      CHART_OPERATION_PANEL_LAYOUT.dataViewMinWidth,
+    );
+    expect(config?.weight).toBe(CHART_OPERATION_PANEL_LAYOUT.configWeight);
+    expect(config?.minWidth).toBe(CHART_OPERATION_PANEL_LAYOUT.configMinWidth);
+    expect(present?.weight).toBe(CHART_OPERATION_PANEL_LAYOUT.presentWeight);
+    expect(present?.minWidth).toBe(
+      CHART_OPERATION_PANEL_LAYOUT.presentMinWidth,
+    );
+    expect(present?.weight || 0).toBeGreaterThan(
+      (dataView?.weight || 0) + (config?.weight || 0),
+    );
+  });
+
+  test('should keep the config panel aligned with the Datart layout width', () => {
+    expect(CHART_OPERATION_PANEL_LAYOUT.dataViewMinWidth).toBe(256);
+    expect(CHART_OPERATION_PANEL_LAYOUT.dataViewWeight).toBe(256);
+    expect(CHART_OPERATION_PANEL_LAYOUT.configMinWidth).toBe(360);
+    expect(CHART_OPERATION_PANEL_LAYOUT.configWeight).toBe(360);
   });
 });

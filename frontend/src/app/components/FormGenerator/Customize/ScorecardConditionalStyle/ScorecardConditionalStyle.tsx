@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import { Button, Col, Popconfirm, Row, Space, Table, Tag } from 'antd';
+import { Button, Col, Popconfirm, Row, Space, Table } from 'antd';
 import type { TableColumnsType as ColumnsType } from 'antd';
 import {
   ChartStyleConfig,
@@ -29,6 +29,7 @@ import { AssignDeep, CloneValueDeep } from 'utils/object';
 import { uuidv4 } from 'utils/utils';
 import { ItemLayoutProps } from '../../types';
 import { itemLayoutComparer } from '../../utils';
+import ConditionalColorTag from '../ConditionalStyle/ConditionalColorTag';
 import AddModal from './add';
 import {
   ScorecardConditionalStyleContext,
@@ -119,12 +120,12 @@ const ScorecardConditionalStyle: FC<
           dataIndex: 'value',
           render: (_, { color }) => (
             <>
-              <Tag color={color.textColor}>
+              <ConditionalColorTag color={color.textColor}>
                 {t('conditionalStyleTable.header.color.text')}
-              </Tag>
-              <Tag color={color.background}>
+              </ConditionalColorTag>
+              <ConditionalColorTag color={color.background}>
                 {t('conditionalStyleTable.header.color.background')}
-              </Tag>
+              </ConditionalColorTag>
             </>
           ),
         },

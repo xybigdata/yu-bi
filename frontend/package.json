@@ -81,6 +81,7 @@
     "axios": "1.18.1",
     "classnames": "2.5.1",
     "dayjs": "1.11.21",
+    "dompurify": "3.4.11",
     "echarts": "6.1.0",
     "flexlayout-react": "0.9.1",
     "i18next": "26.3.3",
@@ -158,6 +159,7 @@
     "undici": "7.28.0",
     "brace-expansion": "1.1.13",
     "braces": "3.0.3",
+    "dompurify": "3.4.11",
     "micromatch": "4.0.8",
     "minimist": "1.2.8",
     "antd": "$antd"

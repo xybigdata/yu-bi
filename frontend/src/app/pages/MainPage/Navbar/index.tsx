@@ -110,8 +110,11 @@ export function Navbar() {
     () => [
       {
         key: 'language',
-        icon: <GlobalOutlined className="icon" />,
-        label: <p>{t('nav.account.switchLanguage.title')}</p>,
+        label: (
+          <MenuItemContent prefix={<GlobalOutlined className="icon" />}>
+            <p>{t('nav.account.switchLanguage.title')}</p>
+          </MenuItemContent>
+        ),
         children: [
           { key: 'zh', label: '中文' },
           { key: 'en', label: 'English' },
@@ -119,8 +122,11 @@ export function Navbar() {
       },
       {
         key: 'theme',
-        icon: <SkinOutlined className="icon" />,
-        label: <p>{t('nav.account.switchTheme.title')}</p>,
+        label: (
+          <MenuItemContent prefix={<SkinOutlined className="icon" />}>
+            <p>{t('nav.account.switchTheme.title')}</p>
+          </MenuItemContent>
+        ),
         children: [
           {
             key: 'light',
@@ -294,7 +300,7 @@ export function Navbar() {
         case 'logout':
           dispatch(
             logout(() => {
-              navigate.replace('/');
+              navigate.replace('/login');
             }),
           );
           break;

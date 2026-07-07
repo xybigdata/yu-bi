@@ -22,8 +22,12 @@ import { AddButton } from './AddButton';
 
 type MenuClickInfo = Parameters<NonNullable<MenuProps['onClick']>>[0];
 type AddButtonCallback =
-  | (() => void | false)
-  | ((menuClickHandler: MenuClickInfo) => void | false);
+  (() => void | false) | ((menuClickHandler: MenuClickInfo) => void | false);
+
+export const SIDEBAR_TITLE_MORE_MENU_POPUP_CLASS =
+  'yubi-sidebar-title-more-menu-popup';
+export const SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS =
+  'sidebar-title-more-menu-item';
 
 export interface ListTitleProps {
   key?: string;
@@ -38,6 +42,8 @@ export interface ListTitleProps {
     callback: AddButtonCallback;
   };
   more?: {
+    overlayClassName?: string;
+    itemClassName?: string;
     items: Array<{
       key: string;
       text: string;
@@ -88,7 +94,11 @@ export function ListTitle({
     ({ key, text, prefix, suffix }) => ({
       key,
       label: (
-        <MenuItemContent prefix={prefix} suffix={suffix}>
+        <MenuItemContent
+          className={more.itemClassName}
+          prefix={prefix}
+          suffix={suffix}
+        >
           {text}
         </MenuItemContent>
       ),
@@ -121,6 +131,7 @@ export function ListTitle({
             <Popup
               trigger={['click']}
               placement="bottomRight"
+              overlayClassName={more.overlayClassName}
               content={
                 <MenuWrapper
                   prefixCls="ant-dropdown-menu"

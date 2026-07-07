@@ -91,7 +91,8 @@ public class JwtRequestAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            // Set authenticated principal in SecurityContext
+            // Set authenticated principal in SecurityContext.
+            // Authorization is loaded lazily by SpringSecuritySubjectFacade using current org context.
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
             SecurityContextHolder.getContext().setAuthentication(authentication);

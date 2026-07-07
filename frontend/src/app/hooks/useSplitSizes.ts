@@ -19,24 +19,111 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
+const SIZE_EPSILON = 0.01;
+
 interface UseSplitSizesProps {
   limitedSide: 0 | 1;
   range: [number, number];
 }
 
+interface NormalizeSplitSizesOptions {
+  limitedSide: 0 | 1;
+  range: [number, number];
+  targetSizes?: number[];
+  viewportWidth: number;
+}
+
+export function getLimitedSideRange(
+  range: [number, number],
+  viewportWidth: number,
+) {
+  const [minSize, maxSize] = range;
+  const limitedViewportWidth = Math.max(viewportWidth, 1);
+  const minPct = Math.min(
+    Math.ceil((minSize / limitedViewportWidth) * 100),
+    100,
+  );
+  const maxPct = Math.max(
+    minPct,
+    Math.min(Math.floor((maxSize / limitedViewportWidth) * 100), 100),
+  );
+
+  return { maxPct, minPct };
+}
+
+export function normalizeSplitSizes({
+  limitedSide,
+  range,
+  targetSizes,
+  viewportWidth,
+}: NormalizeSplitSizesOptions) {
+  const { maxPct, minPct } = getLimitedSideRange(range, viewportWidth);
+  const baseSizes = targetSizes?.length === 2 ? targetSizes : undefined;
+  const limitedPct = Math.min(
+    Math.max(baseSizes?.[limitedSide] ?? minPct, minPct),
+    maxPct,
+  );
+  const normalized = [0, 0];
+  normalized[limitedSide] = limitedPct;
+  normalized[limitedSide === 0 ? 1 : 0] = 100 - limitedPct;
+
+  return normalized;
+}
+
+export function areSplitSizesEqual(
+  currentSizes: number[] | undefined,
+  nextSizes: number[],
+) {
+  return (
+    currentSizes?.length === nextSizes.length &&
+    currentSizes.every(
+      (currentSize, index) =>
+        Math.abs(currentSize - nextSizes[index]) < SIZE_EPSILON,
+    )
+  );
+}
+
 export function useSplitSizes({ limitedSide, range }: UseSplitSizesProps) {
-  const [sizes, setSizes] = useState([0, 0]);
-  const [minSize] = range;
+  const [minSize, maxSize] = range;
+
+  const getNormalizedSizes = useCallback(
+    (targetSizes?: number[]) => {
+      return normalizeSplitSizes({
+        limitedSide,
+        range: [minSize, maxSize],
+        targetSizes,
+        viewportWidth: document.documentElement.clientWidth,
+      });
+    },
+    [limitedSide, maxSize, minSize],
+  );
+
+  const getStableNormalizedSizes = useCallback(
+    (nextSizes: number[] | undefined, currentSizes?: number[]) => {
+      const normalized = getNormalizedSizes(nextSizes);
+      return areSplitSizesEqual(currentSizes, normalized)
+        ? currentSizes!
+        : normalized;
+    },
+    [getNormalizedSizes],
+  );
+
+  const [sizes, setSizes] = useState(() => getNormalizedSizes());
 
   const onResize = useCallback(() => {
-    const minPct = Math.floor(
-      (minSize / document.documentElement.clientWidth) * 100,
+    setSizes(currentSizes =>
+      getStableNormalizedSizes(currentSizes, currentSizes),
     );
-    const pct = Math.max(minPct, sizes[0]);
-    if (pct !== sizes[0]) {
-      setSizes([pct, 100 - pct]);
-    }
-  }, [sizes, minSize]);
+  }, [getStableNormalizedSizes]);
+
+  const setNormalizedSizes = useCallback(
+    (nextSizes: number[]) => {
+      setSizes(currentSizes =>
+        getStableNormalizedSizes(nextSizes, currentSizes),
+      );
+    },
+    [getStableNormalizedSizes],
+  );
 
   useEffect(() => {
     onResize();
@@ -46,5 +133,5 @@ export function useSplitSizes({ limitedSide, range }: UseSplitSizesProps) {
     };
   }, [onResize]);
 
-  return { sizes, setSizes };
+  return { sizes, setSizes: setNormalizedSizes };
 }

@@ -31,6 +31,15 @@ import java.io.IOException;
 @RestController
 public class RootController {
 
+    @GetMapping(value = {
+            "confirminvite",
+            "organizations/{orgId}",
+            "organizations/{orgId}/**"
+    })
+    public void index(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.getRequestDispatcher("/index.html").forward(request, response);
+    }
+
     @GetMapping(value = "shareChart/**")
     public void shareChart(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.getRequestDispatcher("/shareChart.html").forward(request, response);

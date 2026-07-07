@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import type { DeltaStatic } from './quillCompat';
 
 type DeltaLike = {
@@ -5,7 +6,11 @@ type DeltaLike = {
 };
 
 const isDeltaStatic = (value: unknown): value is DeltaStatic => {
-  return !!value && typeof value === 'object' && Array.isArray((value as DeltaLike).ops);
+  return (
+    !!value &&
+    typeof value === 'object' &&
+    Array.isArray((value as DeltaLike).ops)
+  );
 };
 
 const looksLikeStructuredRichText = (value: string) => {
@@ -17,7 +22,7 @@ export const normalizeRichTextValue = (
   value: unknown,
 ): DeltaStatic | string => {
   if (typeof value === 'string') {
-    return value;
+    return sanitizeRichTextHtml(value);
   }
 
   if (isDeltaStatic(value)) {
@@ -25,6 +30,16 @@ export const normalizeRichTextValue = (
   }
 
   return '';
+};
+
+export const sanitizeRichTextHtml = (value: string): string => {
+  if (!value) {
+    return value;
+  }
+
+  return DOMPurify.sanitize(value, {
+    USE_PROFILES: { html: true },
+  });
 };
 
 export const parseRichTextContent = (
@@ -35,12 +50,12 @@ export const parseRichTextContent = (
   }
 
   if (!looksLikeStructuredRichText(value)) {
-    return value;
+    return sanitizeRichTextHtml(value);
   }
 
   try {
     return normalizeRichTextValue(JSON.parse(value));
   } catch {
-    return value;
+    return sanitizeRichTextHtml(value);
   }
 };
