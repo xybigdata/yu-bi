@@ -211,9 +211,12 @@ export function getTheWidgetFiltersAndParams<
     const content = filterWidget.config.content;
     if (!isControllerWidgetContent(content)) return;
     const { relatedViews, config: controllerConfig, type } = content;
-    const relatedViewItem = relatedViews
-      .filter(view => view.fieldValue)
-      .find(view => view.viewId === chartWidget?.viewIds?.[0]);
+    const relatedViewItem = getControllerRelatedViewItem({
+      relatedViews,
+      relation: hasRelation,
+      chartWidget,
+      view,
+    });
     if (!relatedViewItem) return;
 
     const values = getWidgetControlValues({
@@ -278,6 +281,44 @@ export function getTheWidgetFiltersAndParams<
   };
   return res;
 }
+
+const getRelationWidgetRelatedViewIds = (relation: unknown): string[] => {
+  const config = (relation as { config?: unknown })?.config;
+  const controlToWidget = (
+    config as { controlToWidget?: { widgetRelatedViewIds?: unknown } }
+  )?.controlToWidget;
+  const viewIds = controlToWidget?.widgetRelatedViewIds;
+  return Array.isArray(viewIds)
+    ? viewIds.filter((viewId): viewId is string => typeof viewId === 'string')
+    : [];
+};
+
+const getControllerRelatedViewItem = (args: {
+  relatedViews: RelatedView[];
+  relation: unknown;
+  chartWidget: Widget;
+  view?: ChartDataView;
+}) => {
+  const { chartWidget, relatedViews, relation, view } = args;
+  const chartViewIds = new Set(
+    (chartWidget.viewIds || []).concat(view?.id ? [view.id] : []),
+  );
+  const relationViewIds = getRelationWidgetRelatedViewIds(relation);
+
+  return relatedViews
+    .filter(relatedView => relatedView.fieldValue)
+    .find(relatedView => {
+      if (relatedView.viewId) {
+        return chartViewIds.has(relatedView.viewId);
+      }
+
+      if (relationViewIds.length > 0) {
+        return relationViewIds.some(viewId => chartViewIds.has(viewId));
+      }
+
+      return relatedViews.length === 1 && chartViewIds.size === 1;
+    });
+};
 
 export const getWidgetControlValues = (opt: {
   type: ControllerFacadeTypes;

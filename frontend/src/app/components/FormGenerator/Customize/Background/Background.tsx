@@ -22,7 +22,7 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { BackgroundConfig } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { UploadDragger } from 'app/pages/DashBoardPage/pages/BoardEditor/components/SlideSetting/SettingItem/BasicSet/ImageUpload';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
-import { FC, memo, useEffect, useRef } from 'react';
+import { FC, memo, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { getColorPickerPopoverOptions } from '../../Basic/colorPickerOptions';
 import { Group, WithColorPicker } from '../../Basic/components/Group';
@@ -33,8 +33,11 @@ export const Background: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
     const { value, options } = data;
     const gt = useI18NPrefix(`viz.board.setting`);
     const valRef = useRef<BackgroundConfig | undefined>(undefined);
+    const [imageValue, setImageValue] = useState(value?.image || '');
+
     useEffect(() => {
       valRef.current = value;
+      setImageValue(value?.image || '');
     }, [value]);
 
     const handleChange = (obj: { key: string; val: string }) => {
@@ -45,10 +48,13 @@ export const Background: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
       onChange?.(ancestors, newVal);
     };
     const onImageChange = imageUrl => {
+      setImageValue(imageUrl);
       handleChange({ key: 'image', val: imageUrl });
     };
     const onImageUrlChange = e => {
-      handleChange({ key: 'image', val: e.target.value });
+      const nextImageUrl = e.target.value;
+      setImageValue(nextImageUrl);
+      handleChange({ key: 'image', val: nextImageUrl });
     };
     const onColorChange = value => {
       handleChange({ key: 'color', val: value });
@@ -67,14 +73,14 @@ export const Background: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
         </Group>
         <span>{gt('image')}</span>
         <UploadDragger
-          value={value.image as string}
+          value={imageValue}
           onChange={onImageChange}
           placeholder={gt('uploadTip')}
         />
         <div>URL</div>
         <Input
           className="yubi-ant-input"
-          value={value.image}
+          value={imageValue}
           onChange={onImageUrlChange}
         />
       </Wrap>

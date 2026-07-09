@@ -1,9 +1,11 @@
 import styled from 'styled-components';
-import { SPACE_XS } from 'styles/StyleConstants';
+import { G10, SPACE_XS } from 'styles/StyleConstants';
 
 export const Group = styled.div`
   display: flex;
   flex: 1;
+  column-gap: ${SPACE_XS};
+  align-items: center;
   margin-bottom: ${SPACE_XS};
 
   &:last-of-type {
@@ -11,17 +13,18 @@ export const Group = styled.div`
   }
 
   .ant-select {
-    margin-left: ${SPACE_XS};
     overflow: hidden;
+    background-color: ${G10};
 
-    &:first-of-type {
-      margin-left: 0;
+    .ant-select-selector {
+      background-color: ${G10};
     }
   }
 `;
 
 export const WithColorPicker = styled.div`
   display: flex;
+  column-gap: ${SPACE_XS};
   align-items: center;
 
   > div:first-of-type {
@@ -29,6 +32,6 @@ export const WithColorPicker = styled.div`
   }
 
   > .color-picker {
-    margin-left: ${SPACE_XS};
+    margin-left: 0;
   }
 `;

@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+import { CheckOutlined } from '@ant-design/icons';
 import { Menu, MenuProps, Radio, Space } from 'antd';
 import {
   AggregateFieldActionType,
@@ -30,17 +31,20 @@ import { FC, useState } from 'react';
 
 interface AggregationLimitActionMenuItemsArgs {
   actionType: typeof ChartDataSectionFieldActionType.AggregateLimit;
+  aggregate?: AggregateFieldActionType;
   onChange: (selectedValue: AggregateFieldActionType) => void;
   t: (key: string) => string;
 }
 
 export const buildAggregationLimitMenuItems = ({
   actionType,
+  aggregate,
   onChange,
   t,
 }: AggregationLimitActionMenuItemsArgs): MenuProps['items'] => {
   return AggregateFieldSubAggregateType[actionType]?.map(agg => ({
     key: agg,
+    icon: aggregate === agg ? <CheckOutlined /> : undefined,
     label: t(agg),
     onClick: () => onChange(agg),
   }));
@@ -72,6 +76,7 @@ const AggregationLimitAction: FC<{
           selectable={false}
           items={buildAggregationLimitMenuItems({
             actionType: ChartDataSectionFieldActionType.AggregateLimit,
+            aggregate,
             onChange,
             t,
           })}

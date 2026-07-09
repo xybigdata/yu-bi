@@ -194,6 +194,7 @@ const ChartDataConfigSectionActionMenu: FC<
     if (actionName === ChartDataSectionFieldActionType.AggregateLimit) {
       return buildAggregationLimitMenuItems({
         actionType: ChartDataSectionFieldActionType.AggregateLimit,
+        aggregate: fieldConfig?.aggregate,
         onChange: selectedValue => {
           const nextConfig = updateBy(fieldConfig, draft => {
             draft.aggregate = selectedValue;

@@ -244,9 +244,9 @@ const StyledContainer = styled(StyledBackground)<{ curWH: number[] }>`
   }
 
   .grid-wrap {
-    flex: 1;
     min-width: 0;
-    overflow-y: auto;
+    min-height: 100%;
+    overflow-y: visible;
     -ms-overflow-style: none;
   }
 

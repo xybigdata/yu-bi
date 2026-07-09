@@ -24,7 +24,10 @@ import { WidgetContext } from '../WidgetProvider/WidgetProvider';
 import { BlockMaskLayer } from './BlockMaskLayer';
 import { WidgetDndHandleMask } from './WidgetDndHandleMask';
 
-export const EditMask: React.FC<{ group?: boolean }> = memo(({ group }) => {
+export const EditMask: React.FC<{
+  group?: boolean;
+  onDoubleClick?: () => void;
+}> = memo(({ group, onDoubleClick }) => {
   const widget = useContext(WidgetContext);
   const canWrapped = widgetManagerInstance.meta(
     widget.config.originalType,
@@ -33,9 +36,17 @@ export const EditMask: React.FC<{ group?: boolean }> = memo(({ group }) => {
   return (
     <>
       {!widgetInfo.editing && (
-        <WidgetDndHandleMask widgetId={widget.id} canWrapped={canWrapped} />
+        <WidgetDndHandleMask
+          canWrapped={canWrapped}
+          onDoubleClick={onDoubleClick}
+          widgetId={widget.id}
+        />
       )}
-      <BlockMaskLayer widget={widget} widgetInfo={widgetInfo} />
+      <BlockMaskLayer
+        onDoubleClick={onDoubleClick}
+        widget={widget}
+        widgetInfo={widgetInfo}
+      />
     </>
   );
 });

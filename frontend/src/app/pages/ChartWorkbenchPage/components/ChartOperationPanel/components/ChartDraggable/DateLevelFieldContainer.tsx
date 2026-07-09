@@ -46,16 +46,16 @@ function DateLevelFieldContainer({
 
   return (
     <ItemWrapper ref={dragRef}>
-      <Row>
+      <DateLevelRow>
         <IW fontSize={FONT_SIZE_TITLE}>
           {<CalendarOutlined style={{ color: INFO }} />}
         </IW>
-        <p>
+        <DateLevelName>
           {folderRole === ColumnRole.Hierarchy
             ? handleDateLevelsName(item)
             : item?.displayName}
-        </p>
-      </Row>
+        </DateLevelName>
+      </DateLevelRow>
     </ItemWrapper>
   );
 }
@@ -63,4 +63,18 @@ export default DateLevelFieldContainer;
 
 const ItemWrapper = styled.div`
   color: ${p => p.theme.textColorSnd};
+`;
+const DateLevelRow = styled(Row)`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+`;
+const DateLevelName = styled.p`
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;

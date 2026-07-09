@@ -17,17 +17,16 @@
  * limitations under the License.
  */
 
-import { Upload } from 'antd';
-import type { UploadProps } from 'antd';
-import { uploadBoardImage } from 'app/pages/DashBoardPage/pages/BoardEditor/slice/thunk';
 import {
-  ElementRef,
+  ChangeEvent,
+  CSSProperties,
   forwardRef,
   useCallback,
   useContext,
   useImperativeHandle,
   useRef,
 } from 'react';
+import { uploadBoardImage } from 'app/pages/DashBoardPage/pages/BoardEditor/slice/thunk';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import { BoardContext } from '../../BoardProvider/BoardProvider';
 
@@ -39,47 +38,60 @@ export interface HiddenUploaderRef {
   onClick: () => void;
 }
 
-type UploadRef = ElementRef<typeof Upload>;
-
 export const HiddenUploader = forwardRef<
   HiddenUploaderRef | undefined,
   HiddenUploaderProps
 >(({ onChange }: HiddenUploaderProps, ref) => {
   const dispatch = useAppDispatch();
-  const uploadRef = useRef<UploadRef>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const { boardId } = useContext(BoardContext);
 
   useImperativeHandle(ref, () => ({
     onClick: () => {
-      uploadRef.current?.nativeElement?.click();
+      inputRef.current?.click();
     },
   }));
 
-  const beforeUpload: UploadProps['beforeUpload'] = useCallback(
-    async info => {
+  const uploadImage = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) {
+        return;
+      }
+
       const formData = new FormData();
-      formData.append('file', info);
+      formData.append('file', file);
       dispatch(
         uploadBoardImage({
           boardId,
-          fileName: info.name,
+          fileName: file.name,
           formData: formData,
           resolve: onChange,
         }),
       );
-      return false;
+      event.target.value = '';
     },
     [boardId, dispatch, onChange],
   );
 
   return (
-    <Upload
+    <input
       accept=".jpg,.jpeg,.png,.gif,.svg"
-      beforeUpload={beforeUpload}
-      multiple={false}
-      showUploadList={false}
-      style={{ display: 'none' }}
-      ref={uploadRef}
+      onChange={uploadImage}
+      ref={inputRef}
+      style={hiddenInputStyle}
+      tabIndex={-1}
+      type="file"
     />
   );
 });
+
+const hiddenInputStyle: CSSProperties = {
+  position: 'fixed',
+  top: 0,
+  left: -9999,
+  width: 1,
+  height: 1,
+  opacity: 0,
+  pointerEvents: 'none',
+};

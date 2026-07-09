@@ -36,10 +36,11 @@ export enum StateModalSize {
 }
 
 const STATE_MODAL_CLASS_NAME = 'yubi-state-modal';
+const STATE_MODAL_BODY_MAX_HEIGHT = 'calc(100vh - 48px)';
 const STATE_MODAL_BODY_PADDING = '32px 32px 24px';
 
 const defaultBodyStyle: React.CSSProperties = {
-  maxHeight: 1000,
+  maxHeight: STATE_MODAL_BODY_MAX_HEIGHT,
   padding: STATE_MODAL_BODY_PADDING,
 };
 

@@ -18,7 +18,10 @@
  */
 
 import BasicTableChart from '../BasicTableChart';
-import { BASIC_TABLE_MIN_COLUMN_WIDTH } from '../columnWidth';
+import {
+  BASIC_TABLE_MIN_COLUMN_WIDTH,
+  BASIC_TABLE_SCROLLBAR_WIDTH,
+} from '../columnWidth';
 import {
   AggregateFieldActionType,
   ChartDataSectionType,
@@ -26,7 +29,7 @@ import {
 } from 'app/constants';
 
 const createDataset = () => ({
-  columns: [{ name: 'city' }, { name: 'SUM(amount)' }],
+  columns: [{ name: ['city'] }, { name: ['SUM(amount)'] }],
   rows: [
     ['杭州', '128'],
     ['上海', '256'],
@@ -58,6 +61,16 @@ const createConfig = () => ({
   ],
   styles: [],
   settings: [],
+});
+
+const createFixedHeaderConfig = () => ({
+  ...createConfig(),
+  styles: [
+    {
+      key: 'style',
+      rows: [{ key: 'enableFixedHeader', value: true }],
+    },
+  ],
 });
 
 const createContext = width => ({
@@ -106,6 +119,30 @@ describe('<BasicTableChart />', () => {
     ).toBe(true);
   });
 
+  test('stretches default column widths to match dashboard widget width', () => {
+    const options = component.getOptions(
+      createContext(800),
+      createDataset(),
+      createConfig(),
+    );
+
+    expect(options.columns.reduce((sum, column) => sum + column.width, 0)).toBe(
+      800,
+    );
+  });
+
+  test('reserves scrollbar width when fixed header is enabled', () => {
+    const options = component.getOptions(
+      createContext(800),
+      createDataset(),
+      createFixedHeaderConfig(),
+    );
+
+    expect(options.columns.reduce((sum, column) => sum + column.width, 0)).toBe(
+      800 - BASIC_TABLE_SCROLLBAR_WIDTH,
+    );
+  });
+
   test('updates column width through resizable header callback', () => {
     const updated = vi.fn();
     component.adapter.updated = updated;
@@ -128,6 +165,76 @@ describe('<BasicTableChart />', () => {
         ]),
       }),
       expect.objectContaining({ width: 800 }),
+    );
+  });
+
+  test('recalculates stretched column widths after dashboard widget resize', () => {
+    const updated = vi.fn();
+    component.adapter.updated = updated;
+    const dataset = createDataset();
+    const config = createConfig();
+
+    component.onUpdated(
+      {
+        dataset,
+        config,
+        widgetSpecialConfig: {},
+      },
+      createContext(800),
+    );
+    component.onResize(
+      {
+        dataset,
+        config,
+        widgetSpecialConfig: {},
+      },
+      createContext(480),
+    );
+
+    const lastCall = updated.mock.calls[updated.mock.calls.length - 1];
+    expect(
+      lastCall[0].columns.reduce((sum, column) => sum + column.width, 0),
+    ).toBe(480);
+  });
+
+  test('shrinks column widths after dashboard widget is resized smaller', () => {
+    const updated = vi.fn();
+    component.adapter.updated = updated;
+    const dataset = createDataset();
+    const config = createConfig();
+
+    component.onUpdated(
+      {
+        dataset,
+        config,
+        widgetSpecialConfig: {},
+      },
+      createContext(800),
+    );
+    component.onResize(
+      {
+        dataset,
+        config,
+        widgetSpecialConfig: {},
+      },
+      createContext(120),
+    );
+
+    const lastCall = updated.mock.calls[updated.mock.calls.length - 1];
+    expect(
+      lastCall[0].columns.reduce((sum, column) => sum + column.width, 0),
+    ).toBe(120);
+  });
+
+  test('renders row cell value when table dataIndex value is missing', () => {
+    const options = component.getOptions(
+      createContext(800),
+      createDataset(),
+      createConfig(),
+    );
+
+    expect(options.columns[0].render(undefined, options.dataSource[0], 0)).toBe(
+      '杭州',
     );
   });
 });

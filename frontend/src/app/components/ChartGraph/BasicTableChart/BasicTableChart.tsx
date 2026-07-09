@@ -50,8 +50,11 @@ import { CloneValueDeep, isEmptyArray, Omit } from 'utils/object';
 import { ConditionalStyleFormValues } from '../../FormGenerator/Customize/ConditionalStyle';
 import AntdTableWrapper from './AntdTableWrapper';
 import {
+  BasicTableColumnWidthState,
   BASIC_TABLE_BORDER_WIDTH,
   BASIC_TABLE_CELL_HORIZONTAL_PADDING,
+  BASIC_TABLE_SCROLLBAR_WIDTH,
+  fitBasicTableColumnWidthsToContainer,
   getBasicTableDefaultColumnWidth,
   isSummaryValue,
 } from './columnWidth';
@@ -235,7 +238,7 @@ class BasicTableChart extends ReactChart {
     const aggregateConfigs = mixedSectionConfigRows.filter(
       r => r.type === DataViewFieldType.NUMERIC,
     );
-    this.dataColumnWidths = this.calculateFieldsMaxWidth(
+    this.dataColumnWidths = this.getContainerAwareColumnWidths(
       mixedSectionConfigRows,
       chartDataSet,
       styleConfigs,
@@ -246,7 +249,7 @@ class BasicTableChart extends ReactChart {
       (a, b) => a + (b.columnWidthValue || 0),
       0,
     );
-    this.exceedMaxContent = this.totalWidth >= context.width!;
+    this.exceedMaxContent = this.totalWidth > (context.width || 0);
     const tablePagination = this.getPagingOptions(
       settingConfigs,
       dataset?.pageInfo,
@@ -321,7 +324,7 @@ class BasicTableChart extends ReactChart {
       .filter(c => c.key === 'mixed')
       .flatMap(config => config.rows || []);
 
-    this.dataColumnWidths = this.calculateFieldsMaxWidth(
+    this.dataColumnWidths = this.getContainerAwareColumnWidths(
       mixedSectionConfigRows,
       chartDataSet,
       styleConfigs,
@@ -332,7 +335,7 @@ class BasicTableChart extends ReactChart {
       (a, b) => a + (b.columnWidthValue || 0),
       0,
     );
-    this.exceedMaxContent = this.totalWidth >= (context.width || 0);
+    this.exceedMaxContent = this.totalWidth > (context.width || 0);
     return this.getColumns(
       mixedSectionConfigRows,
       styleConfigs,
@@ -601,6 +604,36 @@ class BasicTableChart extends ReactChart {
     return maxContentByFields.reduce<DataColumnWidthMap>((acc, cur) => {
       return Object.assign({}, acc, { ...cur });
     }, {});
+  }
+
+  private getContainerAwareColumnWidths(
+    mixedSectionConfigRows: ChartDataSectionField[],
+    chartDataSet: BasicTableChartDataSet,
+    styleConfigs: ChartStyleConfig[],
+    context: BrokerContext,
+    settingConfigs: ChartStyleConfig[],
+  ): DataColumnWidthMap {
+    const [enableFixedHeader] = getStyles(
+      styleConfigs,
+      ['style'],
+      ['enableFixedHeader'],
+    );
+    const widths = this.calculateFieldsMaxWidth(
+      mixedSectionConfigRows,
+      chartDataSet,
+      styleConfigs,
+      context,
+      settingConfigs,
+    ) as Record<string, BasicTableColumnWidthState>;
+    const availableWidth = Math.max(
+      (context.width || 0) -
+        (enableFixedHeader ? BASIC_TABLE_SCROLLBAR_WIDTH : 0),
+      0,
+    );
+
+    return fitBasicTableColumnWidthsToContainer(widths, availableWidth, [
+      this.rowNumberUniqKey,
+    ]);
   }
 
   protected getTableComponents(
@@ -919,15 +952,7 @@ class BasicTableChart extends ReactChart {
             .reverse()
         : [];
       const columnConfig = this.dataColumnWidths?.[chartDataSet.getFieldKey(c)];
-      const colMaxWidth =
-        !this.exceedMaxContent &&
-        Object.values(this.dataColumnWidths).some(
-          item => item.getUseColumnWidth,
-        )
-          ? columnConfig?.getUseColumnWidth
-            ? columnConfig?.columnWidthValue
-            : ''
-          : columnConfig?.columnWidthValue;
+      const colMaxWidth = columnConfig?.columnWidthValue;
       return {
         sorter: true,
         showSorterTooltip: false,
@@ -987,13 +1012,16 @@ class BasicTableChart extends ReactChart {
           };
         },
         render: (value, row, rowIndex) => {
-          const formattedValue = toFormattedValue(value, c.format);
+          const cellValue =
+            value ??
+            (typeof row?.getCell === 'function' ? row.getCell(c) : value);
+          const formattedValue = toFormattedValue(cellValue, c.format);
           if (!(autoMergeFields || []).includes(c.uid)) {
             return formattedValue;
           }
           return {
             children: formattedValue,
-            props: { rowSpan: columnRowSpans[rowIndex], cellValue: value },
+            props: { rowSpan: columnRowSpans[rowIndex], cellValue },
           };
         },
       };

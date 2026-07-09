@@ -22,6 +22,7 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { RelationFilterValue } from 'app/types/ChartConfig';
 import React, { memo, useCallback } from 'react';
 import styled from 'styled-components';
+import { controllerSelectStyles } from './ControllerSelectStyles';
 
 type TreeSelectValue = string[];
 type TreeSelectRawValue = TreeSelectProps<string[]>['value'];
@@ -104,7 +105,7 @@ export const TreeSelectController: React.FC<TreeControllerFormProps> = memo(
         style={{ width: '100%' }}
         placeholder={t('treeSelectController')}
         maxTagTextLength={4}
-        maxTagCount={3}
+        maxTagCount="responsive"
         onChange={handleTreeSelectChange}
         multiple
         bordered={false}
@@ -130,9 +131,5 @@ export const TreeSelectController: React.FC<TreeControllerFormProps> = memo(
   },
 );
 const StyledTreeSelect = styled(TreeSelect)`
-  display: block;
-
-  &.ant-select .ant-select-selector {
-    background-color: transparent !important;
-  }
+  ${controllerSelectStyles}
 `;

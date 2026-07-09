@@ -79,7 +79,39 @@ export const GlobalOverlays = createGlobalStyle`
   }
 
   .ant-modal.yubi-state-modal.ant-modal-confirm .ant-modal-confirm-btns {
+    flex: 0 0 auto;
     margin-top: ${SPACE_TIMES(6)};
+  }
+
+  .ant-modal.yubi-state-modal.ant-modal-confirm .ant-modal-body {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .ant-modal.yubi-state-modal.ant-modal-confirm .ant-modal-confirm-body-wrapper {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .ant-modal.yubi-state-modal.ant-modal-confirm .ant-modal-confirm-body,
+  .ant-modal.yubi-state-modal.ant-modal-confirm .ant-modal-confirm-content {
+    min-height: 0;
+  }
+
+  .ant-modal.yubi-state-modal.ant-modal-confirm .ant-modal-confirm-body {
+    flex: 1 1 auto;
+    overflow: hidden auto;
+  }
+
+  .ant-modal.yubi-state-modal.ant-modal-confirm .ant-modal-confirm-content {
+    overflow: visible;
+  }
+
+  .ant-modal.yubi-state-modal.ant-modal-confirm .yubi-state-modal-form {
+    overflow: visible;
   }
 
   /* app/components/Popup */
@@ -107,7 +139,23 @@ export const GlobalOverlays = createGlobalStyle`
       padding-top: 0;
     }
   }
-  
+
+  /* data config section dropdown */
+  .yubi-data-section-dropdown {
+    z-index: ${LEVEL_1000 - 1};
+
+    .ant-dropdown-menu {
+      border-inline-end: 0 !important;
+      border-right: 0 !important;
+    }
+
+    .ant-dropdown-menu-item,
+    .ant-dropdown-menu-submenu-title {
+      height: 40px;
+      min-height: 40px;
+      line-height: 40px;
+    }
+  }
 
   /* schema table header action dropdown menu */
   .yubi-schema-table-header-menu {
@@ -141,16 +189,6 @@ export const GlobalOverlays = createGlobalStyle`
     .ant-collapse-content >
     .ant-collapse-content-box {
       padding: ${SPACE_XS} 0 ${SPACE_SM} !important;
-    }
-  }
-
-  /* data config section dropdown */
-  .yubi-data-section-dropdown {
-    z-index: ${LEVEL_1000 - 1};
-
-    .ant-dropdown-menu {
-      border-inline-end: 0 !important;
-      border-right: 0 !important;
     }
   }
 

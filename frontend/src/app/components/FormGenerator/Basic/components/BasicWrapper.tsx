@@ -40,6 +40,14 @@ const Wrapper = styled(Form.Item)<{ $inline: boolean }>`
     width: 100%;
   }
 
+  .ant-select {
+    background-color: ${p => p.theme.bodyBackground} !important;
+  }
+
+  .ant-select:not(.ant-select-customize-input) .ant-select-selector {
+    background-color: ${p => p.theme.bodyBackground} !important;
+  }
+
   .ant-form-item-control-input-content > .ant-input,
   .ant-form-item-control-input-content > .ant-input-number,
   .ant-form-item-control-input-content > .ant-select {

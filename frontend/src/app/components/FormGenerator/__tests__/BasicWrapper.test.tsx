@@ -1,4 +1,4 @@
-import { Input } from 'antd';
+import { Input, Select } from 'antd';
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { ThemeProvider } from 'styled-components';
@@ -60,5 +60,20 @@ describe('BasicWrapper', () => {
       flexFlow: 'row nowrap',
       alignItems: 'center',
     });
+  });
+
+  test('should inject body background styles for direct select controls', () => {
+    renderWithTheme(
+      <BW label="聚合方式">
+        <Select value="sum" options={[{ label: '求和', value: 'sum' }]} />
+      </BW>,
+    );
+
+    expect(document.head.textContent).toContain(
+      `.ant-select{background-color:${themes.light.bodyBackground}!important;`,
+    );
+    expect(document.head.textContent).toContain(
+      `.ant-select:not(.ant-select-customize-input) .ant-select-selector{background-color:${themes.light.bodyBackground}!important;`,
+    );
   });
 });

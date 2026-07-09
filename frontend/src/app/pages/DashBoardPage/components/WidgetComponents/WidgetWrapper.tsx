@@ -21,20 +21,26 @@ import {
   BorderConfig,
   WidgetPadding,
 } from 'app/pages/DashBoardPage/pages/Board/slice/types';
-import { PropsWithChildren, memo } from 'react';
+import { HTMLAttributes, PropsWithChildren, memo } from 'react';
 import styled from 'styled-components';
 import { getWidgetSomeStyle } from '../../utils/widget';
 
 export const WidgetWrapper: React.FC<
-  PropsWithChildren<{
-    background: BackgroundConfig;
-    padding: WidgetPadding;
-    border: BorderConfig;
-  }>
+  PropsWithChildren<
+    HTMLAttributes<HTMLDivElement> & {
+      background: BackgroundConfig;
+      padding: WidgetPadding;
+      border: BorderConfig;
+    }
+  >
 > = memo(props => {
-  const { children, ...rest } = props;
-  const style = getWidgetSomeStyle(rest);
-  return <Wrapper style={style}>{children}</Wrapper>;
+  const { background, border, children, padding, style, ...rest } = props;
+  const widgetStyle = getWidgetSomeStyle({ background, border, padding });
+  return (
+    <Wrapper {...rest} style={{ ...widgetStyle, ...style }}>
+      {children}
+    </Wrapper>
+  );
 });
 const Wrapper = styled.div`
   display: flex;

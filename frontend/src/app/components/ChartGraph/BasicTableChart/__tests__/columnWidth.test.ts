@@ -5,6 +5,7 @@ import {
   BASIC_TABLE_HEADER_ACTION_WIDTH,
   BASIC_TABLE_MIN_COLUMN_WIDTH,
   BASIC_TABLE_SORTER_ICON_WIDTH,
+  fitBasicTableColumnWidthsToContainer,
   getBasicTableDefaultColumnWidth,
 } from '../columnWidth';
 
@@ -62,5 +63,73 @@ describe('getBasicTableDefaultColumnWidth', () => {
         headerWidth: 0,
       }),
     ).toBe(BASIC_TABLE_MIN_COLUMN_WIDTH);
+  });
+});
+
+describe('fitBasicTableColumnWidthsToContainer', () => {
+  test('distributes remaining container width to auto columns', () => {
+    expect(
+      fitBasicTableColumnWidthsToContainer(
+        {
+          city: { columnWidthValue: 100 },
+          amount: { columnWidthValue: 100 },
+        },
+        320,
+      ),
+    ).toEqual({
+      city: { columnWidthValue: 160 },
+      amount: { columnWidthValue: 160 },
+    });
+  });
+
+  test('keeps manual and fixed key columns unchanged while stretching others', () => {
+    expect(
+      fitBasicTableColumnWidthsToContainer(
+        {
+          rowNumber: { columnWidthValue: 40 },
+          city: { columnWidthValue: 100 },
+          amount: { columnWidthValue: 100, getUseColumnWidth: true },
+        },
+        320,
+        ['rowNumber'],
+      ),
+    ).toEqual({
+      rowNumber: { columnWidthValue: 40 },
+      city: { columnWidthValue: 180 },
+      amount: { columnWidthValue: 100, getUseColumnWidth: true },
+    });
+  });
+
+  test('shrinks columns when current widths exceed container width', () => {
+    expect(
+      fitBasicTableColumnWidthsToContainer(
+        {
+          city: { columnWidthValue: 180 },
+          amount: { columnWidthValue: 120 },
+        },
+        150,
+      ),
+    ).toEqual({
+      city: { columnWidthValue: 90 },
+      amount: { columnWidthValue: 60 },
+    });
+  });
+
+  test('shrinks manual columns only when needed to avoid horizontal scroll', () => {
+    expect(
+      fitBasicTableColumnWidthsToContainer(
+        {
+          rowNumber: { columnWidthValue: 40 },
+          city: { columnWidthValue: 180 },
+          amount: { columnWidthValue: 120, getUseColumnWidth: true },
+        },
+        190,
+        ['rowNumber'],
+      ),
+    ).toEqual({
+      rowNumber: { columnWidthValue: 40 },
+      city: { columnWidthValue: 90 },
+      amount: { columnWidthValue: 60, getUseColumnWidth: true },
+    });
   });
 });

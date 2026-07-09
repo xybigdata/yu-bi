@@ -58,6 +58,7 @@ export const Form = createGlobalStyle`
   .yubi-ant-select {
     &.ant-select {
       color: ${p => p.theme.textColorSnd};
+      background-color: ${p => p.theme.bodyBackground};
     }
 
     &.ant-select:not(.ant-select-customize-input) .ant-select-selector {

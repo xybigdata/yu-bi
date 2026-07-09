@@ -19,7 +19,6 @@
 
 import { Form, Modal } from 'antd';
 import { Split } from 'app/components';
-import { ChartDataViewFieldCategory, DataViewFieldType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { BoardContext } from 'app/pages/DashBoardPage/components/BoardProvider/BoardProvider';
 import widgetManagerInstance from 'app/pages/DashBoardPage/components/WidgetManager';
@@ -64,6 +63,7 @@ import { WidgetControlForm } from './ControllerConfig';
 import { RelatedViewForm } from './RelatedViewForm';
 import { RelatedWidgetItem, RelatedWidgets } from './RelatedWidgets';
 import {
+  buildRelatedViewsForWidgets,
   getInitWidgetController,
   postControlConfig,
   preformatControlConfig,
@@ -125,31 +125,11 @@ const ControllerWidgetPanel: React.FC<WidgetControllerPanelParams> = memo(
     const setViewsRelatedView = useCallback(
       (relatedWidgets: RelatedWidgetItem[]) => {
         const relatedViews = getFormRelatedViews();
-        const nextRelatedViews: RelatedView[] = [];
-        relatedWidgets.forEach(widgetItem => {
-          const oldViewItem = relatedViews?.find(
-            view => view.viewId === widgetItem.viewId && viewMap[view.viewId],
-          );
-          const newViewItem = nextRelatedViews.find(
-            view => view.viewId === widgetItem.viewId && viewMap[view.viewId],
-          );
-          if (!newViewItem) {
-            if (oldViewItem) {
-              nextRelatedViews.push({ ...oldViewItem });
-            } else {
-              const view = viewMap[widgetItem.viewId];
-              if (!view) return;
-              const relatedView: RelatedView = {
-                viewId: view.id,
-                relatedCategory: ChartDataViewFieldCategory.Field,
-                fieldValue: '',
-                fieldValueType: DataViewFieldType.STRING,
-              };
-              nextRelatedViews.push(relatedView);
-            }
-          }
+        return buildRelatedViewsForWidgets({
+          relatedWidgets,
+          previousRelatedViews: relatedViews,
+          viewMap,
         });
-        return nextRelatedViews;
       },
       [getFormRelatedViews, viewMap],
     );
@@ -187,9 +167,11 @@ const ControllerWidgetPanel: React.FC<WidgetControllerPanelParams> = memo(
           return tt;
         });
       setRelatedWidgets(oldRelatedWidgetIds);
-      setFormRelatedViews(setViewsRelatedView(oldRelatedWidgetIds));
-      const preRelatedViews = confContent.relatedViews?.filter(t => t.viewId);
-      form?.setFieldsValue({ relatedViews: preRelatedViews });
+      const preRelatedViews = buildRelatedViewsForWidgets({
+        relatedWidgets: oldRelatedWidgetIds,
+        previousRelatedViews: confContent.relatedViews,
+        viewMap,
+      });
 
       const { config } = confContent;
       form.setFieldsValue({

@@ -244,14 +244,14 @@ export const ChartDraggableSourceContainer: FC<
             <Panel
               key={colName}
               header={
-                <div ref={dragRef}>
+                <DateFieldHeader ref={dragRef}>
                   <IW fontSize={FONT_SIZE_TITLE}>{icon}</IW>
-                  <p>
+                  <DateFieldName>
                     {!folderRole || folderRole === ColumnRole.Hierarchy
                       ? colName
                       : displayName}
-                  </p>
-                </div>
+                  </DateFieldName>
+                </DateFieldHeader>
               }
             >
               {((children || []) as dateLevelFieldsProps[]).map((item, i) => {
@@ -434,7 +434,21 @@ const Container = styled.div<{ flexDirection?: string }>`
 
 const CollapseWrapper = styled(Collapse)`
   .ant-collapse-header {
+    align-items: center !important;
     padding: 0 !important;
+  }
+  .ant-collapse-header-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .ant-collapse-expand-icon {
+    display: flex !important;
+    flex: 0 0 ${SPACE_TIMES(8)};
+    align-items: center;
+    justify-content: center;
+    width: ${SPACE_TIMES(8)};
+    padding-inline-start: 0 !important;
   }
   .ant-collapse-content .ant-collapse-content-box {
     padding-top: 0 !important;
@@ -447,14 +461,21 @@ const CollapseWrapper = styled(Collapse)`
   }
   &.ant-collapse {
     width: 100%;
-    .ant-collapse-header {
-      > div {
-        display: flex;
-        align-items: center;
-        width: 100% !important;
-      }
-    }
   }
+`;
+const DateFieldHeader = styled.div`
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+`;
+const DateFieldName = styled.p`
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 const StyledFieldContent = styled.p`
   flex: 1;

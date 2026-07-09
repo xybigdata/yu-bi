@@ -49,11 +49,11 @@ describe('useStateModal', () => {
 
     expect(modalMock.latestConfirmProps?.className).toBe('yubi-state-modal');
     expect(modalMock.latestConfirmProps?.bodyStyle).toMatchObject({
-      maxHeight: 1000,
+      maxHeight: 'calc(100vh - 48px)',
       padding: '32px 32px 24px',
     });
     expect(modalMock.latestConfirmProps?.styles?.body).toMatchObject({
-      maxHeight: 1000,
+      maxHeight: 'calc(100vh - 48px)',
       padding: '32px 32px 24px',
     });
   });
