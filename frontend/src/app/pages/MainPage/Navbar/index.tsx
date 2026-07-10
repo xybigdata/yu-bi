@@ -479,18 +479,24 @@ const NavItem = styled(CompatNavLink)`
   padding: ${SPACE_XS} 0;
   margin: ${SPACE_XS} 0;
   color: ${p => p.theme.textColorDisabled};
+  text-decoration: none;
   border-radius: ${BORDER_RADIUS};
   transition: none;
 
   &:hover,
   &.active {
     color: ${p => p.theme.primary};
+    text-decoration: none;
     background-color: ${p => p.theme.emphasisBackground};
 
     h2 {
       font-weight: ${FONT_WEIGHT_MEDIUM};
       color: ${p => p.theme.textColor};
     }
+  }
+
+  &:focus {
+    text-decoration: none;
   }
 
   .anticon {
@@ -536,6 +542,13 @@ const SubNavTitle = styled(CompatNavLink)`
   align-items: center;
   padding: ${SPACE_XS} ${SPACE_LG} ${SPACE_XS} ${SPACE_LG};
   color: ${p => p.theme.textColorSnd};
+  text-decoration: none;
+
+  &:hover,
+  &:focus {
+    color: ${p => p.theme.textColorSnd};
+    text-decoration: none;
+  }
 
   .prefix {
     flex-shrink: 0;
@@ -550,6 +563,7 @@ const SubNavTitle = styled(CompatNavLink)`
 
   &.active {
     color: ${p => p.theme.primary};
+    text-decoration: none;
     background-color: ${p => p.theme.bodyBackground};
 
     .prefix {

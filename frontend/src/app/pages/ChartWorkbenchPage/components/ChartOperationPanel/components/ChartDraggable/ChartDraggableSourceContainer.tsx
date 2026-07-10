@@ -29,7 +29,7 @@ import {
   TableOutlined,
 } from '@ant-design/icons';
 import { Collapse, Dropdown, Row } from 'antd';
-import { IW, ToolbarButton } from 'app/components';
+import { InlineRow, InlineRowText, IW, ToolbarButton } from 'app/components';
 import { ChartDataViewFieldCategory, DataViewFieldType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import useToggle from 'app/hooks/useToggle';
@@ -244,14 +244,14 @@ export const ChartDraggableSourceContainer: FC<
             <Panel
               key={colName}
               header={
-                <DateFieldHeader ref={dragRef}>
+                <InlineRow ref={dragRef}>
                   <IW fontSize={FONT_SIZE_TITLE}>{icon}</IW>
-                  <DateFieldName>
+                  <InlineRowText>
                     {!folderRole || folderRole === ColumnRole.Hierarchy
                       ? colName
                       : displayName}
-                  </DateFieldName>
-                </DateFieldHeader>
+                  </InlineRowText>
+                </InlineRow>
               }
             >
               {((children || []) as dateLevelFieldsProps[]).map((item, i) => {
@@ -279,14 +279,13 @@ export const ChartDraggableSourceContainer: FC<
           className={styleClasses.join(' ')}
         >
           <IW fontSize={FONT_SIZE_TITLE}>{icon}</IW>
-          <StyledFieldContent>
-            {' '}
+          <InlineRowText>
             {isHierarchyFieldOrTable ||
             !folderRole ||
             folderRole === ColumnRole.Hierarchy
               ? colName
               : displayName}
-          </StyledFieldContent>
+          </InlineRowText>
           <div onClick={stopPPG}>
             <Dropdown
               disabled={_isAllowMoreAction()}
@@ -462,24 +461,4 @@ const CollapseWrapper = styled(Collapse)`
   &.ant-collapse {
     width: 100%;
   }
-`;
-const DateFieldHeader = styled.div`
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-width: 0;
-`;
-const DateFieldName = styled.p`
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-`;
-const StyledFieldContent = styled.p`
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: break-all;
 `;

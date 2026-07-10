@@ -128,7 +128,8 @@ export const GlobalOverlays = createGlobalStyle`
     .ant-popover-content {
       padding: 0;
     }
-    .ant-dropdown-menu {
+    .ant-dropdown-menu,
+    .ant-menu {
       border-inline-end: 0 !important;
       border-right: 0 !important;
       box-shadow: none;

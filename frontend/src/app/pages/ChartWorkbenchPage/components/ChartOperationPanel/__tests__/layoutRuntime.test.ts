@@ -161,4 +161,11 @@ describe('chart operation panel layout', () => {
     expect(CHART_OPERATION_PANEL_LAYOUT.configMinWidth).toBe(360);
     expect(CHART_OPERATION_PANEL_LAYOUT.configWeight).toBe(360);
   });
+
+  test('should allow side panels to stretch wider than the default layout', () => {
+    expect(CHART_OPERATION_PANEL_LAYOUT.presentMinWidth).toBe(520);
+    expect(CHART_OPERATION_PANEL_LAYOUT.presentMinWidth).toBeLessThan(
+      CHART_OPERATION_PANEL_LAYOUT.presentWeight,
+    );
+  });
 });

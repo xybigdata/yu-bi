@@ -31,7 +31,7 @@ export const CHART_OPERATION_PANEL_LAYOUT = {
   dataViewWeight: 256,
   configMinWidth: 360,
   configWeight: 360,
-  presentMinWidth: 640,
+  presentMinWidth: 520,
   presentWeight: 696,
 } as const;
 

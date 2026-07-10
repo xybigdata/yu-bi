@@ -1,5 +1,5 @@
 import { CalendarOutlined } from '@ant-design/icons';
-import { Row } from 'antd';
+import { InlineRow, InlineRowText } from 'app/components';
 import { IW } from 'app/components/IconWrapper';
 import { ColumnRole } from 'app/pages/MainPage/pages/ViewPage/slice/types';
 import { CHART_DRAG_ELEMENT_TYPE } from 'globalConstants';
@@ -46,16 +46,16 @@ function DateLevelFieldContainer({
 
   return (
     <ItemWrapper ref={dragRef}>
-      <DateLevelRow>
+      <InlineRow>
         <IW fontSize={FONT_SIZE_TITLE}>
           {<CalendarOutlined style={{ color: INFO }} />}
         </IW>
-        <DateLevelName>
+        <InlineRowText>
           {folderRole === ColumnRole.Hierarchy
             ? handleDateLevelsName(item)
             : item?.displayName}
-        </DateLevelName>
-      </DateLevelRow>
+        </InlineRowText>
+      </InlineRow>
     </ItemWrapper>
   );
 }
@@ -63,18 +63,4 @@ export default DateLevelFieldContainer;
 
 const ItemWrapper = styled.div`
   color: ${p => p.theme.textColorSnd};
-`;
-const DateLevelRow = styled(Row)`
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-width: 0;
-`;
-const DateLevelName = styled.p`
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 `;

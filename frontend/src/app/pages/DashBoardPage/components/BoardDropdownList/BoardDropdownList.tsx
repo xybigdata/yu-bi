@@ -24,11 +24,12 @@ import {
   ReloadOutlined,
   ShareAltOutlined,
 } from '@ant-design/icons';
-import { Menu, MenuProps, Popconfirm } from 'antd';
+import { Menu, MenuProps } from 'antd';
 import { DownloadFileType } from 'app/constants';
+import { ConfirmMenuLabel } from 'app/components/Popup';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useSaveAsViz } from 'app/pages/MainPage/pages/VizPage/hooks/useSaveAsViz';
-import { FC, memo, useContext, useMemo } from 'react';
+import { FC, memo, useCallback, useContext, useMemo, useState } from 'react';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import { useRecycleViz } from '../../../../hooks/useRecycleViz';
 import { usePublishBoard } from '../../hooks/usePublishBoard';
@@ -40,14 +41,17 @@ interface Props {
   onOpenShareLink: () => void;
   openStoryList: () => void;
   openMockData: () => void;
+  onCloseDropdown?: () => void;
 }
 export const useBoardDropdownItems = ({
   onOpenShareLink,
   openStoryList,
   openMockData,
+  onCloseDropdown,
 }: Props) => {
   const t = useI18NPrefix(`viz.action`);
   const tg = useI18NPrefix(`global`);
+  const [confirmKey, setConfirmKey] = useState<string>();
   const dispatch = useAppDispatch();
   const {
     allowDownload,
@@ -62,21 +66,45 @@ export const useBoardDropdownItems = ({
   const saveAsViz = useSaveAsViz();
   const { onBoardToDownLoad } = useContext(BoardActionContext);
   const { publishBoard } = usePublishBoard(boardId, 'DASHBOARD', status);
+  const closeConfirmMenu = useCallback(() => {
+    setConfirmKey(undefined);
+    onCloseDropdown?.();
+  }, [onCloseDropdown]);
+
+  const openConfirmMenu = useCallback((key: string) => {
+    setConfirmKey(key);
+  }, []);
+
+  const openConfirmMenuFromItem = useCallback(
+    (key: string) =>
+      (info: Parameters<NonNullable<MenuProps['onClick']>>[0]) => {
+        info.domEvent.preventDefault();
+        info.domEvent.stopPropagation();
+        openConfirmMenu(key);
+      },
+    [openConfirmMenu],
+  );
 
   return useMemo<MenuProps['items']>(() => {
     const reloadData = () => {
       dispatch(widgetsQueryAction({ boardId, renderMode }));
     };
-    const confirmLabel = (label: string, onConfirm: () => void | undefined) => (
-      <Popconfirm
-        placement="left"
+    const confirmLabel = (
+      key: string,
+      label: string,
+      onConfirm: (() => void) | undefined,
+    ) => (
+      <ConfirmMenuLabel
+        open={confirmKey === key}
         title={t('common.confirm')}
         okText={t('common.ok')}
         cancelText={t('common.cancel')}
+        onOpen={() => openConfirmMenu(key)}
+        onClose={closeConfirmMenu}
         onConfirm={onConfirm}
       >
         {label}
-      </Popconfirm>
+      </ConfirmMenuLabel>
     );
 
     return [
@@ -102,29 +130,39 @@ export const useBoardDropdownItems = ({
             { key: 'exportDataLine', type: 'divider' as const },
             {
               key: 'exportData',
+              onClick: openConfirmMenuFromItem('exportData'),
               icon: <CloudDownloadOutlined />,
-              label: confirmLabel(t('share.exportData'), () =>
+              label: confirmLabel('exportData', t('share.exportData'), () =>
                 onBoardToDownLoad?.(DownloadFileType.Excel),
               ),
             },
             {
               key: 'exportPDF',
+              onClick: openConfirmMenuFromItem('exportPDF'),
               icon: <CloudDownloadOutlined />,
-              label: confirmLabel(t('share.exportPDF'), () =>
+              label: confirmLabel('exportPDF', t('share.exportPDF'), () =>
                 onBoardToDownLoad?.(DownloadFileType.Pdf),
               ),
             },
             {
               key: 'exportPicture',
+              onClick: openConfirmMenuFromItem('exportPicture'),
               icon: <CloudDownloadOutlined />,
-              label: confirmLabel(t('share.exportPicture'), () =>
-                onBoardToDownLoad?.(DownloadFileType.Image),
+              label: confirmLabel(
+                'exportPicture',
+                t('share.exportPicture'),
+                () => onBoardToDownLoad?.(DownloadFileType.Image),
               ),
             },
             {
               key: 'exportTpl',
+              onClick: openConfirmMenuFromItem('exportTpl'),
               icon: <CloudDownloadOutlined />,
-              label: confirmLabel(t('share.exportTpl'), openMockData),
+              label: confirmLabel(
+                'exportTpl',
+                t('share.exportTpl'),
+                openMockData,
+              ),
             },
           ]
         : []),
@@ -168,9 +206,13 @@ export const useBoardDropdownItems = ({
     allowShare,
     boardId,
     dispatch,
+    closeConfirmMenu,
+    confirmKey,
     onBoardToDownLoad,
     onOpenShareLink,
     openMockData,
+    openConfirmMenu,
+    openConfirmMenuFromItem,
     openStoryList,
     publishBoard,
     recycleViz,

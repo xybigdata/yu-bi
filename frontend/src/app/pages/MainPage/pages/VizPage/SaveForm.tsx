@@ -12,6 +12,7 @@ import {
 import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { SPACE_SM } from 'styles/StyleConstants';
 import { getCascadeAccess } from '../../Access';
 import {
   selectIsOrgOwner,
@@ -149,7 +150,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
         </Form.Item>
       )}
       {vizType === 'DASHBOARD' && type === CommonFormTypes.Add && (
-        <Form.Item
+        <BoardTypeFormItem
           rules={[
             {
               required: true,
@@ -168,7 +169,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
               {t('boardType.free')}
             </Radio.Button>
           </Radio.Group>
-        </Form.Item>
+        </BoardTypeFormItem>
       )}
       {vizType === 'TEMPLATE' && type === CommonFormTypes.Add && (
         <Form.Item
@@ -218,4 +219,14 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
 
 const IdField = styled(Form.Item)`
   display: none;
+`;
+
+const BoardTypeFormItem = styled(Form.Item)`
+  .ant-form-item-label {
+    padding-inline-end: ${SPACE_SM};
+  }
+
+  .ant-form-item-control {
+    min-width: 0;
+  }
 `;

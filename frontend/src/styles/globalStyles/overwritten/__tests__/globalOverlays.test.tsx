@@ -22,4 +22,21 @@ describe('Global overlay styles', () => {
     expect(source).toContain('SPACE_TIMES(6)');
     expect(source).toContain('theme.componentBackground');
   });
+
+  test('should remove menu borders in shared popup overlays', () => {
+    const source = readFileSync(
+      resolve(
+        process.cwd(),
+        'src/styles/globalStyles/overwritten/globalOverlays.ts',
+      ),
+      'utf8',
+    );
+
+    expect(source).toMatch(
+      /\.yubi-popup[\s\S]*\.ant-dropdown-menu,\s*\.ant-menu[\s\S]*border-inline-end: 0 !important;/,
+    );
+    expect(source).toMatch(
+      /\.yubi-popup[\s\S]*\.ant-dropdown-menu,\s*\.ant-menu[\s\S]*border-right: 0 !important;/,
+    );
+  });
 });
