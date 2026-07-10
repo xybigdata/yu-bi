@@ -102,7 +102,7 @@ describe('Test getQueryData', () => {
           },
         ],
         orders: [],
-        pageInfo: { countTotal: false, pageSize: 100 },
+        pageInfo: { countTotal: false, pageNo: 1, pageSize: 100 },
         functionColumns: [{ alias: 'chartAge', snippet: '[age]' }],
         columns: [],
         script: false,
@@ -185,7 +185,7 @@ describe('Test getQueryData', () => {
         ],
         filters: [],
         orders: [],
-        pageInfo: { countTotal: true, pageSize: 100 },
+        pageInfo: { countTotal: true, pageNo: 1, pageSize: 100 },
         functionColumns: [
           {
             alias: 'root.birthday@date_level_delimiter@AGG_DATE_YEAR',
@@ -229,6 +229,7 @@ describe('Test getQueryData', () => {
           orders: [],
           pageInfo: {
             countTotal: false,
+            pageNo: 1,
             pageSize: 1000,
           },
           functionColumns: [],
