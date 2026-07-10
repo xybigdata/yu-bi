@@ -22,6 +22,7 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ControlOption } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import { controllerSelectStyles } from './ControllerSelectStyles';
 
 type SelectValue = SelectProps['value'];
 
@@ -60,7 +61,7 @@ export const SelectController: React.FC<SelectControllerProps> = memo(
         style={{ width: '100%' }}
         placeholder={t('multiSelectController')}
         maxTagTextLength={4}
-        maxTagCount={3}
+        maxTagCount="responsive"
         optionFilterProp="label"
         onChange={onChange}
         mode={'multiple'}
@@ -86,10 +87,5 @@ export const SelectController: React.FC<SelectControllerProps> = memo(
   },
 );
 const StyledSelect = styled(Select)`
-  display: block;
-
-  &.ant-select .ant-select-selector {
-    background-color: transparent !important;
-    /* border: none; */
-  }
+  ${controllerSelectStyles}
 `;

@@ -82,6 +82,7 @@ const VizHeader: FC<{
     const [showShareLinkModal, setShowShareLinkModal] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
     const [mockDataModal, setMockDataModal] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
     const isArchived = Number(status) === 0;
 
     const handleCloseShareLinkModal = useCallback(() => {
@@ -90,6 +91,10 @@ const VizHeader: FC<{
 
     const handleOpenShareLinkModal = useCallback(() => {
       setShowShareLinkModal(true);
+    }, []);
+
+    const handleCloseDropdown = useCallback(() => {
+      setDropdownOpen(false);
     }, []);
 
     const handleModalOk = useCallback(
@@ -120,6 +125,7 @@ const VizHeader: FC<{
       openMockData: () => setMockDataModal(true),
       onPublish: Number(status) === 2 ? onPublish : '',
       onRecycleViz: onRecycleViz,
+      onCloseDropdown: handleCloseDropdown,
     });
 
     const title = useMemo(() => {
@@ -162,7 +168,14 @@ const VizHeader: FC<{
                 </Button>
               )}
               {!isArchived && (
-                <Dropdown key="more" arrow menu={{ items: operationMenuItems }}>
+                <Dropdown
+                  key="more"
+                  arrow
+                  open={dropdownOpen}
+                  onOpenChange={setDropdownOpen}
+                  menu={{ items: operationMenuItems }}
+                  trigger={['click']}
+                >
                   <Button icon={<MoreOutlined />} />
                 </Dropdown>
               )}

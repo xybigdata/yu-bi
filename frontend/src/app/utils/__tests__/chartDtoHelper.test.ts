@@ -18,7 +18,11 @@
  */
 
 import { APP_VERSION_BETA_4, APP_VERSION_RC_2 } from 'app/migration/constants';
-import { ChartStyleSectionComponentType } from 'app/constants';
+import {
+  ChartDataViewFieldCategory,
+  ChartStyleSectionComponentType,
+  DataViewFieldType,
+} from 'app/constants';
 import { ChartConfig } from 'app/types/ChartConfig';
 import { ChartDetailConfigDTO } from 'app/types/ChartConfigDTO';
 import {
@@ -272,6 +276,60 @@ describe('chartDtoHelper Test', () => {
       settings: [createStyleConfig('setting-1', 3)],
       interactions: [],
     });
+  });
+
+  test('should not mutate frozen default chart config when merging', () => {
+    const chartConfig = createChartConfig({
+      datas: [{ key: 'data-1' }],
+      styles: [createStyleConfig('style-1')],
+      settings: [createStyleConfig('setting-1')],
+    });
+    Object.freeze(chartConfig.datas?.[0]);
+    Object.freeze(chartConfig.datas);
+    Object.freeze(chartConfig);
+
+    const chartDetailConfigDto = createChartDetailConfig({
+      chartConfig: {
+        datas: [
+          {
+            key: 'data-1',
+            rows: [
+              {
+                uid: 'field-1',
+                colName: 'field_1',
+                type: DataViewFieldType.STRING,
+                category: ChartDataViewFieldCategory.Field,
+              },
+            ],
+          },
+        ],
+        styles: [createStyleConfig('style-1', 2)],
+        settings: [createStyleConfig('setting-1', 3)],
+      },
+    });
+
+    const result = mergeToChartConfig(chartConfig, chartDetailConfigDto);
+
+    expect(result).toEqual({
+      datas: [
+        {
+          key: 'data-1',
+          rows: [
+            {
+              uid: 'field-1',
+              colName: 'field_1',
+              type: DataViewFieldType.STRING,
+              category: ChartDataViewFieldCategory.Field,
+            },
+          ],
+        },
+      ],
+      styles: [createStyleConfig('style-1', 2)],
+      settings: [createStyleConfig('setting-1', 3)],
+      interactions: [],
+    });
+    expect(result).not.toBe(chartConfig);
+    expect(chartConfig.datas?.[0]).toEqual({ key: 'data-1' });
   });
 
   test('should get chartConfigDto', () => {

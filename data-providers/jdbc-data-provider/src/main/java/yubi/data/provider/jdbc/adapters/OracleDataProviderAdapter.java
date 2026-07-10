@@ -94,7 +94,7 @@ public class OracleDataProviderAdapter extends JdbcDataProviderAdapter {
         // fix page info
         if (executeParam.getPageInfo().isCountTotal()) {
             int total = executeCountSql(render.render(true, false, true));
-            executeParam.getPageInfo().setTotal(total);
+            executeParam.getPageInfo().setTotal((long) total);
             dataframe.setPageInfo(executeParam.getPageInfo());
         }
         dataframe.setScript(wrappedSql);

@@ -193,7 +193,7 @@ export const boardDownLoadAction =
         downloadParams:
           downloadType === DownloadFileType.Excel
             ? requestParams
-            : [{ analytics: false, vizType: 'dashboard', vizId: folderId }],
+            : [{ analytics: false, vizType: 'DASHBOARD', vizId: folderId }],
         fileName,
         downloadType,
         imageWidth,

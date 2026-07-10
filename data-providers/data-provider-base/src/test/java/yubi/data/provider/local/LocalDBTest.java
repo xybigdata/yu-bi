@@ -37,7 +37,7 @@ class LocalDBTest {
         queryScript.setSourceId("local-test");
 
         ExecuteParam executeParam = new ExecuteParam();
-        executeParam.setPageInfo(PageInfo.builder().pageNo(1).pageSize(10).build());
+        executeParam.setPageInfo(PageInfo.builder().pageNo(1L).pageSize(10L).build());
 
         Dataframe result = LocalDB.executeLocalQuery(
                 queryScript,

@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import { Spin } from 'antd';
+import { Alert, Spin } from 'antd';
 import {
   ForwardedRef,
   forwardRef,
@@ -35,6 +35,7 @@ type MonacoModule = typeof Monaco;
 type MonacoEditorInstance = Monaco.editor.IStandaloneCodeEditor;
 type MonacoChangeEvent = Monaco.editor.IModelContentChangedEvent;
 type MonacoEditorOptions = Monaco.editor.IStandaloneEditorConstructionOptions;
+type MonacoThemeOwner = symbol;
 
 export interface MonacoEditorHandle {
   editor: MonacoEditorInstance;
@@ -74,6 +75,122 @@ function normalizeSize(size: string | number | undefined) {
   return size || '100%';
 }
 
+function getFallbackTheme(theme: string) {
+  return theme.toLowerCase().includes('dark') || theme === 'dqlTheme'
+    ? 'vs-dark'
+    : 'vs';
+}
+
+function setEditorTheme(monaco: MonacoModule, theme: string | null) {
+  if (!theme) {
+    return;
+  }
+
+  try {
+    monaco.editor.setTheme(theme);
+  } catch (error) {
+    console.error('Monaco 编辑器主题初始化失败，已使用内置主题兜底', error);
+    try {
+      monaco.editor.setTheme(getFallbackTheme(theme));
+    } catch (fallbackError) {
+      console.error('Monaco 编辑器内置兜底主题初始化失败', fallbackError);
+    }
+  }
+}
+
+const activeEditorThemes: Array<{ owner: MonacoThemeOwner; theme: string }> =
+  [];
+
+function activateEditorTheme(
+  monaco: MonacoModule,
+  owner: MonacoThemeOwner,
+  theme: string | null,
+) {
+  if (!theme) {
+    releaseEditorTheme(monaco, owner);
+    return;
+  }
+
+  const existingIndex = activeEditorThemes.findIndex(
+    activeTheme => activeTheme.owner === owner,
+  );
+  if (existingIndex >= 0) {
+    activeEditorThemes.splice(existingIndex, 1);
+  }
+  activeEditorThemes.push({ owner, theme });
+  setEditorTheme(monaco, theme);
+}
+
+function updateEditorTheme(
+  monaco: MonacoModule,
+  owner: MonacoThemeOwner,
+  theme: string | null,
+) {
+  if (!theme) {
+    releaseEditorTheme(monaco, owner);
+    return;
+  }
+
+  const existingIndex = activeEditorThemes.findIndex(
+    activeTheme => activeTheme.owner === owner,
+  );
+  if (existingIndex < 0) {
+    activateEditorTheme(monaco, owner, theme);
+    return;
+  }
+
+  activeEditorThemes[existingIndex] = { owner, theme };
+  if (existingIndex === activeEditorThemes.length - 1) {
+    setEditorTheme(monaco, theme);
+  }
+}
+
+function releaseEditorTheme(monaco: MonacoModule, owner: MonacoThemeOwner) {
+  const existingIndex = activeEditorThemes.findIndex(
+    activeTheme => activeTheme.owner === owner,
+  );
+  if (existingIndex < 0) {
+    return;
+  }
+
+  activeEditorThemes.splice(existingIndex, 1);
+  const nextTheme = activeEditorThemes[activeEditorThemes.length - 1]?.theme;
+  if (nextTheme) {
+    setEditorTheme(monaco, nextTheme);
+  }
+}
+
+function setModelLanguageSafely(
+  monaco: MonacoModule,
+  model: Monaco.editor.ITextModel,
+  language: string,
+) {
+  try {
+    monaco.editor.setModelLanguage(model, language);
+  } catch (error) {
+    console.error('Monaco 编辑器语言切换失败，已降级为纯文本', error);
+    try {
+      monaco.editor.setModelLanguage(model, 'plaintext');
+    } catch (fallbackError) {
+      console.error('Monaco 编辑器纯文本语言兜底失败', fallbackError);
+    }
+  }
+}
+
+function createModelSafely(
+  monaco: MonacoModule,
+  value: string,
+  language: string,
+  uri: Monaco.Uri | undefined,
+) {
+  try {
+    return monaco.editor.createModel(value, language, uri);
+  } catch (error) {
+    console.error('Monaco 编辑器模型初始化失败，已降级为纯文本', error);
+    return monaco.editor.createModel(value, 'plaintext', uri);
+  }
+}
+
 function MonacoEditorComponent(
   {
     width = '100%',
@@ -97,9 +214,11 @@ function MonacoEditorComponent(
   const editorRef = useRef<MonacoEditorInstance | null>(null);
   const monacoRef = useRef<MonacoModule | null>(null);
   const subscriptionRef = useRef<Monaco.IDisposable | null>(null);
+  const themeOwnerRef = useRef<MonacoThemeOwner>(Symbol('MonacoEditorTheme'));
   const syncingValueRef = useRef(false);
   const onChangeRef = useRef(onChange);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<unknown>(null);
   const mountConfigRef = useRef({
     value,
     defaultValue,
@@ -140,7 +259,7 @@ function MonacoEditorComponent(
       return;
     }
 
-    const { editorWillUnmount: initialEditorWillUnmount, theme: initialTheme } =
+    const { editorWillUnmount: initialEditorWillUnmount } =
       mountConfigRef.current;
     let cancelled = false;
 
@@ -156,14 +275,11 @@ function MonacoEditorComponent(
       }
       monacoRef.current = monaco;
 
-      if (initialTheme) {
-        monaco.editor.setTheme(initialTheme);
-      }
-
       const {
         value: initialValueProp,
         defaultValue: initialDefaultValue,
         language: initialLanguage,
+        theme: initialTheme,
         className: initialClassName,
         options: initialOptions,
         overrideServices: initialOverrideServices,
@@ -174,18 +290,28 @@ function MonacoEditorComponent(
 
       const initialValue =
         initialValueProp !== null ? initialValueProp : initialDefaultValue;
-      const extraOptions = (await initialEditorWillMount(monaco)) || {};
+      let extraOptions: MonacoEditorOptions = {};
+      try {
+        extraOptions = (await initialEditorWillMount(monaco)) || {};
+      } catch (error) {
+        console.error(
+          'Monaco 编辑器扩展初始化失败，已使用基础编辑器继续加载',
+          error,
+        );
+      }
       if (cancelled || !containerRef.current) {
         return;
       }
+      activateEditorTheme(monaco, themeOwnerRef.current, initialTheme);
       const modelUri = initialUri?.(monaco);
       let model = modelUri ? monaco.editor.getModel(modelUri) : undefined;
 
       if (model) {
         model.setValue(initialValue);
-        monaco.editor.setModelLanguage(model, initialLanguage);
+        setModelLanguageSafely(monaco, model, initialLanguage);
       } else {
-        model = monaco.editor.createModel(
+        model = createModelSafely(
+          monaco,
           initialValue,
           initialLanguage,
           modelUri,
@@ -205,7 +331,11 @@ function MonacoEditorComponent(
         initialOverrideServices,
       );
 
-      initialEditorDidMount(editorRef.current, monaco);
+      try {
+        initialEditorDidMount(editorRef.current, monaco);
+      } catch (error) {
+        console.error('Monaco 编辑器挂载回调执行失败，编辑器已保持可用', error);
+      }
       subscriptionRef.current = editorRef.current.onDidChangeModelContent(
         event => {
           if (!syncingValueRef.current && editorRef.current) {
@@ -220,16 +350,28 @@ function MonacoEditorComponent(
 
     void mountEditor().catch(error => {
       console.error('Load monaco editor runtime failed', error);
+      if (!cancelled) {
+        setLoadError(error);
+        setLoading(false);
+      }
     });
 
     return () => {
       cancelled = true;
+      const monaco = monacoRef.current;
       if (editorRef.current) {
-        if (monacoRef.current) {
-          initialEditorWillUnmount(editorRef.current, monacoRef.current);
+        if (monaco) {
+          try {
+            initialEditorWillUnmount(editorRef.current, monaco);
+          } catch (error) {
+            console.error('Monaco 编辑器卸载回调执行失败', error);
+          }
         }
         editorRef.current.dispose();
         editorRef.current = null;
+      }
+      if (monaco) {
+        releaseEditorTheme(monaco, themeOwnerRef.current);
       }
       subscriptionRef.current?.dispose();
       subscriptionRef.current = null;
@@ -266,7 +408,7 @@ function MonacoEditorComponent(
     const model = editorRef.current?.getModel();
     const monaco = monacoRef.current;
     if (model && monaco) {
-      monaco.editor.setModelLanguage(model, language);
+      setModelLanguageSafely(monaco, model, language);
     }
   }, [language]);
 
@@ -287,8 +429,9 @@ function MonacoEditorComponent(
   }, [width, height]);
 
   useEffect(() => {
-    if (theme) {
-      monacoRef.current?.editor.setTheme(theme);
+    const monaco = monacoRef.current;
+    if (monaco) {
+      updateEditorTheme(monaco, themeOwnerRef.current, theme);
     }
   }, [theme]);
 
@@ -299,7 +442,17 @@ function MonacoEditorComponent(
           <Spin size="small" />
         </LoadingWrap>
       ) : null}
-      <EditorContainer ref={containerRef} $hidden={loading} />
+      {loadError ? (
+        <ErrorWrap>
+          <Alert
+            type="error"
+            showIcon
+            message="编辑器加载失败"
+            description="请刷新页面后重试。"
+          />
+        </ErrorWrap>
+      ) : null}
+      <EditorContainer ref={containerRef} $hidden={loading || !!loadError} />
     </EditorShell>
   );
 }
@@ -322,6 +475,15 @@ const LoadingWrap = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+`;
+
+const ErrorWrap = styled.div`
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
 `;
 
 const EditorContainer = styled.div<{ $hidden: boolean }>`

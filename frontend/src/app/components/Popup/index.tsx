@@ -45,3 +45,4 @@ export function Popup({
 
 export { MenuItemContent } from './MenuListItem';
 export { MenuWrapper } from './MenuWrapper';
+export { ConfirmMenuLabel } from './ConfirmMenuLabel';

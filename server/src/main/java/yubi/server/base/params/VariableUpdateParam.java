@@ -49,4 +49,8 @@ public class VariableUpdateParam extends BaseUpdateParam {
 
     private List<RelVariableSubject> relVariableSubjects;
 
+    public void setExpression(Boolean expression) {
+        this.expression = expression != null && expression;
+    }
+
 }

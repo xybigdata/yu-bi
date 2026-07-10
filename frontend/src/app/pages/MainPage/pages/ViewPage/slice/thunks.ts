@@ -32,7 +32,7 @@ import { View } from '../../../../../types/View';
 import { selectVariables } from '../../VariablePage/slice/selectors';
 import { Variable } from '../../VariablePage/slice/types';
 import { parseVariableDefaultValue } from '../../VariablePage/utils';
-import { ViewViewModelStages } from '../constants';
+import { DEFAULT_PREVIEW_SIZE, ViewViewModelStages } from '../constants';
 import {
   buildRequestColumns,
   generateEditingView,
@@ -70,7 +70,6 @@ import {
 type CompletionItemProvider = Monaco.languages.CompletionItemProvider;
 type CompletionItemProviderFactory =
   CompletionItemProvider['provideCompletionItems'];
-type StructRequestColumnsPayload = '' | StructViewRequestColumn[];
 
 const parseRequestVariableValues = (defaultValue?: string | null) => {
   const values = parseVariableDefaultValue(defaultValue);
@@ -177,7 +176,11 @@ export const runSql = createAsyncThunk<
   ) as ViewViewModel;
   const allDatabaseSchemas = selectAllSourceDatabaseSchemas(getState());
 
-  const { sourceId, size, fragment, variables, type } = currentEditingView;
+  const { sourceId, fragment, variables, type } = currentEditingView;
+  const size =
+    typeof currentEditingView.size === 'number' && currentEditingView.size > 0
+      ? currentEditingView.size
+      : DEFAULT_PREVIEW_SIZE;
   let sql = '';
   let structure: StructViewQueryProps | null = null;
   let script = '';
@@ -222,33 +225,39 @@ export const runSql = createAsyncThunk<
   }
 
   let reqColumns: StructViewRequestColumn[] | undefined;
-  let requestColumns: StructRequestColumnsPayload = '';
+  const requestData: {
+    script: string;
+    sourceId: string;
+    size: number;
+    scriptType: ViewViewModel['type'];
+    columns?: StructViewRequestColumn[];
+    variables: unknown[];
+  } = {
+    script,
+    sourceId,
+    size,
+    scriptType: type,
+    variables: variables.map(
+      ({ name, type, valueType, defaultValue, expression }) => ({
+        name,
+        type,
+        valueType,
+        values: parseRequestVariableValues(defaultValue),
+        expression: !!expression,
+      }),
+    ),
+  };
 
   if (type === 'STRUCT') {
     reqColumns = buildRequestColumns(structure!);
-    requestColumns = reqColumns;
+    requestData.columns = reqColumns;
   }
 
   const response = await request2<QueryResult>(
     {
       url: '/data-provider/execute/test',
       method: 'POST',
-      data: {
-        script,
-        sourceId,
-        size,
-        scriptType: type,
-        columns: requestColumns,
-        variables: variables.map(
-          ({ name, type, valueType, defaultValue, expression }) => ({
-            name,
-            type,
-            valueType,
-            values: parseRequestVariableValues(defaultValue),
-            expression,
-          }),
-        ),
-      },
+      data: requestData,
     },
     undefined,
     {

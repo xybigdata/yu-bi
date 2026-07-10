@@ -481,7 +481,7 @@ export class ChartDataRequestBuilder {
     const enablePaging = getValue(settingStyles, ['paging', 'enablePaging']);
     return {
       countTotal: !!enablePaging,
-      pageNo: this.pageInfo?.pageNo,
+      pageNo: this.pageInfo?.pageNo || 1,
       pageSize: pageSize || 1000,
     };
   }

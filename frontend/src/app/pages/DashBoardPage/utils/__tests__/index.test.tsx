@@ -964,6 +964,239 @@ describe('getTheWidgetFiltersAndParams', () => {
       getTheWidgetFiltersAndParams(asLegacyWidgetFiltersAndParamsArgs(obj)),
     ).toEqual(res);
   });
+
+  test('should build controller filters when related view item misses viewId but relation carries widget view ids', () => {
+    const obj = {
+      chartWidget: {
+        config: {
+          type: 'chart',
+          name: 'test1',
+        },
+        dashboardId: 'dashboard_1',
+        datachartId: 'datachart_1',
+        id: 'chart_1',
+        parentId: '',
+        relations: [],
+        viewIds: ['view_1'],
+      },
+      widgetMap: {
+        controller_1: {
+          config: {
+            type: 'controller',
+            name: '控制器test',
+            content: {
+              type: ControllerFacadeTypes.DropdownList,
+              relatedViews: [
+                {
+                  relatedCategory: ChartDataViewFieldCategory.Field,
+                  fieldValue: 'currency_code',
+                },
+              ],
+              config: {
+                controllerValues: ['USD'],
+                valueOptions: [],
+                valueOptionType: 'common',
+                assistViewFields: ['view_1', 'currency_code', 'currency_code'],
+                sqlOperator: FilterSqlOperator.Equal,
+                visibility: {
+                  visibilityType: 'show',
+                },
+              },
+            },
+          },
+          dashboardId: 'dashboard_1',
+          datachartId: null,
+          id: 'controller_1',
+          parentId: '',
+          relations: [
+            {
+              config: {
+                type: 'controlToWidget',
+                controlToWidget: {
+                  widgetRelatedViewIds: ['view_1'],
+                },
+              },
+              sourceId: 'controller_1',
+              targetId: 'chart_1',
+            },
+          ],
+          viewIds: ['view_1'],
+        },
+        chart_1: {
+          config: {
+            type: 'chart',
+            name: 'test1',
+          },
+          dashboardId: 'dashboard_1',
+          datachartId: 'datachart_1',
+          id: 'chart_1',
+          parentId: '',
+          relations: [],
+          viewIds: ['view_1'],
+        },
+      },
+      view: {
+        id: 'view_1',
+        meta: [
+          {
+            category: ChartDataViewFieldCategory.Field,
+            id: 'currency_code',
+            name: 'currency_code',
+            path: ['currency_code'],
+            type: DataViewFieldType.STRING,
+          },
+        ],
+      },
+    };
+
+    expect(
+      getTheWidgetFiltersAndParams(asLegacyWidgetFiltersAndParamsArgs(obj)),
+    ).toEqual({
+      filterParams: [
+        {
+          aggOperator: null,
+          column: ['currency_code'],
+          sqlOperator: FilterSqlOperator.Equal,
+          values: [
+            {
+              value: 'USD',
+              valueType: 'STRING',
+            },
+          ],
+        },
+      ],
+      variableParams: {},
+    });
+  });
+
+  test('should keep chart filters when controller also cascades to another controller', () => {
+    const obj = {
+      chartWidget: {
+        config: {
+          type: 'chart',
+          name: 'test1',
+        },
+        dashboardId: 'dashboard_1',
+        datachartId: 'datachart_1',
+        id: 'chart_1',
+        parentId: '',
+        relations: [],
+        viewIds: ['view_1'],
+      },
+      widgetMap: {
+        controller_1: {
+          config: {
+            type: 'controller',
+            name: '多选框test',
+            content: {
+              type: ControllerFacadeTypes.MultiDropdownList,
+              relatedViews: [
+                {
+                  viewId: 'view_1',
+                  relatedCategory: ChartDataViewFieldCategory.Field,
+                  fieldValue: 'country_name',
+                  fieldValueType: DataViewFieldType.STRING,
+                },
+              ],
+              config: {
+                controllerValues: ['Guam', 'Isle of Man'],
+                valueOptions: [],
+                valueOptionType: 'common',
+                assistViewFields: ['view_1', 'country_name', 'country_name'],
+                sqlOperator: FilterSqlOperator.In,
+                visibility: {
+                  visibilityType: 'show',
+                },
+              },
+            },
+          },
+          dashboardId: 'dashboard_1',
+          datachartId: null,
+          id: 'controller_1',
+          parentId: '',
+          relations: [
+            {
+              config: {
+                type: 'controlToControlCascade',
+              },
+              sourceId: 'controller_1',
+              targetId: 'controller_2',
+            },
+            {
+              config: {
+                type: 'controlToWidget',
+                controlToWidget: {
+                  widgetRelatedViewIds: ['view_1'],
+                },
+              },
+              sourceId: 'controller_1',
+              targetId: 'chart_1',
+            },
+          ],
+          viewIds: ['view_1'],
+        },
+        controller_2: {
+          config: {
+            type: 'controller',
+            name: '控制器test',
+          },
+          dashboardId: 'dashboard_1',
+          datachartId: null,
+          id: 'controller_2',
+          parentId: '',
+          relations: [],
+          viewIds: ['view_1'],
+        },
+        chart_1: {
+          config: {
+            type: 'chart',
+            name: 'test1',
+          },
+          dashboardId: 'dashboard_1',
+          datachartId: 'datachart_1',
+          id: 'chart_1',
+          parentId: '',
+          relations: [],
+          viewIds: ['view_1'],
+        },
+      },
+      view: {
+        id: 'view_1',
+        meta: [
+          {
+            category: ChartDataViewFieldCategory.Field,
+            id: 'country_name',
+            name: 'country_name',
+            path: ['country_name'],
+            type: DataViewFieldType.STRING,
+          },
+        ],
+      },
+    };
+
+    expect(
+      getTheWidgetFiltersAndParams(asLegacyWidgetFiltersAndParamsArgs(obj)),
+    ).toEqual({
+      filterParams: [
+        {
+          aggOperator: null,
+          column: ['country_name'],
+          sqlOperator: FilterSqlOperator.In,
+          values: [
+            {
+              value: 'Guam',
+              valueType: 'STRING',
+            },
+            {
+              value: 'Isle of Man',
+              valueType: 'STRING',
+            },
+          ],
+        },
+      ],
+      variableParams: {},
+    });
+  });
 });
 describe('getWidgetControlValues', () => {
   test('control DropdownList value', () => {

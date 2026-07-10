@@ -56,7 +56,8 @@ export function VizPage() {
         sizes={sizes}
         minSize={[256, 0]}
         maxSize={[768, Infinity]}
-        gutterSize={0}
+        gutterSize={8}
+        onDrag={setSizes}
         onDragStart={siderDragStart}
         onDragEnd={siderDragEnd}
         className="yubi-split"
@@ -74,8 +75,8 @@ export function VizPage() {
           width={400}
           formProps={{
             labelAlign: 'left',
-            labelCol: { offset: 1, span: 7 },
-            wrapperCol: { span: 14 },
+            labelCol: { span: 8 },
+            wrapperCol: { span: 16 },
           }}
           okText={tg('button.save')}
         />

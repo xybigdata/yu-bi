@@ -294,7 +294,7 @@ public class LocalDB {
         ResultSet resultSet = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(sql);
         PageInfo pageInfo = executeParam.getPageInfo();
         resultSet.last();
-        pageInfo.setTotal(resultSet.getRow());
+        pageInfo.setTotal((long) resultSet.getRow());
         resultSet.first();
 
         resultSet.absolute((int) Math.min(pageInfo.getTotal(), (pageInfo.getPageNo() - 1) * pageInfo.getPageSize()));

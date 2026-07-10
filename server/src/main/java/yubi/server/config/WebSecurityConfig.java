@@ -60,10 +60,14 @@ public class WebSecurityConfig {
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(getApiPrefix() + "/tpa/**").permitAll()
                 .requestMatchers(getApiPrefix() + "/sys/info", getApiPrefix() + "/sys/setup").permitAll()
-                .requestMatchers(getApiPrefix() + "/users/register", getApiPrefix() + "/users/active").permitAll()
+                .requestMatchers(getApiPrefix() + "/users/login", getApiPrefix() + "/users/register", getApiPrefix() + "/users/active").permitAll()
                 .requestMatchers(getApiPrefix() + "/users/sendmail", getApiPrefix() + "/users/reset/password").permitAll()
+                .requestMatchers(getApiPrefix() + "/users/forget/password").permitAll()
                 .requestMatchers(getApiPrefix() + "/shares/**").permitAll()
                 .requestMatchers("/shareChart/**", "/shareDashboard/**", "/shareStoryPlayer/**").permitAll()
+                .requestMatchers("/confirminvite", "/organizations/**").permitAll()
+                .requestMatchers("/", "/login", "/setup", "/register", "/activation", "/forgetPassword", "/authorization").permitAll()
+                .requestMatchers("/static/**", "/custom-chart-plugins/**", "/antd/**").permitAll()
                 .requestMatchers("/**/*.html", "/**/*.js", "/**/*.css", "/**/*.ico", "/**/*.png", "/**/*.svg", "/**/*.json").permitAll()
                 .anyRequest().authenticated());
         http.addFilterBefore(jwtRequestAuthenticationFilter, OAuth2AuthorizationRequestRedirectFilter.class);

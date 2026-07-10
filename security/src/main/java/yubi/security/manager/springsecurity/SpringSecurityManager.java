@@ -84,6 +84,10 @@ public class SpringSecurityManager implements YuBiSecurityManager {
         if (!user.getActive()) {
             Exceptions.tr(BaseException.class, "message.user.not.active");
         }
+        if (!validateUser(token.getSubject(), token.getPassword())) {
+            log.error("Login error ({})", token.getSubject());
+            Exceptions.msg("login.fail");
+        }
         try {
             securitySubjectFacade.loginWithPassword(token.getSubject(), token.getPassword());
         } catch (Exception e) {
@@ -98,7 +102,14 @@ public class SpringSecurityManager implements YuBiSecurityManager {
         if (user == null) {
             return false;
         }
-        return BCrypt.checkpw(password, user.getPassword()) || Objects.equals(password, user.getPassword());
+        if (Objects.equals(password, user.getPassword())) {
+            return true;
+        }
+        try {
+            return BCrypt.checkpw(password, user.getPassword());
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     @Override

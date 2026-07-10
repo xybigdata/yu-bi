@@ -61,8 +61,8 @@ public abstract class DefaultDataProvider extends DataProvider {
     @Override
     public Object test(DataProviderSource source) throws Exception {
         PageInfo pageInfo = PageInfo.builder()
-                .pageNo(1)
-                .pageSize(Integer.parseInt(source.getProperties().getOrDefault(TEST_DATA_SIZE, "100").toString()))
+                .pageNo(1L)
+                .pageSize((long) Integer.parseInt(source.getProperties().getOrDefault(TEST_DATA_SIZE, "100").toString()))
                 .countTotal(false)
                 .build();
         ExecuteParam executeParam = ExecuteParam.empty();

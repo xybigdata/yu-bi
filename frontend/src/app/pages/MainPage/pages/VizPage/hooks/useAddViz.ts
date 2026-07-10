@@ -93,7 +93,7 @@ export function useAddViz({ showSaveForm }) {
                 ...dataValues,
                 name: values?.name,
                 orgId: orgId,
-                index: index,
+                index: typeof index === 'number' ? index : 0,
                 avatar: vizType === 'DATACHART' ? initialValues?.avatar : null,
               },
               type: vizType,

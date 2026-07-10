@@ -20,24 +20,54 @@ package yubi.core.base;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
-@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PageInfo implements Serializable {
 
-    private long pageSize;
+    private Long pageSize;
 
-    private long pageNo;
+    private Long pageNo;
 
-    private long total;
+    private Long total;
 
-    private boolean countTotal;
+    private Boolean countTotal;
+
+    public long getPageSize() {
+        return pageSize == null ? 0 : pageSize;
+    }
+
+    public void setPageSize(Long pageSize) {
+        this.pageSize = pageSize == null ? 0 : pageSize;
+    }
+
+    public long getPageNo() {
+        return pageNo == null ? 0 : pageNo;
+    }
+
+    public void setPageNo(Long pageNo) {
+        this.pageNo = pageNo == null ? 0 : pageNo;
+    }
+
+    public long getTotal() {
+        return total == null ? 0 : total;
+    }
+
+    public void setTotal(Long total) {
+        this.total = total == null ? 0 : total;
+    }
+
+    public boolean isCountTotal() {
+        return countTotal != null && countTotal;
+    }
+
+    public void setCountTotal(Boolean countTotal) {
+        this.countTotal = countTotal != null && countTotal;
+    }
 
     @Override
     public String toString() {

@@ -18,7 +18,7 @@
  */
 import { WidgetInfo } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import classnames from 'classnames';
-import { memo, useCallback, useContext, useMemo } from 'react';
+import { memo, useCallback, useContext, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
@@ -33,26 +33,17 @@ import { Widget } from '../../types/widgetTypes';
 import { WidgetActionContext } from '../ActionProvider/WidgetActionProvider';
 
 export interface BlockMaskLayerProps {
+  onDoubleClick?: () => void;
   widget: Widget;
   widgetInfo: WidgetInfo;
 }
 export const BlockMaskLayer: React.FC<BlockMaskLayerProps> = memo(
-  ({ widget, widgetInfo }) => {
+  ({ onDoubleClick, widget, widgetInfo }) => {
     const dispatch = useAppDispatch();
     const { onEditSelectWidget } = useContext(WidgetActionContext);
     const showBlockMask = useSelector(selectShowBlockMask);
-    const onMouseDown = useCallback(
-      (e: React.MouseEvent<HTMLDivElement>) => {
-        onEditSelectWidget({
-          multipleKey: e.shiftKey,
-          id: widget.id,
-          selected: true,
-        });
-      },
-      [onEditSelectWidget, widget.id],
-    );
-
-    const doubleClick = useCallback(() => {
+    const lastDoubleClickAtRef = useRef(0);
+    const openEditing = useCallback(() => {
       if (widget.config.type === 'container') {
         dispatch(editDashBoardInfoActions.changeShowBlockMask(false));
       }
@@ -62,6 +53,40 @@ export const BlockMaskLayer: React.FC<BlockMaskLayerProps> = memo(
         }),
       );
     }, [dispatch, widget.id, widget.config.type]);
+    const triggerDoubleClick = useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        const now = Date.now();
+        e.stopPropagation();
+        if (now - lastDoubleClickAtRef.current < 300) {
+          return;
+        }
+        lastDoubleClickAtRef.current = now;
+        onDoubleClick?.();
+        openEditing();
+      },
+      [onDoubleClick, openEditing],
+    );
+    const onMouseDown = useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        if (e.detail >= 2 && onDoubleClick) {
+          triggerDoubleClick(e);
+          return;
+        }
+        onEditSelectWidget({
+          multipleKey: e.shiftKey,
+          id: widget.id,
+          selected: true,
+        });
+      },
+      [onDoubleClick, onEditSelectWidget, triggerDoubleClick, widget.id],
+    );
+
+    const doubleClick = useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        triggerDoubleClick(e);
+      },
+      [triggerDoubleClick],
+    );
     const hideBorder = useMemo(() => {
       if (widget.config.originalType === ORIGINAL_TYPE_MAP.group) {
         if (widget.config.boardType === 'auto' && !widget.parentId) {

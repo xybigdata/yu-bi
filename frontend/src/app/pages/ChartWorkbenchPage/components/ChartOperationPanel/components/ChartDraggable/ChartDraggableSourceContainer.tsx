@@ -29,7 +29,7 @@ import {
   TableOutlined,
 } from '@ant-design/icons';
 import { Collapse, Dropdown, Row } from 'antd';
-import { IW, ToolbarButton } from 'app/components';
+import { InlineRow, InlineRowText, IW, ToolbarButton } from 'app/components';
 import { ChartDataViewFieldCategory, DataViewFieldType } from 'app/constants';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import useToggle from 'app/hooks/useToggle';
@@ -244,14 +244,14 @@ export const ChartDraggableSourceContainer: FC<
             <Panel
               key={colName}
               header={
-                <div ref={dragRef}>
+                <InlineRow ref={dragRef}>
                   <IW fontSize={FONT_SIZE_TITLE}>{icon}</IW>
-                  <p>
+                  <InlineRowText>
                     {!folderRole || folderRole === ColumnRole.Hierarchy
                       ? colName
                       : displayName}
-                  </p>
-                </div>
+                  </InlineRowText>
+                </InlineRow>
               }
             >
               {((children || []) as dateLevelFieldsProps[]).map((item, i) => {
@@ -279,14 +279,13 @@ export const ChartDraggableSourceContainer: FC<
           className={styleClasses.join(' ')}
         >
           <IW fontSize={FONT_SIZE_TITLE}>{icon}</IW>
-          <StyledFieldContent>
-            {' '}
+          <InlineRowText>
             {isHierarchyFieldOrTable ||
             !folderRole ||
             folderRole === ColumnRole.Hierarchy
               ? colName
               : displayName}
-          </StyledFieldContent>
+          </InlineRowText>
           <div onClick={stopPPG}>
             <Dropdown
               disabled={_isAllowMoreAction()}
@@ -434,7 +433,21 @@ const Container = styled.div<{ flexDirection?: string }>`
 
 const CollapseWrapper = styled(Collapse)`
   .ant-collapse-header {
+    align-items: center !important;
     padding: 0 !important;
+  }
+  .ant-collapse-header-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .ant-collapse-expand-icon {
+    display: flex !important;
+    flex: 0 0 ${SPACE_TIMES(8)};
+    align-items: center;
+    justify-content: center;
+    width: ${SPACE_TIMES(8)};
+    padding-inline-start: 0 !important;
   }
   .ant-collapse-content .ant-collapse-content-box {
     padding-top: 0 !important;
@@ -447,18 +460,5 @@ const CollapseWrapper = styled(Collapse)`
   }
   &.ant-collapse {
     width: 100%;
-    .ant-collapse-header {
-      > div {
-        display: flex;
-        align-items: center;
-        width: 100% !important;
-      }
-    }
   }
-`;
-const StyledFieldContent = styled.p`
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: break-all;
 `;

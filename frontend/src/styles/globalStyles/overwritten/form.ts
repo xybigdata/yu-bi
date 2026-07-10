@@ -21,6 +21,21 @@ import { createGlobalStyle } from 'styled-components';
 import { BORDER_RADIUS } from 'styles/StyleConstants';
 
 export const Form = createGlobalStyle`
+  body {
+    .ant-form,
+    .ant-form-css-var,
+    .ant-form.ant-form-css-var,
+    .ant-form[class*="css-var-"] {
+      --ant-form-label-color: ${p => p.theme.textColorLight} !important;
+    }
+
+    .ant-form .ant-form-item .ant-form-item-label > label,
+    .ant-form .ant-form-item .ant-form-item-row > .ant-col > label,
+    .ant-form .ant-form-item .ant-form-item-row > .ant-form-item-label > label {
+      color: ${p => p.theme.textColorLight} !important;
+    }
+  }
+
   .yubi-ant-input {
     &.ant-input {
       color: ${p => p.theme.textColorSnd};
@@ -43,6 +58,7 @@ export const Form = createGlobalStyle`
   .yubi-ant-select {
     &.ant-select {
       color: ${p => p.theme.textColorSnd};
+      background-color: ${p => p.theme.bodyBackground};
     }
 
     &.ant-select:not(.ant-select-customize-input) .ant-select-selector {

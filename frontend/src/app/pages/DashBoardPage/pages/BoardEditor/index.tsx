@@ -124,10 +124,6 @@ export const BoardEditor: React.FC<{
       .state as BoardEditorLocationState | null;
     try {
       if (histState?.widgetInfo) {
-        // TODO(Stephen): to be confirm if use history state widget info and for what
-        console.error(
-          'if you see the error on board editor, please contact to administrator',
-        );
         const widgetInfo = parseBoardEditorWidgetInfo(histState.widgetInfo);
         if (widgetInfo) {
           let subType: 'widgetChart' | 'dataChart' = 'dataChart';

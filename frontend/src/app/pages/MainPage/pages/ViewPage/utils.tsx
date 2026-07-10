@@ -20,7 +20,12 @@
 import { TreeDataNode } from 'antd';
 import { DataViewFieldType } from 'app/constants';
 import { APP_CURRENT_VERSION } from 'app/migration/constants';
-import { FONT_WEIGHT_MEDIUM, SPACE_UNIT } from 'styles/StyleConstants';
+import {
+  FONT_SIZE_BODY,
+  FONT_WEIGHT_MEDIUM,
+  FONT_WEIGHT_REGULAR,
+  SPACE_UNIT,
+} from 'styles/StyleConstants';
 import { Nullable } from 'types';
 import { isEmptyArray, isEqualObject } from 'utils/object';
 import { getDiffParams, getTextWidth } from 'utils/utils';
@@ -242,34 +247,36 @@ export function getHierarchyColumn(
 export function getColumnWidthMap(
   model: { [key: string]: Omit<ColumnsProps, 'name'> },
   dataSource: QueryResultDataSourceRow[],
-) {
-  const HEADER_PADDING = SPACE_UNIT * (2 + 1);
-  const CELL_PADDING = SPACE_UNIT * (2 + 2);
-  const ICON_WIDTH = 24;
-  const ICON_MARGIN = SPACE_UNIT;
+): Record<string, number> {
+  const HEADER_HORIZONTAL_PADDING = SPACE_UNIT * 3;
+  const CELL_HORIZONTAL_PADDING = SPACE_UNIT * 4;
+  const HEADER_TYPE_ICON_WIDTH = 24;
+  const HEADER_EXTRA_ACTION_WIDTH = 24;
+  const HEADER_ICON_GAP = SPACE_UNIT;
+  const MIN_COLUMN_WIDTH = 80;
 
-  return Object.keys(model).reduce((map, name) => {
+  return Object.keys(model).reduce<Record<string, number>>((map, name) => {
     if (!map[name]) {
       // header width
       map[name] =
-        getTextWidth(name, `${FONT_WEIGHT_MEDIUM}`) +
-        HEADER_PADDING +
-        ICON_WIDTH * 2 +
-        ICON_MARGIN;
+        getTextWidth(name, `${FONT_WEIGHT_MEDIUM}`, FONT_SIZE_BODY) +
+        HEADER_HORIZONTAL_PADDING +
+        HEADER_TYPE_ICON_WIDTH +
+        HEADER_EXTRA_ACTION_WIDTH +
+        HEADER_ICON_GAP;
     }
     if (dataSource.length > 0) {
       map[name] = dataSource.reduce((width, o) => {
         // column width
-        return Math.min(
-          // MAX_RESULT_TABLE_COLUMN_WIDTH,
-          Math.max(
-            width,
-            map[name],
-            o[name] !== null && o[name] !== undefined
-              ? getTextWidth(`${o[name]}`) + CELL_PADDING
-              : 0,
-          ),
-        );
+        const contentWidth =
+          o[name] !== null && o[name] !== undefined
+            ? getTextWidth(
+                `${o[name]}`,
+                `${FONT_WEIGHT_REGULAR}`,
+                FONT_SIZE_BODY,
+              ) + CELL_HORIZONTAL_PADDING
+            : 0;
+        return Math.max(MIN_COLUMN_WIDTH, width, map[name], contentWidth);
       }, 0);
     }
     return map;

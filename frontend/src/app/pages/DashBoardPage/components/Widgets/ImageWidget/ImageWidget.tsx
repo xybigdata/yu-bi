@@ -23,7 +23,7 @@ import {
   editBoardStackActions,
   editWidgetInfoActions,
 } from 'app/pages/DashBoardPage/pages/BoardEditor/slice';
-import { memo, useCallback, useContext, useEffect, useRef } from 'react';
+import { memo, useCallback, useContext, useRef } from 'react';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { BoardContext } from '../../BoardProvider/BoardProvider';
@@ -38,7 +38,6 @@ import {
   getWidgetBaseStyle,
   getWidgetTitle,
 } from '../../WidgetManager/utils/utils';
-import { WidgetInfoContext } from '../../WidgetProvider/WidgetInfoProvider';
 import { HiddenUploader, HiddenUploaderRef } from './HiddenUploader';
 import { ImageWidgetCore } from './ImageWidgetCore';
 import { Picture } from './Picture';
@@ -47,7 +46,6 @@ export const ImageWidget: React.FC<{ hideTitle: boolean }> = memo(
   ({ hideTitle }) => {
     const dispatch = useAppDispatch();
     const widget = useContext(WidgetContext);
-    const widgetInfo = useContext(WidgetInfoContext);
     const { editing } = useContext(BoardContext);
     const title = getWidgetTitle(widget.config.customConfig.props);
     title.title = widget.config.name;
@@ -58,11 +56,12 @@ export const ImageWidget: React.FC<{ hideTitle: boolean }> = memo(
       !background.image && background.color === 'transparent';
     const uploaderRef = useRef<HiddenUploaderRef | undefined>(undefined);
 
-    useEffect(() => {
-      if (widgetInfo.editing) {
-        uploaderRef.current?.onClick();
+    const openUploaderByDoubleClick = useCallback(() => {
+      if (!editing) {
+        return;
       }
-    }, [widgetInfo.editing]);
+      uploaderRef.current?.onClick();
+    }, [editing]);
 
     const uploaderChange = useCallback(
       (url: string) => {
@@ -93,11 +92,11 @@ export const ImageWidget: React.FC<{ hideTitle: boolean }> = memo(
           <div style={ZIndexStyle}>
             {!hideTitle && <WidgetTitle title={title} />}
 
-            <div style={FlexStyle}>
+            <div onDoubleClick={openUploaderByDoubleClick} style={FlexStyle}>
               <ImageWidgetCore />
             </div>
           </div>
-          {editing && <EditMask />}
+          {editing && <EditMask onDoubleClick={openUploaderByDoubleClick} />}
           <StyledWidgetToolBar>
             <Space size={0}>
               <LockIconFn

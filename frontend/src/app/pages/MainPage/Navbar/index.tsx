@@ -110,8 +110,11 @@ export function Navbar() {
     () => [
       {
         key: 'language',
-        icon: <GlobalOutlined className="icon" />,
-        label: <p>{t('nav.account.switchLanguage.title')}</p>,
+        label: (
+          <MenuItemContent prefix={<GlobalOutlined className="icon" />}>
+            <p>{t('nav.account.switchLanguage.title')}</p>
+          </MenuItemContent>
+        ),
         children: [
           { key: 'zh', label: '中文' },
           { key: 'en', label: 'English' },
@@ -119,8 +122,11 @@ export function Navbar() {
       },
       {
         key: 'theme',
-        icon: <SkinOutlined className="icon" />,
-        label: <p>{t('nav.account.switchTheme.title')}</p>,
+        label: (
+          <MenuItemContent prefix={<SkinOutlined className="icon" />}>
+            <p>{t('nav.account.switchTheme.title')}</p>
+          </MenuItemContent>
+        ),
         children: [
           {
             key: 'light',
@@ -294,7 +300,7 @@ export function Navbar() {
         case 'logout':
           dispatch(
             logout(() => {
-              navigate.replace('/');
+              navigate.replace('/login');
             }),
           );
           break;
@@ -473,18 +479,24 @@ const NavItem = styled(CompatNavLink)`
   padding: ${SPACE_XS} 0;
   margin: ${SPACE_XS} 0;
   color: ${p => p.theme.textColorDisabled};
+  text-decoration: none;
   border-radius: ${BORDER_RADIUS};
   transition: none;
 
   &:hover,
   &.active {
     color: ${p => p.theme.primary};
+    text-decoration: none;
     background-color: ${p => p.theme.emphasisBackground};
 
     h2 {
       font-weight: ${FONT_WEIGHT_MEDIUM};
       color: ${p => p.theme.textColor};
     }
+  }
+
+  &:focus {
+    text-decoration: none;
   }
 
   .anticon {
@@ -530,6 +542,13 @@ const SubNavTitle = styled(CompatNavLink)`
   align-items: center;
   padding: ${SPACE_XS} ${SPACE_LG} ${SPACE_XS} ${SPACE_LG};
   color: ${p => p.theme.textColorSnd};
+  text-decoration: none;
+
+  &:hover,
+  &:focus {
+    color: ${p => p.theme.textColorSnd};
+    text-decoration: none;
+  }
 
   .prefix {
     flex-shrink: 0;
@@ -544,6 +563,7 @@ const SubNavTitle = styled(CompatNavLink)`
 
   &.active {
     color: ${p => p.theme.primary};
+    text-decoration: none;
     background-color: ${p => p.theme.bodyBackground};
 
     .prefix {

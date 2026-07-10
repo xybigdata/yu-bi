@@ -5,7 +5,13 @@ import {
   toYuBiDayjsRange,
 } from 'app/utils/date';
 import { PermissionLevels, ResourceTypes } from '../PermissionPage/constants';
-import { FileTypes, JobTypes, TimeModes, VizTypes } from './constants';
+import {
+  DEFAULT_VALUES,
+  FileTypes,
+  JobTypes,
+  TimeModes,
+  VizTypes,
+} from './constants';
 import {
   AddScheduleParams,
   JobConfig,
@@ -186,7 +192,10 @@ export const toEchoFormValues = ({
         : undefined,
     subject: configObj?.subject,
     textContent: configObj?.textContent || '',
-    imageWidth: configObj?.imageWidth,
+    imageWidth:
+      typeof configObj?.imageWidth === 'number'
+        ? configObj.imageWidth
+        : DEFAULT_VALUES.imageWidth,
     to: configObj?.to || '',
     cc: configObj?.cc || '',
     bcc: configObj?.bcc || '',

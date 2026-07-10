@@ -1,7 +1,5 @@
 package yubi.core.base.exception;
 
-import yubi.core.base.exception.BaseException;
-
 public class NotAllowedException extends BaseException {
     public NotAllowedException(String message) {
         super(message);

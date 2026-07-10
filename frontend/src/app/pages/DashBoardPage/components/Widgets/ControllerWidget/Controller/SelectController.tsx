@@ -22,6 +22,7 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ControlOption } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import { controllerSelectStyles } from './ControllerSelectStyles';
 
 type SelectValue = SelectProps['value'];
 
@@ -88,9 +89,5 @@ export const SelectController: React.FC<SelectControllerProps> = ({
   );
 };
 const StyledSelect = styled(Select)`
-  display: block;
-
-  &.ant-select .ant-select-selector {
-    background-color: transparent !important;
-  }
+  ${controllerSelectStyles}
 `;

@@ -22,7 +22,13 @@ import {
   MenuUnfoldOutlined,
 } from '@ant-design/icons';
 import { message } from 'antd';
-import { ListNav, ListPane, ListTitle } from 'app/components';
+import {
+  ListNav,
+  ListPane,
+  ListTitle,
+  SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
+  SIDEBAR_TITLE_MORE_MENU_POPUP_CLASS,
+} from 'app/components';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useGetSourceDbTypeIcon from 'app/hooks/useGetSourceDbTypeIcon';
@@ -172,6 +178,8 @@ export const Sidebar = memo(
             callback: toAdd,
           },
           more: {
+            overlayClassName: SIDEBAR_TITLE_MORE_MENU_POPUP_CLASS,
+            itemClassName: SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
             items: [
               {
                 key: 'recycle',

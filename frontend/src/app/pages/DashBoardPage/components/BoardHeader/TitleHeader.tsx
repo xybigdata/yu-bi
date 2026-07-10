@@ -49,6 +49,7 @@ export const TitleHeader: FC = memo(() => {
   const [showShareLinkModal, setShowShareLinkModal] = useState(false);
   const [mockDataModal, setMockDataModal] = useState(false);
   const [showSaveToStory, setShowSaveToStory] = useState<boolean>(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const { name, status, allowManage, allowShare, boardId, orgId } =
     useContext(BoardContext);
   const title = useStatusTitle(name, status);
@@ -56,6 +57,9 @@ export const TitleHeader: FC = memo(() => {
   const { publishBoard } = usePublishBoard(boardId, 'DASHBOARD', status);
   const onOpenShareLink = useCallback(() => {
     setShowShareLinkModal(true);
+  }, []);
+  const closeDropdown = useCallback(() => {
+    setDropdownOpen(false);
   }, []);
   const isArchived = Number(status) === 0;
 
@@ -86,6 +90,7 @@ export const TitleHeader: FC = memo(() => {
     onOpenShareLink,
     openStoryList: () => setShowSaveToStory(true),
     openMockData: () => setMockDataModal(true),
+    onCloseDropdown: closeDropdown,
   });
 
   return (
@@ -111,8 +116,11 @@ export const TitleHeader: FC = memo(() => {
         )}
         {!isArchived && (
           <Dropdown
+            open={dropdownOpen}
+            onOpenChange={setDropdownOpen}
             menu={{ items: boardDropdownItems }}
             placement="bottomRight"
+            trigger={['click']}
             arrow
           >
             <Button icon={<MoreOutlined />} />

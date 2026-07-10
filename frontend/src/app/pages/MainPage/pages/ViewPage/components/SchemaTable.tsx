@@ -27,10 +27,21 @@ import { ToolbarButton } from 'app/components';
 import { VirtualTable } from 'app/components/VirtualTable';
 import { DataViewFieldType } from 'app/constants';
 import { TABLE_DATA_INDEX } from 'globalConstants';
-import { memo, ReactElement, useMemo } from 'react';
+import {
+  memo,
+  ReactElement,
+  ThHTMLAttributes,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { Resizable } from 'react-resizable';
+import type { Props as ResizableProps } from 'react-resizable';
 import styled from 'styled-components';
 import {
   FONT_SIZE_BASE,
+  LEVEL_1,
   SPACE,
   SPACE_XS,
   WARNING,
@@ -46,11 +57,8 @@ import { getColumnWidthMap, getHierarchyColumn } from '../utils';
 import SetFieldType from './SetFieldType';
 
 const ROW_KEY = 'YUBI_ROW_KEY';
-
-type SchemaTableRow = QueryResultDataSourceRow & {
-  [ROW_KEY]: string;
-  [TABLE_DATA_INDEX]: number;
-};
+const INDEX_COLUMN_WIDTH = 50;
+const MIN_COLUMN_WIDTH = 80;
 
 interface SchemaTableProps extends Omit<
   TableProps<object>,
@@ -99,7 +107,33 @@ export const SchemaTable = memo(
       () => getColumnWidthMap(model, dataSource || []),
       [model, dataSource],
     );
-    const indexColumnWidth = 50;
+    const [manualColumnWidthMap, setManualColumnWidthMap] = useState<
+      Record<string, number>
+    >({});
+
+    useEffect(() => {
+      setManualColumnWidthMap(current => {
+        const next: Record<string, number> = {};
+        Object.keys(model).forEach(name => {
+          if (typeof current[name] === 'number') {
+            next[name] = Math.max(MIN_COLUMN_WIDTH, current[name]);
+          }
+        });
+        return next;
+      });
+    }, [model]);
+
+    const handleColumnResize = useCallback(
+      (name: string): ResizableProps['onResize'] =>
+        (_, { size }) => {
+          setManualColumnWidthMap(current => ({
+            ...current,
+            [name]: Math.max(MIN_COLUMN_WIDTH, size.width),
+          }));
+        },
+      [],
+    );
+
     const {
       columns,
       tableWidth,
@@ -111,7 +145,7 @@ export const SchemaTable = memo(
       const columns = Object.entries(model).map(([name, column]) => {
         const hierarchyColumn = getHierarchyColumn(name, hierarchy) || column;
 
-        const width = columnWidthMap[name];
+        const width = manualColumnWidthMap[name] || columnWidthMap[name];
         tableWidth += width;
 
         let icon;
@@ -155,6 +189,11 @@ export const SchemaTable = memo(
           title,
           dataIndex: name,
           width,
+          onHeaderCell: () =>
+            ({
+              width,
+              onResize: handleColumnResize(name),
+            }) as ResizableHeaderCellProps,
           align:
             column.type === DataViewFieldType.NUMERIC
               ? ('right' as const)
@@ -167,7 +206,7 @@ export const SchemaTable = memo(
           {
             align: 'left',
             dataIndex: TABLE_DATA_INDEX,
-            width: indexColumnWidth,
+            width: INDEX_COLUMN_WIDTH,
           },
           ...columns,
         ],
@@ -177,9 +216,11 @@ export const SchemaTable = memo(
       model,
       hierarchy,
       columnWidthMap,
+      manualColumnWidthMap,
       hasCategory,
       hasFormat,
       getExtraHeaderActions,
+      handleColumnResize,
       onSchemaTypeChange,
     ]);
 
@@ -191,20 +232,76 @@ export const SchemaTable = memo(
         components={{ header: { cell: TableHeader } }}
         dataSource={dataSourceWithKey}
         columns={columns}
-        scroll={{ x: tableWidth + indexColumnWidth, y: height }}
+        scroll={{ x: tableWidth + INDEX_COLUMN_WIDTH, y: height }}
         width={propsWidth}
+        fillColumnWidth={false}
       />
     );
   },
 );
 
-function TableHeader(props) {
+type ResizableHeaderCellProps = ThHTMLAttributes<HTMLTableCellElement> & {
+  width?: number;
+  onResize?: ResizableProps['onResize'];
+};
+
+function TableHeader({ width, onResize, ...props }: ResizableHeaderCellProps) {
+  if (!onResize || !width) {
+    return <StyledTableHeader {...props}>{props.children}</StyledTableHeader>;
+  }
+
   return (
-    <TH className="ant-table-cell">
-      <div className="content-wrapper">{props.children}</div>
-    </TH>
+    <Resizable
+      width={width}
+      height={0}
+      handle={
+        <ColumnResizeHandle
+          onClick={event => {
+            event.stopPropagation();
+          }}
+        />
+      }
+      onResize={onResize}
+      draggableOpts={{ enableUserSelectHack: false }}
+    >
+      <StyledTableHeader {...props}>{props.children}</StyledTableHeader>
+    </Resizable>
   );
 }
+
+const StyledTableHeader = ({
+  children,
+  className,
+  ...props
+}: ThHTMLAttributes<HTMLTableCellElement>) => (
+  <TH {...props} className={`${className || ''} ant-table-cell`.trim()}>
+    <div className="content-wrapper">{children}</div>
+  </TH>
+);
+
+const ColumnResizeHandle = styled.span`
+  position: absolute;
+  right: -5px;
+  bottom: 0;
+  z-index: ${LEVEL_1};
+  width: 10px;
+  height: 100%;
+  cursor: col-resize;
+
+  &::after {
+    position: absolute;
+    top: 25%;
+    right: 4px;
+    width: 1px;
+    height: 50%;
+    content: '';
+    background-color: ${p => p.theme.borderColorSplit};
+  }
+
+  &:hover::after {
+    background-color: ${p => p.theme.primary};
+  }
+`;
 
 const TH = styled.th`
   padding: ${SPACE_XS} ${SPACE} ${SPACE_XS} ${SPACE_XS} !important;

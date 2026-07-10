@@ -120,14 +120,18 @@ type WidgetLinkEventParam = {
   rule;
 };
 
+const toPositivePageNo = (pageNo: unknown) => {
+  return typeof pageNo === 'number' && pageNo > 0 ? pageNo : 1;
+};
+
 const toTablePagingEventValue = (
   value: ChartMouseEventParams['value'],
-): TablePagingEventValue | undefined => {
+): TablePagingEventValue => {
   if (!value || typeof value !== 'object') {
-    return undefined;
+    return { pageNo: 1 };
   }
   const pageNo = (value as TablePagingEventValue).pageNo;
-  return { pageNo };
+  return { pageNo: toPositivePageNo(pageNo) };
 };
 
 const toTableSortEventValue = (
@@ -204,7 +208,7 @@ export const tableChartClickAction =
           ]
         : [];
     const opt = {
-      pageInfo: { pageNo: pageEventValue?.pageNo },
+      pageInfo: { pageNo: pageEventValue.pageNo },
       sorters,
     };
     if (editing) {

@@ -528,66 +528,62 @@ export const syncEditBoardWidgetChartDataAsync = createAsyncThunk<
       .addDrillOption(drillOption)
       .build();
 
-    const { data } = await request2<WidgetData>(
-      {
+    try {
+      const { data } = await request2<WidgetData>({
         method: 'POST',
         url: `data-provider/execute`,
         data: requestParams,
-      },
-      undefined,
-      {
-        onRejected: async error => {
-          await dispatch(
-            editWidgetInfoActions.setWidgetErrInfo({
-              boardId,
-              widgetId,
-              errInfo: getErrorMessage(error),
-              errorType: 'request',
-            }),
-          );
-          await dispatch(
-            editWidgetDataActions.setWidgetData({
-              wid: widgetId,
-              data: undefined,
-            }),
-          );
-        },
-      },
-    );
-    await dispatch(
-      editWidgetDataActions.setWidgetData({
-        wid: widgetId,
-        data: { ...data, id: widgetId },
-      }),
-    );
-    await dispatch(editWidgetInfoActions.renderedWidgets([widgetId]));
-    await dispatch(
-      editWidgetInfoActions.changeWidgetLinkInfo({
-        boardId,
-        widgetId,
-        linkInfo: {
-          sourceWidgetId,
-          filters: extraFilters,
-          tempFilters: tempFilters,
-          variables: variableParams,
-        },
-      }),
-    );
-    await dispatch(
-      editWidgetInfoActions.changePageInfo({
-        boardId,
-        widgetId,
-        pageInfo: data?.pageInfo,
-      }),
-    );
-    await dispatch(
-      editWidgetInfoActions.setWidgetErrInfo({
-        boardId,
-        widgetId,
-        errInfo: undefined,
-        errorType: 'request',
-      }),
-    );
+      });
+      await dispatch(
+        editWidgetDataActions.setWidgetData({
+          wid: widgetId,
+          data: { ...data, id: widgetId },
+        }),
+      );
+      await dispatch(editWidgetInfoActions.renderedWidgets([widgetId]));
+      await dispatch(
+        editWidgetInfoActions.changeWidgetLinkInfo({
+          boardId,
+          widgetId,
+          linkInfo: {
+            sourceWidgetId,
+            filters: extraFilters,
+            tempFilters: tempFilters,
+            variables: variableParams,
+          },
+        }),
+      );
+      await dispatch(
+        editWidgetInfoActions.changePageInfo({
+          boardId,
+          widgetId,
+          pageInfo: data?.pageInfo,
+        }),
+      );
+      await dispatch(
+        editWidgetInfoActions.setWidgetErrInfo({
+          boardId,
+          widgetId,
+          errInfo: undefined,
+          errorType: 'request',
+        }),
+      );
+    } catch (error) {
+      await dispatch(
+        editWidgetInfoActions.setWidgetErrInfo({
+          boardId,
+          widgetId,
+          errInfo: getErrorMessage(error),
+          errorType: 'request',
+        }),
+      );
+      await dispatch(
+        editWidgetDataActions.setWidgetData({
+          wid: widgetId,
+          data: undefined,
+        }),
+      );
+    }
     return null;
   },
 );
@@ -633,58 +629,53 @@ export const getEditChartWidgetDataAsync = createAsyncThunk<
     if (!requestParams) {
       return null;
     }
-    let widgetData;
-    const { data } = await request2<WidgetData>(
-      {
+    try {
+      const { data } = await request2<WidgetData>({
         method: 'POST',
         url: `data-provider/execute`,
         data: requestParams,
-      },
-      undefined,
-      {
-        onRejected: async error => {
-          await dispatch(
-            editWidgetInfoActions.setWidgetErrInfo({
-              widgetId,
-              errInfo: getErrorMessage(error),
-              errorType: 'request',
-            }),
-          );
-          await dispatch(
-            editWidgetDataActions.setWidgetData({
-              wid: widgetId,
-              data: undefined,
-            }),
-          );
-        },
-      },
-    );
-    widgetData = data;
-    await dispatch(
-      editWidgetDataActions.setWidgetData({
-        wid: widgetId,
-        data: filterSqlOperatorName(requestParams, widgetData) as WidgetData,
-      }),
-    );
-    await dispatch(
-      editWidgetInfoActions.changePageInfo({
-        widgetId,
-        pageInfo: data.pageInfo,
-      }),
-    );
-    await dispatch(
-      editWidgetInfoActions.setWidgetErrInfo({
-        widgetId,
-        errInfo: undefined,
-        errorType: 'request',
-      }),
-    );
-    await dispatch(
-      editWidgetSelectedItemsActions.changeSelectedItemsInEditor({
-        wid: widgetId,
-        data: [],
-      }),
-    );
+      });
+      await dispatch(
+        editWidgetDataActions.setWidgetData({
+          wid: widgetId,
+          data: filterSqlOperatorName(requestParams, data) as WidgetData,
+        }),
+      );
+      await dispatch(
+        editWidgetInfoActions.changePageInfo({
+          widgetId,
+          pageInfo: data.pageInfo,
+        }),
+      );
+      await dispatch(
+        editWidgetInfoActions.setWidgetErrInfo({
+          widgetId,
+          errInfo: undefined,
+          errorType: 'request',
+        }),
+      );
+    } catch (error) {
+      await dispatch(
+        editWidgetInfoActions.setWidgetErrInfo({
+          widgetId,
+          errInfo: getErrorMessage(error),
+          errorType: 'request',
+        }),
+      );
+      await dispatch(
+        editWidgetDataActions.setWidgetData({
+          wid: widgetId,
+          data: undefined,
+        }),
+      );
+    } finally {
+      await dispatch(
+        editWidgetSelectedItemsActions.changeSelectedItemsInEditor({
+          wid: widgetId,
+          data: [],
+        }),
+      );
+    }
     return null;
   },
 );
@@ -726,19 +717,40 @@ export const getEditControllerOptions = createAsyncThunk<
     if (!requestParams) {
       return null;
     }
-    let widgetData;
-    const { data } = await request2<WidgetData>({
-      method: 'POST',
-      url: `data-provider/execute`,
-      data: requestParams,
-    });
-    widgetData = data;
-    dispatch(
-      editWidgetDataActions.setWidgetData({
-        wid: widgetId,
-        data: filterSqlOperatorName(requestParams, widgetData) as WidgetData,
-      }),
-    );
+    try {
+      const { data } = await request2<WidgetData>({
+        method: 'POST',
+        url: `data-provider/execute`,
+        data: requestParams,
+      });
+      dispatch(
+        editWidgetDataActions.setWidgetData({
+          wid: widgetId,
+          data: filterSqlOperatorName(requestParams, data) as WidgetData,
+        }),
+      );
+      dispatch(
+        editWidgetInfoActions.setWidgetErrInfo({
+          widgetId,
+          errInfo: undefined,
+          errorType: 'request',
+        }),
+      );
+    } catch (error) {
+      dispatch(
+        editWidgetInfoActions.setWidgetErrInfo({
+          widgetId,
+          errInfo: getErrorMessage(error),
+          errorType: 'request',
+        }),
+      );
+      dispatch(
+        editWidgetDataActions.setWidgetData({
+          wid: widgetId,
+          data: undefined,
+        }),
+      );
+    }
 
     return null;
   },

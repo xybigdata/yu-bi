@@ -61,6 +61,8 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
 
     // build in variables
     private static final String VARIABLE_NAME = "YUBI_USER_NAME";
+    private static final long DEFAULT_PAGE_NO = 1L;
+    private static final long DEFAULT_PAGE_SIZE = 1000L;
 
     private static final String VARIABLE_USERNAME = "YUBI_USER_USERNAME";
 
@@ -200,7 +202,7 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
 
         ExecuteParam executeParam = ExecuteParam
                 .builder()
-                .pageInfo(PageInfo.builder().pageNo(1).pageSize(testExecuteParam.getSize()).countTotal(false).build())
+                .pageInfo(PageInfo.builder().pageNo(DEFAULT_PAGE_NO).pageSize((long) Math.max(testExecuteParam.getSize(), 1)).countTotal(false).build())
                 .includeColumns(Collections.singleton(SelectColumn.of(null, "*")))
                 .columns(testExecuteParam.getColumns())
                 .serverAggregate((boolean) providerSource.getProperties().getOrDefault(SERVER_AGGREGATE, false))
@@ -219,6 +221,7 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
         if (viewExecuteParam.isEmpty()) {
             return Dataframe.empty();
         }
+        normalizePageInfo(viewExecuteParam);
 
         //datasource and view
         View view = retrieve(viewExecuteParam.getViewId(), View.class, checkViewPermission);
@@ -250,12 +253,6 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
                 .schema(parseSchema(view.getModel()))
                 .build();
 
-        if (viewExecuteParam.getPageInfo().getPageNo() < 1) {
-            viewExecuteParam.getPageInfo().setPageNo(1);
-        }
-
-        viewExecuteParam.getPageInfo().setPageSize(Math.min(viewExecuteParam.getPageInfo().getPageSize(), Integer.MAX_VALUE));
-
         ExecuteParam queryParam = ExecuteParam.builder()
                 .columns(viewExecuteParam.getColumns())
                 .keywords(viewExecuteParam.getKeywords())
@@ -278,6 +275,22 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
             dataframe.setScript(null);
         }
         return dataframe;
+    }
+
+    private void normalizePageInfo(ViewExecuteParam viewExecuteParam) {
+        PageInfo pageInfo = viewExecuteParam.getPageInfo();
+        if (pageInfo == null) {
+            pageInfo = PageInfo.builder().pageNo(DEFAULT_PAGE_NO).pageSize(DEFAULT_PAGE_SIZE).countTotal(false).build();
+            viewExecuteParam.setPageInfo(pageInfo);
+            return;
+        }
+        if (pageInfo.getPageNo() < 1) {
+            pageInfo.setPageNo(DEFAULT_PAGE_NO);
+        }
+        if (pageInfo.getPageSize() < 1) {
+            pageInfo.setPageSize(DEFAULT_PAGE_SIZE);
+        }
+        pageInfo.setPageSize(Math.min(pageInfo.getPageSize(), Integer.MAX_VALUE));
     }
 
     @Override

@@ -12,7 +12,7 @@ spring:
 
   web:
     resources:
-      static-locations: file:${yubi.env.file-path}
+      static-locations: file:${user.dir}/static/,file:${yubi.env.file-path}/
       cache:
         cachecontrol:
           cache-public: true

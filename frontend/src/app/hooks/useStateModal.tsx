@@ -35,10 +35,13 @@ export enum StateModalSize {
   XLARGE = 2000,
 }
 
+const STATE_MODAL_CLASS_NAME = 'yubi-state-modal';
+const STATE_MODAL_BODY_MAX_HEIGHT = 'calc(100vh - 48px)';
+const STATE_MODAL_BODY_PADDING = '32px 32px 24px';
+
 const defaultBodyStyle: React.CSSProperties = {
-  maxHeight: 1000,
-  overflowY: 'auto',
-  overflowX: 'auto',
+  maxHeight: STATE_MODAL_BODY_MAX_HEIGHT,
+  padding: STATE_MODAL_BODY_PADDING,
 };
 
 type StateModalOnOk = (...args: never[]) => unknown;
@@ -98,12 +101,31 @@ function useStateModal({ initState }: { initState?: unknown }) {
 
   const handleClickCancelButton = (closeFn?: () => void) => {
     stateRef.current = [];
-    cancelCallbackRef.current?.call(Object.create(null), closeFn || null);
+    form?.resetFields();
+
+    let closed = false;
+    const closeOnce = () => {
+      if (closed) {
+        return;
+      }
+      closed = true;
+      closeFn?.();
+    };
+
+    try {
+      cancelCallbackRef.current?.call(Object.create(null), closeOnce);
+    } finally {
+      closeOnce();
+    }
   };
 
   const FormWrapper = (content: ReactNode) => {
     return (
-      <Form form={form} name="state_modal_form">
+      <Form
+        form={form}
+        name="state_modal_form"
+        className="yubi-state-modal-form"
+      >
         {content}
       </Form>
     );
@@ -132,15 +154,24 @@ function useStateModal({ initState }: { initState?: unknown }) {
   const showModal = (props: StateModalProps) => {
     okCallbackRef.current = props.onOk;
     cancelCallbackRef.current = props.onCancel;
+    const bodyStyle = {
+      ...defaultBodyStyle,
+      ...props.bodyStyle,
+      padding: props.bodyStyle?.padding ?? STATE_MODAL_BODY_PADDING,
+    };
 
     // Note: should destroy old modal and form effects in order to render new content
     Modal.destroyAll();
     form?.resetFields();
 
     return modal.confirm({
+      className: STATE_MODAL_CLASS_NAME,
       title: props.title,
       width: getModalSize(props?.modalSize),
-      bodyStyle: props.bodyStyle || defaultBodyStyle,
+      bodyStyle,
+      styles: {
+        body: bodyStyle,
+      },
       content: FormWrapper(renderContent(props.content)),
       onOk: handleClickOKButton,
       onCancel: handleClickCancelButton,

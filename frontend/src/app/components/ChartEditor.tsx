@@ -603,7 +603,7 @@ export const ChartEditor: FC<ChartEditorProps> = ({
               analytics: dataChartId ? false : true,
               vizName: backendChart?.name || 'chart',
               vizId: isWidget ? widgetId : dataChartId,
-              vizType: isWidget ? 'widget' : 'dataChart',
+              vizType: isWidget ? 'WIDGET' : 'DATACHART',
             },
           },
         ],

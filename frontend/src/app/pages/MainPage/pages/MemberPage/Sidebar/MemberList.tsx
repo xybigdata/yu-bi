@@ -37,7 +37,7 @@ import {
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
-import { SPACE_MD } from 'styles/StyleConstants';
+import { SPACE_MD, SPACE_XS } from 'styles/StyleConstants';
 import { selectOrgId } from '../../../slice/selectors';
 import { InviteForm } from '../InviteForm';
 import {
@@ -209,6 +209,14 @@ const Wrapper = styled.div`
 const ListWrapper = styled.div`
   flex: 1;
   overflow-y: auto;
+
+  .ant-list-item {
+    padding: ${SPACE_XS} ${SPACE_MD} !important;
+  }
+
+  .ant-list-item-meta {
+    min-width: 0;
+  }
 `;
 
 const Emails = styled.code`

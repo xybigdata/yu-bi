@@ -50,6 +50,7 @@ import { ResourceTypes } from './pages/PermissionPage/constants';
 import { useViewSlice } from './pages/ViewPage/slice';
 import { useVizSlice } from './pages/VizPage/slice';
 import { initChartPreviewData } from './pages/VizPage/slice/thunks';
+import { getChartEditorClosePath, MAIN_PAGE_ROUTE_PATHS } from './routes';
 import { useMainSlice } from './slice';
 import { selectOrgId } from './slice/selectors';
 import {
@@ -117,6 +118,15 @@ export function MainPage() {
       container: hisSearch.get('container') || 'dataChart',
       defaultViewId: hisSearch.get('defaultViewId') || '',
     } as ChartEditorBaseProps;
+    const handleCloseChartEditor = useCallback(() => {
+      navigate.push(
+        getChartEditorClosePath({
+          orgId,
+          dataChartId: hisState.dataChartId,
+          defaultViewId: hisState.defaultViewId,
+        }),
+      );
+    }, [hisState.dataChartId, hisState.defaultViewId, navigate, orgId]);
 
     return (
       <AccessRoute module={ResourceTypes.Viz}>
@@ -126,7 +136,7 @@ export function MainPage() {
           chartType={hisState.chartType}
           container={hisState.container}
           defaultViewId={hisState.defaultViewId}
-          onClose={() => navigate.go(-1)}
+          onClose={handleCloseChartEditor}
           onSaveInDataChart={onSaveInDataChart}
         />
       </AccessRoute>
@@ -140,28 +150,31 @@ export function MainPage() {
       {orgId && (
         <Routes>
           <Route
-            path="/"
+            path={MAIN_PAGE_ROUTE_PATHS.root}
             element={<Navigate to={`/organizations/${orgId}`} replace />}
           />
-          <Route path="/confirminvite" element={<LazyConfirmInvitePage />} />
           <Route
-            path="/organizations/:orgId"
+            path={MAIN_PAGE_ROUTE_PATHS.confirmInvite}
+            element={<LazyConfirmInvitePage />}
+          />
+          <Route
+            path={MAIN_PAGE_ROUTE_PATHS.organization}
             element={<Navigate to={`/organizations/${orgId}/vizs`} replace />}
           />
           <Route
-            path="/organizations/:orgId/vizs/chartEditor"
+            path={MAIN_PAGE_ROUTE_PATHS.vizChartEditor}
             element={<ChartEditorRoute />}
           />
           <Route
-            path="/organizations/:orgId/vizs/storyPlayer/:storyId"
+            path={MAIN_PAGE_ROUTE_PATHS.vizStoryPlayer}
             element={<PPTPlayer />}
           />
           <Route
-            path="/organizations/:orgId/vizs/storyEditor/:storyId"
+            path={MAIN_PAGE_ROUTE_PATHS.vizStoryEditor}
             element={<EditorPPT />}
           />
           <Route
-            path="/organizations/:orgId/vizs/:vizId?"
+            path={MAIN_PAGE_ROUTE_PATHS.vizBoardEditor}
             element={
               <AccessRoute module={ResourceTypes.Viz}>
                 <LazyVizPage />
@@ -169,7 +182,23 @@ export function MainPage() {
             }
           />
           <Route
-            path="/organizations/:orgId/views/:viewId?"
+            path={MAIN_PAGE_ROUTE_PATHS.vizList}
+            element={
+              <AccessRoute module={ResourceTypes.Viz}>
+                <LazyVizPage />
+              </AccessRoute>
+            }
+          />
+          <Route
+            path={MAIN_PAGE_ROUTE_PATHS.vizDetail}
+            element={
+              <AccessRoute module={ResourceTypes.Viz}>
+                <LazyVizPage />
+              </AccessRoute>
+            }
+          />
+          <Route
+            path={MAIN_PAGE_ROUTE_PATHS.viewList}
             element={
               <AccessRoute module={ResourceTypes.View}>
                 <LazyViewPage />
@@ -177,7 +206,15 @@ export function MainPage() {
             }
           />
           <Route
-            path="/organizations/:orgId/sources"
+            path={MAIN_PAGE_ROUTE_PATHS.viewDetail}
+            element={
+              <AccessRoute module={ResourceTypes.View}>
+                <LazyViewPage />
+              </AccessRoute>
+            }
+          />
+          <Route
+            path={MAIN_PAGE_ROUTE_PATHS.sourceList}
             element={
               <AccessRoute module={ResourceTypes.Source}>
                 <LazySourcePage />
@@ -185,7 +222,15 @@ export function MainPage() {
             }
           />
           <Route
-            path="/organizations/:orgId/schedules/:scheduleId?"
+            path={MAIN_PAGE_ROUTE_PATHS.sourceDetail}
+            element={
+              <AccessRoute module={ResourceTypes.Source}>
+                <LazySourcePage />
+              </AccessRoute>
+            }
+          />
+          <Route
+            path={MAIN_PAGE_ROUTE_PATHS.scheduleList}
             element={
               <AccessRoute module={ResourceTypes.Schedule}>
                 <LazySchedulePage />
@@ -193,7 +238,15 @@ export function MainPage() {
             }
           />
           <Route
-            path="/organizations/:orgId/members"
+            path={MAIN_PAGE_ROUTE_PATHS.scheduleDetail}
+            element={
+              <AccessRoute module={ResourceTypes.Schedule}>
+                <LazySchedulePage />
+              </AccessRoute>
+            }
+          />
+          <Route
+            path={MAIN_PAGE_ROUTE_PATHS.memberList}
             element={
               <AccessRoute module={ResourceTypes.User}>
                 <LazyMemberPage />
@@ -201,7 +254,7 @@ export function MainPage() {
             }
           />
           <Route
-            path="/organizations/:orgId/roles"
+            path={MAIN_PAGE_ROUTE_PATHS.memberDetail}
             element={
               <AccessRoute module={ResourceTypes.User}>
                 <LazyMemberPage />
@@ -209,7 +262,23 @@ export function MainPage() {
             }
           />
           <Route
-            path="/organizations/:orgId/permissions"
+            path={MAIN_PAGE_ROUTE_PATHS.roleList}
+            element={
+              <AccessRoute module={ResourceTypes.User}>
+                <LazyMemberPage />
+              </AccessRoute>
+            }
+          />
+          <Route
+            path={MAIN_PAGE_ROUTE_PATHS.roleDetail}
+            element={
+              <AccessRoute module={ResourceTypes.User}>
+                <LazyMemberPage />
+              </AccessRoute>
+            }
+          />
+          <Route
+            path={MAIN_PAGE_ROUTE_PATHS.permissionList}
             element={
               <Navigate
                 to={`/organizations/${orgId}/permissions/subject`}
@@ -218,7 +287,7 @@ export function MainPage() {
             }
           />
           <Route
-            path="/organizations/:orgId/permissions/:viewpoint"
+            path={MAIN_PAGE_ROUTE_PATHS.permissionViewpoint}
             element={
               <AccessRoute module={ResourceTypes.Manager}>
                 <LazyPermissionPage />
@@ -226,7 +295,15 @@ export function MainPage() {
             }
           />
           <Route
-            path="/organizations/:orgId/variables"
+            path={MAIN_PAGE_ROUTE_PATHS.permissionDetail}
+            element={
+              <AccessRoute module={ResourceTypes.Manager}>
+                <LazyPermissionPage />
+              </AccessRoute>
+            }
+          />
+          <Route
+            path={MAIN_PAGE_ROUTE_PATHS.variables}
             element={
               <AccessRoute module={ResourceTypes.Manager}>
                 <LazyVariablePage />
@@ -234,7 +311,7 @@ export function MainPage() {
             }
           />
           <Route
-            path="/organizations/:orgId/orgSettings"
+            path={MAIN_PAGE_ROUTE_PATHS.orgSettings}
             element={
               <AccessRoute module={ResourceTypes.Manager}>
                 <LazyOrgSettingPage />
@@ -242,7 +319,7 @@ export function MainPage() {
             }
           />
           <Route
-            path="/organizations/:orgId/resourceMigration"
+            path={MAIN_PAGE_ROUTE_PATHS.resourceMigration}
             element={
               <AccessRoute module={ResourceTypes.Manager}>
                 <LazyResourceMigrationPage />

@@ -19,8 +19,6 @@
 
 package yubi.core.base.exception;
 
-import yubi.core.base.exception.BaseException;
-
 public class ParamException extends BaseException {
 
     public ParamException(String message) {

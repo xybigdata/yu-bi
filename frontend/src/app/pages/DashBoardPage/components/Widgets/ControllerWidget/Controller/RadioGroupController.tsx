@@ -51,27 +51,36 @@ export const RadioGroupController: React.FC<RadioControllerProps> = memo(
     const _onChange = (e: RadioChangeEvent) => {
       onChange([e.target.value]);
     };
+    const clearSelectedValue = useCallback(
+      (nextValue?: string) => {
+        if (nextValue === value) {
+          onChange([]);
+        }
+      },
+      [onChange, value],
+    );
+    const isButtonStyle = radioButtonType === 'button';
     const RadioItem = useMemo(() => {
-      return radioButtonType === 'button' ? Radio.Button : Radio;
-    }, [radioButtonType]);
+      return isButtonStyle ? Radio.Button : Radio;
+    }, [isButtonStyle]);
     const renderOptions = useCallback(() => {
       return (options || []).map(o => (
         <RadioItem
           className="radio-item"
           key={o.value + o.label}
+          onClick={() => clearSelectedValue(o.value)}
           value={o.value}
         >
           {o.label ?? o.value}
         </RadioItem>
       ));
-    }, [RadioItem, options]);
+    }, [RadioItem, clearSelectedValue, options]);
 
     return (
       <StyledWrap>
         <Radio.Group
           className="control-radio-group"
           value={value}
-          optionType={'button'}
           onChange={_onChange}
         >
           {renderOptions()}
@@ -82,13 +91,19 @@ export const RadioGroupController: React.FC<RadioControllerProps> = memo(
 );
 const StyledWrap = styled.div`
   display: flex;
-
-  justify-content: space-around;
   width: 100%;
 
   .control-radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    align-items: center;
     background-color: transparent;
+
     .radio-item {
+      display: inline-flex;
+      align-items: center;
+      margin-inline-end: 0;
       background-color: transparent;
     }
   }

@@ -120,8 +120,8 @@ const StyledContainer = styled(StyledBackground)`
   flex-direction: column;
   min-height: 0;
   .grid-wrap {
-    flex: 1;
-    overflow-y: auto;
+    min-height: 100%;
+    overflow-y: visible;
     -ms-overflow-style: none;
   }
   .grid-wrap::-webkit-scrollbar {

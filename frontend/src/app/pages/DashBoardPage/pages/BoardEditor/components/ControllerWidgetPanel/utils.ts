@@ -33,6 +33,7 @@ import { YuBiDateLike, formatYuBiDate, toYuBiDayjs } from 'app/utils/date';
 import { FilterSqlOperator, TIME_FORMATTER } from 'globalConstants';
 import i18next from 'i18next';
 import { CloneValueDeep } from 'utils/object';
+import type { RelatedView } from '../../../Board/slice/types';
 import {
   DateControllerTypes,
   NumericalControllerTypes,
@@ -42,13 +43,70 @@ import { ControllerConfig, PickerType } from './types';
 import type { InputNumberProps } from 'antd';
 
 type ControllerFilterValueType =
-  | DataViewFieldType
-  | VariableValueTypes
-  | undefined;
+  DataViewFieldType | VariableValueTypes | undefined;
 
 type NumberValue = InputNumberProps['value'];
 
 export type RangeNumberValue = readonly [NumberValue?, NumberValue?];
+
+type RelatedWidgetItemLike = {
+  widgetId: string;
+  viewId?: string;
+};
+
+export const buildRelatedViewsForWidgets = ({
+  relatedWidgets,
+  previousRelatedViews,
+  viewMap,
+}: {
+  relatedWidgets: RelatedWidgetItemLike[];
+  previousRelatedViews?: RelatedView[];
+  viewMap: Record<string, unknown>;
+}) => {
+  const uniqueViewIds = Array.from(
+    new Set(
+      relatedWidgets
+        .map(widgetItem => widgetItem.viewId)
+        .filter((viewId): viewId is string => !!viewId && !!viewMap[viewId]),
+    ),
+  );
+  const previousViews = Array.isArray(previousRelatedViews)
+    ? previousRelatedViews
+    : [];
+  const orphanPreviousViews = previousViews.filter(
+    relatedView => !relatedView.viewId || !viewMap[relatedView.viewId],
+  );
+  const canRecoverOrphanByOrder =
+    orphanPreviousViews.length === uniqueViewIds.length;
+  const canRecoverSingleOrphan =
+    uniqueViewIds.length === 1 && orphanPreviousViews.length > 0;
+
+  return uniqueViewIds.map((viewId, index): RelatedView => {
+    const previousView = previousViews.find(
+      relatedView => relatedView.viewId === viewId && viewMap[viewId],
+    );
+
+    if (previousView) {
+      return { ...previousView, viewId };
+    }
+
+    const orphanPreviousView =
+      canRecoverOrphanByOrder || canRecoverSingleOrphan
+        ? orphanPreviousViews[index] || orphanPreviousViews[0]
+        : undefined;
+
+    if (orphanPreviousView) {
+      return { ...orphanPreviousView, viewId };
+    }
+
+    return {
+      viewId,
+      relatedCategory: ChartDataViewFieldCategory.Field,
+      fieldValue: '',
+      fieldValueType: DataViewFieldType.STRING,
+    };
+  });
+};
 
 const toRangeNumber = (value: NumberValue | undefined) => {
   if (typeof value === 'number') {

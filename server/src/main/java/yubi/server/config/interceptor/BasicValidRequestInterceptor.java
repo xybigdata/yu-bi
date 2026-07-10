@@ -36,6 +36,10 @@ public class BasicValidRequestInterceptor implements HandlerInterceptor {
 
     private static final String staticPath = "/static";
 
+    private static final String mainAppPath = "/organizations";
+
+    private static final String confirmInvitePath = "/confirminvite";
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (!isValidRequest(request)) {
@@ -57,9 +61,11 @@ public class BasicValidRequestInterceptor implements HandlerInterceptor {
         return requestURI.startsWith(getApiPrePath())
                 || requestURI.equals("/")
                 || requestURI.equals("/index.html")
+                || requestURI.equals(confirmInvitePath)
                 || requestURI.equals("/favicon.ico")
                 || requestURI.equals("/manifest.json")
                 || requestURI.equals("/editor.worker.js")
+                || requestURI.startsWith(mainAppPath)
                 || requestURI.startsWith(resourcePath)
                 || requestURI.startsWith("/swagger")
                 || requestURI.startsWith("/webjars")

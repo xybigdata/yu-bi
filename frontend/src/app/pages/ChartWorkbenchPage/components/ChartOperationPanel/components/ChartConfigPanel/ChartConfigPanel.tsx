@@ -247,8 +247,36 @@ const ConfigBlock = styled.div`
     font-weight: ${FONT_WEIGHT_MEDIUM};
     color: ${p => p.theme.textColorSnd};
 
+    .ant-tabs-nav {
+      margin-bottom: 12px;
+    }
+
+    .ant-tabs-nav-list {
+      display: flex;
+      width: 100%;
+    }
+
+    .ant-tabs-tab {
+      flex: 1 1 0;
+      justify-content: center;
+      min-width: 0;
+      padding: 14px 0 12px;
+
+      .ant-tabs-tab-btn {
+        width: 100%;
+      }
+
+      .ant-tabs-tab-btn > span {
+        display: inline-flex;
+        gap: 4px;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+    }
+
     .ant-tabs-tab + .ant-tabs-tab {
-      margin: 0 0 0 ${SPACE_MD};
+      margin: 0;
     }
   }
 `;

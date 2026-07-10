@@ -527,7 +527,7 @@ const ChartPreviewBoard: FC<{
                     : folderId,
                 vizName: chartPreview?.backendChart?.name,
                 analytics: false,
-                vizType: 'dataChart',
+                vizType: 'DATACHART',
               },
             },
           ],

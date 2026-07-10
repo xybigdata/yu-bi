@@ -58,6 +58,10 @@ const toSortActionType = (direction: unknown): SortActionType | undefined => {
     : undefined;
 };
 
+const toPositivePageNo = (pageNo: unknown) => {
+  return typeof pageNo === 'number' && pageNo > 0 ? pageNo : 1;
+};
+
 export const tablePagingAndSortEventListener = (
   param?: ChartMouseEventParams,
   callback?: ChartEventListenerCallback<TablePagingAndSortParams>,
@@ -75,12 +79,11 @@ export const tablePagingAndSortEventListener = (
               column,
               operator,
               aggOperator: param.value?.aggOperator as
-                | AggregateFieldActionType
-                | undefined,
+                AggregateFieldActionType | undefined,
             }
           : undefined,
       pageInfo: {
-        pageNo: param?.value?.pageNo,
+        pageNo: toPositivePageNo(param?.value?.pageNo),
       },
     });
   }

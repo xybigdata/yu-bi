@@ -21,15 +21,16 @@ import React, { memo, useCallback } from 'react';
 import { useDrag } from 'react-dnd';
 import { LEVEL_10 } from 'styles/StyleConstants';
 export interface WidgetDndHandleMaskProps {
-  widgetId: string;
   canWrapped: boolean;
+  onDoubleClick?: () => void;
+  widgetId: string;
 }
 export interface DropItem {
   childId: string;
   canWrapped: boolean;
 }
 export const WidgetDndHandleMask: React.FC<WidgetDndHandleMaskProps> = memo(
-  ({ widgetId, canWrapped }) => {
+  ({ canWrapped, onDoubleClick, widgetId }) => {
     const [_, dragRef, dragPreview] = useDrag(() => ({
       type: CONTAINER_TAB,
       item: { canWrapped: canWrapped, childId: widgetId } as DropItem,
@@ -43,6 +44,13 @@ export const WidgetDndHandleMask: React.FC<WidgetDndHandleMaskProps> = memo(
     const ssp = e => {
       e.stopPropagation();
     };
+    const handleDoubleClick = useCallback(
+      (e: React.MouseEvent<HTMLDivElement>) => {
+        e.stopPropagation();
+        onDoubleClick?.();
+      },
+      [onDoubleClick],
+    );
     const dragPreviewRef = useCallback(
       (node: HTMLDivElement | null) => {
         dragPreview(node);
@@ -61,6 +69,7 @@ export const WidgetDndHandleMask: React.FC<WidgetDndHandleMaskProps> = memo(
           ref={dragPreviewRef}
           className="dragRef2"
           onClick={ssp}
+          onDoubleClick={handleDoubleClick}
           onDragStart={ssp}
           style={{
             position: 'absolute',
@@ -74,6 +83,7 @@ export const WidgetDndHandleMask: React.FC<WidgetDndHandleMaskProps> = memo(
           ref={dragSourceRef}
           // onDragStart={ssp}
           onClick={ssp}
+          onDoubleClick={handleDoubleClick}
           className="dragRef1"
           style={{
             position: 'absolute',

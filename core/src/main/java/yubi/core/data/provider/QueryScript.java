@@ -39,7 +39,7 @@ public class QueryScript implements Serializable {
 
     private String viewId;
 
-    private boolean test;
+    private Boolean test;
 
     private ScriptType scriptType;
 
@@ -48,6 +48,14 @@ public class QueryScript implements Serializable {
     private List<ScriptVariable> variables;
 
     private Map<String, Column> schema;
+
+    public boolean isTest() {
+        return test != null && test;
+    }
+
+    public void setTest(Boolean test) {
+        this.test = test != null && test;
+    }
 
     public String toQueryKey() {
         try {

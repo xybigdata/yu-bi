@@ -54,7 +54,6 @@ import {
   transformToDataSet,
 } from 'app/utils/chartHelper';
 import { getChartDrillOption } from 'app/utils/internalChartHelper';
-import { produce } from 'immer';
 import React, {
   memo,
   useCallback,
@@ -66,7 +65,7 @@ import React, {
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
-import { isEmptyArray } from 'utils/object';
+import { CloneValueDeep, isEmptyArray } from 'utils/object';
 import { uuidv4 } from 'utils/utils';
 import { changeSelectedItems } from '../../../pages/BoardEditor/slice/actions/actions';
 import { WidgetActionContext } from '../../ActionProvider/WidgetActionProvider';
@@ -531,14 +530,10 @@ export const DataChartWidgetCore: React.FC<{}> = memo(() => {
   const config = useMemo(() => {
     if (!chart?.config) return undefined;
     if (!dataChart?.config) return undefined;
-    let chartConfig = produce(chart.config, draft => {
-      mergeToChartConfig(
-        draft,
-        produce(dataChart?.config, draft => {
-          migrateChartConfig(draft as ChartDetailConfigDTO);
-        }) as ChartDetailConfigDTO,
-      );
-    });
+    const migratedConfig = migrateChartConfig(
+      CloneValueDeep(dataChart.config) as ChartDetailConfigDTO,
+    );
+    const chartConfig = mergeToChartConfig(chart.config, migratedConfig);
     return chartConfig as ChartConfig;
   }, [chart?.config, dataChart?.config]);
 

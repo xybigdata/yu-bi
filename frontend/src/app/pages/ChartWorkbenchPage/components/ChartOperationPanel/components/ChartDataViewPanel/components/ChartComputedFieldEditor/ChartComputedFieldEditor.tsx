@@ -24,6 +24,7 @@ import {
   FunctionDescription,
 } from 'app/types/ComputedFieldEditor';
 import debounce from 'lodash/debounce';
+import type * as Monaco from 'monaco-editor';
 import {
   forwardRef,
   ForwardRefRenderFunction,
@@ -34,6 +35,55 @@ import {
 import styled from 'styled-components';
 import ChartComputedFieldEditorDarkTheme from './ChartComputedFieldEditorDarkTheme';
 import YuBiQueryLanguageSpecification from './YuBiQueryLanguageSpecification';
+
+type MonacoModule = typeof Monaco;
+
+const DQL_LANGUAGE_ID = 'dql';
+const DQL_THEME_ID = 'dqlTheme';
+
+function hasLanguage(monacoEditor: MonacoModule, languageId: string) {
+  try {
+    return (
+      monacoEditor.languages
+        .getLanguages?.()
+        .some(language => language.id === languageId) ?? false
+    );
+  } catch (error) {
+    console.error('读取 Monaco 语言列表失败，继续尝试注册 DQL', error);
+    return false;
+  }
+}
+
+function registerDqlLanguage(
+  monacoEditor: MonacoModule,
+  functionDescriptions: FunctionDescription[] = [],
+) {
+  try {
+    if (!hasLanguage(monacoEditor, DQL_LANGUAGE_ID)) {
+      monacoEditor.languages.register({ id: DQL_LANGUAGE_ID });
+    }
+  } catch (error) {
+    console.error('DQL 语言注册失败，计算字段编辑器将降级继续加载', error);
+  }
+
+  try {
+    monacoEditor.languages.setMonarchTokensProvider(DQL_LANGUAGE_ID, {
+      ...YuBiQueryLanguageSpecification,
+      builtinFunctions: functionDescriptions.map(f => f.name),
+    } as unknown as Monaco.languages.IMonarchLanguage);
+  } catch (error) {
+    console.error('DQL 语法高亮注册失败，计算字段编辑器将降级继续加载', error);
+  }
+
+  try {
+    monacoEditor.editor.defineTheme(
+      DQL_THEME_ID,
+      ChartComputedFieldEditorDarkTheme as Monaco.editor.IStandaloneThemeData,
+    );
+  } catch (error) {
+    console.error('DQL 主题注册失败，计算字段编辑器将使用默认主题', error);
+  }
+}
 
 const ChartComputedFieldEditor: ForwardRefRenderFunction<
   ChartComputedFieldHandle,
@@ -82,24 +132,25 @@ const ChartComputedFieldEditor: ForwardRefRenderFunction<
     }
   }, 200);
 
-  const handleEdtiorWillMount = monacoEditor => {
-    monacoEditor.languages.register({ id: 'dql' });
-    monacoEditor.languages.setMonarchTokensProvider('dql', {
-      ...YuBiQueryLanguageSpecification,
-      builtinFunctions: (props?.functionDescriptions || []).map(f => f.name),
-    });
-    monacoEditor.editor.defineTheme(
-      'dqlTheme',
-      ChartComputedFieldEditorDarkTheme,
-    );
+  const handleEdtiorWillMount = (monacoEditor: MonacoModule) => {
+    registerDqlLanguage(monacoEditor, props.functionDescriptions);
   };
 
-  const handleEditorDidMount = (editor, monaco) => {
+  const handleEditorDidMount = (
+    editor: Monaco.editor.IStandaloneCodeEditor,
+  ) => {
     const model = editor.getModel();
+    if (!model) {
+      return;
+    }
 
     editor.onDidChangeCursorPosition(listener => {
-      const positionWord = model.getWordAtPosition(listener.position);
-      handleDescriptionChange(positionWord?.word);
+      try {
+        const positionWord = model.getWordAtPosition(listener.position);
+        handleDescriptionChange(positionWord?.word);
+      } catch (error) {
+        console.error('计算字段编辑器读取光标函数提示失败', error);
+      }
     });
   };
 
@@ -115,8 +166,8 @@ const ChartComputedFieldEditor: ForwardRefRenderFunction<
       <Row>
         <MonacoEditor
           ref={editorRef}
-          theme="dqlTheme"
-          language="dql"
+          theme={DQL_THEME_ID}
+          language={DQL_LANGUAGE_ID}
           defaultValue={editorText}
           onChange={onChange}
           editorWillMount={handleEdtiorWillMount}
@@ -149,6 +200,20 @@ const StyledChartComputedFieldEditor = styled.div`
   background-color: #d9d9d9;
 
   & > .ant-row:first-child {
-    height: 300px;
+    height: 320px;
+    min-height: 320px;
+  }
+
+  & > .ant-row:last-child {
+    min-height: 48px;
+  }
+
+  .ant-divider {
+    margin: 12px 0;
+  }
+
+  p {
+    margin: 0;
+    line-height: 20px;
   }
 `;

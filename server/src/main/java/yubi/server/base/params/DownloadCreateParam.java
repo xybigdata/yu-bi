@@ -37,5 +37,8 @@ public class DownloadCreateParam extends BaseCreateParam {
 
     private int imageWidth;
 
-}
+    public void setImageWidth(Integer imageWidth) {
+        this.imageWidth = imageWidth == null ? 0 : imageWidth;
+    }
 
+}

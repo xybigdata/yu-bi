@@ -15,4 +15,8 @@ public class ResourcePermissionParam {
 
     private String orgId;
 
+    public void setPermission(Integer permission) {
+        this.permission = permission == null ? 0 : permission;
+    }
+
 }

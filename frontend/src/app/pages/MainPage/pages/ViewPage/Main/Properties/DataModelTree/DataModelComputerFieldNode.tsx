@@ -44,6 +44,11 @@ import {
   WARNING,
 } from 'styles/StyleConstants';
 
+export const DATA_MODEL_COMPUTED_FIELD_MENU_POPUP_CLASS =
+  'yubi-data-model-computed-field-menu-popup';
+export const DATA_MODEL_COMPUTED_FIELD_MENU_ITEM_CLASS =
+  'data-model-computed-field-menu-item';
+
 const DataModelComputerFieldNode: FC<{
   node: ChartDataViewMeta;
   menuClick: (node: ChartDataViewMeta, key: string) => void;
@@ -55,7 +60,10 @@ const DataModelComputerFieldNode: FC<{
       {
         key: 'exit',
         label: (
-          <MenuItemContent prefix={<EditOutlined className="icon" />}>
+          <MenuItemContent
+            className={DATA_MODEL_COMPUTED_FIELD_MENU_ITEM_CLASS}
+            prefix={<EditOutlined className="icon" />}
+          >
             {t('edit')}
           </MenuItemContent>
         ),
@@ -63,14 +71,17 @@ const DataModelComputerFieldNode: FC<{
       {
         key: 'del',
         label: (
-          <MenuItemContent prefix={<DeleteOutlined className="icon" />}>
-            <Popconfirm
-              title={t('deleteSure')}
-              onConfirm={() => menuClick(node, 'delete')}
+          <Popconfirm
+            title={t('deleteSure')}
+            onConfirm={() => menuClick(node, 'delete')}
+          >
+            <MenuItemContent
+              className={DATA_MODEL_COMPUTED_FIELD_MENU_ITEM_CLASS}
+              prefix={<DeleteOutlined className="icon" />}
             >
               {t('delete')}
-            </Popconfirm>
-          </MenuItemContent>
+            </MenuItemContent>
+          </Popconfirm>
         ),
       },
     ];
@@ -115,6 +126,7 @@ const DataModelComputerFieldNode: FC<{
           <Popup
             trigger={['click']}
             placement="bottom"
+            overlayClassName={DATA_MODEL_COMPUTED_FIELD_MENU_POPUP_CLASS}
             content={
               <Menu
                 prefixCls="ant-dropdown-menu"

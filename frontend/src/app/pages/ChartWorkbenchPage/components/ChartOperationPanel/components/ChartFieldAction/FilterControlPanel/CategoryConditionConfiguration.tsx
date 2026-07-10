@@ -49,6 +49,12 @@ import {
 import { FilterOptionForwardRef } from '.';
 import CategoryConditionEditableTable from './CategoryConditionEditableTable';
 import CategoryConditionRelationSelector from './CategoryConditionRelationSelector';
+import {
+  FILTER_TRANSFER_LIST_WIDTH,
+  FILTER_TRANSFER_WRAPPER_WIDTH,
+} from './layout';
+
+const TRANSFER_LIST_HEIGHT = SPACE_TIMES(80);
 
 type TransferItemValue = string | RelationFilterValue;
 type TreeCheckedKeys = string[] | { checked: string[]; halfChecked: string[] };
@@ -277,7 +283,7 @@ const CategoryConditionConfiguration: ForwardRefRenderFunction<
       label: t('general'),
       children: (
         <>
-          <Row>
+          <Row className="filter-load-row">
             <Space>
               <Button type="primary" onClick={handleFetchData}>
                 {t('load')}
@@ -331,19 +337,21 @@ const CategoryConditionConfiguration: ForwardRefRenderFunction<
             />
           )}
           {!isTree && (
-            <Transfer
-              operations={[t('moveToRight'), t('moveToLeft')]}
-              dataSource={listDatas}
-              titles={[`${t('sourceList')}`, `${t('targetList')}`]}
-              targetKeys={targetKeys}
-              selectedKeys={selectedKeys}
-              onChange={handleGeneralListChange}
-              onSelectChange={onSelectChange}
-              render={item => item.label}
-              filterOption={filterGeneralListOptions}
-              showSearch
-              pagination
-            />
+            <div className="filter-transfer-wrapper">
+              <Transfer
+                operations={[t('moveToRight'), t('moveToLeft')]}
+                dataSource={listDatas}
+                titles={[`${t('sourceList')}`, `${t('targetList')}`]}
+                targetKeys={targetKeys}
+                selectedKeys={selectedKeys}
+                onChange={handleGeneralListChange}
+                onSelectChange={onSelectChange}
+                render={item => item.label}
+                filterOption={filterGeneralListOptions}
+                showSearch
+                pagination
+              />
+            </div>
           )}
         </>
       ),
@@ -385,30 +393,81 @@ const CategoryConditionConfiguration: ForwardRefRenderFunction<
 export default forwardRef(CategoryConditionConfiguration);
 
 const StyledTabs = styled(Tabs)`
+  width: 100%;
+
   & .ant-tabs-content-holder {
-    max-height: 600px;
     margin-top: 10px;
-    overflow-y: auto;
+    overflow: visible;
   }
 
   & .ant-form-item-explain {
     align-self: end;
   }
 
+  .filter-load-row {
+    margin-bottom: ${SPACE_XS};
+  }
+
+  .filter-transfer-wrapper {
+    width: ${FILTER_TRANSFER_WRAPPER_WIDTH}px;
+    max-width: 100%;
+  }
+
   .ant-transfer {
+    align-items: flex-start;
+    width: 100%;
     margin: ${SPACE_XS} 0;
 
-    /* 
-     * will be solved by upgrading antd to version a 4.17.x+
-     * https://github.com/ant-design/ant-design/pull/31809 
-     */
+    .ant-transfer-section,
     .ant-transfer-list {
-      width: ${SPACE_TIMES(56)};
-      height: ${SPACE_TIMES(80)};
+      flex: 0 0 ${FILTER_TRANSFER_LIST_WIDTH}px;
+      align-self: flex-start;
+      width: ${FILTER_TRANSFER_LIST_WIDTH}px;
+      height: ${TRANSFER_LIST_HEIGHT};
+    }
 
-      .ant-pagination input {
+    .ant-transfer-section-with-pagination {
+      width: ${FILTER_TRANSFER_LIST_WIDTH}px;
+      height: ${TRANSFER_LIST_HEIGHT};
+    }
+
+    .ant-transfer-list-header,
+    .ant-transfer-section-header {
+      padding-inline: ${SPACE_XS};
+    }
+
+    .ant-transfer-list-body-search-wrapper,
+    .ant-transfer-section-body-search-wrapper {
+      padding: ${SPACE_XS};
+    }
+
+    .ant-transfer-list-content-item,
+    .ant-transfer-section-content-item {
+      padding-inline: ${SPACE_XS};
+    }
+
+    .ant-transfer-list-pagination,
+    .ant-transfer-section-pagination {
+      padding: ${SPACE_XS};
+
+      .ant-pagination {
+        justify-content: flex-end;
+      }
+
+      .ant-pagination-options {
+        display: none;
+      }
+
+      input {
         width: 48px;
       }
+    }
+
+    .ant-transfer-operation,
+    .ant-transfer-actions {
+      flex: 0 0 auto;
+      align-self: flex-start;
+      margin: ${SPACE_TIMES(28)} ${SPACE_XS} 0;
     }
   }
 

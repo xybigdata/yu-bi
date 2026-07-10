@@ -223,7 +223,6 @@ export function RoleDetailPage() {
         <MemberForm
           title={t('addMember')}
           open={memberFormVisible}
-          width={992}
           onCancel={hideMemberForm}
           initialValues={memberTableDataSource}
           onChange={setMemberTableDataSource}

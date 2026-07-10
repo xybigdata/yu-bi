@@ -1387,6 +1387,8 @@
       "test": "测试连接",
       "file": "文件",
       "selectFile": "选择文件",
+      "uploadFailed": "文件上传失败，请重新选择文件",
+      "saveSourceBeforeUpload": "请先保存数据源，再上传文件",
       "addProperty": "新增配置项",
       "editProperty": "编辑配置项",
       "addConfig": "新增配置",

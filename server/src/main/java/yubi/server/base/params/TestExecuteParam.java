@@ -43,4 +43,8 @@ public class TestExecuteParam {
 
     private int size = 100;
 
+    public void setSize(Integer size) {
+        this.size = size == null ? 100 : size;
+    }
+
 }

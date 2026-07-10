@@ -29,6 +29,13 @@ import { getDistinctFields } from 'app/utils/fetch';
 import { getRelationFilterValues } from 'app/pages/MainPage/pages/VizPage/ChartPreview/components/ControllerPanel/components/filterValueUtils';
 import { FilterSqlOperator } from 'globalConstants';
 import { FC, memo, useCallback, useEffect, useState } from 'react';
+import styled from 'styled-components';
+import {
+  FILTER_CUSTOM_TABLE_ACTION_WIDTH,
+  FILTER_CUSTOM_TABLE_KEY_WIDTH,
+  FILTER_CUSTOM_TABLE_LABEL_WIDTH,
+  FILTER_CUSTOM_TABLE_WIDTH,
+} from './layout';
 
 type DragSortTableRowProps = React.HTMLAttributes<HTMLElement> & {
   index?: number;
@@ -61,7 +68,7 @@ const CategoryConditionEditableTable: FC<
       {
         title: t('tableHeaderKey'),
         dataIndex: 'key',
-        width: '40%',
+        width: FILTER_CUSTOM_TABLE_KEY_WIDTH,
         sorter: (rowA, rowB) => {
           return String(rowA.key).localeCompare(rowB.key);
         },
@@ -70,7 +77,7 @@ const CategoryConditionEditableTable: FC<
       {
         title: t('tableHeaderLabel'),
         dataIndex: 'label',
-        width: '40%',
+        width: FILTER_CUSTOM_TABLE_LABEL_WIDTH,
         sorter: (rowA, rowB) => {
           return String(rowA.key).localeCompare(rowB.key);
         },
@@ -79,7 +86,7 @@ const CategoryConditionEditableTable: FC<
       {
         title: t('tableHeaderAction'),
         dataIndex: 'action',
-        width: 80,
+        width: FILTER_CUSTOM_TABLE_ACTION_WIDTH,
         render: (_, record: RelationFilterValue) => (
           <Space>
             {!record.isSelected && (
@@ -199,7 +206,7 @@ const CategoryConditionEditableTable: FC<
     };
 
     return (
-      <div>
+      <StyledCategoryConditionEditableTable>
         <Space>
           <Button onClick={handleAdd} type="primary">
             {t('addRow')}
@@ -213,6 +220,8 @@ const CategoryConditionEditableTable: FC<
           dataSource={rows}
           size="small"
           bordered
+          tableLayout="fixed"
+          pagination={false}
           rowKey={(r: RelationFilterValue) => `${r.key}-${r.label}`}
           columns={columnsWithCell}
           onRow={(_, index): DragSortTableRowProps => ({
@@ -220,9 +229,54 @@ const CategoryConditionEditableTable: FC<
             moveRow,
           })}
         />
-      </div>
+      </StyledCategoryConditionEditableTable>
     );
   },
 );
 
 export default CategoryConditionEditableTable;
+
+const StyledCategoryConditionEditableTable = styled.div`
+  width: ${FILTER_CUSTOM_TABLE_WIDTH}px;
+
+  .ant-table {
+    width: ${FILTER_CUSTOM_TABLE_WIDTH}px;
+  }
+
+  .ant-table-wrapper,
+  .ant-spin-nested-loading,
+  .ant-spin-container,
+  .ant-table-container,
+  .ant-table-content {
+    width: ${FILTER_CUSTOM_TABLE_WIDTH}px;
+  }
+
+  .ant-table-content {
+    overflow: hidden !important;
+  }
+
+  .ant-table-body {
+    overflow: visible !important;
+  }
+
+  .ant-table-thead > tr > th {
+    height: 32px;
+    padding: 5px 8px !important;
+  }
+
+  .ant-table-tbody > tr > td {
+    padding: 5px 8px !important;
+  }
+
+  .ant-table-placeholder > .ant-table-cell {
+    height: 96px;
+    padding: 16px 8px !important;
+  }
+
+  .editable-cell-value-wrap {
+    min-height: 24px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+`;

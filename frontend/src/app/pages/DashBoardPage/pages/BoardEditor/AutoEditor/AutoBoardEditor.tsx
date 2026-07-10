@@ -209,7 +209,8 @@ const Wrapper = styled.div<{}>`
   flex: 1;
   flex-direction: column;
   align-items: center;
-  width: 100px;
+  width: 100%;
+  min-width: 0;
   min-height: 0;
 
   .react-resizable-handle {
@@ -217,7 +218,7 @@ const Wrapper = styled.div<{}>`
   }
 
   &.desktop {
-    min-width: 769px;
+    min-width: 0;
   }
 `;
 
@@ -243,8 +244,9 @@ const StyledContainer = styled(StyledBackground)<{ curWH: number[] }>`
   }
 
   .grid-wrap {
-    flex: 1;
-    overflow-y: auto;
+    min-width: 0;
+    min-height: 100%;
+    overflow-y: visible;
     -ms-overflow-style: none;
   }
 

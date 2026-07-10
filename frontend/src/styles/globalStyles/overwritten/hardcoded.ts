@@ -22,10 +22,6 @@ import { FONT_SIZE_LABEL, SPACE_SM } from 'styles/StyleConstants';
 
 export const Hardcoded = createGlobalStyle`
   body {
-    .ant-form-item-label > label {
-      color: ${p => p.theme.textColorLight};
-    }
-
     .ant-form-item-label-left > label {
       padding-left: ${SPACE_SM};
 

@@ -1792,24 +1792,41 @@ describe('Internal Chart Helper ', () => {
   });
 
   describe('transformToViewConfig Test', () => {
-    test('should get empty config fields when config is invalid json', () => {
+    test('should get default request config fields when config is invalid json', () => {
       const viewConfig = transformToViewConfig('{invalid-json}');
       expect(viewConfig).toEqual({
-        cache: undefined,
-        cacheExpires: undefined,
-        concurrencyControl: undefined,
-        concurrencyControlMode: undefined,
+        cache: false,
+        cacheExpires: 0,
+        concurrencyControl: true,
+        concurrencyControlMode: 'DIRTYREAD',
         expensiveQuery: undefined,
       });
     });
 
-    test('should ignore non-object json config', () => {
+    test('should get default request config fields when config is non-object json', () => {
       const viewConfig = transformToViewConfig('true');
       expect(viewConfig).toEqual({
-        cache: undefined,
-        cacheExpires: undefined,
-        concurrencyControl: undefined,
-        concurrencyControlMode: undefined,
+        cache: false,
+        cacheExpires: 0,
+        concurrencyControl: true,
+        concurrencyControlMode: 'DIRTYREAD',
+        expensiveQuery: undefined,
+      });
+    });
+
+    test('should normalize nullable primitive request config fields', () => {
+      const viewConfig = transformToViewConfig({
+        cache: null,
+        cacheExpires: null,
+        concurrencyControl: null,
+        concurrencyControlMode: '',
+        expensiveQuery: null,
+      });
+      expect(viewConfig).toEqual({
+        cache: false,
+        cacheExpires: 0,
+        concurrencyControl: true,
+        concurrencyControlMode: 'DIRTYREAD',
         expensiveQuery: undefined,
       });
     });

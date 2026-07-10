@@ -77,4 +77,24 @@ public class ViewExecuteParam {
                 && CollectionUtils.isEmpty(groups);
     }
 
+    public void setConcurrencyControl(Boolean concurrencyControl) {
+        this.concurrencyControl = concurrencyControl != null && concurrencyControl;
+    }
+
+    public void setCache(Boolean cache) {
+        this.cache = cache != null && cache;
+    }
+
+    public void setCacheExpires(Integer cacheExpires) {
+        this.cacheExpires = cacheExpires == null ? 0 : cacheExpires;
+    }
+
+    public void setScript(Boolean script) {
+        this.script = script != null && script;
+    }
+
+    public void setAnalytics(Boolean analytics) {
+        this.analytics = analytics != null && analytics;
+    }
+
 }

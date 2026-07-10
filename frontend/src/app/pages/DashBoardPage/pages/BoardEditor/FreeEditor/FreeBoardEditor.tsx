@@ -95,10 +95,12 @@ const Container = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-width: 0;
   overflow: hidden;
 
   .grid-background {
     flex: 1;
+    min-width: 0;
     -ms-overflow-style: none;
   }
 

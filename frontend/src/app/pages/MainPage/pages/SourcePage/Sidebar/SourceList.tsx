@@ -25,7 +25,11 @@ import {
 } from '@ant-design/icons';
 import { Menu, MenuProps, message, Popconfirm, TreeDataNode } from 'antd';
 import { Popup, Tree, TreeTitle } from 'app/components';
-import { MenuItemContent } from 'app/components/Popup/MenuListItem';
+import {
+  MenuItemContent,
+  TREE_MORE_MENU_ITEM_CLASS,
+  TREE_MORE_MENU_POPUP_CLASS,
+} from 'app/components/Popup/MenuListItem';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
@@ -180,6 +184,7 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
                         key: 'info',
                         label: (
                           <MenuItemContent
+                            className={TREE_MORE_MENU_ITEM_CLASS}
                             prefix={<EditOutlined className="icon" />}
                           >
                             {tg('button.info')}
@@ -194,6 +199,7 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
                         key: 'addNewView',
                         label: (
                           <MenuItemContent
+                            className={TREE_MORE_MENU_ITEM_CLASS}
                             prefix={<EditOutlined className="icon" />}
                           >
                             {t('creatView')}
@@ -208,6 +214,7 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
                         key: 'delete',
                         label: (
                           <MenuItemContent
+                            className={TREE_MORE_MENU_ITEM_CLASS}
                             prefix={
                               deleteLoading ? (
                                 <LoadingOutlined className="icon" />
@@ -239,6 +246,7 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
                 <Popup
                   trigger={['click']}
                   placement="bottom"
+                  overlayClassName={TREE_MORE_MENU_POPUP_CLASS}
                   content={
                     <Menu
                       prefixCls="ant-dropdown-menu"

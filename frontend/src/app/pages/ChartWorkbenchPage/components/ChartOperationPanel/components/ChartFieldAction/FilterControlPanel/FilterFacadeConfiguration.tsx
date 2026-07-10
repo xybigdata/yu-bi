@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import { InputNumber, Row, Select, Space } from 'antd';
+import { InputNumber, Select } from 'antd';
 import {
   ChartDataViewFieldCategory,
   ControllerFacadeTypes,
@@ -31,6 +31,11 @@ import ChartFilterCondition, {
 import { FilterFacade } from 'app/types/ChartConfig';
 import { FC, memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
+import {
+  FILTER_FACADE_RADIO_SELECT_WIDTH,
+  FILTER_FACADE_SELECT_WIDTH,
+  FILTER_FACADE_SLIDER_NUMBER_WIDTH,
+} from './layout';
 
 type SliderFacadeConfig = Extract<FilterFacade, { facade: string }> & {
   min?: number | null;
@@ -186,60 +191,66 @@ const FilterFacadeConfiguration: FC<
 
     return (
       <StyledFilterFacadeConfiguration>
-        <Row>
-          <Space>
-            <Select value={currentFacade} onChange={handleFacadeChange}>
-              {facadeOptions.map(f => (
-                <Select.Option key={f} value={f}>
-                  {t2(f)}
-                </Select.Option>
-              ))}
+        <Select
+          className="filter-facade-select"
+          value={currentFacade}
+          onChange={handleFacadeChange}
+        >
+          {facadeOptions.map(f => (
+            <Select.Option key={f} value={f}>
+              {t2(f)}
+            </Select.Option>
+          ))}
+        </Select>
+        {currentFacade === ControllerFacadeTypes.RadioGroup && (
+          <div className="filter-facade-extra">
+            <span>{t('radioType')}</span>
+            <Select
+              className="filter-facade-radio-select"
+              value={radioType}
+              onChange={handleRadioTypeChange}
+            >
+              <Select.Option
+                key={ControllerRadioFacadeTypes.Default}
+                value={ControllerRadioFacadeTypes.Default}
+              >
+                {t(ControllerRadioFacadeTypes.Default)}
+              </Select.Option>
+              <Select.Option
+                key={ControllerRadioFacadeTypes.Button}
+                value={ControllerRadioFacadeTypes.Button}
+              >
+                {t(ControllerRadioFacadeTypes.Button)}
+              </Select.Option>
             </Select>
-            {currentFacade === ControllerFacadeTypes.RadioGroup && (
-              <Space>
-                {t('radioType')}
-                <Select value={radioType} onChange={handleRadioTypeChange}>
-                  <Select.Option
-                    key={ControllerRadioFacadeTypes.Default}
-                    value={ControllerRadioFacadeTypes.Default}
-                  >
-                    {t(ControllerRadioFacadeTypes.Default)}
-                  </Select.Option>
-                  <Select.Option
-                    key={ControllerRadioFacadeTypes.Button}
-                    value={ControllerRadioFacadeTypes.Button}
-                  >
-                    {t(ControllerRadioFacadeTypes.Button)}
-                  </Select.Option>
-                </Select>
-              </Space>
-            )}
-            {currentFacade === ControllerFacadeTypes.Slider && (
-              <Space>
-                {t('min')}
-                <InputNumber
-                  value={sliderOptions?.[0]}
-                  onChange={value =>
-                    handleSliderOptionChange(
-                      typeof value === 'number' ? value : null,
-                      sliderOptions?.[1] ?? null,
-                    )
-                  }
-                />
-                {t('max')}
-                <InputNumber
-                  value={sliderOptions?.[1]}
-                  onChange={value =>
-                    handleSliderOptionChange(
-                      sliderOptions?.[0] ?? null,
-                      typeof value === 'number' ? value : null,
-                    )
-                  }
-                />
-              </Space>
-            )}
-          </Space>
-        </Row>
+          </div>
+        )}
+        {currentFacade === ControllerFacadeTypes.Slider && (
+          <div className="filter-facade-extra">
+            <span>{t('min')}</span>
+            <InputNumber
+              className="filter-facade-slider-number"
+              value={sliderOptions?.[0]}
+              onChange={value =>
+                handleSliderOptionChange(
+                  typeof value === 'number' ? value : null,
+                  sliderOptions?.[1] ?? null,
+                )
+              }
+            />
+            <span>{t('max')}</span>
+            <InputNumber
+              className="filter-facade-slider-number"
+              value={sliderOptions?.[1]}
+              onChange={value =>
+                handleSliderOptionChange(
+                  sliderOptions?.[0] ?? null,
+                  typeof value === 'number' ? value : null,
+                )
+              }
+            />
+          </div>
+        )}
       </StyledFilterFacadeConfiguration>
     );
   },
@@ -248,7 +259,31 @@ const FilterFacadeConfiguration: FC<
 export default FilterFacadeConfiguration;
 
 const StyledFilterFacadeConfiguration = styled.div`
-  .ant-select {
-    width: 200px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+
+  .filter-facade-select {
+    flex: 0 0 ${FILTER_FACADE_SELECT_WIDTH}px;
+    width: ${FILTER_FACADE_SELECT_WIDTH}px;
+  }
+
+  .filter-facade-extra {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 8px;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .filter-facade-radio-select {
+    flex: 0 0 ${FILTER_FACADE_RADIO_SELECT_WIDTH}px;
+    width: ${FILTER_FACADE_RADIO_SELECT_WIDTH}px;
+  }
+
+  .filter-facade-slider-number {
+    flex: 0 0 ${FILTER_FACADE_SLIDER_NUMBER_WIDTH}px;
+    width: ${FILTER_FACADE_SLIDER_NUMBER_WIDTH}px;
   }
 `;

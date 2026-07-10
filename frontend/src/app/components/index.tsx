@@ -7,10 +7,15 @@ export { EmptyFiller } from './EmptyFiller';
 export { FormItemEx } from './Form';
 export { GroupLayout, ItemLayout } from './FormGenerator';
 export { IW } from './IconWrapper';
+export { InlineRow, InlineRowAction, InlineRowText } from './InlineRow';
 export { ListItem } from './ListItem';
 export { ListNav, ListPane } from './ListNav';
 export { ListSwitch } from './ListSwitch';
-export { ListTitle } from './ListTitle';
+export {
+  ListTitle,
+  SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
+  SIDEBAR_TITLE_MORE_MENU_POPUP_CLASS,
+} from './ListTitle';
 export type { ListTitleProps } from './ListTitle';
 export { LoadingMask } from './LoadingMask';
 export { ModalForm } from './ModalForm';

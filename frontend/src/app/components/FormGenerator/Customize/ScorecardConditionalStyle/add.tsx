@@ -21,7 +21,6 @@ import { ColorPickerPopover } from 'app/components/ColorPicker';
 import { DataViewFieldType } from 'app/constants';
 import useMount from 'app/hooks/useMount';
 import { memo, useEffect, useState } from 'react';
-import styled from 'styled-components';
 import { G70 } from 'styles/StyleConstants';
 import { isEmpty } from 'utils/object';
 import {
@@ -157,6 +156,7 @@ export default function Add({
 
   return (
     <Modal
+      className="yubi-form-modal yubi-conditional-style-modal"
       destroyOnHidden
       title={t('conditionalStyleTable.modal.title')}
       open={open}
@@ -241,9 +241,12 @@ const ColorSelector = memo(
       <>
         <Col>{label}</Col>
         <Col>
-          <ColorPickerPopover defaultValue={value} onSubmit={onChange}>
-            <StyledColor color={value} />
-          </ColorPickerPopover>
+          <ColorPickerPopover
+            colorPickerClass="conditional-style-color-swatch"
+            defaultValue={value || 'transparent'}
+            size={7}
+            onSubmit={onChange}
+          />
         </Col>
       </>
     );
@@ -314,22 +317,3 @@ const InputNumberScope = memo(
     );
   },
 );
-
-const StyledColor = styled.div`
-  position: relative;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  background-color: ${props => props.color};
-  ::after {
-    position: absolute;
-    top: -7px;
-    left: -7px;
-    display: inline-block;
-    width: 30px;
-    height: 30px;
-    content: '';
-    border: 1px solid ${p => p.theme.borderColorBase};
-    border-radius: 5px;
-  }
-`;
