@@ -108,7 +108,7 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
       onCancel={onCancel}
       afterClose={afterClose}
       ref={formRef}
-      maskClosable={false}
+      mask={{ closable: false }}
     >
       {!simple && (
         <Form.Item

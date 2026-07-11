@@ -558,7 +558,7 @@ const ChartDataViewPanel: FC<{
             value={dataView?.id}
             onChange={handleDataViewChange}
             filterTreeNode={filterDateViewTreeNode}
-            bordered={false}
+            variant="borderless"
           />
           <Popover
             placement="bottomRight"
@@ -588,7 +588,7 @@ const ChartDataViewPanel: FC<{
           className="search-input"
           prefix={<SearchOutlined className="icon" />}
           placeholder={t('searchField')}
-          bordered={false}
+          variant="borderless"
           onChange={treeSearch}
         />
       </StyleSearchbar>

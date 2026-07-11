@@ -147,7 +147,7 @@ public class VariablePlaceholder {
     }
 
     protected SqlCall createIsNullSqlCall(SqlNode sqlNode) {
-        return new SqlBasicCall(SqlStdOperatorTable.IS_NULL, new SqlNode[]{sqlNode}, sqlNode.getParserPosition());
+        return new SqlBasicCall(SqlStdOperatorTable.IS_NULL, List.of(sqlNode), sqlNode.getParserPosition());
     }
 
     protected void replaceVariable(SqlCall sqlCall, ScriptVariable variable) throws ParamReplaceException {

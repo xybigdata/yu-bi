@@ -37,6 +37,7 @@ public class SqlFunctionRegisterVisitor extends SqlBasicVisitor<Object> {
         return operator.acceptCall(this, call);
     }
 
+    @SuppressWarnings("deprecation") // Calcite has no replacement for deliberate runtime registration.
     private void registerIfNotExists(SqlFunction sqlFunction) {
         SqlStdOperatorTable opTab = SqlStdOperatorTable.instance();
         LinkedList<SqlOperator> list = new LinkedList<>();

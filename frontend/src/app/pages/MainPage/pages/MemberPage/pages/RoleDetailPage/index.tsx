@@ -173,7 +173,7 @@ export function RoleDetailPage() {
         }
       />
       <Content>
-        <Card bordered={false}>
+        <Card variant="borderless">
           <Form
             name="role_form_"
             form={form}

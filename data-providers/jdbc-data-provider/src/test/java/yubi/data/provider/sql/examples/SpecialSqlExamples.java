@@ -13,8 +13,6 @@ public class SpecialSqlExamples {
 
     static {
         initScripts(TestSqlDialects.MYSQL, TestSqlDialects.ORACLE);
-        initMysqlScripts();
-        initOracleScripts();
     }
 
     private static void initScripts(SqlDialect... sqlDialects) {
@@ -28,13 +26,4 @@ public class SpecialSqlExamples {
         }
     }
 
-    private static void initMysqlScripts(){
-        SqlDialect sqlDialect = TestSqlDialects.MYSQL;
-
-    }
-
-    private static void initOracleScripts() {
-        SqlDialect sqlDialect = TestSqlDialects.ORACLE;
-
-    }
 }

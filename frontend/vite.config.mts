@@ -12,6 +12,7 @@ import {
 
 const appRoot = __dirname;
 const publicUrl = process.env.PUBLIC_URL || '';
+const buildOutDir = process.env.YUBI_FRONTEND_OUT_DIR || 'build';
 
 const htmlInputs = {
   index: path.resolve(appRoot, 'index.html'),
@@ -97,7 +98,8 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    outDir: 'build',
+    emptyOutDir: true,
+    outDir: buildOutDir,
     sourcemap: false,
     target: 'es2020',
     rollupOptions: {

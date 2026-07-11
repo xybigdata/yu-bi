@@ -1,6 +1,5 @@
 package yubi.server.config;
 
-import yubi.core.base.exception.Exceptions;
 import yubi.core.common.FileUtils;
 import yubi.core.common.UrlUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -16,16 +15,12 @@ import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import java.util.*;
 
-// TODO: Migrate from deprecated EnvironmentPostProcessor to ApplicationListener<ApplicationEnvironmentPreparedEvent> (Spring Boot 4.0+)
+// Spring Boot 4 migration is tracked in docs/tech-stack-modernization-progress.md.
 @SuppressWarnings("removal")
 public class CustomPropertiesValidate implements EnvironmentPostProcessor {
 
@@ -41,7 +36,6 @@ public class CustomPropertiesValidate implements EnvironmentPostProcessor {
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         MutablePropertySources propertySources = environment.getPropertySources();
         Properties properties = loadCustomProperties();
-        //this.validateConfig(properties);
         addYuBiConfigPropertySource(propertySources, new PropertiesPropertySource("yubiConfig", properties));
         switchProfile(environment);
         String jdbcUrl = processDBUrl(environment);
@@ -72,51 +66,6 @@ public class CustomPropertiesValidate implements EnvironmentPostProcessor {
             properties.remove(key);
         }
         return properties;
-    }
-
-    private void validateConfig(Properties properties) {
-        CustomConfigValidateBean customConfigValidateBean = toValidateBean(properties);
-        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-        Set<ConstraintViolation<CustomConfigValidateBean>> validate = validator.validate(customConfigValidateBean);
-        LinkedList<String> errorMessages = new LinkedList<>();
-        for (ConstraintViolation<CustomConfigValidateBean> violation : validate) {
-            String configName = getConfigName(violation.getPropertyPath().toString());
-            errorMessages.add(configName + violation.getMessage());
-        }
-        if (errorMessages.size() > 0) {
-            String msg = "Failed to get the necessary parameters, please check the configuration in the file(config/yubi.conf)\nThe reasons: ";
-            msg = msg + errorMessages.getFirst();
-            errorMessages.removeFirst();
-            errorMessages.addFirst(msg);
-            Exceptions.msg(StringUtils.join(errorMessages, ", "));
-        }
-    }
-
-    private CustomConfigValidateBean toValidateBean(Properties properties) {
-        CustomConfigValidateBean validateBean = new CustomConfigValidateBean();
-        validateBean.setDatasourceIp(properties.getProperty(CustomConfigValidateBean.DATASOURCE_IP));
-        validateBean.setDatasourcePort(properties.getProperty(CustomConfigValidateBean.DATASOURCE_PORT));
-        validateBean.setDatasourceDatabase(properties.getProperty(CustomConfigValidateBean.DATASOURCE_DATABASE));
-        validateBean.setDatasourceUsername(properties.getProperty(CustomConfigValidateBean.DATASOURCE_USERNAME));
-        validateBean.setDatasourcePassword(properties.getProperty(CustomConfigValidateBean.DATASOURCE_PASSWORD));
-        return validateBean;
-    }
-
-    private String getConfigName(String fieldName) {
-        switch (fieldName) {
-            case "datasourceIp":
-                return CustomConfigValidateBean.DATASOURCE_IP;
-            case "datasourcePort":
-                return CustomConfigValidateBean.DATASOURCE_PORT;
-            case "datasourceDatabase":
-                return CustomConfigValidateBean.DATASOURCE_DATABASE;
-            case "datasourceUsername":
-                return CustomConfigValidateBean.DATASOURCE_USERNAME;
-            case "datasourcePassword":
-                return CustomConfigValidateBean.DATASOURCE_PASSWORD;
-            default:
-                return fieldName;
-        }
     }
 
     private void switchProfile(ConfigurableEnvironment environment) {

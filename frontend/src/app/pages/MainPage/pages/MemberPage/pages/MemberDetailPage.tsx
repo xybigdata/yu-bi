@@ -245,7 +245,7 @@ export function MemberDetailPage() {
         }
       />
       <Content>
-        <Card bordered={false}>
+        <Card variant="borderless">
           <Form
             name="member_form_"
             form={form}

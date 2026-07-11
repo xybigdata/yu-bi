@@ -78,7 +78,7 @@ public abstract class DefaultDataProvider extends DataProvider {
     @Override
     public Set<String> readTables(DataProviderSource source, String database) {
 
-        List<Map<String, Object>> schemas = (List<Map<String, Object>>) source.getProperties().get(SCHEMAS);
+        List<Map<String, Object>> schemas = schemaDefinitions(source.getProperties());
 
         if (CollectionUtils.isEmpty(schemas)) {
             return Collections.emptySet();
@@ -91,12 +91,12 @@ public abstract class DefaultDataProvider extends DataProvider {
     @Override
     public Set<Column> readTableColumns(DataProviderSource source, String schema, String table) {
 
-        List<Map<String, Object>> schemas = (List<Map<String, Object>>) source.getProperties().get(SCHEMAS);
+        List<Map<String, Object>> schemas = schemaDefinitions(source.getProperties());
 
         List<Map<String, String>> columns = null;
         for (Map<String, Object> o : schemas) {
             if (table.equals(o.get(TABLE))) {
-                columns = (List<Map<String, String>>) o.get(COLUMNS);
+                columns = stringMapList(o.get(COLUMNS));
             }
         }
         if (columns == null) {
@@ -152,17 +152,66 @@ public abstract class DefaultDataProvider extends DataProvider {
 
     protected List<Column> parseColumns(Map<String, Object> schema) {
         List<Column> columns = null;
-        try {
-            List<Map<String, String>> columnConfig = (List<Map<String, String>>) schema.get(COLUMNS);
-            if (!CollectionUtils.isEmpty(columnConfig)) {
-                columns = columnConfig
-                        .stream()
-                        .map(c -> Column.of(ValueType.valueOf(c.get(COLUMN_TYPE)), c.get(COLUMN_NAME)))
-                        .collect(Collectors.toList());
-            }
-        } catch (ClassCastException ignored) {
+        List<Map<String, String>> columnConfig = stringMapList(schema.get(COLUMNS));
+        if (!CollectionUtils.isEmpty(columnConfig)) {
+            columns = columnConfig
+                    .stream()
+                    .map(c -> Column.of(ValueType.valueOf(c.get(COLUMN_TYPE)), c.get(COLUMN_NAME)))
+                    .collect(Collectors.toList());
         }
         return columns;
+    }
+
+    protected List<Map<String, Object>> schemaDefinitions(Map<String, Object> properties) {
+        return objectMapList(properties.get(SCHEMAS));
+    }
+
+    protected List<Map<String, Object>> objectMapList(Object value) {
+        if (!(value instanceof List<?> values)) {
+            return Collections.emptyList();
+        }
+        List<Map<String, Object>> maps = new ArrayList<>();
+        for (Object item : values) {
+            if (!(item instanceof Map<?, ?> rawMap)) {
+                continue;
+            }
+            Map<String, Object> map = new LinkedHashMap<>();
+            for (Map.Entry<?, ?> entry : rawMap.entrySet()) {
+                if (entry.getKey() instanceof String key) {
+                    map.put(key, entry.getValue());
+                }
+            }
+            maps.add(map);
+        }
+        return maps;
+    }
+
+    protected List<Map<String, String>> stringMapList(Object value) {
+        List<Map<String, Object>> objectMaps = objectMapList(value);
+        List<Map<String, String>> maps = new ArrayList<>();
+        for (Map<String, Object> objectMap : objectMaps) {
+            Map<String, String> map = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
+                if (entry.getValue() instanceof String stringValue) {
+                    map.put(entry.getKey(), stringValue);
+                }
+            }
+            maps.add(map);
+        }
+        return maps;
+    }
+
+    protected Map<String, String> stringMap(Object value) {
+        if (!(value instanceof Map<?, ?> rawMap)) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> map = new LinkedHashMap<>();
+        for (Map.Entry<?, ?> entry : rawMap.entrySet()) {
+            if (entry.getKey() instanceof String key && entry.getValue() instanceof String stringValue) {
+                map.put(key, stringValue);
+            }
+        }
+        return map;
     }
 
     /**
@@ -288,6 +337,7 @@ public abstract class DefaultDataProvider extends DataProvider {
         Object cacheTimeout = config.getProperties().get("cacheTimeout");
         if (cacheTimeout == null) {
             Exceptions.msg("cache timeout can not be empty");
+            return null;
         }
         Calendar instance = Calendar.getInstance();
         instance.add(Calendar.MINUTE, Integer.parseInt(cacheTimeout.toString()));

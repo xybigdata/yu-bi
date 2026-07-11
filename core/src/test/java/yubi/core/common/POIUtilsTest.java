@@ -45,11 +45,11 @@ class POIUtilsTest {
                 1, scoreSetting
         ));
 
-        Workbook workbook = POIUtils.createEmpty();
-        POIUtils.withSheet(workbook, "sheet-1", dataframe, poiSettings);
-
         Path output = Files.createTempFile("poi-utils-", ".xlsx");
-        POIUtils.save(workbook, output.toString(), true);
+        try (Workbook workbook = POIUtils.createEmpty()) {
+            POIUtils.withSheet(workbook, "sheet-1", dataframe, poiSettings);
+            POIUtils.save(workbook, output.toString(), true);
+        }
 
         List<List<Object>> rows = POIUtils.loadExcel(output.toString());
         assertEquals(3, rows.size());
@@ -58,5 +58,20 @@ class POIUtilsTest {
         assertEquals(100d, rows.get(1).get(1));
         assertEquals("bob", rows.get(2).get(0));
         assertEquals(88d, rows.get(2).get(1));
+    }
+
+    @Test
+    void shouldCreateSafeUniqueSheetNames() throws Exception {
+        try (Workbook workbook = POIUtils.createEmpty()) {
+            String first = POIUtils.uniqueSheetName(workbook, "test1_copy");
+            workbook.createSheet(first);
+            String second = POIUtils.uniqueSheetName(workbook, "test1_copy");
+            workbook.createSheet(second);
+
+            assertEquals("test1_copy", first);
+            assertEquals("test1_copy (2)", second);
+            assertEquals("test1_copy (3)", POIUtils.uniqueSheetName(workbook, "test1_copy"));
+            assertEquals("invalid name", POIUtils.uniqueSheetName(workbook, "invalid/name"));
+        }
     }
 }

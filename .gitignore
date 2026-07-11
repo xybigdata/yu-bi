@@ -3,7 +3,9 @@
 .idea
 .DS_Store
 .kiro/
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/maven-lifecycle-mapping.xml
 
 /static
 /.tmp/

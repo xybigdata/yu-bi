@@ -76,7 +76,7 @@ public class Dataframe implements Serializable {
                 .stream()
                 .map(Column::tableName)
                 .distinct()
-                .collect(Collectors.toMap(k -> k, v -> new ArrayList()));
+                .collect(Collectors.toMap(k -> k, v -> new ArrayList<List<Object>>()));
         for (List<Object> row : rows) {
             int i = 0;
             Map<String, List<Object>> tableRowMap = new HashMap<>();

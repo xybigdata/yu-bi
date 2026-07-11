@@ -75,12 +75,9 @@ public class FileDataProvider extends DefaultDataProvider {
             return dataframes;
         }
         Map<String, Object> properties = config.getProperties();
-        List<Map<String, Object>> schemas;
-        if (properties.containsKey(SCHEMAS)) {
-            schemas = (List<Map<String, Object>>) properties.get(SCHEMAS);
-        } else {
-            schemas = Collections.singletonList(properties);
-        }
+        List<Map<String, Object>> schemas = properties.containsKey(SCHEMAS)
+                ? schemaDefinitions(properties)
+                : Collections.singletonList(properties);
         for (Map<String, Object> schema : schemas) {
             if (schema.get(FILE_PATH) == null || StringUtils.isEmpty(schema.get(FILE_PATH).toString())) {
                 Exceptions.msg("message.file.notfound", schema.getOrDefault(TABLE, "").toString());
@@ -141,12 +138,9 @@ public class FileDataProvider extends DefaultDataProvider {
     public void resetSource(DataProviderSource config) {
         super.resetSource(config);
         Map<String, Object> properties = config.getProperties();
-        List<Map<String, Object>> schemas;
-        if (properties.containsKey(SCHEMAS)) {
-            schemas = (List<Map<String, Object>>) properties.get(SCHEMAS);
-        } else {
-            schemas = Collections.singletonList(properties);
-        }
+        List<Map<String, Object>> schemas = properties.containsKey(SCHEMAS)
+                ? schemaDefinitions(properties)
+                : Collections.singletonList(properties);
         Set<String> refFiles = new HashSet<>();
         for (Map<String, Object> schema : schemas) {
             String path = schema.get(FILE_PATH).toString();

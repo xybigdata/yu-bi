@@ -147,13 +147,13 @@ public class SqlBuilder {
                     if (having == null) {
                         having = filterSqlNode;
                     } else {
-                        having = new SqlBasicCall(SqlStdOperatorTable.AND, new SqlNode[]{having, filterSqlNode}, SqlParserPos.ZERO);
+                        having = new SqlBasicCall(SqlStdOperatorTable.AND, Arrays.asList(having, filterSqlNode), SqlParserPos.ZERO);
                     }
                 } else {
                     if (where == null) {
                         where = filterSqlNode;
                     } else {
-                        where = new SqlBasicCall(SqlStdOperatorTable.AND, new SqlNode[]{where, filterSqlNode}, SqlParserPos.ZERO);
+                        where = new SqlBasicCall(SqlStdOperatorTable.AND, Arrays.asList(where, filterSqlNode), SqlParserPos.ZERO);
                     }
                 }
             }
@@ -215,6 +215,7 @@ public class SqlBuilder {
                 groupBy.size() > 0 ? groupBy : null,
                 having,
                 null,
+                null,
                 orderBy.size() > 0 ? orderBy : null,
                 offset,
                 fetch,
@@ -263,12 +264,10 @@ public class SqlBuilder {
         }
         if (operator.getAggOperator() != null) {
             SqlOperator aggOperator = mappingSqlAggFunction(operator.getAggOperator());
-            sqlNode = new SqlBasicCall(aggOperator,
-                    new SqlNode[]{sqlNode}, SqlParserPos.ZERO);
+            sqlNode = new SqlBasicCall(aggOperator, List.of(sqlNode), SqlParserPos.ZERO);
         }
         if (operator.getOperator() == OrderOperator.SqlOperator.DESC) {
-            return new SqlBasicCall(SqlStdOperatorTable.DESC,
-                    new SqlNode[]{sqlNode}, SqlParserPos.ZERO);
+            return new SqlBasicCall(SqlStdOperatorTable.DESC, List.of(sqlNode), SqlParserPos.ZERO);
         } else {
             return sqlNode;
         }
@@ -384,7 +383,7 @@ public class SqlBuilder {
             default:
                 Exceptions.msg("message.provider.sql.type.unsupported", operator.getSqlOperator().name());
         }
-        return new SqlBasicCall(sqlOp, sqlNodes, SqlParserPos.ZERO);
+        return new SqlBasicCall(sqlOp, Arrays.asList(sqlNodes), SqlParserPos.ZERO);
     }
 
     /**

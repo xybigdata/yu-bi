@@ -49,6 +49,7 @@ public interface BaseCRUDService<E extends BaseEntity, M extends CRUDMapper> {
     }
 
     default E retrieve(String id, boolean checkPermission) {
+        @SuppressWarnings("unchecked")
         E e = (E) getDefaultMapper().selectByPrimaryKey(id);
         if (e == null) {
             notFoundException();
@@ -165,6 +166,7 @@ public interface BaseCRUDService<E extends BaseEntity, M extends CRUDMapper> {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     default E getEntityInstance() {
         try {
             return ((Class<E>) getParameterizedType().getActualTypeArguments()[0])
@@ -177,6 +179,7 @@ public interface BaseCRUDService<E extends BaseEntity, M extends CRUDMapper> {
     }
 
 
+    @SuppressWarnings("unchecked")
     default Class<E> getEntityClz() {
         return ((Class<E>) getParameterizedType().getActualTypeArguments()[0]);
     }
@@ -190,6 +193,7 @@ public interface BaseCRUDService<E extends BaseEntity, M extends CRUDMapper> {
         return Application.getContext().getBean(defaultMapperClass());
     }
 
+    @SuppressWarnings("unchecked")
     default Class<M> defaultMapperClass() {
         return (Class<M>) getParameterizedType().getActualTypeArguments()[1];
     }

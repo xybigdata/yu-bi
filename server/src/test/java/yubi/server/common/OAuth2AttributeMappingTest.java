@@ -32,8 +32,7 @@ class OAuth2AttributeMappingTest {
     void shouldKeepStringCastBehaviorForNonStringAttribute() {
         Map<String, Object> attributes = Map.of("profile", Map.of("age", 18));
 
-        assertThrows(ClassCastException.class, () -> {
-            String ignored = OAuth2AttributeMapping.readString(attributes, "$.profile.age");
-        });
+        assertThrows(ClassCastException.class,
+                () -> OAuth2AttributeMapping.readString(attributes, "$.profile.age"));
     }
 }

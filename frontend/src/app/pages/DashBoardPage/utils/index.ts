@@ -596,7 +596,7 @@ export const getBoardChartRequests = (params: {
             ? widgetMap[widgetId].id
             : widgetMap[widgetId].datachartId,
           analytics: false,
-          vizType: isWidget ? 'widget' : 'dataChart',
+          vizType: isWidget ? 'WIDGET' : 'DATACHART',
         },
       };
     })

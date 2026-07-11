@@ -487,7 +487,7 @@ export function SourceDetailPage() {
         />
         <Content>
           <Card
-            bordered={false}
+            variant="borderless"
             extra={
               <div>
                 {lastUpdateTime && `${t('lastUpdateTime')}: ${lastUpdateTime}`}

@@ -44,7 +44,10 @@ public class AttachmentExcelServiceImpl implements AttachmentService {
             Dataframe dataframe = dataProviderService.execute(downloadParams.getDownloadParams().get(i));
             String chartConfigStr = vizService.getChartConfigByVizId(viewExecuteParam.getVizType(), viewExecuteParam.getVizId());
             POISettings poiSettings = PoiConvertUtils.covertToPoiSetting(chartConfigStr, dataframe);
-            String sheetName = StringUtils.isNotBlank(viewExecuteParam.getVizName()) ? viewExecuteParam.getVizName() : "Sheet"+i;
+            String preferredSheetName = StringUtils.isNotBlank(viewExecuteParam.getVizName())
+                    ? viewExecuteParam.getVizName()
+                    : "Sheet" + i;
+            String sheetName = POIUtils.uniqueSheetName(workbook, preferredSheetName);
             POIUtils.withSheet(workbook, sheetName, dataframe, poiSettings);
         }
         path = generateFileName(path,fileName,attachmentType);

@@ -27,7 +27,6 @@ import yubi.security.base.JwtToken;
 import yubi.security.base.PasswordToken;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.JwtException;
@@ -40,7 +39,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 public class JwtUtils {
 

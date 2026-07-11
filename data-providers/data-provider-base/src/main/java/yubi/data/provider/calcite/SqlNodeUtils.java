@@ -39,15 +39,13 @@ public class SqlNodeUtils {
         if (sqlNodes == null) {
             return null;
         }
-        return new SqlBasicCall(sqlOperator, sqlNodes.toArray(new SqlNode[0]), SqlParserPos.ZERO);
+        return new SqlBasicCall(sqlOperator, sqlNodes, SqlParserPos.ZERO);
     }
 
     public static SqlBasicCall createSqlBasicCall(SqlOperator sqlOperator,
                                                   List<SqlNode> sqlNodes,
                                                   SqlLiteral functionQualifier) {
-        return new SqlBasicCall(sqlOperator, sqlNodes.toArray(new SqlNode[0]),
-                SqlParserPos.ZERO,
-                functionQualifier);
+        return new SqlBasicCall(sqlOperator, sqlNodes, SqlParserPos.ZERO, functionQualifier);
     }
 
     public static SqlIdentifier createSqlIdentifier(String... names) {

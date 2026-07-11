@@ -175,7 +175,7 @@ function useStateModal({ initState }: { initState?: unknown }) {
       content: FormWrapper(renderContent(props.content)),
       onOk: handleClickOKButton,
       onCancel: handleClickCancelButton,
-      maskClosable: props.maskClosable ?? true,
+      mask: { closable: props.maskClosable ?? true },
       icon: null,
       centered: props.centered ?? true,
       okButtonProps: props.okButtonProps,

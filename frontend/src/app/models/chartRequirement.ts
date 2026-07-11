@@ -1,10 +1,7 @@
 import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
 import { isInRange } from 'app/utils/internalChartHelper';
 
-const getDrillableRowCount = (
-  isDrillable = false,
-  originalRowLength = 0,
-) => {
+const getDrillableRowCount = (isDrillable = false, originalRowLength = 0) => {
   return isDrillable ? Math.min(1, originalRowLength) : originalRowLength;
 };
 

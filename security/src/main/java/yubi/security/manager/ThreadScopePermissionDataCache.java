@@ -29,65 +29,66 @@ import java.util.Map;
 @Component
 public class ThreadScopePermissionDataCache {
 
-    private static ThreadLocal<Map<String, Object>> permissionData;
-
-    private final static String CURRENT_ORG = "currentOrg";
-
-    private final static String PERMISSION_CACHE = "permissionCache";
-
-    private final static String AUTHORIZATION = "authorization";
-
-    private final static String AUTHENTICATION = "authentication";
+    private static ThreadLocal<PermissionData> permissionData;
 
     @PostConstruct
     public void initData() {
         permissionData = new InheritableThreadLocal<>();
-        permissionData.set(new HashMap<>());
+        permissionData.set(new PermissionData());
     }
 
     public String getCurrentOrg() {
-        return (String) permissionData.get().get(CURRENT_ORG);
+        return permissionData.get().currentOrg;
     }
 
     public void setCurrentOrg(String currentOrg) {
-        permissionData.get().put(CURRENT_ORG, currentOrg);
+        permissionData.get().currentOrg = currentOrg;
     }
 
     public Boolean getCachedPermission(Permission permission) {
-        Map<Permission, Boolean> map = (Map<Permission, Boolean>) permissionData.get().get(PERMISSION_CACHE);
-        if (map == null) {
-            return null;
-        }
-        return map.get(permission);
+        return permissionData.get().permissionCache.get(permission);
     }
 
     public void setPermissionCache(Permission permission, Boolean permitted) {
-        Map<Permission, Boolean> map = (Map<Permission, Boolean>) permissionData.get().get(PERMISSION_CACHE);
-        if (map == null) {
-            map = new HashMap<>();
-            permissionData.get().put(PERMISSION_CACHE, map);
-        }
-        map.put(permission, permitted);
+        permissionData.get().permissionCache.put(permission, permitted);
     }
 
     public AuthorizationCache getAuthorizationCache() {
-        return (AuthorizationCache) permissionData.get().get(AUTHORIZATION);
+        return permissionData.get().authorizationCache;
     }
 
     public void setAuthorizationCache(AuthorizationCache authorizationCache) {
-        permissionData.get().put(AUTHORIZATION, authorizationCache);
+        permissionData.get().authorizationCache = authorizationCache;
     }
 
     public AuthenticationCache getAuthenticationCache() {
-        return (AuthenticationCache) permissionData.get().get(AUTHENTICATION);
+        return permissionData.get().authenticationCache;
     }
 
     public void setAuthenticationCache(AuthenticationCache authenticationCache) {
-        permissionData.get().put(AUTHENTICATION, authenticationCache);
+        permissionData.get().authenticationCache = authenticationCache;
     }
 
     public void clear() {
         permissionData.get().clear();
+    }
+
+    private static final class PermissionData {
+
+        private String currentOrg;
+
+        private final Map<Permission, Boolean> permissionCache = new HashMap<>();
+
+        private AuthorizationCache authorizationCache;
+
+        private AuthenticationCache authenticationCache;
+
+        private void clear() {
+            currentOrg = null;
+            permissionCache.clear();
+            authorizationCache = null;
+            authenticationCache = null;
+        }
     }
 
 }

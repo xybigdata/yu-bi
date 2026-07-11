@@ -126,9 +126,17 @@ import static org.apache.calcite.util.Static.RESOURCE;
  *
  * <p>The public wrapper for this parser is {@link SqlParser}.
  */
+// JavaCC appends generated parser methods to this class. Do not edit target output.
+@SuppressWarnings({"all", "deprecation"})
 public class SqlParserImpl extends SqlAbstractParserImpl
 {
     private static final Logger LOGGER = CalciteTrace.getParserTracer();
+
+    private static <T> List<T> startList(T value) {
+        List<T> list = new ArrayList<>();
+        list.add(value);
+        return list;
+    }
 
     // Can't use quoted literal because of a bug in how JavaCC translates
     // backslash-backslash.
@@ -336,13 +344,6 @@ SqlNode FloorCeilOptions(Span s, boolean floorFlag) :
 /* Epsilon */
 JAVACODE
 void E() {}
-
-JAVACODE List startList(Object o)
-{
-    List list = new ArrayList();
-    list.add(o);
-    return list;
-}
 
 /*
  * NOTE jvs 6-Feb-2004: The straightforward way to implement the SQL grammar is
@@ -845,10 +846,10 @@ SqlNodeList ParenthesizedQueryOrCommaListWithDefault(
  * Parses function parameter lists.
  * If the list starts with DISTINCT or ALL, it is discarded.
  */
-List UnquantifiedFunctionParameterList(
+List<SqlNode> UnquantifiedFunctionParameterList(
     ExprContext exprContext) :
 {
-    final List args;
+    final List<SqlNode> args;
 }
 {
     args = FunctionParameterList(exprContext) {
@@ -862,11 +863,11 @@ List UnquantifiedFunctionParameterList(
  * Parses function parameter lists including DISTINCT keyword recognition,
  * DEFAULT, and named argument assignment.
  */
-List FunctionParameterList(
+List<SqlNode> FunctionParameterList(
     ExprContext exprContext) :
 {
     SqlNode e = null;
-    List list = new ArrayList();
+    List<SqlNode> list = new ArrayList<>();
 }
 {
     <LPAREN>
@@ -896,7 +897,7 @@ List FunctionParameterList(
     }
 }
 
-void Arg0(List list, ExprContext exprContext) :
+void Arg0(List<SqlNode> list, ExprContext exprContext) :
 {
     SqlIdentifier name = null;
     SqlNode e = null;
@@ -937,7 +938,7 @@ void Arg0(List list, ExprContext exprContext) :
     }
 }
 
-void Arg(List list, ExprContext exprContext) :
+void Arg(List<SqlNode> list, ExprContext exprContext) :
 {
     SqlIdentifier name = null;
     SqlNode e = null;
@@ -1024,6 +1025,7 @@ SqlNode SqlStmt() :
     |
         stmt = SqlAlter()
     |
+        LOOKAHEAD(2)
         stmt = OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY)
     |
         stmt = SqlExplain()
@@ -1303,7 +1305,7 @@ SqlSelect SqlSelect() :
     {
         return new SqlSelect(s.end(this), keywordList,
             new SqlNodeList(selectList, Span.of(selectList).pos()),
-            fromClause, where, groupBy, having, windowDecls, null, null, null,
+            fromClause, where, groupBy, having, windowDecls, null, null, null, null,
             new SqlNodeList(hints, getPos()));
     }
 }
@@ -1356,6 +1358,7 @@ SqlNode SqlQueryOrDml() :
 }
 {
     (
+        LOOKAHEAD(2)
         stmt = OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY)
     |
         stmt = SqlInsert()
@@ -1649,7 +1652,7 @@ SqlNode SqlUpdate() :
         targetColumnList.add(id);
     }
     <EQ> exp = Expression(ExprContext.ACCEPT_SUB_QUERY) {
-        // TODO:  support DEFAULT also
+        // DEFAULT assignments are not accepted by this production.
         sourceExpressionList.add(exp);
     }
     (
@@ -1765,9 +1768,8 @@ SqlInsert WhenNotMatchedClause(SqlNode table) :
     rowConstructor = RowConstructor()
     [ <RPAREN> ]
     {
-        // TODO zfong 5/26/06: note that extra parentheses are accepted above
-        // around the VALUES clause as a hack for unparse, but this is
-        // actually invalid SQL; should fix unparse
+        // Extra parentheses around VALUES are accepted for compatibility with
+        // the inherited unparse behavior, although they are not valid SQL.
         insertValues = SqlStdOperatorTable.VALUES.createCall(
             valuesSpan.end(this), rowConstructor);
         return new SqlInsert(insertSpan.end(this), keywordList,
@@ -1922,7 +1924,7 @@ SqlNode JoinTable(SqlNode e) :
     )
 }
 
-// TODO jvs 15-Nov-2003:  SQL standard allows parentheses in the FROM list for
+// Compatibility note: SQL standard allows parentheses in the FROM list for
 // building up non-linear join trees (e.g. OUTER JOIN two tables, and then INNER
 // JOIN the result).  Also note that aliases on parenthesized FROM expressions
 // "hide" all table names inside the parentheses (without aliases, they're
@@ -2156,6 +2158,7 @@ SqlNode TableRef2(boolean lateral) :
 
     )
     [
+        LOOKAHEAD(<PIVOT>)
         tableRef = Pivot(tableRef)
     ]
     [
@@ -2227,8 +2230,8 @@ SqlNode TableRef2(boolean lateral) :
                     SqlSampleSpec tableSampleSpec =
                     isRepeatable
                         ? SqlSampleSpec.createTableSample(
-                            isBernoulli, fRate, repeatableSeed)
-                        : SqlSampleSpec.createTableSample(isBernoulli, fRate);
+                            isBernoulli, BigDecimal.valueOf(fRate), repeatableSeed)
+                        : SqlSampleSpec.createTableSample(isBernoulli, BigDecimal.valueOf(fRate));
 
                     SqlLiteral tableSampleLiteral =
                         SqlLiteral.createSample(tableSampleSpec, s2.end(this));
@@ -2404,9 +2407,8 @@ SqlNode RowConstructor() :
 {
     // hints are necessary here due to common LPAREN prefixes
     (
-        // TODO jvs 8-Feb-2004: extra parentheses are accepted here as a hack
-        // for unparse, but this is actually invalid SQL; should
-        // fix unparse
+        // Extra parentheses are accepted for compatibility with the inherited
+        // unparse behavior, although they are not valid SQL.
         LOOKAHEAD(3)
         <LPAREN> { s = span(); }
         <ROW>
@@ -2617,7 +2619,6 @@ SqlNodeList WindowOpt() :
 SqlWindow WindowSpecification() :
 {
     SqlIdentifier id;
-    List list;
     SqlNodeList partitionList;
     SqlNodeList orderList;
     SqlLiteral isRows = SqlLiteral.createBoolean(false, SqlParserPos.ZERO);
@@ -3335,7 +3336,7 @@ SqlWithItem WithItem() :
     definition = ParenthesizedExpression(ExprContext.ACCEPT_QUERY)
     {
         return new SqlWithItem(id.getParserPosition(), id, columnList,
-            definition);
+            definition, SqlLiteral.createBoolean(false, SqlParserPos.ZERO));
     }
 }
 
@@ -3369,7 +3370,7 @@ SqlNode Expression(ExprContext exprContext) :
     }
 }
 
-// TODO jvs 15-Nov-2003:  ANY/ALL
+// ANY/ALL expression handling follows the inherited Calcite grammar.
 
 void Expression2b(ExprContext exprContext, List<Object> list) :
 {
@@ -3415,9 +3416,9 @@ void Expression2b(ExprContext exprContext, List<Object> list) :
  */
 List<Object> Expression2(ExprContext exprContext) :
 {
-    final List<Object> list = new ArrayList();
+    final List<Object> list = new ArrayList<>();
     List<Object> list2;
-    final List<Object> list3 = new ArrayList();
+    final List<Object> list3 = new ArrayList<>();
     SqlNodeList nodeList;
     SqlNode e;
     SqlOperator op;
@@ -3651,7 +3652,7 @@ SqlNode Expression3(ExprContext exprContext) :
     }
     [
         LOOKAHEAD(2)
-        /* TODO:
+        /* Disabled OVERLAPS parsing retained from the upstream grammar:
         (
             op = periodOperator()
             list2 = ParenthesizedQueryOrCommaList(exprContext)
@@ -3935,7 +3936,7 @@ SqlSetOption SqlSetOption(Span s, String scope) :
             }
         )
         {
-            return new SqlSetOption(s.end(val), scope, name, val);
+            return new SqlSetOption(s.end(val), scope, (SqlNode) name, val);
         }
     |
         <RESET> {
@@ -3950,7 +3951,7 @@ SqlSetOption SqlSetOption(Span s, String scope) :
             }
         )
         {
-            return new SqlSetOption(s.end(name), scope, name, null);
+            return new SqlSetOption(s.end(name), scope, (SqlNode) name, null);
         }
     )
 }
@@ -4173,8 +4174,8 @@ SqlNode StringLiteral() :
         { charSet = SqlParserUtil.getCharacterSet(token.image); }
     |   <QUOTED_STRING>
     |   <UNICODE_STRING_LITERAL> {
-            // TODO jvs 2-Feb-2009:  support the explicit specification of
-            // a character set for Unicode string literals, per SQL:2003
+            // Explicit SQL:2003 character-set syntax is not supported for
+            // Unicode string literals.
             unicodeEscapeChar = BACKSLASH;
             charSet = "UTF16";
         }
@@ -4329,7 +4330,7 @@ SqlNode MultisetConstructor() :
         }
     |
         // by enumeration "MULTISET[e0, e1, ..., eN]"
-        <LBRACKET> // TODO: do trigraph as well ??( ??)
+        <LBRACKET> // The trigraph bracket form ??( ??) is not supported.
         e = Expression(ExprContext.ACCEPT_NON_QUERY) { args = startList(e); }
         (
             <COMMA> e = Expression(ExprContext.ACCEPT_NON_QUERY) { args.add(e); }
@@ -4363,7 +4364,7 @@ SqlNode ArrayConstructor() :
         }
     |
         // by enumeration "ARRAY[e0, e1, ..., eN]"
-        <LBRACKET> // TODO: do trigraph as well ??( ??)
+        <LBRACKET> // The trigraph bracket form ??( ??) is not supported.
         (
             args = ExpressionCommaList(s, ExprContext.ACCEPT_NON_QUERY)
         |
@@ -4398,7 +4399,7 @@ SqlNode MapConstructor() :
         }
     |
         // by enumeration "MAP[k0, v0, ..., kN, vN]"
-        <LBRACKET> // TODO: do trigraph as well ??( ??)
+        <LBRACKET> // The trigraph bracket form ??( ??) is not supported.
         (
             args = ExpressionCommaList(s, ExprContext.ACCEPT_NON_QUERY)
         |
@@ -5020,7 +5021,7 @@ SqlNode NewSpecification() :
     }
 }
 
-//TODO: real parse errors.
+// Integer overflow is reported as an invalid-literal parse error.
 int UnsignedIntLiteral() :
 {
     Token t;
@@ -5541,7 +5542,7 @@ SqlNode BuiltinFunctionCall() :
     |
         <POSITION> { s = span(); }
         <LPAREN>
-        // FIXME jvs 31-Aug-2006:  FRG-192:  This should be
+        // FRG-192 compatibility: this would normally be
         // Expression(ExprContext.ACCEPT_SUB_QUERY), but that doesn't work
         // because it matches the other kind of IN.
         e = AtomicRowExpression() { args = startList(e); }
@@ -6096,7 +6097,7 @@ SqlCall JsonObjectFunctionCall() :
         }
     ]
     <RPAREN> {
-        final List<SqlNode> args = new ArrayList();
+        final List<SqlNode> args = new ArrayList<>();
         args.addAll(Arrays.asList(otherArgs));
         args.addAll(nvArgs);
         return SqlStdOperatorTable.JSON_OBJECT.createCall(span.end(this), args);
@@ -6156,7 +6157,7 @@ SqlCall JsonArrayFunctionCall() :
         }
     ]
     <RPAREN> {
-        final List<SqlNode> args = new ArrayList();
+        final List<SqlNode> args = new ArrayList<>();
         args.addAll(Arrays.asList(otherArgs));
         args.addAll(elements);
         return SqlStdOperatorTable.JSON_ARRAY.createCall(span.end(this), args);
@@ -6463,8 +6464,8 @@ SqlCall nullTreatment(SqlCall arg) :
  * view definitions to permanently bind references to a particular function
  * after the overload resolution performed by view creation.
  *
- * <p>TODO jvs 25-Mar-2005:  Once we have SQL-Flagger support, flag SPECIFIC
- * as non-standard.
+ * <p>Compatibility note: SPECIFIC remains accepted without SQL-Flagger
+ * diagnostics even though it is non-standard.
  */
 SqlNode NamedFunctionCall() :
 {
@@ -6609,6 +6610,7 @@ SqlIdentifier FunctionName() :
 }
 {
     (
+        LOOKAHEAD(2)
         qualifiedName = CompoundIdentifier()
     |
         qualifiedName = ReservedFunctionName()

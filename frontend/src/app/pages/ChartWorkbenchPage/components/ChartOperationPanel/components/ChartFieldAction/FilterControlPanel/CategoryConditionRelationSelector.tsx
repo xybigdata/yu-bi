@@ -100,15 +100,16 @@ const CategoryConditionRelationSelector: FC<{
     <StyledCategoryConditionRelationSelector>
       {condition?.operator !== FilterSqlOperator.Null &&
         condition?.operator !== FilterSqlOperator.NotNull && (
-          <Input
-            className="filter-condition-input"
-            addonBefore={renderRelationSelector()}
-            value={inputValue}
-            onChange={e => {
-              setInputValue(e.target.value);
-              debounceHandleFilterChange(condition?.operator, e.target.value);
-            }}
-          />
+          <Space.Compact className="filter-condition-input">
+            {renderRelationSelector()}
+            <Input
+              value={inputValue}
+              onChange={e => {
+                setInputValue(e.target.value);
+                debounceHandleFilterChange(condition?.operator, e.target.value);
+              }}
+            />
+          </Space.Compact>
         )}
       {(condition?.operator === FilterSqlOperator.Null ||
         condition?.operator === FilterSqlOperator.NotNull) &&
@@ -124,12 +125,6 @@ const StyledCategoryConditionRelationSelector = styled(Space)`
 
   .filter-condition-input {
     width: ${FILTER_CONDITION_TOTAL_WIDTH}px;
-
-    .ant-input-group-addon {
-      width: ${FILTER_CONDITION_OPERATOR_WIDTH}px;
-      padding: 0;
-      text-align: left;
-    }
 
     .ant-input {
       width: ${FILTER_CONDITION_VALUE_WIDTH}px;

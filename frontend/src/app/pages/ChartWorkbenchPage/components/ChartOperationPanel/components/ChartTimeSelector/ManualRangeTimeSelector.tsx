@@ -78,7 +78,7 @@ const ManualRangeTimeSelector: FC<
 
   return (
     <div>
-      <Space direction="vertical" size={12}>
+      <Space orientation="vertical" size={12}>
         <Row>
           <CurrentRangeTime times={getRangeStringTimes()} />
         </Row>

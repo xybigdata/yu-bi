@@ -30,10 +30,10 @@ import {
   SkinOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { List, Menu, MenuProps, Tooltip } from 'antd';
+import { Menu, MenuProps, Tooltip } from 'antd';
 import logo from 'app/assets/images/logo.svg';
 import { CompatNavLink } from 'app/components/CompatNavLink';
-import { Avatar, Popup } from 'app/components';
+import { Avatar, PlainList, Popup } from 'app/components';
 import { MenuItemContent } from 'app/components/Popup/MenuListItem';
 import { TenantManagementMode } from 'app/constants';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
@@ -421,7 +421,7 @@ export function Navbar() {
       </MainNav>
       {showSubNav && (
         <SubNav>
-          <List
+          <PlainList
             dataSource={subNavs}
             renderItem={({ name, title, icon }) => (
               <SubNavTitle

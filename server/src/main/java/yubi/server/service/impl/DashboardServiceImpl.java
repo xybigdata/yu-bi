@@ -65,8 +65,6 @@ public class DashboardServiceImpl extends BaseService implements DashboardServic
 
     private final RelWidgetWidgetMapperExt rwwMapper;
 
-    private final RelRoleResourceMapperExt rrrMapper;
-
     private final RoleService roleService;
 
     private final FileService fileService;
@@ -83,30 +81,22 @@ public class DashboardServiceImpl extends BaseService implements DashboardServic
 
     private final VariableService variableService;
 
-    private final ViewService viewService;
-
-    private final DatachartService datachartService;
-
-
     public DashboardServiceImpl(DashboardMapperExt dashboardMapper,
                                 WidgetMapperExt widgetMapper,
                                 RelWidgetElementMapperExt rweMapper,
                                 RelWidgetWidgetMapperExt rwwMapper,
-                                RelRoleResourceMapperExt rrrMapper, RoleService roleService,
+                                RoleService roleService,
                                 FileService fileService,
                                 FolderMapperExt folderMapper,
                                 ViewMapperExt viewMapper,
                                 DatachartMapperExt datachartMapper,
                                 WidgetService widgetService,
                                 FolderService folderService,
-                                VariableService variableService,
-                                ViewService viewService,
-                                DatachartService datachartService) {
+                                VariableService variableService) {
         this.dashboardMapper = dashboardMapper;
         this.widgetMapper = widgetMapper;
         this.rweMapper = rweMapper;
         this.rwwMapper = rwwMapper;
-        this.rrrMapper = rrrMapper;
         this.roleService = roleService;
         this.fileService = fileService;
         this.folderMapper = folderMapper;
@@ -115,8 +105,6 @@ public class DashboardServiceImpl extends BaseService implements DashboardServic
         this.widgetService = widgetService;
         this.folderService = folderService;
         this.variableService = variableService;
-        this.viewService = viewService;
-        this.datachartService = datachartService;
     }
 
 

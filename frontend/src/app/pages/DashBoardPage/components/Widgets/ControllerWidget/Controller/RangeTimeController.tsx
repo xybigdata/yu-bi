@@ -97,7 +97,7 @@ export const RangeTimeController: React.FC<TimeSetProps> = memo(
             value={rangeValues}
             onChange={handleRangeChange}
             className="control-datePicker"
-            bordered={false}
+            variant="borderless"
           />
         ) : (
           <RangePicker
@@ -107,7 +107,7 @@ export const RangeTimeController: React.FC<TimeSetProps> = memo(
             value={rangeValues}
             picker={pickerType}
             className="control-datePicker"
-            bordered={false}
+            variant="borderless"
           />
         )}
       </StyledWrap>

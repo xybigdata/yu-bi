@@ -18,6 +18,7 @@
  */
 
 import { List, Popover } from 'antd';
+import { PlainList } from 'app/components';
 import { colorThemes } from 'app/assets/theme/colorsConfig';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -43,7 +44,7 @@ function ThemeColorSelection({ children, callbackFn }: themeColorPropTypes) {
       placement="bottomRight"
       content={
         <ColorWrapAlert>
-          <List
+          <PlainList
             itemLayout="horizontal"
             dataSource={colors}
             renderItem={item => (

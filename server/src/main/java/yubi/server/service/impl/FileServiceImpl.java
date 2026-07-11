@@ -36,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Service
 public class FileServiceImpl extends BaseService implements FileService {
@@ -96,6 +97,8 @@ public class FileServiceImpl extends BaseService implements FileService {
             case DATACHART:
                 requireExists(ownerId, Datachart.class);
                 break;
+            case USER_AVATAR, ORG_AVATAR, DATA_SOURCE, SCHEDULE, DOWNLOAD, EXPORT:
+                throw new IllegalArgumentException("unsupported visualization file owner: " + fileOwner);
         }
         String filePath = FileUtils.concatPath(fileOwner.getPath(), ownerId, StringUtils.isBlank(fileName) ? file.getOriginalFilename() : fileName);
         String fullPath = FileUtils.withBasePath(filePath);
@@ -114,9 +117,11 @@ public class FileServiceImpl extends BaseService implements FileService {
 
         FileUtils.mkdirParentIfNotExist(fullPath);
 
-        Thumbnails.of(file.getInputStream())
-                .size(Const.IMAGE_WIDTH, Const.IMAGE_HEIGHT)
-                .toFile(fullPath);
+        try (InputStream inputStream = file.getInputStream()) {
+            Thumbnails.of(inputStream)
+                    .size(Const.IMAGE_WIDTH, Const.IMAGE_HEIGHT)
+                    .toFile(fullPath);
+        }
 
         UserService userService = Application.getBean(UserService.class);
 
@@ -136,9 +141,11 @@ public class FileServiceImpl extends BaseService implements FileService {
 
         FileUtils.mkdirParentIfNotExist(fullPath);
 
-        Thumbnails.of(file.getInputStream())
-                .size(Const.IMAGE_WIDTH, Const.IMAGE_HEIGHT)
-                .toFile(fullPath);
+        try (InputStream inputStream = file.getInputStream()) {
+            Thumbnails.of(inputStream)
+                    .size(Const.IMAGE_WIDTH, Const.IMAGE_HEIGHT)
+                    .toFile(fullPath);
+        }
 
         OrgService orgService = Application.getBean(OrgService.class);
 

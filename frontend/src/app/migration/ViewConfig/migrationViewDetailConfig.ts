@@ -21,9 +21,7 @@ const parseViewDetailConfig = (
   }
 };
 
-export const beta2 = (
-  viewConfig?: ViewDetailConfigMigrationTarget | null,
-) => {
+export const beta2 = (viewConfig?: ViewDetailConfigMigrationTarget | null) => {
   if (!viewConfig) {
     return viewConfig;
   }
@@ -60,9 +58,8 @@ export const migrateViewConfig = (viewConfig: string) => {
     APP_VERSION_BETA_2,
     beta2Task,
   );
-  const dispatcher = new MigrationEventDispatcher<ViewDetailConfigMigrationTarget>(
-    event2,
-  );
+  const dispatcher =
+    new MigrationEventDispatcher<ViewDetailConfigMigrationTarget>(event2);
   const result = dispatcher.process(config);
 
   return JSON.stringify(result);

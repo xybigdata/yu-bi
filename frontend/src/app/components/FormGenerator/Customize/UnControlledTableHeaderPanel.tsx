@@ -307,7 +307,7 @@ const UnControlledTableHeaderPanel: FC<ItemLayoutProps<ChartStyleConfig>> =
       };
 
       return (
-        <StyledUnControlledTableHeaderPanel direction="vertical">
+        <StyledUnControlledTableHeaderPanel orientation="vertical">
           <Row gutter={24}>
             <Col span={20}>
               <Space>

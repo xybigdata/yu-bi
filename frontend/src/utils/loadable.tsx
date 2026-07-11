@@ -9,9 +9,7 @@ type LoadableFactory<C extends LoadableComponent> = () => Promise<{
   default: C;
 }>;
 
-export function lazyLoad<
-  TModule extends { default: LoadableComponent },
->(
+export function lazyLoad<TModule extends { default: LoadableComponent }>(
   importFunc: () => Promise<TModule>,
   selectorFunc?: undefined,
   opts?: Opts,
@@ -44,9 +42,7 @@ export function lazyLoad<TModule, C extends LoadableComponent>(
   );
 }
 
-export function defaultLazyLoad<
-  TModule extends { default: LoadableComponent },
->(
+export function defaultLazyLoad<TModule extends { default: LoadableComponent }>(
   importFunc: () => Promise<TModule>,
   selectorFunc?: undefined,
   opts?: Opts,

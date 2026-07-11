@@ -31,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.WorkbookUtil;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.*;
 
@@ -71,6 +72,19 @@ public class POIUtils {
 
     public static Workbook createEmpty() {
         return new SXSSFWorkbook();
+    }
+
+    public static String uniqueSheetName(Workbook workbook, String preferredName) {
+        String baseName = WorkbookUtil.createSafeSheetName(
+                StringUtils.isNotBlank(preferredName) ? preferredName : "Sheet");
+        String candidate = baseName;
+        int sequence = 2;
+        while (workbook.getSheet(candidate) != null) {
+            String suffix = " (" + sequence++ + ")";
+            int baseLength = Math.min(baseName.length(), 31 - suffix.length());
+            candidate = baseName.substring(0, baseLength) + suffix;
+        }
+        return candidate;
     }
 
     public static void withSheet(Workbook workbook, String sheetName, Dataframe sheetData, POISettings poiSettings) {
@@ -170,23 +184,27 @@ public class POIUtils {
                 return null;
             }
 
-            if (workbook.getNumberOfSheets() < 1) {
-                Exceptions.msg("empty excel :" + path);
-            }
-            // 只处理第一个sheet
-            Sheet sheet = workbook.getSheetAt(0);
-            Iterator<Row> rowIterator = sheet.rowIterator();
-            Row row0 = sheet.getRow(0);
-            if (row0 == null) {
-                Exceptions.msg("empty excel :" + path);
-            }
-            int columns = row0.getPhysicalNumberOfCells();
-            while (rowIterator.hasNext()) {
-                Row row = rowIterator.next();
-                LinkedList<Object> cellValues = new LinkedList<>();
-                for (int i = 0; i < columns; i++)
-                    cellValues.add(readCellValue(row.getCell(i)));
-                rows.add(cellValues);
+            try (workbook) {
+                if (workbook.getNumberOfSheets() < 1) {
+                    Exceptions.msg("empty excel :" + path);
+                    return rows;
+                }
+                // 只处理第一个sheet
+                Sheet sheet = workbook.getSheetAt(0);
+                Iterator<Row> rowIterator = sheet.rowIterator();
+                Row row0 = sheet.getRow(0);
+                if (row0 == null) {
+                    Exceptions.msg("empty excel :" + path);
+                    return rows;
+                }
+                int columns = row0.getPhysicalNumberOfCells();
+                while (rowIterator.hasNext()) {
+                    Row row = rowIterator.next();
+                    LinkedList<Object> cellValues = new LinkedList<>();
+                    for (int i = 0; i < columns; i++)
+                        cellValues.add(readCellValue(row.getCell(i)));
+                    rows.add(cellValues);
+                }
             }
         }
         return rows;

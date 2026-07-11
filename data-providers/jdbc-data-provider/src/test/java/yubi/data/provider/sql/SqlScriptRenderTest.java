@@ -33,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
-import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParserPos;
@@ -122,9 +121,13 @@ public class SqlScriptRenderTest {
     }
 
     private String covertDesiredSql(String sql, SqlDialect sqlDialect) {
-        SqlBasicCall sqlBasicCall = new SqlBasicCall(SqlStdOperatorTable.AS
-                , new SqlNode[]{new SqlFragment("SELECT *  FROM  ( " + sql + " )"), new SqlIdentifier(T, SqlParserPos.ZERO.withQuoting(true))}
-                , SqlParserPos.ZERO);
+        SqlBasicCall sqlBasicCall = new SqlBasicCall(
+                SqlStdOperatorTable.AS,
+                List.of(
+                        new SqlFragment("SELECT *  FROM  ( " + sql + " )"),
+                        new SqlIdentifier(T, SqlParserPos.ZERO.withQuoting(true))
+                ),
+                SqlParserPos.ZERO);
         return sqlBasicCall.toSqlString(sqlDialect).getSql().trim();
     }
 

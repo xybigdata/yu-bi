@@ -19,6 +19,7 @@
 
 import { DeleteOutlined } from '@ant-design/icons';
 import { Col, Divider, List, Row, Select, Typography } from 'antd';
+import { PlainList } from 'app/components';
 import {
   ChartStyleConfig,
   ChartStyleSectionRow,
@@ -187,7 +188,7 @@ const ListTemplatePanel: FC<ItemLayoutProps<ChartStyleConfig>> = memo(
         <Divider />
         <Row>
           <Col span={8}>
-            <List
+            <PlainList
               bordered
               dataSource={selectedItems}
               renderItem={item => (

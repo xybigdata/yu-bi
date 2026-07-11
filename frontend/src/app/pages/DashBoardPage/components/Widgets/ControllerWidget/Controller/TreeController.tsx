@@ -108,7 +108,7 @@ export const TreeSelectController: React.FC<TreeControllerFormProps> = memo(
         maxTagCount="responsive"
         onChange={handleTreeSelectChange}
         multiple
-        bordered={false}
+        variant="borderless"
         treeData={treeData}
         dropdownStyle={{ height: '300px', overflowY: 'auto' }}
         dropdownRender={() => {

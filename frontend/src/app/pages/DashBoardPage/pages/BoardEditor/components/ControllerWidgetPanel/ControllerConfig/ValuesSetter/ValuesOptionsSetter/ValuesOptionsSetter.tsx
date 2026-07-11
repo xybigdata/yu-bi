@@ -446,7 +446,7 @@ const ValuesOptionsSetter: FC<{
                 )}
 
                 {getOptionType() === 'common' && (
-                  <Space direction="vertical" style={{ width: '100%' }}>
+                  <Space orientation="vertical" style={{ width: '100%' }}>
                     {!(isTree && getTreeBuildingMethod() === 'byHierarchy') && (
                       <Select
                         showSearch

@@ -15,14 +15,21 @@ describe('chart download resource type', () => {
       resolve(process.cwd(), 'src/app/components/ChartEditor.tsx'),
       'utf8',
     );
+    const dashboardSource = readFileSync(
+      resolve(process.cwd(), 'src/app/pages/DashBoardPage/utils/index.ts'),
+      'utf8',
+    );
 
     expect(previewSource).toContain("vizType: 'DATACHART'");
     expect(editorSource).toContain("isWidget ? 'WIDGET' : 'DATACHART'");
-    expect(`${previewSource}\n${editorSource}`).not.toContain(
-      "vizType: 'dataChart'",
+    expect(dashboardSource).toContain(
+      "vizType: isWidget ? 'WIDGET' : 'DATACHART'",
     );
-    expect(`${previewSource}\n${editorSource}`).not.toContain(
-      "vizType: 'widget'",
-    );
+    expect(
+      `${previewSource}\n${editorSource}\n${dashboardSource}`,
+    ).not.toContain("vizType: 'dataChart'");
+    expect(
+      `${previewSource}\n${editorSource}\n${dashboardSource}`,
+    ).not.toContain("vizType: 'widget'");
   });
 });

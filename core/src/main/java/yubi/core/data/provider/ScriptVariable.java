@@ -24,7 +24,7 @@ import yubi.core.base.consts.ValueType;
 import yubi.core.base.consts.VariableTypeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Set;
@@ -87,8 +87,8 @@ public class ScriptVariable extends TypedValue {
         if (nameWithQuote != null) {
             return nameWithQuote;
         }
-        nameWithQuote = StringUtils.prependIfMissing(name, Const.DEFAULT_VARIABLE_QUOTE);
-        nameWithQuote = StringUtils.appendIfMissing(nameWithQuote, Const.DEFAULT_VARIABLE_QUOTE);
+        nameWithQuote = Strings.CS.prependIfMissing(name, Const.DEFAULT_VARIABLE_QUOTE);
+        nameWithQuote = Strings.CS.appendIfMissing(nameWithQuote, Const.DEFAULT_VARIABLE_QUOTE);
         return nameWithQuote;
     }
 

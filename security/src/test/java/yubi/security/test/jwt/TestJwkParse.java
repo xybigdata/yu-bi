@@ -8,7 +8,6 @@ import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-import javax.crypto.SecretKey;
 import javax.crypto.Mac;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -19,7 +18,6 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 public class TestJwkParse {

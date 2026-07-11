@@ -32,7 +32,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.util.FileCopyUtils;
 
 import java.io.File;
-import java.net.URL;
+import java.net.URI;
 import java.time.Duration;
 
 
@@ -137,7 +137,7 @@ public class WebUtils {
         options.addArguments("window-size=2048,1536");
 
         if (isRemoteDriver(driverPath)) {
-            return new RemoteWebDriver(new URL(driverPath), options);
+            return new RemoteWebDriver(URI.create(driverPath).toURL(), options);
         }
 
         System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, driverPath);

@@ -20,7 +20,7 @@
 package yubi.core.migration;
 
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.core.io.Resource;
 
 import java.util.Arrays;
@@ -89,7 +89,7 @@ public class Migration implements Comparable<Migration> {
             return false;
         }
         String name = resource.getFilename();
-        if (!StringUtils.endsWithIgnoreCase(name, fileSuffix)) {
+        if (!Strings.CI.endsWith(name, fileSuffix)) {
             return false;
         }
         if (name.split(split).length != 2) {

@@ -35,7 +35,7 @@ export function Searchbar({ placeholder, onSearch }: SearchbarProps) {
           prefix={<SearchOutlined className="icon" />}
           placeholder={placeholder}
           className="search-input"
-          bordered={false}
+          variant="borderless"
           onChange={onSearch}
         />
       </Col>

@@ -35,16 +35,14 @@ import org.quartz.JobExecutionContext;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.CollectionUtils;
 
-import java.io.Closeable;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 @Slf4j
-public abstract class ScheduleJob implements Job, Closeable {
+public abstract class ScheduleJob implements Job {
 
     public static final String SCHEDULE_KEY = "SCHEDULE_KEY";
 
@@ -105,10 +103,7 @@ public abstract class ScheduleJob implements Job, Closeable {
             return false;
         } finally {
             insertLog(start, new Date(), scheduleId, status, message);
-            try {
-                close();
-            } catch (IOException ignored) {
-            }
+            cleanup();
         }
     }
 
@@ -194,8 +189,7 @@ public abstract class ScheduleJob implements Job, Closeable {
         scheduleLogMapper.insert(scheduleLog);
     }
 
-    @Override
-    public void close() throws IOException {
+    private void cleanup() {
         try {
             securityManager.logoutCurrent();
         } catch (Exception e) {

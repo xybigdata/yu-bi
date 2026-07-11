@@ -22,6 +22,7 @@ export function __setSplitLoaderForTest(loader: () => Promise<SplitFactory>) {
 }
 
 export function __resetSplitLoaderForTest() {
-  splitLoader = () => import('split.js').then(module => module.default || module);
+  splitLoader = () =>
+    import('split.js').then(module => module.default || module);
   splitPromise = null;
 }

@@ -179,10 +179,12 @@ public class UserServiceImpl extends BaseService implements UserService {
             jwtToken = JwtUtils.toJwtToken(activeString);
         } catch (ExpiredJwtException e) {
             Exceptions.msg("message.user.confirm.mail.timeout");
+            return null;
         }
         User user = userMapper.selectByUsername(jwtToken.getSubject());
         if (user == null) {
             Exceptions.notFound("resource.not-exist", "resource.user");
+            return null;
         }
         //更新用户激活状态至已激活
         int count = userMapper.updateToActiveById(user.getId());
@@ -202,6 +204,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         User user = userMapper.selectByNameOrEmail(usernameOrEmail);
         if (user == null) {
             Exceptions.notFound("base.not.exists", usernameOrEmail);
+            return false;
         }
         if (user.getActive()) {
             Exceptions.tr(BaseException.class, "message.user.active.fail", usernameOrEmail);
@@ -330,6 +333,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         }
         if (user == null) {
             Exceptions.notFound("resource.user");
+            return null;
         }
         try {
             String verifyCode = SecurityUtils.randomPassword();
@@ -356,6 +360,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         User user = userMapper.selectByUsername(jwtToken.getSubject());
         if (user == null) {
             Exceptions.notFound("resource.not-exist", "resource.user");
+            return false;
         }
         User update = new User();
         update.setId(user.getId());

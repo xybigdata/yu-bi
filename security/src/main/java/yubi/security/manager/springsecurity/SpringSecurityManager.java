@@ -19,7 +19,6 @@
 
 package yubi.security.manager.springsecurity;
 
-import yubi.core.base.consts.Const;
 import yubi.core.base.exception.BaseException;
 import yubi.core.base.exception.Exceptions;
 import yubi.core.common.MessageResolver;
@@ -80,6 +79,7 @@ public class SpringSecurityManager implements YuBiSecurityManager {
         User user = userMapper.selectByNameOrEmail(token.getSubject());
         if (user == null) {
             Exceptions.tr(BaseException.class, "login.fail");
+            return;
         }
         if (!user.getActive()) {
             Exceptions.tr(BaseException.class, "message.user.not.active");
@@ -122,6 +122,7 @@ public class SpringSecurityManager implements YuBiSecurityManager {
         User user = userMapper.selectByNameOrEmail(jwtToken.getSubject());
         if (user == null) {
             Exceptions.tr(AuthException.class, "login.session.timeout");
+            return null;
         }
         if (!user.getActive()) {
             Exceptions.tr(BaseException.class, "message.user.not.active");

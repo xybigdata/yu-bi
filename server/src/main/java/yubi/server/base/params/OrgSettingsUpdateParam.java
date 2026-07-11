@@ -22,9 +22,6 @@ package yubi.server.base.params;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class OrgSettingsUpdateParam extends BaseUpdateParam {

@@ -23,8 +23,6 @@ package yubi.core.data.provider.sql;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.io.Serializable;
-
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class AggregateOperator extends ColumnOperator implements Alias {
@@ -33,7 +31,7 @@ public class AggregateOperator extends ColumnOperator implements Alias {
 
     private String alias;
 
-    public enum SqlOperator implements Serializable {
+    public enum SqlOperator {
 
         MIN,
 

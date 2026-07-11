@@ -52,9 +52,7 @@ const parseViewModelConfig = (
 ): ViewModelMigrationSource | ViewModelMigrationTarget | null | undefined => {
   try {
     return JSON.parse(model) as
-      | ViewModelMigrationSource
-      | ViewModelMigrationTarget
-      | null;
+      ViewModelMigrationSource | ViewModelMigrationTarget | null;
   } catch (error) {
     return undefined;
   }

@@ -79,7 +79,7 @@ export const NumberController: React.FC<NumberControllerProps> = memo(
           onChange={_onChange}
           onPressEnter={_onChangeEnter}
           onBlur={_onBlur}
-          bordered={false}
+          variant="borderless"
         />
       </StyledWrap>
     );

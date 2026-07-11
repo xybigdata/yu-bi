@@ -36,7 +36,9 @@ public class ClassUtils {
 
     public static Properties getClassProperties(String name, Class<?> clz) throws IOException {
         Properties properties = new Properties();
-        properties.load(new FileInputStream(new File(getAbsoluteClassLocation(clz), name)));
+        try (FileInputStream inputStream = new FileInputStream(new File(getAbsoluteClassLocation(clz), name))) {
+            properties.load(inputStream);
+        }
         return properties;
     }
 

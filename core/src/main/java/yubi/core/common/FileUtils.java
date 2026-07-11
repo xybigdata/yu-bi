@@ -21,6 +21,7 @@ package yubi.core.common;
 
 import yubi.core.base.exception.Exceptions;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
@@ -36,16 +37,16 @@ public class FileUtils {
             if (StringUtils.isBlank(path)) {
                 continue;
             }
-            path = StringUtils.appendIfMissing(path, "/");
+            path = Strings.CS.appendIfMissing(path, "/");
             if (i != 0) {
-                path = StringUtils.removeStart(path, "/");
+                path = Strings.CS.removeStart(path, "/");
             }
             if (i == paths.length - 1) {
-                path = StringUtils.removeEnd(path, "/");
+                path = Strings.CS.removeEnd(path, "/");
             }
             stringBuilder.append(path);
         }
-        return StringUtils.removeEnd(stringBuilder.toString(), "/");
+        return Strings.CS.removeEnd(stringBuilder.toString(), "/");
     }
 
     public static void mkdirParentIfNotExist(String path) {
@@ -108,11 +109,8 @@ public class FileUtils {
         for (String name : files) {
             File file = new File(FileUtils.concatPath(baseDir.getAbsolutePath(), name));
             if (file.exists() && file.isFile()) {
-                try {
-                    FileInputStream inputStream = new FileInputStream(file);
-                    byte[] buffer = new byte[inputStream.available()];
-                    inputStream.read(buffer);
-                    bytes.put(name, buffer);
+                try (FileInputStream inputStream = new FileInputStream(file)) {
+                    bytes.put(name, inputStream.readAllBytes());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

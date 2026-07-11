@@ -17,14 +17,8 @@ interface ReducerInjectStore {
 const asReducerInjectStore = (store: unknown): ReducerInjectStore =>
   store as ReducerInjectStore;
 
-export function injectReducerFactory(
-  store: unknown,
-  isValid?: boolean,
-) {
-  return function injectReducer(
-    key: string,
-    reducer: InjectedReducer,
-  ) {
+export function injectReducerFactory(store: unknown, isValid?: boolean) {
+  return function injectReducer(key: string, reducer: InjectedReducer) {
     if (!isValid) checkStore(store);
     const checkedStore = asReducerInjectStore(store);
 

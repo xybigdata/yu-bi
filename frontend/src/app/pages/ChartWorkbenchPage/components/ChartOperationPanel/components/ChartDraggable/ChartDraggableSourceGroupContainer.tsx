@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import { List } from 'antd';
+import { PlainList } from 'app/components';
 import ChartDataViewContext from 'app/pages/ChartWorkbenchPage/contexts/ChartDataViewContext';
 import { renderMataProps } from 'app/pages/ChartWorkbenchPage/slice/types';
 import { getAllColumnInMeta } from 'app/utils/chartHelper';
@@ -108,7 +108,7 @@ export const ChartDraggableSourceGroupContainer: FC<{
     <Container onClick={onClearCheckedList}>
       {/* 拖动层组件 */}
       <ChartDragLayer />
-      <List
+      <PlainList
         dataSource={meta}
         rowKey={item => item.name}
         renderItem={item => (

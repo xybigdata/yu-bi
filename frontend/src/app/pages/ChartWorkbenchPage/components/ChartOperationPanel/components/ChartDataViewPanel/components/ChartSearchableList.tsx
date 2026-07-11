@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import { Divider, Input, List, Space } from 'antd';
+import { Divider, Input, Space } from 'antd';
 import debounce from 'lodash/debounce';
 import { FC, memo, useEffect, useState } from 'react';
 import styled from 'styled-components';
@@ -49,19 +49,22 @@ const ChartSearchableList: FC<{
   }, 100);
 
   return (
-    <StyledChartSearchableList direction="vertical">
+    <StyledChartSearchableList orientation="vertical">
       <Input.Search onChange={e => handleSearch(e.target.value)} enterButton />
       <Divider />
-      <List
-        className="searchable-list-container"
-        dataSource={listItems}
-        rowKey={item => item.value}
-        renderItem={item => (
-          <p title={item.label} onClick={() => handleListItemClick(item.value)}>
-            {item.label}
-          </p>
-        )}
-      />
+      <ul className="searchable-list-container">
+        {listItems.map(item => (
+          <li key={item.value}>
+            <button
+              type="button"
+              title={item.label}
+              onClick={() => handleListItemClick(item.value)}
+            >
+              {item.label}
+            </button>
+          </li>
+        ))}
+      </ul>
     </StyledChartSearchableList>
   );
 });
@@ -76,22 +79,30 @@ const StyledChartSearchableList = styled(Space)`
     width: 100%;
   }
 
-  .ant-list {
+  .searchable-list-container {
+    padding: 0;
+    margin: 0;
     overflow: auto;
+    list-style: none;
   }
 
   .ant-divider {
     margin: 5px;
   }
 
-  p {
+  button {
+    display: block;
+    width: 100%;
     padding: 2px 8px;
-    margin: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 22px;
+    color: inherit;
+    text-align: left;
     white-space: nowrap;
     cursor: pointer;
+    background: transparent;
+    border: 0;
     border-radius: 3px;
 
     &:hover {

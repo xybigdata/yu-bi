@@ -53,13 +53,13 @@ const RecommendRangeTimeSelector: FC<
 
   return (
     <>
-      <Space direction="vertical">
+      <Space orientation="vertical">
         <CurrentRangeTime times={rangeTimes} />
         <Radio.Group
           value={recommend}
           onChange={e => handleChange(e.target?.value)}
         >
-          <Space direction="vertical" key={'smallRange'}>
+          <Space orientation="vertical" key={'smallRange'}>
             {[
               RECOMMEND_TIME.TODAY,
               RECOMMEND_TIME.YESTERDAY,
@@ -70,7 +70,7 @@ const RecommendRangeTimeSelector: FC<
               </Radio>
             ))}
           </Space>
-          <Space direction="vertical" key={'wideRange'}>
+          <Space orientation="vertical" key={'wideRange'}>
             {[
               RECOMMEND_TIME.LAST_7_DAYS,
               RECOMMEND_TIME.LAST_30_DAYS,

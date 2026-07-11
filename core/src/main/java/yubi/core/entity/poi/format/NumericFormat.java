@@ -1,9 +1,11 @@
 package yubi.core.entity.poi.format;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class NumericFormat extends PoiNumFormat {
 
     public static final String type = "numeric";

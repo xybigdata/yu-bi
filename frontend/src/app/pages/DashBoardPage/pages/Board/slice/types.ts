@@ -390,9 +390,7 @@ export type WidgetType = (typeof WidgetTypes)[number];
 export declare const ContainerWidgetTypes: ['tab', 'carousel'];
 
 export type LightWidgetType =
-  | ContainerWidgetType
-  | MediaWidgetType
-  | ControllerFacadeTypes;
+  ContainerWidgetType | MediaWidgetType | ControllerFacadeTypes;
 
 export type ContainerWidgetType = (typeof ContainerWidgetTypes)[number];
 

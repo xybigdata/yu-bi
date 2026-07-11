@@ -101,7 +101,7 @@ public class DingTalkOauth2Client implements CustomOauth2Client {
             String state = request.getParameter("state");
 
             try {
-                String decrypt = AESUtil.decrypt(state);
+                AESUtil.decrypt(state);
             } catch (Exception e) {
                 Exceptions.msg("Failed to verify the state parameter");
             }

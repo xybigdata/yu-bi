@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import type * as Monaco from 'monaco-editor';
-import { __resetMonacoRuntimeLoadersForTest, __setMonacoLoaderForTest } from 'app/components/MonacoEditor/runtime';
+import {
+  __resetMonacoRuntimeLoadersForTest,
+  __setMonacoLoaderForTest,
+} from 'app/components/MonacoEditor/runtime';
 import type { AppDispatch } from 'redux/configureStore';
 import { registerSqlCompletionProvider } from '../completionRuntime';
 
@@ -63,7 +66,9 @@ describe('registerSqlCompletionProvider', () => {
   });
 
   test('should keep provider unset when monaco loading failed', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
     const providerRef = { current: undefined };
     const dispatch = vi.fn() as unknown as AppDispatch;
     __setMonacoLoaderForTest(

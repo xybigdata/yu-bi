@@ -183,7 +183,7 @@ export const DefaultValue = memo(
     }
 
     return (
-      <Wrapper direction="vertical">
+      <Wrapper orientation="vertical">
         {expression || type === VariableValueTypes.Expression ? (
           <Input.TextArea
             placeholder={t('enterExpression')}

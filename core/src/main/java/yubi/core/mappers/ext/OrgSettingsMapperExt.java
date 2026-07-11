@@ -2,7 +2,6 @@ package yubi.core.mappers.ext;
 
 import yubi.core.entity.OrgSettings;
 import yubi.core.mappers.OrgSettingsMapper;
-import org.apache.ibatis.annotations.CacheNamespace;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 

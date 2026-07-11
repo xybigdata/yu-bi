@@ -23,4 +23,35 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
 });
 
+const nativeGetComputedStyle = window.getComputedStyle.bind(window);
+Object.defineProperty(window, 'getComputedStyle', {
+  configurable: true,
+  value: (element: Element) => nativeGetComputedStyle(element),
+});
+
+const createCanvasContext = () =>
+  ({
+    clearRect: () => {},
+    createImageData: () => ({ data: new Uint8ClampedArray(4) }),
+    createLinearGradient: () => ({ addColorStop: () => {} }),
+    drawImage: () => {},
+    fillRect: () => {},
+    fillText: () => {},
+    getImageData: () => ({ data: new Uint8ClampedArray(4) }),
+    measureText: () => ({ width: 0 }),
+    putImageData: () => {},
+    restore: () => {},
+    rotate: () => {},
+    save: () => {},
+    scale: () => {},
+    setTransform: () => {},
+    translate: () => {},
+  }) as unknown as CanvasRenderingContext2D;
+
+Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+  configurable: true,
+  value: (contextId: string) =>
+    contextId === '2d' ? createCanvasContext() : null,
+});
+
 await import('./src/locales/i18n');

@@ -13,9 +13,9 @@ describe('BoardEditor helpers', () => {
       },
     };
 
-    expect(parseBoardEditorWidgetInfo(JSON.stringify(widgetInfo))).toMatchObject(
-      widgetInfo,
-    );
+    expect(
+      parseBoardEditorWidgetInfo(JSON.stringify(widgetInfo)),
+    ).toMatchObject(widgetInfo);
   });
 
   test('should fallback to undefined for invalid widget info', () => {

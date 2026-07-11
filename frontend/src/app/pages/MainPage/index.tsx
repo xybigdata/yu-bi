@@ -118,7 +118,7 @@ export function MainPage() {
       container: hisSearch.get('container') || 'dataChart',
       defaultViewId: hisSearch.get('defaultViewId') || '',
     } as ChartEditorBaseProps;
-    const handleCloseChartEditor = useCallback(() => {
+    const handleCloseChartEditor = () => {
       navigate.push(
         getChartEditorClosePath({
           orgId,
@@ -126,7 +126,7 @@ export function MainPage() {
           defaultViewId: hisState.defaultViewId,
         }),
       );
-    }, [hisState.dataChartId, hisState.defaultViewId, navigate, orgId]);
+    };
 
     return (
       <AccessRoute module={ResourceTypes.Viz}>

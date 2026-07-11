@@ -14,7 +14,6 @@ public class ForbiddenSqlExamples {
     static {
         initScripts(TestSqlDialects.MYSQL, TestSqlDialects.ORACLE);
         initMysqlScripts();
-        initOracleScripts();
     }
 
     private static void initScripts(SqlDialect... sqlDialects) {
@@ -56,11 +55,6 @@ public class ForbiddenSqlExamples {
         SqlDialect sqlDialect = TestSqlDialects.MYSQL;
         sqlList.add(SqlTestEntity.createForbiddenSql(sqlDialect,
                 "replace INTO test_table (id) VALUES(123)"));
-    }
-
-    private static void initOracleScripts(){
-        SqlDialect sqlDialect = TestSqlDialects.ORACLE;
-
     }
 
 }

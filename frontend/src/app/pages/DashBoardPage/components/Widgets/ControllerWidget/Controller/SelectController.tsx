@@ -68,7 +68,7 @@ export const SelectController: React.FC<SelectControllerProps> = ({
       placeholder={t('selectController')}
       onChange={onChange}
       optionFilterProp="label"
-      bordered={false}
+      variant="borderless"
       filterOption={(input, option) =>
         String(option?.label).toLowerCase().indexOf(input.toLowerCase()) >= 0
       }

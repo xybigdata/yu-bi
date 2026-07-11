@@ -65,7 +65,7 @@ export const SelectController: React.FC<SelectControllerProps> = memo(
         optionFilterProp="label"
         onChange={onChange}
         mode={'multiple'}
-        bordered={false}
+        variant="borderless"
         filterOption={(input, option) =>
           String(option?.label).toLowerCase().indexOf(input.toLowerCase()) >= 0
         }

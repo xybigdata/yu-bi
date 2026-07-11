@@ -28,8 +28,7 @@ type ReactComponentFactoryDependencies = {
 };
 
 type ReactComponentFactory =
-  | unknown
-  | ((dependencies: ReactComponentFactoryDependencies) => unknown);
+  unknown | ((dependencies: ReactComponentFactoryDependencies) => unknown);
 
 interface ReactLifecycleAdapterProps {
   mounted: (

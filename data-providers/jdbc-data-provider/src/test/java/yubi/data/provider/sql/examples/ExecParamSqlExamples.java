@@ -34,7 +34,7 @@ public class ExecParamSqlExamples {
     }
 
     private static SqlTestEntity dealExecParam(ExecuteParam executeParam, SqlTestEntity sqlTest){
-        String template = execParamTemplate.getOrDefault(sqlTest.getSqlDialect().getDatabaseProduct().name(), "");
+        String template = execParamTemplate.getOrDefault(TestSqlDialects.nameOf(sqlTest.getSqlDialect()), "");
         if (StringUtils.isBlank(template)) {
             return sqlTest;
         }
@@ -44,9 +44,9 @@ public class ExecParamSqlExamples {
     }
 
     private static void initExecTemplateMap() {
-        execParamTemplate.put(TestSqlDialects.MYSQL.getDatabaseProduct().name(), "SELECT `YUBI_VTABLE`.`name` AS `name`, `YUBI_VTABLE`.`age` AS `age`, `YUBI_VTABLE`.`id` AS `id`, SUM(`YUBI_VTABLE`.`val`) AS `SUM(val)`  " +
+        execParamTemplate.put(TestSqlDialects.nameOf(TestSqlDialects.MYSQL), "SELECT `YUBI_VTABLE`.`name` AS `name`, `YUBI_VTABLE`.`age` AS `age`, `YUBI_VTABLE`.`id` AS `id`, SUM(`YUBI_VTABLE`.`val`) AS `SUM(val)`  " +
                 "FROM  ( &#%xxx%#& )  AS `YUBI_VTABLE`  GROUP BY `YUBI_VTABLE`.`id`  ORDER BY COUNT(`YUBI_VTABLE`.`age`) DESC");
-        execParamTemplate.put(TestSqlDialects.ORACLE.getDatabaseProduct().name(), "SELECT \"YUBI_VTABLE\".\"name\" \"name\", \"YUBI_VTABLE\".\"age\" \"age\", \"YUBI_VTABLE\".\"id\" AS \"id\", SUM(\"YUBI_VTABLE\".\"val\") \"SUM(val)\"  " +
+        execParamTemplate.put(TestSqlDialects.nameOf(TestSqlDialects.ORACLE), "SELECT \"YUBI_VTABLE\".\"name\" \"name\", \"YUBI_VTABLE\".\"age\" \"age\", \"YUBI_VTABLE\".\"id\" AS \"id\", SUM(\"YUBI_VTABLE\".\"val\") \"SUM(val)\"  " +
                 "FROM  ( &#%xxx%#& )  \"YUBI_VTABLE\"  GROUP BY \"YUBI_VTABLE\".\"id\"  ORDER BY COUNT(\"YUBI_VTABLE\".\"age\") DESC");
     }
 

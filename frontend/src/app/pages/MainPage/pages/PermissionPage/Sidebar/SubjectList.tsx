@@ -18,8 +18,8 @@
  */
 
 import { LoadingOutlined } from '@ant-design/icons';
-import { List } from 'antd';
-import { ListItem } from 'app/components';
+import { List as AntList } from 'antd';
+import { ListItem, PlainList } from 'app/components';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { memo } from 'react';
@@ -56,7 +56,7 @@ export const SubjectList = memo(
       <>
         <Searchbar placeholder={t('search')} onSearch={debouncedSearch} />
         <ListWrapper>
-          <List
+          <PlainList
             loading={{
               spinning: loading,
               indicator: <LoadingOutlined />,
@@ -68,10 +68,10 @@ export const SubjectList = memo(
                 selected={viewpointId === id && viewpointType === type}
                 onClick={onToDetail(id, type)}
               >
-                <List.Item.Meta title={name} />
+                <AntList.Item.Meta title={name} />
               </ListItem>
             ))}
-          </List>
+          </PlainList>
         </ListWrapper>
       </>
     );
