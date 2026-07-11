@@ -1,11 +1,5 @@
 import classnames from 'classnames';
-import {
-  memo,
-  ReactElement,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import { memo, ReactElement, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import {
   BORDER_RADIUS,

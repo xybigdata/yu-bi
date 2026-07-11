@@ -96,16 +96,11 @@ export function importQuillBlot(path: string): QuillBlotConstructor {
   return Quill.import(path) as QuillBlotConstructor;
 }
 
-export function registerQuillDefinition(
-  target: unknown,
-  overwrite?: boolean,
-) {
-  (
-    Quill.register as unknown as (
-      target: unknown,
-      overwrite?: boolean,
-    ) => void
-  )(target, overwrite);
+export function registerQuillDefinition(target: unknown, overwrite?: boolean) {
+  (Quill.register as unknown as (target: unknown, overwrite?: boolean) => void)(
+    target,
+    overwrite,
+  );
 }
 
 export function registerQuillPath(

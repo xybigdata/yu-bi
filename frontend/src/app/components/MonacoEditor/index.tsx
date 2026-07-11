@@ -261,6 +261,7 @@ function MonacoEditorComponent(
 
     const { editorWillUnmount: initialEditorWillUnmount } =
       mountConfigRef.current;
+    const themeOwner = themeOwnerRef.current;
     let cancelled = false;
 
     const mountEditor = async () => {
@@ -302,7 +303,7 @@ function MonacoEditorComponent(
       if (cancelled || !containerRef.current) {
         return;
       }
-      activateEditorTheme(monaco, themeOwnerRef.current, initialTheme);
+      activateEditorTheme(monaco, themeOwner, initialTheme);
       const modelUri = initialUri?.(monaco);
       let model = modelUri ? monaco.editor.getModel(modelUri) : undefined;
 
@@ -371,7 +372,7 @@ function MonacoEditorComponent(
         editorRef.current = null;
       }
       if (monaco) {
-        releaseEditorTheme(monaco, themeOwnerRef.current);
+        releaseEditorTheme(monaco, themeOwner);
       }
       subscriptionRef.current?.dispose();
       subscriptionRef.current = null;

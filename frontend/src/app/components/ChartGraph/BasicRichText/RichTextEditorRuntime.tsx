@@ -44,12 +44,19 @@ function RichTextEditorRuntimeImpl(
   };
 
   useEffect(() => {
+    let editor: QuillWithCalcFieldModule | undefined;
+    try {
+      editor = editorRef.current?.getEditor() as
+        QuillWithCalcFieldModule | undefined;
+    } catch {
+      // 测试环境可能在 ReactQuill 完成初始化前卸载组件。
+    }
     return () => {
-      if (!editorRef.current) {
+      if (!editor) {
         return;
       }
 
-      destroyRichTextModules(getEditorInstance());
+      destroyRichTextModules(editor);
     };
   }, []);
 
@@ -97,7 +104,12 @@ function RichTextEditorRuntimeImpl(
     [],
   );
 
-  return <ReactQuill ref={editorRef} {...(props as ComponentProps<typeof ReactQuill>)} />;
+  return (
+    <ReactQuill
+      ref={editorRef}
+      {...(props as ComponentProps<typeof ReactQuill>)}
+    />
+  );
 }
 
 export default forwardRef(RichTextEditorRuntimeImpl);

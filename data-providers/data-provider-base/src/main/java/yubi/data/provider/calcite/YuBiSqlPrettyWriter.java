@@ -45,7 +45,7 @@ public class YuBiSqlPrettyWriter extends SqlPrettyWriter {
     }
 
     public YuBiSqlPrettyWriter(SqlDialect dialect, SqlWriterConfig config) {
-        super(dialect, config);
+        super(config.withDialect(dialect));
     }
 
     /**

@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-import { List, Tag } from 'antd';
-import { ListItem } from 'app/components';
+import { Tag } from 'antd';
+import { ListItem, PlainList } from 'app/components';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { FC, ReactNode, memo, useMemo } from 'react';
 import styled from 'styled-components';
@@ -83,7 +83,7 @@ export const DownloadList: FC<DownloadListProps> = memo(
 
     const tasksContent = useMemo(() => {
       return (
-        <List
+        <PlainList
           size="small"
           dataSource={tasks}
           rowKey={t => t.name}

@@ -18,8 +18,8 @@
  */
 
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import { List } from 'antd';
-import { ListItem, ListTitle } from 'app/components';
+import { List as AntList } from 'antd';
+import { ListItem, ListTitle, PlainList } from 'app/components';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
@@ -83,7 +83,7 @@ export const RoleList = memo(() => {
     <Wrapper>
       <ListTitle {...titleProps} />
       <ListWrapper>
-        <List
+        <PlainList
           dataSource={filteredData}
           loading={listLoading && { indicator: <LoadingOutlined /> }}
           renderItem={({ id, name, description }) => (
@@ -94,7 +94,10 @@ export const RoleList = memo(() => {
               }
               onClick={toDetail(id)}
             >
-              <List.Item.Meta title={name} description={description || '-'} />
+              <AntList.Item.Meta
+                title={name}
+                description={description || '-'}
+              />
             </ListItem>
           )}
         />

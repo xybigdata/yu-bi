@@ -1,10 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { BOARD_UNDO } from 'app/pages/DashBoardPage/constants';
 import { Dashboard } from 'app/pages/DashBoardPage/pages/Board/slice/types';
-import {
-  editBoardStackActions,
-  editBoardStackReducer,
-} from '..';
+import { editBoardStackActions, editBoardStackReducer } from '..';
 import { EditBoardStack } from '../types';
 
 const createDashboard = (id: string): Dashboard =>

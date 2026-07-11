@@ -136,7 +136,6 @@ export const makeDownloadDataTask =
     }
     resolve();
   };
-// TODO
 export const makeShareDownloadDataTask =
   (params: {
     resolve: () => void;

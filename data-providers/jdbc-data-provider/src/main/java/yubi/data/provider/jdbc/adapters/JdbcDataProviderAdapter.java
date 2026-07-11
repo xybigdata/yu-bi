@@ -61,8 +61,6 @@ public class JdbcDataProviderAdapter implements Closeable {
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder().build();
 
-    private static final String SQL_DIALECT_PACKAGE = "yubi.data.provider.calcite.dialect";
-
     protected static final String COUNT_SQL = "SELECT COUNT(*) FROM (%s) V_T";
 
     protected static final String PKTABLE_CAT = "PKTABLE_CAT";

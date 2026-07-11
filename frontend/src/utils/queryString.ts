@@ -82,7 +82,11 @@ function tokenizeQueryKey(key: string) {
   return tokens;
 }
 
-function setParsedValue(target: unknown, tokens: string[], value: string): unknown {
+function setParsedValue(
+  target: unknown,
+  tokens: string[],
+  value: string,
+): unknown {
   if (!tokens.length) {
     return value;
   }

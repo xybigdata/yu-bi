@@ -60,10 +60,11 @@ public class SysServiceImpl implements SysService {
     private String getVersion() {
         try {
             String jarPath = getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
-            JarFile jarFile = new JarFile(jarPath);
+            try (JarFile jarFile = new JarFile(jarPath)) {
             Manifest manifest = jarFile.getManifest();
             Attributes mainAttributes = manifest.getMainAttributes();
             return mainAttributes.getValue("Implementation-Version");
+            }
         } catch (Exception e) {
             return "dev";
         }

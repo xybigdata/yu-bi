@@ -23,7 +23,6 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Set;
-import java.util.Set;
 
 public interface CustomOauth2Client {
 

@@ -58,9 +58,7 @@ import { TreeControllerForm } from './Controller/TreeController';
 type ControllerSubmitScalar = ControllerValue | undefined;
 type ControllerSubmitRange = [ControllerSubmitScalar?, ControllerSubmitScalar?];
 type ControllerSubmitValue =
-  | ControllerSubmitScalar
-  | ControllerValues
-  | ControllerSubmitRange;
+  ControllerSubmitScalar | ControllerValues | ControllerSubmitRange;
 type ControllerSubmitForm = {
   value?: ControllerSubmitValue;
 };

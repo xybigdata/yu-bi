@@ -114,8 +114,7 @@ export const makeSelectPrivileges = () =>
     (permissionMap, viewpoint, dataSourceType) => {
       if (viewpoint === Viewpoints.Resource) {
         const permissionObject = permissionMap[viewpoint].permissionObject as
-          | ResourcePermissions
-          | undefined;
+          ResourcePermissions | undefined;
         if (dataSourceType === SubjectTypes.Role) {
           return permissionObject?.rolePermissions?.filter(
             ({ subjectType }) => subjectType === dataSourceType,
@@ -127,8 +126,7 @@ export const makeSelectPrivileges = () =>
         }
       } else {
         const permissionObject = permissionMap[viewpoint].permissionObject as
-          | SubjectPermissions
-          | undefined;
+          SubjectPermissions | undefined;
         return permissionObject?.permissionInfos?.filter(
           ({ resourceType }) => resourceType === dataSourceType,
         );

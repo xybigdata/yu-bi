@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { Form } from 'antd';
 import { ThemeProvider } from 'styled-components';
 import { describe, expect, test, vi } from 'vitest';
 
@@ -18,31 +19,33 @@ vi.mock('../ChartComputedFieldEditor/ChartComputedFieldEditor', () => ({
 const renderPanel = () =>
   render(
     <ThemeProvider theme={themes.light}>
-      <ChartComputedFieldSettingPanel
-        viewType="SQL"
-        computedField={{
-          name: 'profit_amount',
-          type: DataViewFieldType.NUMERIC,
-          expression: 'SUM(profit)',
-        }}
-        fields={[
-          {
-            name: 'very_long_business_metric_field_name',
-            type: DataViewFieldType.STRING,
-          },
-          {
-            name: 'country_code',
-            type: DataViewFieldType.STRING,
-          },
-        ]}
-        variables={[
-          {
-            name: 'selected_country_region_variable',
-            type: DataViewFieldType.STRING,
-          },
-        ]}
-        onChange={vi.fn()}
-      />
+      <Form>
+        <ChartComputedFieldSettingPanel
+          viewType="SQL"
+          computedField={{
+            name: 'profit_amount',
+            type: DataViewFieldType.NUMERIC,
+            expression: 'SUM(profit)',
+          }}
+          fields={[
+            {
+              name: 'very_long_business_metric_field_name',
+              type: DataViewFieldType.STRING,
+            },
+            {
+              name: 'country_code',
+              type: DataViewFieldType.STRING,
+            },
+          ]}
+          variables={[
+            {
+              name: 'selected_country_region_variable',
+              type: DataViewFieldType.STRING,
+            },
+          ]}
+          onChange={vi.fn()}
+        />
+      </Form>
     </ThemeProvider>,
   );
 

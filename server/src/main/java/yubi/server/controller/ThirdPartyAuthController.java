@@ -1,7 +1,6 @@
 package yubi.server.controller;
 
 import yubi.server.base.dto.ResponseData;
-import yubi.server.service.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
@@ -26,12 +25,6 @@ import java.util.List;
 @RequestMapping(value = "/tpa")
 public class ThirdPartyAuthController extends BaseController {
 
-    private final UserService userService;
-
-    public ThirdPartyAuthController(UserService userService) {
-        this.userService = userService;
-    }
-
     private ClientRegistrationRepository clientRegistrationRepository;
 
     @Operation(summary = "Get Oauth2 clents")
@@ -40,9 +33,14 @@ public class ThirdPartyAuthController extends BaseController {
         if (clientRegistrationRepository == null) {
             return ResponseData.success(Collections.emptyList());
         }
-        Iterable<ClientRegistration> clientRegistrations = (Iterable<ClientRegistration>) clientRegistrationRepository;
+        if (!(clientRegistrationRepository instanceof Iterable<?> clientRegistrations)) {
+            return ResponseData.success(Collections.emptyList());
+        }
         List<HashMap<String, String>> clients = new ArrayList<>();
-        clientRegistrations.forEach(registration -> {
+        clientRegistrations.forEach(candidate -> {
+            if (!(candidate instanceof ClientRegistration registration)) {
+                return;
+            }
             HashMap<String, String> map = new HashMap<>();
             map.put(registration.getClientName(), OAuth2AuthorizationRequestRedirectFilter.DEFAULT_AUTHORIZATION_REQUEST_BASE_URI + "/" + registration.getRegistrationId() + "?redirect_url=/");
             clients.add(map);

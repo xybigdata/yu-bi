@@ -255,6 +255,9 @@
                         </goals>
                         <configuration>
                             <executable>npm</executable>
+                            <environmentVariables>
+                                <YUBI_FRONTEND_OUT_DIR>${project.build.directory}/frontend-build</YUBI_FRONTEND_OUT_DIR>
+                            </environmentVariables>
                             <arguments>
                                 <argument>run</argument>
                                 <argument>build:all</argument>
@@ -301,7 +304,7 @@
                             <outputDirectory>${project.build.directory}/frontend-static</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.parent.basedir}/frontend/build</directory>
+                                    <directory>${project.build.directory}/frontend-build</directory>
                                 </resource>
                             </resources>
                         </configuration>
@@ -321,7 +324,7 @@
                             <goal>copy</goal>
                         </goals>
                         <configuration>
-                            <sourceFile>${project.parent.basedir}/frontend/build/task/index.js</sourceFile>
+                            <sourceFile>${project.build.directory}/frontend-build/task/index.js</sourceFile>
                             <destinationFile>${project.build.outputDirectory}/javascript/parser.js
                             </destinationFile>
                         </configuration>

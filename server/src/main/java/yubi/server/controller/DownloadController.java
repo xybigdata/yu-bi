@@ -53,7 +53,6 @@ public class DownloadController extends BaseController {
     @Operation(summary = "get download tasks")
     @GetMapping(value = "/tasks")
     public ResponseData<List<Download>> listDownloadTasks() {
-        ResponseData.ResponseDataBuilder<List<Download>> builder = ResponseData.builder();
         return ResponseData.success(downloadService.listDownloadTasks());
     }
 

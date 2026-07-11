@@ -37,9 +37,7 @@ export const getNumberRangeValue = (
 ): NumberRangeValue | undefined =>
   isNumberRangeValue(value) ? value : undefined;
 
-export const isNumberRangeValue = (
-  value: unknown,
-): value is NumberRangeValue =>
+export const isNumberRangeValue = (value: unknown): value is NumberRangeValue =>
   Array.isArray(value) &&
   value.length === 2 &&
   typeof value[0] === 'number' &&

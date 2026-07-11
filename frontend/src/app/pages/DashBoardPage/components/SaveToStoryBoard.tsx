@@ -17,8 +17,8 @@
  * limitations under the License.
  */
 
-import { List, Modal } from 'antd';
-import { ListItem } from 'app/components';
+import { List as AntList, Modal } from 'antd';
+import { ListItem, PlainList } from 'app/components';
 import { getCascadeAccess } from 'app/pages/MainPage/Access';
 import {
   PermissionLevels,
@@ -103,17 +103,17 @@ const SaveToStoryBoard: FC<SaveToStoryBoardTypes> = memo(
         onCancel={handleCancel}
         okButtonProps={{ disabled: !selectId }}
       >
-        <List
+        <PlainList
           dataSource={storyData}
           renderItem={s => (
             <ListItem
               onClick={() => selectStoryBoard(s)}
               selected={selectId === s.id}
             >
-              <List.Item.Meta title={s.name} />
+              <AntList.Item.Meta title={s.name} />
             </ListItem>
           )}
-        ></List>
+        ></PlainList>
       </Modal>
     );
   },

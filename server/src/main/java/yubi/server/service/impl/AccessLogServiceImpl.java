@@ -3,7 +3,6 @@ package yubi.server.service.impl;
 import yubi.core.common.UUIDGenerator;
 import yubi.core.entity.AccessLog;
 import yubi.core.log.AccessType;
-import yubi.core.mappers.ext.AccessLogMapperExt;
 import yubi.security.base.ResourceType;
 import yubi.server.service.AsyncAccessLogService;
 import yubi.server.service.BaseService;
@@ -24,12 +23,11 @@ public class AccessLogServiceImpl extends BaseService implements AsyncAccessLogS
 
     private volatile boolean stop = false;
 
-    public AccessLogServiceImpl(AccessLogMapperExt logMapper) {
+    public AccessLogServiceImpl() {
         logThread = new Thread(() -> {
             while (!stop) {
                 try {
-                    AccessLog accessLog = logQueue.take();
-//                    logMapper.insert(accessLog);
+                    logQueue.take();
                 } catch (Exception e) {
 //                    log.error("access log insert error", e);
                 }

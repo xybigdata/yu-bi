@@ -20,24 +20,13 @@
 package yubi.data.provider.jdbc;
 
 import yubi.core.data.provider.ScriptVariable;
-import yubi.data.provider.calcite.SqlNodeUtils;
-import yubi.data.provider.calcite.custom.SqlSimpleStringLiteral;
 import yubi.data.provider.script.ReplacementPair;
 import yubi.data.provider.script.VariablePlaceholder;
-import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlDialect;
-import org.apache.calcite.sql.SqlIdentifier;
-import org.springframework.util.CollectionUtils;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class SimpleVariablePlaceholder extends VariablePlaceholder {
 
     private ScriptVariable variable;
-
-    private SqlIdentifier identifier;
 
     public SimpleVariablePlaceholder(ScriptVariable variable, SqlDialect sqlDialect, String originalSqlFragment) {
         super(null, sqlDialect, null, originalSqlFragment);

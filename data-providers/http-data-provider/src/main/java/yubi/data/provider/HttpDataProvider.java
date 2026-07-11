@@ -19,9 +19,6 @@
 
 package yubi.data.provider;
 
-import tools.jackson.databind.DeserializationFeature;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.json.JsonMapper;
 import yubi.core.common.MessageResolver;
 import yubi.core.common.UUIDGenerator;
 import yubi.core.data.provider.*;
@@ -35,8 +32,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -71,10 +66,6 @@ public class HttpDataProvider extends DefaultDataProvider {
     private static final String CONTENT_TYPE = "contentType";
 
     private static final String I18N_PREFIX = "config.template.http.";
-
-    private final static ObjectMapper MAPPER = JsonMapper.builder()
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .build();
 
     public HttpDataProvider() {
     }
@@ -148,12 +139,9 @@ public class HttpDataProvider extends DefaultDataProvider {
 
         List<HttpRequestParam> requestParams = new ArrayList<>();
 
-        List<Map<String, Object>> schemas;
-        if (source.getProperties().containsKey(SCHEMAS)) {
-            schemas = (List<Map<String, Object>>) source.getProperties().get(SCHEMAS);
-        } else {
-            schemas = Collections.singletonList(source.getProperties());
-        }
+        List<Map<String, Object>> schemas = source.getProperties().containsKey(SCHEMAS)
+                ? schemaDefinitions(source.getProperties())
+                : Collections.singletonList(source.getProperties());
         if (CollectionUtils.isEmpty(schemas)) {
             return requestParams;
         }
@@ -189,84 +177,20 @@ public class HttpDataProvider extends DefaultDataProvider {
         if (parser != null && StringUtils.isNotBlank(parser.toString())) {
             parserClass = parser.toString();
         }
-        Class<? extends HttpResponseParser> aClass = (Class<? extends HttpResponseParser>) Class.forName(parserClass);
-        httpRequestParam.setResponseParser(aClass);
+        Class<? extends HttpResponseParser> parserType = Class.forName(parserClass)
+                .asSubclass(HttpResponseParser.class);
+        httpRequestParam.setResponseParser(parserType);
         Object body = schema.get(BODY);
         if (body != null) {
             httpRequestParam.setBody(body.toString());
         }
-        httpRequestParam.setQueryParam(new TreeMap<>((Map<String, String>) schema.get(QUERY_PARAM)));
+        httpRequestParam.setQueryParam(new TreeMap<>(stringMap(schema.get(QUERY_PARAM))));
 
-        httpRequestParam.setHeaders(new TreeMap<>((Map<String, String>) schema.get(HEADER)));
+        httpRequestParam.setHeaders(new TreeMap<>(stringMap(schema.get(HEADER))));
 
         httpRequestParam.setColumns(parseColumns(schema));
 
         return httpRequestParam;
-    }
-
-    private void replaceVariables(DataProviderSource config, Map<String, Object> schema) {
-        try {
-            if (CollectionUtils.isEmpty(config.getVariables())) {
-                return;
-            }
-            String url = schema.get(URL).toString();
-            if (StringUtils.isNotBlank(url)) {
-                schema.put(URL, replaceVariables(config.getVariables(), url, true));
-            }
-            String username = schema.get(USERNAME).toString();
-            if (StringUtils.isNotBlank(username)) {
-                schema.put(USERNAME, replaceVariables(config.getVariables(), username, false));
-            }
-            String password = schema.get(PASSWORD).toString();
-            if (StringUtils.isNotBlank(password)) {
-                schema.put(PASSWORD, replaceVariables(config.getVariables(), username, false));
-            }
-            String body = schema.get(BODY).toString();
-            if (StringUtils.isNotBlank(body)) {
-                schema.put(BODY, replaceVariables(config.getVariables(), username, false));
-            }
-            Map<String, String> header = (Map<String, String>) schema.get(HEADER);
-            if (!CollectionUtils.isEmpty(header)) {
-                HashMap<Object, Object> newHeader = new HashMap<>();
-                for (Map.Entry<String, String> entry : header.entrySet()) {
-                    String key = replaceVariables(config.getVariables(), entry.getKey(), false);
-                    String value = replaceVariables(config.getVariables(), entry.getValue(), false);
-                    newHeader.put(key, value);
-                }
-                schema.put(HEADER, newHeader);
-            }
-
-            Map<String, String> queryParam = (Map<String, String>) schema.get(QUERY_PARAM);
-            if (!CollectionUtils.isEmpty(queryParam)) {
-                HashMap<String, String> newQueryParam = new HashMap<>();
-                for (Map.Entry<String, String> entry : queryParam.entrySet()) {
-                    String key = replaceVariables(config.getVariables(), entry.getKey(), true);
-                    String value = replaceVariables(config.getVariables(), entry.getValue(), true);
-                    newQueryParam.put(key, value);
-                }
-                schema.put(QUERY_PARAM, newQueryParam);
-            }
-
-        } catch (Exception e) {
-            log.error("http data source variable replace error", e);
-        }
-    }
-
-    private String replaceVariables(List<ScriptVariable> variables, String str, boolean urlEncode) {
-        if (CollectionUtils.isEmpty(variables) || StringUtils.isBlank(str)) {
-            return str;
-        }
-        for (ScriptVariable variable : variables) {
-            String value = variable.valueToString();
-            if (urlEncode) {
-                try {
-                    value = URLEncoder.encode(value, StandardCharsets.UTF_8.name());
-                } catch (Exception ignored) {
-                }
-            }
-            str = str.replaceAll(variable.getNameWithQuote(), value);
-        }
-        return str;
     }
 
 }

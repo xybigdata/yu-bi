@@ -12,11 +12,13 @@ import {
 const appRoot = __dirname;
 const srcRoot = path.resolve(appRoot, 'src');
 const publicUrl = process.env.PUBLIC_URL || '';
+const buildOutDir = process.env.YUBI_FRONTEND_OUT_DIR || 'build';
+const taskOutDir = path.resolve(buildOutDir, 'task');
 
 const syncTaskBundle = (): Plugin => ({
   name: 'yu-bi-sync-task-bundle',
   writeBundle() {
-    const sourceFile = path.resolve(appRoot, 'build/task/index.js');
+    const sourceFile = path.resolve(taskOutDir, 'index.js');
     const targetDir = path.resolve(appRoot, 'public/task');
     const targetFile = path.resolve(targetDir, 'index.js');
 
@@ -49,7 +51,7 @@ export default defineConfig(({ mode }) => ({
       name: 'getQueryData',
     },
     minify: false,
-    outDir: 'build/task',
+    outDir: taskOutDir,
     rollupOptions: {
       output: {
         exports: 'default',

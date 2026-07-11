@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Data
 public class PoiNumFormat {
@@ -46,7 +47,7 @@ public class PoiNumFormat {
         if (obj != null && NumberUtils.isCreatable(obj.toString()) && StringUtils.isNotBlank(this.unitKey)) {
             UnitKey unitKey = UnitKey.getUnitKeyByValue(this.unitKey);
             BigDecimal val = new BigDecimal(obj.toString()).divide(new BigDecimal(unitKey.getUnit()));
-            obj = val.setScale(getDecimalPlacesNum(), BigDecimal.ROUND_HALF_UP);
+            obj = val.setScale(getDecimalPlacesNum(), RoundingMode.HALF_UP);
         }
         return obj;
     }

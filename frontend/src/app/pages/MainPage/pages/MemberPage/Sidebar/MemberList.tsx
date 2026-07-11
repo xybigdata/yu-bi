@@ -18,8 +18,8 @@
  */
 
 import { LoadingOutlined, UserAddOutlined } from '@ant-design/icons';
-import { List, Modal } from 'antd';
-import { Avatar, ListItem, ListTitle } from 'app/components';
+import { List as AntList, Modal } from 'antd';
+import { Avatar, ListItem, ListTitle, PlainList } from 'app/components';
 import { TenantManagementMode } from 'app/constants';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
@@ -114,7 +114,7 @@ export const MemberList = memo(() => {
               Modal.info({
                 title: title.join('；'),
                 content: <Emails>{content}</Emails>,
-                maskClosable: false,
+                mask: { closable: false },
               });
             }
             setInviteFormVisible(false);
@@ -162,7 +162,7 @@ export const MemberList = memo(() => {
     <Wrapper>
       <ListTitle {...titleProps} />
       <ListWrapper>
-        <List
+        <PlainList
           dataSource={filteredData}
           loading={listLoading && { indicator: <LoadingOutlined /> }}
           renderItem={({ id, name, email, username, avatar }) => (
@@ -174,7 +174,7 @@ export const MemberList = memo(() => {
               withAvatar
               onClick={toDetail(id)}
             >
-              <List.Item.Meta
+              <AntList.Item.Meta
                 avatar={
                   <Avatar src={avatar} size="large">
                     {username.substr(0, 1).toUpperCase()}
@@ -193,7 +193,7 @@ export const MemberList = memo(() => {
         confirmLoading={inviteLoading}
         onSave={invite}
         onCancel={hideInviteForm}
-        maskClosable={false}
+        mask={{ closable: false }}
       />
     </Wrapper>
   );

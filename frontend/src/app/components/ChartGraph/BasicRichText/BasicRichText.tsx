@@ -153,8 +153,7 @@ class BasicRichText extends ReactChart {
   }
 
   getOnChange():
-    | { onChange?: (delta: string | undefined) => void }
-    | undefined {
+    { onChange?: (delta: string | undefined) => void } | undefined {
     return this.mouseEvents?.reduce(
       (acc, cur) => {
         if (cur.name === 'click') {

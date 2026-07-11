@@ -90,7 +90,7 @@ const CrossFilteringPanel: FC<
     };
 
     return (
-      <StyledCrossFilteringPanel direction="vertical">
+      <StyledCrossFilteringPanel orientation="vertical">
         <Form
           labelCol={{ offset: 2, span: 2 }}
           wrapperCol={{ span: 18 }}

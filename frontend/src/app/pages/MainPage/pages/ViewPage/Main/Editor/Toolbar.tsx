@@ -207,7 +207,7 @@ export const Toolbar = memo(
                   <Select
                     placeholder={t('source')}
                     value={sourceId}
-                    bordered={false}
+                    variant="borderless"
                     disabled={isArchived}
                     onChange={sourceChange}
                     className="source"

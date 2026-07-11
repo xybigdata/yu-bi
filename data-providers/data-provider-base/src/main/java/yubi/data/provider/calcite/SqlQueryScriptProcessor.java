@@ -92,9 +92,10 @@ public class SqlQueryScriptProcessor implements QueryScriptProcessor {
         }
         selectSql = ensurePadding(selectSql);
 
-        SqlBasicCall sqlBasicCall = new SqlBasicCall(SqlStdOperatorTable.AS
-                , new SqlNode[]{new SqlFragment("(" + selectSql + ")"), new SqlIdentifier(T, SqlParserPos.ZERO)}
-                , SqlParserPos.ZERO);
+        SqlBasicCall sqlBasicCall = new SqlBasicCall(
+                SqlStdOperatorTable.AS,
+                List.of(new SqlFragment("(" + selectSql + ")"), new SqlIdentifier(T, SqlParserPos.ZERO)),
+                SqlParserPos.ZERO);
         QueryScriptProcessResult result = new QueryScriptProcessResult();
         result.setFrom(sqlBasicCall);
         result.setTablePrefix(T);

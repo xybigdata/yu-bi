@@ -5,8 +5,7 @@ import { ToolbarButton } from '../ToolbarButton';
 
 type MenuClickInfo = Parameters<NonNullable<MenuProps['onClick']>>[0];
 type AddButtonCallback =
-  | (() => void | false)
-  | ((menuClickHandler: MenuClickInfo) => void | false);
+  (() => void | false) | ((menuClickHandler: MenuClickInfo) => void | false);
 
 interface AddButtonProps {
   dataSource: {

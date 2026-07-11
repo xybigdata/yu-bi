@@ -29,11 +29,11 @@ class JdbcDataProviderAdapterMetadataTest {
                 .withCatalogs(row("TABLE_CAT", "ignored_catalog"))
                 .withCatalog("current_catalog");
 
-        TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection());
-
-        assertEquals(Set.of("current_catalog"), adapter.readAllDatabases());
-        assertEquals(1, fixture.closeCount("catalogs"));
-        assertEquals(0, fixture.closeCount("schemas"));
+        try (TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection())) {
+            assertEquals(Set.of("current_catalog"), adapter.readAllDatabases());
+            assertEquals(1, fixture.closeCount("catalogs"));
+            assertEquals(0, fixture.closeCount("schemas"));
+        }
     }
 
     @Test
@@ -42,11 +42,11 @@ class JdbcDataProviderAdapterMetadataTest {
                 .withSchemas(row("TABLE_SCHEM", "public"), row("TABLE_SCHEM", "analytics"))
                 .withSchema(null);
 
-        TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection());
-
-        assertEquals(Set.of("public", "analytics"), adapter.readAllDatabases());
-        assertEquals(1, fixture.closeCount("catalogs"));
-        assertEquals(1, fixture.closeCount("schemas"));
+        try (TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection())) {
+            assertEquals(Set.of("public", "analytics"), adapter.readAllDatabases());
+            assertEquals(1, fixture.closeCount("catalogs"));
+            assertEquals(1, fixture.closeCount("schemas"));
+        }
     }
 
     @Test
@@ -56,13 +56,13 @@ class JdbcDataProviderAdapterMetadataTest {
                 .withSchema("public")
                 .withTables(row("TABLE_NAME", "orders"), row("TABLE_NAME", "order_view"));
 
-        TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection());
-
-        assertEquals(Set.of("orders", "order_view"), adapter.readAllTables("sales"));
-        assertEquals("sales", fixture.lastGetTablesArgs[0]);
-        assertEquals("public", fixture.lastGetTablesArgs[1]);
-        assertEquals("%", fixture.lastGetTablesArgs[2]);
-        assertArrayEquals(new String[]{"TABLE", "VIEW"}, (String[]) fixture.lastGetTablesArgs[3]);
+        try (TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection())) {
+            assertEquals(Set.of("orders", "order_view"), adapter.readAllTables("sales"));
+            assertEquals("sales", fixture.lastGetTablesArgs[0]);
+            assertEquals("public", fixture.lastGetTablesArgs[1]);
+            assertEquals("%", fixture.lastGetTablesArgs[2]);
+            assertArrayEquals(new String[]{"TABLE", "VIEW"}, (String[]) fixture.lastGetTablesArgs[3]);
+        }
     }
 
     @Test
@@ -70,11 +70,11 @@ class JdbcDataProviderAdapterMetadataTest {
         MetadataFixture fixture = new MetadataFixture()
                 .withTables(row("TABLE_NAME", "orders"));
 
-        TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection());
-
-        assertEquals(Set.of("orders"), adapter.readAllTables("analytics"));
-        assertNull(fixture.lastGetTablesArgs[0]);
-        assertEquals("analytics", fixture.lastGetTablesArgs[1]);
+        try (TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection())) {
+            assertEquals(Set.of("orders"), adapter.readAllTables("analytics"));
+            assertNull(fixture.lastGetTablesArgs[0]);
+            assertEquals("analytics", fixture.lastGetTablesArgs[1]);
+        }
     }
 
     @Test
@@ -94,29 +94,30 @@ class JdbcDataProviderAdapterMetadataTest {
                         row("COLUMN_NAME", "created_at", "DATA_TYPE", Types.TIMESTAMP)
                 );
 
-        TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection());
-        Set<Column> columns = adapter.readTableColumn("sales", "orders");
+        try (TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection())) {
+            Set<Column> columns = adapter.readTableColumn("sales", "orders");
 
-        Column idColumn = findColumn(columns, "id");
-        Column customerIdColumn = findColumn(columns, "customer_id");
-        Column createdAtColumn = findColumn(columns, "created_at");
+            Column idColumn = findColumn(columns, "id");
+            Column customerIdColumn = findColumn(columns, "customer_id");
+            Column createdAtColumn = findColumn(columns, "created_at");
 
-        assertEquals(ValueType.NUMERIC, idColumn.getType());
-        assertEquals(ValueType.NUMERIC, customerIdColumn.getType());
-        assertEquals(ValueType.DATE, createdAtColumn.getType());
-        assertNull(idColumn.getForeignKeys());
-        assertEquals(1, customerIdColumn.getForeignKeys().size());
+            assertEquals(ValueType.NUMERIC, idColumn.getType());
+            assertEquals(ValueType.NUMERIC, customerIdColumn.getType());
+            assertEquals(ValueType.DATE, createdAtColumn.getType());
+            assertNull(idColumn.getForeignKeys());
+            assertEquals(1, customerIdColumn.getForeignKeys().size());
 
-        ForeignKey foreignKey = customerIdColumn.getForeignKeys().get(0);
-        assertEquals("crm", foreignKey.getDatabase());
-        assertEquals("customers", foreignKey.getTable());
-        assertEquals("id", foreignKey.getColumn());
-        assertEquals("sales", fixture.lastGetColumnsArgs[0]);
-        assertEquals("public", fixture.lastGetColumnsArgs[1]);
-        assertEquals("orders", fixture.lastGetColumnsArgs[2]);
-        assertEquals("sales", fixture.lastGetImportedKeysArgs[0]);
-        assertEquals("public", fixture.lastGetImportedKeysArgs[1]);
-        assertEquals("orders", fixture.lastGetImportedKeysArgs[2]);
+            ForeignKey foreignKey = customerIdColumn.getForeignKeys().get(0);
+            assertEquals("crm", foreignKey.getDatabase());
+            assertEquals("customers", foreignKey.getTable());
+            assertEquals("id", foreignKey.getColumn());
+            assertEquals("sales", fixture.lastGetColumnsArgs[0]);
+            assertEquals("public", fixture.lastGetColumnsArgs[1]);
+            assertEquals("orders", fixture.lastGetColumnsArgs[2]);
+            assertEquals("sales", fixture.lastGetImportedKeysArgs[0]);
+            assertEquals("public", fixture.lastGetImportedKeysArgs[1]);
+            assertEquals("orders", fixture.lastGetImportedKeysArgs[2]);
+        }
     }
 
     @Test
@@ -124,17 +125,18 @@ class JdbcDataProviderAdapterMetadataTest {
         MetadataFixture fixture = new MetadataFixture()
                 .withColumns(row("COLUMN_NAME", "id", "DATA_TYPE", Types.BIGINT));
 
-        TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection());
-        Column idColumn = findColumn(adapter.readTableColumn("analytics", "orders"), "id");
+        try (TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection())) {
+            Column idColumn = findColumn(adapter.readTableColumn("analytics", "orders"), "id");
 
-        assertEquals(ValueType.NUMERIC, idColumn.getType());
-        assertNull(fixture.lastGetColumnsArgs[0]);
-        assertEquals("analytics", fixture.lastGetColumnsArgs[1]);
-        assertEquals("orders", fixture.lastGetColumnsArgs[2]);
-        assertNull(fixture.lastGetColumnsArgs[3]);
-        assertNull(fixture.lastGetImportedKeysArgs[0]);
-        assertEquals("analytics", fixture.lastGetImportedKeysArgs[1]);
-        assertEquals("orders", fixture.lastGetImportedKeysArgs[2]);
+            assertEquals(ValueType.NUMERIC, idColumn.getType());
+            assertNull(fixture.lastGetColumnsArgs[0]);
+            assertEquals("analytics", fixture.lastGetColumnsArgs[1]);
+            assertEquals("orders", fixture.lastGetColumnsArgs[2]);
+            assertNull(fixture.lastGetColumnsArgs[3]);
+            assertNull(fixture.lastGetImportedKeysArgs[0]);
+            assertEquals("analytics", fixture.lastGetImportedKeysArgs[1]);
+            assertEquals("orders", fixture.lastGetImportedKeysArgs[2]);
+        }
     }
 
     @Test
@@ -143,10 +145,10 @@ class JdbcDataProviderAdapterMetadataTest {
                 .withImportedKeysUnsupported()
                 .withColumns(row("COLUMN_NAME", "id", "DATA_TYPE", Types.BIGINT));
 
-        TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection());
-        Column idColumn = findColumn(adapter.readTableColumn("sales", "orders"), "id");
-
-        assertNull(idColumn.getForeignKeys());
+        try (TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection())) {
+            Column idColumn = findColumn(adapter.readTableColumn("sales", "orders"), "id");
+            assertNull(idColumn.getForeignKeys());
+        }
     }
 
     private static Column findColumn(Set<Column> columns, String name) {
@@ -191,27 +193,32 @@ class JdbcDataProviderAdapterMetadataTest {
         private Object[] lastGetImportedKeysArgs;
         private final Map<String, Integer> closeCounts = new java.util.HashMap<>();
 
-        private MetadataFixture withCatalogs(Map<String, Object>... rows) {
+        @SafeVarargs
+        private final MetadataFixture withCatalogs(Map<String, Object>... rows) {
             this.catalogs = List.of(rows);
             return this;
         }
 
-        private MetadataFixture withSchemas(Map<String, Object>... rows) {
+        @SafeVarargs
+        private final MetadataFixture withSchemas(Map<String, Object>... rows) {
             this.schemas = List.of(rows);
             return this;
         }
 
-        private MetadataFixture withTables(Map<String, Object>... rows) {
+        @SafeVarargs
+        private final MetadataFixture withTables(Map<String, Object>... rows) {
             this.tables = List.of(rows);
             return this;
         }
 
-        private MetadataFixture withColumns(Map<String, Object>... rows) {
+        @SafeVarargs
+        private final MetadataFixture withColumns(Map<String, Object>... rows) {
             this.columns = List.of(rows);
             return this;
         }
 
-        private MetadataFixture withImportedKeys(Map<String, Object>... rows) {
+        @SafeVarargs
+        private final MetadataFixture withImportedKeys(Map<String, Object>... rows) {
             this.importedKeys = List.of(rows);
             return this;
         }
@@ -306,9 +313,10 @@ class JdbcDataProviderAdapterMetadataTest {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     private static <T> T proxy(Class<T> type, InvocationHandler handler) {
-        return (T) Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}, handler);
+        return type.cast(
+                Proxy.newProxyInstance(type.getClassLoader(), new Class<?>[]{type}, handler)
+        );
     }
 
     private static Object defaultValue(Class<?> type) {

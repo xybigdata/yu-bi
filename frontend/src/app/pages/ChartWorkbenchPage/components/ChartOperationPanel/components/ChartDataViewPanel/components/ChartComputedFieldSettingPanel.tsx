@@ -215,7 +215,7 @@ const ChartComputedFieldSettingPanel: FC<{
   ];
 
   return (
-    <StyledChartComputedFieldSettingPanel direction="vertical">
+    <StyledChartComputedFieldSettingPanel orientation="vertical">
       <HeaderRow>
         <FormItemEx
           label={`${t('fieldName')}`}
@@ -255,7 +255,7 @@ const ChartComputedFieldSettingPanel: FC<{
             onChange={handleExpressionChange}
           />
         </EditorPanel>
-        <FunctionPanel direction="vertical">
+        <FunctionPanel orientation="vertical">
           <span>{`${t('functions')}`}</span>
           <Select
             value={selectedFunctionCategory}

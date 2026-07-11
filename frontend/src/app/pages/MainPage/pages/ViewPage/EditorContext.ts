@@ -30,8 +30,7 @@ import type * as Monaco from 'monaco-editor';
 interface EditorContextValue {
   editorInstance: Monaco.editor.IStandaloneCodeEditor | undefined;
   editorCompletionItemProviderRef:
-    | MutableRefObject<Monaco.IDisposable | undefined>
-    | undefined;
+    MutableRefObject<Monaco.IDisposable | undefined> | undefined;
   setEditor: (editor: Monaco.editor.IStandaloneCodeEditor | undefined) => void;
   onRun: () => void;
   onSave: () => void;

@@ -19,13 +19,10 @@
 
 package yubi.server.base.params;
 
-import yubi.core.base.consts.Const;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -38,9 +35,5 @@ public class RoleCreateParam extends BaseCreateParam {
 
     @NotBlank(message = "Invalid orgId")
     private String orgId;
-
-//    @NotNull
-//    @Pattern(regexp = Const.REG_ROLE_TYPE, message = "The role type must be ORG")
-//    private String roleType;
 
 }

@@ -83,7 +83,7 @@
                 <version>${javacc-maven-plugin.version}</version>
                 <executions>
                     <execution>
-                        <phase>generate-resources</phase>
+                        <phase>generate-sources</phase>
                         <id>javacc</id>
                         <goals>
                             <goal>javacc</goal>

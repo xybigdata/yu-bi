@@ -102,11 +102,9 @@ const slice = createSlice({
         entries.forEach(([key, value]) => {
           currentEditingView[key] = value;
         });
-        if (
-          !(
-            entries.length === 1 && ['fragment', 'size'].includes(entries[0][0])
-          )
-        ) {
+        if (!(
+          entries.length === 1 && ['fragment', 'size'].includes(entries[0][0])
+        )) {
           currentEditingView.touched = true;
           if (
             ['model', 'variables', 'columnPermissions'].includes(entries[0][0])

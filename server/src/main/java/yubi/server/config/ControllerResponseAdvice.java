@@ -2,7 +2,6 @@ package yubi.server.config;
 
 import yubi.core.common.RequestContext;
 import yubi.server.base.dto.ResponseData;
-import yubi.server.controller.BaseController;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -24,14 +23,14 @@ public class ControllerResponseAdvice implements ResponseBodyAdvice<Object> {
 
     @Override
     public Object beforeBodyWrite(Object o, MethodParameter methodParameter, MediaType mediaType, Class<? extends HttpMessageConverter<?>> aClass, ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse) {
-        if (o instanceof ResponseData) {
+        if (o instanceof ResponseData<?> responseData) {
             Map<String, Exception> warnings = RequestContext.getWarnings();
             if (warnings != null && warnings.size() > 0) {
                 LinkedList<String> msg = new LinkedList<>();
                 for (Exception value : warnings.values()) {
                     msg.add(value.toString());
                 }
-                ((ResponseData) o).setWarnings(msg);
+                responseData.setWarnings(msg);
             }
         }
         return o;

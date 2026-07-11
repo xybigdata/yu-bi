@@ -49,9 +49,7 @@ describe('runtimeHelpers', () => {
     expect(
       translateRichTextCalcFields(
         {
-          ops: [
-            { insert: { calcfield: { id: 'field-2', name: '订单数' } } },
-          ],
+          ops: [{ insert: { calcfield: { id: 'field-2', name: '订单数' } } }],
         } as DeltaStatic,
         [
           { id: 'field-1', name: '订单数', value: '128' },
@@ -91,8 +89,6 @@ describe('runtimeHelpers', () => {
   });
 
   test('should keep plain string value unchanged', () => {
-    expect(translateRichTextCalcFields('<p>demo</p>', [])).toBe(
-      '<p>demo</p>',
-    );
+    expect(translateRichTextCalcFields('<p>demo</p>', [])).toBe('<p>demo</p>');
   });
 });

@@ -135,7 +135,7 @@ const NumberFormatAction: FC<{
       return null;
     } else {
       return (
-        <Space direction="vertical">
+        <Space orientation="vertical">
           <FormItemEx {...formItemLayout} label={t('format.decimalPlace')}>
             <InputNumber
               min={0}
@@ -262,7 +262,7 @@ const NumberFormatAction: FC<{
           onChange={e => handleFormatTypeChanged(e.target.value)}
           value={type}
         >
-          <Space direction="vertical">
+          <Space orientation="vertical">
             <Radio value={FieldFormatType.Default}>{t('format.default')}</Radio>
             <Radio value={FieldFormatType.Numeric}>{t('format.numeric')}</Radio>
             <Radio value={FieldFormatType.Currency}>

@@ -414,6 +414,7 @@ public class ShareServiceImpl extends BaseService implements ShareService {
                 }
                 if (user == null) {
                     Exceptions.tr(BaseException.class, "message.user.not.exists");
+                    return;
                 }
                 // 验证用户是否具有访问权限
                 if (ShareRowPermissionBy.CREATOR.name().equals(share.getRowPermissionBy())) {
@@ -432,10 +433,12 @@ public class ShareServiceImpl extends BaseService implements ShareService {
                         || StringUtils.isBlank(shareToken.getUsername())
                         || StringUtils.isBlank(share.getRoles())) {
                     Exceptions.tr(BaseException.class, "message.share.permission.denied");
+                    return;
                 }
                 List<Role> roles = roleService.listUserRoles(share.getOrgId(), user.getId());
                 if (CollectionUtils.isEmpty(roles)) {
                     Exceptions.tr(BaseException.class, "message.share.permission.denied");
+                    return;
                 }
                 Set<String> roleIdList = roles.stream().map(BaseEntity::getId).collect(Collectors.toSet());
                 List<String> permittedRoles = readRoles(share.getRoles());

@@ -242,7 +242,7 @@ export const Resource = memo(() => {
               prefix={<SearchOutlined className="icon" />}
               placeholder={t('search')}
               className="input"
-              bordered={false}
+              variant="borderless"
               onChange={debouncedSearch}
             />
             <Dropdown

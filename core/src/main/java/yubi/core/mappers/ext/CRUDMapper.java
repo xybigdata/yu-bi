@@ -73,7 +73,7 @@ public interface CRUDMapper extends BaseMapper {
         }
         SQL sql = new SQL();
         StringJoiner stringJoiner = new StringJoiner(",", "(", ")");
-        for (String id : ids) {
+        for (int i = 0; i < ids.size(); i++) {
             stringJoiner.add("?");
         }
         sql.DELETE_FROM(format(c.getSimpleName()))

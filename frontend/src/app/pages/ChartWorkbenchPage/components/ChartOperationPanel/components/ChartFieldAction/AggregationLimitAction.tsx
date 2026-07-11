@@ -86,7 +86,7 @@ const AggregationLimitAction: FC<{
 
     return (
       <Radio.Group onChange={e => onChange(e.target?.value)} value={aggregate}>
-        <Space direction="vertical">
+        <Space orientation="vertical">
           {AggregateFieldSubAggregateType[
             ChartDataSectionFieldActionType.AggregateLimit
           ]?.map(agg => {

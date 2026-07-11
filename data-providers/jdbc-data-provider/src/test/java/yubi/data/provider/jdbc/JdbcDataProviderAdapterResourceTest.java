@@ -28,27 +28,27 @@ class JdbcDataProviderAdapterResourceTest {
     @Test
     void shouldClosePreparedStatementAndResultSetWhenExecutingCountSql() throws Exception {
         ResourceFixture fixture = new ResourceFixture();
-        TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection());
-
-        assertEquals(42, adapter.executeCountSql("SELECT * FROM orders"));
-        assertEquals(1, fixture.closeCount("connection"));
-        assertEquals(1, fixture.closeCount("preparedStatement"));
-        assertEquals(1, fixture.closeCount("resultSet"));
-        assertEquals("SELECT COUNT(*) FROM (SELECT * FROM orders) V_T", fixture.lastPreparedSql);
+        try (TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection())) {
+            assertEquals(42, adapter.executeCountSql("SELECT * FROM orders"));
+            assertEquals(1, fixture.closeCount("connection"));
+            assertEquals(1, fixture.closeCount("preparedStatement"));
+            assertEquals(1, fixture.closeCount("resultSet"));
+            assertEquals("SELECT COUNT(*) FROM (SELECT * FROM orders) V_T", fixture.lastPreparedSql);
+        }
     }
 
     @Test
     void shouldCloseStatementAndResultSetWhenExecutingMsSqlCountSql() throws Exception {
         ResourceFixture fixture = new ResourceFixture();
-        TestMsSqlDataProviderAdapter adapter = new TestMsSqlDataProviderAdapter(fixture.connection());
-
-        assertEquals(42, adapter.executeCountSql("SELECT * FROM orders"));
-        assertEquals(1, fixture.closeCount("connection"));
-        assertEquals(1, fixture.closeCount("statement"));
-        assertEquals(1, fixture.closeCount("resultSet"));
-        assertEquals("SELECT * FROM orders", fixture.lastExecutedSql);
-        assertEquals(ResultSet.TYPE_SCROLL_INSENSITIVE, fixture.lastResultSetType);
-        assertEquals(ResultSet.CONCUR_READ_ONLY, fixture.lastResultSetConcurrency);
+        try (TestMsSqlDataProviderAdapter adapter = new TestMsSqlDataProviderAdapter(fixture.connection())) {
+            assertEquals(42, adapter.executeCountSql("SELECT * FROM orders"));
+            assertEquals(1, fixture.closeCount("connection"));
+            assertEquals(1, fixture.closeCount("statement"));
+            assertEquals(1, fixture.closeCount("resultSet"));
+            assertEquals("SELECT * FROM orders", fixture.lastExecutedSql);
+            assertEquals(ResultSet.TYPE_SCROLL_INSENSITIVE, fixture.lastResultSetType);
+            assertEquals(ResultSet.CONCUR_READ_ONLY, fixture.lastResultSetConcurrency);
+        }
     }
 
     @Test
@@ -57,11 +57,11 @@ class JdbcDataProviderAdapterResourceTest {
         TestDriver driver = new TestDriver(fixture.connection());
         DriverManager.registerDriver(driver);
         try {
-            TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection());
-
-            assertTrue(adapter.test(jdbcProperties()));
-            assertEquals(1, fixture.closeCount("connection"));
-            assertEquals(TEST_DRIVER_URL, driver.lastUrl);
+            try (TestJdbcDataProviderAdapter adapter = new TestJdbcDataProviderAdapter(fixture.connection())) {
+                assertTrue(adapter.test(jdbcProperties()));
+                assertEquals(1, fixture.closeCount("connection"));
+                assertEquals(TEST_DRIVER_URL, driver.lastUrl);
+            }
         } finally {
             DriverManager.deregisterDriver(driver);
         }

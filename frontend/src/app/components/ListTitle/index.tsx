@@ -151,7 +151,7 @@ export function ListTitle({
           className="search-input"
           prefix={<SearchOutlined className="icon" />}
           placeholder={t('searchValue')}
-          bordered={false}
+          variant="borderless"
           onChange={onSearch}
         />
       </Searchbar>

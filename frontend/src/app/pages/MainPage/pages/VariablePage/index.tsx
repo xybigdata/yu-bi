@@ -272,7 +272,7 @@ export function VariablePage() {
         }
       }
     },
-    [rowPermissions, editingVariable, tg, variables],
+    [rowPermissions, tg, variables],
   );
 
   const columns: TableColumnProps<VariableViewModel>[] = useMemo(
@@ -387,7 +387,7 @@ export function VariablePage() {
           onCancel={hideForm}
           afterClose={afterFormClose}
           keyboard={false}
-          maskClosable={false}
+          mask={{ closable: false }}
         />
         <SubjectForm
           scope={VariableScopes.Public}
@@ -400,7 +400,7 @@ export function VariablePage() {
           onCancel={hideSubjectForm}
           afterClose={afterFormClose}
           keyboard={false}
-          maskClosable={false}
+          mask={{ closable: false }}
         />
       </Card>
     </Wrapper>

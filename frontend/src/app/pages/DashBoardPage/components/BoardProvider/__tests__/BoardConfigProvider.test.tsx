@@ -17,10 +17,14 @@ describe('BoardConfigProvider', () => {
     const config = initAutoBoardConfig();
     const mSpace = config.jsonConfig.props.find(item => item.key === 'mSpace');
 
-    mSpace?.rows?.find(row => row.key === 'paddingTB') && (mSpace.rows.find(row => row.key === 'paddingTB')!.value = 101);
-    mSpace?.rows?.find(row => row.key === 'paddingLR') && (mSpace.rows.find(row => row.key === 'paddingLR')!.value = 102);
-    mSpace?.rows?.find(row => row.key === 'marginTB') && (mSpace.rows.find(row => row.key === 'marginTB')!.value = 103);
-    mSpace?.rows?.find(row => row.key === 'marginLR') && (mSpace.rows.find(row => row.key === 'marginLR')!.value = 104);
+    mSpace?.rows?.find(row => row.key === 'paddingTB') &&
+      (mSpace.rows.find(row => row.key === 'paddingTB')!.value = 101);
+    mSpace?.rows?.find(row => row.key === 'paddingLR') &&
+      (mSpace.rows.find(row => row.key === 'paddingLR')!.value = 102);
+    mSpace?.rows?.find(row => row.key === 'marginTB') &&
+      (mSpace.rows.find(row => row.key === 'marginTB')!.value = 103);
+    mSpace?.rows?.find(row => row.key === 'marginLR') &&
+      (mSpace.rows.find(row => row.key === 'marginLR')!.value = 104);
 
     const { getByTestId } = render(
       <BoardConfigProvider config={config} boardId="board-1">
@@ -28,10 +32,11 @@ describe('BoardConfigProvider', () => {
       </BoardConfigProvider>,
     );
 
-    expect(JSON.parse(getByTestId('board-config-value').textContent || '{}'))
-      .toMatchObject({
-        mPadding: [102, 101],
-        mMargin: [104, 103],
-      });
+    expect(
+      JSON.parse(getByTestId('board-config-value').textContent || '{}'),
+    ).toMatchObject({
+      mPadding: [102, 101],
+      mMargin: [104, 103],
+    });
   });
 });

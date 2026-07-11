@@ -18,19 +18,16 @@
  */
 package yubi.core.common;
 
-import yubi.core.base.consts.ValueType;
 import yubi.core.base.exception.Exceptions;
 import lombok.Data;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,14 +37,9 @@ public class CSVParse {
 
     private String path;
 
-    private ValueType[] types;
-
-    private SimpleDateFormat simpleDateFormat;
-
     public static CSVParse create(String path, ParseConfig parseConfig) {
         CSVParse csvParse = new CSVParse();
         csvParse.path = path;
-        csvParse.simpleDateFormat = new SimpleDateFormat(parseConfig.getDateFormat());
         return csvParse;
     }
 
@@ -66,11 +58,6 @@ public class CSVParse {
         if (CollectionUtils.isEmpty(records)) {
             return Collections.emptyList();
         }
-        if (records.size() < 2) {
-            types = inferDataType(records.get(0));
-        } else {
-            types = inferDataType(records.get(1));
-        }
         List<List<Object>> values = records.parallelStream().map(this::extractValues)
                 .collect(Collectors.toList());
         // remove utf-8-with-bom char
@@ -79,24 +66,6 @@ public class CSVParse {
             values.get(0).set(0, start.substring(1));
         }
         return values;
-    }
-
-    private ValueType[] inferDataType(CSVRecord record) {
-        ValueType[] valueTypes = new ValueType[record.size()];
-        for (int i = 0; i < record.size(); i++) {
-            if (NumberUtils.isNumber(record.get(i))) {
-                valueTypes[i] = ValueType.NUMERIC;
-                continue;
-            }
-            try {
-                simpleDateFormat.parse(record.get(i));
-                valueTypes[i] = ValueType.DATE;
-                continue;
-            } catch (Exception ignore) {
-            }
-            valueTypes[i] = ValueType.STRING;
-        }
-        return valueTypes;
     }
 
     private List<Object> extractValues(CSVRecord record) {

@@ -9,6 +9,7 @@ export { GroupLayout, ItemLayout } from './FormGenerator';
 export { IW } from './IconWrapper';
 export { InlineRow, InlineRowAction, InlineRowText } from './InlineRow';
 export { ListItem } from './ListItem';
+export { PlainList } from './PlainList';
 export { ListNav, ListPane } from './ListNav';
 export { ListSwitch } from './ListSwitch';
 export {

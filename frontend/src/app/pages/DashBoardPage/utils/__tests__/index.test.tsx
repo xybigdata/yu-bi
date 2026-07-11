@@ -2090,7 +2090,7 @@ describe('getBoardChartRequests', () => {
         vizName: undefined,
         vizId: '2421674d25f740809433ace249506624',
         analytics: false,
-        vizType: 'dataChart',
+        vizType: 'DATACHART',
       },
       {
         viewId: '3ca2a12f09c84c8ca1a5714fc6fa44d8',
@@ -2126,7 +2126,7 @@ describe('getBoardChartRequests', () => {
         vizName: '私有图表_1',
         vizId: 'a8c7191e276d41cba67743041c650ee3',
         analytics: false,
-        vizType: 'widget',
+        vizType: 'WIDGET',
       },
     ];
     expect(getBoardChartRequests(asLegacyBoardChartRequestsArgs(obj))).toEqual(

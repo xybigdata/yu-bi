@@ -2,9 +2,11 @@ package yubi.core.entity.poi.format;
 
 import yubi.core.base.consts.Currency;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class CurrencyFormat extends PoiNumFormat {
 
     public static final String type = "currency";

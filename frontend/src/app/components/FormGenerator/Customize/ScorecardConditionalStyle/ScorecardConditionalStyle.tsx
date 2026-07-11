@@ -185,7 +185,7 @@ const ScorecardConditionalStyle: FC<
     };
 
     return (
-      <StyledScorecardConditionalStylePanel direction="vertical">
+      <StyledScorecardConditionalStylePanel orientation="vertical">
         <Button type="primary" onClick={openConditionalStyle}>
           {t('conditionalStyleTable.btn.add')}
         </Button>

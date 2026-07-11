@@ -24,16 +24,7 @@ import { FilterSqlOperator, RECOMMEND_TIME } from 'globalConstants';
 import { ManipulateType, OpUnitType, QUnitType } from 'dayjs';
 
 type LegacyManipulateUnit =
-  | ManipulateType
-  | QUnitType
-  | 'W'
-  | 'Q'
-  | 'M'
-  | 'y'
-  | 'd'
-  | 'h'
-  | 'm'
-  | 's';
+  ManipulateType | QUnitType | 'W' | 'Q' | 'M' | 'y' | 'd' | 'h' | 'm' | 's';
 
 type LegacyOpUnit = OpUnitType | QUnitType | 'W' | 'Q';
 

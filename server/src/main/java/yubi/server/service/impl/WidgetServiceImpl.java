@@ -31,7 +31,6 @@ import yubi.server.base.params.WidgetCreateParam;
 import yubi.server.base.params.WidgetRelParam;
 import yubi.server.base.params.WidgetUpdateParam;
 import yubi.server.service.BaseService;
-import yubi.server.service.FileService;
 import yubi.server.service.WidgetService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -56,16 +55,12 @@ public class WidgetServiceImpl extends BaseService implements WidgetService {
 
     private final RelWidgetWidgetMapperExt rwwMapper;
 
-    private final FileService fileService;
-
     public WidgetServiceImpl(WidgetMapperExt widgetMapper,
                              RelWidgetElementMapperExt rweMapper,
-                             RelWidgetWidgetMapperExt rwwMapper,
-                             FileService fileService) {
+                             RelWidgetWidgetMapperExt rwwMapper) {
         this.widgetMapper = widgetMapper;
         this.rweMapper = rweMapper;
         this.rwwMapper = rwwMapper;
-        this.fileService = fileService;
     }
 
     @Override
@@ -162,9 +157,6 @@ public class WidgetServiceImpl extends BaseService implements WidgetService {
         if (CollectionUtils.isEmpty(widgetIds)) {
             return false;
         }
-//        for (String id : widgetIds) {
-//            fileService.deleteFiles(FileOwner.WIDGET, id);
-//        }
         return widgetMapper.deleteWidgets(widgetIds) > 0;
     }
 

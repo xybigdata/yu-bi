@@ -307,6 +307,7 @@ public class FolderServiceImpl extends BaseService implements FolderService {
         Folder folder = retrieve(updateParam.getId());
         if (folder == null) {
             Exceptions.notFound("resource.folder");
+            return false;
         }
         requirePermission(folder, Const.MANAGE);
         // check name
@@ -351,6 +352,8 @@ public class FolderServiceImpl extends BaseService implements FolderService {
                 storyboard.setId(folder.getRelId());
                 storyboard.setName(folder.getName());
                 storyboardMapper.updateByPrimaryKeySelective(storyboard);
+                break;
+            case SOURCE, VIEW, WIDGET, FOLDER, VIZ, SCHEDULE, ROLE, USER:
                 break;
         }
         return true;

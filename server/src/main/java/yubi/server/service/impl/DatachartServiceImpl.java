@@ -31,7 +31,6 @@ import yubi.core.entity.Variable;
 import yubi.core.entity.View;
 import yubi.core.mappers.ext.DatachartMapperExt;
 import yubi.core.mappers.ext.FolderMapperExt;
-import yubi.core.mappers.ext.RelRoleResourceMapperExt;
 import yubi.security.base.ResourceType;
 import yubi.security.util.PermissionHelper;
 import yubi.server.base.dto.DatachartDetail;
@@ -59,31 +58,23 @@ public class DatachartServiceImpl extends BaseService implements DatachartServic
 
     private final FolderMapperExt folderMapper;
 
-    private final RelRoleResourceMapperExt rrrMapper;
-
     private final FolderService folderService;
 
     private final DatachartMapperExt datachartMapper;
-
-    private final ViewService viewService;
 
     private final VariableService variableService;
 
     public DatachartServiceImpl(RoleService roleService,
                                 FileService fileService,
                                 FolderMapperExt folderMapper,
-                                RelRoleResourceMapperExt rrrMapper,
                                 FolderService folderService,
                                 DatachartMapperExt datachartMapper,
-                                ViewService viewService,
                                 VariableService variableService) {
         this.roleService = roleService;
         this.fileService = fileService;
         this.folderMapper = folderMapper;
-        this.rrrMapper = rrrMapper;
         this.folderService = folderService;
         this.datachartMapper = datachartMapper;
-        this.viewService = viewService;
         this.variableService = variableService;
     }
 

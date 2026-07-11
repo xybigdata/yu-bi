@@ -417,8 +417,8 @@ public class SourceServiceImpl extends BaseService implements SourceService {
                 if (attribute.isEncrypt()
                         && jsonObject.has(attribute.getName())
                         && !jsonObject.path(attribute.getName()).isNull()
-                        && StringUtils.isNotBlank(jsonObject.path(attribute.getName()).asText())) {
-                    String val = jsonObject.path(attribute.getName()).asText();
+                        && StringUtils.isNotBlank(jsonObject.path(attribute.getName()).asString())) {
+                    String val = jsonObject.path(attribute.getName()).asString();
                     if (val.startsWith(Const.ENCRYPT_FLAG)) {
                         jsonObject.put(attribute.getName(), val);
                     } else {
@@ -481,6 +481,7 @@ public class SourceServiceImpl extends BaseService implements SourceService {
                 Object interval = dataProviderSource.getProperties().get(SYNC_INTERVAL);
                 if (interval == null || !NumberUtils.isDigits(interval.toString())) {
                     Exceptions.msg("sync interval must be a number");
+                    return;
                 }
                 int intervalMin = Math.max(Integer.parseInt(interval.toString()), Const.MINIMUM_SYNC_INTERVAL);
 

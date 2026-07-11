@@ -20,7 +20,6 @@
 package yubi.server.config.interceptor;
 
 import yubi.core.common.Application;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import jakarta.servlet.http.HttpServletRequest;

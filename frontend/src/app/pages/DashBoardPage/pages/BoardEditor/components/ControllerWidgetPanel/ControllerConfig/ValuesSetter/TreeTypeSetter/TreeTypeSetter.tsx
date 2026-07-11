@@ -27,9 +27,10 @@ export interface TreeTypeSetterProps {
   form: FormInstance<ControllerWidgetContent> | undefined;
 }
 
+const EMPTY_CONTROLLER_VALUES: ControllerValues = [];
+
 function TreeTypeSetter({ form }: TreeTypeSetterProps) {
   const t = useI18NPrefix('viz.control');
-  const EMPTY_CONTROLLER_VALUES: ControllerValues = [];
 
   const getControllerConfig = useCallback(() => {
     return form?.getFieldValue('config') as ControllerConfig;
@@ -45,7 +46,7 @@ function TreeTypeSetter({ form }: TreeTypeSetterProps) {
         assistViewFields: [],
       },
     });
-  }, [EMPTY_CONTROLLER_VALUES, form, getControllerConfig]);
+  }, [form, getControllerConfig]);
 
   return (
     <Form.Item

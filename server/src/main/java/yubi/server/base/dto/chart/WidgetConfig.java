@@ -13,7 +13,7 @@ public class WidgetConfig {
         if (content != null && content.has("dataChart")){
             JsonNode configNode = content.path("dataChart").path("config");
             if (!configNode.isMissingNode() && !configNode.isNull()){
-                return configNode.asText("");
+                return configNode.asString("");
             }
         }
         return "";

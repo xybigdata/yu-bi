@@ -36,6 +36,7 @@ public class ReflectUtils {
         return field;
     }
 
+    @SuppressWarnings("unchecked") // Field values are dynamically typed by the reflected member.
     public static <T> T getFieldValue(Object o, String name) {
         boolean isClass = o instanceof Class;
         Field field;

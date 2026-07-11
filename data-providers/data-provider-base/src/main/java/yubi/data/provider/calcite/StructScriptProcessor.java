@@ -55,10 +55,13 @@ public class StructScriptProcessor implements QueryScriptProcessor {
                     if (!joinCondition.isValid()) {
                         continue;
                     }
-                    SqlBasicCall condition = new SqlBasicCall(SqlStdOperatorTable.EQUALS
-                            , new SqlNode[]{SqlNodeUtils.createSqlIdentifier(joinCondition.getLeft())
-                            , SqlNodeUtils.createSqlIdentifier(joinCondition.getRight())}
-                            , SqlParserPos.ZERO);
+                    SqlBasicCall condition = new SqlBasicCall(
+                            SqlStdOperatorTable.EQUALS,
+                            Arrays.asList(
+                                    SqlNodeUtils.createSqlIdentifier(joinCondition.getLeft()),
+                                    SqlNodeUtils.createSqlIdentifier(joinCondition.getRight())
+                            ),
+                            SqlParserPos.ZERO);
                     if (conditionNode == null) {
                         conditionNode = condition;
                     } else {

@@ -78,9 +78,13 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
   const dispatch = useAppDispatch();
 
   const { onEditClearActiveWidgets } = useContext(WidgetActionContext);
-  const widgetContent = (widget.config.content || {
-    type: 'richText',
-  }) as RichTextWidgetRuntimeContent;
+  const widgetContent = useMemo(
+    () =>
+      (widget.config.content || {
+        type: 'richText',
+      }) as RichTextWidgetRuntimeContent,
+    [widget.config.content],
+  );
   const initContent = useMemo(() => {
     return normalizeRichTextValue(widgetContent?.richText?.content);
   }, [widgetContent]);
@@ -219,7 +223,7 @@ export const RichTextWidgetCore: React.FC<RichTextWidgetProps> = ({
       <Modal
         width={992}
         closable={false}
-        maskClosable={false}
+        mask={{ closable: false }}
         keyboard={false}
         open={widgetInfo.editing}
         onOk={modalOk}

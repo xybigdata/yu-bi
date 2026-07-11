@@ -38,14 +38,13 @@ public class SerializerUtils {
         }
     }
 
+    @SuppressWarnings("unchecked") // Deserialization cannot retain T after type erasure.
     public static <T> T deserializeFile(String path, boolean gzipped) throws IOException, ClassNotFoundException {
-        ObjectInputStream inputStream;
-        if (gzipped) {
-            inputStream = new ObjectInputStream(new GZIPInputStream(new FileInputStream(path)));
-        } else {
-            inputStream = new ObjectInputStream(new FileInputStream(path));
+        try (ObjectInputStream inputStream = gzipped
+                ? new ObjectInputStream(new GZIPInputStream(new FileInputStream(path)))
+                : new ObjectInputStream(new FileInputStream(path))) {
+            return (T) inputStream.readObject();
         }
-        return (T) inputStream.readObject();
     }
 
 }

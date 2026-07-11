@@ -18,8 +18,8 @@
  */
 
 import { LoadingOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Col, Input, List, Row } from 'antd';
-import { ListItem, Popup, Tree } from 'app/components';
+import { Button, Col, Input, List as AntList, Row } from 'antd';
+import { ListItem, PlainList, Popup, Tree } from 'app/components';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import classnames from 'classnames';
@@ -173,7 +173,7 @@ export const ColumnPermissions = memo(() => {
             </Popup>,
           ]}
         >
-          <List.Item.Meta title={name} />
+          <AntList.Item.Meta title={name} />
         </ListItem>
       );
     },
@@ -188,13 +188,13 @@ export const ColumnPermissions = memo(() => {
             prefix={<SearchOutlined className="icon" />}
             placeholder={t('search')}
             className="input"
-            bordered={false}
+            variant="borderless"
             onChange={debouncedSearch}
           />
         </Col>
       </SearchBar>
       <ListWrapper>
-        <List
+        <PlainList
           dataSource={filteredData}
           loading={
             stage === ViewViewModelStages.Loading && {

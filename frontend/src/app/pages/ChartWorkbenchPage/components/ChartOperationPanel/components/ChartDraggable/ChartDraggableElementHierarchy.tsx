@@ -69,7 +69,7 @@ const ChartDraggableElementHierarchy: FC<{
     return (
       <div key={columnConfig.uid}>
         <StyledGroupName>{columnConfig.colName}</StyledGroupName>
-        <Space direction="vertical" size="small">
+        <Space orientation="vertical" size="small">
           {renderChildren()}
         </Space>
       </div>

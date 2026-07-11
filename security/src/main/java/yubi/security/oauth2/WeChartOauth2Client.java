@@ -19,7 +19,6 @@
 
 package yubi.security.oauth2;
 
-import com.aliyun.teaopenapi.models.Config;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
@@ -108,7 +107,7 @@ public class WeChartOauth2Client implements CustomOauth2Client {
             String code = request.getParameter("code");
             String state = request.getParameter("state");
             try {
-                String decrypt = AESUtil.decrypt(state);
+                AESUtil.decrypt(state);
             } catch (Exception e) {
                 Exceptions.msg("Failed to verify the state parameter");
             }
@@ -146,13 +145,6 @@ public class WeChartOauth2Client implements CustomOauth2Client {
         return provider;
     }
 
-    private com.aliyun.dingtalkoauth2_1_0.Client authClient() throws Exception {
-        Config config = new Config();
-        config.protocol = "https";
-        config.regionId = "central";
-        return new com.aliyun.dingtalkoauth2_1_0.Client(config);
-    }
-
     private String getAccessToken(String code) throws Exception {
         URIBuilder uriBuilder = new URIBuilder(tokenUri);
         uriBuilder.addParameter("grant_type", "authorization_code");
@@ -163,7 +155,7 @@ public class WeChartOauth2Client implements CustomOauth2Client {
         HttpClientResponseHandler<String> responseHandler = response -> {
             String entity = EntityUtils.toString(response.getEntity());
             JsonNode jsonNode = OBJECT_MAPPER.readTree(entity);
-            return jsonNode.path("access_token").asText(null);
+            return jsonNode.path("access_token").asString(null);
         };
         return httpClient.execute(httpRequest, responseHandler);
     }

@@ -1,4 +1,8 @@
-import type { AxiosAdapter, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import type {
+  AxiosAdapter,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from 'axios';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { getToken, setToken } from '../auth';
 import { instance, request2, requestWithHeader } from '../request';
@@ -6,7 +10,9 @@ import { instance, request2, requestWithHeader } from '../request';
 const originalAdapter = instance.defaults.adapter;
 
 function createAdapter(
-  handler: (config: InternalAxiosRequestConfig) => AxiosResponse | Promise<AxiosResponse>,
+  handler: (
+    config: InternalAxiosRequestConfig,
+  ) => AxiosResponse | Promise<AxiosResponse>,
 ): AxiosAdapter {
   return async config => handler(config as InternalAxiosRequestConfig);
 }

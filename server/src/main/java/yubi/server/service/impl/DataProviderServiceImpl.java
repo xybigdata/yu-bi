@@ -20,6 +20,7 @@
 package yubi.server.service.impl;
 
 import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -150,7 +151,9 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
             providerSource.setName(source.getName());
             Map<String, Object> properties = new HashMap<>(16);
             if (StringUtils.isNotBlank(source.getConfig())) {
-                properties = objectMapper.readValue(source.getConfig(), HashMap.class);
+                properties = objectMapper.readValue(
+                        source.getConfig(), new TypeReference<Map<String, Object>>() {
+                        });
             }
             // decrypt values
             for (String key : properties.keySet()) {
@@ -423,7 +426,8 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
             Set<SelectColumn> columns = new HashSet<>();
             List<RelSubjectColumns> relSubjectColumns = rscMapper.listByUser(view.getId(), getCurrentUser().getId());
             for (RelSubjectColumns relSubjectColumn : relSubjectColumns) {
-                List<String> cols = (List<String>) objectMapper.readValue(relSubjectColumn.getColumnPermission(), ArrayList.class);
+                List<String> cols = objectMapper.readerForListOf(String.class)
+                        .readValue(relSubjectColumn.getColumnPermission());
                 if (!CollectionUtils.isEmpty(cols)) {
                     for (String col : cols) {
                         if (StringUtils.isNotBlank(col)) {
@@ -460,7 +464,7 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
                     String key = entry.getKey();
                     JsonNode item = entry.getValue();
                     String[] names = parseColumnNames(item, key);
-                    Column column = Column.of(ValueType.valueOf(item.path("type").asText()), names);
+                    Column column = Column.of(ValueType.valueOf(item.path("type").asString()), names);
                     schema.put(column.columnKey(), column);
                 }
             } else if (root.has("hierarchy") && root.get("hierarchy").isObject()) {
@@ -473,11 +477,11 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
                     JsonNode children = item.get("children");
                     if (children != null && children.isArray() && children.size() > 0) {
                         for (JsonNode child : children) {
-                            String name = child.path("name").asText();
-                            schema.put(name, Column.of(ValueType.valueOf(child.path("type").asText()), name.split("\\.")));
+                            String name = child.path("name").asString();
+                            schema.put(name, Column.of(ValueType.valueOf(child.path("type").asString()), name.split("\\.")));
                         }
                     } else {
-                        schema.put(key, Column.of(ValueType.valueOf(item.path("type").asText()), key.split("\\.")));
+                        schema.put(key, Column.of(ValueType.valueOf(item.path("type").asString()), key.split("\\.")));
                     }
                 }
             } else {
@@ -486,7 +490,7 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
                 while (iterator.hasNext()) {
                     Map.Entry<String, JsonNode> entry = iterator.next();
                     String key = entry.getKey();
-                    ValueType type = ValueType.valueOf(entry.getValue().path("type").asText());
+                    ValueType type = ValueType.valueOf(entry.getValue().path("type").asString());
                     schema.put(key, Column.of(type, key));
                 }
             }
@@ -502,8 +506,8 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
             return new String[]{fallbackName};
         }
         if (nameNode.isArray()) {
-            if (nameNode.size() == 1 && nameNode.get(0).isTextual()) {
-                String nameString = nameNode.get(0).asText();
+            if (nameNode.size() == 1 && nameNode.get(0).isString()) {
+                String nameString = nameNode.get(0).asString();
                 try {
                     JsonNode nestedArray = objectMapper.readTree(nameString);
                     if (nestedArray.isArray()) {
@@ -516,7 +520,7 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
             }
             return objectMapper.convertValue(nameNode, String[].class);
         }
-        return new String[]{nameNode.asText(fallbackName)};
+        return new String[]{nameNode.asString(fallbackName)};
     }
 
 }

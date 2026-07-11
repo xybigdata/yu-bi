@@ -25,8 +25,8 @@ import {
   SearchOutlined,
   TeamOutlined,
 } from '@ant-design/icons';
-import { Button, List, Popconfirm } from 'antd';
-import { ListItem } from 'app/components';
+import { Button, List as AntList, Popconfirm } from 'antd';
+import { ListItem, PlainList } from 'app/components';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { getRoles } from 'app/pages/MainPage/pages/MemberPage/slice/thunks';
@@ -318,7 +318,7 @@ export const Variables = memo(() => {
   return (
     <Container {...titleProps}>
       <ListWrapper>
-        <List
+        <PlainList
           dataSource={filteredData}
           loading={
             stage === ViewViewModelStages.Loading && {
@@ -363,7 +363,7 @@ export const Variables = memo(() => {
             }
             return (
               <ListItem actions={actions}>
-                <List.Item.Meta
+                <AntList.Item.Meta
                   avatar={
                     item.type === VariableTypes.Query ? (
                       <SearchOutlined className="query" />
@@ -390,7 +390,7 @@ export const Variables = memo(() => {
         onCancel={hideForm}
         afterClose={afterFormClose}
         keyboard={false}
-        maskClosable={false}
+        mask={{ closable: false }}
       />
       <SubjectForm
         scope={VariableScopes.Private}
@@ -401,7 +401,7 @@ export const Variables = memo(() => {
         onCancel={hideSubjectForm}
         afterClose={afterFormClose}
         keyboard={false}
-        maskClosable={false}
+        mask={{ closable: false }}
       />
     </Container>
   );

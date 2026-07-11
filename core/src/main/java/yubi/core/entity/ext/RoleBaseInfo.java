@@ -23,8 +23,6 @@ import yubi.core.entity.Role;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
-import java.util.Date;
-
 @Data
 public class RoleBaseInfo {
 

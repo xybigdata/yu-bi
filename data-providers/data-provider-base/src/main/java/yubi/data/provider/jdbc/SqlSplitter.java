@@ -68,24 +68,24 @@ public class SqlSplitter {
             int nextChar = cursor + 1;
             if (c == '\'') {
                 nextChar = consumeInQuotes(string, '\'', cursor, builder);
-                tokens.add(new Token(TokenType.SINGLE_QUOTED, builder.toString(), cursor));
+                tokens.add(new Token(TokenType.SINGLE_QUOTED, cursor));
             } else if (c == '"') {
                 nextChar = consumeInQuotes(string, '"', cursor, builder);
-                tokens.add(new Token(TokenType.DOUBLE_QUOTED, builder.toString(), cursor));
+                tokens.add(new Token(TokenType.DOUBLE_QUOTED, cursor));
             } else if (c == '`') {
                 nextChar = consumeInQuotes(string, '`', cursor, builder);
-                tokens.add(new Token(TokenType.BACK_QUOTED, builder.toString(), cursor));
+                tokens.add(new Token(TokenType.BACK_QUOTED, cursor));
             } else if (c == delimiter) {
-                tokens.add(new Token(TokenType.DELIMITER, String.valueOf(c), cursor));
+                tokens.add(new Token(TokenType.DELIMITER, cursor));
             } else if (singleLineComment(c, nextChar, string)) {
                 nextChar = consumeSingleLineComment(string, nextChar, builder);
-                tokens.add(new Token(TokenType.COMMENT, builder.toString(), cursor));
+                tokens.add(new Token(TokenType.COMMENT, cursor));
             } else if (multiLineComment(c, nextChar, string)) {
                 nextChar = consumeMultiLineComment(string, nextChar, builder);
-                tokens.add(new Token(TokenType.COMMENT, builder.toString(), cursor));
+                tokens.add(new Token(TokenType.COMMENT, cursor));
             } else if (!Character.isWhitespace(c)) {
                 nextChar = consumeUnquoted(string, delimiter, cursor, builder);
-                tokens.add(new Token(TokenType.UNQUOTED, builder.toString(), cursor));
+                tokens.add(new Token(TokenType.UNQUOTED, cursor));
             }
             builder.setLength(0);
             cursor = nextChar;
@@ -182,21 +182,15 @@ public class SqlSplitter {
 
     private static class Token {
         private final TokenType tokenType;
-        private final String string;
         private final int position;
 
-        private Token(TokenType tokenType, String string, int position) {
+        private Token(TokenType tokenType, int position) {
             this.tokenType = tokenType;
-            this.string = string;
             this.position = position;
         }
 
         public TokenType getTokenType() {
             return tokenType;
-        }
-
-        public String getString() {
-            return string;
         }
 
         public int getPosition() {

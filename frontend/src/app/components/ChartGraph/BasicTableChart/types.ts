@@ -12,10 +12,11 @@ import type { Props as ResizableProps } from 'react-resizable';
 export type BasicTableDataValue = ChartDataSetCellValue;
 export type BasicTableRowData = Record<string, BasicTableDataValue>;
 export type BasicTableDataSetRow = IChartDataSetRow<ChartDataSetCellValue>;
-export type BasicTableWidgetSpecialConfig = BrokerOption['widgetSpecialConfig'] & {
-  linkFields?: string[];
-  jumpField?: string;
-};
+export type BasicTableWidgetSpecialConfig =
+  BrokerOption['widgetSpecialConfig'] & {
+    linkFields?: string[];
+    jumpField?: string;
+  };
 export type BasicTableColumnRecord = BasicTableRowData & {
   uid?: string;
   dataIndex?: number;
@@ -29,10 +30,10 @@ export type BasicTableColumnRecord = BasicTableRowData & {
 export type BasicTableSummary = {
   summarys: Array<string | null | undefined>;
 };
-type BasicTableColumns = NonNullable<TableProps<BasicTableDataSetRow>['columns']>;
-type BasicTableColumnRender = NonNullable<
-  BasicTableColumns[number]['render']
+type BasicTableColumns = NonNullable<
+  TableProps<BasicTableDataSetRow>['columns']
 >;
+type BasicTableColumnRender = NonNullable<BasicTableColumns[number]['render']>;
 export type BasicTableSorter = Parameters<
   NonNullable<TableProps<BasicTableDataSetRow>['onChange']>
 >[2];

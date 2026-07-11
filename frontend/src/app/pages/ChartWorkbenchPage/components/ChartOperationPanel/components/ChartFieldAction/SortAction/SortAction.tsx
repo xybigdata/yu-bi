@@ -102,7 +102,7 @@ const SortAction: FC<{
             onChange={e => handleSortTypeChange(e.target?.value)}
             value={direction}
           >
-            <Space direction="vertical">
+            <Space orientation="vertical">
               <Radio key={SortActionType.None} value={SortActionType.None}>
                 {t('sort.none')}
               </Radio>

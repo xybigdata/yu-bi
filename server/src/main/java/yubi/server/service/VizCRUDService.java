@@ -37,6 +37,7 @@ public interface VizCRUDService<E extends BaseEntity, M extends CRUDMapper> exte
         return e;
     }
 
+    @SuppressWarnings("unchecked") // The mapper method is discovered reflectively and returns List<E> by contract.
     default List<E> listArchived(String orgId) {
         M mapper = getDefaultMapper();
         try {

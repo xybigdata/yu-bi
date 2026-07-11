@@ -25,9 +25,7 @@ import { addWidgetsToEditBoard, getEditChartWidgetDataAsync } from './../thunk';
 import { HistoryEditBoard } from './../types';
 
 export type ControllerActionType =
-  | ControllerFacadeTypes
-  | 'queryBtn'
-  | 'resetBtn';
+  ControllerFacadeTypes | 'queryBtn' | 'resetBtn';
 
 export type BtnActionParams = {
   type: ControllerActionType;

@@ -37,23 +37,17 @@ import org.quartz.*;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 @Slf4j
-public class SchemaSyncJob implements Job, Closeable {
+public class SchemaSyncJob implements Job {
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.builder().build();
 
     public static final String SOURCE_ID = "SOURCE_ID";
-
-    @Override
-    public void close() throws IOException {
-    }
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {

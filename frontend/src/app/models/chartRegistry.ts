@@ -84,11 +84,10 @@ export const basicChartRegistry: ChartRegistryItem[] = [
   createChartRegistryItem(() => new BasicRichText()),
 ];
 
-export const basicChartPaletteSeeds: ChartPaletteSeed[] = basicChartRegistry.map(
-  item => ({
+export const basicChartPaletteSeeds: ChartPaletteSeed[] =
+  basicChartRegistry.map(item => ({
     id: item.id,
     meta: CloneValueDeep(item.meta),
     datas: CloneValueDeep(item.datas || []),
     i18ns: CloneValueDeep(item.i18ns || []),
-  }),
-);
+  }));

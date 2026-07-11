@@ -17,7 +17,6 @@ import yubi.data.provider.sql.examples.VariableSqlExamples;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlDialect;
 import org.apache.calcite.sql.SqlIdentifier;
-import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParseException;
 import org.apache.calcite.sql.parser.SqlParserPos;
@@ -47,7 +46,7 @@ class SqlScriptRenderExamplesTest {
     void shouldRenderNormalSqlExamplesWithoutSpringContext() throws SqlParseException {
         validateExamples(
                 NormalSqlExamples.sqlList.stream()
-                        .filter(sqlTest -> "MYSQL".equals(sqlTest.getSqlDialect().getDatabaseProduct().name()))
+                        .filter(sqlTest -> TestSqlDialects.MYSQL == sqlTest.getSqlDialect())
                         .limit(6)
                         .toList(),
                 false
@@ -58,7 +57,7 @@ class SqlScriptRenderExamplesTest {
     void shouldRenderVariableSqlExamplesWithoutSpringContext() throws SqlParseException {
         validateExamples(
                 VariableSqlExamples.sqlList.stream()
-                        .filter(sqlTest -> "MYSQL".equals(sqlTest.getSqlDialect().getDatabaseProduct().name()))
+                        .filter(sqlTest -> TestSqlDialects.MYSQL == sqlTest.getSqlDialect())
                         .limit(6)
                         .toList(),
                 false
@@ -143,7 +142,7 @@ class SqlScriptRenderExamplesTest {
     private Stream<SqlTestEntity> mysqlExamples(List<SqlTestEntity> sqlTests) {
         return sqlTests.stream()
                 .filter(sqlTest -> sqlTest.getSqlDialect() != null)
-                .filter(sqlTest -> "MYSQL".equals(sqlTest.getSqlDialect().getDatabaseProduct().name()));
+                .filter(sqlTest -> TestSqlDialects.MYSQL == sqlTest.getSqlDialect());
     }
 
     private static Stream<Object[]> representativeDialectRenderCases() {
@@ -166,10 +165,10 @@ class SqlScriptRenderExamplesTest {
     private String wrapExpectedSql(String sql, SqlDialect sqlDialect) {
         SqlBasicCall sqlBasicCall = new SqlBasicCall(
                 SqlStdOperatorTable.AS,
-                new SqlNode[]{
+                List.of(
                         new SqlFragment("SELECT *  FROM  ( " + sql + " )"),
                         new SqlIdentifier(TABLE_ALIAS, SqlParserPos.ZERO.withQuoting(true))
-                },
+                ),
                 SqlParserPos.ZERO
         );
         return sqlBasicCall.toSqlString(sqlDialect).getSql().trim();

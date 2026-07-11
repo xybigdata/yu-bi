@@ -133,6 +133,7 @@ const useChartInteractions = (props: {
   openJumpVizDialogModal?: (props: JumpVizDialogParams) => void;
   openJumpUrlDialogModal?: (props: JumpUrlDialogParams) => void;
 }) => {
+  const { openViewDetailPanel } = props;
   const {
     openNewTab,
     openBrowserTab,
@@ -456,7 +457,7 @@ const useChartInteractions = (props: {
         if (hasNoSelectedItems) {
           return;
         }
-        props?.openViewDetailPanel?.({
+        openViewDetailPanel?.({
           currentDataView: view,
           chartConfig: chartConfig,
           drillOption: drillOption,
@@ -466,7 +467,7 @@ const useChartInteractions = (props: {
         });
       }
     },
-    [props?.openViewDetailPanel],
+    [openViewDetailPanel],
   );
 
   return {

@@ -61,7 +61,7 @@ public class ChartColumn {
         if (format == null || !format.hasNonNull("type")){
             return numFormat;
         }
-        String type = format.path("type").asText();
+        String type = format.path("type").asString();
         JsonNode formatNode = format.get(type);
         if (formatNode == null || formatNode.isNull()) {
             return numFormat;

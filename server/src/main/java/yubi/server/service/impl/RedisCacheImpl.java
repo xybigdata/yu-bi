@@ -10,9 +10,9 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RedisCacheImpl implements Cache {
 
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate<Object, Object> redisTemplate;
 
-    public RedisCacheImpl(RedisTemplate redisTemplate) {
+    public RedisCacheImpl(RedisTemplate<Object, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
@@ -32,6 +32,7 @@ public class RedisCacheImpl implements Cache {
     }
 
     @Override
+    @SuppressWarnings("unchecked") // Cache#get cannot retain T in the backing key-value store.
     public <T> T get(String key) {
         return (T) redisTemplate.opsForValue().get(key);
     }

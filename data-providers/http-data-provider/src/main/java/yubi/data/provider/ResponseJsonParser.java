@@ -36,7 +36,6 @@ import org.springframework.util.CollectionUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -123,8 +122,8 @@ public class ResponseJsonParser implements HttpResponseParser {
         if (valueNode.isArray() || valueNode.isObject()) {
             return valueNode.toString();
         }
-        if (valueNode.isTextual()) {
-            return valueNode.asText();
+        if (valueNode.isString()) {
+            return valueNode.asString(null);
         }
         return OBJECT_MAPPER.convertValue(valueNode, Object.class);
     }

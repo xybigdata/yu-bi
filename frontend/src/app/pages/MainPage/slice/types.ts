@@ -105,13 +105,7 @@ export interface DataProviderAttribute {
   displayName: string;
   defaultValue: DataProviderAttributeValue;
   type:
-    | 'string'
-    | 'password'
-    | 'bool'
-    | 'object'
-    | 'array'
-    | 'files'
-    | 'schema';
+    'string' | 'password' | 'bool' | 'object' | 'array' | 'files' | 'schema';
   key?: string;
   required?: boolean;
   description?: string;

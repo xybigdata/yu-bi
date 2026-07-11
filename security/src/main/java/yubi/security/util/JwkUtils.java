@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.math.BigInteger;
 import java.net.URI;
-import java.net.URL;
 import java.security.*;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;

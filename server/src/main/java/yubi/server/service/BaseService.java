@@ -83,22 +83,28 @@ public class BaseService extends MessageResolver {
     }
 
     public <T> T retrieve(String id, Class<T> clz) {
-        return (T) getEntityService(clz).retrieve(id);
+        return clz.cast(getEntityService(clz).retrieve(id));
     }
 
     public <T> T retrieve(String id, Class<T> clz, boolean checkPermission) {
-        return (T) getEntityService(clz).retrieve(id, checkPermission);
+        return clz.cast(getEntityService(clz).retrieve(id, checkPermission));
     }
 
     private BaseCRUDService<?, ?> getEntityService(Class<?> clz) {
         if (CollectionUtils.isEmpty(entityServiceMap) || !entityServiceMap.containsKey(clz)) {
             entityServiceMap = new HashMap<>();
-            Map<String, BaseCRUDService> beansOfType = Application.getContext().getBeansOfType(BaseCRUDService.class);
-            for (BaseCRUDService service : beansOfType.values()) {
+            Map<String, BaseCRUDService<?, ?>> beansOfType = getCrudServices();
+            for (BaseCRUDService<?, ?> service : beansOfType.values()) {
                 entityServiceMap.put(service.getEntityClz(), service);
             }
         }
         return entityServiceMap.get(clz);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private Map<String, BaseCRUDService<?, ?>> getCrudServices() {
+        // Spring's class-token lookup loses BaseCRUDService generic arguments at runtime.
+        return (Map) Application.getContext().getBeansOfType(BaseCRUDService.class);
     }
 
     public MessageResolver getMessageResolver() {

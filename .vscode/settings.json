@@ -1,0 +1,6 @@
+{
+    "java.compile.nullAnalysis.mode": "disabled",
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.configuration.maven.lifecycleMappings": "${workspaceFolder}/.vscode/maven-lifecycle-mapping.xml",
+    "java.import.maven.enabled": true
+}

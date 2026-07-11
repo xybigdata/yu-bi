@@ -131,12 +131,10 @@ public class JdbcDataProvider extends DataProvider {
         }
 
         Object properties = config.getProperties().get("properties");
-        if (properties != null) {
-            if (properties instanceof Map) {
-                Properties prop = new Properties();
-                prop.putAll((Map) properties);
-                jdbcProperties.setProperties(prop);
-            }
+        if (properties instanceof Map<?, ?> propertyMap) {
+            Properties prop = new Properties();
+            prop.putAll(propertyMap);
+            jdbcProperties.setProperties(prop);
         }
         return jdbcProperties;
     }
@@ -263,7 +261,8 @@ public class JdbcDataProvider extends DataProvider {
                 log.error("Jdbc adapter class load error ", e);
             }
             if (adapter == null) {
-                Exceptions.tr(DataProviderException.class, "message.provider.jdbc.create.error", prop.getDbType());
+                throw new DataProviderException(MessageResolver.getMessages(
+                        "message.provider.jdbc.create.error", prop.getDbType()));
             }
             if (init) {
                 adapter.init(prop, driverInfo);
@@ -326,8 +325,7 @@ public class JdbcDataProvider extends DataProvider {
 
         private static Map<String, Map<String, String>> loadYml(String file) {
             try (InputStream inputStream = ProviderFactory.class.getResourceAsStream(file)) {
-                Yaml yaml = new Yaml();
-                return yaml.loadAs(inputStream, HashMap.class);
+                return readDriverConfig(inputStream);
             } catch (Exception e) {
                 Exceptions.e(e);
             }
@@ -339,12 +337,36 @@ public class JdbcDataProvider extends DataProvider {
                 return Collections.emptyMap();
             }
             try (InputStream inputStream = new FileInputStream(file)) {
-                Yaml yaml = new Yaml();
-                return yaml.loadAs(inputStream, HashMap.class);
+                return readDriverConfig(inputStream);
             } catch (Exception e) {
                 Exceptions.e(e);
             }
             return null;
+        }
+
+        private static Map<String, Map<String, String>> readDriverConfig(InputStream inputStream) {
+            if (inputStream == null) {
+                return Collections.emptyMap();
+            }
+            Object loaded = new Yaml().load(inputStream);
+            if (!(loaded instanceof Map<?, ?> rawDrivers)) {
+                return Collections.emptyMap();
+            }
+            Map<String, Map<String, String>> drivers = new HashMap<>();
+            for (Map.Entry<?, ?> driverEntry : rawDrivers.entrySet()) {
+                if (!(driverEntry.getKey() instanceof String dbType)
+                        || !(driverEntry.getValue() instanceof Map<?, ?> rawDriver)) {
+                    continue;
+                }
+                Map<String, String> driver = new HashMap<>();
+                for (Map.Entry<?, ?> entry : rawDriver.entrySet()) {
+                    if (entry.getKey() instanceof String key && entry.getValue() instanceof String value) {
+                        driver.put(key, value);
+                    }
+                }
+                drivers.put(dbType, driver);
+            }
+            return drivers;
         }
 
     }

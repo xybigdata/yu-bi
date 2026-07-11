@@ -55,7 +55,7 @@ const RangeTimeFilter: FC<PresentControllerFilterProps> = memo(
 
     return (
       <div>
-        <Space direction="vertical" size={12}>
+        <Space orientation="vertical" size={12}>
           <TimeSelector.ManualSingleTimeSelector
             i18nPrefix={i18NPrefix}
             time={rangeTimes[0]}

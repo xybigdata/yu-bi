@@ -27,6 +27,8 @@ import styled from 'styled-components';
 import { SPACE_MD } from 'styles/StyleConstants';
 import { uploadBoardImage } from '../../../../slice/thunk';
 
+const noopChange = (_url: string) => undefined;
+
 export const UploadDragger: React.FC<{
   value: string;
   onChange?: (url: string) => void;
@@ -34,7 +36,7 @@ export const UploadDragger: React.FC<{
 }> = memo(({ value, onChange, placeholder }) => {
   const dispatch = useAppDispatch();
   const { boardId } = useContext(BoardContext);
-  const resolveChange = onChange || (() => {});
+  const resolveChange = onChange || noopChange;
 
   const beforeUpload: UploadProps['beforeUpload'] = useCallback(
     async info => {

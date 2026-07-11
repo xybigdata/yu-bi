@@ -89,6 +89,7 @@ describe('<WordCloudChart />', () => {
       .mockImplementation(() => {
         return {
           clearRect: vi.fn(),
+          createImageData: vi.fn(() => ({ data: new Uint8ClampedArray(4) })),
           createLinearGradient: vi.fn(() => ({
             addColorStop: vi.fn(),
           })),
@@ -99,7 +100,9 @@ describe('<WordCloudChart />', () => {
             data: new Uint8ClampedArray(4),
           })),
           measureText: vi.fn(() => ({ width: 10 })),
+          putImageData: vi.fn(),
           restore: vi.fn(),
+          rotate: vi.fn(),
           save: vi.fn(),
           scale: vi.fn(),
           setTransform: vi.fn(),
@@ -147,6 +150,12 @@ describe('<WordCloudChart />', () => {
   test('should replay lifecycle render with ECharts 6 word cloud runtime', async () => {
     const container = document.createElement('div');
     container.id = 'word-cloud-container';
+    Object.defineProperties(container, {
+      clientHeight: { configurable: true, value: 360 },
+      clientWidth: { configurable: true, value: 640 },
+      offsetHeight: { configurable: true, value: 360 },
+      offsetWidth: { configurable: true, value: 640 },
+    });
     document.body.appendChild(container);
     const clickCallback = vi.fn();
     const chart = new WordCloudChart({

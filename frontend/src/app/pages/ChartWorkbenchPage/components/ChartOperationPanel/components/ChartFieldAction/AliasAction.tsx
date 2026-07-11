@@ -53,7 +53,7 @@ const AliasAction: FC<{
   };
 
   return (
-    <StyledAliasAction direction="vertical">
+    <StyledAliasAction orientation="vertical">
       <FormItemEx {...formItemLayout} label={t('alias.fieldName')}>
         {getColumnRenderOriginName(config)}
       </FormItemEx>

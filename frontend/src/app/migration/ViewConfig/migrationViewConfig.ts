@@ -40,8 +40,9 @@ const migrationViewConfig = (view: View): View => {
     APP_VERSION_BETA_4,
     beta4Task,
   );
-  const dispatcher =
-    new MigrationEventDispatcher<ViewConfigMigrationTarget>(event2);
+  const dispatcher = new MigrationEventDispatcher<ViewConfigMigrationTarget>(
+    event2,
+  );
   const result = dispatcher.process(view);
 
   return result as View;

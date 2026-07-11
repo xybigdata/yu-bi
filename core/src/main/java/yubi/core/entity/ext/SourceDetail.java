@@ -21,11 +21,13 @@ package yubi.core.entity.ext;
 
 import yubi.core.entity.Source;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.beans.BeanUtils;
 
 import java.util.Date;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class SourceDetail extends Source {
 
     private Date schemaUpdateDate;

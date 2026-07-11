@@ -179,14 +179,7 @@ const ControllerWidgetPanel: React.FC<WidgetControllerPanelParams> = memo(
         relatedViews: preRelatedViews,
         config: preformatControlConfig(config, controllerType!),
       });
-    }, [
-      curFilterWidget,
-      controllerType,
-      form,
-      widgetMap,
-      setFormRelatedViews,
-      setViewsRelatedView,
-    ]);
+    }, [curFilterWidget, controllerType, form, widgetMap, viewMap]);
 
     const onFinish = useCallback(
       (values: ControllerWidgetContent) => {

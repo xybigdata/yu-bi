@@ -57,14 +57,14 @@ public class ResponseData<T> {
     private Exception exception;
 
     public static <E> ResponseData<E> success(E data) {
-        return (ResponseData<E>) ResponseData.builder()
+        return ResponseData.<E>builder()
                 .data(data)
                 .success(true)
                 .build();
     }
 
     public static <E> ResponseData<E> failure(String message) {
-        return (ResponseData<E>) ResponseData.builder()
+        return ResponseData.<E>builder()
                 .success(false)
                 .message(message)
                 .build();

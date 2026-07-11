@@ -7,7 +7,8 @@ import {
 
 describe('auth cookie helpers', () => {
   beforeEach(() => {
-    document.cookie = 'AUTHORIZATION_TOKEN=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    document.cookie =
+      'AUTHORIZATION_TOKEN=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
     setTokenExpiration(1000 * 60 * 60);
   });
 

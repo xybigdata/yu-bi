@@ -27,11 +27,10 @@ import yubi.core.mappers.ext.UserMapperExt;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -49,7 +48,7 @@ public class Application implements ApplicationContextAware {
     private static Boolean initialized;
 
     @Override
-    public void setApplicationContext(@NonNull ApplicationContext applicationContext) throws BeansException {
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         Application.context = applicationContext;
     }
 
@@ -78,17 +77,17 @@ public class Application implements ApplicationContextAware {
         if (path.startsWith(".")) {
             path = path.replace(".", userDir());
         }
-        return StringUtils.appendIfMissing(path, "/");
+        return Strings.CS.appendIfMissing(path, "/");
     }
 
     public static String userDir() {
-        return StringUtils.removeEnd(System.getProperty("user.dir"), "/");
+        return Strings.CS.removeEnd(System.getProperty("user.dir"), "/");
     }
 
 
     public static String getWebRootURL() {
         String url = getProperty("yubi.server.address");
-        url = StringUtils.removeEnd(url, "/");
+        url = Strings.CS.removeEnd(url, "/");
         return url;
     }
 
