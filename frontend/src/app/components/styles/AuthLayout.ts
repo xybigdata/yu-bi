@@ -31,7 +31,8 @@ import {
 } from 'styles/StyleConstants';
 
 export const Form = styled.div`
-  width: ${SPACE_TIMES(100)};
+  width: calc(100% - ${SPACE_TIMES(8)});
+  max-width: ${SPACE_TIMES(100)};
   padding: ${SPACE_XL} ${SPACE_XL} ${SPACE_TIMES(8)};
   margin-top: ${SPACE_TIMES(10)};
   background-color: ${p => p.theme.componentBackground};
