@@ -8,7 +8,8 @@
 !.vscode/maven-lifecycle-mapping.xml
 
 /static
-/docs/
+/docs/*
+!/docs/agent-ready-architecture-plan.md
 /.tmp/
 /logs/
 
