@@ -12,6 +12,21 @@ const renderMenuItem = (element: ReactElement) =>
   render(<ThemeProvider theme={themes.light}>{element}</ThemeProvider>);
 
 describe('MenuItemContent', () => {
+  test('should inherit menu line height so labels stay vertically centered', () => {
+    const { container } = renderMenuItem(
+      <div style={{ lineHeight: '40px' }}>
+        <MenuItemContent prefix={<EditOutlined className="icon" />}>
+          <p>账号设置</p>
+        </MenuItemContent>
+      </div>,
+    );
+
+    expect(screen.getByText('账号设置')).toHaveStyle({ lineHeight: '40px' });
+    expect(container.querySelector('.prefix')).toHaveStyle({
+      justifyContent: 'center',
+    });
+  });
+
   test('should keep popconfirm label as a direct menu item child', () => {
     const { container } = renderMenuItem(
       <>

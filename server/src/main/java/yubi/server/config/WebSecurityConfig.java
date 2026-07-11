@@ -68,6 +68,8 @@ public class WebSecurityConfig {
                 .requestMatchers("/confirminvite", "/organizations/**").permitAll()
                 .requestMatchers("/", "/login", "/setup", "/register", "/activation", "/forgetPassword", "/authorization").permitAll()
                 .requestMatchers("/static/**", "/custom-chart-plugins/**", "/antd/**").permitAll()
+                // 浏览器 img 请求无法携带 Authorization 请求头，头像资源需要允许匿名读取。
+                .requestMatchers("/resources/org/avatar/**", "/resources/user/avatar/**").permitAll()
                 .requestMatchers("/**/*.html", "/**/*.js", "/**/*.css", "/**/*.ico", "/**/*.png", "/**/*.svg", "/**/*.json").permitAll()
                 .anyRequest().authenticated());
         http.addFilterBefore(jwtRequestAuthenticationFilter, OAuth2AuthorizationRequestRedirectFilter.class);
