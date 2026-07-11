@@ -50,7 +50,7 @@ const StyledListItem = styled.div`
     margin: 0;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 1;
+    line-height: inherit;
     white-space: nowrap;
   }
 
