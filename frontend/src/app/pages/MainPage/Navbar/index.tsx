@@ -335,7 +335,7 @@ export function Navbar() {
     <>
       <MainNav>
         <Brand onClick={brandClick}>
-          <img src={logo} alt="logo" />
+          <img src={logo} alt="yu-bi logo" />
         </Brand>
         <Nav>
           {navs.map(({ name, title, icon, isActive, module }) => {
@@ -462,6 +462,7 @@ const Brand = styled.div`
   img {
     width: ${SPACE_TIMES(9)};
     height: ${SPACE_TIMES(9)};
+    object-fit: contain;
   }
 `;
 

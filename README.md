@@ -1,5 +1,9 @@
 # yu-bi Independent Open Source Project
 
+<p align="center">
+  <img src="frontend/public/brand/yu-bi-logo.svg" alt="yu-bi logo" width="180" />
+</p>
+
 > An independently maintained open source analytics project, focused on keeping the codebase runnable, modernized, and openly maintained.
 
 ## Project Status

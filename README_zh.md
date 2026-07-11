@@ -1,5 +1,9 @@
 # yu-bi 独立开源项目
 
+<p align="center">
+  <img src="frontend/public/brand/yu-bi-logo.svg" alt="yu-bi logo" width="180" />
+</p>
+
 > 这是一个独立维护的开源分析项目，目标是让代码库继续可运行、可升级、可发布，并保持公开维护。
 
 ## 项目状态

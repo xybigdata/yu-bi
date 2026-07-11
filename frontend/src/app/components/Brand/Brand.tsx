@@ -31,5 +31,6 @@ const Header = styled.header`
   img {
     width: 56px;
     height: 56px;
+    object-fit: contain;
   }
 `;
