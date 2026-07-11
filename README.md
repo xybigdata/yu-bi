@@ -80,8 +80,6 @@ npm run test:ci
 ## Documentation
 
 - Deployment guide: [Deployment.md](./Deployment.md)
-- Modernization progress board: [docs/tech-stack-modernization-progress.md](./docs/tech-stack-modernization-progress.md)
-- Modernization log: [docs/tech-stack-modernization-log.md](./docs/tech-stack-modernization-log.md)
 - Security policy: [SECURITY.md](./SECURITY.md)
 - Maintainers: [MAINTAINERS.md](./MAINTAINERS.md)
 - Roadmap: [ROADMAP.md](./ROADMAP.md)

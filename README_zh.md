@@ -80,8 +80,6 @@ npm run test:ci
 ## 文档入口
 
 - 部署说明：[Deployment.md](./Deployment.md)
-- 技术栈现代化进度看板：[docs/tech-stack-modernization-progress.md](./docs/tech-stack-modernization-progress.md)
-- 技术栈现代化改造日志：[docs/tech-stack-modernization-log.md](./docs/tech-stack-modernization-log.md)
 - 安全策略：[SECURITY.md](./SECURITY.md)
 - 维护者说明：[MAINTAINERS.md](./MAINTAINERS.md)
 - 路线图：[ROADMAP.md](./ROADMAP.md)

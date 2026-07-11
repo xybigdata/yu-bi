@@ -8,6 +8,7 @@
 !.vscode/maven-lifecycle-mapping.xml
 
 /static
+/docs/
 /.tmp/
 /logs/
 

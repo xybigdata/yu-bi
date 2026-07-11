@@ -20,7 +20,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.*;
 
-// Spring Boot 4 migration is tracked in docs/tech-stack-modernization-progress.md.
+// EnvironmentPostProcessor 已标记待移除，升级 Spring Boot 前需迁移到替代扩展点。
 @SuppressWarnings("removal")
 public class CustomPropertiesValidate implements EnvironmentPostProcessor {
 
