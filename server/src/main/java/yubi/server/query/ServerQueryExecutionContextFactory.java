@@ -29,6 +29,12 @@ public class ServerQueryExecutionContextFactory {
         return create(Channel.SYSTEM);
     }
 
+    public QueryExecutionContext forMetadata(String organizationId) {
+        User user = securityManager.getCurrentUser();
+        return new QueryExecutionContext(Channel.AUTHENTICATED, user.getId(), organizationId,
+                UUID.randomUUID().toString());
+    }
+
     private QueryExecutionContext create(Channel channel) {
         User user = securityManager.getCurrentUser();
         return new QueryExecutionContext(channel, user.getId(), null, UUID.randomUUID().toString());

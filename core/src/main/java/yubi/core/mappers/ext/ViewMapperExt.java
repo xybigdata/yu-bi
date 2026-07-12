@@ -25,6 +25,12 @@ public interface ViewMapperExt extends ViewMapper {
     View selectActiveByPrimaryKey(@Param("id") String id);
 
     @Select({
+            "SELECT id,`name`,description,org_id,parent_id,source_id,is_folder " +
+                    "FROM view WHERE id=#{id} AND `status`=1"
+    })
+    View selectMetadataProjection(@Param("id") String id);
+
+    @Select({
             "SELECT * FROM `view` WHERE org_id=#{orgId} AND `status`=0"
     })
     List<View> listArchived(String orgId);

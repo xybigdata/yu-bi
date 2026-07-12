@@ -222,6 +222,8 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 
 ### 目标 E：元数据与语义能力
 
+**状态**：已完成（2026-07-12）
+
 **依赖**：目标 D。
 
 **目的**：让 Agent 在查询前能够发现和理解有权限的数据资产。
@@ -237,6 +239,19 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 
 - 不同组织、角色和列权限下的元数据结果符合现有授权模型。
 - 搜索和详情接口不依赖 Agent Runtime 或具体模型 SDK。
+
+**完成记录**：
+
+- 在纯 Java `query` 模块新增 `QueryMetadataUseCase`，提供 `search` 和 `describe` 两个进程内能力。搜索输入仅包含非空搜索词和可选数量上限，详情输入仅包含资产 ID 与是否请求脚本；身份、组织、角色和权限均不在请求契约中，由 `server` 的 `ServerQueryExecutionContextFactory` 注入可信 `QueryExecutionContext`。本目标未新增 REST 入口。
+- 元数据公开结果包含安全资产摘要、完整字段路径与 Query `ValueType`、不含值的变量描述、Provider 支持的标准函数，以及显式可选的脚本。应用层统一负责校验、端口失败分类、组织隔离、字段裁剪、去重、稳定排序、默认搜索上限和结果深度不可变性。
+- 搜索适配器复用现有 `ViewService.getViews` 的组织与 READ 权限过滤，并只读取 View 安全投影；按 ID 查找新增专用 Mapper 投影，不读取脚本、模型、View 配置或任何 Source 配置。详情固定先比较可信组织并执行 READ 授权，再读取 View 模型、变量和函数能力，拒绝路径不会读取详情、变量或调用 Provider。
+- 组织 Owner 获得完整字段；非 Owner 仅获得 `rel_subject_columns` 为当前用户角色合并出的允许字段。脚本只有在请求显式要求且现有 View MANAGE 检查通过时返回，搜索摘要永不包含脚本。View 不存在使用稳定 `QueryDefinitionException`，跨组织、无 READ 权限或安全主体与上下文不一致使用稳定 `QueryAccessDeniedException`。元数据端口抛出的所有 `RuntimeException`，包括自身携带敏感 message/cause 的公共 Query 异常，都会在应用边界按端口类别重建为固定消息、无 cause 异常；该规则不改变执行查询保留 Provider cause 的目标 B 语义。
+- 变量适配复用现有组织和 View 变量解析范围，只投影名称、标签、变量类型、值类型、是否必填、是否表达式、格式和作用域；默认值、权限值、加密值和主体关系均不进入 Query 端口结果。必填判断与现有默认值 JSON 数组语义一致：QUERY 变量的 null、空白、`[]` 或损坏 JSON 均视为没有默认值，只有合法非空数组视为已有默认值，PERMISSION 变量始终非必填；解析失败按既有 fail-empty 语义处理且不记录敏感值。函数适配仅投影 `StdSqlOperator` 的稳定名称与符号，Source 密码、连接串、原始/解密配置、AES 内容、实体、Mapper 和 Provider DTO 均不进入 Query API。
+- 新增纯 Java、确定性且不可变的 `search_data_assets` 与 `describe_data_asset` Tool Schema。结构测试锁定输入/输出顺序和只读标记，并证明输入不包含身份覆盖、组织覆盖、角色、权限覆盖、任意 SQL、Source 配置或写操作；本目标没有创建 Tool Registry，也没有注册工具。
+- Query 新增 9 项元数据应用、契约、结构和安全测试，连同既有测试共 20 项；Server 新增 10 项适配、授权、组织、列权限、变量 JSON 默认值、变量脱敏、函数投影、Source 安全投影和可信上下文测试，连同既有测试共 57 项。拒绝路径、公共 Query 异常敏感 message/cause、未授权脚本、变量默认值/权限值和 Source 配置均有回归覆盖。
+- 验证通过：`mvn -pl query -am test`（20 项）、Server 元数据定向测试、`mvn -pl server -am -Dexec.skip=true test`（Server 57 项，全反应堆 289 项通过、JDBC 既有 6 项跳过）、`mvn -pl query dependency:tree -Dscope=runtime`（只有 Query 模块自身）、前端 `checkTs`、`lint`、`test:ci`（203 个测试文件、1336 项通过、4 项跳过）、`build:task`、`build`，以及 `mvn -pl server -am -DskipTests package` 和安装包 assembly。
+- 全仓模型 SDK、Agent Runtime、Tool Registry、身份覆盖、敏感配置类型和目标 F 工件搜索通过，生产代码只保留既有 ROADMAP 描述，Query 架构测试显式禁止相关依赖；`git diff --check` 通过。已知非阻断告警仍为 Mockito 动态 agent、测试 Log4j provider、GraalVM fallback、AntV S2 缺失 sourcemap、ECharts 弃用提示、Vite 大 chunk 和 npm allow-scripts 提示。
+- 未新增 `agent` 模块、会话、Tool Registry、步骤执行、模型网关、模型 SDK、任意 SQL、写操作、审批或 Agent 前端；未修改数据库结构、现有 Query REST、View/Dashboard 持久化 Schema 或 DataProvider SPI，未进入目标 F。
 
 ### 目标 F：只读 Agent Runtime
 

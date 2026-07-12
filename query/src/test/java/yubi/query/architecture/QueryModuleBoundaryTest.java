@@ -14,7 +14,8 @@ class QueryModuleBoundaryTest {
     private static final List<String> FORBIDDEN = List.of(
             "yubi.core.", "yubi.security.", "yubi.server.", "org.springframework.",
             "org.mybatis.", "tools.jackson.", "com.fasterxml.jackson.", "AESUtil",
-            "DataProvider", "Dataframe", "QueryScript", "ExecuteParam");
+            "DataProvider", "Dataframe", "QueryScript", "ExecuteParam",
+            "com.openai.", "dev.langchain4j.", "AgentRuntime", "ToolRegistry");
 
     @Test
     void productionSourcesMustNotReferenceInfrastructureOrProviderTypes() throws IOException {
