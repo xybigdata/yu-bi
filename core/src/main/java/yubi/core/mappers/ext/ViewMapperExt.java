@@ -4,6 +4,7 @@ import yubi.core.entity.View;
 import yubi.core.mappers.ViewMapper;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -23,6 +24,10 @@ public interface ViewMapperExt extends ViewMapper {
             "SELECT v.* from view v where v.status=1 AND v.id=#{id}"
     })
     View selectActiveByPrimaryKey(@Param("id") String id);
+
+    @Select("SELECT * FROM `view` WHERE id = #{id} FOR UPDATE")
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
+    View selectControlledWriteCurrentForUpdate(@Param("id") String id);
 
     @Select({
             "SELECT id,`name`,description,org_id,parent_id,source_id,is_folder " +

@@ -12,6 +12,18 @@ import java.util.Set;
 public interface RelRoleResourceMapperExt extends RelRoleResourceMapper {
 
     @Select({
+            "SELECT rrr.id FROM rel_role_resource rrr",
+            "JOIN role r ON r.id=rrr.role_id AND r.org_id=#{orgId}",
+            "JOIN rel_role_user rru ON rru.role_id=r.id AND rru.user_id=#{userId}",
+            "ORDER BY rrr.role_id, rrr.resource_id, rrr.resource_type",
+            "LIMIT " + (RoleMapperExt.CONTROLLED_WRITE_AUTHORIZATION_LOCK_LIMIT + 1),
+            "FOR UPDATE"
+    })
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
+    List<String> selectControlledWriteCurrentAuthorizationForUpdate(@Param("orgId") String orgId,
+                                                                    @Param("userId") String userId);
+
+    @Select({
             "SELECT ",
             "	rrr.*  ",
             "FROM ",

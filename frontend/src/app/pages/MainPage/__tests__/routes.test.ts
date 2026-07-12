@@ -9,6 +9,7 @@ const matchesMainPageRoute = (pathname: string) =>
 
 describe('MainPage routes', () => {
   test.each([
+    '/organizations/o-1/agent',
     '/organizations/o-1/vizs',
     '/organizations/o-1/vizs/v-1',
     '/organizations/o-1/vizs/v-1/boardEditor',

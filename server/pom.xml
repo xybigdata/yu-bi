@@ -17,6 +17,11 @@
     <dependencies>
         <dependency>
             <groupId>yubi</groupId>
+            <artifactId>yu-bi-visualization-write</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>yubi</groupId>
             <artifactId>yu-bi-query</artifactId>
             <version>${project.version}</version>
         </dependency>

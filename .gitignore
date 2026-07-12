@@ -18,6 +18,7 @@
 !/docs/architecture/adr/0001-query-capability-boundary.md
 !/docs/architecture/adr/0002-read-only-agent-runtime.md
 !/docs/architecture/adr/0003-agent-evaluation-observability-governance.md
+!/docs/architecture/adr/0004-controlled-agent-writes.md
 /.tmp/
 /logs/
 

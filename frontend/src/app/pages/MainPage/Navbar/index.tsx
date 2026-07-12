@@ -24,6 +24,7 @@ import {
   FunctionOutlined,
   GlobalOutlined,
   ProfileOutlined,
+  RobotOutlined,
   SafetyCertificateFilled,
   SettingFilled,
   SettingOutlined,
@@ -218,6 +219,13 @@ export function Navbar() {
   const navs = useMemo(
     () => [
       {
+        name: 'agent',
+        title: t('nav.agent'),
+        icon: <RobotOutlined />,
+        isActive: undefined,
+        module: undefined,
+      },
+      {
         name: 'vizs',
         title: t('nav.vizs'),
         icon: <i className="iconfont icon-xietongzhihuidaping" />,
@@ -339,26 +347,34 @@ export function Navbar() {
         </Brand>
         <Nav>
           {navs.map(({ name, title, icon, isActive, module }) => {
-            return name !== 'toSub' || subNavs.length > 0 ? (
+            if (name === 'toSub' && subNavs.length === 0) {
+              return null;
+            }
+            const item = (
+              <Tooltip key={name} title={title} placement="right">
+                <NavItem
+                  to={`/organizations/${orgId}/${
+                    name === 'toSub' ? subNavs[0].name : name
+                  }`}
+                  activeClassName="active"
+                  {...(isActive && { isActive })}
+                >
+                  {icon}
+                </NavItem>
+              </Tooltip>
+            );
+            return module ? (
               <Access
                 key={name}
                 type="module"
                 module={module}
                 level={PermissionLevels.Enable}
               >
-                <Tooltip title={title} placement="right">
-                  <NavItem
-                    to={`/organizations/${orgId}/${
-                      name === 'toSub' ? subNavs[0].name : name
-                    }`}
-                    activeClassName="active"
-                    {...(isActive && { isActive })}
-                  >
-                    {icon}
-                  </NavItem>
-                </Tooltip>
+                {item}
               </Access>
-            ) : null;
+            ) : (
+              item
+            );
           })}
         </Nav>
         <Toolbar>
@@ -470,7 +486,9 @@ const Nav = styled.nav`
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-height: 0;
   padding: 0 ${SPACE_LG};
+  overflow-y: auto;
 `;
 
 const NavItem = styled(CompatNavLink)`

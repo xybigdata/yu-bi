@@ -329,6 +329,8 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 
 ### 目标 H：受控写工具与 Agent 工作区
 
+**状态**：已完成（2026-07-13 完成严格复审修复）
+
 **依赖**：目标 G。
 
 **目的**：在只读链路稳定后逐步开放创建图表、修改仪表盘等高价值操作。
@@ -345,6 +347,22 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 - 未审批的写操作不会产生业务副作用。
 - 重复提交不会创建重复资源。
 - 用户可以查看并追溯 Agent 的每次业务变更。
+
+**完成记录**：
+
+- 新增纯 Java `visualization-write` 模块，提供独立的 `CreateChartUseCase` 和 `RenameDashboardUseCase`，均采用 `prepare -> execute`。首批能力严格收窄为创建绑定已有 View 的未发布基础明细表图表，以及只修改已有仪表盘名称；命令不暴露 Controller DTO、实体、Mapper、组织或主体覆盖、原始配置、Widget、发布状态、权限、SQL、Source 或脚本。新增 ADR-0004 固化业务边界、审批、幂等、事务、审计和工作区决策，并保持 ADR-0001/0002/0003 的 Query 与只读 Agent 边界不变。
+- Agent 新增独立写提议协议和精确 `WriteProposalToolRegistry`，只注册 `create_chart`、`rename_dashboard`，Schema 固定标记写操作且必须审批；目标 F/G 的 `DefaultReadOnlyToolRegistry` 仍精确只有 `search_data_assets`、`describe_data_asset`、`execute_view`。写提议只能规范化参数、生成安全预览并持久化 `PENDING`，不能直接执行；删除、发布、分享、权限变更、任意 SQL、View/Source/脚本写入和通用 Dashboard patch 均未注册，未知字段与越界输入在业务副作用前拒绝。
+- 服务端实现不可绕过的 `PENDING -> SUCCEEDED | REJECTED | EXPIRED | FAILED` 状态机。服务端生成 workspace session 和 approval ID，并绑定可信 subject、organization、session、request、correlation、tool、规范化参数摘要、prepared 摘要、幂等摘要和有效期；批准请求只携带 approval ID 与会话 Header，不重传模型参数。批准执行使用专属 `REQUIRES_NEW + REPEATABLE_READ` 事务，并在任何普通业务一致性读前按固定顺序完成 operation、目标、名称空间和授权的 `FOR UPDATE` 当前读；专用 Mapper 禁用并刷新一、二级缓存，锁后再重验成员、权限、目标状态和名称唯一性。未审批、拒绝、过期、篡改、跨主体/组织/会话、重复批准，以及批准等待锁期间发生的权限撤销或目标状态变化，均在写入前终止。
+- 幂等唯一作用域固定为 `(subject, organization, tool, SHA-256(idempotency-key))`。等价请求返回原 operation 或终态结果，同键异参固定冲突，不同用户或组织不能复用；有效 `PENDING` 仍绑定原 session，终态可在可信会话恢复后回放但不会再次写入。数据库唯一约束、operation 行锁、MySQL 当前读和 `REPEATABLE_READ` next-key lock 覆盖并发 preview/approve、同名称空间竞争及继承授权中缺失资源授权行的并发显式降权，单个 approval 最多执行一次业务变更；终态 operation 默认保留 90 天，因此幂等保证窗口同样明确为 90 天。
+- 新增三张 InnoDB 表持久化工作区会话、写 operation/幂等和追加式审计，并提供逆向回滚迁移；未修改既有 Query REST、DataProvider SPI 或 View/Dashboard 持久化 Schema。图表、Folder、operation 终态和成功审计在同一事务提交；仪表盘与 Folder 同步改名同样原子提交。业务失败整体回滚后，以独立 `REQUIRES_NEW + READ_COMMITTED` 事务记录 `FAILED` 和有限失败码，不留下半成品；首批能力没有外部副作用，因此不需要补偿流程。默认保留窗口为终态 operation 90 天、过期 session 30 天、审计事件 365 天，维护批次和频率均有上限。
+- 审计可按可信 user/session/request/correlation/tool/approval/idempotency 摘要/resource/final status 追溯，且不记录参数值、原始异常、令牌、密码、Source 配置、脚本、SQL 或完整数据。服务端工作区支持可信会话创建/恢复、只读运行、写预览、审批列表、批准和拒绝；相同主体和组织的并发会话创建在组织行锁内恢复活动 session，并优先恢复仍有有效待审批 operation 的 session。每次恢复和批准均重新读取当前身份、组织、权限及目标状态。缺少生产 `ModelGateway` 或 Agent 会话存储适配器时，只读运行稳定返回运行时未配置，确定性引导式写入口仍可独立使用，没有伪造自然语言能力。
+- 前端新增 `app/features/agent`、`agentWorkspace` Redux slice 和 `/organizations/:orgId/agent` 工作区，展示只读计划、Tool 执行、受限数据结果、最终回答、参数预览、影响范围、待审批、审批中、成功、拒绝、过期、重复和失败状态。路由 `:orgId` 必须同时属于服务端成员组织列表并与 Redux 当前组织一致，才是唯一请求作用域；URL B 与持久偏好 A 不一致、非成员 URL 或组织切换竞态期间均先清空工作区并 fail closed，旧 session、approval 和响应不能进入新组织，也不会向 A 发出 B 页面意图的 preview/approve。异步响应继续绑定组织、session 和工作区代次，审批状态单调合并；页面不直接调用旧 Viz/Chart/Board 写接口。session、approval、幂等键、prompt 和写参数不进入 URL、浏览器持久存储、日志或分析事件；Redux DevTools 对全部 `agentWorkspace/*` action 仅投影 type，并把根状态中的整个 `agentWorkspace` 子树替换为固定占位符，全局 rejected 日志也只输出 action type，保留其他 Redux 调试能力。
+- 浏览器使用隔离安装包、临时 H2 副本和最小 QA 夹具完成桌面与 390x844 验收：创建图表在 preview 前后均无资源，显式批准后恰好创建一个图表并展示可追溯变更；仪表盘重命名被拒绝后原名称保持不变。验收曾发现窄屏 Grid 行收缩导致控制区与审批区重叠，以及长资源 ID 挤压审批描述；均在 Agent 路由内最小修复并新增门禁。最终 390px 下导航与页面边界精确衔接、两面板首尾相接、主体无横向越界，桌面与移动控制台均无 warning/error；临时夹具未进入仓库或产品迁移。
+- 测试覆盖 `visualization-write` 21 项、Agent 64 项，以及 Server 审批状态机、当前权限重验、参数篡改、幂等重放与并发、事务回滚、失败独立落账、审计脱敏、迁移/回滚/保留策略、会话并发恢复、Web 契约和 Spring 装配；前端覆盖客户端精确接口、URL B 与持久偏好 A 的硬加载、切组织竞态、DevTools action/state 投影、日志脱敏、审批交互、只读结果和架构门禁。验证通过：`mvn -pl agent -am test`（Query 20、Agent 64）、`mvn -pl query -am test`（Query 20）、`mvn -pl server -am -Dexec.skip=true test`（完整反应堆 464 项零失败：Query 20、`visualization-write` 21、Agent 64、Core 23、Security 18、Provider Base 46、JDBC 125、Server 147；JDBC 既有 6 项条件跳过）、`mvn -pl server -am -DskipTests package`、前端 `checkTs`、`lint`、`test:ci`（208 文件，1382 项通过、4 项跳过）、Agent 架构与敏感门禁 19 项、`build:task`、`build`、JDBC 定向与全量测试，以及最终隔离安装包 demo 健康检查。
+- 真实 MySQL 8.4.10/InnoDB、默认 `REPEATABLE-READ` 环境额外执行 8 项条件集成回归：4 项覆盖当前读、MyBatis 二级缓存、成员授权和缺失资源授权行 phantom，3 项覆盖并发同名创建、批准等待锁期间撤权和 Dashboard 状态变化，1 项覆盖同一 approval 并发批准终态回放；失败方均零业务副作用并正确落账。验证过程中确认 H2 在 `SELECT FOR UPDATE` 等待后可能继续返回旧 RR 快照，不能证明 MySQL 当前读语义，因此审批并发回归不再以 H2 结果冒充生产保证。
+- 依赖与门禁验证通过：Agent 运行时依赖仍为 `agent -> query`，Query 和 `visualization-write` 均无生产运行时依赖；`jdeps`、Maven Enforcer、Agent/Query/Visualization Write 模块边界、只读/写 Registry 精确 allowlist、前端受控 API/旧写路径/浏览器存储/DevTools 投影门禁、架构与敏感泄露搜索及 `git diff --check` 均通过。验证过程中曾真实发现 Server 测试夹具缺少目标 H 锁路径所需表、保留服务多构造器生产装配缺少明确注入、H2 锁等待语义偏差、批准事务锁前已建立快照、URL 组织与持久偏好错绑、DevTools 投影泄露，以及两项响应式展示缺陷；均补齐回归门禁并修复后重新验证。
+- 真实阻断保持为既有构建体积基线：raw 与 gzip 当前报告的基线检查仍先报告 `chunk rawOversized` 新增 `slice.js` 与 `task/index.js`；raw 报告同时保留既有 `logo.svg` asset 超限，gzip 报告另记录 `monacoEditor.js` 超限。本目标未更新基线掩盖差异。既有非阻断告警仍包括 Mockito 动态 agent、测试 Log4j provider、GraalVM fallback、AntV S2 缺失 sourcemap、ECharts 弃用、Vite 大 chunk 和 npm allow-scripts。
+- 残余风险：生产 `ModelGateway` 和 Agent 会话存储仍未选型，接入真实模型前还需建立最终回答的生产级敏感输出策略；受控当前读依赖共享 MySQL/InnoDB、`REPEATABLE_READ`、生产授权索引和 MyBatis 事务工厂，4096 条授权上限会对更高授权量 fail closed，`LIMIT 4097` 只约束 Java 结果物化量，实际扫描与 next-key 锁范围仍由索引和执行计划决定；Agent 与旧 UI 写入口未共享名称空间锁协议，跨入口同名创建仍存在竞态；幂等保证受 90 天 operation 保留窗口限制；外部审计归档、告警和长期合规留存仍由部署治理；operation 建立前被拒绝的未知字段、缺失 Header 或越权请求不会逐项进入受控写账本，后续应由低基数安全指标覆盖。
 
 ## 4. 验证基线
 

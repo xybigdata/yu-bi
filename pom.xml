@@ -90,6 +90,7 @@
 
     <modules>
         <module>query</module>
+        <module>visualization-write</module>
         <module>agent</module>
         <module>core</module>
         <module>security</module>

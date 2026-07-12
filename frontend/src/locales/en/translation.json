@@ -141,6 +141,7 @@
   },
   "main": {
     "nav": {
+      "agent": "Agent Workspace",
       "vizs": "Vizs",
       "views": "Views",
       "sources": "Sources",
@@ -1724,6 +1725,123 @@
     "modal": {
       "password": "Password",
       "enterPassword": "Enter password"
+    }
+  },
+  "agent": {
+    "title": "Agent Workspace",
+    "subtitle": "Preview and approve narrowly scoped business changes",
+    "retry": "Retry",
+    "refresh": "Refresh approvals",
+    "empty": "No content",
+    "duplicate": "Duplicate request",
+    "unsupportedTool": "This write tool is not in the frontend allowlist",
+    "noWritableTools": "No controlled write tools are available in this session",
+    "scope": {
+      "denied": "Unable to enter this organization's Agent workspace",
+      "deniedDescription": "The current account is not a member of the organization in the URL. No Agent request was sent."
+    },
+    "runtime": {
+      "unavailable": "Model runtime is not configured",
+      "guidedAvailable": "The guided form below remains available for controlled writes."
+    },
+    "readonly": {
+      "title": "Read-only data analysis",
+      "description": "Run permission-bound data asset discovery and queries",
+      "prompt": "Analysis request",
+      "placeholder": "Enter a data question to analyze",
+      "run": "Run analysis",
+      "disabled": "Configure the model runtime to use read-only analysis.",
+      "plan": "Run plan",
+      "planEmpty": "This run contains no execution steps",
+      "tools": "Tool execution",
+      "toolsEmpty": "This run did not call a data tool",
+      "dataEmpty": "The tool returned no data",
+      "answer": "Final answer",
+      "truncated": "The result was filtered by the server safety boundary",
+      "truncatedShort": "Truncated",
+      "status": {
+        "running": "Running",
+        "completed": "Completed",
+        "failed": "Failed",
+        "step_limit_reached": "Step limit reached"
+      },
+      "stepStatus": {
+        "succeeded": "Succeeded",
+        "failed": "Failed"
+      },
+      "stepKind": {
+        "final_answer": "Generate final answer",
+        "model_failure": "Model call failed",
+        "request_rejected": "Request rejected"
+      },
+      "tool": {
+        "search_data_assets": "Search data assets",
+        "describe_data_asset": "Describe data asset",
+        "execute_view": "Execute read-only view",
+        "<unregistered>": "Unregistered tool",
+        "unknown": "Unknown step"
+      }
+    },
+    "session": {
+      "new": "New session",
+      "failed": "Unable to create an Agent workspace session",
+      "expired": "The current workspace session has expired"
+    },
+    "tools": {
+      "createChart": "Create chart",
+      "renameDashboard": "Rename dashboard"
+    },
+    "plan": {
+      "title": "Execution plan",
+      "description": "Every write requires a preview and explicit approval",
+      "session": "Establish trusted session",
+      "sessionDescription": "The server binds the current user and organization",
+      "preview": "Generate parameter preview",
+      "previewDescription": "Validate parameters and impact deterministically",
+      "approval": "Wait for explicit approval",
+      "approvalDescription": "Recheck permissions and resource state on approval",
+      "change": "Record business change",
+      "changeDescription": "Trace the execution through its change record"
+    },
+    "form": {
+      "title": "Controlled write",
+      "description": "Generate a preview before changing business data",
+      "tool": "Operation",
+      "toolRequired": "Select an operation",
+      "viewId": "Data view ID",
+      "viewIdRequired": "Enter a data view ID",
+      "dashboardId": "Dashboard ID",
+      "dashboardIdRequired": "Enter a dashboard ID",
+      "name": "Name",
+      "nameRequired": "Enter a name",
+      "preview": "Generate preview",
+      "previewHint": "Generating a preview has no business side effects"
+    },
+    "activity": {
+      "title": "Tool execution and approvals",
+      "description": "Review previews, approval status, and business changes",
+      "empty": "No pending or completed operations"
+    },
+    "status": {
+      "pending": "Pending",
+      "succeeded": "Succeeded",
+      "rejected": "Rejected",
+      "expired": "Expired",
+      "failed": "Failed"
+    },
+    "approval": {
+      "createdAt": "Created:",
+      "expiresAt": "Expires:",
+      "parameters": "Parameter preview",
+      "impacts": "Impact scope",
+      "change": "Business change",
+      "changeId": "Change ID",
+      "resource": "Resource",
+      "action": "Action",
+      "finalStatus": "Final status",
+      "openResource": "Open resource",
+      "reject": "Reject",
+      "approve": "Approve and execute"
     }
   },
   "components": {

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>yubi</groupId>
+        <artifactId>yu-bi-parent</artifactId>
+        <version>2.0.0</version>
+    </parent>
+
+    <artifactId>yu-bi-visualization-write</artifactId>
+    <name>yu-bi Visualization Write</name>
+    <description>与 Agent 和服务端基础设施解耦的确定性可视化写能力</description>
+
+    <dependencies>
+        <!-- 覆盖父 POM 的通用生产依赖；本模块生产运行时依赖为空。 -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>test</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>visualization-write-production-boundary</id>
+                        <goals><goal>enforce</goal></goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <searchTransitive>true</searchTransitive>
+                                    <excludes>
+                                        <exclude>yubi:yu-bi-core</exclude>
+                                        <exclude>yubi:yu-bi-security</exclude>
+                                        <exclude>yubi:yu-bi-server</exclude>
+                                        <exclude>yubi:yu-bi-agent</exclude>
+                                        <exclude>yubi:yu-bi-query</exclude>
+                                        <exclude>yubi:yu-bi-data-provider</exclude>
+                                        <exclude>yubi:yu-bi-data-provider-base</exclude>
+                                        <exclude>yubi:yu-bi-*-data-provider</exclude>
+                                        <exclude>org.springframework*:*</exclude>
+                                        <exclude>org.mybatis*:*</exclude>
+                                        <exclude>com.baomidou:*</exclude>
+                                        <exclude>com.fasterxml.jackson*:*</exclude>
+                                        <exclude>tools.jackson*:*</exclude>
+                                        <exclude>org.bouncycastle:*</exclude>
+                                        <exclude>com.openai:*</exclude>
+                                        <exclude>com.anthropic:*</exclude>
+                                        <exclude>dev.langchain4j:*</exclude>
+                                        <exclude>org.springframework.ai:*</exclude>
+                                        <exclude>com.azure:azure-ai-openai</exclude>
+                                        <exclude>software.amazon.awssdk:bedrockruntime</exclude>
+                                        <exclude>com.google.cloud:google-cloud-vertexai</exclude>
+                                        <exclude>io.mistralai:*</exclude>
+                                    </excludes>
+                                    <includes>
+                                        <include>*:*:*:*:test</include>
+                                    </includes>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

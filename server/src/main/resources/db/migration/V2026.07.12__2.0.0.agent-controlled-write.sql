@@ -1,0 +1,68 @@
+CREATE TABLE `agent_workspace_session` (
+  `id` varchar(36) NOT NULL,
+  `subject_id` varchar(32) NOT NULL,
+  `organization_id` varchar(32) NOT NULL,
+  `status` varchar(16) NOT NULL,
+  `expires_at` timestamp(3) NOT NULL,
+  `created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `last_access_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  INDEX `idx_agent_workspace_scope` (`subject_id`, `organization_id`, `status`),
+  INDEX `idx_agent_workspace_expiry` (`status`, `expires_at`)
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+
+CREATE TABLE `agent_write_operation` (
+  `approval_id` varchar(36) NOT NULL,
+  `subject_id` varchar(32) NOT NULL,
+  `organization_id` varchar(32) NOT NULL,
+  `session_id` varchar(36) NOT NULL,
+  `request_id` varchar(36) NOT NULL,
+  `correlation_id` varchar(36) NOT NULL,
+  `tool_name` varchar(32) NOT NULL,
+  `arguments_digest` char(64) NOT NULL,
+  `prepared_digest` char(64) NOT NULL,
+  `arguments_json` text NOT NULL,
+  `prepared_json` text NOT NULL,
+  `idempotency_digest` char(64) NOT NULL,
+  `preview_json` text NOT NULL,
+  `status` varchar(24) NOT NULL,
+  `expires_at` timestamp(3) NOT NULL,
+  `change_id` varchar(36) NOT NULL,
+  `resource_type` varchar(32) NULL,
+  `resource_id` varchar(64) NULL,
+  `change_action` varchar(32) NULL,
+  `failure_code` varchar(64) NULL,
+  `created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`approval_id`),
+  UNIQUE INDEX `uq_agent_write_idempotency`
+    (`subject_id`, `organization_id`, `tool_name`, `idempotency_digest`),
+  INDEX `idx_agent_write_session` (`session_id`, `created_at`),
+  INDEX `idx_agent_write_expiry` (`status`, `expires_at`),
+  INDEX `idx_agent_write_retention` (`status`, `updated_at`)
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+
+CREATE TABLE `agent_write_audit_event` (
+  `id` varchar(36) NOT NULL,
+  `approval_id` varchar(36) NOT NULL,
+  `change_id` varchar(36) NOT NULL,
+  `subject_id` varchar(32) NOT NULL,
+  `organization_id` varchar(32) NOT NULL,
+  `session_id` varchar(36) NOT NULL,
+  `request_id` varchar(36) NOT NULL,
+  `correlation_id` varchar(36) NOT NULL,
+  `tool_name` varchar(32) NOT NULL,
+  `arguments_digest` char(64) NOT NULL,
+  `prepared_digest` char(64) NOT NULL,
+  `idempotency_digest` char(64) NOT NULL,
+  `event_type` varchar(32) NOT NULL,
+  `final_status` varchar(24) NOT NULL,
+  `resource_type` varchar(32) NULL,
+  `resource_id` varchar(64) NULL,
+  `failure_code` varchar(64) NULL,
+  `created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`),
+  INDEX `idx_agent_write_audit_approval` (`approval_id`, `created_at`),
+  INDEX `idx_agent_write_audit_trace` (`subject_id`, `session_id`, `request_id`),
+  INDEX `idx_agent_write_audit_retention` (`created_at`)
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;

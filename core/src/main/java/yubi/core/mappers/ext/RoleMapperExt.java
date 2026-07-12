@@ -11,6 +11,20 @@ import java.util.List;
 @Mapper
 public interface RoleMapperExt extends RoleMapper {
 
+    int CONTROLLED_WRITE_AUTHORIZATION_LOCK_LIMIT = 4096;
+
+    @Select({
+            "SELECT r.id FROM role r",
+            "JOIN rel_role_user rru ON rru.role_id = r.id AND rru.user_id=#{userId}",
+            "WHERE r.org_id=#{orgId}",
+            "ORDER BY r.id",
+            "LIMIT " + (CONTROLLED_WRITE_AUTHORIZATION_LOCK_LIMIT + 1),
+            "FOR UPDATE"
+    })
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
+    List<String> selectControlledWriteCurrentAuthorizationForUpdate(@Param("orgId") String orgId,
+                                                                    @Param("userId") String userId);
+
     @Select({
             "SELECT " +
                     "	r.*  " +

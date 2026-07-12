@@ -1,5 +1,10 @@
 import { defaultLazyLoad } from 'utils/loadable';
 
+export const LazyAgentPage = defaultLazyLoad(
+  () => import('./pages/AgentPage'),
+  module => module.AgentPage,
+);
+
 export const LazyConfirmInvitePage = defaultLazyLoad(
   () => import('./pages/ConfirmInvitePage'),
   module => module.ConfirmInvitePage,

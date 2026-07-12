@@ -1,6 +1,7 @@
 import { WorkbenchState } from 'app/pages/ChartWorkbenchPage/slice/types';
 import { BoardState } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { EditBoardState } from 'app/pages/DashBoardPage/pages/BoardEditor/slice/types';
+import { AgentWorkspaceState } from 'app/pages/MainPage/pages/AgentPage/slice/types';
 import { MemberState } from 'app/pages/MainPage/pages/MemberPage/slice/types';
 import { PermissionState } from 'app/pages/MainPage/pages/PermissionPage/slice/types';
 import { ScheduleState } from 'app/pages/MainPage/pages/SchedulePage/slice/types';
@@ -25,6 +26,7 @@ export interface RootState {
   theme?: ThemeState;
   app?: AppState;
   main?: MainState;
+  agentWorkspace?: AgentWorkspaceState;
   member?: MemberState;
   permission?: PermissionState;
   variable?: VariableState;

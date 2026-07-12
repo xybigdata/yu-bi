@@ -23,6 +23,18 @@ public final class ServerAgentExecutionContextFactory {
 
     /** organizationId 必须来自服务器已控制的组织选择范围，不属于 AgentRequest 或模型参数。 */
     public AgentExecutionContext create(String organizationId) {
+        return create(organizationId, UUID.randomUUID().toString());
+    }
+
+    /** sessionId 只能由服务端工作区会话存储校验后传入。 */
+    public AgentExecutionContext resume(String organizationId, String sessionId) {
+        if (sessionId == null || sessionId.isBlank()) {
+            throw denied();
+        }
+        return create(organizationId, sessionId);
+    }
+
+    private AgentExecutionContext create(String organizationId, String sessionId) {
         if (organizationId == null || organizationId.isBlank()) {
             throw denied();
         }
@@ -35,7 +47,6 @@ public final class ServerAgentExecutionContextFactory {
         if (user == null || user.getId() == null || user.getId().isBlank() || !isMember(organizationId)) {
             throw denied();
         }
-        String sessionId = UUID.randomUUID().toString();
         String requestId = UUID.randomUUID().toString();
         String correlationId = UUID.randomUUID().toString();
         QueryExecutionContext queryContext = new QueryExecutionContext(

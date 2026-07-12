@@ -39,6 +39,19 @@ public interface FolderMapperExt extends FolderMapper {
     })
     List<Folder> checkVizName(String orgId, String parentId, String name);
 
+    @Select({
+            "<script>",
+            "SELECT * FROM folder WHERE org_id=#{orgId} AND `name`=#{name}",
+            "<if test='parentId == null'> AND parent_id IS NULL </if>",
+            "<if test='parentId != null'> AND parent_id=#{parentId} </if>",
+            "FOR UPDATE",
+            "</script>"
+    })
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
+    List<Folder> selectControlledWriteCurrentNamesForUpdate(@Param("orgId") String orgId,
+                                                            @Param("parentId") String parentId,
+                                                            @Param("name") String name);
+
     @Delete({
             "DELETE FROM folder WHERE rel_type=#{relType} and rel_id=#{relId}"
     })
@@ -48,6 +61,19 @@ public interface FolderMapperExt extends FolderMapper {
             "SELECT * FROM folder WHERE rel_type=#{relType} and rel_id=#{relId}"
     })
     Folder selectByRelTypeAndId(String relType, String relId);
+
+    @Select("SELECT * FROM folder WHERE id=#{id} FOR UPDATE")
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
+    Folder selectControlledWriteCurrentForUpdate(@Param("id") String id);
+
+    @Select("SELECT * FROM folder WHERE rel_type=#{relType} AND rel_id=#{relId} FOR UPDATE")
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
+    Folder selectControlledWriteCurrentByRelationForUpdate(@Param("relType") String relType,
+                                                            @Param("relId") String relId);
+
+    @Select("SELECT id FROM organization WHERE id=#{orgId} FOR UPDATE")
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
+    String selectControlledWriteRootNamespaceForUpdate(@Param("orgId") String orgId);
 
 
     @Select({

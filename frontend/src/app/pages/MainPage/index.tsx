@@ -35,6 +35,7 @@ import { AccessRoute } from './AccessRoute';
 import { Background } from './Background';
 import { Navbar } from './Navbar';
 import {
+  LazyAgentPage,
   LazyConfirmInvitePage,
   LazyMemberPage,
   LazyOrgSettingPage,
@@ -160,6 +161,10 @@ export function MainPage() {
           <Route
             path={MAIN_PAGE_ROUTE_PATHS.organization}
             element={<Navigate to={`/organizations/${orgId}/vizs`} replace />}
+          />
+          <Route
+            path={MAIN_PAGE_ROUTE_PATHS.agentWorkspace}
+            element={<LazyAgentPage />}
           />
           <Route
             path={MAIN_PAGE_ROUTE_PATHS.vizChartEditor}

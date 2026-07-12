@@ -10,6 +10,10 @@ import java.util.List;
 @CacheNamespaceRef(value = FolderMapperExt.class)
 public interface DashboardMapperExt extends DashboardMapper {
 
+    @Select("SELECT * FROM dashboard WHERE id=#{id} FOR UPDATE")
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
+    Dashboard selectControlledWriteCurrentForUpdate(@Param("id") String id);
+
     @Select({
             "SELECT " +
                     "	d.id, " +
