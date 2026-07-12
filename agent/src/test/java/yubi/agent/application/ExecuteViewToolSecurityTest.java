@@ -261,7 +261,7 @@ class ExecuteViewToolSecurityTest {
         QueryResult result = new QueryResult(huge, huge, huge, huge, columns,
                 List.of(List.of(huge, new ExplosiveCell())), new Page(1, 1, 1, true), null);
 
-        ToolOutput output = new ExecuteViewOutputMapper(limits).map(result);
+        ToolOutput output = new ExecuteViewOutputMapper(limits).map(result, outputInput(100));
 
         assertTrue(output.size().truncated());
         assertTrue(output.size().observedBytes() > output.size().returnedBytes());
@@ -277,7 +277,7 @@ class ExecuteViewToolSecurityTest {
                 List.of(new ColumnMetadata(List.of("orders", "amount"), ValueType.STRING, null, List.of())),
                 List.of(List.of(huge)), new Page(1, 1, 1, true), null);
 
-        ToolOutput output = new ExecuteViewOutputMapper(limits).map(hugeResult);
+        ToolOutput output = new ExecuteViewOutputMapper(limits).map(hugeResult, outputInput(10));
 
         assertEquals(1, output.size().returnedItems());
         assertTrue(output.size().truncated());
@@ -291,7 +291,7 @@ class ExecuteViewToolSecurityTest {
         QueryResult unknownResult = new QueryResult("result-2", "Orders", null, null,
                 List.of(new ColumnMetadata(List.of("orders", "amount"), ValueType.STRING, null, List.of())),
                 List.of(List.of(new ExplosiveCell())), new Page(1, 1, 1, true), null);
-        ToolOutput unknownOutput = new ExecuteViewOutputMapper(limits).map(unknownResult);
+        ToolOutput unknownOutput = new ExecuteViewOutputMapper(limits).map(unknownResult, outputInput(10));
         ArrayValue unknownRows = (ArrayValue) unknownOutput.value().values().get("rows");
         ArrayValue unknownRow = (ArrayValue) unknownRows.values().getFirst();
         ObjectValue unknownCell = (ObjectValue) unknownRow.values().getFirst();
@@ -317,7 +317,7 @@ class ExecuteViewToolSecurityTest {
                         new ColumnMetadata(List.of("legacy_date"), ValueType.DATE, null, List.of())),
                 List.of(temporalValues), new Page(1, 1, 1, true), null);
 
-        ToolOutput output = new ExecuteViewOutputMapper(limits).map(result);
+        ToolOutput output = new ExecuteViewOutputMapper(limits).map(result, outputInput(10));
 
         ArrayValue rows = (ArrayValue) output.value().values().get("rows");
         ArrayValue row = (ArrayValue) rows.values().getFirst();
@@ -341,6 +341,78 @@ class ExecuteViewToolSecurityTest {
         }
     }
 
+    @Test
+    void executeViewMustUseSentinelAndReturnOnlyPublicLimit() {
+        Harness harness = harness(new ToolResultLimits(100, 64 * 1024L));
+        harness.execute.result = queryResult(rows(101), new Page(1, 101, 0, false));
+
+        ToolOutput output = harness.tool.execute(selection("orders", "amount"), CONTEXT);
+
+        assertEquals(101, harness.execute.command.page().pageSize());
+        assertFalse(harness.execute.command.page().countTotal());
+        assertEquals(100, outputRows(output).values().size());
+        assertTrue(output.size().truncated());
+        assertEquals(100, output.size().maximumItems());
+        assertPublicPage(output, 1, 100, 0, false);
+    }
+
+    @Test
+    void executeViewMustRespectSmallPageAndNotMisreportExactBoundary() {
+        Harness small = harness(new ToolResultLimits(100, 64 * 1024L));
+        small.execute.result = queryResult(rows(26), new Page(1, 26, 0, false));
+        ObjectValue page25 = object(
+                "viewId", text("view-1"),
+                "columns", array(object("path", path("orders", "amount"))),
+                "page", object("pageSize", new StructuredValue.IntegerValue(25)));
+
+        ToolOutput truncated = small.tool.execute(page25, CONTEXT);
+        assertEquals(26, small.execute.command.page().pageSize());
+        assertEquals(25, outputRows(truncated).values().size());
+        assertTrue(truncated.size().truncated());
+
+        Harness exact = harness(new ToolResultLimits(100, 64 * 1024L));
+        exact.execute.result = queryResult(rows(100), new Page(1, 101, 0, false));
+        ToolOutput complete = exact.tool.execute(selection("orders", "amount"), CONTEXT);
+        assertEquals(100, outputRows(complete).values().size());
+        assertFalse(complete.size().truncated());
+    }
+
+    @Test
+    void laterPagesMustPreserveEffectiveOffsetAndUseInternalTotalProbe() {
+        Harness harness = harness(new ToolResultLimits(100, 64 * 1024L));
+        harness.execute.result = queryResult(rows(25), new Page(2, 25, 51, true));
+        ObjectValue secondPage = object(
+                "viewId", text("view-1"),
+                "columns", array(object("path", path("orders", "amount"))),
+                "page", object("pageNo", new StructuredValue.IntegerValue(2),
+                        "pageSize", new StructuredValue.IntegerValue(25),
+                        "countTotal", StructuredValues.bool(false)));
+
+        ToolOutput truncated = harness.tool.execute(secondPage, CONTEXT);
+
+        assertEquals(25, harness.execute.command.page().pageSize());
+        assertTrue(harness.execute.command.page().countTotal());
+        assertEquals(25, outputRows(truncated).values().size());
+        assertTrue(truncated.size().truncated());
+        assertPublicPage(truncated, 2, 25, 0, false);
+
+        harness.execute.result = queryResult(rows(25), new Page(2, 25, 50, true));
+        ToolOutput exact = harness.tool.execute(secondPage, CONTEXT);
+        assertFalse(exact.size().truncated());
+
+        harness.execute.result = queryResult(List.of(), new Page(2, 25, 10, true));
+        ToolOutput beyondLastPage = harness.tool.execute(secondPage, CONTEXT);
+        assertTrue(outputRows(beyondLastPage).values().isEmpty());
+        assertFalse(beyondLastPage.size().truncated());
+        assertPublicPage(beyondLastPage, 2, 25, 0, false);
+
+        harness.execute.result = queryResult(List.of(), new Page(2, 25, 0, true));
+        ToolOutput emptyResult = harness.tool.execute(secondPage, CONTEXT);
+        assertTrue(outputRows(emptyResult).values().isEmpty());
+        assertFalse(emptyResult.size().truncated());
+        assertPublicPage(emptyResult, 2, 25, 0, false);
+    }
+
     private Harness harness(ToolResultLimits limits) {
         CapturingMetadata metadata = new CapturingMetadata();
         metadata.detail = detail(
@@ -350,6 +422,36 @@ class ExecuteViewToolSecurityTest {
                 List.of(new ColumnMetadata(List.of("orders", "amount"), ValueType.NUMERIC, null, List.of())),
                 List.of(List.of(42)), new Page(1, 1, 1, true), null);
         return new Harness(new ExecuteViewTool(execute, metadata, limits), metadata, execute);
+    }
+
+    private QueryResult queryResult(List<List<Object>> rows, Page page) {
+        return new QueryResult("result-1", "Orders", null, null,
+                List.of(new ColumnMetadata(List.of("orders", "amount"), ValueType.NUMERIC, null, List.of())),
+                rows, page, null);
+    }
+
+    private List<List<Object>> rows(int count) {
+        List<List<Object>> rows = new ArrayList<>();
+        for (int index = 0; index < count; index++) {
+            rows.add(List.of(index));
+        }
+        return rows;
+    }
+
+    private ArrayValue outputRows(ToolOutput output) {
+        return (ArrayValue) output.value().values().get("rows");
+    }
+
+    private void assertPublicPage(ToolOutput output,
+                                  long pageNo,
+                                  long pageSize,
+                                  long total,
+                                  boolean countTotal) {
+        ObjectValue page = (ObjectValue) output.value().values().get("page");
+        assertEquals(pageNo, ((StructuredValue.IntegerValue) page.values().get("pageNo")).value());
+        assertEquals(pageSize, ((StructuredValue.IntegerValue) page.values().get("pageSize")).value());
+        assertEquals(total, ((StructuredValue.IntegerValue) page.values().get("total")).value());
+        assertEquals(countTotal, ((StructuredValue.BooleanValue) page.values().get("countTotal")).value());
     }
 
     private DataAssetDetail detail(List<DataAssetDetail.FieldDescription> fields,
@@ -438,6 +540,11 @@ class ExecuteViewToolSecurityTest {
 
     private TextValue text(String value) {
         return new TextValue(value);
+    }
+
+    private ExecuteViewInput outputInput(long pageSize) {
+        return new ExecuteViewInput("view-1", List.of(), List.of(), List.of(), List.of(), List.of(),
+                1, pageSize, true, Map.of());
     }
 
     private record Harness(ExecuteViewTool tool,

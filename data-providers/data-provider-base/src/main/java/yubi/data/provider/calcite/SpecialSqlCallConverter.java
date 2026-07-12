@@ -50,7 +50,7 @@ public class SpecialSqlCallConverter {
             CustomSqlBetweenOperator customSqlBetweenOperator = new CustomSqlBetweenOperator(operator.flag, operator.isNegated());
             ReflectUtils.setFiledValue(sqlCall, "operator", customSqlBetweenOperator);
         } catch (Exception e) {
-            log.error("spacial call convert error", e);
+            log.error("Special SQL call conversion failed");
         }
         return sqlCall;
     }

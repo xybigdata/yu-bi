@@ -11,6 +11,14 @@ import yubi.query.api.QueryValidationException;
 final class AgentFailureClassifier {
 
     AgentFailure classify(Throwable failure, boolean canRecover) {
+        if (failure instanceof ToolTimeoutException) {
+            return new AgentFailure(FailureCategory.TIMEOUT, "TOOL_EXECUTION_TIMEOUT",
+                    "只读工具执行超过时间限制", false);
+        }
+        if (failure instanceof ToolConcurrencyLimitException) {
+            return new AgentFailure(FailureCategory.CONCURRENCY_LIMIT, "TOOL_CONCURRENCY_LIMIT",
+                    "只读工具并发已达到上限", false);
+        }
         if (failure instanceof ToolInputException exception) {
             return new AgentFailure(FailureCategory.VALIDATION, exception.code(),
                     "工具参数不符合只读契约", false);

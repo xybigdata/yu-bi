@@ -17,12 +17,14 @@ public final class AgentModels {
 
     public enum FailureCategory {
         VALIDATION, ACCESS_DENIED, DEFINITION, EXECUTION,
-        UNKNOWN_TOOL, MODEL_FAILURE, STEP_LIMIT, INTERNAL
+        TIMEOUT, CONCURRENCY_LIMIT, UNKNOWN_TOOL, MODEL_FAILURE, STEP_LIMIT, INTERNAL
     }
 
     public enum AuditEventType { SESSION_STARTED, STEP_COMPLETED, SESSION_COMPLETED }
 
     public enum AuditStatus { STARTED, SUCCEEDED, FAILED, LIMIT_REACHED }
+
+    public enum ToolMetricStatus { SUCCEEDED, FAILED, TIMED_OUT, CONCURRENCY_REJECTED }
 
     public record AgentFailure(FailureCategory category,
                                String code,
@@ -103,5 +105,16 @@ public final class AgentModels {
                                   ResultSize resultSize,
                                   AuditStatus status,
                                   FailureCategory failureCategory) {
+    }
+
+    /** 只包含有限枚举和数值，不允许携带身份、请求、参数值或查询内容。 */
+    public record ToolMetric(String toolName,
+                             ToolMetricStatus status,
+                             FailureCategory failureCategory,
+                             long durationMillis,
+                             int argumentNodes,
+                             int resultItems,
+                             long resultBytes,
+                             int queryRows) {
     }
 }

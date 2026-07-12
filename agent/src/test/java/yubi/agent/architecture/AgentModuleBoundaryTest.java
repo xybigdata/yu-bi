@@ -3,6 +3,7 @@ package yubi.agent.architecture;
 import org.junit.jupiter.api.Test;
 import yubi.agent.api.AgentRequest;
 import yubi.agent.domain.ModelProtocol.ModelTurn;
+import yubi.agent.domain.AgentModels.ToolMetric;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,6 +43,8 @@ class AgentModuleBoundaryTest {
     void requestAndModelTurnMustNotCarryTrustedIdentityOrOrganization() {
         assertEquals(Set.of("message"), components(AgentRequest.class));
         assertEquals(Set.of("userMessage", "stepIndex", "tools", "history"), components(ModelTurn.class));
+        assertEquals(Set.of("toolName", "status", "failureCategory", "durationMillis", "argumentNodes",
+                "resultItems", "resultBytes", "queryRows"), components(ToolMetric.class));
     }
 
     @Test

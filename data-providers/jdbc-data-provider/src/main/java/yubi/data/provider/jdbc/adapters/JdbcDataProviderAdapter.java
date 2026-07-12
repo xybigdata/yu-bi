@@ -87,7 +87,7 @@ public class JdbcDataProviderAdapter implements Closeable {
             this.driverInfo = driverInfo;
             this.dataSource = JdbcDataProvider.getDataSourceFactory().createDataSource(jdbcProperties);
         } catch (Exception e) {
-            log.error("data provider init error", e);
+            log.error("JDBC data provider initialization failed");
             Exceptions.e(e);
         }
         this.init = true;
@@ -98,8 +98,7 @@ public class JdbcDataProviderAdapter implements Closeable {
         try {
             Class.forName(properties.getDriverClass());
         } catch (ClassNotFoundException e) {
-            String errMsg = "Driver class not found " + properties.getDriverClass();
-            log.error(errMsg, e);
+            log.error("JDBC driver class was not found");
             Exceptions.e(e);
         }
         try (Connection ignored = DriverManager.getConnection(properties.getUrl(), properties.getUser(), properties.getPassword())) {
@@ -224,7 +223,7 @@ public class JdbcDataProviderAdapter implements Closeable {
                 keyMap.computeIfAbsent(importedKeys.getString(FKCOLUMN_NAME), key -> new ArrayList<>()).add(foreignKey);
             }
         } catch (SQLFeatureNotSupportedException e) {
-            log.warn(e.getMessage());
+            log.warn("JDBC foreign-key metadata is not supported");
         }
         return keyMap;
     }
@@ -327,7 +326,7 @@ public class JdbcDataProviderAdapter implements Closeable {
                     sqlDialect = (SqlDialect) clz.getDeclaredConstructor().newInstance();
                 }
             } catch (Exception ignored) {
-                log.warn("Sql dialect " + driverInfo.getSqlDialect() + " not found, use default sql dialect");
+                log.warn("Configured query dialect was not found; using the default dialect");
             }
         }
         if (sqlDialect == null) {
@@ -367,7 +366,7 @@ public class JdbcDataProviderAdapter implements Closeable {
                 ReflectUtils.setFiledValue(sqlDialect, entry.getKey(), entry.getValue());
             }
         } catch (Exception e) {
-            log.warn("sql dialect config error for " + driverInfo.getSqlDialect());
+            log.warn("Query dialect configuration failed");
         }
     }
 
@@ -463,11 +462,11 @@ public class JdbcDataProviderAdapter implements Closeable {
 
         if (supportPaging()) {
             sql = render.render(true, true, false);
-            log.debug(sql);
+            log.debug("Executing paged read-only source query");
             dataframe = execute(sql);
         } else {
             sql = render.render(true, false, false);
-            log.debug(sql);
+            log.debug("Executing read-only source query");
             dataframe = execute(sql, executeParam.getPageInfo());
         }
         // fix page info

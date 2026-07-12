@@ -25,12 +25,13 @@ final class ExecuteViewOutputMapper {
         this.limits = limits;
     }
 
-    ToolOutput map(QueryResult result) {
+    ToolOutput map(QueryResult result, ExecuteViewInput input) {
+        int returnLimit = Math.toIntExact(input.returnLimit(limits.maximumItems()));
         Projection id = text(result.id(), metadataTextLimit());
         Projection name = text(result.name(), metadataTextLimit());
         Projection visualizationType = text(result.visualizationType(), metadataTextLimit());
         Projection visualizationId = text(result.visualizationId(), metadataTextLimit());
-        Projection page = page(result.page());
+        Projection page = page(result.page(), input, returnLimit);
 
         Projection returnedPage = null;
         Projection returnedId = null;
@@ -40,7 +41,7 @@ final class ExecuteViewOutputMapper {
         List<StructuredValue> returnedColumns = new ArrayList<>();
         List<StructuredValue> returnedRows = new ArrayList<>();
         boolean truncated = id.truncated() || name.truncated() || visualizationType.truncated()
-                || visualizationId.truncated() || page.truncated();
+                || visualizationId.truncated() || page.truncated() || hasMore(result, input, returnLimit);
 
         if (page.value() != null && fits(returnedId, returnedName, returnedVisualizationType,
                 returnedVisualizationId, returnedColumns, returnedRows, page)) {
@@ -97,7 +98,7 @@ final class ExecuteViewOutputMapper {
             Projection row = row(result.rows().get(index));
             observedRowsBytes += row.observedBytes() + (index == 0 ? 0 : 1);
             truncated |= row.truncated();
-            if (!acceptingRows || returnedRows.size() >= limits.maximumItems()) {
+            if (!acceptingRows || returnedRows.size() >= returnLimit) {
                 acceptingRows = false;
                 truncated = true;
                 continue;
@@ -127,7 +128,40 @@ final class ExecuteViewOutputMapper {
             throw new IllegalStateException("execute_view 结果超过确定性字节上限");
         }
         return new ToolOutput(output, new ResultSize(result.rows().size(), returnedRows.size(),
-                observedBytes, returnedBytes, limits.maximumItems(), limits.maximumBytes(), truncated));
+                observedBytes, returnedBytes, returnLimit, limits.maximumBytes(), truncated));
+    }
+
+    private boolean hasMore(QueryResult result, ExecuteViewInput input, int returnLimit) {
+        if (result.rows().size() > returnLimit) {
+            return true;
+        }
+        boolean totalProbe = input.countTotal() || input.pageNo() > 1;
+        if (!totalProbe) {
+            return false;
+        }
+        Page internalPage = result.page();
+        if (internalPage == null || !internalPage.countTotal()) {
+            return result.rows().size() >= returnLimit;
+        }
+        long offset = saturatedMultiply(input.pageNo() - 1L, returnLimit);
+        long observedThrough = saturatedAdd(offset, result.rows().size());
+        return internalPage.total() > observedThrough;
+    }
+
+    private long saturatedMultiply(long left, long right) {
+        try {
+            return Math.multiplyExact(left, right);
+        } catch (ArithmeticException exception) {
+            return Long.MAX_VALUE;
+        }
+    }
+
+    private long saturatedAdd(long left, long right) {
+        try {
+            return Math.addExact(left, right);
+        } catch (ArithmeticException exception) {
+            return Long.MAX_VALUE;
+        }
     }
 
     private boolean fits(Projection id,
@@ -184,15 +218,13 @@ final class ExecuteViewOutputMapper {
                 "isNull", fixed(StructuredValues.bool(false)));
     }
 
-    private Projection page(Page page) {
-        if (page == null) {
-            return Projection.empty();
-        }
+    private Projection page(Page internalPage, ExecuteViewInput input, int returnLimit) {
+        long publicTotal = input.countTotal() && internalPage != null ? internalPage.total() : 0;
         return object(
-                "pageNo", fixed(StructuredValues.integer(page.pageNo())),
-                "pageSize", fixed(StructuredValues.integer(page.pageSize())),
-                "total", fixed(StructuredValues.integer(page.total())),
-                "countTotal", fixed(StructuredValues.bool(page.countTotal())));
+                "pageNo", fixed(StructuredValues.integer(input.pageNo())),
+                "pageSize", fixed(StructuredValues.integer(returnLimit)),
+                "total", fixed(StructuredValues.integer(publicTotal)),
+                "countTotal", fixed(StructuredValues.bool(input.countTotal())));
     }
 
     private Projection text(String value, long maximumBytes) {

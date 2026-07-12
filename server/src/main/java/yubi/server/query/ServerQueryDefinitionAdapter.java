@@ -93,7 +93,7 @@ public class ServerQueryDefinitionAdapter implements QueryDefinitionPort {
                 }
             }
         } catch (Exception ex) {
-            log.error("view model parse error", ex);
+            log.error("View model projection failed");
         }
         return schema;
     }

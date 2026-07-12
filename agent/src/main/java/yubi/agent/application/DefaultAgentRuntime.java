@@ -16,6 +16,8 @@ import yubi.agent.domain.AgentModels.ResultSize;
 import yubi.agent.domain.AgentModels.SessionStatus;
 import yubi.agent.domain.AgentModels.StepKind;
 import yubi.agent.domain.AgentModels.StepStatus;
+import yubi.agent.domain.AgentModels.ToolMetric;
+import yubi.agent.domain.AgentModels.ToolMetricStatus;
 import yubi.agent.domain.AgentRuntimePolicy;
 import yubi.agent.domain.ModelProtocol.FinalAnswer;
 import yubi.agent.domain.ModelProtocol.ModelDecision;
@@ -23,10 +25,12 @@ import yubi.agent.domain.ModelProtocol.ModelTurn;
 import yubi.agent.domain.ModelProtocol.ToolCall;
 import yubi.agent.port.AgentAuditPort;
 import yubi.agent.port.AgentClockPort;
+import yubi.agent.port.AgentMetricsPort;
 import yubi.agent.port.AgentSessionStorePort;
 import yubi.agent.port.ModelGateway;
 import yubi.agent.port.ReadOnlyTool;
 import yubi.agent.port.ReadOnlyToolRegistry;
+import yubi.agent.port.ToolExecutionPort;
 import yubi.query.api.MetadataToolSchema;
 
 import java.util.Objects;
@@ -41,6 +45,8 @@ public final class DefaultAgentRuntime implements AgentUseCase {
     private final AgentSessionStorePort sessionStore;
     private final AgentClockPort clock;
     private final AgentRuntimePolicy policy;
+    private final ToolExecutionPort toolExecutionPort;
+    private final AgentMetricsPort metricsPort;
     private final ArgumentSummarizer argumentSummarizer = new ArgumentSummarizer();
     private final AgentFailureClassifier failureClassifier = new AgentFailureClassifier();
 
@@ -50,12 +56,26 @@ public final class DefaultAgentRuntime implements AgentUseCase {
                                AgentSessionStorePort sessionStore,
                                AgentClockPort clock,
                                AgentRuntimePolicy policy) {
+        this(modelGateway, toolRegistry, auditPort, sessionStore, clock, policy,
+                (tool, arguments, context) -> tool.execute(arguments, context), metric -> { });
+    }
+
+    public DefaultAgentRuntime(ModelGateway modelGateway,
+                               ReadOnlyToolRegistry toolRegistry,
+                               AgentAuditPort auditPort,
+                               AgentSessionStorePort sessionStore,
+                               AgentClockPort clock,
+                               AgentRuntimePolicy policy,
+                               ToolExecutionPort toolExecutionPort,
+                               AgentMetricsPort metricsPort) {
         this.modelGateway = Objects.requireNonNull(modelGateway, "modelGateway");
         this.toolRegistry = Objects.requireNonNull(toolRegistry, "toolRegistry");
         this.auditPort = Objects.requireNonNull(auditPort, "auditPort");
         this.sessionStore = Objects.requireNonNull(sessionStore, "sessionStore");
         this.clock = Objects.requireNonNull(clock, "clock");
         this.policy = Objects.requireNonNull(policy, "policy");
+        this.toolExecutionPort = Objects.requireNonNull(toolExecutionPort, "toolExecutionPort");
+        this.metricsPort = Objects.requireNonNull(metricsPort, "metricsPort");
     }
 
     @Override
@@ -161,7 +181,7 @@ public final class DefaultAgentRuntime implements AgentUseCase {
 
             long started = clock.nanoTime();
             try {
-                var output = tool.execute(call.arguments(), context.queryContext());
+                var output = toolExecutionPort.execute(tool, call.arguments(), context.queryContext());
                 long duration = durationMillis(started);
                 AgentStep step = new AgentStep(stepIndex, StepKind.TOOL_CALL, tool.schema().name(),
                         StepStatus.SUCCEEDED, summary, output, null, duration);
@@ -277,6 +297,29 @@ public final class DefaultAgentRuntime implements AgentUseCase {
                 step.durationMillis(), step.output() == null ? ResultSize.empty() : step.output().size(),
                 step.status() == StepStatus.SUCCEEDED ? AuditStatus.SUCCEEDED : AuditStatus.FAILED,
                 step.failure() == null ? null : step.failure().category());
+        metric(step);
+    }
+
+    private void metric(AgentStep step) {
+        if (step.kind() != StepKind.TOOL_CALL) {
+            return;
+        }
+        try {
+            ResultSize size = step.output() == null ? ResultSize.empty() : step.output().size();
+            FailureCategory failure = step.failure() == null ? null : step.failure().category();
+            ToolMetricStatus status = switch (failure) {
+                case TIMEOUT -> ToolMetricStatus.TIMED_OUT;
+                case CONCURRENCY_LIMIT -> ToolMetricStatus.CONCURRENCY_REJECTED;
+                case null -> ToolMetricStatus.SUCCEEDED;
+                default -> ToolMetricStatus.FAILED;
+            };
+            int nodes = step.arguments().scalarCount() + step.arguments().collectionCount();
+            int queryRows = "execute_view".equals(step.toolName()) ? size.observedItems() : 0;
+            metricsPort.record(new ToolMetric(step.toolName(), status, failure, step.durationMillis(),
+                    nodes, size.returnedItems(), size.returnedBytes(), queryRows));
+        } catch (RuntimeException ignored) {
+            // 指标失败与 Trace 一样不得覆盖业务结果或原始失败。
+        }
     }
 
     private void audit(AgentExecutionContext context,

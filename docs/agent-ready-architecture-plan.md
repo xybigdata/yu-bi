@@ -292,6 +292,8 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 
 ### 目标 G：评测、可观测与安全加固
 
+**状态**：已完成（2026-07-12）
+
 **依赖**：目标 F。
 
 **目的**：在扩展 Agent 能力前建立可量化的质量和运行风险基线。
@@ -308,6 +310,22 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 - 评测可在 CI 或受控环境中重复运行。
 - 每次 Agent 查询都能追踪到具体用户、工具调用和最终结果。
 - 安全测试覆盖提示注入、身份伪造和超限查询。
+
+**完成记录**：
+
+- 新增确定性离线评测集，使用固定案例 ID、结构化假模型、内存 Query/Metadata 能力和脱敏评分报告，实际穿过 V1 Registry、Tool 映射、字段授权守卫、Query 命令生成、Trace、指标和会话快照。9 个案例覆盖资产发现、查询参数生成、有限码拒答、实际 `execute_sql` 未注册工具攻击、实际 `execute_view.sql` 输入攻击、提示注入写工具、身份伪造、未授权字段和超限分页；两类 SQL 攻击均在能力调用前拒绝，身份伪造同时要求 Metadata 与 Query 零调用。敏感检查包含完整 `AgentRunResult` 与最终答案，并逐项检查令牌、JDBC URL、密码原值和未授权字段四个独立 canary；反向测试在合法 Tool 调用后分别泄露每个 canary，均得到有限 `SENSITIVE_OUTPUT`，错误拒答和跳过 SQL 攻击也只产生有限失败原因。不访问网络、真实模型或真实数据源，失败报告只包含案例 ID 与有限原因枚举。
+- 新增 `ToolExecutionPolicy` 和 `BoundedToolExecutor`。`yubi.agent.*` 可配置查询最大页大小、Tool 超时、最大并发、结果项数和结果字节数，默认分别为 100、30 秒、4、100 和 64 KiB，平台线程并发绝对上限为 64。执行器线程按需创建，不在构造时预启动；使用固定上限线程池、固定容量队列和非阻塞并发许可。许可由 Tool 任务实际退出释放而非 `Future.cancel/done` 释放，提交拒绝（含线程工厂抛出 `Error`）、取消未开始、正常/异常、调用方中断、超时和关闭竞态均恰好释放一次，完成后的竞争测试锁定许可不会过量释放；忽略中断的 Tool 在真正退出前持续占用许可，新调用稳定得到 `CONCURRENCY_LIMIT`。缺少模型网关或会话存储时组合根不创建 Runtime 或执行器；非默认外部配置、YAML 键和无效值 fail-fast 均有装配测试。
+- `execute_view` 在能力调用前按独立页大小策略拒绝超限请求，并分离调用方请求页大小、公开返回上限和内部探测量。首屏未计数时 Query 最多取公开上限加 1 行；后续页或显式计数保持公开有效页大小并用内部总数可靠判断 `hasMore`，不会因简单加 1 改变分页偏移。已知总数只按 `total > offset + observedRows` 判断是否还有数据，空越界页和总数为零不会误报截断。输出隐藏内部哨兵/强制计数，严格返回公开上限内的稳定前缀并正确标记 `truncated`；超过 100 行、小页、恰好边界、后续页、空越界页和总数为零均有端到端 Tool 测试。现有 Query REST、Preview、下载、View/Dashboard Schema 和 DataProvider SPI 未改变。
+- 新增基础设施无关 `AgentMetricsPort`。Runtime 每个 Tool 调用只记录一次有限协议事件；server 通过窄依赖 `spring-boot-starter-micrometer-metrics` 提供 `MeterRegistry`，Micrometer 适配器记录调用计数、耗时、参数节点、结果项/字节和 `execute_view` 查询行数指标，失败率可由 `status/failure` 调用计数计算。指标标签只允许三工具名或 `unregistered`、有限状态和失败枚举，不包含用户、组织、session、request、correlation、SQL、字段名、参数值或数据内容；测试锁定运行时没有 Actuator Web 自动配置，POM 不引入 Actuator，因此目标 G 未增加 `/actuator` 或其他管理 Web 入口。
+- 既有 Agent Trace 继续记录可信 session/request/subject/organization/correlation、步骤、工具、耗时、结果规模、状态和失败分类；新增测试锁定每个 Tool 步骤和会话最终状态均可追踪。会话存储继续清空 Tool payload 与最终答案，指标/Trace/存储失败不覆盖确定性结果。
+- 敏感加固移除登录失败日志中的原始密码、Query/Provider（包括 Oracle）日志中的原始 SQL、变量替换日志中的变量名/SQL 片段、Provider 不受控异常 message/cause，以及 View 模型投影失败的原始异常详情。JDK AST 门禁对目标 G 实际清理的 11 个 server/Query 适配器/Provider 生产文件使用显式受控集合逐文件扫描，传统日志级别调用只允许固定字符串字面量或其编译期拼接，任何动态参数均拒绝；SLF4J 2 的 `atTrace/atDebug/atInfo/atWarn/atError/atLevel/makeLoggingEventBuilder` fluent builder 入口全部禁止。夹具覆盖 logger 字段、Throwable、SQL 值改名、包装表达式、登录密码、Source URL，以及 fluent API 中的密码、Source URL/SQL、Throwable 与动态消息。该门禁证明的是受控文件集合，不声称对集合外全仓代码执行跨过程污点分析。评测、Trace、指标和快照测试逐项使用令牌、JDBC URL、密码原值及未授权字段 canary 验证无泄露；未知工具名和指标工具标签均归一化。
+- 新增 ADR-0003，固化离线评测、固定容量执行、低基数指标、Trace/指标职责分离和敏感输出约束；与 ADR-0001 的 Query 边界及 ADR-0002 的三工具、可信上下文和双重授权一致。没有新增模型 SDK、生产数据库表、Agent REST/前端、写 Tool、审批或工作区，Registry 仍精确只有 `search_data_assets`、`describe_data_asset`、`execute_view`。
+- 测试通过：`mvn -pl agent -am test`（Query 20、Agent 48）、`mvn -pl query -am test`（Query 20）、`mvn -pl server -am -Dexec.skip=true test`（Query 20、Agent 48、Core 23、Security 18、Provider Base 46、JDBC 125、Server 70，共 350 项通过；JDBC 既有 6 项跳过）。离线评测及反向评分、超时/并发/忽略中断/取消未开始/惰性线程/提交 Error/许可不过量/关闭竞态、分页/截断/空越界页、非默认配置/fail-fast、Micrometer 有注册表且无 Actuator Web surface、指标低基数、Trace 完整性、提示注入、身份伪造、未授权字段、超限查询和敏感日志受控集合 AST 门禁均包含在上述测试中。
+- 构建与运行验证通过：`mvn -pl server -am -DskipTests package`、安装包 assembly、`npm run checkTs`、`npm run lint`、`npm run test:ci`（203 个文件、1336 项通过、4 项跳过）、`npm run build:task`、`npm run build`、JDBC 定向反应堆（125 项，既有 6 项跳过）及最终隔离安装包 demo 健康检查。健康检查首次在工作区沙箱中因端口绑定 `Operation not permitted` 失败；在获准的本机 18080 端口运行同一脚本后通过。
+- 依赖和架构验证通过：Agent 运行时依赖仅为 `agent -> query`，Query 运行时依赖为空；`jdeps` 为 Agent -> `query/java.base/java.sql`、Query -> `java.base`，`java.sql` 仍受三种时间值类型源码门禁限制。Maven Enforcer、Agent/Query 源码门禁、三工具装配搜索、指标标签搜索、目标 G 受控日志 AST 门禁和 `git diff --check` 均通过；全仓敏感日志搜索结果已逐项核对，集合外命中按下述残余风险保留。
+- 真实阻断保持不变：raw 与 gzip 当前构建报告的基线检查都会先报告 `chunk rawOversized` 新增 `slice.js` 与 `task/index.js`；报告同时显示既有 `logo.svg` 超过 asset raw 阈值。目标 G 未修改前端或体积基线，也未通过更新基线掩盖差异。既有非阻断告警仍包括 Mockito 动态 agent、测试 Log4j provider、GraalVM fallback、AntV S2 缺失 sourcemap、ECharts 弃用、Vite 大 chunk 和 npm allow-scripts。
+- 残余风险：Java 中断依赖 Provider 协作，忽略中断的调用会继续占用一个固定工作线程和许可直到实际退出，但不会提前接纳新调用；Micrometer 的外部导出、告警阈值、留存和多实例聚合由部署环境配置；生产模型网关和会话存储仍未选型。全仓搜索还发现 Agent/Query 链路之外的历史 OAuth、迁移和通用配置路径使用 `printStackTrace` 或原始异常日志，未在本目标中跨域重写，后续安全清理应单独评审其令牌/配置异常脱敏与诊断替代方案。
+- 本目标未进入目标 H；目标 H 状态和内容未修改。
 
 ### 目标 H：受控写工具与 Agent 工作区
 

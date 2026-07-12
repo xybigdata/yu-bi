@@ -43,9 +43,16 @@ record ExecuteViewInput(String viewId,
     }
 
     ExecuteQueryCommand command(int maximumRows) {
-        long boundedPageSize = Math.min(pageSize, (long) maximumRows + 1L);
+        long returnLimit = returnLimit(maximumRows);
+        boolean sentinelProbe = pageNo == 1 && !countTotal;
+        long fetchLimit = sentinelProbe ? returnLimit + 1L : returnLimit;
+        boolean internalCountTotal = countTotal || pageNo > 1;
         return new ExecuteQueryCommand(viewId, List.of(), columns, List.of(), aggregators, filters, groups, orders,
-                Page.request(pageNo, boundedPageSize, countTotal), parameters,
+                Page.request(pageNo, fetchLimit, internalCountTotal), parameters,
                 false, false, 0, false);
+    }
+
+    long returnLimit(int maximumRows) {
+        return Math.min(pageSize, maximumRows);
     }
 }

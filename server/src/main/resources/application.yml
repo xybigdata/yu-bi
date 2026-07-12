@@ -67,6 +67,16 @@ yubi:
   migration:
     enable: true
 
+  agent:
+    query:
+      maximum-page-size: 100
+    tool:
+      timeout-millis: 30000
+      maximum-concurrent-calls: 4
+    result:
+      maximum-items: 100
+      maximum-bytes: 65536
+
   server:
     path-prefix: /api/v1
 

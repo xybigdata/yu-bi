@@ -2,7 +2,7 @@ package yubi.agent.application;
 
 import yubi.agent.domain.StructuredValue;
 import yubi.agent.domain.StructuredValue.ObjectValue;
-import yubi.agent.domain.ToolResultLimits;
+import yubi.agent.domain.ToolExecutionPolicy;
 import yubi.query.domain.QueryModels.Aggregate;
 import yubi.query.domain.QueryModels.AggregateType;
 import yubi.query.domain.QueryModels.ColumnSelection;
@@ -29,10 +29,10 @@ final class ExecuteViewInputMapper {
     private static final Set<ValueType> SAFE_VALUE_TYPES = Set.of(
             ValueType.STRING, ValueType.NUMERIC, ValueType.DATE, ValueType.BOOLEAN);
     private static final int MAX_COLLECTION_SIZE = 100;
-    private final ToolResultLimits limits;
+    private final int maximumPageSize;
 
-    ExecuteViewInputMapper(ToolResultLimits limits) {
-        this.limits = limits;
+    ExecuteViewInputMapper(ToolExecutionPolicy policy) {
+        this.maximumPageSize = policy.maximumPageSize();
     }
 
     ExecuteViewInput map(ObjectValue arguments) {
@@ -50,8 +50,8 @@ final class ExecuteViewInputMapper {
         ToolArgumentReader page = new ToolArgumentReader(root.optionalObject("page"))
                 .exact(Set.of("pageNo", "pageSize", "countTotal"));
         long pageNo = page.optionalInteger("pageNo", 1, 1, Integer.MAX_VALUE);
-        long pageSize = page.optionalInteger("pageSize", (long) limits.maximumItems() + 1L,
-                1, 10_000);
+        long pageSize = page.optionalInteger("pageSize", (long) maximumPageSize,
+                1, maximumPageSize);
         boolean countTotal = page.optionalBoolean("countTotal", false);
         Map<String, Set<String>> parameters = parameters(root.array("parameters", MAX_COLLECTION_SIZE));
         return new ExecuteViewInput(viewId, columns, aggregators, filters, groups, orders,

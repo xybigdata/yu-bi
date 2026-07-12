@@ -191,7 +191,7 @@ public class VariablePlaceholder {
                 Pattern variablePattern = Pattern.compile(String.format(Const.VARIABLE_PATTERN_TEMPLATE, variable.getName()), Pattern.CASE_INSENSITIVE);
                 Matcher matcher = variablePattern.matcher(sqlNode.toSqlString(sqlDialect).getSql());
                 if (matcher.find()) {
-                    log.warn("variable replace failed due to unknown sql type :" + sqlNode.getKind() + ">" + sqlNode.toSqlString(sqlDialect).getSql());
+                    log.warn("Variable replacement failed for an unsupported query node type");
                     throw new ParamReplaceException();
                 }
             }
@@ -261,7 +261,7 @@ public class VariablePlaceholder {
             }
             ScriptVariable variable = variables.get(0);
             if (CollectionUtils.isEmpty(variable.getValues())) {
-                log.warn("The query variable [" + variable.getName() + "] do not have default values, which may cause SQL syntax errors");
+                log.warn("Query variable has no default values; using NULL comparison fallback");
                 SqlCall isNullSqlCall = createIsNullSqlCall(sqlCall.getOperandList().get(0));
                 return new ReplacementPair(originalSqlFragment, SqlNodeUtils.toSql(isNullSqlCall, sqlDialect, false));
             }
