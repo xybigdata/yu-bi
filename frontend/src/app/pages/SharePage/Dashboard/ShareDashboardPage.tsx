@@ -23,7 +23,7 @@ import ChartManager from 'app/models/ChartManager';
 import { preloadChartPlugins } from 'app/services/chartPluginService';
 import { useLocation } from 'app/routerCompat';
 import { login } from 'app/slice/thunks';
-import { ChartDataRequest } from 'app/types/ChartDataRequest';
+import { ChartDataRequest } from 'app/features/query';
 import {
   downloadShareDataChartFile,
   loadShareTask,

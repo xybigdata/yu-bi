@@ -32,7 +32,7 @@ import { ExecuteToken, ShareVizInfo } from 'app/pages/SharePage/slice/types';
 import {
   ChartVariableParams,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import ChartDataSetDTO from 'app/types/ChartDataSet';
 import {
   fetchAvailableSourceFunctionsAsync,

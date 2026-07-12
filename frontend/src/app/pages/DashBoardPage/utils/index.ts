@@ -34,7 +34,7 @@ import {
   ChartDataRequestFilter,
   ChartVariableParams,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import ChartDataView from 'app/types/ChartDataView';
 import { convertToChartConfigDTO } from 'app/utils/ChartDtoHelper';
 import { findPathByNameInMeta, getStyles } from 'app/utils/chartHelper';

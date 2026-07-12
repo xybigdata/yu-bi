@@ -27,7 +27,7 @@ import { ChartMouseEventParams } from 'app/types/Chart';
 import {
   ChartDataRequest,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import { CompatNavigate } from 'app/hooks/useCompatNavigate';
 import { tablePagingAndSortEventListener } from 'app/utils/ChartEventListenerHelper';
 import {
@@ -41,6 +41,7 @@ import { isEmptyArray } from 'utils/object';
 import { urlSearchTransfer } from 'utils/urlSearchTransfer';
 import { jumpTypes, ORIGINAL_TYPE_MAP } from '../constants';
 import { boardActions } from '../pages/Board/slice';
+import { selectWidgetInfoMap } from '../pages/Board/slice/selector';
 import {
   getChartWidgetDataAsync,
   getControllerOptions,
@@ -60,10 +61,7 @@ import {
   editWidgetDataActions,
   editWidgetInfoActions,
 } from '../pages/BoardEditor/slice';
-import {
-  editorWidgetClearLinkageAction,
-  widgetClearLinkageAction,
-} from '../pages/BoardEditor/slice/actions/actions';
+import { editorWidgetClearLinkageAction } from '../pages/BoardEditor/slice/actions/actions';
 import {
   getEditChartWidgetDataAsync,
   getEditControllerOptions,
@@ -568,6 +566,48 @@ export const widgetGetDataAction =
     } else {
       dispatch(getWidgetData({ boardId, widget, renderMode }));
     }
+  };
+
+const widgetClearLinkageAction =
+  (widget: Widget, renderMode: VizRenderMode) => (dispatch, getState) => {
+    const { id, dashboardId } = widget;
+    const rootState = getState();
+    const boardWidgetInfoRecord = selectWidgetInfoMap(getState(), dashboardId);
+    const executeTokenMap = rootState?.share?.executeTokenMap || {};
+    const currentWidgetInfo = boardWidgetInfoRecord?.[id];
+
+    let executeToken;
+    if (renderMode === 'share') {
+      executeToken = executeTokenMap?.[widget?.viewIds?.[0]]?.authorizedToken;
+    }
+    if (!currentWidgetInfo?.inLinking) {
+      return;
+    }
+    dispatch(
+      boardActions.changeWidgetInLinking({
+        boardId: dashboardId,
+        widgetId: id,
+        toggle: false,
+      }),
+    );
+    dispatch(boardActions.changeSelectedItems({ wid: id, data: [] }));
+    const linkTargetWidgets = Object.values(boardWidgetInfoRecord || {}).filter(
+      widgetInfo => widgetInfo?.linkInfo?.sourceWidgetId === id,
+    );
+    linkTargetWidgets.forEach(widgetInfo => {
+      const filters = widgetInfo?.linkInfo?.filters || [];
+      const variables = widgetInfo?.linkInfo?.variables;
+      dispatch(
+        syncBoardWidgetChartDataAsync({
+          boardId: dashboardId,
+          sourceWidgetId: '',
+          widgetId: widgetInfo.id,
+          executeToken,
+          extraFilters: filters,
+          variableParams: variables,
+        }),
+      );
+    });
   };
 
 export const widgetToClearLinkageAction =

@@ -53,7 +53,6 @@ class QueryCorsConfigurationTest {
 
     @Test
     void shouldNotExpandCorsToLegacyOrUnrelatedApiPaths() {
-        assertNull(source.getCorsConfiguration(new MockHttpServletRequest("OPTIONS", "/api/v1/shares/execute")));
         assertNull(source.getCorsConfiguration(new MockHttpServletRequest("OPTIONS", "/api/v1/users")));
     }
 }

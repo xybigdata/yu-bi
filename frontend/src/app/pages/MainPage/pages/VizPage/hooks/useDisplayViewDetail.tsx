@@ -29,7 +29,7 @@ import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
 import {
   ChartDataRequest,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import ChartDataSetDTO, { ChartDatasetMeta } from 'app/types/ChartDataSet';
 import ChartDataView from 'app/types/ChartDataView';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';

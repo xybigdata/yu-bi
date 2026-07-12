@@ -6,32 +6,29 @@
  * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package yubi.server.base.params;
 
-import yubi.core.base.PageInfo;
-import yubi.core.data.provider.SelectColumn;
-import yubi.core.data.provider.sql.*;
-import yubi.security.base.ResourceType;
 import lombok.Data;
 import org.springframework.util.CollectionUtils;
+import yubi.core.base.PageInfo;
+import yubi.core.data.provider.SelectColumn;
+import yubi.core.data.provider.sql.AggregateOperator;
+import yubi.core.data.provider.sql.FilterOperator;
+import yubi.core.data.provider.sql.FunctionColumn;
+import yubi.core.data.provider.sql.GroupByOperator;
+import yubi.core.data.provider.sql.OrderOperator;
+import yubi.core.data.provider.sql.SelectKeyword;
+import yubi.security.base.ResourceType;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/** 下载和调度持久化载荷使用的查询请求，不作为 Web 查询契约暴露。 */
 @Data
-public class ViewExecuteParam {
+public class DownloadQueryRequest {
 
     private String vizId;
 
@@ -61,7 +58,7 @@ public class ViewExecuteParam {
 
     private boolean concurrencyControl;
 
-    private String concurrencyControlModel;
+    private String concurrencyControlMode;
 
     private boolean cache;
 
@@ -96,5 +93,4 @@ public class ViewExecuteParam {
     public void setAnalytics(Boolean analytics) {
         this.analytics = analytics != null && analytics;
     }
-
 }

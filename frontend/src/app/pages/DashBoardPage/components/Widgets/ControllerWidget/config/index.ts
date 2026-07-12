@@ -37,10 +37,7 @@ import {
   getTheWidgetFiltersAndParams,
 } from 'app/pages/DashBoardPage/utils';
 import { ChartStyleConfig } from 'app/types/ChartConfig';
-import {
-  ChartDataRequest,
-  ChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+import { ChartDataRequest, ChartDataRequestFilter } from 'app/features/query';
 import ChartDataView from 'app/types/ChartDataView';
 import { getAllColumnInMeta } from 'app/utils/chartHelper';
 import { transformToViewConfig } from 'app/utils/internalChartHelper';

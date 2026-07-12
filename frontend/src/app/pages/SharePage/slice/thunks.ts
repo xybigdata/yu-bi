@@ -32,7 +32,7 @@ import {
 } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import { handleServerStoryAction } from 'app/pages/StoryBoardPage/slice/actions';
 import { ServerStoryBoard } from 'app/pages/StoryBoardPage/slice/types';
-import type { ChartDataRequest } from 'app/types/ChartDataRequest';
+import type { ChartDataRequest } from 'app/features/query';
 import type {
   ChartDataSetDTO,
   ChartDatasetPageInfo,

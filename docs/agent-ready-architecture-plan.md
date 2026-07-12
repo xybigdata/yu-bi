@@ -192,6 +192,8 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 
 ### 目标 D：旧接口与过渡代码清理
 
+**状态**：已完成（2026-07-12）
+
 **依赖**：目标 C。
 
 **目的**：在无外部用户的前提下完成原子迁移收尾，不长期维护双实现。
@@ -209,6 +211,14 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 - 旧接口返回 404，仓库内无旧路径和 `concurrencyControlModel` 引用。
 - View/Dashboard 历史配置兼容测试通过。
 - 完整产品查询、分享和下载回归通过。
+
+**完成记录**：
+
+- 已删除三个旧查询 REST 的 Controller 查询方法；`/data-provider/execute`、`/data-provider/execute/test` 与 `/shares/execute` 的 POST 集成验收均返回 404。分享通用 ID 路由显式排除 `execute`，避免旧地址被错误解析为 405。
+- 已移除旧查询 DTO、兼容 Mapper 和 DataProvider/Share 查询门面。下载、分享下载和调度保留原有持久化载荷形状，但统一改用 `DownloadQueryRequest`、`DownloadQueryExecutor` 和 Query Use Case；历史 `concurrencyControlMode` 值在下载请求反序列化与分享下载回归中保持兼容。
+- 已删除前端临时 re-export，所有调用直接从 `app/features/query` 导入。14 项迁移架构测试使用 TypeScript AST 递归扫描生产扩展名，禁止 feature/shared 导入页面、禁止页面直接导入其他页面的 Query thunk，并覆盖本地/默认导出、绝对、相对、别名、命名空间、动态、无插值模板、require、重导出及全部生产扩展的目录入口解析。
+- 已增加生产代码旧工件架构测试、旧入口 404 测试、分享下载回归和前端临时模块/旧字段门禁；生产代码中不保留旧路径、旧字段或旧 DTO。
+- 验证通过：`mvn -pl query -am test`（11 项）、`mvn -pl server -am -Dexec.skip=true test`（Server 47 项）、`mvn -pl query dependency:tree -Dscope=runtime`、前端 `checkTs`、`lint`、`test:ci`、`build:task`、`build`，以及 `mvn -pl server -am -DskipTests package`。本目标未进入目标 E。
 
 ### 目标 E：元数据与语义能力
 

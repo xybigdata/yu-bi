@@ -46,10 +46,10 @@ import yubi.core.mappers.ext.SourceMapperExt;
 import yubi.security.manager.YuBiSecurityManager;
 import yubi.query.application.DefaultQueryService;
 import yubi.server.base.dto.VariableValue;
-import yubi.server.base.params.TestExecuteParam;
-import yubi.server.base.params.ViewExecuteParam;
+import yubi.server.base.params.DownloadQueryRequest;
 import yubi.server.query.ServerQueryAccessPolicyAdapter;
-import yubi.server.query.ServerQueryCompatibilityMapper;
+import yubi.server.query.DownloadQueryExecutor;
+import yubi.server.query.DownloadQueryMapper;
 import yubi.server.query.ServerQueryDefinitionAdapter;
 import yubi.server.query.ServerQueryEngineAdapter;
 import yubi.server.query.ServerQueryExecutionContextFactory;
@@ -100,7 +100,7 @@ class DataProviderServiceImplCharacterizationTest {
 
     private SourceMapperExt sourceMapper;
 
-    private DataProviderServiceImpl service;
+    private DownloadQueryExecutor downloadQueryExecutor;
 
     private Dataframe providerResult;
 
@@ -159,10 +159,9 @@ class DataProviderServiceImplCharacterizationTest {
                 dataProviderManager, sourceService, sourceConfigMapper);
         DefaultQueryService queryService = new DefaultQueryService(
                 definitionAdapter, accessAdapter, variableAdapter, engineAdapter, event -> { });
-        ServerQueryCompatibilityMapper compatibilityMapper = new ServerQueryCompatibilityMapper();
+        DownloadQueryMapper downloadQueryMapper = new DownloadQueryMapper();
         ServerQueryExecutionContextFactory contextFactory = new ServerQueryExecutionContextFactory(securityManager);
-        service = new DataProviderServiceImpl(dataProviderManager, queryService, queryService,
-                compatibilityMapper, contextFactory, sourceConfigMapper);
+        downloadQueryExecutor = new DownloadQueryExecutor(queryService, downloadQueryMapper, contextFactory);
         providerResult = dataframeWithScript();
         when(dataProviderManager.execute(any(), any(), any())).thenReturn(providerResult);
     }
@@ -174,11 +173,11 @@ class DataProviderServiceImplCharacterizationTest {
 
     @Test
     void shouldCharacterizeAuthenticatedQueryPermissionsVariablesAndProviderRequest() throws Exception {
-        ViewExecuteParam request = executableRequest();
+        DownloadQueryRequest request = executableRequest();
         request.setScript(true);
         request.setParams(Map.of("status", Set.of("paid")));
 
-        Dataframe result = service.execute(request);
+        Dataframe result = downloadQueryExecutor.execute(request);
 
         ArgumentCaptor<DataProviderSource> sourceCaptor = ArgumentCaptor.forClass(DataProviderSource.class);
         ArgumentCaptor<QueryScript> scriptCaptor = ArgumentCaptor.forClass(QueryScript.class);
@@ -241,7 +240,7 @@ class DataProviderServiceImplCharacterizationTest {
     void shouldCharacterizeOwnerWildcardAndDisabledPermissionVariables() throws Exception {
         when(securityManager.isOrgOwner("org-1")).thenReturn(true);
 
-        service.execute(executableRequest());
+        downloadQueryExecutor.execute(executableRequest());
 
         ArgumentCaptor<QueryScript> scriptCaptor = ArgumentCaptor.forClass(QueryScript.class);
         ArgumentCaptor<ExecuteParam> executeCaptor = ArgumentCaptor.forClass(ExecuteParam.class);
@@ -258,14 +257,14 @@ class DataProviderServiceImplCharacterizationTest {
 
     @Test
     void shouldCharacterizePageNormalization() throws Exception {
-        ViewExecuteParam request = executableRequest();
+        DownloadQueryRequest request = executableRequest();
         request.setPageInfo(PageInfo.builder()
                 .pageNo(0L)
                 .pageSize((long) Integer.MAX_VALUE + 100L)
                 .countTotal(true)
                 .build());
 
-        service.execute(request);
+        downloadQueryExecutor.execute(request);
 
         ArgumentCaptor<ExecuteParam> executeCaptor = ArgumentCaptor.forClass(ExecuteParam.class);
         verify(dataProviderManager).execute(any(), any(), executeCaptor.capture());
@@ -279,10 +278,10 @@ class DataProviderServiceImplCharacterizationTest {
         doThrow(new RuntimeException("manage denied"))
                 .when(viewService)
                 .requirePermission(any(View.class), eq(Const.MANAGE));
-        ViewExecuteParam request = executableRequest();
+        DownloadQueryRequest request = executableRequest();
         request.setScript(true);
 
-        Dataframe result = service.execute(request);
+        Dataframe result = downloadQueryExecutor.execute(request);
 
         assertNull(result.getScript());
         assertEquals(Boolean.FALSE, RequestContext.getScriptPermission());
@@ -293,75 +292,24 @@ class DataProviderServiceImplCharacterizationTest {
         Exception providerFailure = new Exception("provider unavailable");
         when(dataProviderManager.execute(any(), any(), any())).thenThrow(providerFailure);
 
-        Exception thrown = assertThrows(Exception.class, () -> service.execute(executableRequest()));
+        Exception thrown = assertThrows(Exception.class, () -> downloadQueryExecutor.execute(executableRequest()));
 
         assertSame(providerFailure, thrown);
-    }
-
-    @Test
-    void shouldCharacterizePreviewQueryExecution() throws Exception {
-        ScriptVariable requestVariable = new ScriptVariable(
-                "preview_filter",
-                VariableTypeEnum.QUERY,
-                ValueType.STRING,
-                Set.of("amount > 10"),
-                true);
-        TestExecuteParam request = new TestExecuteParam();
-        request.setSourceId("source-1");
-        request.setScript("select * from orders where $preview_filter$");
-        request.setScriptType(ScriptType.SQL);
-        request.setVariables(List.of(requestVariable));
-        request.setSize(0);
-
-        service.testExecute(request);
-
-        ArgumentCaptor<QueryScript> scriptCaptor = ArgumentCaptor.forClass(QueryScript.class);
-        ArgumentCaptor<ExecuteParam> executeCaptor = ArgumentCaptor.forClass(ExecuteParam.class);
-        verify(dataProviderManager).execute(any(), scriptCaptor.capture(), executeCaptor.capture());
-        ArgumentCaptor<Source> readSourceCaptor = ArgumentCaptor.forClass(Source.class);
-        verify(sourceService).requirePermission(readSourceCaptor.capture(), eq(Const.READ));
-        assertEquals(source.getId(), readSourceCaptor.getValue().getId());
-        assertEquals(source.getOrgId(), readSourceCaptor.getValue().getOrgId());
-        assertTrue(scriptCaptor.getValue().isTest());
-        assertEquals("source-1", scriptCaptor.getValue().getSourceId());
-        ScriptVariable previewVariable = scriptCaptor.getValue().getVariables().stream()
-                .filter(variable -> "preview_filter".equals(variable.getName()))
-                .findFirst()
-                .orElseThrow();
-        assertEquals(ValueType.FRAGMENT, previewVariable.getValueType());
-        assertEquals(1L, executeCaptor.getValue().getPageInfo().getPageNo());
-        assertEquals(1L, executeCaptor.getValue().getPageInfo().getPageSize());
-        assertFalse(executeCaptor.getValue().isCacheEnable());
-        assertEquals(Set.of("*"), columnKeys(executeCaptor.getValue().getIncludeColumns()));
     }
 
     @Test
     void shouldPreserveStructScriptTypeForViewExecution() throws Exception {
         view.setType(ScriptType.STRUCT.name());
 
-        service.execute(executableRequest());
+        downloadQueryExecutor.execute(executableRequest());
 
         ArgumentCaptor<QueryScript> scriptCaptor = ArgumentCaptor.forClass(QueryScript.class);
         verify(dataProviderManager).execute(any(), scriptCaptor.capture(), any());
         assertEquals(ScriptType.STRUCT, scriptCaptor.getValue().getScriptType());
     }
 
-    @Test
-    void shouldPreserveStructScriptTypeForPreviewExecution() throws Exception {
-        TestExecuteParam request = new TestExecuteParam();
-        request.setSourceId("source-1");
-        request.setScript("{\"columns\":[]}");
-        request.setScriptType(ScriptType.STRUCT);
-
-        service.testExecute(request);
-
-        ArgumentCaptor<QueryScript> scriptCaptor = ArgumentCaptor.forClass(QueryScript.class);
-        verify(dataProviderManager).execute(any(), scriptCaptor.capture(), any());
-        assertEquals(ScriptType.STRUCT, scriptCaptor.getValue().getScriptType());
-    }
-
-    private ViewExecuteParam executableRequest() {
-        ViewExecuteParam request = new ViewExecuteParam();
+    private DownloadQueryRequest executableRequest() {
+        DownloadQueryRequest request = new DownloadQueryRequest();
         request.setViewId("view-1");
         request.setColumns(List.of(SelectColumn.of("amount", "orders", "amount")));
         return request;

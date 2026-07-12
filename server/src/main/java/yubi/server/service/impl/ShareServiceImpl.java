@@ -255,22 +255,11 @@ public class ShareServiceImpl extends BaseService implements ShareService {
     }
 
     @Override
-    public Dataframe execute(ShareToken shareToken, ViewExecuteParam executeParam) throws Exception {
-        ShareAuthorizedToken shareAuthorizedToken = validateExecutePermission(shareToken.getAuthorizedToken(), executeParam);
-        try {
-            getSecurityManager().runAs(shareAuthorizedToken.getPermissionBy());
-            return dataProviderService.execute(executeParam, false);
-        } finally {
-            getSecurityManager().releaseRunAs();
-        }
-    }
-
-    @Override
     public Download createDownload(String clientId, ShareDownloadParam downloadParam) {
         if (CollectionUtils.isEmpty(downloadParam.getDownloadParams()) || CollectionUtils.isEmpty(downloadParam.getExecuteToken())) {
             return null;
         }
-        for (ViewExecuteParam param : downloadParam.getDownloadParams()) {
+        for (DownloadQueryRequest param : downloadParam.getDownloadParams()) {
             Map<String, ShareToken> tokeMap = downloadParam.getExecuteToken();
             if (CollectionUtils.isEmpty(tokeMap)) {
                 validateExecutePermission(null, param);
@@ -279,7 +268,7 @@ public class ShareServiceImpl extends BaseService implements ShareService {
             }
         }
 
-        List<ViewExecuteParam> viewExecuteParams = downloadParam.getDownloadParams();
+        List<DownloadQueryRequest> viewExecuteParams = downloadParam.getDownloadParams();
         DownloadCreateParam downloadCreateParam = new DownloadCreateParam();
         downloadCreateParam.setFileName(downloadParam.getFileName());
         downloadCreateParam.setDownloadParams(viewExecuteParams);
@@ -371,7 +360,7 @@ public class ShareServiceImpl extends BaseService implements ShareService {
         return shareVizDetail;
     }
 
-    private ShareAuthorizedToken validateExecutePermission(String authorizedToken, ViewExecuteParam executeParam) {
+    private ShareAuthorizedToken validateExecutePermission(String authorizedToken, DownloadQueryRequest executeParam) {
         if (StringUtils.isBlank(authorizedToken)) {
             Exceptions.tr(PermissionDeniedException.class, "message.provider.execute.permission.denied");
         }

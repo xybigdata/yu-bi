@@ -25,6 +25,10 @@ public class ServerQueryExecutionContextFactory {
         return create(Channel.AUTHENTICATED);
     }
 
+    public QueryExecutionContext forSystem() {
+        return create(Channel.SYSTEM);
+    }
+
     private QueryExecutionContext create(Channel channel) {
         User user = securityManager.getCurrentUser();
         return new QueryExecutionContext(channel, user.getId(), null, UUID.randomUUID().toString());

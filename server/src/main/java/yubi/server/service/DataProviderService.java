@@ -3,8 +3,6 @@ package yubi.server.service;
 
 import yubi.core.data.provider.*;
 import yubi.core.entity.Source;
-import yubi.server.base.params.ViewExecuteParam;
-import yubi.server.base.params.TestExecuteParam;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -25,12 +23,6 @@ public interface DataProviderService {
     Set<String> readTables(String sourceId, String database) throws SQLException;
 
     Set<Column> readTableColumns(String sourceId, String schema, String table) throws SQLException;
-
-    Dataframe testExecute(TestExecuteParam testExecuteParam) throws Exception;
-
-    Dataframe execute(ViewExecuteParam viewExecuteParam) throws Exception;
-
-    Dataframe execute(ViewExecuteParam viewExecuteParam, boolean checkViewPermission) throws Exception;
 
     Set<StdSqlOperator> supportedStdFunctions(String sourceId);
 

@@ -18,6 +18,10 @@ import yubi.server.config.WebExceptionHandler;
 import yubi.server.query.ServerQueryExecutionContextFactory;
 import yubi.server.query.web.PublicQueryExecutor;
 import yubi.server.query.web.QueryWebMapper;
+import yubi.server.controller.DataProviderController;
+import yubi.server.controller.ShareController;
+import yubi.server.service.DataProviderService;
+import yubi.server.service.ShareService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -155,5 +159,16 @@ class QueryControllerWebTest {
                 .andExpect(jsonPath("$.message").value("查询请求参数无效"));
 
         verifyNoInteractions(publicQueryExecutor);
+    }
+
+    @Test
+    void shouldReturnNotFoundForRemovedQueryEndpoints() throws Exception {
+        MockMvc legacyMvc = MockMvcBuilders.standaloneSetup(
+                new DataProviderController(mock(DataProviderService.class)),
+                new ShareController(mock(ShareService.class))).build();
+
+        legacyMvc.perform(post("/data-provider/execute")).andExpect(status().isNotFound());
+        legacyMvc.perform(post("/data-provider/execute/test")).andExpect(status().isNotFound());
+        legacyMvc.perform(post("/shares/execute")).andExpect(status().isNotFound());
     }
 }

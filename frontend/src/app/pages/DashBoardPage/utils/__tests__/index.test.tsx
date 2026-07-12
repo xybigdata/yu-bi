@@ -34,7 +34,7 @@ import {
   ControllerDate,
 } from 'app/pages/DashBoardPage/pages/BoardEditor/components/ControllerWidgetPanel/types';
 import { ChartDataConfig } from 'app/types/ChartConfig';
-import { ChartVariableParams } from 'app/types/ChartDataRequest';
+import { ChartVariableParams } from 'app/features/query';
 import ChartDataView from 'app/types/ChartDataView';
 import { FilterSqlOperator } from 'globalConstants';
 import {

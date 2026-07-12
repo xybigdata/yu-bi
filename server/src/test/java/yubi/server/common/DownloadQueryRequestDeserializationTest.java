@@ -9,21 +9,20 @@ import yubi.core.data.provider.QueryScript;
 import yubi.core.data.provider.ScriptVariable;
 import yubi.server.base.params.DashboardCreateParam;
 import yubi.server.base.params.DownloadCreateParam;
-import yubi.server.base.params.TestExecuteParam;
+import yubi.server.base.params.DownloadQueryRequest;
 import yubi.server.base.params.VariableCreateParam;
-import yubi.server.base.params.ViewExecuteParam;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-class ViewExecuteParamDeserializationTest {
+class DownloadQueryRequestDeserializationTest {
 
     private final ObjectMapper objectMapper = JsonMapper.builder().build();
 
     @Test
     void shouldIgnoreNullPrimitivePageInfoFields() throws Exception {
-        ViewExecuteParam param = objectMapper.readValue("""
+        DownloadQueryRequest param = objectMapper.readValue("""
                 {
                   "viewId": "view-1",
                   "columns": [],
@@ -41,7 +40,7 @@ class ViewExecuteParamDeserializationTest {
                   "script": false,
                   "analytics": false
                 }
-                """, ViewExecuteParam.class);
+                """, DownloadQueryRequest.class);
 
         assertNotNull(param.getPageInfo());
         assertEquals(0L, param.getPageInfo().getPageNo());
@@ -51,8 +50,8 @@ class ViewExecuteParamDeserializationTest {
     }
 
     @Test
-    void shouldReadViewExecuteParamWhenPrimitiveFieldsAreMissing() throws Exception {
-        ViewExecuteParam param = objectMapper.readValue("""
+    void shouldReadDownloadQueryRequestWhenPrimitiveFieldsAreMissing() throws Exception {
+        DownloadQueryRequest param = objectMapper.readValue("""
                 {
                   "viewId": "view-1",
                   "columns": [],
@@ -60,7 +59,7 @@ class ViewExecuteParamDeserializationTest {
                   "groups": [],
                   "pageInfo": {}
                 }
-                """, ViewExecuteParam.class);
+                """, DownloadQueryRequest.class);
 
         assertNotNull(param.getPageInfo());
         assertEquals(0L, param.getPageInfo().getPageNo());
@@ -73,29 +72,27 @@ class ViewExecuteParamDeserializationTest {
 
     @Test
     void shouldIgnoreNullPrimitiveViewExecuteFields() throws Exception {
-        ViewExecuteParam param = objectMapper.readValue("""
+        DownloadQueryRequest param = objectMapper.readValue("""
                 {
                   "concurrencyControl": null,
                   "cache": null,
                   "cacheExpires": null,
                   "script": null,
-                  "analytics": null
+                  "analytics": null,
+                  "concurrencyControlMode": "DIRTYREAD"
                 }
-                """, ViewExecuteParam.class);
+                """, DownloadQueryRequest.class);
 
         assertFalse(param.isConcurrencyControl());
         assertFalse(param.isCache());
         assertEquals(0, param.getCacheExpires());
         assertFalse(param.isScript());
         assertFalse(param.isAnalytics());
+        assertEquals("DIRTYREAD", param.getConcurrencyControlMode());
     }
 
     @Test
     void shouldIgnoreNullPrimitiveFieldsForOtherRequestParams() throws Exception {
-        TestExecuteParam testExecuteParam = objectMapper.readValue(
-                "{\"scriptType\":\"SQL\",\"size\":null}",
-                TestExecuteParam.class
-        );
         DownloadCreateParam downloadCreateParam = objectMapper.readValue(
                 "{\"imageWidth\":null}",
                 DownloadCreateParam.class
@@ -109,7 +106,6 @@ class ViewExecuteParamDeserializationTest {
                 VariableCreateParam.class
         );
 
-        assertEquals(100, testExecuteParam.getSize());
         assertEquals(0, downloadCreateParam.getImageWidth());
         assertEquals(0D, dashboardCreateParam.getIndex());
         assertFalse(variableCreateParam.isExpression());
@@ -117,18 +113,6 @@ class ViewExecuteParamDeserializationTest {
 
     @Test
     void shouldIgnoreNullPrimitiveFieldsForNestedScriptVariables() throws Exception {
-        TestExecuteParam testExecuteParam = objectMapper.readValue("""
-                {
-                  "scriptType": "SQL",
-                  "variables": [
-                    {
-                      "name": "status",
-                      "expression": null,
-                      "disabled": null
-                    }
-                  ]
-                }
-                """, TestExecuteParam.class);
         DataProviderSource dataProviderSource = objectMapper.readValue("""
                 {
                   "sourceId": "source-1",
@@ -150,11 +134,8 @@ class ViewExecuteParamDeserializationTest {
                 DataProviderConfigTemplate.Attribute.class
         );
 
-        ScriptVariable testVariable = testExecuteParam.getVariables().get(0);
         ScriptVariable sourceVariable = dataProviderSource.getVariables().get(0);
 
-        assertFalse(testVariable.isExpression());
-        assertFalse(testVariable.isDisabled());
         assertFalse(sourceVariable.isExpression());
         assertFalse(sourceVariable.isDisabled());
         assertFalse(queryScript.isTest());

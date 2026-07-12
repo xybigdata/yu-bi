@@ -52,7 +52,7 @@ import {
 import {
   ChartVariableParams,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import { FilterSqlOperator } from 'globalConstants';

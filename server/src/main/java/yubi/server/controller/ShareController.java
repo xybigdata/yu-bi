@@ -20,7 +20,6 @@
 package yubi.server.controller;
 
 import yubi.core.common.FileUtils;
-import yubi.core.data.provider.Dataframe;
 import yubi.core.data.provider.StdSqlOperator;
 import yubi.core.entity.Download;
 import yubi.server.base.dto.ResponseData;
@@ -59,7 +58,7 @@ public class ShareController extends BaseController {
     }
 
     @Operation(summary = "update a share")
-    @PutMapping(value = "{shareId}")
+    @PutMapping(value = "{shareId:^(?!execute$).+}")
     public ResponseData<ShareInfo> update(
             @PathVariable String shareId,
             @Validated @RequestBody ShareUpdateParam updateParam) {
@@ -68,13 +67,13 @@ public class ShareController extends BaseController {
     }
 
     @Operation(summary = "delete a share")
-    @DeleteMapping(value = "{shareId}")
+    @DeleteMapping(value = "{shareId:^(?!execute$).+}")
     public ResponseData<Boolean> delete(@PathVariable String shareId) {
         return ResponseData.success(shareService.delete(shareId, false));
     }
 
     @Operation(summary = "list share")
-    @GetMapping(value = "{vizId}")
+    @GetMapping(value = "{vizId:^(?!execute$).+}")
     public ResponseData<List<ShareInfo>> list(@PathVariable String vizId) {
         return ResponseData.success(shareService.listShare(vizId));
     }
@@ -94,13 +93,6 @@ public class ShareController extends BaseController {
     public ResponseData<Set<StdSqlOperator>> supportFunctions(@PathVariable String sourceId,
                                                               @RequestBody ShareToken executeToken) {
         return ResponseData.success(shareService.supportedStdFunctions(executeToken, sourceId));
-    }
-
-    @Operation(summary = "execute with share token")
-    @PostMapping("/execute")
-    public ResponseData<Dataframe> execute(@RequestParam String executeToken,
-                                           @RequestBody ViewExecuteParam executeParam) throws Exception {
-        return ResponseData.success(shareService.execute(ShareToken.create(executeToken), executeParam));
     }
 
     @Operation(summary = "create a download task")

@@ -43,7 +43,7 @@ import { ChartMouseEventParams, IChart } from 'app/types/Chart';
 import {
   ChartVariableParams,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import {
   chartSelectionEventListener,

@@ -5,14 +5,12 @@ import yubi.core.base.PageInfo;
 import yubi.core.data.provider.Column;
 import yubi.core.data.provider.Dataframe;
 import yubi.core.data.provider.ForeignKey;
-import yubi.core.data.provider.ScriptVariable;
 import yubi.core.data.provider.SelectColumn;
 import yubi.core.data.provider.SingleTypedValue;
 import yubi.core.data.provider.sql.AggregateOperator;
 import yubi.core.data.provider.sql.FilterOperator;
 import yubi.core.data.provider.sql.OrderOperator;
 import yubi.query.api.ExecuteQueryCommand;
-import yubi.query.api.PreviewQueryCommand;
 import yubi.query.api.QueryResult;
 import yubi.query.domain.QueryModels.Aggregate;
 import yubi.query.domain.QueryModels.AggregateType;
@@ -25,18 +23,15 @@ import yubi.query.domain.QueryModels.OrderType;
 import yubi.query.domain.QueryModels.Page;
 import yubi.query.domain.QueryModels.TypedValue;
 import yubi.query.domain.QueryModels.ValueType;
-import yubi.query.domain.QueryModels.Variable;
-import yubi.query.domain.QueryModels.VariableType;
-import yubi.server.base.params.TestExecuteParam;
-import yubi.server.base.params.ViewExecuteParam;
+import yubi.server.base.params.DownloadQueryRequest;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Component
-public class ServerQueryCompatibilityMapper {
+public class DownloadQueryMapper {
 
-    public ExecuteQueryCommand toCommand(ViewExecuteParam source) {
+    public ExecuteQueryCommand toCommand(DownloadQueryRequest source) {
         return new ExecuteQueryCommand(source.getViewId(),
                 source.getKeywords() == null ? null : source.getKeywords().stream().map(Enum::name).toList(),
                 mapColumns(source.getColumns()),
@@ -51,14 +46,6 @@ public class ServerQueryCompatibilityMapper {
                 source.getOrders() == null ? null : source.getOrders().stream().map(this::order).toList(),
                 page(source.getPageInfo()), source.getParams(), source.isConcurrencyControl(), source.isCache(),
                 source.getCacheExpires(), source.isScript());
-    }
-
-    public PreviewQueryCommand toCommand(TestExecuteParam source) {
-        return new PreviewQueryCommand(source.getSourceId(), source.getScript(),
-                source.getScriptType() == null ? null : yubi.query.domain.QueryModels.ScriptType.valueOf(source.getScriptType().name()),
-                mapColumns(source.getColumns()),
-                source.getVariables() == null ? null : source.getVariables().stream().map(this::variable).toList(),
-                source.getSize());
     }
 
     public Dataframe toDataframe(QueryResult source) {
@@ -98,12 +85,6 @@ public class ServerQueryCompatibilityMapper {
 
     private TypedValue typedValue(SingleTypedValue value) {
         return new TypedValue(value.getValue(), ValueType.valueOf(value.getValueType().name()), value.getFormat());
-    }
-
-    private Variable variable(ScriptVariable value) {
-        return new Variable(value.getName(), VariableType.valueOf(value.getType().name()),
-                ValueType.valueOf(value.getValueType().name()), value.getValues(), value.isExpression(),
-                value.isDisabled(), value.getFormat());
     }
 
     private Page page(PageInfo value) {

@@ -22,7 +22,7 @@ import yubi.server.base.dto.DatachartDetail;
 import yubi.server.base.dto.JobFile;
 import yubi.server.base.dto.ScheduleJobConfig;
 import yubi.server.base.params.DownloadCreateParam;
-import yubi.server.base.params.ViewExecuteParam;
+import yubi.server.base.params.DownloadQueryRequest;
 import yubi.server.common.JsParserUtils;
 import yubi.server.service.AttachmentService;
 import yubi.server.service.FolderService;
@@ -152,7 +152,7 @@ public abstract class ScheduleJob implements Job {
         if (ResourceType.DATACHART.name().equals(folder.getRelType())
                 && !CollectionUtils.isEmpty(result.getDownloadParams())
                 && result.getDownloadParams().size() == 1) {
-            ViewExecuteParam viewExecuteParam = result.getDownloadParams().get(0);
+            DownloadQueryRequest viewExecuteParam = result.getDownloadParams().get(0);
             if (attachmentType.equals(AttachmentType.EXCEL)) {
                 viewExecuteParam.setVizId(folder.getRelId());
                 viewExecuteParam.setVizType(ResourceType.DATACHART);
@@ -161,7 +161,7 @@ public abstract class ScheduleJob implements Job {
             }
         } else if (ResourceType.DASHBOARD.name().equals(folder.getRelType())
                 && (attachmentType.equals(AttachmentType.IMAGE) || attachmentType.equals(AttachmentType.PDF))) {
-            ViewExecuteParam viewExecuteParam = new ViewExecuteParam();
+            DownloadQueryRequest viewExecuteParam = new DownloadQueryRequest();
             viewExecuteParam.setVizId(folder.getId());
             viewExecuteParam.setVizType(ResourceType.DASHBOARD);
             result.setDownloadParams(new ArrayList<>(List.of(viewExecuteParam)));

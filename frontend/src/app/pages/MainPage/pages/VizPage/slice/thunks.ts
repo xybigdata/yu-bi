@@ -28,7 +28,7 @@ import {
   ChartDataRequest,
   ChartVariableParams,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import type {
   ChartDataSetDTO,
   ChartDatasetPageInfo,

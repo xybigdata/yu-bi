@@ -26,7 +26,7 @@ import {
 } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import { transferChartConfig } from 'app/pages/MainPage/pages/VizPage/slice/utils';
 import { ChartConfig, SelectedItem } from 'app/types/ChartConfig';
-import { PendingChartDataRequestFilter } from 'app/types/ChartDataRequest';
+import { PendingChartDataRequestFilter } from 'app/features/query';
 import type { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { ChartDTO } from 'app/types/ChartDTO';
 import { mergeToChartConfig } from 'app/utils/ChartDtoHelper';

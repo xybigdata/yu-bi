@@ -29,7 +29,7 @@ import {
   DownloadTaskState,
 } from 'app/pages/MainPage/slice/types';
 import { ExecuteToken } from 'app/pages/SharePage/slice/types';
-import { ChartDataRequest } from 'app/types/ChartDataRequest';
+import { ChartDataRequest } from 'app/features/query';
 import ChartDataSetDTO from 'app/types/ChartDataSet';
 import { ChartDTO } from 'app/types/ChartDTO';
 import {

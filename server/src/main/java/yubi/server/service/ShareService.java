@@ -23,8 +23,6 @@ public interface ShareService extends BaseCRUDService<Share, ShareMapperExt> {
 
     ShareVizDetail getShareViz(ShareToken shareToken);
 
-    Dataframe execute(ShareToken shareToken, ViewExecuteParam executeParam) throws Exception;
-
     Download createDownload(String clientId, ShareDownloadParam downloadCreateParams);
 
     List<Download> listDownloadTask(ShareToken shareToken, String clientId);

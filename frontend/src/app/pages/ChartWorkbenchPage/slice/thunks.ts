@@ -22,7 +22,7 @@ import type { AxiosResponse } from 'axios';
 import { migrateView } from 'app/migration/ViewConfig/migrationViewConfig';
 import { ChartDataRequestBuilder, executeQuery } from 'app/features/query';
 import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
-import { ChartDataRequest } from 'app/types/ChartDataRequest';
+import { ChartDataRequest } from 'app/features/query';
 import type {
   ChartDataSetDTO,
   ChartDatasetPageInfo,

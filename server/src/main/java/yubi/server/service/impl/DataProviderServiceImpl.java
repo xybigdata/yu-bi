@@ -28,16 +28,8 @@ import yubi.core.data.provider.DataProviderConfigTemplate;
 import yubi.core.data.provider.DataProviderInfo;
 import yubi.core.data.provider.DataProviderManager;
 import yubi.core.data.provider.DataProviderSource;
-import yubi.core.data.provider.Dataframe;
 import yubi.core.data.provider.StdSqlOperator;
 import yubi.core.entity.Source;
-import yubi.query.api.ExecuteQueryUseCase;
-import yubi.query.api.PreviewQueryUseCase;
-import yubi.query.api.QueryExecutionException;
-import yubi.server.base.params.TestExecuteParam;
-import yubi.server.base.params.ViewExecuteParam;
-import yubi.server.query.ServerQueryCompatibilityMapper;
-import yubi.server.query.ServerQueryExecutionContextFactory;
 import yubi.server.query.ServerSourceConfigMapper;
 import yubi.server.service.BaseService;
 import yubi.server.service.DataProviderService;
@@ -48,28 +40,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** 旧 DataProvider API 的兼容门面，以及非查询的数据源能力。 */
+/** 非查询的数据源能力。 */
 @Service
 public class DataProviderServiceImpl extends BaseService implements DataProviderService {
 
     private final DataProviderManager dataProviderManager;
-    private final ExecuteQueryUseCase executeQueryUseCase;
-    private final PreviewQueryUseCase previewQueryUseCase;
-    private final ServerQueryCompatibilityMapper compatibilityMapper;
-    private final ServerQueryExecutionContextFactory contextFactory;
     private final ServerSourceConfigMapper sourceConfigMapper;
 
     public DataProviderServiceImpl(DataProviderManager dataProviderManager,
-                                   ExecuteQueryUseCase executeQueryUseCase,
-                                   PreviewQueryUseCase previewQueryUseCase,
-                                   ServerQueryCompatibilityMapper compatibilityMapper,
-                                   ServerQueryExecutionContextFactory contextFactory,
                                    ServerSourceConfigMapper sourceConfigMapper) {
         this.dataProviderManager = dataProviderManager;
-        this.executeQueryUseCase = executeQueryUseCase;
-        this.previewQueryUseCase = previewQueryUseCase;
-        this.compatibilityMapper = compatibilityMapper;
-        this.contextFactory = contextFactory;
         this.sourceConfigMapper = sourceConfigMapper;
     }
 
@@ -112,37 +92,6 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
     }
 
     @Override
-    public Dataframe testExecute(TestExecuteParam param) throws Exception {
-        try {
-            return compatibilityMapper.toDataframe(previewQueryUseCase.preview(
-                    compatibilityMapper.toCommand(param), contextFactory.forSource()));
-        } catch (QueryExecutionException ex) {
-            throwOriginalCause(ex);
-            throw ex;
-        }
-    }
-
-    @Override
-    public Dataframe execute(ViewExecuteParam param) throws Exception {
-        return execute(param, true);
-    }
-
-    @Override
-    public Dataframe execute(ViewExecuteParam param, boolean checkViewPermission) throws Exception {
-        if (param.isEmpty()) {
-            return Dataframe.empty();
-        }
-        try {
-            return compatibilityMapper.toDataframe(executeQueryUseCase.execute(
-                    compatibilityMapper.toCommand(param),
-                    contextFactory.forView(checkViewPermission)));
-        } catch (QueryExecutionException ex) {
-            throwOriginalCause(ex);
-            throw ex;
-        }
-    }
-
-    @Override
     public Set<StdSqlOperator> supportedStdFunctions(String sourceId) {
         Source source = retrieve(sourceId, Source.class, false);
         return dataProviderManager.supportedStdFunctions(parseDataProviderConfig(source));
@@ -174,9 +123,4 @@ public class DataProviderServiceImpl extends BaseService implements DataProvider
         }
     }
 
-    private void throwOriginalCause(QueryExecutionException exception) throws Exception {
-        if (exception.getCause() instanceof Exception cause) {
-            throw cause;
-        }
-    }
 }

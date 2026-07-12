@@ -38,7 +38,7 @@ import { Variable } from 'app/pages/MainPage/pages/VariablePage/slice/types';
 import {
   ChartVariableParams,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import ChartDataView from 'app/types/ChartDataView';
 import { View } from 'app/types/View';
 import { filterSqlOperatorName } from 'app/utils/internalChartHelper';
