@@ -15,7 +15,8 @@ class QueryModuleBoundaryTest {
             "yubi.core.", "yubi.security.", "yubi.server.", "org.springframework.",
             "org.mybatis.", "tools.jackson.", "com.fasterxml.jackson.", "AESUtil",
             "DataProvider", "Dataframe", "QueryScript", "ExecuteParam",
-            "com.openai.", "dev.langchain4j.", "AgentRuntime", "ToolRegistry");
+            "com.openai.", "dev.langchain4j.", "com.anthropic.", "yubi.agent.",
+            "AgentRuntime", "ToolRegistry");
 
     @Test
     void productionSourcesMustNotReferenceInfrastructureOrProviderTypes() throws IOException {

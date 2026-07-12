@@ -255,6 +255,8 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 
 ### 目标 F：只读 Agent Runtime
 
+**状态**：已完成（2026-07-12）
+
 **依赖**：目标 E。
 
 **目的**：在不开放任意 SQL 和写操作的前提下完成第一条端到端 Agent 数据分析链路。
@@ -272,6 +274,21 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 - 使用假模型可重复验证工具选择、权限拒绝、失败恢复和结果截断。
 - Agent 无法执行任意 SQL、访问未授权字段或调用写操作。
 - 领域模块和 Query 模块不依赖任何模型 SDK。
+
+**完成记录**：
+
+- 新增纯 Java 21 `agent` Maven 模块，生产代码只依赖 `query`，按 `api/application/domain/port` 分层提供 `AgentUseCase`、Model Gateway、不可变会话/步骤/结构化模型决策、只读 Tool Registry、审计/Trace、时钟和会话存储端口。运行时使用固定上限 `for` 状态机，默认最多 8 步；权限或输入失败立即终止，只有 Query 定义/执行失败最多恢复 1 次，未知工具、模型协议和内部失败稳定拒绝，不存在无界重试；模型或 Tool 的致命 `Error` 会先尽力记录失败终态和 Trace，再原样重抛。
+- Registry 构造时强制且只允许 `search_data_assets`、`describe_data_asset`、`execute_view`。前两项直接复用 `QueryMetadataToolSchemas` 单例并调用 `QueryMetadataUseCase`；`execute_view` 使用独立稳定只读 Schema 和严格未知字段校验，排除 Preview、Source、脚本、SQL、计算片段、关键字、身份、组织、角色、权限、分享、缓存、并发和所有写操作输入。
+- `execute_view` 只接受已有 View 的选择列、聚合、过滤、分组、排序、有界分页和安全 Query 变量。每次调用先以同一可信上下文重新执行 `describe(..., false)`，按路径片段精确校验当前授权字段，并校验非表达式 Query 变量和安全值类型；NUMERIC 值必须经 `BigDecimal` 严格解析和规范化，BOOLEAN 只接受 `true` / `false`，过滤类型必须匹配授权字段。过滤值基数在 Metadata/Query 调用前按运算符穷尽校验：单值比较恰好 1 个，`IN/NOT_IN` 至少 1 个，`BETWEEN/NOT_BETWEEN` 恰好 2 个，`IS_NULL/NOT_NULL` 不得携带值。V1 不暴露也不接受过滤级 `aggregateOperator`，避免在没有聚合结果类型推导契约时错误比较 `COUNT/COUNT_DISTINCT` 等结果。显式空变量、缺失的安全必填 Query 变量，以及 V1 无法安全满足的必填表达式/非安全类型 Query 变量会明确拒绝；随后调用 `ExecuteQueryUseCase` 重新完成定义读取、组织绑定、READ/列权限、变量和引擎边界，授权结论不跨 Tool 调用缓存。空查询、未授权字段、路径重分段、权限变量、SQL 风格数值/别名及 `FRAGMENT/SNIPPET/IDENTIFIER/KEYWORD` 值均在引擎前拒绝。
+- Tool 参数和模型决策使用深度不可变的结构化值对象，不以字符串拼装模拟协议；运行时限制请求长度、参数节点数和嵌套深度。默认结果上限为 100 项和 64 KiB，`execute_view` 最多向 Query 请求上限加 1 行以确定是否截断，再按稳定前缀执行行数/字节截断。完整模型可见结构，包括 envelope、标识、列元数据、分页和行，都按紧凑 JSON 等价 UTF-8 大小计入预算；超大文本使用有界前缀，JDBC `Timestamp/Date/Time` 和普通 `java.util.Date` 使用各自安全且确定性的时间文本投影，未知单元格只输出稳定类型标记且不调用任意对象的 `toString()`。`describe_data_asset` 先保留 `id/name/fields/variables/functions` 最小必填 envelope，再在剩余预算中确定性截断文本和集合，128/256 字节合法下限均不破坏 Query Schema。结构化 `ResultSize` 同时进入下一轮模型历史和最终 `AgentRunResult`，包含观察/返回项数、字节数、实际累计上限与截断标记。
+- `server/agent` 新增可信上下文工厂，从当前 Spring Security 主体取得用户，并通过 `OrgService.listOrganizations()` 校验显式服务器受控组织范围；空主体、空组织、非成员组织或适配器失败均在进入模型前固定拒绝。工厂生成 session/request/correlation ID 和固定 `AUTHENTICATED` Query 上下文；`AgentRequest` 与 `ModelTurn` 不含 userId、organizationId、roleId、权限或分享身份。
+- Agent Trace 记录会话开始/完成及每一步的 session、request、subject、organization、correlation、step、已注册工具、Schema 识别字段、拒绝字段数、标量/集合/深度摘要、耗时、结果项数/字节数、截断、状态和失败分类。参数值、用户原始请求、令牌、密码、Source 配置、脚本和完整结果不进入审计事件；未知工具名统一记录为 `<unregistered>`。会话存储端口也只接收清空 Tool payload 和最终答案的脱敏状态快照；Trace 与会话存储适配失败不覆盖确定性业务结果。
+- `server` 只作为组合根和可信适配器：固定 Tool Registry、限制、时钟与审计可正常装配；只有同时提供 `ModelGateway` 和 `AgentSessionStorePort` 时才创建 Runtime。目标 F 没有选择模型供应商或引入模型 SDK，也没有新增 Agent Controller/前端。会话持久化目前仅建立稳定端口和测试内存适配器，没有擅自新增数据库表；具体模型网关和持久化方案留待后续独立决策。
+- 新增 ADR：`docs/architecture/adr/0002-read-only-agent-runtime.md`，固化模块依赖、可信上下文、三工具白名单、双重授权、严格标量与路径契约、状态机、失败恢复、完整结果截断、Trace 与暂不持久化决策；`.gitignore` 显式纳入该 ADR，保持 ADR-0001 的 Query 能力边界不变。
+- 测试新增 Agent 31 项，覆盖结构化值不可变性、Schema/Registry 精确集合、假模型 search → describe → execute 多步骤链路、每次重新授权、权限拒绝不可降级为空成功、一次恢复预算、内部失败不可恢复、模型/Tool 致命错误终态审计、未知/写工具、最大步骤、完整输出截断对模型和最终结果可见、超大元数据/单元格和未知对象、JDBC/普通日期稳定有界投影、128/256 字节 `describe` 必填 envelope、全部 FilterType 合法/非法值基数及能力零调用、过滤级聚合拒绝、身份/组织/权限/SQL/Preview/Source/分享覆盖拒绝、NUMERIC/BOOLEAN 严格解析、空值与不支持的必填变量、路径重分段、未授权字段、权限变量、表达式/片段与别名注入、参数复杂度、成功/失败审计脱敏、会话快照，以及 `java.sql` 仅允许三种时间值类型的架构门禁；Server 新增 4 项可信上下文与条件装配测试。
+- 验证通过：`mvn -pl agent -am test`（Agent 31 项、Query 20 项）、`mvn -pl query -am test`（20 项）、`mvn -pl server -am -Dexec.skip=true test`（Query 20、Agent 31、Core 23、Security 18、Provider Base 46、JDBC 125、Server 61，共 324 项通过，JDBC 既有 6 项跳过）、`mvn -pl server -am -DskipTests package`、安装包 assembly 和隔离端口 demo 健康检查。Agent Maven 运行时依赖为 `agent -> query`，Query 运行时依赖仍只有自身；`jdeps` 证明 Agent 字节码只依赖 `query`、`java.base` 与用于安全读取 JDBC 时间值的 JDK `java.sql`，源码架构门禁进一步将 `java.sql` 引用锁定为 `Timestamp/Date/Time`。Maven Enforcer 与源码/全仓门禁未发现数据库驱动/API、模型 SDK、Preview、Provider、server/core/security/MyBatis/Spring、Jackson 或写工具越界。
+- 前端未修改，`npm run checkTs`、`npm run lint`、`npm run test:ci`（203 个测试文件、1336 项通过、4 项跳过）、`npm run build:task` 和 `npm run build` 均通过。发布链路额外执行的当前构建体积基线检查未通过：生成报告相对仓库基线新增 raw oversized `slice.js` 与 `task/index.js`（报告还显示既有 `logo.svg` 超过 asset 阈值）；本目标没有前端代码或基线改动，未通过更新基线掩盖该真实差异。
+- 已知非阻断告警仍为 Mockito 动态 agent、测试 Log4j provider、GraalVM fallback、AntV S2 缺失 sourcemap、ECharts 弃用、Vite 大 chunk 和 npm allow-scripts 提示。目标 F 未修改数据库结构、现有 Query REST、View/Dashboard 持久化 Schema 或 DataProvider SPI，未进入目标 G。
 
 ### 目标 G：评测、可观测与安全加固
 

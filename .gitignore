@@ -16,6 +16,7 @@
 !/docs/architecture/adr/
 /docs/architecture/adr/*
 !/docs/architecture/adr/0001-query-capability-boundary.md
+!/docs/architecture/adr/0002-read-only-agent-runtime.md
 /.tmp/
 /logs/
 

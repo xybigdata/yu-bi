@@ -9,12 +9,18 @@
         <version>2.0.0</version>
     </parent>
 
-    <artifactId>yu-bi-query</artifactId>
-    <name>yu-bi Query</name>
-    <description>与框架和基础设施解耦的查询应用能力</description>
+    <artifactId>yu-bi-agent</artifactId>
+    <name>yu-bi Agent</name>
+    <description>与模型供应商和服务端基础设施解耦的只读 Agent Runtime</description>
 
     <dependencies>
-        <!-- 覆盖父 POM 的通用生产依赖，query 生产代码只依赖 Java 21。 -->
+        <dependency>
+            <groupId>yubi</groupId>
+            <artifactId>yu-bi-query</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- 覆盖父 POM 的通用生产依赖，agent 生产代码只依赖 Query API 和 Java 21。 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -37,7 +43,7 @@
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>query-production-boundary</id>
+                        <id>agent-production-boundary</id>
                         <goals><goal>enforce</goal></goals>
                         <configuration>
                             <rules>
@@ -47,9 +53,27 @@
                                         <exclude>yubi:yu-bi-core</exclude>
                                         <exclude>yubi:yu-bi-security</exclude>
                                         <exclude>yubi:yu-bi-server</exclude>
-                                        <exclude>yubi:yu-bi-agent</exclude>
+                                        <exclude>yubi:yu-bi-data-provider</exclude>
+                                        <exclude>yubi:yu-bi-data-provider-base</exclude>
                                         <exclude>yubi:yu-bi-*-data-provider</exclude>
+                                        <exclude>org.springframework*:*</exclude>
+                                        <exclude>org.mybatis*:*</exclude>
+                                        <exclude>com.baomidou:*</exclude>
+                                        <exclude>com.fasterxml.jackson*:*</exclude>
+                                        <exclude>tools.jackson*:*</exclude>
+                                        <exclude>org.bouncycastle:*</exclude>
+                                        <exclude>com.openai:*</exclude>
+                                        <exclude>com.anthropic:*</exclude>
+                                        <exclude>dev.langchain4j:*</exclude>
+                                        <exclude>org.springframework.ai:*</exclude>
+                                        <exclude>com.azure:azure-ai-openai</exclude>
+                                        <exclude>software.amazon.awssdk:bedrockruntime</exclude>
+                                        <exclude>com.google.cloud:google-cloud-vertexai</exclude>
+                                        <exclude>io.mistralai:*</exclude>
                                     </excludes>
+                                    <includes>
+                                        <include>*:*:*:*:test</include>
+                                    </includes>
                                 </bannedDependencies>
                             </rules>
                         </configuration>
