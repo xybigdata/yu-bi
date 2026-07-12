@@ -17,7 +17,10 @@
  * limitations under the License.
  */
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
+import {
+  ChartDataRequestBuilder,
+  executePublicQuery,
+} from 'app/features/query';
 import { handleServerBoardAction } from 'app/pages/DashBoardPage/pages/Board/slice/asyncActions';
 import {
   ServerDashboard,
@@ -187,16 +190,10 @@ export const fetchShareDataSetByPreviewChartAction = createAsyncThunk<
     .addDrillOption(args?.drillOption)
     .build();
 
-  const response = await request2<ChartDataSetDTO>({
-    method: 'POST',
-    url: `shares/execute`,
-    params: {
-      executeToken:
-        shareState?.shareToken[executeParam.viewId]['authorizedToken'],
-    },
-    data: executeParam,
-  });
-  return response.data;
+  return executePublicQuery<ChartDataSetDTO>(
+    executeParam,
+    shareState?.shareToken[executeParam.viewId]['authorizedToken'],
+  );
 });
 
 export const updateFilterAndFetchDatasetForShare = createAsyncThunk(

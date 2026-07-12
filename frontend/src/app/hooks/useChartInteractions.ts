@@ -33,7 +33,7 @@ import type { DisplayViewDetailProps } from 'app/pages/MainPage/pages/VizPage/ho
 import type { ExecuteToken } from 'app/pages/SharePage/slice/types';
 import type { VizType } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import type { ModalFuncProps } from 'antd';
-import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
+import { ChartDataRequestBuilder } from 'app/features/query';
 import type { IChartDrillOption } from 'app/types/ChartDrillOption';
 import type {
   ChartConfig,

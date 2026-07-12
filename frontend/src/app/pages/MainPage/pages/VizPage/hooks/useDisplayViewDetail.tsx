@@ -24,7 +24,7 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import useMount from 'app/hooks/useMount';
 import useStateModal, { StateModalSize } from 'app/hooks/useStateModal';
 import { ExecuteToken } from 'app/pages/SharePage/slice/types';
-import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
+import { ChartDataRequestBuilder } from 'app/features/query';
 import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
 import {
   ChartDataRequest,

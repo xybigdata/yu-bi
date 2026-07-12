@@ -18,6 +18,7 @@
  */
 import { message } from 'antd';
 import type { AxiosResponse } from 'axios';
+import { executePublicQuery, executeQuery } from 'app/features/query';
 import type {
   ShareLinkCreateRequest,
   ShareLinkCreateResult,
@@ -89,22 +90,14 @@ export const getDistinctFields = async (
     ...viewConfigs,
   };
   if (executeToken) {
-    const { data } = await request2<ChartDataSetDTO>({
-      method: 'POST',
-      url: `shares/execute`,
-      params: {
-        executeToken: executeToken[viewId].authorizedToken,
-      },
-      data: requestParams,
-    });
+    const data = await executePublicQuery<ChartDataSetDTO>(
+      requestParams,
+      executeToken[viewId].authorizedToken,
+    );
     return filterSqlOperatorName(requestParams, data);
   } else {
-    const response = await request2<ChartDataSetDTO>({
-      method: 'POST',
-      url: `data-provider/execute`,
-      data: requestParams,
-    });
-    return filterSqlOperatorName(requestParams, response?.data);
+    const data = await executeQuery<ChartDataSetDTO>(requestParams);
+    return filterSqlOperatorName(requestParams, data);
   }
 };
 
@@ -366,23 +359,13 @@ export async function fetchChartDataSet(
   authorizedToken?: ExecuteToken,
 ): Promise<ChartDataSetDTO> {
   if (authorizedToken) {
-    const { data } = await request2<ChartDataSetDTO>({
-      method: 'POST',
-      url: `shares/execute`,
-      params: {
-        executeToken: authorizedToken,
-      },
-      data: requestParams,
-    });
-    return data;
+    return executePublicQuery<ChartDataSetDTO>(
+      requestParams,
+      authorizedToken.authorizedToken,
+    );
   }
 
-  const { data } = await request2<ChartDataSetDTO>({
-    method: 'POST',
-    url: `data-provider/execute`,
-    data: requestParams,
-  });
-  return data;
+  return executeQuery<ChartDataSetDTO>(requestParams);
 }
 
 export async function fetchDashboardDetail(boardId: string) {

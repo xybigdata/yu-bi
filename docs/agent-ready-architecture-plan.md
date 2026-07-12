@@ -151,6 +151,8 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 
 ### 目标 C：新 REST 契约与前端 Query Feature
 
+**状态**：已完成（2026-07-12）
+
 **依赖**：目标 B。
 
 **目的**：让现有产品界面统一通过 Query 能力接口访问查询服务。
@@ -170,6 +172,23 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 - 所有查询调用通过 `features/query` 客户端发送。
 - 分享查询只通过请求头发送执行令牌。
 - 前端类型检查、查询单测、分享页面测试和构建通过。
+
+**完成记录**：
+
+- 新增 `POST /api/v1/queries/execute`、`POST /api/v1/queries/preview` 和 `POST /api/v1/public/queries/execute`。新 Web DTO 经单次 `QueryWebMapper` 映射直接调用目标 B 的 `ExecuteQueryUseCase` / `PreviewQueryUseCase`，响应保持现有 Dataframe 可观察字段兼容；旧 Controller、旧路径和旧 DTO 继续存在。
+- 新 REST 为 Query 稳定异常建立明确 HTTP 映射：校验失败 400、权限拒绝 403、定义失败 422、执行失败 502。Query Advice 显式使用最高优先级；真实 Spring MVC + Security 上下文同时加载 Query Advice 与全局 Advice，逐项锁定 400/403/422/502，并确认非 Query 异常仍由全局 Advice 处理为 400。Spring Security 只匿名放行公共查询，登录查询和预览继续要求认证。
+- `QueryWebMapper` 在 Web 边界显式校验空请求、所有嵌套对象/路径集合、参数 Map 键值及 Set 元素，并只在 `enumValue` 中把非法枚举转换为稳定的 `QueryValidationException`；对象图映射和 Query 值对象构造不做宽泛异常捕获，内部 NPE/IAE 保持原异常。认证 execute、preview 和 public execute 的空/非法输入均在 Use Case、执行上下文或公共身份切换前返回 400。
+- 公共查询只从 `X-YuBi-Share-Token` 读取执行令牌。服务端解密后校验令牌类型为 View 且绑定请求 `viewId`，以 `permissionBy` 身份调用 Query Use Case，并在执行成功、执行异常和身份切换异常路径通过 `finally` 可靠释放身份；回归测试锁定 `runAs` 自身失败时原异常不变、释放恰好一次且不调用后续上下文或 Use Case。缺失、无效类型和错误 View 令牌均拒绝且不回显令牌。
+- CORS 只配置新 Query 路径：认证入口允许 `POST/OPTIONS`、`Authorization/Content-Type`，公共入口允许 `POST/OPTIONS`、`Content-Type/X-YuBi-Share-Token`；未向旧分享或其他 API 扩大跨域权限，真实预检处理测试通过。
+- 新增 `frontend/src/app/features/query`，集中请求/响应类型、`ChartDataRequestBuilder`、认证/公共/预览客户端和公开入口；客户端复用现有 `request2`，没有新增第二套 HTTP 实例。旧 `app/models/ChartDataRequestBuilder` 和 `app/types/ChartDataRequest` 仅保留最小 re-export。
+- ChartWorkbench、Dashboard Board/BoardEditor、Dashboard actions 经公共 fetch 链路、Viz、Share、过滤器公共 fetch、交互 Hook、ChartEditor 和 task 构建调用点均已迁移；页面 thunk 只保留状态、错误和交互编排。迁移架构测试递归扫描 `frontend/src/app` 与 `frontend/src/task.ts` 的全部生产 TS/TSX/JS/JSX，并兼容 MTS/CTS/MJS/CJS，锁定三个旧查询 URL 为 0、新查询 URL 只存在于 `features/query/client.ts`、feature 生产源码不导入 `app/pages`。
+- 分享执行令牌只写入专用 Header，不进入执行 URL、query parameter 或请求体。Query 客户端测试、普通分享路由、Chart/Dashboard/Story 分享页面、应用内 iframe 生命周期及迁移架构回归测试均通过；View/Dashboard 历史配置和 `concurrencyControlMode` 测试继续通过。
+- 后端新增 Query Web、安全与 CORS 测试 21 项，覆盖认证、DTO 精确映射边界、稳定错误映射、两个 Advice 真实共存、公共 Header、缺失/错误 token、View 绑定、成功/失败身份释放和 CORS 预检；目标 A/B 特征测试继续通过。
+- `mvn -pl query -am test`：通过，Query 11 项；`mvn -pl server -am -Dexec.skip=true test`：通过，Query 11、Core 23、Security 18、Provider Base 46、JDBC Provider 125、Server 51，共 274 项，0 失败、0 错误，JDBC 既有 6 项跳过。
+- `mvn -pl query dependency:tree -Dscope=runtime`：只包含 Query 模块自身；`npm run checkTs`、`npm run lint`、`npm run build:task`、`npm run build` 均通过；`npm run test:ci` 全量 203 个测试文件、1332 项通过、4 项跳过；`mvn -pl server -am -DskipTests package` 和安装包 assembly 通过。
+- 全仓旧前端 URL、新 Header 使用、Query feature 依赖、旧接口并存和目标 D 清理项搜索通过，`git diff --check` 通过。已知非阻断告警仍为 Mockito 动态 agent、测试 Log4j provider、GraalVM fallback、AntV S2 缺失 sourcemap、Vite 大 chunk 和 npm allow-scripts 提示。
+- 残余安全策略：公共执行令牌的 `expiryDate` 校验继续沿用旧 `/shares/execute` 基线，目标 C 未新增令牌有效期校验，因此本目标不宣称覆盖完整令牌有效期策略。
+- 本目标未删除旧 REST、旧 DTO、旧字段或临时 re-export，未实现元数据、Agent Runtime、模型 SDK 或写操作，未进入目标 D。
 
 ### 目标 D：旧接口与过渡代码清理
 

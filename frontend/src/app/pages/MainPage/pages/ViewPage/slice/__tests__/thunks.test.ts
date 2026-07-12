@@ -96,11 +96,12 @@ describe('runSql', () => {
 
     expect(requestMock.request2).toHaveBeenCalledWith(
       expect.objectContaining({
+        url: 'queries/preview',
         data: expect.not.objectContaining({
           columns: expect.anything(),
         }),
       }),
-      undefined,
+      {},
       expect.any(Object),
     );
   });
@@ -118,7 +119,7 @@ describe('runSql', () => {
           size: 1000,
         }),
       }),
-      undefined,
+      {},
       expect.any(Object),
     );
   });
@@ -142,7 +143,7 @@ describe('runSql', () => {
           scriptType: 'STRUCT',
         }),
       }),
-      undefined,
+      {},
       expect.any(Object),
     );
   });

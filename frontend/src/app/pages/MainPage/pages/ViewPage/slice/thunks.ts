@@ -20,6 +20,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import sqlReservedWords from 'app/assets/javascripts/sqlReservedWords';
 import { MONACO_COMPLETION_ITEM_KIND_KEYWORD } from 'app/components/MonacoEditor/runtime';
+import { previewQuery, type PreviewQueryRequest } from 'app/features/query';
 import { migrateView } from 'app/migration/ViewConfig/migrationViewConfig';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import i18n from 'i18next';
@@ -225,14 +226,7 @@ export const runSql = createAsyncThunk<
   }
 
   let reqColumns: StructViewRequestColumn[] | undefined;
-  const requestData: {
-    script: string;
-    sourceId: string;
-    size: number;
-    scriptType: ViewViewModel['type'];
-    columns?: StructViewRequestColumn[];
-    variables: unknown[];
-  } = {
+  const requestData: PreviewQueryRequest = {
     script,
     sourceId,
     size,
@@ -253,24 +247,16 @@ export const runSql = createAsyncThunk<
     requestData.columns = reqColumns;
   }
 
-  const response = await request2<QueryResult>(
-    {
-      url: '/data-provider/execute/test',
-      method: 'POST',
-      data: requestData,
+  const response = await previewQuery<QueryResult>(requestData, {
+    onRejected: error => {
+      dispatch(
+        viewActions.changeCurrentEditingView({
+          stage: ViewViewModelStages.Initialized,
+          error: getErrorMessage(error),
+        }),
+      );
     },
-    undefined,
-    {
-      onRejected: error => {
-        dispatch(
-          viewActions.changeCurrentEditingView({
-            stage: ViewViewModelStages.Initialized,
-            error: getErrorMessage(error),
-          }),
-        );
-      },
-    },
-  );
+  });
   return {
     ...response?.data,
     warnings: response?.warnings,
