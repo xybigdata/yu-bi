@@ -77,6 +77,8 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 
 ### 目标 A：架构基线与行为特征测试
 
+**状态**：已完成（2026-07-12）
+
 **目的**：在移动查询逻辑前锁定现有行为和安全语义。
 
 **工作内容**：
@@ -91,6 +93,19 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 - 特征测试在未重构代码上通过。
 - 文档能够解释查询请求从 Controller 到 Provider 的完整数据流。
 - 无尚未决定的 Query 模块依赖方向或公开契约。
+
+**完成记录**：
+
+- 架构审查：`docs/architecture/query-current-state-review.md`
+- Query ADR：`docs/architecture/adr/0001-query-capability-boundary.md`
+- 新增 8 个特征测试，覆盖登录与预览查询、分享令牌、变量、列权限、Owner 规则、分页、脚本隐藏和 Provider 异常。
+- `mvn -pl server -am -Dexec.skip=true test`：通过；server 19 项测试通过，reactor 全部成功。
+- Query 定向测试：8 项通过。
+- `npm run checkTs`、`npm run lint`：通过。
+- `npm run test:ci`：201 个测试文件通过，1319 项测试通过，4 项跳过；其中 View 配置迁移与请求构建定向测试 3 个文件、38 项通过。
+- `mvn -pl server -am -DskipTests package`：通过；前端主应用/task、后端 Jar 和安装包 assembly 均成功。
+- 已知非阻断告警：Mockito 动态 agent、测试环境 Log4j provider、Vite 大 chunk、AntV S2 缺失 sourcemap 提示；前端迁移异常输出来自错误分支测试预期。均未通过放宽测试处理。
+- 本目标未修改生产代码，未创建 `query` 模块，未进入目标 B。
 
 ### 目标 B：后端 Query 能力模块
 

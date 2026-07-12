@@ -10,6 +10,12 @@
 /static
 /docs/*
 !/docs/agent-ready-architecture-plan.md
+!/docs/architecture/
+/docs/architecture/*
+!/docs/architecture/query-current-state-review.md
+!/docs/architecture/adr/
+/docs/architecture/adr/*
+!/docs/architecture/adr/0001-query-capability-boundary.md
 /.tmp/
 /logs/
 
