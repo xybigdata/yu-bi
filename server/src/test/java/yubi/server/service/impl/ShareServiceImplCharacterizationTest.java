@@ -97,6 +97,21 @@ class ShareServiceImplCharacterizationTest {
         assertSame(expected, result);
         verify(securityManager).runAs("share-owner");
         verify(dataProviderService).execute(request, false);
+        verify(securityManager).releaseRunAs();
+    }
+
+    @Test
+    void shouldReleaseSharedIdentityWhenQueryFails() throws Exception {
+        ViewExecuteParam request = executableRequest("view-1");
+        Exception failure = new Exception("query failed");
+        when(dataProviderService.execute(request, false)).thenThrow(failure);
+
+        Exception thrown = assertThrows(Exception.class,
+                () -> shareService.execute(tokenFor("view-1", "share-owner"), request));
+
+        assertSame(failure, thrown);
+        verify(securityManager).runAs("share-owner");
+        verify(securityManager).releaseRunAs();
     }
 
     @Test

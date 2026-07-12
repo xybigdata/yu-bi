@@ -257,8 +257,12 @@ public class ShareServiceImpl extends BaseService implements ShareService {
     @Override
     public Dataframe execute(ShareToken shareToken, ViewExecuteParam executeParam) throws Exception {
         ShareAuthorizedToken shareAuthorizedToken = validateExecutePermission(shareToken.getAuthorizedToken(), executeParam);
-        getSecurityManager().runAs(shareAuthorizedToken.getPermissionBy());
-        return dataProviderService.execute(executeParam, false);
+        try {
+            getSecurityManager().runAs(shareAuthorizedToken.getPermissionBy());
+            return dataProviderService.execute(executeParam, false);
+        } finally {
+            getSecurityManager().releaseRunAs();
+        }
     }
 
     @Override

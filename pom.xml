@@ -89,6 +89,7 @@
     </dependencies>
 
     <modules>
+        <module>query</module>
         <module>core</module>
         <module>security</module>
         <module>data-providers</module>

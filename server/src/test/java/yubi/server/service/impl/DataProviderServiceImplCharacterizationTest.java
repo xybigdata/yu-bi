@@ -31,6 +31,7 @@ import yubi.core.common.RequestContext;
 import yubi.core.data.provider.DataProviderManager;
 import yubi.core.data.provider.DataProviderSource;
 import yubi.core.data.provider.Dataframe;
+import yubi.core.data.provider.Column;
 import yubi.core.data.provider.ExecuteParam;
 import yubi.core.data.provider.QueryScript;
 import yubi.core.data.provider.ScriptType;
@@ -41,10 +42,20 @@ import yubi.core.entity.Source;
 import yubi.core.entity.User;
 import yubi.core.entity.View;
 import yubi.core.mappers.ext.RelSubjectColumnsMapperExt;
+import yubi.core.mappers.ext.SourceMapperExt;
 import yubi.security.manager.YuBiSecurityManager;
+import yubi.query.application.DefaultQueryService;
 import yubi.server.base.dto.VariableValue;
 import yubi.server.base.params.TestExecuteParam;
 import yubi.server.base.params.ViewExecuteParam;
+import yubi.server.query.ServerQueryAccessPolicyAdapter;
+import yubi.server.query.ServerQueryCompatibilityMapper;
+import yubi.server.query.ServerQueryDefinitionAdapter;
+import yubi.server.query.ServerQueryEngineAdapter;
+import yubi.server.query.ServerQueryExecutionContextFactory;
+import yubi.server.query.ServerQueryVariableAdapter;
+import yubi.server.query.ServerSourceConfigMapper;
+import yubi.server.service.SourceService;
 import yubi.server.service.VariableService;
 import yubi.server.service.ViewService;
 
@@ -62,6 +73,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -84,7 +96,13 @@ class DataProviderServiceImplCharacterizationTest {
 
     private Source source;
 
-    private TestDataProviderService service;
+    private SourceService sourceService;
+
+    private SourceMapperExt sourceMapper;
+
+    private DataProviderServiceImpl service;
+
+    private Dataframe providerResult;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -92,6 +110,8 @@ class DataProviderServiceImplCharacterizationTest {
         columnPermissionMapper = mock(RelSubjectColumnsMapperExt.class);
         variableService = mock(VariableService.class);
         viewService = mock(ViewService.class);
+        sourceService = mock(SourceService.class);
+        sourceMapper = mock(SourceMapperExt.class);
         securityManager = mock(YuBiSecurityManager.class);
 
         view = new View();
@@ -126,16 +146,25 @@ class DataProviderServiceImplCharacterizationTest {
         columnPermission.setColumnPermission("[\"orders.amount\",\"customers.region\"]");
         when(columnPermissionMapper.listByUser("view-1", "user-1")).thenReturn(List.of(columnPermission));
 
-        service = new TestDataProviderService(
-                dataProviderManager,
-                columnPermissionMapper,
-                variableService,
-                viewService,
-                view,
-                source);
-        service.setSecurityManager(securityManager);
-        service.init();
-        when(dataProviderManager.execute(any(), any(), any())).thenReturn(service.providerResult);
+        when(viewService.retrieve("view-1", false)).thenReturn(view);
+        when(sourceService.retrieve("source-1", false)).thenReturn(source);
+        when(sourceMapper.selectQueryAccessProjection("source-1")).thenReturn(source);
+
+        ServerSourceConfigMapper sourceConfigMapper = new ServerSourceConfigMapper();
+        ServerQueryDefinitionAdapter definitionAdapter = new ServerQueryDefinitionAdapter(viewService, sourceMapper);
+        ServerQueryAccessPolicyAdapter accessAdapter = new ServerQueryAccessPolicyAdapter(
+                viewService, sourceService, columnPermissionMapper, securityManager);
+        ServerQueryVariableAdapter variableAdapter = new ServerQueryVariableAdapter(variableService, securityManager);
+        ServerQueryEngineAdapter engineAdapter = new ServerQueryEngineAdapter(
+                dataProviderManager, sourceService, sourceConfigMapper);
+        DefaultQueryService queryService = new DefaultQueryService(
+                definitionAdapter, accessAdapter, variableAdapter, engineAdapter, event -> { });
+        ServerQueryCompatibilityMapper compatibilityMapper = new ServerQueryCompatibilityMapper();
+        ServerQueryExecutionContextFactory contextFactory = new ServerQueryExecutionContextFactory(securityManager);
+        service = new DataProviderServiceImpl(dataProviderManager, queryService, queryService,
+                compatibilityMapper, contextFactory, sourceConfigMapper);
+        providerResult = dataframeWithScript();
+        when(dataProviderManager.execute(any(), any(), any())).thenReturn(providerResult);
     }
 
     @AfterEach
@@ -156,9 +185,25 @@ class DataProviderServiceImplCharacterizationTest {
         ArgumentCaptor<ExecuteParam> executeCaptor = ArgumentCaptor.forClass(ExecuteParam.class);
         verify(dataProviderManager).execute(sourceCaptor.capture(), scriptCaptor.capture(), executeCaptor.capture());
 
-        assertSame(service.providerResult, result);
-        assertTrue(service.viewPermissionCheck);
-        assertFalse(service.sourcePermissionCheck);
+        // Query API 不暴露 Dataframe，因此兼容层会重建边界对象；这里锁定全部可观察字段而非对象身份。
+        assertEquals(providerResult.getId(), result.getId());
+        assertEquals(providerResult.getName(), result.getName());
+        assertEquals(providerResult.getVizType(), result.getVizType());
+        assertEquals(providerResult.getVizId(), result.getVizId());
+        assertEquals(providerResult.getColumns(), result.getColumns());
+        assertEquals(providerResult.getRows(), result.getRows());
+        assertSame(providerResult.getRows().getFirst().getFirst(), result.getRows().getFirst().getFirst());
+        assertEquals(providerResult.getPageInfo().getPageNo(), result.getPageInfo().getPageNo());
+        assertEquals(providerResult.getPageInfo().getPageSize(), result.getPageInfo().getPageSize());
+        assertEquals(providerResult.getPageInfo().getTotal(), result.getPageInfo().getTotal());
+        assertEquals(providerResult.getPageInfo().isCountTotal(), result.getPageInfo().isCountTotal());
+        assertEquals(providerResult.getScript(), result.getScript());
+        ArgumentCaptor<View> readViewCaptor = ArgumentCaptor.forClass(View.class);
+        verify(viewService).requirePermission(readViewCaptor.capture(), eq(Const.READ));
+        assertEquals(view.getId(), readViewCaptor.getValue().getId());
+        assertEquals(view.getOrgId(), readViewCaptor.getValue().getOrgId());
+        assertEquals(view.getParentId(), readViewCaptor.getValue().getParentId());
+        verify(sourceService).retrieve("source-1", false);
         assertEquals(Boolean.TRUE, RequestContext.getScriptPermission());
         assertEquals("select amount, region from orders", result.getScript());
 
@@ -188,7 +233,7 @@ class DataProviderServiceImplCharacterizationTest {
         assertEquals(1000L, executeParam.getPageInfo().getPageSize());
         assertTrue(executeParam.isServerAggregate());
         assertEquals(Set.of("customers.region", "orders.amount"), columnKeys(executeParam.getIncludeColumns()));
-        verify(viewService).requirePermission(view, Const.MANAGE);
+        verify(viewService).requirePermission(any(View.class), eq(Const.MANAGE));
         verify(columnPermissionMapper).listByUser("view-1", "user-1");
     }
 
@@ -233,7 +278,7 @@ class DataProviderServiceImplCharacterizationTest {
     void shouldCharacterizeScriptHidingWithoutManagePermission() throws Exception {
         doThrow(new RuntimeException("manage denied"))
                 .when(viewService)
-                .requirePermission(view, Const.MANAGE);
+                .requirePermission(any(View.class), eq(Const.MANAGE));
         ViewExecuteParam request = executableRequest();
         request.setScript(true);
 
@@ -273,7 +318,10 @@ class DataProviderServiceImplCharacterizationTest {
         ArgumentCaptor<QueryScript> scriptCaptor = ArgumentCaptor.forClass(QueryScript.class);
         ArgumentCaptor<ExecuteParam> executeCaptor = ArgumentCaptor.forClass(ExecuteParam.class);
         verify(dataProviderManager).execute(any(), scriptCaptor.capture(), executeCaptor.capture());
-        assertTrue(service.sourcePermissionCheck);
+        ArgumentCaptor<Source> readSourceCaptor = ArgumentCaptor.forClass(Source.class);
+        verify(sourceService).requirePermission(readSourceCaptor.capture(), eq(Const.READ));
+        assertEquals(source.getId(), readSourceCaptor.getValue().getId());
+        assertEquals(source.getOrgId(), readSourceCaptor.getValue().getOrgId());
         assertTrue(scriptCaptor.getValue().isTest());
         assertEquals("source-1", scriptCaptor.getValue().getSourceId());
         ScriptVariable previewVariable = scriptCaptor.getValue().getVariables().stream()
@@ -287,6 +335,31 @@ class DataProviderServiceImplCharacterizationTest {
         assertEquals(Set.of("*"), columnKeys(executeCaptor.getValue().getIncludeColumns()));
     }
 
+    @Test
+    void shouldPreserveStructScriptTypeForViewExecution() throws Exception {
+        view.setType(ScriptType.STRUCT.name());
+
+        service.execute(executableRequest());
+
+        ArgumentCaptor<QueryScript> scriptCaptor = ArgumentCaptor.forClass(QueryScript.class);
+        verify(dataProviderManager).execute(any(), scriptCaptor.capture(), any());
+        assertEquals(ScriptType.STRUCT, scriptCaptor.getValue().getScriptType());
+    }
+
+    @Test
+    void shouldPreserveStructScriptTypeForPreviewExecution() throws Exception {
+        TestExecuteParam request = new TestExecuteParam();
+        request.setSourceId("source-1");
+        request.setScript("{\"columns\":[]}");
+        request.setScriptType(ScriptType.STRUCT);
+
+        service.testExecute(request);
+
+        ArgumentCaptor<QueryScript> scriptCaptor = ArgumentCaptor.forClass(QueryScript.class);
+        verify(dataProviderManager).execute(any(), scriptCaptor.capture(), any());
+        assertEquals(ScriptType.STRUCT, scriptCaptor.getValue().getScriptType());
+    }
+
     private ViewExecuteParam executableRequest() {
         ViewExecuteParam request = new ViewExecuteParam();
         request.setViewId("view-1");
@@ -295,9 +368,17 @@ class DataProviderServiceImplCharacterizationTest {
     }
 
     private static Dataframe dataframeWithScript() {
+        Object cell = new Object();
+        Column column = Column.of(ValueType.NUMERIC, "orders", "amount");
+        column.setFmt("0.00");
+        column.setForeignKeys(List.of());
         Dataframe dataframe = new Dataframe("query-result");
-        dataframe.setColumns(List.of());
-        dataframe.setRows(List.of());
+        dataframe.setName("orders-result");
+        dataframe.setVizType("DATACHART");
+        dataframe.setVizId("viz-1");
+        dataframe.setColumns(List.of(column));
+        dataframe.setRows(List.of(java.util.Arrays.asList(cell, null)));
+        dataframe.setPageInfo(PageInfo.builder().pageNo(1L).pageSize(1000L).total(7L).countTotal(true).build());
         dataframe.setScript("select amount, region from orders");
         return dataframe;
     }
@@ -322,41 +403,4 @@ class DataProviderServiceImplCharacterizationTest {
                 .collect(Collectors.toSet());
     }
 
-    private static final class TestDataProviderService extends DataProviderServiceImpl {
-
-        private final View view;
-
-        private final Source source;
-
-        private final Dataframe providerResult;
-
-        private boolean viewPermissionCheck;
-
-        private boolean sourcePermissionCheck;
-
-        private TestDataProviderService(DataProviderManager dataProviderManager,
-                                        RelSubjectColumnsMapperExt columnPermissionMapper,
-                                        VariableService variableService,
-                                        ViewService viewService,
-                                        View view,
-                                        Source source) {
-            super(dataProviderManager, columnPermissionMapper, variableService, viewService);
-            this.view = view;
-            this.source = source;
-            this.providerResult = dataframeWithScript();
-        }
-
-        @Override
-        public <T> T retrieve(String id, Class<T> type, boolean checkPermission) {
-            if (View.class.equals(type)) {
-                viewPermissionCheck = checkPermission;
-                return type.cast(view);
-            }
-            if (Source.class.equals(type)) {
-                sourcePermissionCheck = checkPermission;
-                return type.cast(source);
-            }
-            throw new IllegalArgumentException("Unexpected entity type: " + type.getName());
-        }
-    }
 }

@@ -109,6 +109,8 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 
 ### 目标 B：后端 Query 能力模块
 
+**状态**：已完成（2026-07-12）
+
 **依赖**：目标 A。
 
 **目的**：建立与框架和基础设施解耦的查询应用能力，暂不改变前端调用路径。
@@ -126,6 +128,26 @@ Mapper 查询、Spring Security 上下文、AES 解密、Jackson 配置解析以
 - 原查询特征测试全部通过。
 - `query` 的 Maven 依赖树不包含 Spring MVC、MyBatis、Security 或 Provider 实现。
 - `DataProviderServiceImpl` 不再负责变量、列权限、分页和执行编排。
+
+**完成记录**：
+
+- 新增纯 Java 21 `query` 模块，按 `api/application/domain/port` 分层提供 `ExecuteQueryUseCase`、`PreviewQueryUseCase`、纯值对象、稳定异常和五个端口；`server` 单向依赖 `query`。
+- `DefaultQueryService` 统一承担查询与预览编排、变量覆盖、Owner 权限变量规则、列权限决策接入、分页归一化、引擎执行、脚本可见性、异常分类和尽力审计。端口返回 `null`、结果转换等未预期 `RuntimeException` 也会稳定分类、保留 cause 并审计为失败；`Error` 不包装、不吞掉，但同样不误记为成功。审计事件仅包含渠道、主体/组织引用、关联 ID、资源 ID、耗时、行数和失败类别，审计失败不覆盖查询结果或原异常。
+- `server/query` 提供定义安全投影、权限与列权限、系统/组织/View 变量、Provider DTO 转换与调度、审计、可信执行上下文和旧 DTO 兼容映射适配器；Query API 不暴露实体、Spring Authentication、Provider DTO 或数据源配置。View 定义只携带 `sourceId` 和纯查询/权限投影，预览 Source 使用不选择 `config/type` 的最小投影；只有权限通过并进入 `ServerQueryEngineAdapter` 后，才按 `sourceId` 读取完整 Source、解密配置并调用 Provider。
+- 上下文工厂不再预读 View/Source；应用服务在单次定义快照上绑定并校验组织。登录/分享 View 执行只读取一次 View，预览在授权前只读取一次无配置投影，授权成功后由引擎读取一次完整 Source，没有使用全局缓存或线程本地传递快照。
+- `DataProviderServiceImpl` 的查询方法已收缩为旧 DTO 映射、可信上下文创建、Use Case 委托和旧 `Dataframe` 映射；数据源元数据、连接测试、函数能力及 Source 更新等非查询职责继续保留。旧 Controller、附件下载和调度/下载任务仍经原 `DataProviderService` 路径工作，REST 路径未变。
+- 分享查询在 `try/finally` 中执行 `runAs`，成功和异常路径均调用 `releaseRunAs()`；分享令牌仍由旧分享入口校验并绑定 View，没有新增目标 C 的 REST 路径或 `X-YuBi-Share-Token` 契约。
+- Query 脚本类型同时覆盖 `SQL` 和 `STRUCT`，旧 View 执行与预览 DTO 均双向映射到 Provider 原类型。
+- 查询结果集合只在公开 `QueryResult` 边界冻结一次；内部 `EngineResult` 作为受信任的同步端口传输对象不重复复制，公开 columns、rows 和每一行均保持不可修改，Provider 原始 rows 后续变化不会影响公开结果。
+- 兼容层因 Query API 禁止暴露 `Dataframe` 而重建边界响应对象；目标 A 测试不再只比较 ID，而是锁定 ID、名称、可视化字段、列、行、分页、脚本和单元格对象引用等全部可观察字段，避免以削弱断言换取重构通过。
+- 测试新增：Query 应用服务 9 项、Query 结果所有权与不可变性 1 项、Query 源码边界 1 项、旧接口委托 2 项、定义安全投影 1 项、授权拒绝顺序 2 项、引擎延迟读取/解密与组织快照校验 2 项、Spring Use Case 装配 1 项、View/Preview STRUCT 2 项、分享异常释放 1 项；目标 A 原 8 项行为特征测试继续通过。
+- `mvn -pl query test`：通过，11 项测试全部成功；Maven Enforcer 的 `query-production-boundary` 同时通过。
+- 目标 A 与 Query 定向测试：`DataProviderServiceImplCharacterizationTest` 原 6 项及新增 2 项 STRUCT 回归均通过；`ShareServiceImplCharacterizationTest` 原 2 项及新增异常释放测试均通过。
+- `mvn -pl server -am -Dexec.skip=true test`：通过；Query 11、Core 23、Security 18、Provider Base 46、JDBC Provider 125、Server 30，共 253 项，0 失败、0 错误，JDBC 既有 6 项跳过。
+- `mvn -pl query dependency:tree -Dscope=runtime`：只包含 `yubi:yu-bi-query` 自身，运行时生产依赖为空，不含 core、security、server、Spring、MyBatis、Jackson、AES 或 Provider 实现。
+- `mvn -pl server -am -DskipTests package`：通过；前端主应用/task、Query 与后端 Jar、安装包 assembly 均成功。
+- 已知非阻断告警：Mockito 动态 agent、测试环境 Log4j provider、GraalVM fallback runtime、Vite 大 chunk 和 npm allow-scripts 提示；均未通过删除测试、吞异常或放宽权限/边界规则处理。
+- 本目标未修改前端查询调用路径，未新增或删除 REST 接口，未实现 Agent Runtime、LLM 接入或写操作，未进入目标 C。
 
 ### 目标 C：新 REST 契约与前端 Query Feature
 
