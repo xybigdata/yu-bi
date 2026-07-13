@@ -13,6 +13,8 @@ import yubi.security.util.AESUtil;
 import yubi.server.base.params.ShareAuthorizedToken;
 import yubi.server.query.ServerQueryExecutionContextFactory;
 
+import java.util.Objects;
+
 @Component
 public class PublicQueryExecutor {
 
@@ -48,7 +50,7 @@ public class PublicQueryExecutor {
             ShareAuthorizedToken authorizedToken = AESUtil.decrypt(token, Application.getTokenSecret(),
                     ShareAuthorizedToken.class);
             if (authorizedToken == null || !ResourceType.VIEW.equals(authorizedToken.getVizType())
-                    || !StringUtils.equals(authorizedToken.getVizId(), viewId)) {
+                    || !Objects.equals(authorizedToken.getVizId(), viewId)) {
                 throw denied(null);
             }
             return authorizedToken;

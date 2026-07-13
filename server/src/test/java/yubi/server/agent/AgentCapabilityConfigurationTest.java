@@ -23,7 +23,6 @@ import yubi.agent.port.ModelGateway;
 import yubi.agent.port.ReadOnlyToolRegistry;
 import yubi.query.api.DataAssetDetail;
 import yubi.query.api.DescribeDataAssetRequest;
-import yubi.query.api.ExecuteQueryCommand;
 import yubi.query.api.ExecuteQueryUseCase;
 import yubi.query.api.QueryExecutionContext;
 import yubi.query.api.QueryMetadataUseCase;

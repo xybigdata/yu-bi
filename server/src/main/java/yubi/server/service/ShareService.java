@@ -1,6 +1,5 @@
 package yubi.server.service;
 
-import yubi.core.data.provider.Dataframe;
 import yubi.core.data.provider.StdSqlOperator;
 import yubi.core.entity.Download;
 import yubi.core.entity.Share;

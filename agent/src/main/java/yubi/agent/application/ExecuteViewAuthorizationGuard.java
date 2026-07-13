@@ -5,7 +5,6 @@ import yubi.query.api.DataAssetDetail;
 import yubi.query.api.DescribeDataAssetRequest;
 import yubi.query.api.QueryExecutionContext;
 import yubi.query.api.QueryMetadataUseCase;
-import yubi.query.domain.QueryModels.ColumnSelection;
 import yubi.query.domain.QueryModels.Filter;
 import yubi.query.domain.QueryModels.ValueType;
 import yubi.query.domain.QueryModels.VariableType;

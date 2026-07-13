@@ -54,6 +54,7 @@ class ServerVisualizationWriteCurrentReadGatewayMySqlTest {
     private JdbcTemplate jdbc;
     private DataSourceTransactionManager transactionManager;
     private SqlSessionFactory sessionFactory;
+    private SqlSessionTemplate sessions;
     private DashboardMapperExt dashboardMapper;
     private FolderMapperExt folderMapper;
     private RoleMapperExt roleMapper;
@@ -80,7 +81,7 @@ class ServerVisualizationWriteCurrentReadGatewayMySqlTest {
         seedData();
 
         sessionFactory = sessionFactory(dataSource);
-        SqlSessionTemplate sessions = new SqlSessionTemplate(sessionFactory);
+        sessions = new SqlSessionTemplate(sessionFactory);
         ViewMapperExt viewMapper = sessions.getMapper(ViewMapperExt.class);
         folderMapper = sessions.getMapper(FolderMapperExt.class);
         dashboardMapper = sessions.getMapper(DashboardMapperExt.class);

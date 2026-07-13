@@ -59,8 +59,8 @@ public final class StructuredValueWebMapper {
         if (value.isNull()) {
             return NullValue.INSTANCE;
         }
-        if (value.isTextual()) {
-            return new TextValue(value.textValue());
+        if (value.isString()) {
+            return new TextValue(value.stringValue());
         }
         if (value.isBoolean()) {
             return new BooleanValue(value.booleanValue());

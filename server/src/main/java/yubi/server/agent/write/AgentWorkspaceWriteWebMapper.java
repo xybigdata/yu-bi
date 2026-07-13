@@ -35,11 +35,11 @@ public final class AgentWorkspaceWriteWebMapper {
         }
         JsonNode tool = request.get("toolName");
         JsonNode arguments = request.get("arguments");
-        if (tool == null || !tool.isTextual() || tool.textValue() == null
-                || tool.textValue().isBlank() || tool.textValue().length() > 64 || arguments == null) {
+        if (tool == null || !tool.isString() || tool.stringValue() == null
+                || tool.stringValue().isBlank() || tool.stringValue().length() > 64 || arguments == null) {
             throw invalid();
         }
-        return new WriteProposalCommand(tool.textValue(), values.toObject(arguments), idempotencyKey);
+        return new WriteProposalCommand(tool.stringValue(), values.toObject(arguments), idempotencyKey);
     }
 
     public void requireBodylessDecision(JsonNode request) {

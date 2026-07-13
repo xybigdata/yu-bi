@@ -223,10 +223,10 @@ final class ControlledWriteJsonCodec {
     }
 
     private String text(JsonNode value, int maximumLength) {
-        if (value == null || !value.isTextual()) {
+        if (value == null || !value.isString()) {
             throw damaged();
         }
-        String result = value.textValue();
+        String result = value.stringValue();
         if (result == null || result.isBlank() || result.length() > maximumLength) {
             throw damaged();
         }

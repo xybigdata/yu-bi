@@ -2,7 +2,6 @@ package yubi.server.config;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -127,7 +126,7 @@ class QuerySecurityIntegrationTest {
                 .andExpect(jsonPath("$.message").value("denied"));
 
         doThrow(new QueryDefinitionException("definition", null)).when(useCase).execute(any(), any());
-        performAuthenticatedQuery().andExpect(status().isUnprocessableEntity())
+        performAuthenticatedQuery().andExpect(status().isUnprocessableContent())
                 .andExpect(jsonPath("$.message").value("definition"));
 
         doThrow(new QueryExecutionException("execution", null)).when(useCase).execute(any(), any());

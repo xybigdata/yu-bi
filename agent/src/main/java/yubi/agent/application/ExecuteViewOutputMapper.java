@@ -307,8 +307,5 @@ final class ExecuteViewOutputMapper {
                               long observedBytes,
                               long returnedBytes,
                               boolean truncated) {
-        private static Projection empty() {
-            return new Projection(null, 0, 0, false);
-        }
     }
 }

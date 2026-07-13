@@ -18,8 +18,6 @@ import yubi.server.config.WebExceptionHandler;
 import yubi.server.query.ServerQueryExecutionContextFactory;
 import yubi.server.query.web.PublicQueryExecutor;
 import yubi.server.query.web.QueryWebMapper;
-import yubi.server.controller.DataProviderController;
-import yubi.server.controller.ShareController;
 import yubi.server.service.DataProviderService;
 import yubi.server.service.ShareService;
 
@@ -119,7 +117,7 @@ class QueryControllerWebTest {
 
         doThrow(new QueryDefinitionException("definition", null)).when(executeUseCase).execute(any(), any());
         authenticatedMvc.perform(post("/queries/execute").contentType(MediaType.APPLICATION_JSON).content(body))
-                .andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.message").value("definition"));
+                .andExpect(status().isUnprocessableContent()).andExpect(jsonPath("$.message").value("definition"));
 
         doThrow(new QueryExecutionException("execution", null)).when(executeUseCase).execute(any(), any());
         authenticatedMvc.perform(post("/queries/execute").contentType(MediaType.APPLICATION_JSON).content(body))

@@ -6,8 +6,6 @@ import yubi.visualization.write.api.PreparedRenameDashboard;
 import yubi.visualization.write.api.RenameDashboardCommand;
 import yubi.visualization.write.api.VisualizationWriteContext;
 import yubi.visualization.write.api.VisualizationWriteException;
-import yubi.visualization.write.domain.VisualizationWriteModels.CreateChartDraft;
-import yubi.visualization.write.domain.VisualizationWriteModels.CreateChartOutcome;
 import yubi.visualization.write.domain.VisualizationWriteModels.DashboardTarget;
 import yubi.visualization.write.domain.VisualizationWriteModels.ParentTarget;
 import yubi.visualization.write.domain.VisualizationWriteModels.RenameDashboardDraft;
