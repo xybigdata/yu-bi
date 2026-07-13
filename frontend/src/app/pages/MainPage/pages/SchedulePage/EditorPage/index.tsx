@@ -55,6 +55,7 @@ import {
 } from '../utils';
 import { BasicBaseForm } from './BasicBaseForm';
 import { EmailSettingForm } from './EmailSettingForm';
+import { ScheduleFormContent } from './layout';
 import { ScheduleErrorLog } from './ScheduleErrorLog';
 import { SendContentForm } from './SendContentForm';
 import { WeChatSettingForm } from './WeChatSettingForm';
@@ -371,7 +372,7 @@ export const EditorPage: FC = () => {
                 <ScheduleErrorLog scheduleId={editingSchedule?.id} />
               ) : null}
               <FormCard title={t('basicSettings')}>
-                <FormWrapper>
+                <ScheduleFormContent>
                   <BasicBaseForm
                     isAdd={isAdd}
                     orgId={orgId}
@@ -382,29 +383,29 @@ export const EditorPage: FC = () => {
                     periodInput={periodInput}
                     onPeriodInputChange={onPeriodInputChange}
                   />
-                </FormWrapper>
+                </ScheduleFormContent>
               </FormCard>
 
               {jobType === JobTypes.Email ? (
                 <FormCard title={t('emailSetting')}>
-                  <FormWrapper>
+                  <ScheduleFormContent>
                     <EmailSettingForm
                       fileType={fileType}
                       onFileTypeChange={onFileTypeChange}
                     />
-                  </FormWrapper>
+                  </ScheduleFormContent>
                 </FormCard>
               ) : (
                 <FormCard title={t('enterpriseWeChatSettings')}>
-                  <FormWrapper>
+                  <ScheduleFormContent>
                     <WeChatSettingForm />
-                  </FormWrapper>
+                  </ScheduleFormContent>
                 </FormCard>
               )}
               <FormCard title={t('sendContentSettings')}>
-                <FormWrapper>
+                <ScheduleFormContent>
                   <SendContentForm />
-                </FormWrapper>
+                </ScheduleFormContent>
               </FormCard>
             </FormAreaWrapper>
           </Form>
@@ -422,7 +423,9 @@ const Container = styled.div`
 
 const EditorWrapper = styled.div`
   flex: 1;
+  min-width: 0;
   padding: ${SPACE_LG};
+  overflow-x: hidden;
   overflow-y: auto;
 `;
 
@@ -430,6 +433,8 @@ const FormAreaWrapper = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  width: 100%;
+  min-width: 0;
   .image_width_form_item_wrapper {
     display: flex;
     flex-direction: row;
@@ -451,13 +456,12 @@ const FormAreaWrapper = styled.div`
 `;
 
 const FormCard = styled(Card)`
+  min-width: 0;
+
   &.ant-card {
     margin-top: ${SPACE_LG};
     background-color: ${p => p.theme.componentBackground};
     border-radius: ${BORDER_RADIUS};
     box-shadow: ${p => p.theme.shadowBlock};
   }
-`;
-const FormWrapper = styled.div`
-  width: 860px;
 `;

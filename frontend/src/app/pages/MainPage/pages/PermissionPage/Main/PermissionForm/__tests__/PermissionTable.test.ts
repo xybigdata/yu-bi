@@ -3,6 +3,7 @@ import {
   getLimitedPermissionResourceNameColumnWidth,
   getPermissionTableLayout,
   getPermissionTableWidth,
+  getResponsivePermissionTableLayout,
   getResizedPermissionTableWidth,
   PERMISSION_RESOURCE_NAME_COLUMN_DEFAULT_WIDTH,
   PERMISSION_RESOURCE_NAME_COLUMN_MAX_WIDTH,
@@ -58,6 +59,30 @@ describe('PermissionTable layout helpers', () => {
       resourceNameColumnWidth: 460,
       privilegeColumnWidth: 200,
       tableWidth: 660,
+    });
+  });
+
+  test('fits the default resource column into the available table viewport', () => {
+    expect(getResponsivePermissionTableLayout(360, 620)).toEqual({
+      resourceNameColumnWidth: 259,
+      privilegeColumnWidth: 360,
+      tableWidth: 619,
+    });
+  });
+
+  test('keeps the minimum readable columns and delegates overflow to the table viewport', () => {
+    expect(getResponsivePermissionTableLayout(360, 540)).toEqual({
+      resourceNameColumnWidth: 220,
+      privilegeColumnWidth: 360,
+      tableWidth: 580,
+    });
+  });
+
+  test('preserves a manually resized table inside the scrollable viewport', () => {
+    expect(getResponsivePermissionTableLayout(360, 620, 600, 960)).toEqual({
+      resourceNameColumnWidth: 600,
+      privilegeColumnWidth: 360,
+      tableWidth: 960,
     });
   });
 });

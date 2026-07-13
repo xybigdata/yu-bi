@@ -41,6 +41,7 @@ import {
 } from '../../slice/types';
 import { getDefaultPermissionArray } from '../../utils';
 import { IndependentPermissionSetting } from './IndependentPermissionSetting';
+import { PERMISSION_FORM_LAYOUT, PermissionFormContent } from './layout';
 import { PermissionTable } from './PermissionTable';
 import {
   calcPermission,
@@ -270,11 +271,7 @@ export const PermissionForm = memo(
     return (
       <Wrapper className={classnames({ selected })}>
         <LoadingMask loading={permissionLoading}>
-          <FormContent
-            labelAlign="left"
-            labelCol={{ span: 4 }}
-            wrapperCol={{ span: 18 }}
-          >
+          <PermissionFormContent {...PERMISSION_FORM_LAYOUT} labelAlign="left">
             {viewpoint === Viewpoints.Subject && (
               <IndependentPermissionSetting
                 enabled={moduleEnabled}
@@ -295,7 +292,7 @@ export const PermissionForm = memo(
                 onPrivilegeChange={privilegeChange}
               />
             </Form.Item>
-          </FormContent>
+          </PermissionFormContent>
         </LoadingMask>
       </Wrapper>
     );
@@ -309,8 +306,4 @@ const Wrapper = styled.div`
     position: relative;
     display: block;
   }
-`;
-
-const FormContent = styled(Form)`
-  width: 960px;
 `;
