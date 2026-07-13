@@ -8,17 +8,7 @@
 !.vscode/maven-lifecycle-mapping.xml
 
 /static
-/docs/*
-!/docs/agent-ready-architecture-plan.md
-!/docs/architecture/
-/docs/architecture/*
-!/docs/architecture/query-current-state-review.md
-!/docs/architecture/adr/
-/docs/architecture/adr/*
-!/docs/architecture/adr/0001-query-capability-boundary.md
-!/docs/architecture/adr/0002-read-only-agent-runtime.md
-!/docs/architecture/adr/0003-agent-evaluation-observability-governance.md
-!/docs/architecture/adr/0004-controlled-agent-writes.md
+/docs/
 /.tmp/
 /logs/
 
