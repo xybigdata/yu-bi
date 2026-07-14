@@ -1,6 +1,5 @@
 package yubi.server.service;
 
-import yubi.core.data.provider.Dataframe;
 import yubi.core.data.provider.StdSqlOperator;
 import yubi.core.entity.Download;
 import yubi.core.entity.Share;
@@ -22,8 +21,6 @@ public interface ShareService extends BaseCRUDService<Share, ShareMapperExt> {
     List<ShareInfo> listShare(String vizId);
 
     ShareVizDetail getShareViz(ShareToken shareToken);
-
-    Dataframe execute(ShareToken shareToken, ViewExecuteParam executeParam) throws Exception;
 
     Download createDownload(String clientId, ShareDownloadParam downloadCreateParams);
 

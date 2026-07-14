@@ -2,6 +2,7 @@ export const MAIN_PAGE_ROUTE_PATHS = {
   root: '/',
   confirmInvite: '/confirminvite',
   organization: '/organizations/:orgId',
+  agentWorkspace: '/organizations/:orgId/agent',
   vizChartEditor: '/organizations/:orgId/vizs/chartEditor',
   vizStoryPlayer: '/organizations/:orgId/vizs/storyPlayer/:storyId',
   vizStoryEditor: '/organizations/:orgId/vizs/storyEditor/:storyId',

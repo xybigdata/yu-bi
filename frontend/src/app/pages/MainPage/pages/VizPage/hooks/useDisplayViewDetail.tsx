@@ -24,12 +24,12 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import useMount from 'app/hooks/useMount';
 import useStateModal, { StateModalSize } from 'app/hooks/useStateModal';
 import { ExecuteToken } from 'app/pages/SharePage/slice/types';
-import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
+import { ChartDataRequestBuilder } from 'app/features/query';
 import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
 import {
   ChartDataRequest,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import ChartDataSetDTO, { ChartDatasetMeta } from 'app/types/ChartDataSet';
 import ChartDataView from 'app/types/ChartDataView';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';

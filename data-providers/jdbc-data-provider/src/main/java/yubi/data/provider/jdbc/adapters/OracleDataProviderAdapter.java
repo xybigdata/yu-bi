@@ -88,7 +88,7 @@ public class OracleDataProviderAdapter extends JdbcDataProviderAdapter {
 
         String wrappedSql = pageWrapper(sql, executeParam.getPageInfo());
 
-        log.debug(wrappedSql);
+        log.debug("Executing paged read-only Oracle source query");
 
         Dataframe dataframe = execute(wrappedSql);
         // fix page info

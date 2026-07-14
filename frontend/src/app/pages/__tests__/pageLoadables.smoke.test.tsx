@@ -86,6 +86,11 @@ const modules: PageLoadableCase[] = [
     kind: 'default',
   },
   {
+    exportName: 'LazyAgentPage',
+    importModule: () => import('../MainPage/PageLoadables'),
+    kind: 'default',
+  },
+  {
     exportName: 'LazyConfirmInvitePage',
     importModule: () => import('../MainPage/PageLoadables'),
     kind: 'default',

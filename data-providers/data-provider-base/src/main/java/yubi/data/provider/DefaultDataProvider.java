@@ -251,7 +251,7 @@ public abstract class DefaultDataProvider extends DataProvider {
         try {
             LocalDB.clearCache("DB" + source.getSourceId());
         } catch (Exception e) {
-            log.error("reset datasource error ", e);
+            log.error("Data source cache reset failed");
         }
     }
 

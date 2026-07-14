@@ -141,6 +141,7 @@
   },
   "main": {
     "nav": {
+      "agent": "Agent 工作区",
       "vizs": "可视化",
       "views": "数据视图",
       "sources": "数据源",
@@ -1723,6 +1724,123 @@
     "modal": {
       "password": "密码",
       "enterPassword": "请输入密码"
+    }
+  },
+  "agent": {
+    "title": "Agent 工作区",
+    "subtitle": "预览并审批范围明确的业务变更",
+    "retry": "重试",
+    "refresh": "刷新审批",
+    "empty": "暂无内容",
+    "duplicate": "重复请求",
+    "unsupportedTool": "该写工具未在前端允许列表中",
+    "noWritableTools": "当前会话没有可用的受控写工具",
+    "scope": {
+      "denied": "无法进入此组织的 Agent 工作区",
+      "deniedDescription": "当前账号不属于地址中指定的组织，未发起任何 Agent 请求。"
+    },
+    "runtime": {
+      "unavailable": "模型运行时未配置",
+      "guidedAvailable": "仍可使用下方引导式表单完成受控写操作。"
+    },
+    "readonly": {
+      "title": "只读数据分析",
+      "description": "运行受权限约束的数据资产检索与查询",
+      "prompt": "分析请求",
+      "placeholder": "输入要分析的数据问题",
+      "run": "运行分析",
+      "disabled": "配置模型运行时后可使用只读分析。",
+      "plan": "运行计划",
+      "planEmpty": "本次运行没有执行步骤",
+      "tools": "工具执行",
+      "toolsEmpty": "本次运行未调用数据工具",
+      "dataEmpty": "工具返回空结果",
+      "answer": "最终回答",
+      "truncated": "结果已按服务端安全边界裁剪",
+      "truncatedShort": "已截断",
+      "status": {
+        "running": "运行中",
+        "completed": "已完成",
+        "failed": "运行失败",
+        "step_limit_reached": "达到步骤上限"
+      },
+      "stepStatus": {
+        "succeeded": "成功",
+        "failed": "失败"
+      },
+      "stepKind": {
+        "final_answer": "生成最终回答",
+        "model_failure": "模型调用失败",
+        "request_rejected": "请求被拒绝"
+      },
+      "tool": {
+        "search_data_assets": "检索数据资产",
+        "describe_data_asset": "读取数据资产定义",
+        "execute_view": "执行只读数据视图",
+        "<unregistered>": "未注册工具",
+        "unknown": "未知步骤"
+      }
+    },
+    "session": {
+      "new": "新会话",
+      "failed": "无法创建 Agent 工作区会话",
+      "expired": "当前工作区会话已过期"
+    },
+    "tools": {
+      "createChart": "创建图表",
+      "renameDashboard": "重命名仪表板"
+    },
+    "plan": {
+      "title": "执行计划",
+      "description": "每项写操作都经过预览和显式审批",
+      "session": "建立可信会话",
+      "sessionDescription": "服务端绑定当前用户和组织",
+      "preview": "生成参数预览",
+      "previewDescription": "确定性校验参数与影响范围",
+      "approval": "等待显式审批",
+      "approvalDescription": "批准时重新校验权限和资源状态",
+      "change": "记录业务变更",
+      "changeDescription": "执行结果可按变更记录追溯"
+    },
+    "form": {
+      "title": "受控写操作",
+      "description": "先生成预览，不会直接修改业务数据",
+      "tool": "操作类型",
+      "toolRequired": "请选择操作类型",
+      "viewId": "数据视图 ID",
+      "viewIdRequired": "请输入数据视图 ID",
+      "dashboardId": "仪表板 ID",
+      "dashboardIdRequired": "请输入仪表板 ID",
+      "name": "名称",
+      "nameRequired": "请输入名称",
+      "preview": "生成预览",
+      "previewHint": "生成预览不会产生业务副作用"
+    },
+    "activity": {
+      "title": "工具执行与审批",
+      "description": "查看预览、审批状态和业务变更",
+      "empty": "尚无待审批或已执行操作"
+    },
+    "status": {
+      "pending": "待审批",
+      "succeeded": "已成功",
+      "rejected": "已拒绝",
+      "expired": "已过期",
+      "failed": "失败"
+    },
+    "approval": {
+      "createdAt": "创建时间：",
+      "expiresAt": "有效期至：",
+      "parameters": "参数预览",
+      "impacts": "影响范围",
+      "change": "业务变更记录",
+      "changeId": "变更 ID",
+      "resource": "资源",
+      "action": "动作",
+      "finalStatus": "最终状态",
+      "openResource": "查看资源",
+      "reject": "拒绝",
+      "approve": "批准并执行"
     }
   },
   "components": {

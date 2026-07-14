@@ -1,6 +1,6 @@
 import { ChartDataSectionType, ControllerFacadeTypes } from 'app/constants';
 import { ChartConfig, RelationFilterValue } from 'app/types/ChartConfig';
-import { PendingChartDataRequestFilter } from 'app/types/ChartDataRequest';
+import { PendingChartDataRequestFilter } from 'app/features/query';
 import { RUNTIME_FILTER_KEY } from 'globalConstants';
 import { isEmptyArray } from 'utils/object';
 import { FilterSearchParams } from './types';

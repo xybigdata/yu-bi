@@ -54,7 +54,7 @@ public class ProviderManager extends DataProviderExecuteOptimizer implements Dat
                         try {
                             cachedDataProviders.put(dataProvider.getType(), dataProvider);
                         } catch (IOException e) {
-                            log.error("", e);
+                            log.error("Data Provider discovery failed");
                         }
                     }
                 }
@@ -70,7 +70,7 @@ public class ProviderManager extends DataProviderExecuteOptimizer implements Dat
             try {
                 providerInfos.add(dataProvider.getBaseInfo());
             } catch (IOException e) {
-                log.error("DataProvider init error {" + dataProvider.getClass().getName() + "}", e);
+                log.error("Data Provider metadata initialization failed");
             }
         }
         return providerInfos;

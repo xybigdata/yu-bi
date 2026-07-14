@@ -31,7 +31,7 @@ public class DownloadCreateParam extends BaseCreateParam {
 
     private String fileName;
 
-    private List<ViewExecuteParam> downloadParams;
+    private List<DownloadQueryRequest> downloadParams;
 
     private AttachmentType downloadType;
 

@@ -25,7 +25,7 @@ import {
   TimeFilterValueCategory,
 } from 'app/constants';
 import { migrateChartConfig } from 'app/migration';
-import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
+import { ChartDataRequestBuilder } from 'app/features/query';
 import { ChartDrillOption } from 'app/models/ChartDrillOption';
 import { RelatedView } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { ChartDataConfig, ChartDataSectionField } from 'app/types/ChartConfig';
@@ -34,7 +34,7 @@ import {
   ChartDataRequestFilter,
   ChartVariableParams,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import ChartDataView from 'app/types/ChartDataView';
 import { convertToChartConfigDTO } from 'app/utils/ChartDtoHelper';
 import { findPathByNameInMeta, getStyles } from 'app/utils/chartHelper';

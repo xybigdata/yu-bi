@@ -79,7 +79,7 @@ public class LocalDB {
                 statement.execute(CACHE_EXPIRE_TABLE_SQL);
             }
         } catch (Exception e) {
-            log.error("H2 init error", e);
+            log.error("Local query store initialization failed");
         }
     }
 
@@ -208,7 +208,7 @@ public class LocalDB {
             try {
                 connection.close();
             } catch (Exception e) {
-                log.error("connection close error ", e);
+                log.error("Local query connection close failed");
             }
             for (Dataframe df : dataframes.getDataframes()) {
                 unregisterData(df.getId());
@@ -289,7 +289,7 @@ public class LocalDB {
 
         String sql = render.render(true, false, false);
 
-        log.debug(sql);
+        log.debug("Executing read-only local query");
 
         ResultSet resultSet = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(sql);
         PageInfo pageInfo = executeParam.getPageInfo();

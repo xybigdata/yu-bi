@@ -13,6 +13,7 @@ import {
 } from '../../slice/selectors';
 import { getScheduleErrorLogs } from '../../slice/thunks';
 import { ErrorLog } from '../../slice/types';
+import { ScheduleFormContent } from '../layout';
 
 interface ScheduleErrorLogProps {
   scheduleId: string;
@@ -59,7 +60,7 @@ export const ScheduleErrorLog: FC<ScheduleErrorLogProps> = ({ scheduleId }) => {
   if (logs?.length > 0) {
     return (
       <FormCard title={t('log')}>
-        <FormWrapper>
+        <ScheduleFormContent>
           <Table
             rowKey="id"
             loading={loading}
@@ -69,7 +70,7 @@ export const ScheduleErrorLog: FC<ScheduleErrorLogProps> = ({ scheduleId }) => {
             scroll={{ y: 400 }}
             pagination={false}
           />
-        </FormWrapper>
+        </ScheduleFormContent>
       </FormCard>
     );
   } else {
@@ -83,7 +84,4 @@ const FormCard = styled(Card)`
     border-radius: ${BORDER_RADIUS};
     box-shadow: ${p => p.theme.shadowBlock};
   }
-`;
-const FormWrapper = styled.div`
-  width: 860px;
 `;

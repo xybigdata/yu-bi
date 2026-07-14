@@ -67,6 +67,25 @@ yubi:
   migration:
     enable: true
 
+  agent:
+    workspace:
+      session-lifetime-minutes: 480
+      approval-lifetime-minutes: 15
+      retention:
+        terminal-operation-days: 90
+        expired-session-days: 30
+        audit-event-days: 365
+        cleanup-interval-seconds: 300
+        batch-size: 100
+    query:
+      maximum-page-size: 100
+    tool:
+      timeout-millis: 30000
+      maximum-concurrent-calls: 4
+    result:
+      maximum-items: 100
+      maximum-bytes: 65536
+
   server:
     path-prefix: /api/v1
 

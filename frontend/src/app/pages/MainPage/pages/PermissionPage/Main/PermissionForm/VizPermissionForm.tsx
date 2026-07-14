@@ -43,6 +43,7 @@ import {
 } from '../../slice/types';
 import { getDefaultPermissionArray } from '../../utils';
 import { IndependentPermissionSetting } from './IndependentPermissionSetting';
+import { PERMISSION_FORM_LAYOUT, PermissionFormContent } from './layout';
 import { PermissionTable } from './PermissionTable';
 import {
   calcPermission,
@@ -312,10 +313,9 @@ export const VizPermissionForm = memo(
     return (
       <Wrapper className={classnames({ selected })}>
         <LoadingMask loading={permissionLoading}>
-          <FormContent
+          <VizPermissionFormContent
+            {...PERMISSION_FORM_LAYOUT}
             labelAlign="left"
-            labelCol={{ span: 4 }}
-            wrapperCol={{ span: 18 }}
           >
             <IndependentPermissionSetting
               enabled={moduleEnabled}
@@ -370,7 +370,7 @@ export const VizPermissionForm = memo(
                 onPrivilegeChange={privilegeChange}
               />
             </Form.Item>
-          </FormContent>
+          </VizPermissionFormContent>
         </LoadingMask>
       </Wrapper>
     );
@@ -386,9 +386,7 @@ const Wrapper = styled.div`
   }
 `;
 
-const FormContent = styled(Form)`
-  width: 960px;
-
+const VizPermissionFormContent = styled(PermissionFormContent)`
   .vizTable {
     display: none;
 

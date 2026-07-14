@@ -55,8 +55,6 @@ import { RootState } from 'types';
 import { uuidv4 } from 'utils/utils';
 import { editBoardStackActions, editDashBoardInfoActions } from '..';
 import { ORIGINAL_TYPE_MAP } from '../../../../constants';
-import { selectWidgetInfoMap } from '../../../Board/slice/selector';
-import { syncBoardWidgetChartDataAsync } from '../../../Board/slice/thunk';
 import { EventLayerNode } from '../../components/LayerPanel/LayerTreeItem';
 import { getDropInfo } from '../../components/LayerPanel/utils';
 import { selectAllWidgetInfoMap } from '../selectors';
@@ -424,48 +422,6 @@ export const clearActiveWidgets = () => dispatch => {
   dispatch(editWidgetInfoActions.clearSelectedWidgets());
   dispatch(editDashBoardInfoActions.changeShowBlockMask(true));
 };
-
-export const widgetClearLinkageAction =
-  (widget: Widget, renderMode: VizRenderMode) => (dispatch, getState) => {
-    const { id, dashboardId } = widget;
-    const rootState = getState();
-    const boardWidgetInfoRecord = selectWidgetInfoMap(getState(), dashboardId);
-    const executeTokenMap = rootState?.share?.executeTokenMap || {};
-    const currentWidgetInfo = boardWidgetInfoRecord?.[id];
-
-    let executeToken;
-    if (renderMode === 'share') {
-      executeToken = executeTokenMap?.[widget?.viewIds?.[0]]?.authorizedToken;
-    }
-    if (!currentWidgetInfo?.inLinking) {
-      return;
-    }
-    dispatch(
-      boardActions.changeWidgetInLinking({
-        boardId: dashboardId,
-        widgetId: id,
-        toggle: false,
-      }),
-    );
-    dispatch(boardActions.changeSelectedItems({ wid: id, data: [] }));
-    const linkTargetWidgets = Object.values(boardWidgetInfoRecord || {}).filter(
-      widgetInfo => widgetInfo?.linkInfo?.sourceWidgetId === id,
-    );
-    linkTargetWidgets.forEach(widgetInfo => {
-      const filters = widgetInfo?.linkInfo?.filters || [];
-      const variables = widgetInfo?.linkInfo?.variables;
-      dispatch(
-        syncBoardWidgetChartDataAsync({
-          boardId: dashboardId,
-          sourceWidgetId: '',
-          widgetId: widgetInfo.id,
-          executeToken,
-          extraFilters: filters,
-          variableParams: variables,
-        }),
-      );
-    });
-  };
 
 export const editorWidgetClearLinkageAction =
   (widget: Widget) => (dispatch, getState) => {

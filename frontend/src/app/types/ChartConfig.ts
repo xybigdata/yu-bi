@@ -32,7 +32,7 @@ import {
   FilterRelationType,
   SortActionType,
 } from 'app/constants';
-import { PendingChartDataRequestFilter } from 'app/types/ChartDataRequest';
+import { PendingChartDataRequestFilter } from 'app/features/query';
 import {
   FilterSqlOperator,
   NumberUnitKey,

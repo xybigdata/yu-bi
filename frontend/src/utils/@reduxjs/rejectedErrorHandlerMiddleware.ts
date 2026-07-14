@@ -48,7 +48,11 @@ rejectedErrorHandlerMiddleware.startListening({
     if (errorMessage) {
       message.error(errorMessage);
     }
-    console.error(`Redux Rejection Error | `, action);
+    const actionType =
+      action && typeof action === 'object' && 'type' in action
+        ? String(action.type)
+        : 'unknown';
+    console.error('Redux 异步操作失败', actionType);
   },
 });
 

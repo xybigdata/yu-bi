@@ -31,7 +31,7 @@ import useChartInteractions from 'app/hooks/useChartInteractions';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useDebouncedLoadingStatus from 'app/hooks/useDebouncedLoadingStatus';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
-import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
+import { ChartDataRequestBuilder } from 'app/features/query';
 import ChartManager from 'app/models/ChartManager';
 import { useWorkbenchSlice } from 'app/pages/ChartWorkbenchPage/slice';
 import { selectAvailableSourceFunctions } from 'app/pages/ChartWorkbenchPage/slice/selectors';
@@ -43,7 +43,7 @@ import { ChartMouseEventParams, IChart } from 'app/types/Chart';
 import {
   ChartVariableParams,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 import {
   chartSelectionEventListener,

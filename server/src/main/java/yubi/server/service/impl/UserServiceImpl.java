@@ -148,11 +148,11 @@ public class UserServiceImpl extends BaseService implements UserService {
     @Transactional
     public boolean register(UserRegisterParam userRegisterParam, boolean sendMail) throws MessagingException, UnsupportedEncodingException {
         if (!checkUserName(userRegisterParam.getUsername())) {
-            log.error("The username({}) has been registered", userRegisterParam.getUsername());
+            log.error("Username registration rejected because the identifier is occupied");
             Exceptions.tr(ParamException.class, "error.param.occupied", "resource.user.username");
         }
         if (!checkEmail(userRegisterParam.getEmail())) {
-            log.info("The email({}) has been registered", userRegisterParam.getEmail());
+            log.info("Email registration rejected because the address is occupied");
             Exceptions.tr(ParamException.class, "error.param.occupied", "resource.user.email");
         }
         User user = new User();
@@ -192,7 +192,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             Exceptions.tr(BaseException.class, "message.user.active.fail", user.getUsername());
         }
         initUser(user);
-        log.info("User({}) activation success", user.getUsername());
+        log.info("User activation succeeded");
         jwtToken.setPwdHash(user.getPassword().hashCode());
         jwtToken.setExp(null);
         jwtToken.setCreateTime(System.currentTimeMillis());
@@ -228,7 +228,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         update.setPassword(BCrypt.hashpw(passwordParam.getNewPassword(), BCrypt.gensalt()));
         boolean success = userMapper.updateByPrimaryKeySelective(update) == 1;
         if (success) {
-            log.info("User({}) password changed by {}", user.getUsername(), user.getUsername());
+            log.info("User password change succeeded");
         }
         return success;
     }
@@ -255,7 +255,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             if (organizationList.size() == 1) {
                 Organization organization = organizationList.get(0);
                 orgService.addUserToOrg(user.getId(), organization.getId());
-                log.info("The user({}) is joined the default organization({}).", user.getUsername(), organization.getName());
+                log.info("User joined the default organization");
                 return;
             } else if (organizationList.size() > 1) {
                 Exceptions.msg("There is more than one organization in team tenant-management-mode.");
@@ -264,14 +264,14 @@ public class UserServiceImpl extends BaseService implements UserService {
             }
         }
         //创建默认组织
-        log.info("Create default organization for user({})", user.getUsername());
+        log.info("Creating a default organization for a user");
         Organization organization = new Organization();
         organization.setId(UUIDGenerator.generate());
         organization.setCreateBy(user.getId());
         organization.setCreateTime(new Date());
         organization.setName(user.getUsername() + "'s Organization");
         orgMapper.insert(organization);
-        log.info("Init organization({})", organization.getName());
+        log.info("Initializing a default organization");
         orgService.initOrganization(organization, user);
     }
 
@@ -292,7 +292,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             if (StringUtils.isNotBlank(tokenStr)) {
                 return tokenStr;
             }
-            log.error("Login error ({} {})", passwordToken.getSubject(), passwordToken.getPassword());
+            log.error("Login failed after password and LDAP authentication");
             Exceptions.msg("login.fail");
             return null;
         }
@@ -306,7 +306,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     private String ldapLogin(PasswordToken passwordToken) {
         String token = "";
         try {
-            log.info("try to login with ldap ({}).", passwordToken.getSubject());
+            log.info("Attempting LDAP login");
             ExternalRegisterService externalRegisterService = Application.getBean(ExternalRegisterService.class);
             token = externalRegisterService.ldapRegister(passwordToken.getSubject(), passwordToken.getPassword());
             if (StringUtils.isNotBlank(token)) {
@@ -341,7 +341,7 @@ public class UserServiceImpl extends BaseService implements UserService {
             mailService.sendVerifyCode(user);
             return JwtUtils.toJwtString(new PasswordToken(user.getUsername(), verifyCode, System.currentTimeMillis()));
         } catch (Exception e) {
-            log.error("Verify Code Mail send error", e);
+            log.error("Verification code email delivery failed");
             Exceptions.tr(BaseException.class, "message.email.send.error");
         }
         return null;
@@ -403,7 +403,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (insert > 0) {
             return user;
         } else {
-            log.info("regist fail: {}", oauthUser.getName());
+            log.info("External user registration failed");
             throw new ServerException("regist fail: unspecified error");
         }
     }
@@ -457,7 +457,7 @@ public class UserServiceImpl extends BaseService implements UserService {
         securityManager.requireOrgOwner(orgId);
         User user = retrieve(userUpdateParam.getId());
         if (!user.getEmail().equals(userUpdateParam.getEmail()) && !checkEmail(userUpdateParam.getEmail())) {
-            log.error("The email({}) has been registered", userUpdateParam.getEmail());
+            log.error("User update rejected because the email address is occupied");
             Exceptions.tr(ParamException.class, "error.param.occupied", "resource.user.email");
         }
         if (StringUtils.isBlank(userUpdateParam.getPassword())) {

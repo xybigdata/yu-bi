@@ -19,7 +19,7 @@
 
 import { migrateWidgets } from 'app/migration/BoardConfig/migrateWidgets';
 import migrateChartConfig from 'app/migration/ChartConfig/migrateChartConfig';
-import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
+import { ChartDataRequestBuilder } from 'app/features/query';
 import {
   DataChart,
   ServerDashboard,

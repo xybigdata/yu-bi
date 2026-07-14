@@ -31,7 +31,7 @@ import {
   ChartDataRequest,
   ChartVariableParams,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import { ChartDatasetMeta } from 'app/types/ChartDataSet';
 import ChartDataView from 'app/types/ChartDataView';
 import { LayoutItem } from 'react-grid-layout/legacy';

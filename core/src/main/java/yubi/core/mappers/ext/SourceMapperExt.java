@@ -15,6 +15,11 @@ import java.util.List;
 public interface SourceMapperExt extends SourceMapper {
 
     @Select({
+            "SELECT id, `name`, org_id, parent_id FROM source WHERE id=#{sourceId}"
+    })
+    Source selectQueryAccessProjection(@Param("sourceId") String sourceId);
+
+    @Select({
             "<script>",
             "SELECT * FROM source  WHERE org_id=#{orgId} AND `name` = #{name}",
             "<if test=\"parentId==null\">",

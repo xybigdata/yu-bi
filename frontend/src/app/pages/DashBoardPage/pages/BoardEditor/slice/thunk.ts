@@ -2,7 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import migrateWidgetChartConfig from 'app/migration/BoardConfig/migrateWidgetChartConfig';
 import migrateWidgetConfig from 'app/migration/BoardConfig/migrateWidgetConfig';
 import { migrateWidgets } from 'app/migration/BoardConfig/migrateWidgets';
-import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
+import { ChartDataRequestBuilder, executeQuery } from 'app/features/query';
 import {
   boardDrillManager,
   EDIT_PREFIX,
@@ -38,7 +38,7 @@ import { Variable } from 'app/pages/MainPage/pages/VariablePage/slice/types';
 import {
   ChartVariableParams,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import ChartDataView from 'app/types/ChartDataView';
 import { View } from 'app/types/View';
 import { filterSqlOperatorName } from 'app/utils/internalChartHelper';
@@ -529,11 +529,7 @@ export const syncEditBoardWidgetChartDataAsync = createAsyncThunk<
       .build();
 
     try {
-      const { data } = await request2<WidgetData>({
-        method: 'POST',
-        url: `data-provider/execute`,
-        data: requestParams,
-      });
+      const data = await executeQuery<WidgetData>(requestParams);
       await dispatch(
         editWidgetDataActions.setWidgetData({
           wid: widgetId,
@@ -630,11 +626,7 @@ export const getEditChartWidgetDataAsync = createAsyncThunk<
       return null;
     }
     try {
-      const { data } = await request2<WidgetData>({
-        method: 'POST',
-        url: `data-provider/execute`,
-        data: requestParams,
-      });
+      const data = await executeQuery<WidgetData>(requestParams);
       await dispatch(
         editWidgetDataActions.setWidgetData({
           wid: widgetId,
@@ -718,11 +710,7 @@ export const getEditControllerOptions = createAsyncThunk<
       return null;
     }
     try {
-      const { data } = await request2<WidgetData>({
-        method: 'POST',
-        url: `data-provider/execute`,
-        data: requestParams,
-      });
+      const data = await executeQuery<WidgetData>(requestParams);
       dispatch(
         editWidgetDataActions.setWidgetData({
           wid: widgetId,

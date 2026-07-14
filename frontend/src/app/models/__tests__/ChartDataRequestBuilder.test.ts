@@ -26,13 +26,13 @@ import {
   SortActionType,
 } from 'app/constants';
 import { ChartDataConfig, ChartDataSectionField } from 'app/types/ChartConfig';
-import { ChartDataRequest } from 'app/types/ChartDataRequest';
+import { ChartDataRequest } from 'app/features/query';
 import ChartDataView from 'app/types/ChartDataView';
 import { ChartDataViewMeta } from 'app/types/ChartDataViewMeta';
 import { yubiDayjs } from 'app/utils/date';
 import { getChartDrillOption } from 'app/utils/internalChartHelper';
 import { FilterSqlOperator, RECOMMEND_TIME } from 'globalConstants';
-import { ChartDataRequestBuilder } from '../ChartDataRequestBuilder';
+import { ChartDataRequestBuilder } from 'app/features/query';
 
 type BuilderDataView = Pick<
   ChartDataView,

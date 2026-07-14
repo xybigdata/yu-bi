@@ -12,7 +12,7 @@ import yubi.security.manager.YuBiSecurityManager;
 import yubi.server.base.params.DownloadCreateParam;
 import yubi.server.base.params.ShareCreateParam;
 import yubi.server.base.params.ShareToken;
-import yubi.server.base.params.ViewExecuteParam;
+import yubi.server.base.params.DownloadQueryRequest;
 import yubi.server.service.AttachmentService;
 import yubi.server.service.FolderService;
 import yubi.server.service.ShareService;
@@ -43,7 +43,7 @@ public class AttachmentImageServiceImpl implements AttachmentService {
 
     @Override
     public File getFile(DownloadCreateParam downloadCreateParam, String path, String fileName) throws Exception {
-        ViewExecuteParam viewExecuteParam = downloadCreateParam.getDownloadParams().size() > 0 ? downloadCreateParam.getDownloadParams().get(0) : new ViewExecuteParam();
+        DownloadQueryRequest viewExecuteParam = downloadCreateParam.getDownloadParams().size() > 0 ? downloadCreateParam.getDownloadParams().get(0) : new DownloadQueryRequest();
         String folderId = viewExecuteParam.getVizId();
         Folder folder = folderService.retrieve(folderId);
         ShareCreateParam shareCreateParam = new ShareCreateParam();

@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-import { ChartDataRequest } from 'app/types/ChartDataRequest';
+import { ChartDataRequest } from 'app/features/query';
 import DndProviderCompat from 'app/components/DndProviderCompat';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { HTML5Backend } from 'react-dnd-html5-backend';

@@ -22,7 +22,7 @@ import { migrateWidgets } from 'app/migration/BoardConfig/migrateWidgets';
 import { FilterSearchParamsWithMatch } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import { mainActions } from 'app/pages/MainPage/slice';
 import { ExecuteToken } from 'app/pages/SharePage/slice/types';
-import { ChartDataRequest } from 'app/types/ChartDataRequest';
+import { ChartDataRequest } from 'app/features/query';
 import { makeDownloadDataTask } from 'app/utils/fetch';
 import { RootState } from 'types';
 import { UniqWith } from 'utils/object';

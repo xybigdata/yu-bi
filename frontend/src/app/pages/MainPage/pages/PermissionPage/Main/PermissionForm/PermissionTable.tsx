@@ -22,6 +22,7 @@ import { Col, Input, Row, Table, TableColumnProps } from 'antd';
 import { Resizable } from 'react-resizable';
 import type { Props as ResizableProps } from 'react-resizable';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import useResizeObserver from 'app/hooks/useResizeObserver';
 import { useSearchAndExpand } from 'app/hooks/useSearchAndExpand';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ThHTMLAttributes } from 'react';
@@ -46,6 +47,7 @@ import { getPrivilegeSettingWidth, setTreeDataWithPrivilege } from './utils';
 export const PERMISSION_RESOURCE_NAME_COLUMN_MIN_WIDTH = 220;
 export const PERMISSION_RESOURCE_NAME_COLUMN_DEFAULT_WIDTH = 510;
 export const PERMISSION_RESOURCE_NAME_COLUMN_MAX_WIDTH = 760;
+export const PERMISSION_TABLE_BORDER_ALLOWANCE = 1;
 
 export const getLimitedPermissionResourceNameColumnWidth = (width: number) =>
   Math.min(
@@ -92,6 +94,32 @@ export const getPermissionTableWidth = (
 ) =>
   getPermissionTableLayout(privilegeColumnWidth, resourceNameColumnWidth)
     .tableWidth;
+
+export const getResponsivePermissionTableLayout = (
+  privilegeColumnWidth: number,
+  availableWidth?: number,
+  resourceNameColumnWidth = PERMISSION_RESOURCE_NAME_COLUMN_DEFAULT_WIDTH,
+  tableWidth?: number,
+) => {
+  if (tableWidth !== undefined || !availableWidth || availableWidth <= 0) {
+    return getPermissionTableLayout(
+      privilegeColumnWidth,
+      resourceNameColumnWidth,
+      tableWidth,
+    );
+  }
+
+  const fittedResourceNameColumnWidth = Math.min(
+    resourceNameColumnWidth,
+    Math.floor(availableWidth) -
+      privilegeColumnWidth -
+      PERMISSION_TABLE_BORDER_ALLOWANCE,
+  );
+  return getPermissionTableLayout(
+    privilegeColumnWidth,
+    fittedResourceNameColumnWidth,
+  );
+};
 
 type ResizableHeaderCellProps = ThHTMLAttributes<HTMLTableCellElement> & {
   width?: number;
@@ -162,6 +190,8 @@ export const PermissionTable = memo(
     const [manualTableWidth, setManualTableWidth] = useState<
       number | undefined
     >();
+    const { ref: tableViewportRef, width: tableViewportWidth } =
+      useResizeObserver<HTMLDivElement>({ refreshRate: 50 });
 
     const treeData = useMemo(() => {
       if (dataSource && privileges) {
@@ -224,12 +254,18 @@ export const PermissionTable = memo(
 
     const tableLayout = useMemo(
       () =>
-        getPermissionTableLayout(
+        getResponsivePermissionTableLayout(
           privilegeColumnWidth,
+          tableViewportWidth,
           resourceNameColumnWidth,
           manualTableWidth,
         ),
-      [privilegeColumnWidth, resourceNameColumnWidth, manualTableWidth],
+      [
+        privilegeColumnWidth,
+        tableViewportWidth,
+        resourceNameColumnWidth,
+        manualTableWidth,
+      ],
     );
 
     useEffect(() => {
@@ -311,27 +347,29 @@ export const PermissionTable = memo(
             />
           </Col>
         </Toolbar>
-        <TableWidthWrapper $width={tableLayout.tableWidth}>
-          <Table
-            rowKey="id"
-            columns={columns}
-            dataSource={filteredData}
-            loading={resourceLoading}
-            pagination={false}
-            size="middle"
-            expandable={{
-              expandedRowKeys,
-              onExpandedRowsChange: onExpand,
-            }}
-            tableLayout="fixed"
-            components={{
-              header: {
-                cell: ResizableHeaderCell,
-              },
-            }}
-            bordered
-          />
-        </TableWidthWrapper>
+        <TableViewport ref={tableViewportRef}>
+          <TableWidthWrapper $width={tableLayout.tableWidth}>
+            <Table
+              rowKey="id"
+              columns={columns}
+              dataSource={filteredData}
+              loading={resourceLoading}
+              pagination={false}
+              size="middle"
+              expandable={{
+                expandedRowKeys,
+                onExpandedRowsChange: onExpand,
+              }}
+              tableLayout="fixed"
+              components={{
+                header: {
+                  cell: ResizableHeaderCell,
+                },
+              }}
+              bordered
+            />
+          </TableWidthWrapper>
+        </TableViewport>
       </>
     );
   },
@@ -367,7 +405,16 @@ const ColumnResizeHandle = styled.span`
   }
 `;
 
+const TableViewport = styled.div`
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  contain: inline-size;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+`;
+
 const TableWidthWrapper = styled.div<{ $width: number }>`
   width: ${p => p.$width}px;
-  max-width: none;
 `;

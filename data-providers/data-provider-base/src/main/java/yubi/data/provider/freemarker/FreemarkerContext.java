@@ -48,7 +48,7 @@ public class FreemarkerContext {
             template.process(dataModel, writer);
             return writer.toString();
         } catch (Exception e) {
-            log.error("freemarker parse error", e);
+            log.error("Template rendering failed");
         }
         return content;
     }

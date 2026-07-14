@@ -22,8 +22,6 @@ package yubi.server.controller;
 
 import yubi.core.data.provider.*;
 import yubi.server.base.dto.ResponseData;
-import yubi.server.base.params.ViewExecuteParam;
-import yubi.server.base.params.TestExecuteParam;
 import yubi.server.service.DataProviderService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -88,18 +86,6 @@ public class DataProviderController extends BaseController {
         checkBlank(database, "database");
         checkBlank(table, "table");
         return ResponseData.success(dataProviderService.readTableColumns(sourceId, database, table));
-    }
-
-    @Operation(summary = "Execute Script")
-    @PostMapping(value = "/execute/test")
-    public ResponseData<Dataframe> testExecute(@RequestBody TestExecuteParam executeParam) throws Exception {
-        return ResponseData.success(dataProviderService.testExecute(executeParam));
-    }
-
-    @Operation(summary = "Execute Script")
-    @PostMapping(value = "/execute")
-    public ResponseData<Dataframe> execute(@RequestBody ViewExecuteParam viewExecuteParam) throws Exception {
-        return ResponseData.success(dataProviderService.execute(viewExecuteParam));
     }
 
     @Operation(summary = "get all supported functions for this data source type")

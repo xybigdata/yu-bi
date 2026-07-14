@@ -62,7 +62,9 @@ export const Main = memo(() => {
 
 const Wrapper = styled.div`
   flex: 1;
+  min-width: 0;
   padding: ${SPACE_LG};
+  overflow-x: hidden;
   overflow-y: auto;
 
   .ant-card-head {

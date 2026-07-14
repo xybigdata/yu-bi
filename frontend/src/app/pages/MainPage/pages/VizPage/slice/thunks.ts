@@ -18,7 +18,7 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
+import { ChartDataRequestBuilder, executeQuery } from 'app/features/query';
 import {
   Dashboard,
   DataChart,
@@ -28,7 +28,7 @@ import {
   ChartDataRequest,
   ChartVariableParams,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import type {
   ChartDataSetDTO,
   ChartDatasetPageInfo,
@@ -399,14 +399,10 @@ export const fetchDataSetByPreviewChartAction = createAsyncThunk(
       .addVariableParams(arg?.jumpVariableParams)
       .build();
 
-    const response = await request2({
-      method: 'POST',
-      url: `data-provider/execute`,
-      data,
-    });
+    const response = await executeQuery(data);
     return {
       backendChartId: currentChartPreview?.backendChartId,
-      data: filterSqlOperatorName(data, response.data) || [],
+      data: filterSqlOperatorName(data, response) || [],
     };
   },
 );

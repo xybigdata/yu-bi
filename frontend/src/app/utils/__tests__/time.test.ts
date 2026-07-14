@@ -18,7 +18,7 @@
  */
 
 import * as dateUtils from '../date';
-import { ChartDataRequestFilter } from 'app/types/ChartDataRequest';
+import { ChartDataRequestFilter } from 'app/features/query';
 import { getTime, getTimeRange, splitRangerDateFilters } from '../time';
 
 describe('test splitRangerDateFilters', () => {

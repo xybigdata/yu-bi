@@ -24,6 +24,17 @@ public interface OrganizationMapperExt extends OrganizationMapper {
     List<Organization> listOrganizationsByUserId(@Param("userId") String userId);
 
     @Select({
+            "SELECT org.id FROM organization org",
+            "JOIN rel_user_organization rel",
+            "  ON org.id=rel.org_id AND rel.user_id=#{userId}",
+            "WHERE org.id=#{orgId}",
+            "FOR UPDATE"
+    })
+    @Options(useCache = false, flushCache = Options.FlushCachePolicy.TRUE)
+    String selectControlledWriteCurrentMembershipForUpdate(@Param("orgId") String orgId,
+                                                            @Param("userId") String userId);
+
+    @Select({
             "SELECT " +
                     "	u.*  " +
                     "FROM " +

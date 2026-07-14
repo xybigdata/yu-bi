@@ -30,7 +30,7 @@ import {
   SelectedItem,
 } from 'app/types/ChartConfig';
 import { ChartDatasetPageInfo } from 'app/types/ChartDataSet';
-import { ChartDataRequest } from 'app/types/ChartDataRequest';
+import { ChartDataRequest } from 'app/features/query';
 import { IChartDrillOption } from 'app/types/ChartDrillOption';
 
 type RequestSorter = NonNullable<ChartDataRequest['orders']>[number];

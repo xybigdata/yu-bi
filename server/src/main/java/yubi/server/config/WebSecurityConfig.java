@@ -17,13 +17,18 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestRedirectFilter;
 import org.springframework.security.oauth2.client.web.OAuth2LoginAuthenticationFilter;
 
 import static yubi.core.common.Application.getApiPrefix;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -54,6 +59,7 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
+        http.cors(Customizer.withDefaults());
         http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.authenticationProvider(yubiAuthenticationProvider());
@@ -64,6 +70,7 @@ public class WebSecurityConfig {
                 .requestMatchers(getApiPrefix() + "/users/sendmail", getApiPrefix() + "/users/reset/password").permitAll()
                 .requestMatchers(getApiPrefix() + "/users/forget/password").permitAll()
                 .requestMatchers(getApiPrefix() + "/shares/**").permitAll()
+                .requestMatchers(getApiPrefix() + "/public/queries/**").permitAll()
                 .requestMatchers("/shareChart/**", "/shareDashboard/**", "/shareStoryPlayer/**").permitAll()
                 .requestMatchers("/confirminvite", "/organizations/**").permitAll()
                 .requestMatchers("/", "/login", "/setup", "/register", "/activation", "/forgetPassword", "/authorization").permitAll()
@@ -87,6 +94,26 @@ public class WebSecurityConfig {
                 .authenticationEntryPoint(yubiAuthenticationEntryPoint)
                 .accessDeniedHandler(yubiAccessDeniedHandler));
         return http.build();
+    }
+
+    @Bean
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration(getApiPrefix() + "/queries/**",
+                corsConfiguration(List.of("POST", "OPTIONS"), List.of("Authorization", "Content-Type")));
+        source.registerCorsConfiguration(getApiPrefix() + "/public/queries/**",
+                corsConfiguration(List.of("POST", "OPTIONS"),
+                        List.of("Content-Type", "X-YuBi-Share-Token")));
+        return source;
+    }
+
+    private CorsConfiguration corsConfiguration(List<String> methods, List<String> headers) {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(List.of("*"));
+        configuration.setAllowedMethods(methods);
+        configuration.setAllowedHeaders(headers);
+        configuration.setMaxAge(3600L);
+        return configuration;
     }
 
     @Autowired(required = false)

@@ -102,7 +102,7 @@ public class JdbcDataProvider extends DataProvider {
         try {
             return getBaseInfo().getType();
         } catch (IOException e) {
-            log.error("The JDBC Data Provider configuration file resolves error", e);
+            log.error("JDBC Data Provider metadata resolution failed");
         }
         return null;
     }
@@ -251,14 +251,14 @@ public class JdbcDataProvider extends DataProvider {
                         Class<?> aClass = Class.forName(driverInfo.getAdapterClass());
                         adapter = (JdbcDataProviderAdapter) aClass.getDeclaredConstructor().newInstance();
                     } catch (Exception e) {
-                        log.error("Jdbc adapter class (" + driverInfo.getAdapterClass() + ") load error.use default adapter");
+                        log.error("Configured JDBC adapter loading failed; using the default adapter");
                     }
                 }
                 if (adapter == null) {
                     adapter = (JdbcDataProviderAdapter) Class.forName(DEFAULT_ADAPTER).getDeclaredConstructor().newInstance();
                 }
             } catch (Exception e) {
-                log.error("Jdbc adapter class load error ", e);
+                log.error("JDBC adapter class loading failed");
             }
             if (adapter == null) {
                 throw new DataProviderException(MessageResolver.getMessages(
@@ -317,7 +317,7 @@ public class JdbcDataProvider extends DataProvider {
                     jdbcDriverInfo.setDbType(jdbcDriverInfo.getDbType().toUpperCase());
                     return jdbcDriverInfo;
                 } catch (Exception e) {
-                    log.error("DbType " + entry.getKey() + " driver read Exception", e);
+                    log.error("JDBC driver metadata loading failed");
                 }
                 return null;
             }).filter(Objects::nonNull).sorted(Comparator.comparing(JdbcDriverInfo::getDbType)).collect(Collectors.toList());
@@ -383,9 +383,9 @@ public class JdbcDataProvider extends DataProvider {
             if (adapter != null) {
                 adapter.close();
             }
-            log.info("jdbc source '{}-{}' updated, source has been reset", source.getSourceId(), source.getName());
+            log.info("JDBC source was updated and reset");
         } catch (Exception e) {
-            log.error("source reset error.", e);
+            log.error("JDBC source reset failed");
         }
     }
 }

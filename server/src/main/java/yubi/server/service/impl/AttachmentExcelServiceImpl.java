@@ -8,7 +8,8 @@ import yubi.core.data.provider.Dataframe;
 import yubi.core.entity.View;
 import yubi.core.entity.poi.POISettings;
 import yubi.server.base.params.DownloadCreateParam;
-import yubi.server.base.params.ViewExecuteParam;
+import yubi.server.base.params.DownloadQueryRequest;
+import yubi.server.query.DownloadQueryExecutor;
 import yubi.server.common.PoiConvertUtils;
 import yubi.server.service.*;
 import lombok.extern.slf4j.Slf4j;
@@ -26,22 +27,24 @@ public class AttachmentExcelServiceImpl implements AttachmentService {
 
     private final VizService vizService;
 
-    public AttachmentExcelServiceImpl(VizService vizService) {
+    private final DownloadQueryExecutor downloadQueryExecutor;
+
+    public AttachmentExcelServiceImpl(VizService vizService, DownloadQueryExecutor downloadQueryExecutor) {
         this.vizService = vizService;
+        this.downloadQueryExecutor = downloadQueryExecutor;
     }
 
     @Override
     public File getFile(DownloadCreateParam downloadParams, String path, String fileName) throws Exception {
-        DataProviderService dataProviderService = Application.getBean(DataProviderService.class);
         OrgSettingService orgSettingService = Application.getBean(OrgSettingService.class);
         ViewService viewService = Application.getBean(ViewService.class);
 
         Workbook workbook = POIUtils.createEmpty();
         for (int i = 0; i < downloadParams.getDownloadParams().size(); i++) {
-            ViewExecuteParam viewExecuteParam = downloadParams.getDownloadParams().get(i);
+            DownloadQueryRequest viewExecuteParam = downloadParams.getDownloadParams().get(i);
             View view = viewService.retrieve(viewExecuteParam.getViewId(), false);
             viewExecuteParam.setPageInfo(PageInfo.builder().pageNo(1L).pageSize(orgSettingService.getDownloadRecordLimit(view.getOrgId()).longValue()).build());
-            Dataframe dataframe = dataProviderService.execute(downloadParams.getDownloadParams().get(i));
+            Dataframe dataframe = downloadQueryExecutor.execute(downloadParams.getDownloadParams().get(i));
             String chartConfigStr = vizService.getChartConfigByVizId(viewExecuteParam.getVizType(), viewExecuteParam.getVizId());
             POISettings poiSettings = PoiConvertUtils.covertToPoiSetting(chartConfigStr, dataframe);
             String preferredSheetName = StringUtils.isNotBlank(viewExecuteParam.getVizName())

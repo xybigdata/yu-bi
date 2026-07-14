@@ -18,7 +18,7 @@
  */
 
 import { DataViewFieldType } from 'app/constants';
-import { ChartDataRequestFilter } from 'app/types/ChartDataRequest';
+import { ChartDataRequestFilter } from 'app/features/query';
 import { YuBiDayjs, formatYuBiDateTime, getYuBiNow } from 'app/utils/date';
 import { FilterSqlOperator, RECOMMEND_TIME } from 'globalConstants';
 import { ManipulateType, OpUnitType, QUnitType } from 'dayjs';

@@ -20,9 +20,9 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import type { AxiosResponse } from 'axios';
 import { migrateView } from 'app/migration/ViewConfig/migrationViewConfig';
-import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
+import { ChartDataRequestBuilder, executeQuery } from 'app/features/query';
 import { ChartConfig, ChartDataConfig } from 'app/types/ChartConfig';
-import { ChartDataRequest } from 'app/types/ChartDataRequest';
+import { ChartDataRequest } from 'app/features/query';
 import type {
   ChartDataSetDTO,
   ChartDatasetPageInfo,
@@ -90,25 +90,17 @@ export const fetchDataSetAction = createAsyncThunk<
   { rejectValue: WorkbenchDatasetRejectPayload }
 >('workbench/fetchDataSetAction', async (arg: ChartDataRequest, thunkAPI) => {
   let errorData: AxiosResponse | undefined;
-  const response = await request2(
-    {
-      method: 'POST',
-      url: `data-provider/execute`,
-      data: arg,
+  const data = await executeQuery<ChartDataSetDTO>(arg, {
+    onRejected: error => {
+      errorData = (error as { response?: AxiosResponse }).response;
     },
-    {},
-    {
-      onRejected: error => {
-        errorData = (error as { response?: AxiosResponse }).response;
-      },
-    },
-  );
+  });
   if (errorData) {
     return thunkAPI.rejectWithValue(
       errorData.data as WorkbenchDatasetRejectPayload,
     );
   } else {
-    return filterSqlOperatorName(arg, response.data);
+    return filterSqlOperatorName(arg, data);
   }
 });
 

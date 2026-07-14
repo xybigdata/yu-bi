@@ -17,7 +17,11 @@
  * limitations under the License.
  */
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { ChartDataRequestBuilder } from 'app/models/ChartDataRequestBuilder';
+import {
+  ChartDataRequestBuilder,
+  executePublicQuery,
+  executeQuery,
+} from 'app/features/query';
 import { boardDrillManager } from 'app/pages/DashBoardPage/components/BoardDrillManager/BoardDrillManager';
 import { getControlOptionQueryParams } from 'app/pages/DashBoardPage/components/Widgets/ControllerWidget/config';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
@@ -28,7 +32,7 @@ import { ExecuteToken, ShareVizInfo } from 'app/pages/SharePage/slice/types';
 import {
   ChartVariableParams,
   PendingChartDataRequestFilter,
-} from 'app/types/ChartDataRequest';
+} from 'app/features/query';
 import ChartDataSetDTO from 'app/types/ChartDataSet';
 import {
   fetchAvailableSourceFunctionsAsync,
@@ -399,12 +403,7 @@ export const getChartWidgetDataAsync = createAsyncThunk<
     let widgetData;
     try {
       if (renderMode === 'read') {
-        const { data } = await request2<WidgetData>({
-          method: 'POST',
-          url: `data-provider/execute`,
-          data: requestParams,
-        });
-        widgetData = data;
+        widgetData = await executeQuery<WidgetData>(requestParams);
       } else {
         const executeTokenMap = (getState() as RootState)?.share
           ?.executeTokenMap;
@@ -412,15 +411,10 @@ export const getChartWidgetDataAsync = createAsyncThunk<
         const dataChart = dataChartMap[boardId][curWidget.datachartId];
         const viewId = viewMap[dataChart.viewId].id;
         const executeToken = executeTokenMap?.[viewId];
-        const { data } = await request2<WidgetData>({
-          method: 'POST',
-          url: `shares/execute`,
-          params: {
-            executeToken: executeToken?.authorizedToken,
-          },
-          data: requestParams,
-        });
-        widgetData = data;
+        widgetData = await executePublicQuery<WidgetData>(
+          requestParams,
+          executeToken?.authorizedToken || '',
+        );
       }
       dispatch(
         boardActions.setWidgetData({
@@ -529,22 +523,12 @@ export const getControllerOptions = createAsyncThunk<
     let widgetData;
     try {
       if (executeToken && renderMode !== 'read') {
-        const { data } = await request2<ChartDataSetDTO>({
-          method: 'POST',
-          url: `shares/execute`,
-          params: {
-            executeToken: executeToken?.authorizedToken,
-          },
-          data: requestParams,
-        });
-        widgetData = data;
+        widgetData = await executePublicQuery<ChartDataSetDTO>(
+          requestParams,
+          executeToken.authorizedToken,
+        );
       } else {
-        const { data } = await request2<WidgetData>({
-          method: 'POST',
-          url: `data-provider/execute`,
-          data: requestParams,
-        });
-        widgetData = data;
+        widgetData = await executeQuery<WidgetData>(requestParams);
       }
       dispatch(
         boardActions.setWidgetData({
