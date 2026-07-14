@@ -3,7 +3,6 @@ package yubi.server.query;
 import org.springframework.stereotype.Service;
 import yubi.core.data.provider.Dataframe;
 import yubi.query.api.ExecuteQueryUseCase;
-import yubi.query.api.QueryExecutionContext;
 import yubi.query.api.QueryExecutionException;
 import yubi.server.base.params.DownloadQueryRequest;
 
@@ -23,18 +22,11 @@ public class DownloadQueryExecutor {
     }
 
     public Dataframe execute(DownloadQueryRequest request) throws Exception {
-        return execute(request, contextFactory.forSystem());
-    }
-
-    public Dataframe executeShared(DownloadQueryRequest request,
-                                   String trustedSubjectId,
-                                   String trustedOrganizationId) throws Exception {
-        return execute(request, contextFactory.forShared(trustedSubjectId, trustedOrganizationId));
-    }
-
-    private Dataframe execute(DownloadQueryRequest request, QueryExecutionContext context) throws Exception {
+        if (request.isEmpty()) {
+            return Dataframe.empty();
+        }
         try {
-            return mapper.toDataframe(executeQueryUseCase.execute(mapper.toCommand(request), context));
+            return mapper.toDataframe(executeQueryUseCase.execute(mapper.toCommand(request), contextFactory.forSystem()));
         } catch (QueryExecutionException exception) {
             if (exception.getCause() instanceof Exception cause) {
                 throw cause;

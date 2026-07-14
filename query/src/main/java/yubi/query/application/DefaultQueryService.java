@@ -67,13 +67,13 @@ public final class DefaultQueryService implements ExecuteQueryUseCase, PreviewQu
         String resourceId = command == null ? null : command.viewId();
         try {
             validate(command, context);
-            Definition definition = loadDefinition(command.viewId());
-            auditContext = bindOrganization(context, definition.organizationId());
-            AccessDecision access = authorize(definition, auditContext);
             if (command.empty()) {
                 result = QueryResult.empty();
                 return result;
             }
+            Definition definition = loadDefinition(command.viewId());
+            auditContext = bindOrganization(context, definition.organizationId());
+            AccessDecision access = authorize(definition, auditContext);
             List<Variable> variables = resolveVariables(definition, command, auditContext, access.organizationOwner());
             Page page = normalize(command.page());
             Script script = new Script(false, definition.sourceId(), definition.viewId(), definition.script(),

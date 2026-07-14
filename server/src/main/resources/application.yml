@@ -67,10 +67,6 @@ yubi:
   migration:
     enable: true
 
-  security:
-    share-download-session:
-      secret: ${YUBI_SHARE_DOWNLOAD_SESSION_SECRET:}
-
   agent:
     workspace:
       session-lifetime-minutes: 480

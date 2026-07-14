@@ -35,26 +35,6 @@ public class DownloadSqlProvider {
         if (record.getStatus() != null) {
             sql.VALUES("`status`", "#{status,jdbcType=TINYINT}");
         }
-
-        if (record.getOwnerType() != null) {
-            sql.VALUES("owner_type", "#{ownerType,jdbcType=VARCHAR}");
-        }
-
-        if (record.getOwnerId() != null) {
-            sql.VALUES("owner_id", "#{ownerId,jdbcType=VARCHAR}");
-        }
-
-        if (record.getShareId() != null) {
-            sql.VALUES("share_id", "#{shareId,jdbcType=VARCHAR}");
-        }
-
-        if (record.getFailureCode() != null) {
-            sql.VALUES("failure_code", "#{failureCode,jdbcType=VARCHAR}");
-        }
-
-        if (record.getDeletedAt() != null) {
-            sql.VALUES("deleted_at", "#{deletedAt,jdbcType=TIMESTAMP}");
-        }
         
         return sql.toString();
     }
@@ -85,26 +65,6 @@ public class DownloadSqlProvider {
         
         if (record.getStatus() != null) {
             sql.SET("`status` = #{status,jdbcType=TINYINT}");
-        }
-
-        if (record.getOwnerType() != null) {
-            sql.SET("owner_type = #{ownerType,jdbcType=VARCHAR}");
-        }
-
-        if (record.getOwnerId() != null) {
-            sql.SET("owner_id = #{ownerId,jdbcType=VARCHAR}");
-        }
-
-        if (record.getShareId() != null) {
-            sql.SET("share_id = #{shareId,jdbcType=VARCHAR}");
-        }
-
-        if (record.getFailureCode() != null) {
-            sql.SET("failure_code = #{failureCode,jdbcType=VARCHAR}");
-        }
-
-        if (record.getDeletedAt() != null) {
-            sql.SET("deleted_at = #{deletedAt,jdbcType=TIMESTAMP}");
         }
         
         sql.WHERE("id = #{id,jdbcType=VARCHAR}");

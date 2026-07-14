@@ -10,16 +10,9 @@
 
 # 1. Docker 部署
 
-启动前必须生成分享下载会话密钥。该值必须是 Base64 编码、解码后至少 32 字节的独立随机密钥：
-
 ```shell
-export YUBI_SHARE_DOWNLOAD_SESSION_SECRET="$(openssl rand -base64 32)"
-test "$(printf '%s' "${YUBI_SHARE_DOWNLOAD_SESSION_SECRET}" | openssl base64 -d -A | wc -c | tr -d ' ')" -ge 32
-docker run -p 8080:8080 -e YUBI_SHARE_DOWNLOAD_SESSION_SECRET yubi/yu-bi
+docker run -p 8080:8080 yubi/yu-bi
 ```
-
-首次生成后必须把该值安全保存到部署平台的 Secret 管理服务，并在后续每次启动时注入同一个值。不要把密钥写入镜像、仓库、普通配置文件或命令历史。缺失、不是有效 Base64 或解码后少于 32 字节时，服务会明确拒绝启动。
-
 启动后可访问 <http://docker_ip:8080>  
 默认账户:用户名`demo`,密码`123456`
 
@@ -46,7 +39,7 @@ yubi.send-mail=false
 yubi.webdriver-path=http://127.0.0.1:4444/wd/hub
 ```
 
-运行 `docker run -d --name yu-bi -e YUBI_SHARE_DOWNLOAD_SESSION_SECRET -v your_path/yubi.conf:/yu-bi/config/yubi.conf -p 8080:8080 yubi/yu-bi`
+运行 `docker run -d --name yu-bi -v your_path/yubi.conf:/yu-bi/config/yubi.conf -p 8080:8080 yubi/yu-bi`
 
 ## 1.2. 将用户文件挂载到外部
 
@@ -54,11 +47,7 @@ yubi.webdriver-path=http://127.0.0.1:4444/wd/hub
 
 在命令中增加参数 `-v your_path/files:/yu-bi/files` 即可。以下是完整命令：
 
-`docker run -d --name yu-bi -e YUBI_SHARE_DOWNLOAD_SESSION_SECRET -v your_path/yubi.conf:/yu-bi/config/yubi.conf -v your_path/files:/yu-bi/files -p 8080:8080 yubi/yu-bi`
-
-## 1.3. 集群部署的密钥要求
-
-同一集群的全部实例必须从 Secret 管理服务注入同一个 `YUBI_SHARE_DOWNLOAD_SESSION_SECRET` 值，否则用户在不同实例之间访问时会话校验失败。密钥轮换会立即撤销全部既有分享下载会话，需要用户重新完成分享认证；应按凭证轮换变更管理流程执行，不得由每个容器自行生成不同值。
+`docker run -d --name yu-bi -v your_path/yubi.conf:/yu-bi/config/yubi.conf -v your_path/files:/yu-bi/files -p 8080:8080 yubi/yu-bi`
 
 ***更多配置请以当前仓库文档与配置文件示例为准。***
 
@@ -66,9 +55,8 @@ yubi.webdriver-path=http://127.0.0.1:4444/wd/hub
 ## 2.1. 环境准备
 
 - JDK 21+
-- MySQL 8.4.10+
+- MySql5.7+
 - yu-bi 安装包（例如 `yu-bi-server-2.0.0-install.zip`）
-- OpenSSL（用于生成必填的分享下载会话密钥）
 - Mail Server （可选）
 - [ChromeWebDriver](https://chromedriver.chromium.org/) （可选）
 - Redis （可选）
@@ -98,23 +86,11 @@ unzip yu-bi-server-2.0.0-install.zip
 
 ## 2.2. 以独立模式运行
 
-安装包解压后不能在缺少分享下载会话密钥时直接启动。首次部署先生成一次密钥，将其安全保存到操作系统或部署平台的 Secret 管理服务；后续每次启动都必须注入保存的同一个值：
-
-```shell
-export YUBI_SHARE_DOWNLOAD_SESSION_SECRET="$(openssl rand -base64 32)"
-test "$(printf '%s' "${YUBI_SHARE_DOWNLOAD_SESSION_SECRET}" | openssl base64 -d -A | wc -c | tr -d ' ')" -ge 32
-./bin/yu-bi-server.sh start
-```
-
-上面的生成命令只应在首次部署或受控轮换时执行，不应放入每次启动的脚本。密钥轮换会撤销全部既有分享下载会话。启动后默认访问地址是 <http://127.0.0.1:8080>，默认用户 `demo/123456`。
-
-官方新安装包内的 demo H2 数据库已内置下载任务安全 Schema。`scripts/check-demo-health.sh` 会在启动前校验解压数据库的完整列规格、主键、索引列序、约束行为、稳定创建时间和历史所有权状态，并在 demo Spring 初始化阶段实际执行登录与分享 Mapper 查询；任一检查失败都不会报告健康。现有 demo H2 数据的原地升级编排属于 Deferred，当前版本不提供原地升级脚本；升级既有 demo 数据前必须先备份，并迁移到新安装包或受支持的外部数据库。
+安装包解压后，即可运行 `./bin/yu-bi-server.sh start` 启动 yu-bi，启动后默认访问地址是 <http://127.0.0.1:8080>，默认用户 `demo/123456`
 
 ***独立模式使用内置数据库作为应用数据库，数据的安全性和数据迁移无法保证，建议配置外部数据库作为应用数据库***
 
-## 2.3. 配置外部数据库，要求 MySQL 8.4.10 及以上版本。
-
-下载任务安全迁移依赖 MySQL 强制执行 `CHECK` 约束及对应的 `DROP CHECK` 回滚语义，不支持 MySQL 5.7。
+## 2.3. 配置外部数据库，要求Mysql5.7及以上版本。
 
 - 创建数据库，指定数据库编码为utf8
 
@@ -144,7 +120,7 @@ mysql> CREATE DATABASE `yubi` CHARACTER SET 'utf8' COLLATE 'utf8_general_ci';
     5. yubi.webdriver-path(截图驱动)
 ```
 
-## 2.4. 高级配置（除必填会话密钥外可选）：配置文件位于 config/profiles/application-config.yml
+## 2.4. 高级配置 (可选) : 配置文件位于 config/profiles/application-config.yml
 
 ***高级配置文件格式是yml格式,配置错误会导致程序无法启动。配置时一定要严格遵循yml格式。***
 
@@ -211,9 +187,6 @@ yubi:
     token:
       secret: "y@u$b%i^s&e*c" #加密密钥
       timeout-min: 30  # 登录会话有效时长，单位：分钟。
-    share-download-session:
-      # 必须通过环境变量注入 Base64 编码、解码后至少 32 字节的独立随机密钥。
-      secret: ${YUBI_SHARE_DOWNLOAD_SESSION_SECRET:}
 
   env:
     file-path: ${user.dir}/files # 服务端文件保存位置
@@ -226,7 +199,7 @@ yubi:
 
 ```
 
-*注意：分享下载会话密钥是启动必填项，必须安全保存；同一集群全部实例必须使用同一个值。轮换该值会撤销全部既有分享下载会话。*
+*注意：加密密钥每个服务端部署前应该进行修改，且部署后不能再次修改。如果是集群部署，同一个集群内的secret要保持统一*
 
 ### 2.4.2 截图配置 [ChromeWebDriver]-可选
 

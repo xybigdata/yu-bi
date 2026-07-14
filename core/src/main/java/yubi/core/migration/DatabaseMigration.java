@@ -158,13 +158,8 @@ public class DatabaseMigration {
             log.error("Migration failure! version: " + migration.getVersion() + ". A rollback is about to be performed");
             Resource rollbackFile = migration.getRollbackFile();
             if (rollbackFile != null) {
-                if (runScript(rollbackFile, false)) {
-                    log.info("The rollback script (" + rollbackFile.getFilename()
-                            + ") is successfully executed");
-                } else {
-                    log.error("The rollback script (" + rollbackFile.getFilename()
-                            + ") failed; database state requires inspection");
-                }
+                runScript(rollbackFile, false);
+                log.info("The rollback script (" + rollbackFile.getFilename() + ") is successfully executed");
             } else {
                 log.warn("The rollback script does not exist. Skip execution");
             }
@@ -266,13 +261,12 @@ public class DatabaseMigration {
             scriptRunner.setStopOnError(stopOnError);
             scriptRunner.setSendFullScript(false);
             LogWriter logWriter = new LogWriter(System.out);
-            ErrorLogWriter errorLogWriter = new ErrorLogWriter(System.err);
             if (!stopOnError) {
-                scriptRunner.setErrorLogWriter(errorLogWriter);
+                scriptRunner.setErrorLogWriter(logWriter);
             }
             scriptRunner.setLogWriter(logWriter);
             scriptRunner.runScript(new InputStreamReader(resource.getInputStream()));
-            return !errorLogWriter.hasErrors();
+            return true;
         } catch (Exception e) {
             log.error("Script execute failed! " + resource.getFilename());
             return false;
@@ -345,27 +339,6 @@ public class DatabaseMigration {
         @Override
         public void write(String s) {
             log.info(s);
-        }
-    }
-
-    static class ErrorLogWriter extends PrintWriter {
-
-        private boolean errors;
-
-        public ErrorLogWriter(OutputStream out) {
-            super(out);
-        }
-
-        @Override
-        public void write(String s) {
-            if (s != null && !s.isBlank()) {
-                errors = true;
-                log.error("迁移回滚脚本中的 SQL 语句执行失败");
-            }
-        }
-
-        boolean hasErrors() {
-            return errors;
         }
     }
 

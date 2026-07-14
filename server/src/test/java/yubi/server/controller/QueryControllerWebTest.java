@@ -20,7 +20,6 @@ import yubi.server.query.web.PublicQueryExecutor;
 import yubi.server.query.web.QueryWebMapper;
 import yubi.server.service.DataProviderService;
 import yubi.server.service.ShareService;
-import yubi.server.service.ShareDownloadSessionManager;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -164,10 +163,7 @@ class QueryControllerWebTest {
     void shouldReturnNotFoundForRemovedQueryEndpoints() throws Exception {
         MockMvc legacyMvc = MockMvcBuilders.standaloneSetup(
                 new DataProviderController(mock(DataProviderService.class)),
-                new ShareController(
-                        mock(ShareService.class),
-                        mock(ShareDownloadSessionManager.class)
-                )).build();
+                new ShareController(mock(ShareService.class))).build();
 
         legacyMvc.perform(post("/data-provider/execute")).andExpect(status().isNotFound());
         legacyMvc.perform(post("/data-provider/execute/test")).andExpect(status().isNotFound());

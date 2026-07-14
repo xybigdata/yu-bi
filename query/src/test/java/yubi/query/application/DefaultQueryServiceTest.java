@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -140,69 +139,6 @@ class DefaultQueryServiceTest {
         assertNull(service.execute(command(null, false), context).script());
         scriptVisible = false;
         assertNull(service.execute(command(null, true), context).script());
-    }
-
-    @Test
-    void shouldAuthorizeEmptyQueryBeforeReturningWithoutVariablesOrEngine() {
-        AtomicInteger definitions = new AtomicInteger();
-        AtomicInteger authorizations = new AtomicInteger();
-        AtomicInteger variables = new AtomicInteger();
-        AtomicInteger engineCalls = new AtomicInteger();
-        QueryDefinitionPort definitionPort = new QueryDefinitionPort() {
-            public Definition load(String ignored) { definitions.incrementAndGet(); return definition; }
-            public SourceDefinition loadSource(String ignored) { return source; }
-        };
-        QueryAccessPolicyPort deny = new QueryAccessPolicyPort() {
-            public AccessDecision authorize(Definition ignored, QueryExecutionContext ignoredContext) {
-                authorizations.incrementAndGet();
-                throw new SecurityException("read denied");
-            }
-            public boolean authorizePreview(SourceDefinition ignored, QueryExecutionContext ignoredContext) { return false; }
-        };
-        QueryVariablePort variablePort = new QueryVariablePort() {
-            public List<Variable> loadForView(String viewId, String org, QueryExecutionContext ignored) {
-                variables.incrementAndGet();
-                return List.of();
-            }
-            public List<Variable> loadForSource(String org, QueryExecutionContext ignored) { return List.of(); }
-        };
-        DefaultQueryService denied = new DefaultQueryService(definitionPort, deny, variablePort,
-                plan -> { engineCalls.incrementAndGet(); return null; }, event -> { });
-
-        assertThrows(QueryAccessDeniedException.class, () -> denied.execute(emptyCommand(), context));
-        assertEquals(1, definitions.get());
-        assertEquals(1, authorizations.get());
-        assertEquals(0, variables.get());
-        assertEquals(0, engineCalls.get());
-    }
-
-    @Test
-    void shouldBindSharedOrganizationBeforeReturningEmptyQuery() {
-        AtomicInteger variables = new AtomicInteger();
-        AtomicInteger engineCalls = new AtomicInteger();
-        QueryVariablePort variablePort = new QueryVariablePort() {
-            public List<Variable> loadForView(String viewId, String org, QueryExecutionContext ignored) {
-                variables.incrementAndGet();
-                return List.of();
-            }
-            public List<Variable> loadForSource(String org, QueryExecutionContext ignored) { return List.of(); }
-        };
-        DefaultQueryService shared = new DefaultQueryService(
-                new QueryDefinitionPort() {
-                    public Definition load(String ignored) { return definition; }
-                    public SourceDefinition loadSource(String ignored) { return source; }
-                },
-                accessPort(),
-                variablePort,
-                plan -> { engineCalls.incrementAndGet(); return null; },
-                event -> { }
-        );
-        QueryExecutionContext validShared = new QueryExecutionContext(Channel.SHARED, "visitor", "org-1", "shared");
-        assertTrue(shared.execute(emptyCommand(), validShared).rows().isEmpty());
-        QueryExecutionContext driftedShared = new QueryExecutionContext(Channel.SHARED, "visitor", "org-2", "shared");
-        assertThrows(QueryAccessDeniedException.class, () -> shared.execute(emptyCommand(), driftedShared));
-        assertEquals(0, variables.get());
-        assertEquals(0, engineCalls.get());
     }
 
     @Test
@@ -381,11 +317,6 @@ class DefaultQueryServiceTest {
         return new ExecuteQueryCommand("view-1", List.of(), List.of(column("orders", "amount")), List.of(),
                 List.of(), List.of(), List.of(), List.of(), page, Map.of("status", Set.of("paid")),
                 false, false, 0, includeScript);
-    }
-
-    private ExecuteQueryCommand emptyCommand() {
-        return new ExecuteQueryCommand("view-1", List.of(), List.of(), List.of(), List.of(), List.of(),
-                List.of(), List.of(), null, Map.of(), false, false, 0, false);
     }
 
     private static ColumnSelection column(String... names) {

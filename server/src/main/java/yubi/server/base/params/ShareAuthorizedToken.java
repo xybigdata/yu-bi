@@ -19,7 +19,6 @@
 
 package yubi.server.base.params;
 
-import yubi.core.base.consts.ShareAuthenticationMode;
 import yubi.security.base.ResourceType;
 import lombok.Data;
 
@@ -40,15 +39,5 @@ public class ShareAuthorizedToken {
     private String vizId;
 
     private Date expiryDate;
-
-    private String shareId;
-
-    private ResourceType shareVizType;
-
-    private String shareVizId;
-
-    private String organizationId;
-
-    private ShareAuthenticationMode shareAuthenticationMode;
 
 }

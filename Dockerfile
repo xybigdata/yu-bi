@@ -16,9 +16,7 @@ RUN apt-get update \
     && apt-get purge -y --auto-remove unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# 运行时必须覆盖会话密钥；空值用于保持应用的安全 fail-fast 行为，镜像不内置公开密钥。
-ENV TZ=Asia/Shanghai \
-    YUBI_SHARE_DOWNLOAD_SESSION_SECRET=""
+ENV TZ=Asia/Shanghai
 
 EXPOSE 8080
 

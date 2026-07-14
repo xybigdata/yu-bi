@@ -100,9 +100,6 @@ yubi:
     token:
       secret: "d@a$t%a^r&a*t" #加密密钥
       timeout-min: 30  # 登录会话有效时长，单位：分钟。
-    share-download-session:
-      # Base64 编码的至少 32 字节独立随机密钥；所有应用实例必须配置相同值。
-      secret: ${YUBI_SHARE_DOWNLOAD_SESSION_SECRET:}
 
   env:
     file-path: ${user.dir}/files # 服务端文件保存位置

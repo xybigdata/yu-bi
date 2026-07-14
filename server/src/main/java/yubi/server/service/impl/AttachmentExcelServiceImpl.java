@@ -36,54 +36,26 @@ public class AttachmentExcelServiceImpl implements AttachmentService {
 
     @Override
     public File getFile(DownloadCreateParam downloadParams, String path, String fileName) throws Exception {
-        return getFile(downloadParams, path, fileName, null, null);
-    }
-
-    @Override
-    public File getFile(DownloadCreateParam downloadParams,
-                        String path,
-                        String fileName,
-                        String trustedSharedQuerySubjectId,
-                        String trustedSharedQueryOrganizationId) throws Exception {
-        boolean sharedQuery = StringUtils.isNotBlank(trustedSharedQuerySubjectId)
-                || StringUtils.isNotBlank(trustedSharedQueryOrganizationId);
-        if (sharedQuery && StringUtils.isAnyBlank(
-                trustedSharedQuerySubjectId,
-                trustedSharedQueryOrganizationId
-        )) {
-            throw new IllegalArgumentException("分享查询上下文无效");
-        }
         OrgSettingService orgSettingService = Application.getBean(OrgSettingService.class);
         ViewService viewService = Application.getBean(ViewService.class);
 
-        File file = new File(generateFileName(path, fileName, attachmentType));
-        try (Workbook workbook = POIUtils.createEmpty()) {
-            for (int i = 0; i < downloadParams.getDownloadParams().size(); i++) {
-                DownloadQueryRequest viewExecuteParam = downloadParams.getDownloadParams().get(i);
-                View view = viewService.retrieve(viewExecuteParam.getViewId(), false);
-                viewExecuteParam.setPageInfo(PageInfo.builder().pageNo(1L).pageSize(orgSettingService.getDownloadRecordLimit(view.getOrgId()).longValue()).build());
-                Dataframe dataframe = sharedQuery
-                        ? downloadQueryExecutor.executeShared(
-                                viewExecuteParam,
-                                trustedSharedQuerySubjectId,
-                                trustedSharedQueryOrganizationId
-                        )
-                        : downloadQueryExecutor.execute(viewExecuteParam);
-                String chartConfigStr = sharedQuery
-                        ? ""
-                        : vizService.getChartConfigByVizId(
-                                viewExecuteParam.getVizType(),
-                                viewExecuteParam.getVizId()
-                        );
-                POISettings poiSettings = PoiConvertUtils.covertToPoiSetting(chartConfigStr, dataframe);
-                String preferredSheetName = StringUtils.isNotBlank(viewExecuteParam.getVizName())
-                        ? viewExecuteParam.getVizName()
-                        : "Sheet" + i;
-                String sheetName = POIUtils.uniqueSheetName(workbook, preferredSheetName);
-                POIUtils.withSheet(workbook, sheetName, dataframe, poiSettings);
-            }
-            POIUtils.save(workbook, file.getPath(), true);
+        Workbook workbook = POIUtils.createEmpty();
+        for (int i = 0; i < downloadParams.getDownloadParams().size(); i++) {
+            DownloadQueryRequest viewExecuteParam = downloadParams.getDownloadParams().get(i);
+            View view = viewService.retrieve(viewExecuteParam.getViewId(), false);
+            viewExecuteParam.setPageInfo(PageInfo.builder().pageNo(1L).pageSize(orgSettingService.getDownloadRecordLimit(view.getOrgId()).longValue()).build());
+            Dataframe dataframe = downloadQueryExecutor.execute(downloadParams.getDownloadParams().get(i));
+            String chartConfigStr = vizService.getChartConfigByVizId(viewExecuteParam.getVizType(), viewExecuteParam.getVizId());
+            POISettings poiSettings = PoiConvertUtils.covertToPoiSetting(chartConfigStr, dataframe);
+            String preferredSheetName = StringUtils.isNotBlank(viewExecuteParam.getVizName())
+                    ? viewExecuteParam.getVizName()
+                    : "Sheet" + i;
+            String sheetName = POIUtils.uniqueSheetName(workbook, preferredSheetName);
+            POIUtils.withSheet(workbook, sheetName, dataframe, poiSettings);
         }
+        path = generateFileName(path,fileName,attachmentType);
+        File file = new File(path);
+        POIUtils.save(workbook, file.getPath(), true);
         log.info("create excel file complete.");
         return file;
     }

@@ -7,7 +7,6 @@ import yubi.security.manager.YuBiSecurityManager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,18 +25,5 @@ class ServerQueryExecutionContextFactoryTest {
         assertEquals("user-1", context.subjectId());
         assertEquals("org-1", context.organizationId());
         assertNotNull(context.correlationId());
-    }
-
-    @Test
-    void shouldBindTrustedSubjectAndOrganizationForSharedQuery() {
-        var factory = new ServerQueryExecutionContextFactory(mock(YuBiSecurityManager.class));
-
-        var context = factory.forShared("visitor-1", "org-1");
-
-        assertEquals(Channel.SHARED, context.channel());
-        assertEquals("visitor-1", context.subjectId());
-        assertEquals("org-1", context.organizationId());
-        assertNotNull(context.correlationId());
-        assertThrows(IllegalArgumentException.class, () -> factory.forShared("visitor-1", null));
     }
 }

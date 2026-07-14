@@ -22,16 +22,12 @@ package yubi.server.service.impl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.env.Environment;
 import yubi.core.base.PageInfo;
 import yubi.core.base.consts.Const;
 import yubi.core.base.consts.ValueType;
 import yubi.core.base.consts.VariableTypeEnum;
 import yubi.core.common.RequestContext;
-import yubi.core.common.Application;
 import yubi.core.data.provider.DataProviderManager;
 import yubi.core.data.provider.DataProviderSource;
 import yubi.core.data.provider.Dataframe;
@@ -51,7 +47,6 @@ import yubi.security.manager.YuBiSecurityManager;
 import yubi.query.application.DefaultQueryService;
 import yubi.server.base.dto.VariableValue;
 import yubi.server.base.params.DownloadQueryRequest;
-import yubi.server.base.params.DownloadCreateParam;
 import yubi.server.query.ServerQueryAccessPolicyAdapter;
 import yubi.server.query.DownloadQueryExecutor;
 import yubi.server.query.DownloadQueryMapper;
@@ -61,13 +56,9 @@ import yubi.server.query.ServerQueryExecutionContextFactory;
 import yubi.server.query.ServerQueryVariableAdapter;
 import yubi.server.query.ServerSourceConfigMapper;
 import yubi.server.service.SourceService;
-import yubi.server.service.OrgSettingService;
 import yubi.server.service.VariableService;
 import yubi.server.service.ViewService;
-import yubi.server.service.VizService;
 
-import java.io.File;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -90,9 +81,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class DataProviderServiceImplCharacterizationTest {
-
-    @TempDir
-    Path tempDir;
 
     private DataProviderManager dataProviderManager;
 
@@ -265,74 +253,6 @@ class DataProviderServiceImplCharacterizationTest {
         assertTrue(permissionVariables.stream().allMatch(ScriptVariable::isDisabled));
         assertEquals(Set.of("*"), columnKeys(executeCaptor.getValue().getIncludeColumns()));
         verify(columnPermissionMapper, never()).listByUser(any(), any());
-    }
-
-    @Test
-    void shouldGenerateSharedAttachmentWithVisitorPermissionsWithoutDirectViewRead() throws Exception {
-        doThrow(new RuntimeException("visitor has no direct read"))
-                .when(viewService).requirePermission(any(View.class), eq(Const.READ));
-        OrgSettingService orgSettingService = mock(OrgSettingService.class);
-        when(orgSettingService.getDownloadRecordLimit("org-1")).thenReturn(1000);
-        VizService vizService = mock(VizService.class);
-        when(vizService.getChartConfigByVizId(any(), any())).thenReturn("");
-        ApplicationContext context = mock(ApplicationContext.class);
-        Environment environment = mock(Environment.class);
-        when(context.getEnvironment()).thenReturn(environment);
-        when(environment.getProperty("yubi.env.file-path")).thenReturn(tempDir.toString());
-        when(context.getBean(OrgSettingService.class)).thenReturn(orgSettingService);
-        when(context.getBean(ViewService.class)).thenReturn(viewService);
-        ApplicationContext previous = Application.getContext();
-
-        DownloadCreateParam download = new DownloadCreateParam();
-        download.setDownloadParams(List.of(executableRequest()));
-        try {
-            new Application().setApplicationContext(context);
-            File file = new AttachmentExcelServiceImpl(vizService, downloadQueryExecutor)
-                    .getFile(download, tempDir.toString(), "shared-dashboard", "user-1", "org-1");
-
-            assertTrue(file.isFile());
-            verify(viewService, never()).requirePermission(any(View.class), eq(Const.READ));
-            verify(columnPermissionMapper).listByUser("view-1", "user-1");
-            verify(variableService).listViewVarValuesByUser("user-1", "view-1");
-            verify(dataProviderManager).execute(any(), any(), any());
-        } finally {
-            new Application().setApplicationContext(previous);
-        }
-    }
-
-    @Test
-    void shouldRejectSharedViewOrganizationDriftBeforeVariablesSourceOrProvider() throws Exception {
-        view.setOrgId("org-2");
-        OrgSettingService orgSettingService = mock(OrgSettingService.class);
-        when(orgSettingService.getDownloadRecordLimit("org-2")).thenReturn(1000);
-        VizService vizService = mock(VizService.class);
-        ApplicationContext context = mock(ApplicationContext.class);
-        Environment environment = mock(Environment.class);
-        when(context.getEnvironment()).thenReturn(environment);
-        when(environment.getProperty("yubi.env.file-path")).thenReturn(tempDir.toString());
-        when(context.getBean(OrgSettingService.class)).thenReturn(orgSettingService);
-        when(context.getBean(ViewService.class)).thenReturn(viewService);
-        ApplicationContext previous = Application.getContext();
-
-        DownloadCreateParam download = new DownloadCreateParam();
-        download.setDownloadParams(List.of(executableRequest()));
-        try {
-            new Application().setApplicationContext(context);
-            assertThrows(
-                    Exception.class,
-                    () -> new AttachmentExcelServiceImpl(vizService, downloadQueryExecutor)
-                            .getFile(download, tempDir.toString(), "shared-dashboard", "user-1", "org-1")
-            );
-        } finally {
-            new Application().setApplicationContext(previous);
-        }
-
-        verify(variableService, never()).listOrgValue(any());
-        verify(variableService, never()).listViewVarValuesByUser(any(), any());
-        verify(columnPermissionMapper, never()).listByUser(any(), any());
-        verify(sourceMapper, never()).selectQueryAccessProjection(any());
-        verify(sourceService, never()).retrieve(any(), eq(false));
-        verify(dataProviderManager, never()).execute(any(), any(), any());
     }
 
     @Test

@@ -47,6 +47,7 @@ export interface DownloadManagement {
 export interface DownloadTask {
   id: string;
   status: number;
+  path: string;
   name: string;
 }
 

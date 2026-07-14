@@ -23,15 +23,11 @@ public interface DownloadMapper extends CRUDMapper {
         "insert into download (id, `name`, ",
         "`path`, last_download_time, ",
         "create_time, create_by, ",
-        "`status`, owner_type, ",
-        "owner_id, share_id, ",
-        "failure_code, deleted_at)",
+        "`status`)",
         "values (#{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, ",
         "#{path,jdbcType=VARCHAR}, #{lastDownloadTime,jdbcType=TIMESTAMP}, ",
         "#{createTime,jdbcType=TIMESTAMP}, #{createBy,jdbcType=VARCHAR}, ",
-        "#{status,jdbcType=TINYINT}, #{ownerType,jdbcType=VARCHAR}, ",
-        "#{ownerId,jdbcType=VARCHAR}, #{shareId,jdbcType=VARCHAR}, ",
-        "#{failureCode,jdbcType=VARCHAR}, #{deletedAt,jdbcType=TIMESTAMP})"
+        "#{status,jdbcType=TINYINT})"
     })
     int insert(Download record);
 
@@ -40,8 +36,7 @@ public interface DownloadMapper extends CRUDMapper {
 
     @Select({
         "select",
-        "id, `name`, `path`, last_download_time, create_time, create_by, `status`, ",
-        "owner_type, owner_id, share_id, failure_code, deleted_at",
+        "id, `name`, `path`, last_download_time, create_time, create_by, `status`",
         "from download",
         "where id = #{id,jdbcType=VARCHAR}"
     })
@@ -52,12 +47,7 @@ public interface DownloadMapper extends CRUDMapper {
         @Result(column="last_download_time", property="lastDownloadTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="create_time", property="createTime", jdbcType=JdbcType.TIMESTAMP),
         @Result(column="create_by", property="createBy", jdbcType=JdbcType.VARCHAR),
-        @Result(column="status", property="status", jdbcType=JdbcType.TINYINT),
-        @Result(column="owner_type", property="ownerType", jdbcType=JdbcType.VARCHAR),
-        @Result(column="owner_id", property="ownerId", jdbcType=JdbcType.VARCHAR),
-        @Result(column="share_id", property="shareId", jdbcType=JdbcType.VARCHAR),
-        @Result(column="failure_code", property="failureCode", jdbcType=JdbcType.VARCHAR),
-        @Result(column="deleted_at", property="deletedAt", jdbcType=JdbcType.TIMESTAMP)
+        @Result(column="status", property="status", jdbcType=JdbcType.TINYINT)
     })
     Download selectByPrimaryKey(String id);
 
@@ -71,12 +61,7 @@ public interface DownloadMapper extends CRUDMapper {
           "last_download_time = #{lastDownloadTime,jdbcType=TIMESTAMP},",
           "create_time = #{createTime,jdbcType=TIMESTAMP},",
           "create_by = #{createBy,jdbcType=VARCHAR},",
-          "`status` = #{status,jdbcType=TINYINT},",
-          "owner_type = #{ownerType,jdbcType=VARCHAR},",
-          "owner_id = #{ownerId,jdbcType=VARCHAR},",
-          "share_id = #{shareId,jdbcType=VARCHAR},",
-          "failure_code = #{failureCode,jdbcType=VARCHAR},",
-          "deleted_at = #{deletedAt,jdbcType=TIMESTAMP}",
+          "`status` = #{status,jdbcType=TINYINT}",
         "where id = #{id,jdbcType=VARCHAR}"
     })
     int updateByPrimaryKey(Download record);
