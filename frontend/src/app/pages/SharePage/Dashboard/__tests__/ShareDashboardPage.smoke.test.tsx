@@ -50,10 +50,6 @@ vi.mock('utils/persistence', () => ({
   },
 }));
 
-vi.mock('utils/utils', () => ({
-  uuidv4: vi.fn(() => 'client-id'),
-}));
-
 vi.mock('app/utils/fetch', () => ({
   downloadShareDataChartFile: vi.fn(),
   loadShareTask: vi.fn(),
@@ -172,7 +168,6 @@ describe('ShareDashboardPage smoke', () => {
     vi.mocked(useSelector).mockImplementation(selector =>
       selector(createState()),
     );
-    localStorage.clear();
   });
 
   test('should preload plugins, fetch share dashboard data and render dashboard page', async () => {

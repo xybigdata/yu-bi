@@ -22,10 +22,7 @@ import yubi.core.entity.*;
 import yubi.security.base.ResourceType;
 import yubi.server.base.dto.*;
 import yubi.server.base.params.*;
-import yubi.server.base.transfer.DashboardTemplateParam;
-import yubi.server.base.transfer.DatachartTemplateParam;
 import yubi.server.base.transfer.ImportStrategy;
-import yubi.server.base.transfer.ResourceTransferParam;
 import yubi.server.service.VizService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -270,32 +267,11 @@ public class VizController extends BaseController {
         return ResponseData.success(vizService.unpublish(ResourceType.valueOf(vizType), vizId));
     }
 
-    @Operation(summary = "export viz")
-    @PostMapping(value = "/export")
-    public ResponseData<Download> exportViz(@RequestBody ResourceTransferParam param) throws IOException {
-        return ResponseData.success(vizService.exportResource(param));
-    }
-
     @Operation(summary = "import viz")
     @PostMapping(value = "/import")
     public ResponseData<Boolean> importViz(@RequestParam("file") MultipartFile file, ImportStrategy strategy, String orgId) throws IOException {
         return ResponseData.success(vizService.importResource(file, strategy, orgId));
     }
-
-
-    @Operation(summary = "export dashboard template")
-    @PostMapping(value = "/export/dashboard/template")
-    public ResponseData<Download> exportDashboardTemplate(@Validated @RequestBody DashboardTemplateParam param) throws IOException {
-        return ResponseData.success(vizService.exportDashboardTemplate(param));
-    }
-
-    @Operation(summary = "export datachart template")
-    @PostMapping(value = "/export/datachart/template")
-    public ResponseData<Download> exportDatachartTemplate(@Validated @RequestBody DatachartTemplateParam param) throws IOException {
-        return ResponseData.success(vizService.exportDatachartTemplate(param));
-
-    }
-
 
     @Operation(summary = "import viz template")
     @PostMapping(value = "/import/template")

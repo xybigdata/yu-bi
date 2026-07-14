@@ -14,4 +14,14 @@ public class Download extends BaseEntity {
     private Date lastDownloadTime;
 
     private Byte status;
+
+    private String ownerType;
+
+    private String ownerId;
+
+    private String shareId;
+
+    private String failureCode;
+
+    private Date deletedAt;
 }

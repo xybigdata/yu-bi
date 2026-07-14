@@ -2,6 +2,7 @@ package yubi.server.service;
 
 import yubi.core.entity.*;
 import yubi.security.base.ResourceType;
+import yubi.server.base.dto.DownloadTaskDTO;
 import yubi.server.base.dto.*;
 import yubi.server.base.params.*;
 import yubi.server.base.transfer.DashboardTemplateParam;
@@ -80,13 +81,13 @@ public interface VizService {
 
     String getChartConfigByVizId(ResourceType resourceType, String vizId);
 
-    Download exportResource(ResourceTransferParam transferParam) throws IOException;
+    DownloadTaskDTO exportResource(ResourceTransferParam transferParam) throws IOException;
 
     boolean importResource(MultipartFile file, ImportStrategy importStrategy, String orgId) throws IOException;
 
-    Download exportDatachartTemplate(DatachartTemplateParam templateModel);
+    DownloadTaskDTO exportDatachartTemplate(DatachartTemplateParam templateModel);
 
-    Download exportDashboardTemplate(DashboardTemplateParam templateModel);
+    DownloadTaskDTO exportDashboardTemplate(DashboardTemplateParam templateModel);
 
     Folder importVizTemplate(MultipartFile file, String orgId, String parentId, String name) throws Exception;
 

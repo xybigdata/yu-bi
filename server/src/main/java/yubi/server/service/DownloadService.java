@@ -18,22 +18,27 @@
  */
 package yubi.server.service;
 
-import yubi.core.entity.Download;
-import yubi.core.mappers.ext.DownloadMapperExt;
+import yubi.server.base.dto.DownloadTaskDTO;
 import yubi.server.base.params.DownloadCreateParam;
 
 import java.util.List;
 
-public interface DownloadService extends BaseCRUDService<Download, DownloadMapperExt> {
+public interface DownloadService {
 
-    Download submitDownloadTask(DownloadCreateParam downloadCreateParam);
+    DownloadTaskDTO submitDownloadTask(DownloadCreateParam downloadCreateParam);
 
-    Download submitDownloadTask(DownloadCreateParam downloadCreateParam,String clientId);
+    DownloadTaskDTO submitSharedDownloadTask(
+            DownloadCreateParam downloadCreateParam,
+            SharedDownloadContext context
+    );
 
-    List<Download> listDownloadTasks();
+    DownloadTaskDTO submitGeneratedTask(String fileName, DownloadTaskFileGenerator generator);
 
-    List<Download> listDownloadTasks(String clientId);
+    List<DownloadTaskDTO> listDownloadTasks();
 
-    Download downloadFile(String downloadId);
+    List<DownloadTaskDTO> listSharedDownloadTasks(SharedDownloadContext context);
 
+    DownloadFileResource downloadFile(String downloadId);
+
+    DownloadFileResource downloadSharedFile(String downloadId, SharedDownloadContext context);
 }

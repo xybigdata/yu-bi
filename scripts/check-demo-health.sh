@@ -11,6 +11,11 @@ HEALTH_URL="${YUBI_DEMO_HEALTH_URL:-http://127.0.0.1:${PORT}/api/v1/sys/info}"
 STARTUP_TIMEOUT_SECONDS="${YUBI_DEMO_TIMEOUT_SECONDS:-180}"
 SPRING_PROFILE="${YUBI_DEMO_PROFILE:-demo}"
 START_CLASS="${YUBI_DEMO_START_CLASS:-yubi.YuBiServerApplication}"
+SESSION_SECRET="${YUBI_DEMO_SHARE_DOWNLOAD_SESSION_SECRET:-${YUBI_SHARE_DOWNLOAD_SESSION_SECRET:-}}"
+
+if [[ -z "${SESSION_SECRET}" ]]; then
+  SESSION_SECRET="$(openssl rand -base64 32)"
+fi
 
 mkdir -p "${LOG_DIR}"
 rm -f "${LOG_FILE}"
@@ -49,7 +54,16 @@ unzip -q "${INSTALL_ZIP}" -d "${RUNTIME_DIR}"
 
 cd "${RUNTIME_DIR}"
 
-java \
+DEMO_JDBC_URL="jdbc:h2:file:${RUNTIME_DIR}/bin/h2/yubi.demo;MODE=MySQL;DATABASE_TO_LOWER=TRUE;IGNORECASE=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;NON_KEYWORDS=USER;IFEXISTS=TRUE"
+if ! java -Dfile.encoding=UTF-8 -cp "lib/*" \
+  yubi.server.validation.DemoDownloadSchemaCheck "${DEMO_JDBC_URL}" \
+  >>"${LOG_FILE}" 2>&1; then
+  echo "安装包 demo 下载 Schema 校验失败" >&2
+  tail -n 120 "${LOG_FILE}" >&2 || true
+  exit 1
+fi
+
+YUBI_SHARE_DOWNLOAD_SESSION_SECRET="${SESSION_SECRET}" java \
   -Dspring.profiles.active="${SPRING_PROFILE}" \
   -Dserver.port="${PORT}" \
   -Dfile.encoding=UTF-8 \
@@ -61,6 +75,11 @@ SERVER_PID=$!
 deadline=$((SECONDS + STARTUP_TIMEOUT_SECONDS))
 
 while (( SECONDS < deadline )); do
+  if ! kill -0 "${SERVER_PID}" 2>/dev/null; then
+    echo "应用在健康检查前退出" >&2
+    tail -n 120 "${LOG_FILE}" >&2 || true
+    exit 1
+  fi
   if curl --silent --show-error --fail "${HEALTH_URL}" | grep -q '"success":true'; then
     echo "健康检查通过: ${HEALTH_URL}"
     exit 0

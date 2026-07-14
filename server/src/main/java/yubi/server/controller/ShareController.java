@@ -19,24 +19,21 @@
 
 package yubi.server.controller;
 
-import yubi.core.common.FileUtils;
 import yubi.core.data.provider.StdSqlOperator;
-import yubi.core.entity.Download;
+import yubi.core.base.exception.NotAllowedException;
 import yubi.server.base.dto.ResponseData;
 import yubi.server.base.dto.ShareInfo;
 import yubi.server.base.params.*;
+import yubi.server.service.ShareDownloadSession;
+import yubi.server.service.ShareDownloadSessionManager;
 import yubi.server.service.ShareService;
+import yubi.server.service.ShareVizAccess;
 import io.swagger.v3.oas.annotations.Operation;
-import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
 
@@ -46,9 +43,12 @@ public class ShareController extends BaseController {
 
     private final ShareService shareService;
 
-    public ShareController(ShareService shareService) {
+    private final ShareDownloadSessionManager sessionManager;
+
+    public ShareController(ShareService shareService, ShareDownloadSessionManager sessionManager) {
 
         this.shareService = shareService;
+        this.sessionManager = sessionManager;
     }
 
     @Operation(summary = "create a share")
@@ -58,7 +58,7 @@ public class ShareController extends BaseController {
     }
 
     @Operation(summary = "update a share")
-    @PutMapping(value = "{shareId:^(?!execute$).+}")
+    @PutMapping(value = "{shareId:^(?!(?:execute|download)$).+}")
     public ResponseData<ShareInfo> update(
             @PathVariable String shareId,
             @Validated @RequestBody ShareUpdateParam updateParam) {
@@ -67,13 +67,13 @@ public class ShareController extends BaseController {
     }
 
     @Operation(summary = "delete a share")
-    @DeleteMapping(value = "{shareId:^(?!execute$).+}")
+    @DeleteMapping(value = "{shareId:^(?!(?:execute|download)$).+}")
     public ResponseData<Boolean> delete(@PathVariable String shareId) {
         return ResponseData.success(shareService.delete(shareId, false));
     }
 
     @Operation(summary = "list share")
-    @GetMapping(value = "{vizId:^(?!execute$).+}")
+    @GetMapping(value = "{vizId:^(?!(?:execute|download)$).+}")
     public ResponseData<List<ShareInfo>> list(@PathVariable String vizId) {
         return ResponseData.success(shareService.listShare(vizId));
     }
@@ -82,9 +82,29 @@ public class ShareController extends BaseController {
     @Operation(summary = "get viz detail")
     @PostMapping("{shareId}/viz")
     public ResponseData<ShareVizDetail> vizDetail(@PathVariable String shareId,
-                                                  @RequestBody ShareToken shareToken) {
+                                                  @RequestBody ShareToken shareToken,
+                                                  HttpServletRequest request,
+                                                  HttpServletResponse response) {
+        if (shareToken == null) {
+            throw new NotAllowedException("分享访问无效");
+        }
+        ShareDownloadSession existingSession = null;
+        if (shareToken.getAuthorizedToken() != null && !shareToken.getAuthorizedToken().isBlank()) {
+            existingSession = sessionManager.require(shareId, request);
+        }
         shareToken.setId(shareId);
-        return ResponseData.success(shareService.getShareViz(shareToken));
+        ShareVizAccess access = shareService.getShareViz(shareToken, existingSession);
+        if (existingSession == null) {
+            sessionManager.issue(
+                    access.shareId(),
+                    access.authenticationMode(),
+                    access.securityFingerprint(),
+                    access.authenticatedSubjectId(),
+                    request,
+                    response
+            );
+        }
+        return ResponseData.success(access.detail());
     }
 
 
@@ -93,36 +113,6 @@ public class ShareController extends BaseController {
     public ResponseData<Set<StdSqlOperator>> supportFunctions(@PathVariable String sourceId,
                                                               @RequestBody ShareToken executeToken) {
         return ResponseData.success(shareService.supportedStdFunctions(executeToken, sourceId));
-    }
-
-    @Operation(summary = "create a download task")
-    @PostMapping("/download")
-    public ResponseData<Download> createDownload(@RequestParam(required = false) String password,
-                                                 @RequestParam String clientId,
-                                                 @RequestBody ShareDownloadParam downloadCreateParam) {
-        return ResponseData.success(shareService.createDownload(clientId, downloadCreateParam));
-    }
-
-    @Operation(summary = "get download task")
-    @GetMapping("/download/task")
-    public ResponseData<List<Download>> downloadList(@RequestParam String shareToken,
-                                                     @RequestParam String clientId) {
-        return ResponseData.success(shareService.listDownloadTask(ShareToken.create(shareToken), clientId));
-    }
-
-    @Operation(summary = "download file")
-    @GetMapping("/download")
-    public void downloadFile(@RequestParam String shareToken,
-                             @RequestParam String downloadId,
-                             HttpServletResponse response) throws IOException {
-        Download download = shareService.download(ShareToken.create(shareToken), downloadId);
-
-        response.setHeader("Content-Type", "application/octet-stream");
-        File file = new File(FileUtils.withBasePath(download.getPath()));
-        try (InputStream inputStream = new FileInputStream(file)) {
-            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", URLEncoder.encode(file.getName(), "utf-8")));
-            Streams.copy(inputStream, response.getOutputStream(), true);
-        }
     }
 
 }

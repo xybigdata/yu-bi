@@ -1,9 +1,9 @@
 package yubi.server.service;
 
 import yubi.core.data.provider.StdSqlOperator;
-import yubi.core.entity.Download;
 import yubi.core.entity.Share;
 import yubi.core.mappers.ext.ShareMapperExt;
+import yubi.server.base.dto.DownloadTaskDTO;
 import yubi.server.base.dto.ShareInfo;
 import yubi.server.base.params.*;
 
@@ -20,13 +20,17 @@ public interface ShareService extends BaseCRUDService<Share, ShareMapperExt> {
 
     List<ShareInfo> listShare(String vizId);
 
-    ShareVizDetail getShareViz(ShareToken shareToken);
+    ShareVizAccess getShareViz(ShareToken shareToken, ShareDownloadSession existingSession);
 
-    Download createDownload(String clientId, ShareDownloadParam downloadCreateParams);
+    DownloadTaskDTO createDownload(
+            String shareId,
+            ShareDownloadSession session,
+            ShareDownloadParam downloadCreateParams
+    );
 
-    List<Download> listDownloadTask(ShareToken shareToken, String clientId);
+    List<DownloadTaskDTO> listDownloadTask(String shareId, ShareDownloadSession session);
 
-    Download download(ShareToken shareToken, String downloadId);
+    DownloadFileResource download(String shareId, ShareDownloadSession session, String downloadId);
 
     Set<StdSqlOperator> supportedStdFunctions(ShareToken shareToken, String sourceId);
 

@@ -83,7 +83,6 @@ npm run test:ci
 - 安全策略：[SECURITY.md](./SECURITY.md)
 - 维护者说明：[MAINTAINERS.md](./MAINTAINERS.md)
 - 路线图：[ROADMAP.md](./ROADMAP.md)
-- Agent-ready 架构改造计划：[docs/agent-ready-architecture-plan.md](./docs/agent-ready-architecture-plan.md)
 - 变更记录：[CHANGELOG.md](./CHANGELOG.md)
 
 ## 维护策略

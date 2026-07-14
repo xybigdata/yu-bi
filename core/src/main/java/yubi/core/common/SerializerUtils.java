@@ -27,12 +27,15 @@ public class SerializerUtils {
 
     public static <T extends Serializable> void serializeObjectToFile(T obj, boolean gzip, String path) throws IOException {
         FileUtils.mkdirParentIfNotExist(path);
-        OutputStream outputStream;
-        if (gzip) {
-            outputStream = new GZIPOutputStream(new FileOutputStream(path));
-        } else {
-            outputStream = new FileOutputStream(path);
+        try (OutputStream outputStream = new FileOutputStream(path)) {
+            serializeObject(obj, gzip, outputStream);
         }
+    }
+
+    public static <T extends Serializable> void serializeObject(T obj,
+                                                                 boolean gzip,
+                                                                 OutputStream target) throws IOException {
+        OutputStream outputStream = gzip ? new GZIPOutputStream(target) : target;
         try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream)) {
             objectOutputStream.writeObject(obj);
         }

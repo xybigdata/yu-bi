@@ -19,6 +19,7 @@
 
 package yubi.server.base.params;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import yubi.core.base.consts.AttachmentType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -39,6 +40,11 @@ public class DownloadCreateParam extends BaseCreateParam {
 
     public void setImageWidth(Integer imageWidth) {
         this.imageWidth = imageWidth == null ? 0 : imageWidth;
+    }
+
+    @JsonAnySetter
+    public void rejectUnknownField(String field, Object value) {
+        throw new IllegalArgumentException("下载任务请求包含不允许的字段");
     }
 
 }

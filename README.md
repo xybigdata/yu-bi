@@ -83,7 +83,6 @@ npm run test:ci
 - Security policy: [SECURITY.md](./SECURITY.md)
 - Maintainers: [MAINTAINERS.md](./MAINTAINERS.md)
 - Roadmap: [ROADMAP.md](./ROADMAP.md)
-- Agent-ready architecture plan: [docs/agent-ready-architecture-plan.md](./docs/agent-ready-architecture-plan.md)
 - Changelog: [CHANGELOG.md](./CHANGELOG.md)
 
 ## Maintenance Policy

@@ -25,7 +25,6 @@ import yubi.core.base.consts.VariableTypeEnum;
 import yubi.core.base.exception.Exceptions;
 import yubi.core.common.*;
 import yubi.core.entity.*;
-import yubi.core.mappers.ext.DownloadMapperExt;
 import yubi.security.base.ResourceType;
 import yubi.server.base.dto.*;
 import yubi.server.base.dto.chart.WidgetConfig;
@@ -71,7 +70,7 @@ public class VizServiceImpl extends BaseService implements VizService {
 
     private final FileService fileService;
 
-    private final DownloadMapperExt downloadMapper;
+    private final DownloadService downloadService;
 
     public VizServiceImpl(DatachartService datachartService,
                           DashboardService dashboardService,
@@ -80,7 +79,7 @@ public class VizServiceImpl extends BaseService implements VizService {
                           FolderService folderService,
                           ViewService viewService,
                           SourceService sourceService, VariableService variableService,
-                          FileService fileService, DownloadMapperExt downloadMapper) {
+                          FileService fileService, DownloadService downloadService) {
         this.datachartService = datachartService;
         this.dashboardService = dashboardService;
         this.storyboardService = storyboardService;
@@ -90,7 +89,7 @@ public class VizServiceImpl extends BaseService implements VizService {
         this.sourceService = sourceService;
         this.variableService = variableService;
         this.fileService = fileService;
-        this.downloadMapper = downloadMapper;
+        this.downloadService = downloadService;
     }
 
     @Override
@@ -279,11 +278,8 @@ public class VizServiceImpl extends BaseService implements VizService {
     }
 
     @Override
-    public Download exportResource(ResourceTransferParam param) throws IOException {
-        final String user = securityManager.getCurrentUser().getUsername();
-
+    public DownloadTaskDTO exportResource(ResourceTransferParam param) throws IOException {
         return newExportDownloadTask(transferParam -> {
-            securityManager.runAs(user);
             TransferConfig transferConfig = TransferConfig.builder()
                     .withParents(true)
                     .build();
@@ -381,7 +377,7 @@ public class VizServiceImpl extends BaseService implements VizService {
     }
 
     @Override
-    public Download exportDatachartTemplate(DatachartTemplateParam param) {
+    public DownloadTaskDTO exportDatachartTemplate(DatachartTemplateParam param) {
         return newExportDownloadTask(templateParam -> {
             DatachartTemplateModel templateModel = new DatachartTemplateModel();
             templateModel.setDatachart(param.getDatachart());
@@ -390,7 +386,7 @@ public class VizServiceImpl extends BaseService implements VizService {
     }
 
     @Override
-    public Download exportDashboardTemplate(DashboardTemplateParam param) {
+    public DownloadTaskDTO exportDashboardTemplate(DashboardTemplateParam param) {
         return newExportDownloadTask(templateParam -> {
             DashboardTemplateModel templateModel = new DashboardTemplateModel();
             templateModel.setDashboard(param.getDashboard());
@@ -403,38 +399,16 @@ public class VizServiceImpl extends BaseService implements VizService {
     }
 
 
-    private <P extends TransferParam, R extends TransferModel> Download newExportDownloadTask(Function<P, R> function, P param, TransferFileType fileType) {
-        final Download download = new Download();
-        download.setCreateTime(new Date());
-        download.setId(UUIDGenerator.generate());
-        download.setStatus((byte) 0);
-        download.setCreateBy(securityManager.getCurrentUser().getId());
-        String path = getExportFile(getMessage("message.viz.export.name"), fileType);
-        download.setName(new File(path).getName());
-        download.setPath(path);
-        downloadMapper.insert(download);
-        TaskExecutor.submit(() -> {
-            try {
-                TransferModel model = function.apply(param);
-                SerializerUtils.serializeObjectToFile(model, true, download.getPath());
-                download.setStatus((byte) 1);
-            } catch (Exception e) {
-                download.setStatus((byte) -1);
-                log.error("object serialize error", e);
-            } finally {
-                try {
-                    download.setUpdateTime(new Date());
-                    downloadMapper.updateByPrimaryKey(download);
-                } catch (Exception e) {
-                    log.error("download task update error", e);
-                }
-                try {
-                    securityManager.releaseRunAs();
-                } catch (Exception ignored) {
-                }
-            }
+    private <P extends TransferParam, R extends TransferModel> DownloadTaskDTO newExportDownloadTask(
+            Function<P, R> function,
+            P param,
+            TransferFileType fileType
+    ) {
+        String fileName = getExportFileName(getMessage("message.viz.export.name"), fileType);
+        return downloadService.submitGeneratedTask(fileName, target -> {
+            TransferModel model = function.apply(param);
+            SerializerUtils.serializeObject(model, true, target);
         });
-        return download;
     }
 
     @Override
@@ -587,8 +561,8 @@ public class VizServiceImpl extends BaseService implements VizService {
         folderService.getDefaultMapper().insert(folder);
     }
 
-    private String getExportFile(String name, TransferFileType fileType) {
-        return fileService.getBasePath(FileOwner.EXPORT, null) + "/" + name + "-" + System.currentTimeMillis() + fileType.getSuffix();
+    private String getExportFileName(String name, TransferFileType fileType) {
+        return name + "-" + System.currentTimeMillis() + fileType.getSuffix();
     }
 
     public TransferModel extractModel(MultipartFile file) throws IOException, ClassNotFoundException {

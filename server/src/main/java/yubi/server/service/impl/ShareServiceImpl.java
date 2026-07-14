@@ -20,15 +20,20 @@
 package yubi.server.service.impl;
 
 import yubi.core.base.consts.Const;
+import yubi.core.base.consts.AttachmentType;
 import yubi.core.base.consts.ShareAuthenticationMode;
 import yubi.core.base.consts.ShareRowPermissionBy;
 import yubi.core.base.exception.BaseException;
 import yubi.core.base.exception.Exceptions;
+import yubi.core.base.exception.NotAllowedException;
 import yubi.core.common.Application;
 import yubi.core.common.UUIDGenerator;
 import yubi.core.data.provider.StdSqlOperator;
 import yubi.core.entity.*;
 import yubi.core.mappers.ext.ShareMapperExt;
+import yubi.core.mappers.ext.DashboardMapperExt;
+import yubi.core.mappers.ext.DatachartMapperExt;
+import yubi.core.mappers.ext.StoryboardMapperExt;
 import yubi.core.mappers.ext.UserMapperExt;
 import yubi.security.base.ResourceType;
 import yubi.security.exception.PermissionDeniedException;
@@ -36,6 +41,7 @@ import yubi.security.util.AESUtil;
 import yubi.security.util.SecurityUtils;
 import yubi.server.base.dto.DashboardDetail;
 import yubi.server.base.dto.DatachartDetail;
+import yubi.server.base.dto.DownloadTaskDTO;
 import yubi.server.base.dto.ShareInfo;
 import yubi.server.base.dto.StoryboardDetail;
 import yubi.server.base.params.*;
@@ -65,18 +71,34 @@ public class ShareServiceImpl extends BaseService implements ShareService {
 
     private final UserMapperExt userMapperExt;
 
+    private final DashboardMapperExt dashboardMapper;
+
+    private final DatachartMapperExt datachartMapper;
+
+    private final StoryboardMapperExt storyboardMapper;
+
+    private final ShareDownloadSessionManager shareDownloadSessionManager;
+
     public ShareServiceImpl(DataProviderService dataProviderService,
                             VizService vizService,
                             DownloadService downloadService,
                             ShareMapperExt shareMapper,
                             RoleService roleService,
-                            UserMapperExt userMapperExt) {
+                            UserMapperExt userMapperExt,
+                            DashboardMapperExt dashboardMapper,
+                            DatachartMapperExt datachartMapper,
+                            StoryboardMapperExt storyboardMapper,
+                            ShareDownloadSessionManager shareDownloadSessionManager) {
         this.dataProviderService = dataProviderService;
         this.vizService = vizService;
         this.downloadService = downloadService;
         this.shareMapper = shareMapper;
         this.roleService = roleService;
         this.userMapperExt = userMapperExt;
+        this.dashboardMapper = dashboardMapper;
+        this.datachartMapper = datachartMapper;
+        this.storyboardMapper = storyboardMapper;
+        this.shareDownloadSessionManager = shareDownloadSessionManager;
     }
 
     @Override
@@ -247,61 +269,132 @@ public class ShareServiceImpl extends BaseService implements ShareService {
     }
 
     @Override
-    public ShareVizDetail getShareViz(ShareToken shareToken) {
-        ShareAuthorizedToken authorizedToken = parseToken(shareToken);
-        validateExpiration(authorizedToken);
-        return getVizDetail(authorizedToken);
+    public ShareVizAccess getShareViz(ShareToken shareToken, ShareDownloadSession existingSession) {
+        ParsedShare parsed = parseToken(shareToken);
+        validateExpiration(parsed.share());
+        String securityFingerprint = shareDownloadSessionManager.securityFingerprint(parsed.share());
+        if (StringUtils.isNotBlank(shareToken.getAuthorizedToken())) {
+            validateExistingShareSession(parsed, existingSession, securityFingerprint);
+        }
+        ShareVizDetail detail = getVizDetail(parsed.authorizedToken());
+        return new ShareVizAccess(
+                detail,
+                parsed.share().getId(),
+                ShareAuthenticationMode.valueOf(parsed.share().getAuthenticationMode()),
+                parsed.authenticatedSubjectId(),
+                securityFingerprint
+        );
+    }
+
+    private void validateExistingShareSession(ParsedShare parsed,
+                                              ShareDownloadSession existingSession,
+                                              String securityFingerprint) {
+        ShareAuthenticationMode authenticationMode;
+        try {
+            authenticationMode = ShareAuthenticationMode.valueOf(parsed.share().getAuthenticationMode());
+        } catch (RuntimeException exception) {
+            throw new NotAllowedException("分享下载会话无效");
+        }
+        if (existingSession == null
+                || !Objects.equals(parsed.share().getId(), existingSession.shareId())
+                || !Objects.equals(authenticationMode, existingSession.authenticationMode())
+                || !Objects.equals(parsed.authenticatedSubjectId(), existingSession.authenticatedSubjectId())
+                || !Objects.equals(securityFingerprint, existingSession.securityFingerprint())) {
+            throw new NotAllowedException("分享下载会话无效");
+        }
     }
 
     @Override
-    public Download createDownload(String clientId, ShareDownloadParam downloadParam) {
-        if (CollectionUtils.isEmpty(downloadParam.getDownloadParams()) || CollectionUtils.isEmpty(downloadParam.getExecuteToken())) {
-            return null;
+    public DownloadTaskDTO createDownload(String shareId,
+                                          ShareDownloadSession session,
+                                          ShareDownloadParam downloadParam) {
+        Share share = validateShareDownloadAccess(shareId, session);
+        if (downloadParam == null
+                || !AttachmentType.EXCEL.equals(Objects.requireNonNullElse(
+                        downloadParam.getDownloadType(),
+                        AttachmentType.EXCEL
+                ))
+                || CollectionUtils.isEmpty(downloadParam.getDownloadParams())
+                || CollectionUtils.isEmpty(downloadParam.getExecuteToken())) {
+            throw new NotAllowedException("分享下载请求无效");
         }
+        String executionUsername = null;
         for (DownloadQueryRequest param : downloadParam.getDownloadParams()) {
-            Map<String, ShareToken> tokeMap = downloadParam.getExecuteToken();
-            if (CollectionUtils.isEmpty(tokeMap)) {
-                validateExecutePermission(null, param);
-            } else {
-                validateExecutePermission(downloadParam.getExecuteToken().getOrDefault(param.getViewId(), null).getAuthorizedToken(), param);
+            if (param == null || StringUtils.isBlank(param.getViewId())) {
+                throw new NotAllowedException("分享下载请求无效");
+            }
+            ShareToken executeToken = downloadParam.getExecuteToken().get(param.getViewId());
+            ShareAuthorizedToken authorizedToken = validateExecutePermission(
+                    executeToken == null ? null : executeToken.getAuthorizedToken(),
+                    param,
+                    share
+            );
+            if (executionUsername == null) {
+                executionUsername = authorizedToken.getPermissionBy();
+            } else if (!Objects.equals(executionUsername, authorizedToken.getPermissionBy())) {
+                throw new NotAllowedException("分享下载请求无效");
             }
         }
 
-        List<DownloadQueryRequest> viewExecuteParams = downloadParam.getDownloadParams();
+        Set<String> currentViewIds = currentDashboardViewIds(share);
+        boolean containsUnrelatedView = downloadParam.getDownloadParams().stream()
+                .map(DownloadQueryRequest::getViewId)
+                .anyMatch(viewId -> !currentViewIds.contains(viewId));
+        if (containsUnrelatedView) {
+            throw new NotAllowedException("分享下载请求无效");
+        }
+
         DownloadCreateParam downloadCreateParam = new DownloadCreateParam();
         downloadCreateParam.setFileName(downloadParam.getFileName());
-        downloadCreateParam.setDownloadParams(viewExecuteParams);
+        downloadCreateParam.setDownloadParams(downloadParam.getDownloadParams().stream()
+                .map(this::withoutUntrustedVizMetadata)
+                .toList());
+        downloadCreateParam.setDownloadType(AttachmentType.EXCEL);
 
-        return downloadService.submitDownloadTask(downloadCreateParam, clientId);
+        return downloadService.submitSharedDownloadTask(
+                downloadCreateParam,
+                sharedContext(share, session, executionUsername)
+        );
     }
 
     @Override
-    public List<Download> listDownloadTask(ShareToken shareToken, String clientId) {
-        ShareAuthorizedToken authorizedToken = parseToken(shareToken);
-        validateExpiration(authorizedToken);
-        return downloadService.listDownloadTasks(clientId);
+    public List<DownloadTaskDTO> listDownloadTask(String shareId, ShareDownloadSession session) {
+        Share share = validateShareDownloadAccess(shareId, session);
+        return downloadService.listSharedDownloadTasks(sharedContext(share, session, null));
     }
 
     @Override
-    public Download download(ShareToken shareToken, String downloadId) {
-        ShareAuthorizedToken authorizedToken = parseToken(shareToken);
-        validateExpiration(authorizedToken);
-        return downloadService.downloadFile(downloadId);
+    public DownloadFileResource download(String shareId,
+                                         ShareDownloadSession session,
+                                         String downloadId) {
+        Share share = validateShareDownloadAccess(shareId, session);
+        return downloadService.downloadSharedFile(
+                downloadId,
+                sharedContext(share, session, null)
+        );
     }
 
     @Override
     public Set<StdSqlOperator> supportedStdFunctions(ShareToken shareToken, String sourceId) {
-        ShareAuthorizedToken authorizedToken = parseToken(shareToken);
-        validateExpiration(authorizedToken);
+        ParsedShare parsed = parseToken(shareToken);
+        validateExpiration(parsed.share());
         return dataProviderService.supportedStdFunctions(sourceId);
     }
 
     private ShareVizDetail getVizDetail(ShareAuthorizedToken authorizedToken) {
-
         User user = userMapperExt.selectByPrimaryKey(authorizedToken.getCreateBy());
+        if (user == null || StringUtils.isBlank(user.getUsername())) {
+            throw new NotAllowedException("分享访问无效");
+        }
+        try {
+            getSecurityManager().runAs(user.getUsername());
+            return buildVizDetail(authorizedToken);
+        } finally {
+            getSecurityManager().releaseRunAs();
+        }
+    }
 
-        getSecurityManager().runAs(user.getUsername());
-
+    private ShareVizDetail buildVizDetail(ShareAuthorizedToken authorizedToken) {
         ShareVizDetail shareVizDetail = new ShareVizDetail();
 
         shareVizDetail.setVizType(authorizedToken.getVizType());
@@ -359,93 +452,98 @@ public class ShareServiceImpl extends BaseService implements ShareService {
         return shareVizDetail;
     }
 
-    private ShareAuthorizedToken validateExecutePermission(String authorizedToken, DownloadQueryRequest executeParam) {
+    private ShareAuthorizedToken validateExecutePermission(String authorizedToken,
+                                                           DownloadQueryRequest executeParam,
+                                                           Share share) {
         if (StringUtils.isBlank(authorizedToken)) {
             Exceptions.tr(PermissionDeniedException.class, "message.provider.execute.permission.denied");
         }
-        ShareAuthorizedToken shareAuthorizedToken = AESUtil.decrypt(authorizedToken, Application.getTokenSecret(), ShareAuthorizedToken.class);
-        if (!ResourceType.VIEW.equals(shareAuthorizedToken.getVizType()) || !shareAuthorizedToken.getVizId().equals(executeParam.getViewId())) {
+        ShareAuthorizedToken shareAuthorizedToken;
+        try {
+            shareAuthorizedToken = AESUtil.decrypt(
+                    authorizedToken,
+                    Application.getTokenSecret(),
+                    ShareAuthorizedToken.class
+            );
+        } catch (RuntimeException exception) {
+            throw new NotAllowedException("分享下载请求无效");
+        }
+        if (shareAuthorizedToken == null
+                || executeParam == null
+                || !ResourceType.VIEW.equals(shareAuthorizedToken.getVizType())
+                || !Objects.equals(shareAuthorizedToken.getVizId(), executeParam.getViewId())
+                || !Objects.equals(shareAuthorizedToken.getShareId(), share.getId())
+                || !Objects.equals(shareAuthorizedToken.getShareVizType(), ResourceType.valueOf(share.getVizType()))
+                || !Objects.equals(shareAuthorizedToken.getShareVizId(), share.getVizId())
+                || !Objects.equals(shareAuthorizedToken.getOrganizationId(), share.getOrgId())
+                || !Objects.equals(
+                        shareAuthorizedToken.getShareAuthenticationMode(),
+                        ShareAuthenticationMode.valueOf(share.getAuthenticationMode())
+                )
+                || StringUtils.isBlank(shareAuthorizedToken.getPermissionBy())) {
             Exceptions.tr(PermissionDeniedException.class, "message.provider.execute.permission.denied");
         }
+        validateAuthorizedToken(shareAuthorizedToken, share);
         return shareAuthorizedToken;
     }
 
-    private void validateExpiration(ShareAuthorizedToken share) {
+    private void validateExpiration(Share share) {
         if (share == null || (share.getExpiryDate() != null && new Date().after(share.getExpiryDate()))) {
             Exceptions.tr(BaseException.class, "message.share.expired");
         }
     }
 
-    private void authenticationShare(Share share, ShareToken shareToken) {
+    private User authenticationShare(Share share, ShareToken shareToken) {
         ShareAuthenticationMode authenticationMode = ShareAuthenticationMode.valueOf(share.getAuthenticationMode());
         switch (authenticationMode) {
             case NONE:
-                return;
+                return null;
             case CODE:
                 if (StringUtils.isEmpty(shareToken.getAuthenticationCode()) || !shareToken.getAuthenticationCode().equals(share.getAuthenticationCode())) {
                     Exceptions.tr(BaseException.class, "message.share.permission.denied");
                 }
-                break;
+                return null;
             case LOGIN:
-                // 验证用户是否存在
-                User user = null;
-                if (StringUtils.isBlank(shareToken.getUsername())) {
-                    try {
-                        user = getSecurityManager().getCurrentUser();
-                        if (user != null) {
-                            shareToken.setUsername(user.getUsername());
-                            shareToken.setPassword(user.getPassword());
-                        } else {
-                            Exceptions.tr(BaseException.class, "message.share.permission.denied");
-                        }
-                    } catch (Exception ignored) {
-                        Exceptions.tr(BaseException.class, "message.share.permission.denied");
-                    }
-                } else {
-                    user = userMapperExt.selectByNameOrEmail(shareToken.getUsername());
-                }
-                if (user == null) {
-                    Exceptions.tr(BaseException.class, "message.user.not.exists");
-                    return;
-                }
-                // 验证用户是否具有访问权限
-                if (ShareRowPermissionBy.CREATOR.name().equals(share.getRowPermissionBy())) {
-                    return;
-                }
-                getSecurityManager().runAs(shareToken.getUsername());
-                if (getSecurityManager().isOrgOwner(share.getOrgId())) {
-                    return;
-                }
-                try {
-                    checkVizReadPermission(ResourceType.valueOf(share.getVizType()), share.getVizId());
-                    return;
-                } catch (PermissionDeniedException ignored) {
-                }
-                if (StringUtils.isBlank(shareToken.getUsername())
-                        || StringUtils.isBlank(shareToken.getUsername())
-                        || StringUtils.isBlank(share.getRoles())) {
-                    Exceptions.tr(BaseException.class, "message.share.permission.denied");
-                    return;
-                }
-                List<Role> roles = roleService.listUserRoles(share.getOrgId(), user.getId());
-                if (CollectionUtils.isEmpty(roles)) {
-                    Exceptions.tr(BaseException.class, "message.share.permission.denied");
-                    return;
-                }
-                Set<String> roleIdList = roles.stream().map(BaseEntity::getId).collect(Collectors.toSet());
-                List<String> permittedRoles = readRoles(share.getRoles());
-                if (!CollectionUtils.isEmpty(permittedRoles)) {
-                    permittedRoles = permittedRoles.stream().map(id -> id.substring(1)).collect(Collectors.toList());
-                } else {
-                    permittedRoles = Collections.emptyList();
-                }
-                if (Collections.disjoint(roleIdList, permittedRoles)) {
-                    Exceptions.tr(BaseException.class, "message.share.permission.denied");
-                }
-                break;
+                return authenticateLoginShare(share);
             default:
                 Exceptions.tr(BaseException.class, "message.share.permission.denied");
+                return null;
         }
+    }
+
+    private User authenticateLoginShare(Share share) {
+        User user = getSecurityManager().getCurrentUser();
+        if (user == null || StringUtils.isBlank(user.getId())) {
+            Exceptions.tr(BaseException.class, "message.share.permission.denied");
+        }
+        if (ShareRowPermissionBy.CREATOR.name().equals(share.getRowPermissionBy())) {
+            return user;
+        }
+        if (getSecurityManager().isOrgOwner(share.getOrgId())) {
+            return user;
+        }
+        try {
+            checkVizReadPermission(ResourceType.valueOf(share.getVizType()), share.getVizId());
+            return user;
+        } catch (PermissionDeniedException ignored) {
+            // 继续按分享配置中的角色白名单校验。
+        }
+        if (StringUtils.isBlank(share.getRoles())) {
+            Exceptions.tr(BaseException.class, "message.share.permission.denied");
+        }
+        List<Role> roles = roleService.listUserRoles(share.getOrgId(), user.getId());
+        if (CollectionUtils.isEmpty(roles)) {
+            Exceptions.tr(BaseException.class, "message.share.permission.denied");
+        }
+        Set<String> roleIdList = roles.stream().map(BaseEntity::getId).collect(Collectors.toSet());
+        List<String> permittedRoles = readRoles(share.getRoles()).stream()
+                .filter(value -> value != null && value.length() > 1)
+                .map(value -> value.substring(1))
+                .toList();
+        if (Collections.disjoint(roleIdList, permittedRoles)) {
+            Exceptions.tr(BaseException.class, "message.share.permission.denied");
+        }
+        return user;
     }
 
     @Override
@@ -479,29 +577,303 @@ public class ShareServiceImpl extends BaseService implements ShareService {
         }
     }
 
-    private ShareAuthorizedToken parseToken(ShareToken shareToken) {
+    private ParsedShare parseToken(ShareToken shareToken) {
+        if (shareToken == null) {
+            throw new NotAllowedException("分享访问无效");
+        }
         ShareAuthorizedToken authorizedToken = null;
-        if (StringUtils.isBlank(shareToken.getAuthorizedToken())) {
-            Share share = retrieve(shareToken.getId());
-            authenticationShare(share, shareToken);
-            authorizedToken = new ShareAuthorizedToken();
-            BeanUtils.copyProperties(share, authorizedToken);
-            authorizedToken.setVizType(ResourceType.valueOf(share.getVizType()));
-            if (ShareRowPermissionBy.CREATOR.name().equals(share.getRowPermissionBy())) {
-                String shareCreateBy = share.getCreateBy();
-                if (shareCreateBy.startsWith(AttachmentService.SHARE_USER)) {
-                    shareCreateBy = shareCreateBy.replace(AttachmentService.SHARE_USER, "");
-                    authorizedToken.setCreateBy(shareCreateBy);
-                }
-                User user = retrieve(shareCreateBy, User.class, false);
-                authorizedToken.setPermissionBy(user.getUsername());
-            } else {
-                authorizedToken.setPermissionBy(shareToken.getUsername());
+        if (StringUtils.isNotBlank(shareToken.getAuthorizedToken())) {
+            try {
+                authorizedToken = AESUtil.decrypt(
+                        shareToken.getAuthorizedToken(),
+                        Application.getTokenSecret(),
+                        ShareAuthorizedToken.class
+                );
+            } catch (RuntimeException exception) {
+                throw new NotAllowedException("分享访问无效");
             }
+        }
+
+        String shareId = StringUtils.defaultIfBlank(
+                shareToken.getId(),
+                authorizedToken == null ? null : authorizedToken.getShareId()
+        );
+        Share share = loadCurrentShare(shareId);
+        validateExpiration(share);
+        validateShareTarget(share);
+
+        User authenticatedUser;
+        if (authorizedToken == null) {
+            authenticatedUser = authenticationShare(share, shareToken);
+            authorizedToken = createAuthorizedToken(share, authenticatedUser);
         } else {
-            authorizedToken = AESUtil.decrypt(shareToken.getAuthorizedToken(), Application.getTokenSecret(), ShareAuthorizedToken.class);
+            validateAuthorizedToken(authorizedToken, share);
+            authenticatedUser = ShareAuthenticationMode.LOGIN.name().equals(share.getAuthenticationMode())
+                    ? authenticateLoginShare(share)
+                    : null;
+        }
+        return new ParsedShare(
+                share,
+                authorizedToken,
+                authenticatedUser == null ? null : authenticatedUser.getId()
+        );
+    }
+
+    private ShareAuthorizedToken createAuthorizedToken(Share share, User authenticatedUser) {
+        ShareAuthorizedToken authorizedToken = new ShareAuthorizedToken();
+        BeanUtils.copyProperties(share, authorizedToken);
+        ResourceType topType = ResourceType.valueOf(share.getVizType());
+        authorizedToken.setVizType(topType);
+        authorizedToken.setShareId(share.getId());
+        authorizedToken.setShareVizType(topType);
+        authorizedToken.setShareVizId(share.getVizId());
+        authorizedToken.setOrganizationId(share.getOrgId());
+        authorizedToken.setShareAuthenticationMode(
+                ShareAuthenticationMode.valueOf(share.getAuthenticationMode())
+        );
+
+        User shareCreator = loadShareCreator(share);
+        authorizedToken.setCreateBy(shareCreator.getId());
+
+        if (ShareRowPermissionBy.CREATOR.name().equals(share.getRowPermissionBy())) {
+            authorizedToken.setPermissionBy(shareCreator.getUsername());
+        } else {
+            if (authenticatedUser == null || StringUtils.isBlank(authenticatedUser.getUsername())) {
+                throw new NotAllowedException("分享访问无效");
+            }
+            authorizedToken.setPermissionBy(authenticatedUser.getUsername());
         }
         return authorizedToken;
+    }
+
+    private void validateAuthorizedToken(ShareAuthorizedToken token, Share share) {
+        ResourceType topType;
+        ShareAuthenticationMode authenticationMode;
+        try {
+            topType = ResourceType.valueOf(share.getVizType());
+            authenticationMode = ShareAuthenticationMode.valueOf(share.getAuthenticationMode());
+        } catch (RuntimeException exception) {
+            throw new NotAllowedException("分享访问无效");
+        }
+        if (token == null
+                || !Objects.equals(token.getShareId(), share.getId())
+                || !Objects.equals(token.getShareVizType(), topType)
+                || !Objects.equals(token.getShareVizId(), share.getVizId())
+                || !Objects.equals(token.getOrganizationId(), share.getOrgId())
+                || !Objects.equals(token.getShareAuthenticationMode(), authenticationMode)
+                || !Objects.equals(token.getCreateBy(), normalizedShareCreatorId(share))
+                || !Objects.equals(token.getPermissionBy(), expectedPermissionBy(share))
+                || StringUtils.isAnyBlank(token.getCreateBy(), token.getPermissionBy())) {
+            throw new NotAllowedException("分享访问无效");
+        }
+    }
+
+    private Share validateShareDownloadAccess(String shareId, ShareDownloadSession session) {
+        try {
+            return validateShareDownloadAccessInternal(shareId, session);
+        } catch (BaseException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            throw new NotAllowedException("分享下载会话无效");
+        }
+    }
+
+    private Share validateShareDownloadAccessInternal(String shareId, ShareDownloadSession session) {
+        if (session == null || !Objects.equals(shareId, session.shareId())) {
+            throw new NotAllowedException("分享下载会话无效");
+        }
+        Share share = loadCurrentShare(shareId);
+        validateExpiration(share);
+        validateShareTarget(share);
+        ShareAuthenticationMode authenticationMode;
+        try {
+            authenticationMode = ShareAuthenticationMode.valueOf(share.getAuthenticationMode());
+        } catch (RuntimeException exception) {
+            throw new NotAllowedException("分享下载会话无效");
+        }
+        if (!ResourceType.DASHBOARD.name().equals(share.getVizType())
+                || !Objects.equals(authenticationMode, session.authenticationMode())
+                || !Objects.equals(
+                        shareDownloadSessionManager.securityFingerprint(share),
+                        session.securityFingerprint()
+                )) {
+            throw new NotAllowedException("分享下载会话无效");
+        }
+        if (ShareAuthenticationMode.LOGIN.equals(authenticationMode)) {
+            User user = authenticateLoginShare(share);
+            if (!Objects.equals(user.getId(), session.authenticatedSubjectId())) {
+                throw new NotAllowedException("分享下载会话无效");
+            }
+        } else if (session.authenticatedSubjectId() != null) {
+            throw new NotAllowedException("分享下载会话无效");
+        }
+        return share;
+    }
+
+    private Share loadCurrentShare(String shareId) {
+        if (StringUtils.isBlank(shareId)) {
+            throw new NotAllowedException("分享访问无效");
+        }
+        Share share;
+        try {
+            share = shareMapper.selectByPrimaryKey(shareId);
+        } catch (RuntimeException exception) {
+            throw new NotAllowedException("分享访问无效");
+        }
+        if (share == null) {
+            throw new NotAllowedException("分享访问无效");
+        }
+        return share;
+    }
+
+    private User loadShareCreator(Share share) {
+        try {
+            User user = userMapperExt.selectByPrimaryKey(normalizedShareCreatorId(share));
+            if (user == null || StringUtils.isAnyBlank(user.getId(), user.getUsername())) {
+                throw new NotAllowedException("分享访问无效");
+            }
+            return user;
+        } catch (NotAllowedException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            throw new NotAllowedException("分享访问无效");
+        }
+    }
+
+    private String normalizedShareCreatorId(Share share) {
+        String createBy = share.getCreateBy();
+        if (StringUtils.isBlank(createBy)) {
+            throw new NotAllowedException("分享访问无效");
+        }
+        return createBy.startsWith(AttachmentService.SHARE_USER)
+                ? createBy.substring(AttachmentService.SHARE_USER.length())
+                : createBy;
+    }
+
+    private String expectedPermissionBy(Share share) {
+        if (ShareRowPermissionBy.CREATOR.name().equals(share.getRowPermissionBy())) {
+            return loadShareCreator(share).getUsername();
+        }
+        User currentUser = getSecurityManager().getCurrentUser();
+        if (currentUser == null || StringUtils.isBlank(currentUser.getUsername())) {
+            throw new NotAllowedException("分享访问无效");
+        }
+        return currentUser.getUsername();
+    }
+
+    private void validateShareTarget(Share share) {
+        boolean valid;
+        try {
+            ResourceType type = ResourceType.valueOf(share.getVizType());
+            valid = switch (type) {
+                case DASHBOARD -> belongsToShare(dashboardMapper.selectByPrimaryKey(share.getVizId()), share);
+                case DATACHART -> belongsToShare(datachartMapper.selectByPrimaryKey(share.getVizId()), share);
+                case STORYBOARD -> belongsToShare(storyboardMapper.selectByPrimaryKey(share.getVizId()), share);
+                default -> false;
+            };
+        } catch (RuntimeException exception) {
+            throw new NotAllowedException("分享访问无效");
+        }
+        if (!valid) {
+            throw new NotAllowedException("分享访问无效");
+        }
+    }
+
+    private boolean belongsToShare(BaseEntity entity, Share share) {
+        if (entity == null) {
+            return false;
+        }
+        if (entity instanceof Dashboard dashboard) {
+            return dashboard.getStatus() != null
+                    && !Byte.valueOf((byte) 0).equals(dashboard.getStatus())
+                    && Objects.equals(dashboard.getOrgId(), share.getOrgId());
+        }
+        if (entity instanceof Datachart datachart) {
+            return datachart.getStatus() != null
+                    && !Byte.valueOf((byte) 0).equals(datachart.getStatus())
+                    && Objects.equals(datachart.getOrgId(), share.getOrgId());
+        }
+        if (entity instanceof Storyboard storyboard) {
+            return storyboard.getStatus() != null
+                    && !Byte.valueOf((byte) 0).equals(storyboard.getStatus())
+                    && Objects.equals(storyboard.getOrgId(), share.getOrgId());
+        }
+        return false;
+    }
+
+    private Set<String> currentDashboardViewIds(Share share) {
+        User shareCreator = loadShareCreator(share);
+        try {
+            getSecurityManager().runAs(shareCreator.getUsername());
+            DashboardDetail dashboard = vizService.getDashboard(share.getVizId());
+            if (dashboard == null
+                    || !Objects.equals(dashboard.getId(), share.getVizId())
+                    || !Objects.equals(dashboard.getOrgId(), share.getOrgId())
+                    || dashboard.getStatus() == null
+                    || Byte.valueOf((byte) 0).equals(dashboard.getStatus())) {
+                throw new NotAllowedException("分享下载请求无效");
+            }
+            return Optional.ofNullable(dashboard.getViews()).orElseGet(Collections::emptyList).stream()
+                    .peek(view -> {
+                        if (view == null
+                                || StringUtils.isBlank(view.getId())
+                                || !Objects.equals(view.getOrgId(), share.getOrgId())
+                                || !Byte.valueOf(Const.DATA_STATUS_ACTIVE).equals(view.getStatus())) {
+                            throw new NotAllowedException("分享下载请求无效");
+                        }
+                    })
+                    .map(View::getId)
+                    .collect(Collectors.toUnmodifiableSet());
+        } catch (NotAllowedException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            throw new NotAllowedException("分享下载请求无效");
+        } finally {
+            try {
+                getSecurityManager().releaseRunAs();
+            } catch (RuntimeException ignored) {
+                // 清理失败不记录会话或令牌。
+            }
+        }
+    }
+
+    private DownloadQueryRequest withoutUntrustedVizMetadata(DownloadQueryRequest request) {
+        DownloadQueryRequest trusted = new DownloadQueryRequest();
+        BeanUtils.copyProperties(request, trusted);
+        trusted.setVizType(null);
+        trusted.setVizId(null);
+        return trusted;
+    }
+
+    private SharedDownloadContext sharedContext(Share share,
+                                                ShareDownloadSession session,
+                                                String executionUsername) {
+        return new SharedDownloadContext(
+                share.getId(),
+                session.sessionDigest(),
+                executionUsername,
+                normalizedShareCreatorId(share),
+                sharedQuerySubjectId(share, session),
+                share.getOrgId()
+        );
+    }
+
+    private String sharedQuerySubjectId(Share share, ShareDownloadSession session) {
+        if (ShareRowPermissionBy.VISITOR.name().equals(share.getRowPermissionBy())) {
+            if (!ShareAuthenticationMode.LOGIN.name().equals(share.getAuthenticationMode())
+                    || StringUtils.isBlank(session.authenticatedSubjectId())) {
+                throw new NotAllowedException("分享下载请求无效");
+            }
+            return session.authenticatedSubjectId();
+        }
+        return normalizedShareCreatorId(share);
+    }
+
+    private record ParsedShare(
+            Share share,
+            ShareAuthorizedToken authorizedToken,
+            String authenticatedSubjectId
+    ) {
     }
 
 }

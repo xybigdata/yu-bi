@@ -4,7 +4,6 @@ import yubi.core.base.consts.AttachmentType;
 import yubi.core.base.consts.Const;
 import yubi.core.base.exception.Exceptions;
 import yubi.core.common.Application;
-import yubi.core.common.FileUtils;
 import yubi.server.base.params.DownloadCreateParam;
 import yubi.server.service.impl.AttachmentExcelServiceImpl;
 import yubi.server.service.impl.AttachmentImageServiceImpl;
@@ -12,6 +11,7 @@ import yubi.server.service.impl.AttachmentPdfServiceImpl;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Calendar;
 
 public interface AttachmentService {
@@ -20,12 +20,25 @@ public interface AttachmentService {
 
     File getFile(DownloadCreateParam downloadCreateParam, String path, String fileName) throws Exception;
 
-    default String generateFileName(String path, String fileName, AttachmentType attachmentType) {
-        path = FileUtils.withBasePath(path);
+    default File getFile(DownloadCreateParam downloadCreateParam,
+                         String path,
+                         String fileName,
+                         String trustedSharedQuerySubjectId,
+                         String trustedSharedQueryOrganizationId) throws Exception {
+        return getFile(downloadCreateParam, path, fileName);
+    }
+
+    default String generateFileName(String trustedStagingDirectory,
+                                    String fileName,
+                                    AttachmentType attachmentType) {
+        Path staging = Path.of(trustedStagingDirectory);
+        if (!staging.isAbsolute()) {
+            throw new IllegalArgumentException("下载临时目录必须为绝对路径");
+        }
         String timeStr = DateFormatUtils.format(Calendar.getInstance(), Const.FILE_SUFFIX_DATE_FORMAT);
         String randomStr = org.apache.commons.lang3.RandomStringUtils.secure().nextNumeric(3);
         fileName = fileName + "_" + timeStr + "_" + randomStr + attachmentType.getSuffix();
-        return FileUtils.concatPath(path, fileName);
+        return staging.resolve(fileName).toString();
     }
 
     static AttachmentService matchAttachmentService(AttachmentType type) {

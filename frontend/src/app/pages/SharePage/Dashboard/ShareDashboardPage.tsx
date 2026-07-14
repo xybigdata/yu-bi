@@ -29,15 +29,13 @@ import {
   loadShareTask,
   makeShareDownloadDataTask,
 } from 'app/utils/fetch';
-import { StorageKeys } from 'globalConstants';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { getToken } from 'utils/auth';
 import persistence from 'utils/persistence';
 import { urlSearchTransfer } from 'utils/urlSearchTransfer';
-import { uuidv4 } from 'utils/utils';
 import { BoardLoading } from '../../DashBoardPage/components/BoardLoading';
 import { useBoardSlice } from '../../DashBoardPage/pages/Board/slice';
 import { selectShareBoard } from '../../DashBoardPage/pages/Board/slice/selector';
@@ -50,7 +48,6 @@ import { shareActions, useShareSlice } from '../slice';
 import {
   selectNeedVerify,
   selectShareExecuteTokenMap,
-  selectSharePassword,
   selectShareVizType,
 } from '../slice/selectors';
 import { fetchShareVizInfo } from '../slice/thunks';
@@ -67,19 +64,8 @@ function ShareDashboardPage() {
   const { token: shareToken } = useShareRouteParams('dashboard');
   const search = location.search;
 
-  const [shareClientId] = useState(() => {
-    const clientId = localStorage.getItem(StorageKeys.ShareClientId);
-    if (clientId) {
-      return clientId;
-    }
-
-    const nextClientId = uuidv4();
-    localStorage.setItem(StorageKeys.ShareClientId, nextClientId);
-    return nextClientId;
-  });
   const executeTokenMap = useSelector(selectShareExecuteTokenMap);
   const needVerify = useSelector(selectNeedVerify);
-  const sharePassword = useSelector(selectSharePassword);
   const shareBoard = useSelector(selectShareBoard);
   const vizType = useSelector(selectShareVizType);
   const logged = !!getToken();
@@ -150,53 +136,38 @@ function ShareDashboardPage() {
   );
 
   const onLoadShareTask = useMemo(() => {
-    const executeToken = Object.values(executeTokenMap)[0]?.authorizedToken;
-    return () =>
-      loadShareTask({
-        shareToken: executeToken,
-        clientId: shareClientId,
-      });
-  }, [executeTokenMap, shareClientId]);
+    return () => loadShareTask(shareToken || '');
+  }, [shareToken]);
 
   const onMakeShareDownloadDataTask = useCallback(
     (downloadParams: ChartDataRequest[], fileName: string) => {
-      if (shareClientId && executeTokenMap && shareToken) {
+      if (executeTokenMap && shareToken) {
         dispatch(
           makeShareDownloadDataTask({
-            clientId: shareClientId,
+            shareId: shareToken,
             executeToken: executeTokenMap,
             downloadParams: downloadParams,
-            shareToken,
             fileName: fileName,
             resolve: () => {
               dispatch(actions.setShareDownloadPolling(true));
             },
-            password: sharePassword,
           }),
         );
       }
     },
-    [
-      shareClientId,
-      shareToken,
-      sharePassword,
-      executeTokenMap,
-      dispatch,
-      actions,
-    ],
+    [shareToken, executeTokenMap, dispatch, actions],
   );
 
   const onDownloadFile = useCallback(
     task => {
-      const executeToken = Object.values(executeTokenMap)[0]?.authorizedToken;
       downloadShareDataChartFile({
         downloadId: task.id,
-        shareToken: executeToken,
+        shareId: shareToken || '',
       }).then(() => {
         dispatch(actions.setShareDownloadPolling(true));
       });
     },
-    [executeTokenMap, dispatch, actions],
+    [shareToken, dispatch, actions],
   );
 
   const handleLogin = useCallback(

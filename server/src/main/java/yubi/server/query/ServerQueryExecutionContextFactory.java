@@ -29,6 +29,19 @@ public class ServerQueryExecutionContextFactory {
         return create(Channel.SYSTEM);
     }
 
+    public QueryExecutionContext forShared(String subjectId, String organizationId) {
+        if (subjectId == null || subjectId.isBlank()
+                || organizationId == null || organizationId.isBlank()) {
+            throw new IllegalArgumentException("分享查询主体无效");
+        }
+        return new QueryExecutionContext(
+                Channel.SHARED,
+                subjectId,
+                organizationId,
+                UUID.randomUUID().toString()
+        );
+    }
+
     public QueryExecutionContext forMetadata(String organizationId) {
         User user = securityManager.getCurrentUser();
         return new QueryExecutionContext(Channel.AUTHENTICATED, user.getId(), organizationId,

@@ -43,12 +43,6 @@ import { request2, requestWithHeader } from 'utils/request';
 import { convertToChartDto } from './ChartDtoHelper';
 import { getAllColumnInMeta } from './chartHelper';
 
-type ShareTaskParams = {
-  clientId?: string;
-  password?: string | null;
-  shareToken?: string;
-};
-
 export const getDistinctFields = async (
   viewId: string,
   columns: string[],
@@ -132,35 +126,20 @@ export const makeDownloadDataTask =
 export const makeShareDownloadDataTask =
   (params: {
     resolve: () => void;
-    clientId: string;
+    shareId: string;
     fileName: string;
     downloadParams: ChartDataRequest[];
-    shareToken: string;
     executeToken?: Record<string, ExecuteToken>;
-    password?: string | null;
   }) =>
   async () => {
-    const {
-      downloadParams,
-      fileName,
-      resolve,
-      executeToken,
-      clientId,
-      password,
-      shareToken,
-    } = params;
+    const { downloadParams, fileName, resolve, executeToken, shareId } = params;
     const { success } = await request2<null>({
-      url: `shares/download`,
+      url: `shares/${shareId}/download`,
       method: 'POST',
       data: {
         downloadParams,
         fileName: fileName,
         executeToken,
-        shareToken,
-      },
-      params: {
-        password,
-        clientId,
       },
     });
     if (success) {
@@ -307,14 +286,13 @@ export async function getChartPluginPaths() {
   return response?.data || [];
 }
 
-export async function loadShareTask(params: ShareTaskParams): Promise<{
+export async function loadShareTask(shareId: string): Promise<{
   isNeedStopPolling: boolean;
   data: DownloadTask[];
 }> {
   const { data } = await request2<DownloadTask[]>({
-    url: `/shares/download/task`,
+    url: `/shares/${shareId}/download/tasks`,
     method: 'GET',
-    params,
   });
   const isNeedStopPolling = !(data || []).some(
     v => v.status === DownloadTaskState.CREATED,
@@ -326,17 +304,15 @@ export async function loadShareTask(params: ShareTaskParams): Promise<{
 }
 interface DownloadShareDashChartFileParams {
   downloadId: string;
-  shareToken: string;
-  password?: string | null;
+  shareId: string;
 }
 export async function downloadShareDataChartFile(
   params: DownloadShareDashChartFileParams,
 ) {
   const [data, headers] = await requestWithHeader<BlobPart>({
-    url: `shares/download`,
+    url: `shares/${params.shareId}/download/${params.downloadId}`,
     method: 'GET',
     responseType: 'blob',
-    params,
   });
   dealFileSave(data, headers);
 }
