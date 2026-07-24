@@ -9,6 +9,10 @@
 
 /static
 /docs/
+!/docs/
+/docs/*
+!/docs/agents/
+!/docs/agents/*.md
 /.tmp/
 /logs/
 
