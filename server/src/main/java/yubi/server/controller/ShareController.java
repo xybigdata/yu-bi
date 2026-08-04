@@ -19,24 +19,18 @@
 
 package yubi.server.controller;
 
-import yubi.core.common.FileUtils;
 import yubi.core.data.provider.StdSqlOperator;
-import yubi.core.entity.Download;
+import yubi.server.artifact.ArtifactTaskWebMapper;
+import yubi.server.artifact.ArtifactTaskWebMapper.ArtifactTaskResponse;
+import yubi.server.artifact.TaskHandle;
 import yubi.server.base.dto.ResponseData;
 import yubi.server.base.dto.ShareInfo;
 import yubi.server.base.params.*;
 import yubi.server.service.ShareService;
 import io.swagger.v3.oas.annotations.Operation;
-import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Set;
 
@@ -46,9 +40,12 @@ public class ShareController extends BaseController {
 
     private final ShareService shareService;
 
-    public ShareController(ShareService shareService) {
+    private final ArtifactTaskWebMapper artifactTaskWebMapper;
+
+    public ShareController(ShareService shareService, ArtifactTaskWebMapper artifactTaskWebMapper) {
 
         this.shareService = shareService;
+        this.artifactTaskWebMapper = artifactTaskWebMapper;
     }
 
     @Operation(summary = "create a share")
@@ -97,32 +94,11 @@ public class ShareController extends BaseController {
 
     @Operation(summary = "create a download task")
     @PostMapping("/download")
-    public ResponseData<Download> createDownload(@RequestParam(required = false) String password,
-                                                 @RequestParam String clientId,
-                                                 @RequestBody ShareDownloadParam downloadCreateParam) {
-        return ResponseData.success(shareService.createDownload(clientId, downloadCreateParam));
-    }
-
-    @Operation(summary = "get download task")
-    @GetMapping("/download/task")
-    public ResponseData<List<Download>> downloadList(@RequestParam String shareToken,
-                                                     @RequestParam String clientId) {
-        return ResponseData.success(shareService.listDownloadTask(ShareToken.create(shareToken), clientId));
-    }
-
-    @Operation(summary = "download file")
-    @GetMapping("/download")
-    public void downloadFile(@RequestParam String shareToken,
-                             @RequestParam String downloadId,
-                             HttpServletResponse response) throws IOException {
-        Download download = shareService.download(ShareToken.create(shareToken), downloadId);
-
-        response.setHeader("Content-Type", "application/octet-stream");
-        File file = new File(FileUtils.withBasePath(download.getPath()));
-        try (InputStream inputStream = new FileInputStream(file)) {
-            response.setHeader("Content-Disposition", String.format("attachment; filename=\"%s\"", URLEncoder.encode(file.getName(), "utf-8")));
-            Streams.copy(inputStream, response.getOutputStream(), true);
-        }
+    public ResponseData<ArtifactTaskResponse> createDownload(@RequestParam(required = false) String password,
+                                                             @RequestParam String clientId,
+                                                             @RequestBody ShareDownloadParam downloadCreateParam) {
+        TaskHandle task = shareService.createDownload(clientId, password, downloadCreateParam);
+        return ResponseData.success(task == null ? null : artifactTaskWebMapper.response(task));
     }
 
 }

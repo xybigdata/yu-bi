@@ -534,9 +534,6 @@ const ChartPreviewBoard: FC<{
           imageWidth: cacheW,
           downloadType,
           fileName: chartPreview?.backendChart?.name || 'chart',
-          resolve: () => {
-            dispatch(actions.setDownloadPolling(true));
-          },
         }),
       );
     };

@@ -31,14 +31,7 @@ import {
   getOrganizations,
   getUserSettings,
 } from './thunks';
-import {
-  DownloadManagementStatus,
-  DownloadTask,
-  DownloadTaskState,
-  MainState,
-  UserPermissionMap,
-  UserSetting,
-} from './types';
+import { MainState, UserPermissionMap, UserSetting } from './types';
 
 export const initialState: MainState = {
   userSettings: void 0,
@@ -47,10 +40,6 @@ export const initialState: MainState = {
   dataProviders: {},
   isOwner: false,
   permissionMap: {},
-  downloadManagement: {
-    status: DownloadManagementStatus.INIT,
-    tasks: [],
-  },
   userSettingLoading: false,
   organizationListLoading: false,
   dataProviderListLoading: false,
@@ -59,7 +48,6 @@ export const initialState: MainState = {
   saveOrganizationLoading: false,
   deleteOrganizationLoading: false,
   initializationError: false,
-  downloadPolling: false,
 };
 
 const slice = createSlice({
@@ -84,44 +72,6 @@ const slice = createSlice({
       Object.entries(initialState).forEach(([key, value]) => {
         state[key] = value;
       });
-    },
-    setDownloadManagement(
-      state,
-      {
-        payload,
-      }: PayloadAction<{
-        newStatus?: DownloadManagementStatus;
-        newTasks?: DownloadTask[];
-      }>,
-    ) {
-      let newDownloadStatus = payload?.newStatus;
-      const _isNotPendingDownload = status =>
-        status !== DownloadTaskState.CREATED;
-      if (!newDownloadStatus) {
-        const originTasks = state.downloadManagement?.tasks || [];
-        const newTasks = payload?.newTasks || [];
-        if (!originTasks?.length) {
-          newDownloadStatus = DownloadManagementStatus.INIT;
-        } else if (originTasks.length !== newTasks.length) {
-          newDownloadStatus = DownloadManagementStatus.NEW;
-        } else {
-          const isAllFinish = originTasks.every(
-            ot =>
-              newTasks.find(nt => nt.id === ot.id)?.status === ot.status &&
-              _isNotPendingDownload(ot.status),
-          );
-          newDownloadStatus = isAllFinish
-            ? DownloadManagementStatus.FINISH
-            : DownloadManagementStatus.NEW;
-        }
-      }
-      state.downloadManagement = {
-        status: newDownloadStatus,
-        tasks: payload?.newTasks || state.downloadManagement?.tasks,
-      };
-    },
-    setDownloadPolling(state, { payload }: PayloadAction<boolean>) {
-      state.downloadPolling = payload;
     },
   },
   extraReducers: builder => {

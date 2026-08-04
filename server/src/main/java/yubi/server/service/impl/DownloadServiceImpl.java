@@ -19,39 +19,46 @@
 package yubi.server.service.impl;
 
 import yubi.core.base.consts.AttachmentType;
-import yubi.core.base.consts.Const;
 import yubi.core.base.consts.FileOwner;
-import yubi.core.base.exception.Exceptions;
-import yubi.core.base.exception.NotAllowedException;
 import yubi.core.common.FileUtils;
-import yubi.core.common.TaskExecutor;
-import yubi.core.common.UUIDGenerator;
 import yubi.core.entity.Download;
 import yubi.core.mappers.ext.DownloadMapperExt;
+import yubi.server.artifact.ArtifactAccess;
+import yubi.server.artifact.ArtifactDescriptor;
+import yubi.server.artifact.ArtifactTasks;
+import yubi.server.artifact.TaskHandle;
 import yubi.server.base.params.DownloadCreateParam;
 import yubi.server.service.AttachmentService;
 import yubi.server.service.BaseService;
 import yubi.server.service.DownloadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.List;
+import java.nio.file.Files;
+import java.util.function.Function;
 
 @Slf4j
 @Service
 public class DownloadServiceImpl extends BaseService implements DownloadService {
 
     private final DownloadMapperExt downloadMapper;
+    private final ArtifactTasks artifactTasks;
+    private final Function<AttachmentType, AttachmentService> attachmentServiceResolver;
 
-    public DownloadServiceImpl(DownloadMapperExt downloadMapper) {
+    @Autowired
+    public DownloadServiceImpl(DownloadMapperExt downloadMapper, ArtifactTasks artifactTasks) {
+        this(downloadMapper, artifactTasks, AttachmentService::matchAttachmentService);
+    }
+
+    DownloadServiceImpl(DownloadMapperExt downloadMapper,
+                        ArtifactTasks artifactTasks,
+                        Function<AttachmentType, AttachmentService> attachmentServiceResolver) {
         this.downloadMapper = downloadMapper;
+        this.artifactTasks = artifactTasks;
+        this.attachmentServiceResolver = attachmentServiceResolver;
     }
 
     @Override
@@ -60,82 +67,62 @@ public class DownloadServiceImpl extends BaseService implements DownloadService 
     }
 
     @Override
-    @Transactional
-    public Download submitDownloadTask(DownloadCreateParam downloadParams) {
-        return submitDownloadTask(downloadParams, getCurrentUser().getId());
-    }
-
-    @Override
-    @Transactional
-    public Download submitDownloadTask(DownloadCreateParam downloadParams, String clientId) {
-
+    public TaskHandle submitDownloadTask(DownloadCreateParam downloadParams) {
         if (downloadParams == null || downloadParams.getDownloadParams() == null) {
             return null;
         }
-        final Download download = new Download();
-        BeanUtils.copyProperties(downloadParams, download);
-        download.setCreateTime(new Date());
-        download.setId(UUIDGenerator.generate());
-        download.setName(downloadParams.getFileName());
-        download.setStatus((byte) 0);
-        download.setCreateBy(clientId);
-        downloadMapper.insert(download);
-        requirePermission(download, Const.DOWNLOAD);
-        final String downloadUser = getCurrentUser().getUsername();
+        AttachmentType downloadType = downloadParams.getDownloadType() == null
+                ? AttachmentType.EXCEL
+                : downloadParams.getDownloadType();
+        String fileName = StringUtils.isEmpty(downloadParams.getFileName())
+                ? "download"
+                : downloadParams.getFileName();
+        ArtifactDescriptor descriptor = new ArtifactDescriptor(
+                fileName,
+                mediaType(downloadType),
+                downloadType.getSuffix(),
+                "VISUALIZATION"
+        );
+        return artifactTasks.submit(
+                ArtifactAccess.authenticated(getCurrentUser().getId(), downloadParams.getOrgId(),
+                        getCurrentUser().getUsername()),
+                descriptor,
+                context -> createAttachment(downloadParams, downloadType, fileName, context.output(),
+                        context.executionUser())
+        );
+    }
 
-        TaskExecutor.submit(() -> {
-
-            try {
-                securityManager.runAs(downloadUser);
-
-                String fileName = downloadParams.getFileName();
-                fileName = StringUtils.isEmpty(fileName) ? "download" : fileName;
-                try {
-                    if (null == downloadParams.getDownloadType()) {
-                        downloadParams.setDownloadType(AttachmentType.EXCEL);
-                    }
-                    AttachmentService attachmentService = AttachmentService.matchAttachmentService(downloadParams.getDownloadType());
-                    File file = attachmentService.getFile(downloadParams, FileUtils.withBasePath(FileOwner.DOWNLOAD.getPath()), fileName);
-                    download.setPath(FileUtils.concatPath(FileOwner.DOWNLOAD.getPath(), file.getName()));
-                    download.setStatus((byte) 1);
-                } catch (Exception e) {
-                    log.error("Download Task execute error", e);
-                    download.setStatus((byte) -1);
-                }
-                downloadMapper.updateByPrimaryKey(download);
-            } finally {
-                securityManager.logoutCurrent();
+    private void createAttachment(DownloadCreateParam downloadParams,
+                                  AttachmentType downloadType,
+                                  String fileName,
+                                  java.io.OutputStream output,
+                                  String executionUser) throws Exception {
+        File temporaryFile = null;
+        try {
+            securityManager.runAs(executionUser);
+            AttachmentService attachmentService = attachmentServiceResolver.apply(downloadType);
+            temporaryFile = attachmentService.getFile(
+                    downloadParams,
+                    FileUtils.withBasePath(FileOwner.DOWNLOAD.getPath()),
+                    fileName
+            );
+            Files.copy(temporaryFile.toPath(), output);
+        } catch (Exception exception) {
+            throw ArtifactExportFailures.classify(downloadType, exception);
+        } finally {
+            if (temporaryFile != null) {
+                FileUtils.delete(temporaryFile);
             }
-        });
-        return download;
-    }
-
-    @Override
-    public List<Download> listDownloadTasks() {
-        return downloadMapper.selectByCreator(
-                getCurrentUser().getId(),
-                Date.from(Instant.now().minus(7, ChronoUnit.DAYS))
-        );
-    }
-
-    @Override
-    public List<Download> listDownloadTasks(String clientId) {
-        return downloadMapper.selectByCreator(
-                clientId,
-                Date.from(Instant.now().minus(7, ChronoUnit.DAYS))
-        );
-    }
-
-    @Override
-    public Download downloadFile(String downloadId) {
-        Download download = downloadMapper.selectByPrimaryKey(downloadId);
-        if (download.getStatus() < 1) {
-            Exceptions.tr(NotAllowedException.class, "message.download.not.finished");
+            securityManager.releaseRunAs();
         }
-        download.setLastDownloadTime(new Date());
-        download.setStatus((byte) 2);
-        downloadMapper.updateByPrimaryKey(download);
-        return download;
+    }
+
+    private String mediaType(AttachmentType downloadType) {
+        return switch (downloadType) {
+            case EXCEL -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            case IMAGE -> "image/png";
+            case PDF -> "application/pdf";
+        };
     }
 
 }

@@ -22,12 +22,16 @@ package yubi.server.base.params;
 import yubi.core.base.consts.AttachmentType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class DownloadCreateParam extends BaseCreateParam {
+
+    @NotBlank
+    private String orgId;
 
     private String fileName;
 

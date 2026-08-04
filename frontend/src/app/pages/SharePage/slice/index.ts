@@ -51,7 +51,6 @@ export const initialState: SharePageState = {
   chartPreview: { isLoadingData: false },
   headlessBrowserRenderSign: false,
   pageWidthHeight: [0, 0],
-  shareDownloadPolling: false,
   loginLoading: false,
   oauth2Clients: [],
   availableSourceFunctions: [],
@@ -71,9 +70,6 @@ export const slice = createSlice({
     },
     setVizType: (state, action: PayloadAction<VizType | undefined>) => {
       state.vizType = action.payload;
-    },
-    setShareDownloadPolling: (state, action: PayloadAction<boolean>) => {
-      state.shareDownloadPolling = action.payload;
     },
     setExecuteTokenMap: (
       state,

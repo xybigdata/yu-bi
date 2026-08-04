@@ -16,18 +16,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { DownloadOutlined } from '@ant-design/icons';
 import { Button, Space } from 'antd';
 import SaveToDashboard from 'app/components/SaveToDashboard';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import useMount from 'app/hooks/useMount';
-import { useWorkbenchSlice } from 'app/pages/ChartWorkbenchPage/slice';
 import { BoardType } from 'app/pages/DashBoardPage/pages/Board/slice/types';
-import { DownloadListPopup } from 'app/pages/MainPage/Navbar/DownloadListPopup';
-import { loadTasks } from 'app/pages/MainPage/Navbar/service';
 import { selectHasVizFetched } from 'app/pages/MainPage/pages/VizPage/slice/selectors';
 import { getFolders } from 'app/pages/MainPage/pages/VizPage/slice/thunks';
-import { downloadFile } from 'app/utils/fetch';
 import { FC, memo, useCallback, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -40,10 +35,7 @@ import {
   SPACE_SM,
   SPACE_XS,
 } from 'styles/StyleConstants';
-import {
-  backendChartSelector,
-  selectChartEditorDownloadPolling,
-} from '../../slice/selectors';
+import { backendChartSelector } from '../../slice/selectors';
 
 const ChartHeaderPanel: FC<{
   chartName?: string;
@@ -68,9 +60,7 @@ const ChartHeaderPanel: FC<{
     const hasVizFetched = useSelector(selectHasVizFetched);
     const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
     const backendChart = useSelector(backendChartSelector);
-    const downloadPolling = useSelector(selectChartEditorDownloadPolling);
     const dispatch = useAppDispatch();
-    const { actions } = useWorkbenchSlice();
 
     const handleModalOk = useCallback(
       (dashboardId: string, dashboardType?: BoardType) => {
@@ -88,13 +78,6 @@ const ChartHeaderPanel: FC<{
       setIsModalVisible(true);
     }, []);
 
-    const onSetPolling = useCallback(
-      (polling: boolean) => {
-        dispatch(actions.setChartEditorDownloadPolling(polling));
-      },
-      [dispatch, actions],
-    );
-
     useMount(() => {
       if (!hasVizFetched) {
         // Request data when there is no data
@@ -106,21 +89,6 @@ const ChartHeaderPanel: FC<{
       <Wrapper>
         <h1>{chartName}</h1>
         <Space>
-          <DownloadListPopup
-            polling={downloadPolling}
-            setPolling={onSetPolling}
-            onLoadTasks={loadTasks}
-            onDownloadFile={item => {
-              if (item.id) {
-                downloadFile(item.id).then(() => {
-                  dispatch(actions.setChartEditorDownloadPolling(true));
-                });
-              }
-            }}
-            renderDom={
-              <Button icon={<DownloadOutlined />}>{t('downloadList')}</Button>
-            }
-          />
           <Button onClick={onGoBack}>{t('cancel')}</Button>
           <Button type="primary" onClick={onSaveChart}>
             {t('save')}

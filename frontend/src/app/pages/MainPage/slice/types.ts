@@ -27,7 +27,6 @@ export interface MainState {
   dataProviders: DataProviderViewModel;
   isOwner: boolean;
   permissionMap: UserPermissionMap;
-  downloadManagement: DownloadManagement;
   userSettingLoading: boolean;
   organizationListLoading: boolean;
   dataProviderListLoading: boolean;
@@ -36,19 +35,6 @@ export interface MainState {
   saveOrganizationLoading: boolean;
   deleteOrganizationLoading: boolean;
   initializationError: boolean;
-  downloadPolling: boolean;
-}
-
-export interface DownloadManagement {
-  tasks: Array<DownloadTask>;
-  status: DownloadManagementStatus;
-}
-
-export interface DownloadTask {
-  id: string;
-  status: number;
-  path: string;
-  name: string;
 }
 
 export interface Organization {
@@ -147,18 +133,6 @@ export interface DeleteOrganizationPayload {
   userSettings: UserSetting[];
 }
 
-export enum DownloadManagementStatus {
-  INIT = 'init',
-  FINISH = 'finish',
-  NEW = 'new',
-}
-
-export enum DownloadTaskState {
-  CREATED = 0,
-  DONE = 1,
-  DOWNLOADED = 2,
-  FAILED = -1,
-}
 export interface LocalTreeDataNode extends TreeDataNode {
   index?: number | null;
   isFolder?: boolean;

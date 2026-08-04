@@ -9,6 +9,7 @@ import yubi.server.base.transfer.DatachartTemplateParam;
 import yubi.server.base.transfer.ImportStrategy;
 import yubi.server.base.transfer.ResourceTransferParam;
 import org.springframework.web.multipart.MultipartFile;
+import yubi.server.artifact.TaskHandle;
 
 import java.io.IOException;
 import java.util.List;
@@ -80,13 +81,13 @@ public interface VizService {
 
     String getChartConfigByVizId(ResourceType resourceType, String vizId);
 
-    Download exportResource(ResourceTransferParam transferParam) throws IOException;
+    TaskHandle exportResource(ResourceTransferParam transferParam) throws IOException;
 
     boolean importResource(MultipartFile file, ImportStrategy importStrategy, String orgId) throws IOException;
 
-    Download exportDatachartTemplate(DatachartTemplateParam templateModel);
+    TaskHandle exportDatachartTemplate(DatachartTemplateParam templateModel);
 
-    Download exportDashboardTemplate(DashboardTemplateParam templateModel);
+    TaskHandle exportDashboardTemplate(DashboardTemplateParam templateModel);
 
     Folder importVizTemplate(MultipartFile file, String orgId, String parentId, String name) throws Exception;
 

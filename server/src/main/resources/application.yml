@@ -67,6 +67,19 @@ yubi:
   migration:
     enable: true
 
+  artifact:
+    storage-directory: artifact-task
+    timeout-minutes: 15
+    undelivered-retention-hours: 24
+    delivered-retention-minutes: 15
+    max-concurrent-per-owner: 3
+    executor:
+      thread-count: 4
+      queue-capacity: 100
+    maintenance-batch-size: 500
+    maintenance-initial-delay-ms: 60000
+    maintenance-interval-ms: 60000
+
   agent:
     workspace:
       session-lifetime-minutes: 480

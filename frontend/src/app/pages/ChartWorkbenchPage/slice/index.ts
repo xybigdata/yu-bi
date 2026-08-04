@@ -53,7 +53,6 @@ export const initState: WorkbenchState = {
   dataset: {},
   aggregation: true,
   datasetLoading: false,
-  chartEditorDownloadPolling: false,
   selectedItems: [],
 };
 
@@ -159,9 +158,6 @@ const workbenchSlice = createSlice({
     },
     resetWorkbenchState: (state, action) => {
       return initState;
-    },
-    setChartEditorDownloadPolling(state, { payload }: PayloadAction<boolean>) {
-      state.chartEditorDownloadPolling = payload;
     },
     changeSelectedItems(
       state,

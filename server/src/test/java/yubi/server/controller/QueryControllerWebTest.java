@@ -13,6 +13,7 @@ import yubi.query.api.QueryExecutionContext;
 import yubi.query.api.QueryExecutionException;
 import yubi.query.api.QueryResult;
 import yubi.query.api.QueryValidationException;
+import yubi.server.artifact.ArtifactTaskWebMapper;
 import yubi.server.config.QueryWebExceptionHandler;
 import yubi.server.config.WebExceptionHandler;
 import yubi.server.query.ServerQueryExecutionContextFactory;
@@ -163,7 +164,7 @@ class QueryControllerWebTest {
     void shouldReturnNotFoundForRemovedQueryEndpoints() throws Exception {
         MockMvc legacyMvc = MockMvcBuilders.standaloneSetup(
                 new DataProviderController(mock(DataProviderService.class)),
-                new ShareController(mock(ShareService.class))).build();
+                new ShareController(mock(ShareService.class), new ArtifactTaskWebMapper())).build();
 
         legacyMvc.perform(post("/data-provider/execute")).andExpect(status().isNotFound());
         legacyMvc.perform(post("/data-provider/execute/test")).andExpect(status().isNotFound());

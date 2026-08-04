@@ -17,6 +17,10 @@
  * limitations under the License.
  */
 import { request2 } from 'utils/request';
+import {
+  submitAuthenticatedArtifactTask,
+  type ArtifactTaskWebResponse,
+} from 'app/features/artifact';
 
 export async function onImport(args: {
   file: FormData;
@@ -32,13 +36,16 @@ export async function onImport(args: {
   return true;
 }
 
-export async function onExport(idList) {
-  await request2<null>({
-    method: 'POST',
-    url: `viz/export`,
-    data: {
-      resources: idList,
-    },
-  });
-  return true;
+export async function onExport(idList, orgId: string) {
+  await submitAuthenticatedArtifactTask(async () => {
+    const response = await request2<ArtifactTaskWebResponse>({
+      method: 'POST',
+      url: `viz/export`,
+      data: {
+        resources: idList,
+        orgId,
+      },
+    });
+    return response.data;
+  }, orgId);
 }

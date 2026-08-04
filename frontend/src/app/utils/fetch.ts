@@ -16,8 +16,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { message } from 'antd';
-import type { AxiosResponse } from 'axios';
 import { executePublicQuery, executeQuery } from 'app/features/query';
 import type {
   ShareLinkCreateRequest,
@@ -25,10 +23,13 @@ import type {
 } from 'app/components/VizOperationMenu/components/slice/type';
 import { DownloadFileType } from 'app/constants';
 import {
-  DownloadTask,
-  DownloadTaskState,
-} from 'app/pages/MainPage/slice/types';
+  submitAuthenticatedArtifactTask,
+  sharedArtifactAccess,
+  submitSharedArtifactTask,
+  type ArtifactTaskWebResponse,
+} from 'app/features/artifact';
 import { ExecuteToken } from 'app/pages/SharePage/slice/types';
+import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { ChartDataRequest } from 'app/features/query';
 import ChartDataSetDTO from 'app/types/ChartDataSet';
 import { ChartDTO } from 'app/types/ChartDTO';
@@ -37,17 +38,10 @@ import {
   transformToViewConfig,
 } from 'app/utils/internalChartHelper';
 import { BASE_RESOURCE_URL } from 'globalConstants';
-import i18next from 'i18next';
 import { stringifyQuery } from 'utils/queryString';
-import { request2, requestWithHeader } from 'utils/request';
+import { request2 } from 'utils/request';
 import { convertToChartDto } from './ChartDtoHelper';
 import { getAllColumnInMeta } from './chartHelper';
-
-type ShareTaskParams = {
-  clientId?: string;
-  password?: string | null;
-  shareToken?: string;
-};
 
 export const getDistinctFields = async (
   viewId: string,
@@ -107,31 +101,29 @@ export const makeDownloadDataTask =
     fileName: string;
     downloadType: DownloadFileType;
     imageWidth?: number;
-    resolve: () => void;
   }) =>
-  async () => {
-    const { downloadParams, fileName, resolve, downloadType, imageWidth } =
-      params;
+  async (_dispatch, getState) => {
+    const { downloadParams, fileName, downloadType, imageWidth } = params;
+    const orgId = selectOrgId(getState());
     const normalizedImageWidth =
       typeof imageWidth === 'number' && imageWidth > 0 ? imageWidth : 1920;
-    const res = await request2<null>({
-      url: `download/submit/task`,
-      method: 'POST',
-      data: {
-        downloadParams: downloadParams,
-        fileName: fileName,
-        downloadType,
-        imageWidth: normalizedImageWidth,
-      },
-    });
-    if (res?.success) {
-      message.success(String(i18next.t('viz.action.downloadTaskSuccess')));
-    }
-    resolve();
+    await submitAuthenticatedArtifactTask(async () => {
+      const response = await request2<ArtifactTaskWebResponse>({
+        url: `download/submit/task`,
+        method: 'POST',
+        data: {
+          downloadParams,
+          fileName,
+          downloadType,
+          orgId,
+          imageWidth: normalizedImageWidth,
+        },
+      });
+      return response.data;
+    }, orgId);
   };
 export const makeShareDownloadDataTask =
   (params: {
-    resolve: () => void;
     clientId: string;
     fileName: string;
     downloadParams: ChartDataRequest[];
@@ -143,30 +135,33 @@ export const makeShareDownloadDataTask =
     const {
       downloadParams,
       fileName,
-      resolve,
       executeToken,
       clientId,
       password,
       shareToken,
     } = params;
-    const { success } = await request2<null>({
-      url: `shares/download`,
-      method: 'POST',
-      data: {
-        downloadParams,
-        fileName: fileName,
-        executeToken,
-        shareToken,
-      },
-      params: {
-        password,
-        clientId,
-      },
-    });
-    if (success) {
-      message.success(String(i18next.t('viz.action.downloadTaskSuccess')));
-    }
-    resolve();
+    const access = sharedArtifactAccess(
+      shareToken,
+      clientId,
+      password ?? undefined,
+    );
+    await submitSharedArtifactTask(async () => {
+      const response = await request2<ArtifactTaskWebResponse>({
+        url: `shares/download`,
+        method: 'POST',
+        data: {
+          downloadParams,
+          fileName,
+          executeToken,
+          shareToken,
+        },
+        params: {
+          password,
+          clientId,
+        },
+      });
+      return response.data;
+    }, access);
   };
 
 export async function checkComputedFieldAsync(
@@ -236,59 +231,6 @@ export async function generateShareLinkAsync({
   return response?.data;
 }
 
-function getDownloadFileName(contentDisposition: string | undefined) {
-  if (!contentDisposition) {
-    return 'unknown.xlsx';
-  }
-
-  const encodedMatch = /filename\*\s*=\s*([^;]+)/i.exec(contentDisposition);
-
-  if (encodedMatch?.[1]) {
-    const encodedFileName = encodedMatch[1].trim().replace(/^UTF-8''/i, '');
-    return decodeURIComponent(encodedFileName).split('"').join('');
-  }
-
-  const normalMatch = /filename\s*=\s*((['"]).*?\2|[^;\n]*)/i.exec(
-    contentDisposition,
-  );
-
-  if (normalMatch?.[1]) {
-    return decodeURIComponent(normalMatch[1]).split('"').join('');
-  }
-
-  return 'unknown.xlsx';
-}
-
-export const dealFileSave = (
-  data: BlobPart,
-  headers: AxiosResponse['headers'],
-) => {
-  const fileName =
-    getDownloadFileName(String(headers?.['content-disposition'] || '')) ||
-    'unknown.xlsx';
-  const blob = new Blob([data], { type: '**application/octet-stream**' });
-  const downloadUrl = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-
-  anchor.href = downloadUrl;
-  anchor.download = fileName;
-  anchor.style.display = 'none';
-
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  URL.revokeObjectURL(downloadUrl);
-};
-
-export async function downloadFile(id: string): Promise<void> {
-  const [data, headers] = await requestWithHeader<BlobPart>({
-    url: `download/files/${id}`,
-    method: 'GET',
-    responseType: 'blob',
-  });
-  dealFileSave(data, headers);
-}
-
 export async function fetchPluginChart(path: string): Promise<string> {
   const result = await request2<string>(path, {
     baseURL: BASE_RESOURCE_URL,
@@ -305,40 +247,6 @@ export async function getChartPluginPaths() {
     url: `plugins/custom/charts`,
   });
   return response?.data || [];
-}
-
-export async function loadShareTask(params: ShareTaskParams): Promise<{
-  isNeedStopPolling: boolean;
-  data: DownloadTask[];
-}> {
-  const { data } = await request2<DownloadTask[]>({
-    url: `/shares/download/task`,
-    method: 'GET',
-    params,
-  });
-  const isNeedStopPolling = !(data || []).some(
-    v => v.status === DownloadTaskState.CREATED,
-  );
-  return {
-    isNeedStopPolling,
-    data: data || [],
-  };
-}
-interface DownloadShareDashChartFileParams {
-  downloadId: string;
-  shareToken: string;
-  password?: string | null;
-}
-export async function downloadShareDataChartFile(
-  params: DownloadShareDashChartFileParams,
-) {
-  const [data, headers] = await requestWithHeader<BlobPart>({
-    url: `shares/download`,
-    method: 'GET',
-    responseType: 'blob',
-    params,
-  });
-  dealFileSave(data, headers);
 }
 
 export async function fetchCheckName(url, data: unknown) {

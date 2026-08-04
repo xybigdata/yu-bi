@@ -18,12 +18,15 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import {
+  submitAuthenticatedArtifactTask,
+  type ArtifactTaskWebResponse,
+} from 'app/features/artifact';
 import { ChartDataRequestBuilder, executeQuery } from 'app/features/query';
 import {
   Dashboard,
   DataChart,
 } from 'app/pages/DashBoardPage/pages/Board/slice/types';
-import { mainActions } from 'app/pages/MainPage/slice';
 import {
   ChartDataRequest,
   ChartVariableParams,
@@ -41,6 +44,7 @@ import { RootState } from 'types';
 import { request2 } from 'utils/request';
 import { vizActions } from '.';
 import { selectSelectedTab, selectVizs } from './selectors';
+import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import {
   AddStoryboardParams,
   AddVizParams,
@@ -335,6 +339,7 @@ export const exportChartTpl = createAsyncThunk(
     thunkAPI,
   ) => {
     const vizState = (thunkAPI.getState() as RootState)?.viz as VizState;
+    const orgId = selectOrgId(thunkAPI.getState() as RootState);
     const { chartId, dataset, callBack } = arg;
     const dataChart = vizState.chartPreviews.find(
       item => item.backendChartId === chartId,
@@ -346,13 +351,15 @@ export const exportChartTpl = createAsyncThunk(
       avatar: newConf.chartGraphId, //
       config: JSON.stringify(newConf),
     };
-    await request2<null>({
-      url: `viz/export/datachart/template`,
-      method: 'POST',
-      data: { datachart: newChart },
-    });
+    await submitAuthenticatedArtifactTask(async () => {
+      const response = await request2<ArtifactTaskWebResponse>({
+        url: `viz/export/datachart/template`,
+        method: 'POST',
+        data: { datachart: newChart, orgId },
+      });
+      return response.data;
+    }, orgId);
     callBack();
-    thunkAPI.dispatch(mainActions.setDownloadPolling(true));
   },
 );
 export const fetchDataSetByPreviewChartAction = createAsyncThunk(

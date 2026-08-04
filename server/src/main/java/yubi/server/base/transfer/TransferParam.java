@@ -20,8 +20,12 @@
 package yubi.server.base.transfer;
 
 import lombok.Data;
+import jakarta.validation.constraints.NotBlank;
 
 @Data
 public class TransferParam {
+
+    @NotBlank
+    private String orgId;
 
 }

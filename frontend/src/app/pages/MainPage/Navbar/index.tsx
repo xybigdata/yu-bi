@@ -37,11 +37,14 @@ import { CompatNavLink } from 'app/components/CompatNavLink';
 import { Avatar, PlainList, Popup } from 'app/components';
 import { MenuItemContent } from 'app/components/Popup/MenuListItem';
 import { TenantManagementMode } from 'app/constants';
+import {
+  ArtifactTaskCenter,
+  resumeAuthenticatedArtifactTasks,
+} from 'app/features/artifact';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
   selectCurrentOrganization,
-  selectDownloadPolling,
   selectOrganizationListLoading,
   selectOrgId,
 } from 'app/pages/MainPage/slice/selectors';
@@ -49,10 +52,9 @@ import { getOrganizations } from 'app/pages/MainPage/slice/thunks';
 import { useLocation } from 'app/routerCompat';
 import { selectLoggedInUser, selectSystemInfo } from 'app/slice/selectors';
 import { logout } from 'app/slice/thunks';
-import { downloadFile } from 'app/utils/fetch';
 import { BASE_RESOURCE_URL } from 'globalConstants';
 import { changeLang, getLang } from 'locales/i18n';
-import { cloneElement, useCallback, useMemo, useState } from 'react';
+import { cloneElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
@@ -78,15 +80,11 @@ import {
   PermissionLevels,
   ResourceTypes,
 } from '../pages/PermissionPage/constants';
-import { useMainSlice } from '../slice';
-import { DownloadListPopup } from './DownloadListPopup';
 import { ModifyPassword } from './ModifyPassword';
 import { OrganizationList } from './OrganizationList';
 import { Profile } from './Profile';
-import { loadTasks } from './service';
 
 export function Navbar() {
-  const { actions } = useMainSlice();
   const [profileOpen, setProfileOpen] = useState(false);
   const [modifyPasswordOpen, setModifyPasswordOpen] = useState(false);
   const lang = getLang();
@@ -99,7 +97,6 @@ export function Navbar() {
   const currentOrganization = useSelector(selectCurrentOrganization);
   const loggedInUser = useSelector(selectLoggedInUser);
   const organizationListLoading = useSelector(selectOrganizationListLoading);
-  const downloadPolling = useSelector(selectDownloadPolling);
   const themeKey = useSelector(selectThemeKey);
 
   const t = useI18NPrefix('main');
@@ -332,12 +329,13 @@ export function Navbar() {
     [dispatch, navigate, i18n, handleChangeThemeFn],
   );
 
-  const onSetPolling = useCallback(
-    (polling: boolean) => {
-      dispatch(actions.setDownloadPolling(polling));
-    },
-    [dispatch, actions],
-  );
+  useEffect(() => {
+    if (loggedInUser?.id && orgId) {
+      void resumeAuthenticatedArtifactTasks(loggedInUser.id, orgId).catch(
+        () => undefined,
+      );
+    }
+  }, [loggedInUser?.id, orgId]);
 
   return (
     <>
@@ -378,18 +376,9 @@ export function Navbar() {
           })}
         </Nav>
         <Toolbar>
-          <DownloadListPopup
-            polling={downloadPolling}
-            setPolling={onSetPolling}
-            onLoadTasks={loadTasks}
-            onDownloadFile={item => {
-              if (item.id) {
-                downloadFile(item.id).then(() => {
-                  dispatch(actions.setDownloadPolling(true));
-                });
-              }
-            }}
-          />
+          <li>
+            <ArtifactTaskCenter />
+          </li>
           {systemInfo?.tenantManagementMode ===
             TenantManagementMode.Platform && (
             <Popup

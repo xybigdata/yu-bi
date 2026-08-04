@@ -25,8 +25,11 @@ import yubi.core.base.consts.VariableTypeEnum;
 import yubi.core.base.exception.Exceptions;
 import yubi.core.common.*;
 import yubi.core.entity.*;
-import yubi.core.mappers.ext.DownloadMapperExt;
 import yubi.security.base.ResourceType;
+import yubi.server.artifact.ArtifactAccess;
+import yubi.server.artifact.ArtifactDescriptor;
+import yubi.server.artifact.ArtifactTasks;
+import yubi.server.artifact.TaskHandle;
 import yubi.server.base.dto.*;
 import yubi.server.base.dto.chart.WidgetConfig;
 import yubi.server.base.params.*;
@@ -44,10 +47,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 @Slf4j
 @Service
@@ -71,7 +76,7 @@ public class VizServiceImpl extends BaseService implements VizService {
 
     private final FileService fileService;
 
-    private final DownloadMapperExt downloadMapper;
+    private final ArtifactTasks artifactTasks;
 
     public VizServiceImpl(DatachartService datachartService,
                           DashboardService dashboardService,
@@ -80,7 +85,7 @@ public class VizServiceImpl extends BaseService implements VizService {
                           FolderService folderService,
                           ViewService viewService,
                           SourceService sourceService, VariableService variableService,
-                          FileService fileService, DownloadMapperExt downloadMapper) {
+                          FileService fileService, ArtifactTasks artifactTasks) {
         this.datachartService = datachartService;
         this.dashboardService = dashboardService;
         this.storyboardService = storyboardService;
@@ -90,7 +95,7 @@ public class VizServiceImpl extends BaseService implements VizService {
         this.sourceService = sourceService;
         this.variableService = variableService;
         this.fileService = fileService;
-        this.downloadMapper = downloadMapper;
+        this.artifactTasks = artifactTasks;
     }
 
     @Override
@@ -279,11 +284,8 @@ public class VizServiceImpl extends BaseService implements VizService {
     }
 
     @Override
-    public Download exportResource(ResourceTransferParam param) throws IOException {
-        final String user = securityManager.getCurrentUser().getUsername();
-
-        return newExportDownloadTask(transferParam -> {
-            securityManager.runAs(user);
+    public TaskHandle exportResource(ResourceTransferParam param) throws IOException {
+        return newExportArtifactTask(transferParam -> {
             TransferConfig transferConfig = TransferConfig.builder()
                     .withParents(true)
                     .build();
@@ -381,8 +383,8 @@ public class VizServiceImpl extends BaseService implements VizService {
     }
 
     @Override
-    public Download exportDatachartTemplate(DatachartTemplateParam param) {
-        return newExportDownloadTask(templateParam -> {
+    public TaskHandle exportDatachartTemplate(DatachartTemplateParam param) {
+        return newExportArtifactTask(templateParam -> {
             DatachartTemplateModel templateModel = new DatachartTemplateModel();
             templateModel.setDatachart(param.getDatachart());
             return templateModel;
@@ -390,8 +392,8 @@ public class VizServiceImpl extends BaseService implements VizService {
     }
 
     @Override
-    public Download exportDashboardTemplate(DashboardTemplateParam param) {
-        return newExportDownloadTask(templateParam -> {
+    public TaskHandle exportDashboardTemplate(DashboardTemplateParam param) {
+        return newExportArtifactTask(templateParam -> {
             DashboardTemplateModel templateModel = new DashboardTemplateModel();
             templateModel.setDashboard(param.getDashboard());
             templateModel.setWidgets(param.getWidgets());
@@ -403,38 +405,37 @@ public class VizServiceImpl extends BaseService implements VizService {
     }
 
 
-    private <P extends TransferParam, R extends TransferModel> Download newExportDownloadTask(Function<P, R> function, P param, TransferFileType fileType) {
-        final Download download = new Download();
-        download.setCreateTime(new Date());
-        download.setId(UUIDGenerator.generate());
-        download.setStatus((byte) 0);
-        download.setCreateBy(securityManager.getCurrentUser().getId());
-        String path = getExportFile(getMessage("message.viz.export.name"), fileType);
-        download.setName(new File(path).getName());
-        download.setPath(path);
-        downloadMapper.insert(download);
-        TaskExecutor.submit(() -> {
+    private <P extends TransferParam, R extends TransferModel> TaskHandle newExportArtifactTask(
+            Function<P, R> function,
+            P param,
+            TransferFileType fileType
+    ) {
+        User currentUser = securityManager.getCurrentUser();
+        ArtifactDescriptor descriptor = new ArtifactDescriptor(
+                getMessage("message.viz.export.name"),
+                "application/octet-stream",
+                fileType.getSuffix(),
+                fileType == TransferFileType.YUBI_RESOURCE_FILE
+                        ? "RESOURCE_MIGRATION"
+                        : "TEMPLATE"
+        );
+        return artifactTasks.submit(
+                ArtifactAccess.authenticated(currentUser.getId(), param.getOrgId(),
+                        currentUser.getUsername()),
+                descriptor,
+                context -> {
             try {
+                securityManager.runAs(context.executionUser());
                 TransferModel model = function.apply(param);
-                SerializerUtils.serializeObjectToFile(model, true, download.getPath());
-                download.setStatus((byte) 1);
-            } catch (Exception e) {
-                download.setStatus((byte) -1);
-                log.error("object serialize error", e);
+                try (ObjectOutputStream output = new ObjectOutputStream(
+                        new GZIPOutputStream(context.output())
+                )) {
+                    output.writeObject(model);
+                }
             } finally {
-                try {
-                    download.setUpdateTime(new Date());
-                    downloadMapper.updateByPrimaryKey(download);
-                } catch (Exception e) {
-                    log.error("download task update error", e);
-                }
-                try {
-                    securityManager.releaseRunAs();
-                } catch (Exception ignored) {
-                }
+                securityManager.releaseRunAs();
             }
         });
-        return download;
     }
 
     @Override
@@ -585,10 +586,6 @@ public class VizServiceImpl extends BaseService implements VizService {
         folder.setName(name);
         folder.setIndex(index);
         folderService.getDefaultMapper().insert(folder);
-    }
-
-    private String getExportFile(String name, TransferFileType fileType) {
-        return fileService.getBasePath(FileOwner.EXPORT, null) + "/" + name + "-" + System.currentTimeMillis() + fileType.getSuffix();
     }
 
     public TransferModel extractModel(MultipartFile file) throws IOException, ClassNotFoundException {

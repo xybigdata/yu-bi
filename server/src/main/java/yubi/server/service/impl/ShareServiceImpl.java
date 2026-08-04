@@ -19,12 +19,15 @@
 
 package yubi.server.service.impl;
 
+import yubi.core.base.consts.AttachmentType;
 import yubi.core.base.consts.Const;
+import yubi.core.base.consts.FileOwner;
 import yubi.core.base.consts.ShareAuthenticationMode;
 import yubi.core.base.consts.ShareRowPermissionBy;
 import yubi.core.base.exception.BaseException;
 import yubi.core.base.exception.Exceptions;
 import yubi.core.common.Application;
+import yubi.core.common.FileUtils;
 import yubi.core.common.UUIDGenerator;
 import yubi.core.data.provider.StdSqlOperator;
 import yubi.core.entity.*;
@@ -34,6 +37,15 @@ import yubi.security.base.ResourceType;
 import yubi.security.exception.PermissionDeniedException;
 import yubi.security.util.AESUtil;
 import yubi.security.util.SecurityUtils;
+import yubi.server.artifact.ArtifactAccess;
+import yubi.server.artifact.ArtifactContent;
+import yubi.server.artifact.ArtifactDescriptor;
+import yubi.server.artifact.ArtifactTaskException;
+import yubi.server.artifact.ArtifactTasks;
+import yubi.server.artifact.TaskBatch;
+import yubi.server.artifact.TaskHandle;
+import yubi.server.artifact.TaskPage;
+import yubi.server.artifact.TaskView;
 import yubi.server.base.dto.DashboardDetail;
 import yubi.server.base.dto.DatachartDetail;
 import yubi.server.base.dto.ShareInfo;
@@ -43,10 +55,14 @@ import yubi.server.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -57,26 +73,41 @@ public class ShareServiceImpl extends BaseService implements ShareService {
 
     private final VizService vizService;
 
-    private final DownloadService downloadService;
-
     private final ShareMapperExt shareMapper;
 
     private final RoleService roleService;
 
     private final UserMapperExt userMapperExt;
 
+    private final ArtifactTasks artifactTasks;
+
+    private final Function<AttachmentType, AttachmentService> attachmentServiceResolver;
+
+    @Autowired
     public ShareServiceImpl(DataProviderService dataProviderService,
                             VizService vizService,
-                            DownloadService downloadService,
                             ShareMapperExt shareMapper,
                             RoleService roleService,
-                            UserMapperExt userMapperExt) {
+                            UserMapperExt userMapperExt,
+                            ArtifactTasks artifactTasks) {
+        this(dataProviderService, vizService, shareMapper, roleService, userMapperExt,
+                artifactTasks, AttachmentService::matchAttachmentService);
+    }
+
+    ShareServiceImpl(DataProviderService dataProviderService,
+                     VizService vizService,
+                     ShareMapperExt shareMapper,
+                     RoleService roleService,
+                     UserMapperExt userMapperExt,
+                     ArtifactTasks artifactTasks,
+                     Function<AttachmentType, AttachmentService> attachmentServiceResolver) {
         this.dataProviderService = dataProviderService;
         this.vizService = vizService;
-        this.downloadService = downloadService;
         this.shareMapper = shareMapper;
         this.roleService = roleService;
         this.userMapperExt = userMapperExt;
+        this.artifactTasks = artifactTasks;
+        this.attachmentServiceResolver = attachmentServiceResolver;
     }
 
     @Override
@@ -254,39 +285,139 @@ public class ShareServiceImpl extends BaseService implements ShareService {
     }
 
     @Override
-    public Download createDownload(String clientId, ShareDownloadParam downloadParam) {
+    public TaskHandle createDownload(String clientId, String password, ShareDownloadParam downloadParam) {
         if (CollectionUtils.isEmpty(downloadParam.getDownloadParams()) || CollectionUtils.isEmpty(downloadParam.getExecuteToken())) {
             return null;
         }
+        ArtifactAccess access = sharedArtifactAccess(downloadParam.getShareToken(), clientId, password);
+        validateDownloadPermissions(downloadParam);
+
+        AttachmentType downloadType = downloadParam.getDownloadType() == null
+                ? AttachmentType.EXCEL
+                : downloadParam.getDownloadType();
+        String fileName = StringUtils.defaultIfBlank(downloadParam.getFileName(), "download");
+        ArtifactDescriptor descriptor = new ArtifactDescriptor(
+                fileName,
+                mediaType(downloadType),
+                downloadType.getSuffix()
+        );
+        return artifactTasks.submit(access, descriptor, context -> {
+            validateDownloadPermissions(downloadParam);
+            createAttachment(downloadParam, downloadType, fileName, context.output(),
+                    context.executionUser());
+        });
+    }
+
+    private void validateDownloadPermissions(ShareDownloadParam downloadParam) {
         for (DownloadQueryRequest param : downloadParam.getDownloadParams()) {
-            Map<String, ShareToken> tokeMap = downloadParam.getExecuteToken();
-            if (CollectionUtils.isEmpty(tokeMap)) {
-                validateExecutePermission(null, param);
-            } else {
-                validateExecutePermission(downloadParam.getExecuteToken().getOrDefault(param.getViewId(), null).getAuthorizedToken(), param);
+            ShareToken executeToken = downloadParam.getExecuteToken().get(param.getViewId());
+            validateExecutePermission(
+                    executeToken == null ? null : executeToken.getAuthorizedToken(),
+                    param
+            );
+        }
+    }
+
+    private ArtifactAccess sharedArtifactAccess(String shareId, String clientId, String password) {
+        try {
+            ShareToken shareToken = new ShareToken();
+            shareToken.setId(shareId);
+            shareToken.setAuthenticationCode(password);
+            ShareAuthorizedToken authorizedToken = parseToken(shareToken);
+            validateExpiration(authorizedToken);
+            String accessPrincipal = StringUtils.defaultIfBlank(
+                    shareToken.getUsername(),
+                    authorizedToken.getPermissionBy()
+            );
+            return ArtifactAccess.shared(
+                    clientId,
+                    shareId,
+                    accessPrincipal,
+                    authorizedToken.getPermissionBy()
+            );
+        } catch (RuntimeException exception) {
+            throw artifactNotFound();
+        }
+    }
+
+    private void createAttachment(DownloadCreateParam downloadParam,
+                                  AttachmentType downloadType,
+                                  String fileName,
+                                  java.io.OutputStream output,
+                                  String executionUser) throws Exception {
+        File temporaryFile = null;
+        boolean runAs = false;
+        try {
+            securityManager.runAs(executionUser);
+            runAs = true;
+            temporaryFile = attachmentServiceResolver.apply(downloadType).getFile(
+                    downloadParam,
+                    FileUtils.withBasePath(FileOwner.DOWNLOAD.getPath()),
+                    fileName
+            );
+            Files.copy(temporaryFile.toPath(), output);
+        } catch (Exception exception) {
+            throw ArtifactExportFailures.classify(downloadType, exception);
+        } finally {
+            if (temporaryFile != null) {
+                FileUtils.delete(temporaryFile);
+            }
+            if (runAs) {
+                securityManager.releaseRunAs();
             }
         }
+    }
 
-        List<DownloadQueryRequest> viewExecuteParams = downloadParam.getDownloadParams();
-        DownloadCreateParam downloadCreateParam = new DownloadCreateParam();
-        downloadCreateParam.setFileName(downloadParam.getFileName());
-        downloadCreateParam.setDownloadParams(viewExecuteParams);
+    private String mediaType(AttachmentType downloadType) {
+        return switch (downloadType) {
+            case EXCEL -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            case IMAGE -> "image/png";
+            case PDF -> "application/pdf";
+        };
+    }
 
-        return downloadService.submitDownloadTask(downloadCreateParam, clientId);
+    private ArtifactTaskException artifactNotFound() {
+        return new ArtifactTaskException(
+                "ARTIFACT_NOT_FOUND",
+                "产物任务不存在或已过期",
+                UUID.randomUUID().toString()
+        );
     }
 
     @Override
-    public List<Download> listDownloadTask(ShareToken shareToken, String clientId) {
-        ShareAuthorizedToken authorizedToken = parseToken(shareToken);
-        validateExpiration(authorizedToken);
-        return downloadService.listDownloadTasks(clientId);
+    public TaskView getArtifactTask(String shareId, String clientId, String password, String taskId) {
+        ArtifactAccess access = sharedArtifactAccess(shareId, clientId, password);
+        TaskBatch batch = artifactTasks.inspect(access, Set.of(taskId));
+        if (batch.missingIds().contains(taskId) || batch.tasks().isEmpty()) {
+            throw artifactNotFound();
+        }
+        return batch.tasks().getFirst();
     }
 
     @Override
-    public Download download(ShareToken shareToken, String downloadId) {
-        ShareAuthorizedToken authorizedToken = parseToken(shareToken);
-        validateExpiration(authorizedToken);
-        return downloadService.downloadFile(downloadId);
+    public TaskPage listArtifactTasks(String shareId, String clientId, String password,
+                                      int offset, int limit) {
+        return artifactTasks.list(sharedArtifactAccess(shareId, clientId, password), offset, limit);
+    }
+
+    @Override
+    public TaskHandle retryArtifactTask(String shareId, String clientId, String password, String taskId) {
+        return artifactTasks.retry(sharedArtifactAccess(shareId, clientId, password), taskId);
+    }
+
+    @Override
+    public ArtifactContent openArtifact(String shareId, String clientId, String password, String taskId) {
+        return artifactTasks.open(sharedArtifactAccess(shareId, clientId, password), taskId);
+    }
+
+    @Override
+    public void confirmArtifactDelivery(String shareId, String clientId, String password, String taskId) {
+        artifactTasks.confirmDelivery(sharedArtifactAccess(shareId, clientId, password), taskId);
+    }
+
+    @Override
+    public void deleteArtifactTask(String shareId, String clientId, String password, String taskId) {
+        artifactTasks.delete(sharedArtifactAccess(shareId, clientId, password), taskId);
     }
 
     @Override
@@ -367,6 +498,7 @@ public class ShareServiceImpl extends BaseService implements ShareService {
         if (!ResourceType.VIEW.equals(shareAuthorizedToken.getVizType()) || !shareAuthorizedToken.getVizId().equals(executeParam.getViewId())) {
             Exceptions.tr(PermissionDeniedException.class, "message.provider.execute.permission.denied");
         }
+        validateExpiration(shareAuthorizedToken);
         return shareAuthorizedToken;
     }
 
@@ -412,35 +544,42 @@ public class ShareServiceImpl extends BaseService implements ShareService {
                 if (ShareRowPermissionBy.CREATOR.name().equals(share.getRowPermissionBy())) {
                     return;
                 }
-                getSecurityManager().runAs(shareToken.getUsername());
-                if (getSecurityManager().isOrgOwner(share.getOrgId())) {
-                    return;
-                }
+                boolean runAs = false;
                 try {
-                    checkVizReadPermission(ResourceType.valueOf(share.getVizType()), share.getVizId());
-                    return;
-                } catch (PermissionDeniedException ignored) {
-                }
-                if (StringUtils.isBlank(shareToken.getUsername())
-                        || StringUtils.isBlank(shareToken.getUsername())
-                        || StringUtils.isBlank(share.getRoles())) {
-                    Exceptions.tr(BaseException.class, "message.share.permission.denied");
-                    return;
-                }
-                List<Role> roles = roleService.listUserRoles(share.getOrgId(), user.getId());
-                if (CollectionUtils.isEmpty(roles)) {
-                    Exceptions.tr(BaseException.class, "message.share.permission.denied");
-                    return;
-                }
-                Set<String> roleIdList = roles.stream().map(BaseEntity::getId).collect(Collectors.toSet());
-                List<String> permittedRoles = readRoles(share.getRoles());
-                if (!CollectionUtils.isEmpty(permittedRoles)) {
-                    permittedRoles = permittedRoles.stream().map(id -> id.substring(1)).collect(Collectors.toList());
-                } else {
-                    permittedRoles = Collections.emptyList();
-                }
-                if (Collections.disjoint(roleIdList, permittedRoles)) {
-                    Exceptions.tr(BaseException.class, "message.share.permission.denied");
+                    getSecurityManager().runAs(shareToken.getUsername());
+                    runAs = true;
+                    if (getSecurityManager().isOrgOwner(share.getOrgId())) {
+                        return;
+                    }
+                    try {
+                        checkVizReadPermission(ResourceType.valueOf(share.getVizType()), share.getVizId());
+                        return;
+                    } catch (PermissionDeniedException ignored) {
+                    }
+                    if (StringUtils.isBlank(shareToken.getUsername())
+                            || StringUtils.isBlank(share.getRoles())) {
+                        Exceptions.tr(BaseException.class, "message.share.permission.denied");
+                        return;
+                    }
+                    List<Role> roles = roleService.listUserRoles(share.getOrgId(), user.getId());
+                    if (CollectionUtils.isEmpty(roles)) {
+                        Exceptions.tr(BaseException.class, "message.share.permission.denied");
+                        return;
+                    }
+                    Set<String> roleIdList = roles.stream().map(BaseEntity::getId).collect(Collectors.toSet());
+                    List<String> permittedRoles = readRoles(share.getRoles());
+                    if (!CollectionUtils.isEmpty(permittedRoles)) {
+                        permittedRoles = permittedRoles.stream().map(id -> id.substring(1)).collect(Collectors.toList());
+                    } else {
+                        permittedRoles = Collections.emptyList();
+                    }
+                    if (Collections.disjoint(roleIdList, permittedRoles)) {
+                        Exceptions.tr(BaseException.class, "message.share.permission.denied");
+                    }
+                } finally {
+                    if (runAs) {
+                        getSecurityManager().releaseRunAs();
+                    }
                 }
                 break;
             default:
@@ -451,6 +590,11 @@ public class ShareServiceImpl extends BaseService implements ShareService {
     @Override
     public void requirePermission(Share entity, int permission) {
 
+    }
+
+    @Override
+    public ShareMapperExt getDefaultMapper() {
+        return shareMapper;
     }
 
     private void validateShareParam(ShareCreateParam createParam) {
@@ -493,7 +637,10 @@ public class ShareServiceImpl extends BaseService implements ShareService {
                     shareCreateBy = shareCreateBy.replace(AttachmentService.SHARE_USER, "");
                     authorizedToken.setCreateBy(shareCreateBy);
                 }
-                User user = retrieve(shareCreateBy, User.class, false);
+                User user = userMapperExt.selectByPrimaryKey(shareCreateBy);
+                if (user == null) {
+                    Exceptions.notFound("resource.user");
+                }
                 authorizedToken.setPermissionBy(user.getUsername());
             } else {
                 authorizedToken.setPermissionBy(shareToken.getUsername());

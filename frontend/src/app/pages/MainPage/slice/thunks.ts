@@ -37,8 +37,6 @@ import {
   DataProviderConfigTemplate,
   DataProviderViewModel,
   DeleteOrganizationPayload,
-  DownloadTask,
-  DownloadTaskState,
   EditOrganizationParams,
   Organization,
   UserSetting,
@@ -222,21 +220,3 @@ export const deleteOrganization = createAsyncThunk<
     userSettings: await updateLvoUserSettings(userSettings, nextOrgId),
   };
 });
-
-interface FetchDownloadTasksPayload {
-  resolve?: (isNeedClear: boolean) => void;
-}
-export const fetchDownloadTasks = createAsyncThunk(
-  'main/fetchDownloadTasks',
-  async (payload: FetchDownloadTasksPayload | undefined, { dispatch }) => {
-    const { data } = await request2<DownloadTask[]>({
-      url: `/download/tasks`,
-      method: 'GET',
-    });
-    dispatch(mainActions.setDownloadManagement({ newTasks: data }));
-    const isNeedClear = !(data || []).some(
-      v => v.status === DownloadTaskState.CREATED,
-    );
-    payload?.resolve?.(isNeedClear);
-  },
-);

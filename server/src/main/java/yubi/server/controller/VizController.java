@@ -27,6 +27,8 @@ import yubi.server.base.transfer.DatachartTemplateParam;
 import yubi.server.base.transfer.ImportStrategy;
 import yubi.server.base.transfer.ResourceTransferParam;
 import yubi.server.service.VizService;
+import yubi.server.artifact.ArtifactTaskWebMapper;
+import yubi.server.artifact.ArtifactTaskWebMapper.ArtifactTaskResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
@@ -45,9 +47,12 @@ import java.util.Set;
 public class VizController extends BaseController {
 
     private final VizService vizService;
+    private final ArtifactTaskWebMapper artifactTaskWebMapper;
 
-    public VizController(VizService vizService) {
+    public VizController(VizService vizService,
+                         ArtifactTaskWebMapper artifactTaskWebMapper) {
         this.vizService = vizService;
+        this.artifactTaskWebMapper = artifactTaskWebMapper;
     }
 
 
@@ -272,8 +277,10 @@ public class VizController extends BaseController {
 
     @Operation(summary = "export viz")
     @PostMapping(value = "/export")
-    public ResponseData<Download> exportViz(@RequestBody ResourceTransferParam param) throws IOException {
-        return ResponseData.success(vizService.exportResource(param));
+    public ResponseData<ArtifactTaskResponse> exportViz(
+            @Validated @RequestBody ResourceTransferParam param
+    ) throws IOException {
+        return ResponseData.success(artifactTaskWebMapper.response(vizService.exportResource(param)));
     }
 
     @Operation(summary = "import viz")
@@ -285,14 +292,22 @@ public class VizController extends BaseController {
 
     @Operation(summary = "export dashboard template")
     @PostMapping(value = "/export/dashboard/template")
-    public ResponseData<Download> exportDashboardTemplate(@Validated @RequestBody DashboardTemplateParam param) throws IOException {
-        return ResponseData.success(vizService.exportDashboardTemplate(param));
+    public ResponseData<ArtifactTaskResponse> exportDashboardTemplate(
+            @Validated @RequestBody DashboardTemplateParam param
+    ) throws IOException {
+        return ResponseData.success(artifactTaskWebMapper.response(
+                vizService.exportDashboardTemplate(param)
+        ));
     }
 
     @Operation(summary = "export datachart template")
     @PostMapping(value = "/export/datachart/template")
-    public ResponseData<Download> exportDatachartTemplate(@Validated @RequestBody DatachartTemplateParam param) throws IOException {
-        return ResponseData.success(vizService.exportDatachartTemplate(param));
+    public ResponseData<ArtifactTaskResponse> exportDatachartTemplate(
+            @Validated @RequestBody DatachartTemplateParam param
+    ) throws IOException {
+        return ResponseData.success(artifactTaskWebMapper.response(
+                vizService.exportDatachartTemplate(param)
+        ));
 
     }
 

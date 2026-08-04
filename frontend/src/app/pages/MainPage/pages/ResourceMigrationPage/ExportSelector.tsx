@@ -16,14 +16,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { Button, Card, message, TreeSelect } from 'antd';
+import { Button, Card, TreeSelect } from 'antd';
 import type { TreeDataNode as DataNode } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { FC, memo, useState } from 'react';
-import { useAppDispatch } from 'app/hooks/useRedux';
+import { useSelector } from 'react-redux';
+import { selectOrgId } from '../../slice/selectors';
 import styled from 'styled-components';
 import { BORDER_RADIUS, SPACE_LG } from 'styles/StyleConstants';
-import { mainActions } from '../../slice';
 import { Folder } from '../VizPage/slice/types';
 import { onExport } from './utils';
 
@@ -32,7 +32,7 @@ export const ExportSelector: FC<{
   folders: Folder[];
 }> = memo(({ treeData, folders }) => {
   const t = useI18NPrefix('main.subNavs');
-  const dispatch = useAppDispatch();
+  const orgId = useSelector(selectOrgId);
   const [selectedIds, setIds] = useState<string[]>();
   const onChange = (ids: string[], label, extra) => {
     setIds(ids);
@@ -51,14 +51,8 @@ export const ExportSelector: FC<{
         return null;
       })
       .filter(item => !!item);
-    const resData = await onExport(idList);
-    if (resData === true) {
-      message.success('success');
-      setIds([]);
-      dispatch(mainActions.setDownloadPolling(true));
-    } else {
-      message.warning('warn');
-    }
+    await onExport(idList, orgId);
+    setIds([]);
   };
   return (
     <StyledWrapper>

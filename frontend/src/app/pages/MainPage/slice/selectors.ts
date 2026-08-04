@@ -93,17 +93,7 @@ export const selectDeleteOrganizationLoading = createSelector(
   mainState => mainState.deleteOrganizationLoading,
 );
 
-export const selectDownloadManagement = createSelector(
-  [selectDomain],
-  mainState => mainState.downloadManagement,
-);
-
 export const selectInitializationError = createSelector(
   [selectDomain],
   mainState => mainState.initializationError,
-);
-
-export const selectDownloadPolling = createSelector(
-  [selectDomain],
-  mainState => mainState.downloadPolling,
 );

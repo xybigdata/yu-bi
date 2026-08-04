@@ -197,9 +197,6 @@ export const boardDownLoadAction =
         fileName,
         downloadType,
         imageWidth,
-        resolve: () => {
-          dispatch(mainActions.setDownloadPolling(true));
-        },
       }),
     );
   };

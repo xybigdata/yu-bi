@@ -36,9 +36,6 @@ import {
   VizRenderMode,
 } from '../../DashBoardPage/pages/Board/slice/types';
 import { getJsonConfigs } from '../../DashBoardPage/utils';
-import { OnLoadTasksType } from '../../MainPage/Navbar/DownloadListPopup';
-import { DownloadTask } from '../../MainPage/slice/types';
-import { DownloadTaskContainer } from '../components/DownloadTaskContainer';
 import { HeadlessBrowserIdentifier } from '../components/HeadlessBrowserIdentifier';
 import TitleForShare from '../components/TitleForShare';
 const TitleHeight = 60;
@@ -49,8 +46,6 @@ export interface ShareBoardProps {
   filterSearchUrl: string;
   allowDownload: boolean;
   loadVizData: () => void;
-  onLoadShareTask: OnLoadTasksType;
-  onDownloadFile: (item: DownloadTask) => void;
   onMakeShareDownloadDataTask: (
     downloadParams: ChartDataRequest[],
     fileName: string,
@@ -65,8 +60,6 @@ export const DashboardForShare: React.FC<ShareBoardProps> = memo(
     allowDownload,
     loadVizData,
     onMakeShareDownloadDataTask,
-    onLoadShareTask,
-    onDownloadFile,
   }) => {
     const dispatch = useAppDispatch();
 
@@ -133,12 +126,7 @@ export const DashboardForShare: React.FC<ShareBoardProps> = memo(
             <TitleForShare
               onShareDownloadData={onShareDownloadData}
               loadVizData={loadVizData}
-            >
-              <DownloadTaskContainer
-                onLoadTasks={onLoadShareTask}
-                onDownloadFile={onDownloadFile}
-              ></DownloadTaskContainer>
-            </TitleForShare>
+            />
             {boardType === 'auto' && <AutoBoardCore boardId={dashboard.id} />}
             {boardType === 'free' && <FreeBoardCore boardId={dashboard.id} />}
             <FullScreenPanel />
@@ -149,8 +137,6 @@ export const DashboardForShare: React.FC<ShareBoardProps> = memo(
       allowDownload,
       dashboard,
       loadVizData,
-      onDownloadFile,
-      onLoadShareTask,
       onShareDownloadData,
       renderMode,
     ]);

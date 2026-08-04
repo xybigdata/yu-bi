@@ -7,6 +7,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import type { Dashboard } from 'app/pages/DashBoardPage/pages/Board/slice/types';
 import { preloadChartPlugins } from 'app/services/chartPluginService';
+import { resumeSharedArtifactTasks } from 'app/features/artifact';
 import persistence from 'utils/persistence';
 
 import ShareDashboardPage from '../ShareDashboardPage';
@@ -55,12 +56,16 @@ vi.mock('utils/utils', () => ({
 }));
 
 vi.mock('app/utils/fetch', () => ({
-  downloadShareDataChartFile: vi.fn(),
-  loadShareTask: vi.fn(),
   makeShareDownloadDataTask: vi.fn(payload => ({
     payload,
     type: 'share/makeShareDownloadDataTask',
   })),
+}));
+
+vi.mock('app/features/artifact', async importOriginal => ({
+  ...(await importOriginal<typeof import('app/features/artifact')>()),
+  ArtifactTaskCenter: () => <div data-testid="artifact-task-center" />,
+  resumeSharedArtifactTasks: vi.fn(() => Promise.resolve()),
 }));
 
 vi.mock('app/pages/DashBoardPage/components/BoardLoading', () => ({
@@ -138,10 +143,15 @@ const shareBoard = {
 const createState = ({
   needVerify = false,
   vizType = 'DASHBOARD',
+  loggedInUser = null,
 }: {
   needVerify?: boolean;
   vizType?: string;
+  loggedInUser?: { id: string; username: string } | null;
 } = {}) => ({
+  app: {
+    loggedInUser,
+  },
   board: {
     boardRecord: {
       [shareBoard.id]: shareBoard,
@@ -167,6 +177,7 @@ describe('ShareDashboardPage smoke', () => {
     dispatchMock.mockClear();
     vi.mocked(fetchShareVizInfo).mockClear();
     vi.mocked(preloadChartPlugins).mockClear();
+    vi.mocked(resumeSharedArtifactTasks).mockClear();
     vi.mocked(useAppDispatch).mockReturnValue(dispatchMock);
     vi.mocked(persistence.session.get).mockReset();
     vi.mocked(useSelector).mockImplementation(selector =>
@@ -242,5 +253,36 @@ describe('ShareDashboardPage smoke', () => {
         type: 'share/saveNeedVerify',
       }),
     );
+  });
+
+  test('登录身份变化后重新激活分享任务作用域', async () => {
+    let state = createState();
+    vi.mocked(useSelector).mockImplementation(selector => selector(state));
+    const view = renderPage('/shareDashboard/share-token?type=LOGIN');
+
+    await waitFor(() => {
+      expect(resumeSharedArtifactTasks).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          scopeKey: 'share:share-token:client-id:anonymous',
+        }),
+      );
+    });
+
+    state = createState({
+      loggedInUser: { id: 'user-id', username: 'alice' },
+    });
+    view.rerender(
+      <MemoryRouter initialEntries={['/shareDashboard/share-token?type=LOGIN']}>
+        <ShareDashboardPage />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(resumeSharedArtifactTasks).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          scopeKey: 'share:share-token:client-id:user:user-id',
+        }),
+      );
+    });
   });
 });

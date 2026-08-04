@@ -42,11 +42,6 @@ export const selectPageWidthHeight = createSelector(
   shareState => shareState.pageWidthHeight,
 );
 
-export const selectShareDownloadPolling = createSelector(
-  [selectDomain],
-  shareState => shareState.shareDownloadPolling,
-);
-
 export const selectShareExecuteToken = createSelector(
   [selectDomain],
   shareState => shareState.executeToken,

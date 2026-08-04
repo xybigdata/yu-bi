@@ -22,11 +22,14 @@ import {
   executePublicQuery,
   executeQuery,
 } from 'app/features/query';
+import {
+  submitAuthenticatedArtifactTask,
+  type ArtifactTaskWebResponse,
+} from 'app/features/artifact';
 import { boardDrillManager } from 'app/pages/DashBoardPage/components/BoardDrillManager/BoardDrillManager';
 import { getControlOptionQueryParams } from 'app/pages/DashBoardPage/components/Widgets/ControllerWidget/config';
 import { Widget } from 'app/pages/DashBoardPage/types/widgetTypes';
 import { FilterSearchParams } from 'app/pages/MainPage/pages/VizPage/slice/types';
-import { mainActions } from 'app/pages/MainPage/slice';
 import { shareActions } from 'app/pages/SharePage/slice';
 import { ExecuteToken, ShareVizInfo } from 'app/pages/SharePage/slice/types';
 import {
@@ -126,15 +129,17 @@ export const exportBoardTpl = createAsyncThunk<
     widgets: BoardTemplateExportWidget[];
     callBack: () => void;
   }
->('board/exportBoardTpl', async (params, { dispatch, rejectWithValue }) => {
+>('board/exportBoardTpl', async params => {
   const { dashboard, widgets, callBack } = params;
-  await request2<null>({
-    url: `viz/export/dashboard/template`,
-    method: 'POST',
-    data: { dashboard, widgets },
-  });
+  await submitAuthenticatedArtifactTask(async () => {
+    const response = await request2<ArtifactTaskWebResponse>({
+      url: `viz/export/dashboard/template`,
+      method: 'POST',
+      data: { dashboard, widgets, orgId: dashboard.orgId },
+    });
+    return response.data;
+  }, dashboard.orgId!);
   callBack();
-  dispatch(mainActions.setDownloadPolling(true));
   return null;
 });
 export const fetchBoardDetailInShare = createAsyncThunk<

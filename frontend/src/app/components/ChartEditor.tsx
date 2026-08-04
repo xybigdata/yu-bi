@@ -609,9 +609,6 @@ export const ChartEditor: FC<ChartEditorProps> = ({
         ],
         fileName: backendChart?.name || 'chart',
         downloadType: DownloadFileType.Excel,
-        resolve: () => {
-          dispatch(actions.setChartEditorDownloadPolling(true));
-        },
       }),
     );
   }, [
@@ -622,7 +619,6 @@ export const ChartEditor: FC<ChartEditorProps> = ({
     dataChartId,
     dataview,
     dispatch,
-    actions,
     widgetId,
   ]);
 

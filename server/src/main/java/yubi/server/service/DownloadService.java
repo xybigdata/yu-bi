@@ -21,19 +21,10 @@ package yubi.server.service;
 import yubi.core.entity.Download;
 import yubi.core.mappers.ext.DownloadMapperExt;
 import yubi.server.base.params.DownloadCreateParam;
-
-import java.util.List;
+import yubi.server.artifact.TaskHandle;
 
 public interface DownloadService extends BaseCRUDService<Download, DownloadMapperExt> {
 
-    Download submitDownloadTask(DownloadCreateParam downloadCreateParam);
-
-    Download submitDownloadTask(DownloadCreateParam downloadCreateParam,String clientId);
-
-    List<Download> listDownloadTasks();
-
-    List<Download> listDownloadTasks(String clientId);
-
-    Download downloadFile(String downloadId);
+    TaskHandle submitDownloadTask(DownloadCreateParam downloadCreateParam);
 
 }

@@ -94,10 +94,6 @@ vi.mock('app/pages/DashBoardPage/pages/Board/slice/asyncActions', () => ({
   })),
 }));
 
-vi.mock('app/pages/SharePage/components/DownloadTaskContainer', () => ({
-  DownloadTaskContainer: () => <div data-testid="download-task-container" />,
-}));
-
 vi.mock('app/pages/SharePage/components/HeadlessBrowserIdentifier', () => ({
   HeadlessBrowserIdentifier: ({
     height,
@@ -133,8 +129,6 @@ vi.mock('app/pages/SharePage/components/TitleForShare', () => ({
 
 const dispatchMock = vi.fn();
 const loadVizDataMock = vi.fn();
-const onDownloadFileMock = vi.fn();
-const onLoadShareTaskMock = vi.fn();
 const onMakeShareDownloadDataTaskMock = vi.fn();
 
 const createState = ({
@@ -194,8 +188,6 @@ const renderDashboard = (
         dashboard={dashboard}
         filterSearchUrl=""
         loadVizData={loadVizDataMock}
-        onDownloadFile={onDownloadFileMock}
-        onLoadShareTask={onLoadShareTaskMock}
         onMakeShareDownloadDataTask={onMakeShareDownloadDataTaskMock}
         renderMode={renderMode}
       />
@@ -206,8 +198,6 @@ describe('DashboardForShare smoke', () => {
   beforeEach(() => {
     dispatchMock.mockClear();
     loadVizDataMock.mockClear();
-    onDownloadFileMock.mockClear();
-    onLoadShareTaskMock.mockClear();
     onMakeShareDownloadDataTaskMock.mockClear();
     vi.mocked(useAppDispatch).mockReturnValue(dispatchMock);
   });
@@ -251,7 +241,9 @@ describe('DashboardForShare smoke', () => {
       'auto-board',
     );
     expect(screen.queryByTestId('free-board-core')).not.toBeInTheDocument();
-    expect(screen.getByTestId('download-task-container')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('download-task-container'),
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId('full-screen-panel')).toBeInTheDocument();
 
     await waitFor(() => {

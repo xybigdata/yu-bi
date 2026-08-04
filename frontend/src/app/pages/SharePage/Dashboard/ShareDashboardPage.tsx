@@ -23,12 +23,14 @@ import ChartManager from 'app/models/ChartManager';
 import { preloadChartPlugins } from 'app/services/chartPluginService';
 import { useLocation } from 'app/routerCompat';
 import { login } from 'app/slice/thunks';
+import { selectLoggedInUser } from 'app/slice/selectors';
 import { ChartDataRequest } from 'app/features/query';
 import {
-  downloadShareDataChartFile,
-  loadShareTask,
-  makeShareDownloadDataTask,
-} from 'app/utils/fetch';
+  ArtifactTaskCenter,
+  resumeSharedArtifactTasks,
+  sharedArtifactAccess,
+} from 'app/features/artifact';
+import { makeShareDownloadDataTask } from 'app/utils/fetch';
 import { StorageKeys } from 'globalConstants';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -82,6 +84,7 @@ function ShareDashboardPage() {
   const sharePassword = useSelector(selectSharePassword);
   const shareBoard = useSelector(selectShareBoard);
   const vizType = useSelector(selectShareVizType);
+  const loggedInUser = useSelector(selectLoggedInUser);
   const logged = !!getToken();
 
   const shareType = useRouteQuery({
@@ -149,14 +152,22 @@ function ShareDashboardPage() {
     [dispatch, renderMode],
   );
 
-  const onLoadShareTask = useMemo(() => {
-    const executeToken = Object.values(executeTokenMap)[0]?.authorizedToken;
-    return () =>
-      loadShareTask({
-        shareToken: executeToken,
-        clientId: shareClientId,
-      });
-  }, [executeTokenMap, shareClientId]);
+  const artifactAccess = useMemo(
+    () =>
+      sharedArtifactAccess(
+        shareToken || '',
+        shareClientId,
+        sharePassword,
+        loggedInUser?.id ? `user:${loggedInUser.id}` : 'anonymous',
+      ),
+    [loggedInUser?.id, shareClientId, sharePassword, shareToken],
+  );
+
+  useEffect(() => {
+    if (!needVerify && shareBoard && shareToken) {
+      void resumeSharedArtifactTasks(artifactAccess).catch(() => undefined);
+    }
+  }, [artifactAccess, needVerify, shareBoard, shareToken]);
 
   const onMakeShareDownloadDataTask = useCallback(
     (downloadParams: ChartDataRequest[], fileName: string) => {
@@ -168,35 +179,12 @@ function ShareDashboardPage() {
             downloadParams: downloadParams,
             shareToken,
             fileName: fileName,
-            resolve: () => {
-              dispatch(actions.setShareDownloadPolling(true));
-            },
             password: sharePassword,
           }),
         );
       }
     },
-    [
-      shareClientId,
-      shareToken,
-      sharePassword,
-      executeTokenMap,
-      dispatch,
-      actions,
-    ],
-  );
-
-  const onDownloadFile = useCallback(
-    task => {
-      const executeToken = Object.values(executeTokenMap)[0]?.authorizedToken;
-      downloadShareDataChartFile({
-        downloadId: task.id,
-        shareToken: executeToken,
-      }).then(() => {
-        dispatch(actions.setShareDownloadPolling(true));
-      });
-    },
-    [executeTokenMap, dispatch, actions],
+    [shareClientId, shareToken, sharePassword, executeTokenMap, dispatch],
   );
 
   const handleLogin = useCallback(
@@ -238,16 +226,17 @@ function ShareDashboardPage() {
       )}
 
       {!Boolean(needVerify) && shareToken && shareBoard && (
-        <DashboardForShare
-          dashboard={shareBoard}
-          allowDownload={false}
-          loadVizData={loadVizData}
-          onMakeShareDownloadDataTask={onMakeShareDownloadDataTask}
-          renderMode={renderMode}
-          filterSearchUrl={''}
-          onLoadShareTask={onLoadShareTask}
-          onDownloadFile={onDownloadFile}
-        />
+        <>
+          <DashboardForShare
+            dashboard={shareBoard}
+            allowDownload={false}
+            loadVizData={loadVizData}
+            onMakeShareDownloadDataTask={onMakeShareDownloadDataTask}
+            renderMode={renderMode}
+            filterSearchUrl={''}
+          />
+          <ArtifactTaskCenter floating />
+        </>
       )}
     </StyledWrapper>
   );

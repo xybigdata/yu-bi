@@ -28,6 +28,8 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 public class ShareDownloadParam extends DownloadCreateParam {
 
+    private String shareToken;
+
     private Map<String, ShareToken> executeToken;
 
 }
