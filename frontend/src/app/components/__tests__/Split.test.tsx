@@ -67,6 +67,44 @@ describe('Split', () => {
     expect(gutterElement.__isSplitGutter).toBe(true);
   });
 
+  test('should render only one gutter in React StrictMode', async () => {
+    const splitInstance = {
+      collapse: vi.fn(),
+      destroy: vi.fn(),
+      getSizes: vi.fn(() => [50, 50]),
+      setSizes: vi.fn(),
+    };
+    const splitFactory = vi.fn(
+      (
+        elements: HTMLElement[],
+        options: {
+          gutter: (
+            index: number,
+            direction: 'horizontal' | 'vertical',
+          ) => HTMLElement;
+        },
+      ) => {
+        const gutter = options.gutter(1, 'horizontal');
+        elements[1].before(gutter);
+        return splitInstance;
+      },
+    );
+    runtimeMock.loadSplit.mockResolvedValue(splitFactory);
+
+    const { container } = render(
+      <React.StrictMode>
+        <Split sizes={[50, 50]}>
+          <div>left</div>
+          <div>right</div>
+        </Split>
+      </React.StrictMode>,
+    );
+
+    await waitFor(() => {
+      expect(container.querySelectorAll('.gutter-horizontal')).toHaveLength(1);
+    });
+  });
+
   test('should not create split instance when unmounted before runtime loaded', async () => {
     let resolveSplit!: (factory: unknown) => void;
     const splitFactory = vi.fn();

@@ -1,16 +1,16 @@
 import {
   FolderAddFilled,
   FundProjectionScreenOutlined,
-  MenuUnfoldOutlined,
 } from '@ant-design/icons';
 import { ListSwitch } from 'app/components';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
+import { SidebarCollapseButton } from 'app/pages/MainPage/components/SidebarCollapseButton';
 import { useParams } from 'app/routerCompat';
 import classnames from 'classnames';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { LEVEL_5, SPACE_TIMES } from 'styles/StyleConstants';
+import { LEVEL_5 } from 'styles/StyleConstants';
 import { selectStoryboards, selectVizs } from '../slice/selectors';
 import { Folder } from '../slice/types';
 import { Folders } from './Folders';
@@ -18,14 +18,12 @@ import { Storyboards } from './Storyboards';
 
 interface SidebarProps extends I18NComponentProps {
   isDragging: boolean;
-  width: number;
   sliderVisible: boolean;
   handleSliderVisible: (status: boolean) => void;
 }
 
 export const Sidebar = memo(
   ({
-    width,
     isDragging,
     i18nPrefix,
     sliderVisible,
@@ -76,28 +74,24 @@ export const Sidebar = memo(
         sliderVisible={sliderVisible}
         className={sliderVisible ? 'close' : ''}
         isDragging={isDragging}
-        width={width}
       >
-        {sliderVisible ? (
-          <MenuUnfoldOutlined className="menuUnfoldOutlined" />
-        ) : (
-          ''
-        )}
+        <SidebarCollapseButton
+          collapsed={sliderVisible}
+          expandLabel={t('folders.open')}
+          collapseLabel={t('folders.close')}
+          onToggle={handleSliderVisible}
+        />
         <ListSwitch
           titles={listTitles}
           selectedKey={selectedKey}
           onSelect={switchSelect}
         />
         <Folders
-          sliderVisible={sliderVisible}
-          handleSliderVisible={handleSliderVisible}
           selectedId={selectedFolderId}
           i18nPrefix={i18nPrefix}
           className={classnames({ hidden: selectedKey !== 'folder' })}
         />
         <Storyboards
-          sliderVisible={sliderVisible}
-          handleSliderVisible={handleSliderVisible}
           selectedId={vizId}
           className={classnames({ hidden: selectedKey !== 'presentation' })}
           i18nPrefix={i18nPrefix}
@@ -110,8 +104,8 @@ export const Sidebar = memo(
 const Wrapper = styled.div<{
   sliderVisible: boolean;
   isDragging: boolean;
-  width: number;
 }>`
+  position: relative;
   z-index: ${LEVEL_5};
   display: flex;
   flex-shrink: 0;
@@ -131,28 +125,8 @@ const Wrapper = styled.div<{
   }
   &.close {
     position: absolute;
-    width: ${SPACE_TIMES(7.5)} !important;
+    width: 0 !important;
     height: 100%;
-    .menuUnfoldOutlined {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-    &:hover {
-      width: ${p => p.width + '%'} !important;
-      .menuUnfoldOutlined {
-        display: none;
-      }
-      > ul {
-        display: block;
-      }
-      > div {
-        display: flex;
-        &.hidden {
-          display: none;
-        }
-      }
-    }
+    box-shadow: none;
   }
 `;

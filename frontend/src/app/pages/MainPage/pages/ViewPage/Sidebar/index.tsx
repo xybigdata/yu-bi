@@ -22,8 +22,6 @@ import {
   DeleteOutlined,
   FolderFilled,
   FolderOpenFilled,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
 } from '@ant-design/icons';
 import {
   ListNav,
@@ -35,13 +33,14 @@ import {
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { SidebarCollapseButton } from 'app/pages/MainPage/components/SidebarCollapseButton';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
 import React, { memo, useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
-import { LEVEL_10, SPACE_TIMES, SPACE_XS, WHITE } from 'styles/StyleConstants';
+import { LEVEL_10, SPACE_XS } from 'styles/StyleConstants';
 import { getInsertedNodeIndex, uuidv4 } from 'utils/utils';
 import { UNPERSISTED_ID_PREFIX } from '../constants';
 import { SaveFormContext } from '../SaveFormContext';
@@ -57,13 +56,12 @@ import { Recycle } from './Recycle';
 
 interface SidebarProps {
   isDragging: boolean;
-  width: number;
   sliderVisible: boolean;
   handleSliderVisible: (status: boolean) => void;
 }
 
 export const Sidebar = memo(
-  ({ isDragging, width, sliderVisible, handleSliderVisible }: SidebarProps) => {
+  ({ isDragging, sliderVisible, handleSliderVisible }: SidebarProps) => {
     const navigate = useCompatNavigate();
     const dispatch = useAppDispatch();
     const { showSaveForm } = useContext(SaveFormContext);
@@ -170,23 +168,11 @@ export const Sidebar = memo(
                 text: t('recycle'),
                 prefix: <DeleteOutlined className="icon" />,
               },
-              {
-                key: 'collapse',
-                text: t(sliderVisible ? 'open' : 'close'),
-                prefix: sliderVisible ? (
-                  <MenuUnfoldOutlined className="icon" />
-                ) : (
-                  <MenuFoldOutlined className="icon" />
-                ),
-              },
             ],
             callback: (key, _, onNext) => {
               switch (key) {
                 case 'recycle':
                   onNext();
-                  break;
-                case 'collapse':
-                  handleSliderVisible(!sliderVisible);
                   break;
               }
             },
@@ -201,7 +187,7 @@ export const Sidebar = memo(
           onSearch: listSearch,
         },
       ],
-      [add, treeSearch, listSearch, t, handleSliderVisible, sliderVisible],
+      [add, treeSearch, listSearch, t],
     );
 
     return (
@@ -209,13 +195,13 @@ export const Sidebar = memo(
         sliderVisible={sliderVisible}
         className={sliderVisible ? 'close' : ''}
         isDragging={isDragging}
-        width={width}
       >
-        {sliderVisible ? (
-          <MenuUnfoldOutlined className="menuUnfoldOutlined" />
-        ) : (
-          <></>
-        )}
+        <SidebarCollapseButton
+          collapsed={sliderVisible}
+          expandLabel={t('open')}
+          collapseLabel={t('close')}
+          onToggle={handleSliderVisible}
+        />
         <ListNavWrapper defaultActiveKey="list">
           <ListPane key="list">
             <ListTitle {...titles[0]} />
@@ -233,36 +219,18 @@ export const Sidebar = memo(
 const Wrapper = styled.div<{
   sliderVisible: boolean;
   isDragging: boolean;
-  width: number;
 }>`
+  position: relative;
   height: 100%;
   transition: ${p => (!p.isDragging ? 'width 0.3s ease' : 'none')};
   &.close {
     position: absolute;
-    width: ${SPACE_TIMES(7.5)} !important;
+    width: 0 !important;
     height: 100%;
-    background: ${WHITE};
-    border-right: 1px solid #e9ecef;
-    .menuUnfoldOutlined {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
+    background: transparent;
+    border-right: 0;
     > div {
       display: ${p => (p.sliderVisible ? 'none' : 'flex')};
-    }
-    &:hover {
-      width: ${p => p.width + '%'} !important;
-      .menuUnfoldOutlined {
-        display: none;
-      }
-      > div {
-        display: flex;
-        &.hidden {
-          display: none;
-        }
-      }
     }
   }
 `;

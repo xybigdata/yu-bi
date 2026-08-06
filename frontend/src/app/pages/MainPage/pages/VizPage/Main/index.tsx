@@ -256,10 +256,10 @@ const Wrapper = styled.div`
   flex-direction: column;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
   &.close {
-    width: calc(100% - 30px) !important;
-    min-width: calc(100% - 30px) !important;
-    padding-left: 30px;
+    width: 100% !important;
+    min-width: 100% !important;
   }
 `;
 

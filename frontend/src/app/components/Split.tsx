@@ -116,6 +116,7 @@ function SplitWrapper({
 
   // Mount: create split instance
   useEffect(() => {
+    let cancelled = false;
     mountedRef.current = true;
 
     const initSplit = async () => {
@@ -141,7 +142,7 @@ function SplitWrapper({
         return;
       }
 
-      if (!mountedRef.current || !parentRef.current) {
+      if (cancelled || !mountedRef.current || !parentRef.current) {
         return;
       }
 
@@ -173,6 +174,7 @@ function SplitWrapper({
     initSplit();
 
     return () => {
+      cancelled = true;
       mountedRef.current = false;
       if (splitRef.current) {
         splitRef.current.destroy();

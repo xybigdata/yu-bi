@@ -71,7 +71,7 @@ export function Container() {
       sizes={sizes}
       minSize={[256, 0]}
       maxSize={[768, Infinity]}
-      gutterSize={8}
+      gutterSize={0}
       onDrag={setSizes}
       onDragStart={siderDragStart}
       onDragEnd={siderDragEnd}
@@ -79,7 +79,6 @@ export function Container() {
       sliderVisible={sliderVisible}
     >
       <Sidebar
-        width={sizes[0]}
         isDragging={isDragging}
         sliderVisible={sliderVisible}
         handleSliderVisible={handleSliderVisible}

@@ -76,8 +76,7 @@ const Container = styled.div`
   flex: 1;
   flex-direction: column;
   &.close {
-    width: calc(100% - 30px) !important;
-    min-width: calc(100% - 30px) !important;
-    padding-left: 30px;
+    width: 100% !important;
+    min-width: 100% !important;
   }
 `;

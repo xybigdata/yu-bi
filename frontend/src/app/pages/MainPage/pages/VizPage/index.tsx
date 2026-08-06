@@ -56,7 +56,7 @@ export function VizPage() {
         sizes={sizes}
         minSize={[256, 0]}
         maxSize={[768, Infinity]}
-        gutterSize={8}
+        gutterSize={0}
         onDrag={setSizes}
         onDragStart={siderDragStart}
         onDragEnd={siderDragEnd}
@@ -64,7 +64,6 @@ export function VizPage() {
         sliderVisible={sliderVisible}
       >
         <Sidebar
-          width={sizes[0]}
           isDragging={isDragging}
           i18nPrefix={'viz.sidebar'}
           sliderVisible={sliderVisible}
@@ -90,6 +89,7 @@ const Container = styled(Split)<{ sliderVisible: boolean }>`
   flex: 1;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
   .gutter-horizontal {
     display: ${p => (p.sliderVisible ? 'none' : 'block')};
   }

@@ -354,6 +354,7 @@ export function Navbar() {
                   to={`/organizations/${orgId}/${
                     name === 'toSub' ? subNavs[0].name : name
                   }`}
+                  aria-label={title}
                   activeClassName="active"
                   {...(isActive && { isActive })}
                 >

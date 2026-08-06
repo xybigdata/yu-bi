@@ -3,8 +3,6 @@ import {
   FolderFilled,
   FolderOpenFilled,
   FundProjectionScreenOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
 import {
@@ -38,20 +36,12 @@ import { Recycle } from '../Recycle';
 import { List } from './List';
 
 interface FoldersProps extends I18NComponentProps {
-  sliderVisible: boolean;
-  handleSliderVisible: (status: boolean) => void;
   selectedId?: string;
   className?: string;
 }
 
 export const Storyboards = memo(
-  ({
-    selectedId,
-    className,
-    i18nPrefix,
-    sliderVisible,
-    handleSliderVisible,
-  }: FoldersProps) => {
+  ({ selectedId, className, i18nPrefix }: FoldersProps) => {
     const dispatch = useAppDispatch();
     const orgId = useSelector(selectOrgId);
     const { showSaveForm } = useContext(SaveFormContext);
@@ -182,23 +172,11 @@ export const Storyboards = memo(
                 text: t('storyboards.recycle'),
                 prefix: <DeleteOutlined className="icon" />,
               },
-              {
-                key: 'collapse',
-                text: t(sliderVisible ? 'folders.open' : 'folders.close'),
-                prefix: sliderVisible ? (
-                  <MenuUnfoldOutlined className="icon" />
-                ) : (
-                  <MenuFoldOutlined className="icon" />
-                ),
-              },
             ],
             callback: (key, _, onNext) => {
               switch (key) {
                 case 'recycle':
                   onNext();
-                  break;
-                case 'collapse':
-                  handleSliderVisible(!sliderVisible);
                   break;
               }
             },
@@ -213,7 +191,7 @@ export const Storyboards = memo(
           onSearch: recycleSearch,
         },
       ],
-      [add, listSearch, recycleSearch, t, handleSliderVisible, sliderVisible],
+      [add, listSearch, recycleSearch, t],
     );
 
     return (

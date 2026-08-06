@@ -291,6 +291,18 @@ describe('Board read runtime smoke', () => {
     });
   });
 
+  test('keeps the title outside the board content scroll viewport', () => {
+    renderBoard({
+      dashboard: createDashboard('auto', 'auto-board'),
+    });
+
+    const title = screen.getByTestId('title-header');
+    const scrollViewport = screen.getByTestId('auto-board-core').parentElement!;
+
+    expect(scrollViewport).not.toContainElement(title);
+    expect(window.getComputedStyle(scrollViewport).overflowY).toBe('auto');
+  });
+
   test('should render free board without title and pass zoom control flag', () => {
     renderBoard({
       dashboard: createDashboard('free', 'auto-board'),

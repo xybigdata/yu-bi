@@ -57,7 +57,7 @@ export function SchedulePage() {
         sizes={sizes}
         minSize={[256, 0]}
         maxSize={[768, Infinity]}
-        gutterSize={8}
+        gutterSize={0}
         onDrag={setSizes}
         onDragStart={siderDragStart}
         onDragEnd={siderDragEnd}
@@ -65,7 +65,6 @@ export function SchedulePage() {
         sliderVisible={sliderVisible}
       >
         <Sidebar
-          width={sizes[0]}
           isDragging={isDragging}
           sliderVisible={sliderVisible}
           handleSliderVisible={handleSliderVisible}
@@ -102,8 +101,7 @@ const EditorPageWrapper = styled.div`
   min-width: 0;
   min-height: 0;
   &.close {
-    width: calc(100% - 30px) !important;
-    min-width: calc(100% - 30px) !important;
-    padding-left: 30px;
+    width: 100% !important;
+    min-width: 100% !important;
   }
 `;

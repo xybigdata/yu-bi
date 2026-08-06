@@ -1,38 +1,48 @@
 import classnames from 'classnames';
-import React, { FC, ReactNode, useMemo } from 'react';
+import React, {
+  ComponentPropsWithoutRef,
+  forwardRef,
+  ReactNode,
+  useMemo,
+} from 'react';
 import { Link, useLocation } from 'app/routerCompat';
 
-interface CompatNavLinkProps {
+interface CompatNavLinkProps extends Omit<
+  ComponentPropsWithoutRef<typeof Link>,
+  'children' | 'to'
+> {
   activeClassName?: string;
   children?: ReactNode;
-  className?: string;
   isActive?: (match: unknown, location: { pathname: string }) => boolean;
   to: string;
 }
 
-export const CompatNavLink: FC<CompatNavLinkProps> = ({
-  activeClassName,
-  children,
-  className,
-  isActive,
-  to,
-}) => {
-  const location = useLocation();
-  const active = useMemo(() => {
-    if (isActive) {
-      return isActive(undefined, { pathname: location.pathname });
-    }
-    return location.pathname === to;
-  }, [isActive, location.pathname, to]);
+export const CompatNavLink = forwardRef<HTMLAnchorElement, CompatNavLinkProps>(
+  (
+    { activeClassName, children, className, isActive, to, ...linkProps },
+    ref,
+  ) => {
+    const location = useLocation();
+    const active = useMemo(() => {
+      if (isActive) {
+        return isActive(undefined, { pathname: location.pathname });
+      }
+      return location.pathname === to;
+    }, [isActive, location.pathname, to]);
 
-  return (
-    <Link
-      className={classnames(className, {
-        [activeClassName || 'active']: active,
-      })}
-      to={to}
-    >
-      {children}
-    </Link>
-  );
-};
+    return (
+      <Link
+        {...linkProps}
+        ref={ref}
+        className={classnames(className, {
+          [activeClassName || 'active']: active,
+        })}
+        to={to}
+      >
+        {children}
+      </Link>
+    );
+  },
+);
+
+CompatNavLink.displayName = 'CompatNavLink';

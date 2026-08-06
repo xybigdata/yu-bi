@@ -5,8 +5,6 @@ import {
   FolderOpenFilled,
   FolderOutlined,
   MailOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
   WechatOutlined,
 } from '@ant-design/icons';
 import { message } from 'antd';
@@ -19,14 +17,14 @@ import {
 } from 'app/components';
 import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
+import { SidebarCollapseButton } from 'app/pages/MainPage/components/SidebarCollapseButton';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
-import { dispatchResize } from 'app/utils/dispatchResize';
 import { CommonFormTypes } from 'globalConstants';
 import { memo, useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
-import { LEVEL_5, SPACE_TIMES, SPACE_XS } from 'styles/StyleConstants';
+import { LEVEL_5, SPACE_XS } from 'styles/StyleConstants';
 import { getInsertedNodeIndex } from 'utils/utils';
 import { JobTypes } from '../constants';
 import { useToScheduleDetails } from '../hooks';
@@ -45,13 +43,12 @@ import { useScheduleRouteParams } from '../hooks';
 
 interface SidebarProps extends I18NComponentProps {
   isDragging: boolean;
-  width: number;
   sliderVisible: boolean;
   handleSliderVisible: (status: boolean) => void;
 }
 
 export const Sidebar = memo(
-  ({ width, isDragging, sliderVisible, handleSliderVisible }: SidebarProps) => {
+  ({ isDragging, sliderVisible, handleSliderVisible }: SidebarProps) => {
     const dispatch = useAppDispatch();
     const { scheduleId } = useScheduleRouteParams();
     const orgId = useSelector(selectOrgId);
@@ -146,20 +143,13 @@ export const Sidebar = memo(
       [toDetails, orgId, showSaveForm, scheduleData, dispatch, t],
     );
 
-    const moreMenuClick = useCallback(
-      (key, _, onNext) => {
-        switch (key) {
-          case 'recycle':
-            onNext();
-            break;
-          case 'collapse':
-            handleSliderVisible(!sliderVisible);
-            dispatchResize();
-            break;
-        }
-      },
-      [handleSliderVisible, sliderVisible],
-    );
+    const moreMenuClick = useCallback((key, _, onNext) => {
+      switch (key) {
+        case 'recycle':
+          onNext();
+          break;
+      }
+    }, []);
 
     const titles = useMemo(
       () => [
@@ -184,15 +174,6 @@ export const Sidebar = memo(
                 text: t('index.recycle'),
                 prefix: <DeleteOutlined className="icon" />,
               },
-              {
-                key: 'collapse',
-                text: t(sliderVisible ? 'index.open' : 'index.close'),
-                prefix: sliderVisible ? (
-                  <MenuUnfoldOutlined className="icon" />
-                ) : (
-                  <MenuFoldOutlined className="icon" />
-                ),
-              },
             ],
             callback: moreMenuClick,
           },
@@ -205,7 +186,7 @@ export const Sidebar = memo(
           onSearch: archivedSearch,
         },
       ],
-      [t, listSearch, toAdd, sliderVisible, moreMenuClick, archivedSearch],
+      [t, listSearch, toAdd, moreMenuClick, archivedSearch],
     );
 
     return (
@@ -213,13 +194,13 @@ export const Sidebar = memo(
         sliderVisible={sliderVisible}
         className={sliderVisible ? 'close' : ''}
         isDragging={isDragging}
-        width={width}
       >
-        {sliderVisible ? (
-          <MenuUnfoldOutlined className="menuUnfoldOutlined" />
-        ) : (
-          ''
-        )}
+        <SidebarCollapseButton
+          collapsed={sliderVisible}
+          expandLabel={t('index.open')}
+          collapseLabel={t('index.close')}
+          onToggle={handleSliderVisible}
+        />
         <ListNavWrapper defaultActiveKey="list">
           <ListPane key="list">
             <ListTitle {...titles[0]} />
@@ -250,8 +231,8 @@ export const Sidebar = memo(
 const Wrapper = styled.div<{
   sliderVisible: boolean;
   isDragging: boolean;
-  width: number;
 }>`
+  position: relative;
   z-index: ${LEVEL_5};
   display: flex;
   flex-shrink: 0;
@@ -271,29 +252,9 @@ const Wrapper = styled.div<{
   }
   &.close {
     position: absolute;
-    width: ${SPACE_TIMES(7.5)} !important;
+    width: 0 !important;
     height: 100%;
-    .menuUnfoldOutlined {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-    &:hover {
-      width: ${p => p.width + '%'} !important;
-      .menuUnfoldOutlined {
-        display: none;
-      }
-      > ul {
-        display: block;
-      }
-      > div {
-        display: flex;
-        &.hidden {
-          display: none;
-        }
-      }
-    }
+    box-shadow: none;
   }
 `;
 

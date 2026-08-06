@@ -103,7 +103,7 @@ export const Board: FC<BoardProps> = memo(
             >
               {!hideTitle && <TitleHeader />}
               {!readBoardHide && (
-                <>
+                <BoardContent>
                   {boardType === 'auto' && (
                     <AutoBoardCore boardId={dashboard.id} />
                   )}
@@ -113,7 +113,7 @@ export const Board: FC<BoardProps> = memo(
                       showZoomCtrl={showZoomCtrl}
                     />
                   )}
-                </>
+                </BoardContent>
               )}
 
               <FullScreenPanel />
@@ -190,5 +190,16 @@ const Wrapper = styled.div`
     flex: 1;
     flex-direction: column;
     min-height: 0;
+    overflow: hidden;
   }
+`;
+
+const BoardContent = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 `;

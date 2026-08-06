@@ -118,6 +118,7 @@ const Container = styled.div`
   flex: 1;
   flex-direction: column;
   height: 100%;
+  overflow: hidden;
 
   &.selected {
     display: flex;
