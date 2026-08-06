@@ -15,6 +15,8 @@
 !/docs/agents/*.md
 /.tmp/
 /logs/
+/bin/h2/*.mv.db
+/bin/h2/*.trace.db
 
 /server/src/main/resources/javascript/**
 **/target/**

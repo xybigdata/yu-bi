@@ -38,11 +38,11 @@ class ServerQueryEngineAdapterTest {
 
     @Test
     void shouldReadAndDecryptSourceOnlyWhenExecutingProvider() throws Exception {
-        String secret = "query-engine-adapter-test";
+        String secret = "0123456789abcdef0123456789abcdef";
         ApplicationContext applicationContext = mock(ApplicationContext.class);
         Environment environment = mock(Environment.class);
         when(applicationContext.getEnvironment()).thenReturn(environment);
-        when(environment.getProperty("yubi.security.token.secret", "d@a$t%a^r&a*t")).thenReturn(secret);
+        when(environment.getProperty("yubi.security.token.secret")).thenReturn(secret);
         new Application().setApplicationContext(applicationContext);
 
         Source source = new Source();

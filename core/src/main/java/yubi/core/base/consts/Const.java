@@ -98,9 +98,6 @@ public class Const {
 
     public static final int IMAGE_HEIGHT = 256;
 
-
     public static final String ENCRYPT_FLAG = "_encrypted_";
-
-    public static final String USER_DEFAULT_PSW = "123456";
 
 }

@@ -61,7 +61,7 @@ import static org.mockito.Mockito.when;
 
 class ShareServiceImplDownloadTest {
 
-    private static final String TOKEN_SECRET = "agent-ready-query-download";
+    private static final String TOKEN_SECRET = "0123456789abcdef0123456789abcdef";
 
     private ShareMapperExt shareMapper;
 
@@ -81,7 +81,7 @@ class ShareServiceImplDownloadTest {
         ApplicationContext applicationContext = mock(ApplicationContext.class);
         Environment environment = mock(Environment.class);
         when(applicationContext.getEnvironment()).thenReturn(environment);
-        when(environment.getProperty("yubi.security.token.secret", "d@a$t%a^r&a*t"))
+        when(environment.getProperty("yubi.security.token.secret"))
                 .thenReturn(TOKEN_SECRET);
         when(environment.getProperty("yubi.env.file-path")).thenReturn(tempDir.toString());
         new Application().setApplicationContext(applicationContext);

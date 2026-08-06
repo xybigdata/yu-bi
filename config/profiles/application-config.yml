@@ -2,8 +2,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://${datasource.ip:null}:${datasource.port:3306}/${datasource.database:yubi}?&allowMultiQueries=true&characterEncoding=utf-8
-    username: ${datasource.username:root}
-    password: ${datasource.password:123456}
+    username: ${datasource.username:}
+    password: ${datasource.password:}
 
 # security:
 #   oauth2:
@@ -74,7 +74,7 @@ server:
   ssl:
     enabled: false
     key-store: keystore.p12 # Absolute path
-    key-store-password: password
+    key-store-password: ${YUBI_SSL_KEY_STORE_PASSWORD:}
     keyStoreType: PKCS12
     keyAlias: tomcat
 
@@ -88,8 +88,8 @@ yubi:
   tenant-management-mode: platform
 
   user:
-    admin-username: ${yubi.admin-username:demo} # 启动时自动提升为管理员(ORG_OWNER)的用户名，留空则不启用
-    register: true # 是否允许注册
+    admin-username: ${YUBI_ADMIN_USERNAME:} # 启动时自动提升为管理员(ORG_OWNER)的用户名，留空则不启用
+    register: ${YUBI_USER_REGISTER:false} # 是否允许注册
     active:
       send-mail: ${yubi.send-mail:false}  # 注册用户时是否需要邮件验证激活
       expire-hours: ${yubi.register.expire-hours:48} # 注册邮件有效期/小时
@@ -98,7 +98,7 @@ yubi:
 
   security:
     token:
-      secret: "d@a$t%a^r&a*t" #加密密钥
+      secret: ${YUBI_SECURITY_TOKEN_SECRET:} # 加密密钥，非 demo 环境必须通过环境变量配置
       timeout-min: 30  # 登录会话有效时长，单位：分钟。
 
   env:

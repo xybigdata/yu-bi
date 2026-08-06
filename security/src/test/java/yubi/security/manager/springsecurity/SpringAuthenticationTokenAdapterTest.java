@@ -5,8 +5,8 @@ import yubi.security.base.JwtToken;
 import yubi.security.util.JwtUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.core.env.Environment;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.mock.env.MockEnvironment;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -18,8 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class SpringAuthenticationTokenAdapterTest {
 
@@ -27,11 +25,10 @@ class SpringAuthenticationTokenAdapterTest {
 
     @BeforeAll
     static void setUpApplicationContext() {
-        Environment environment = mock(Environment.class);
-        when(environment.getProperty("yubi.security.token.secret", "d@a$t%a^r&a*t"))
-                .thenReturn("d@a$t%a^r&a*t");
-        ApplicationContext context = mock(ApplicationContext.class);
-        when(context.getEnvironment()).thenReturn(environment);
+        MockEnvironment environment = new MockEnvironment()
+                .withProperty("yubi.security.token.secret", "0123456789abcdef0123456789abcdef");
+        GenericApplicationContext context = new GenericApplicationContext();
+        context.setEnvironment(environment);
         new Application().setApplicationContext(context);
     }
 

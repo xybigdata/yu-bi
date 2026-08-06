@@ -1,33 +1,43 @@
-# Security Policy
+# 安全策略
 
-## Supported Maintenance Line
+## 支持范围
 
-This repository currently maintains one active line:
+| 分支或版本线                 | 安全支持状态           |
+| ---------------------------- | ---------------------- |
+| `main`                       | 支持，包含下一版本修复 |
+| `v0.1.x`                     | 支持当前最新补丁版本   |
+| 更早提交、历史分支及上游版本 | 不提供安全回溯保证     |
 
-| Branch / Line | Status |
-| --- | --- |
-| `codex/stack-modernization` and follow-up maintenance work | supported |
+安全修复会优先进入 `main`，并在风险和兼容性允许时回溯到仍受支持的发布线。使用者应升级到对应版本线的最新补丁版本。
 
-Older states of the repository may contain known issues and are not guaranteed to receive security backports.
+## 私密报告漏洞
 
-## Reporting a Vulnerability
+不要在公开 Issue、Discussion、Pull Request 或社交平台披露漏洞细节。
 
-If you discover a security issue:
+首选通过 GitHub 的 [Private Vulnerability Reporting](https://github.com/xybigdata/yu-bi/security/advisories/new) 创建私密安全报告。若该入口暂时不可用，请发送邮件至 `congyu_email@163.com`，主题注明 `[yu-bi security]`。只需选择一个私密渠道，无需重复提交。
 
-1. Do not publish exploit details in a public issue first.
-2. Contact the current maintainer before broad disclosure.
-3. Include:
-   - affected version or commit
-   - reproduction steps
-   - impact assessment
-   - suggested mitigation if available
+报告请尽量包含：
 
-If no private reporting channel has been published yet, open a minimal public issue that only states a security report is needed, without disclosing the exploit details.
+- 受影响的版本、tag 或 commit；
+- 可复现的最小步骤或概念验证；
+- 影响范围、所需前置条件和可能的利用场景；
+- 已尝试的缓解措施或修复建议；
+- 希望采用的署名方式。
 
-## Response Expectations
+请不要附带真实生产数据、有效凭据或不必要的个人信息。
 
-Best-effort targets for this independently maintained project:
+## 响应目标
 
-- initial acknowledgement: within 7 days
-- triage outcome: as soon as the issue is reproducible
-- public fix disclosure: after a patch or mitigation is ready
+本项目由独立维护者以尽力而为的方式响应：
+
+- 7 天内确认收到报告；
+- 完成复现后尽快给出初步分级和处理计划；
+- 修复或缓解措施可用后，再协调公开披露时间。
+
+复杂问题可能需要更长时间。维护者会在私密报告中同步关键进展；请在修复发布前保留合理的协调窗口。
+
+## 披露与致谢
+
+修复发布后，项目会在不增加使用者风险的前提下说明影响版本、修复版本和缓解措施。除非报告者要求匿名或不公开，贡献者可在 Release Notes 或安全公告中获得致谢。
+
+本策略只用于安全漏洞。普通缺陷和使用问题请参见 [SUPPORT.md](./SUPPORT.md)。

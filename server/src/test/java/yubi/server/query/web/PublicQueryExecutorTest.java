@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 
 class PublicQueryExecutorTest {
 
-    private static final String TOKEN_SECRET = "query-web-test-secret";
+    private static final String TOKEN_SECRET = "0123456789abcdef0123456789abcdef";
 
     private ExecuteQueryUseCase useCase;
     private ServerQueryExecutionContextFactory contextFactory;
@@ -41,7 +41,7 @@ class PublicQueryExecutorTest {
         ApplicationContext applicationContext = mock(ApplicationContext.class);
         Environment environment = mock(Environment.class);
         when(applicationContext.getEnvironment()).thenReturn(environment);
-        when(environment.getProperty("yubi.security.token.secret", "d@a$t%a^r&a*t")).thenReturn(TOKEN_SECRET);
+        when(environment.getProperty("yubi.security.token.secret")).thenReturn(TOKEN_SECRET);
         new Application().setApplicationContext(applicationContext);
 
         useCase = mock(ExecuteQueryUseCase.class);

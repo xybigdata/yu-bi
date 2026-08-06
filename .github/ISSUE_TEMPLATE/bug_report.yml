@@ -1,0 +1,81 @@
+name: 错误报告 / Bug report
+description: 报告可复现的软件缺陷
+title: "[Bug] "
+labels:
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢报告问题。安全漏洞请勿在此披露，请改用仓库安全策略中的私密渠道。
+  - type: input
+    id: version
+    attributes:
+      label: yu-bi 版本
+      description: 请填写 Release tag 或 commit SHA。
+      placeholder: v0.1.0 或 abc1234
+    validations:
+      required: true
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: 部署方式
+      options:
+        - Release 安装包
+        - 源码构建
+        - 本地开发环境
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境信息
+      description: 请列出操作系统、JDK、Node.js、浏览器和数据库的相关版本，并移除敏感信息。
+      placeholder: |
+        OS: macOS 15
+        JDK: 21
+        Browser: Chrome 140
+        Database: MySQL 8.4
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 最小复现步骤
+      description: 从干净状态开始，给出能稳定触发问题的最少步骤。
+      placeholder: |
+        1. 创建……
+        2. 打开……
+        3. 点击……
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望结果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+      description: 可附脱敏日志、错误堆栈或截图。
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: 补充信息
+      description: 请说明复现频率、可能的回归版本、临时规避方式或其他上下文。
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 提交确认
+      options:
+        - label: 我已搜索现有 Issue，未发现相同问题。
+          required: true
+        - label: 我已移除凭据、个人数据和生产连接信息。
+          required: true
+        - label: 这不是需要私密报告的安全漏洞。
+          required: true

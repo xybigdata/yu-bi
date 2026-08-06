@@ -11,3 +11,5 @@
 | `wontfix` | `wontfix` | 不处理 |
 
 当工程技能提及规范角色时，应使用表中对应的 GitHub 标签。若仓库标签词汇调整，更新本文件中的“GitHub 标签”列。
+
+新 Issue 默认进入 `needs-triage`。信息不足时转为 `needs-info`；范围和验收条件明确后转为 `ready-for-agent` 或 `ready-for-human`；决定不处理时标记 `wontfix` 并说明原因。

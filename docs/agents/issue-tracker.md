@@ -2,6 +2,8 @@
 
 本仓库的需求、缺陷和 PRD 使用 GitHub Issues 管理，并通过 `gh` CLI 操作。
 
+疑似安全漏洞是例外：先遵循根目录 `SECURITY.md` 使用私密渠道，不得创建包含复现细节、凭据、日志或利用方式的公开 Issue。
+
 - 创建：`gh issue create --title "..." --body "..."`
 - 查看：`gh issue view <编号> --comments`
 - 列表：`gh issue list --state open`
@@ -10,6 +12,8 @@
 - 关闭：`gh issue close <编号> --comment "..."`
 
 在仓库中运行时，`gh` 会自动识别 `xybigdata/yu-bi`。
+
+执行任何写操作前，先用 `gh auth status` 和 `gh repo view --json nameWithOwner` 确认认证有效且目标仓库确为 `xybigdata/yu-bi`。
 
 ## Pull Request 作为分诊入口
 
