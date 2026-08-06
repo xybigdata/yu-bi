@@ -19,7 +19,6 @@
 
 package yubi.server.service.impl;
 
-import yubi.core.base.consts.Const;
 import yubi.core.base.consts.TenantManagementMode;
 import yubi.core.base.consts.UserIdentityType;
 import yubi.core.base.exception.BaseException;
@@ -413,7 +412,7 @@ public class UserServiceImpl extends BaseService implements UserService {
     public User addUserToOrg(UserAddParam userAddParam, String orgId) throws MessagingException, UnsupportedEncodingException {
         securityManager.requireOrgOwner(orgId);
         if (StringUtils.isBlank(userAddParam.getPassword())) {
-            userAddParam.setPassword(Const.USER_DEFAULT_PSW);
+            Exceptions.tr(ParamException.class, "error.param.empty", "resource.user.password");
         }
         if (StringUtils.isBlank(userAddParam.getEmail())) {
             String str = userAddParam.getUsername() + LocalDate.now();

@@ -1,121 +1,109 @@
-# yu-bi 独立开源项目
+# yu-bi
 
 <p align="center">
   <img src="frontend/public/brand/yu-bi-logo.svg" alt="yu-bi logo" width="180" />
 </p>
 
-> 这是一个独立维护的开源分析项目，目标是让代码库继续可运行、可升级、可发布，并保持公开维护。
+<p align="center">
+  独立维护的开源商业智能与数据可视化平台。
+</p>
+
+<p align="center">
+  <a href="./README.md">English</a> · 简体中文 ·
+  <a href="https://github.com/xybigdata/yu-bi/releases">版本下载</a> ·
+  <a href="./Deployment.md">部署文档</a> ·
+  <a href="./CONTRIBUTING.md">参与贡献</a>
+</p>
+
+## 产品概览
+
+yu-bi 帮助团队连接数据、创建可复用的数据视图和图表，并把分析结果组织成仪表板或故事板，在组织内协作与分享。当前主要能力包括：
+
+- 关系型数据源、SQL 数据视图与可复用数据模型；
+- 交互式图表、仪表板和演示型故事板；
+- 组织、角色、成员和资源权限管理；
+- 分享、定时任务、截图及导出相关工作流；
+- 数据提供器和可视化扩展能力。
+
+本仓库源自 [`running-elephant/datart`](https://github.com/running-elephant/datart)，现以 `yu-bi` 品牌独立开发。它不是原项目的官方发行版，也不再把原仓库作为持续维护来源。归属信息参见 [NOTICE](./NOTICE)。
 
 ## 项目状态
 
-这个仓库当前按独立开源项目持续维护。
+yu-bi 正处于首个独立发布系列，当前重点是建立可复现的发布流程、安全的部署默认值、现代工具链支持，以及尽量保持兼容的持续维护。可用版本、安装包和版本说明以 [GitHub Releases](https://github.com/xybigdata/yu-bi/releases) 页面为准。
 
-当前维护目标：
+目前没有发布官方容器镜像，请使用 Release 安装包或从源码构建。
 
-- 保持项目能够在现代工具链上继续构建和运行
-- 在可控范围内保持主要产品能力和行为稳定
-- 持续进行安全、依赖和运行时维护
-- 所有维护工作继续保持开源、可审阅、可追溯
+## 快速开始
 
-这个仓库当前以 `yu-bi` 品牌独立维护。它源自原始 `datart` 代码库，但现在按独立项目演进，不再把原上游作为维护来源，也不冒充原项目官方仓库。
-
-## 项目来源
-
-- 原始项目：`running-elephant/datart`
-- 原始许可证：`Apache-2.0`
-- 本仓库继续保留 Apache 2.0 要求的许可证与归属信息，并在此基础上作为独立项目继续演进
-
-## 本项目重点维护内容
-
-当前维护主线主要覆盖：
-
-- JDK 21 兼容
-- Spring Boot 3 / Spring Cloud 新基线
-- Node 24 本地开发兼容
-- 基于 Vite 的前端构建链
-- 在尽量不破坏既有功能的前提下推进依赖升级
-- 逐步降低测试链、Shiro、安全体系、富文本和旧运行时集成等历史技术包袱
-
-## 当前技术基线
-
-- Java：`21`
-- Spring Boot：`3.5.15`
-- Spring Cloud：`2025.0.3`
-- Node.js：`24.x`
-- npm：`11.x`
-- 前端构建：`Vite 8.1.0`
-- React：`19.2.7`
-
-## 本地开发
-
-### 后端
-
-部署相关说明参见 [Deployment.md](./Deployment.md)。
-
-常用命令：
+本地体验可先从 [Releases](https://github.com/xybigdata/yu-bi/releases) 下载最新安装包，然后执行：
 
 ```bash
-# 仅验证后端 Java 编译，跳过 server 模块绑定的前端 npm 构建。
-mvn -pl server -am -DskipTests -Dexec.skip=true compile
+unzip <yu-bi-install-package>.zip -d yu-bi-dist
+cd yu-bi-dist
+bash bin/yu-bi-server.sh start
+```
 
-# 完整发布包构建，会执行前端 npm 安装、前端构建和安装包 assembly。
+访问 <http://127.0.0.1:8080>。未配置外部数据库时，应用会进入仅供本地体验的 demo 模式。不要把 demo 模式暴露到公网，也不要用它保存生产数据。
+
+生产部署前必须配置外部数据库、至少 32 字节且仅属于当前部署的 `YUBI_SECURITY_TOKEN_SECRET`，并规划首个用户初始化流程。注册与自动提升管理员默认关闭，完整配置和备份要求参见 [Deployment.md](./Deployment.md)。
+
+从源码构建安装包：
+
+```bash
+git clone https://github.com/xybigdata/yu-bi.git
+cd yu-bi
 mvn -pl server -am -DskipTests package
 ```
 
-### 前端
+构建过程会先安装并构建前端，再把安装包输出到仓库根目录。正式 Release 产物从干净检出构建并完成验证；本地生成的安装包只属于开发产物。
+
+## 开发环境
+
+### 工具链基线
+
+| 范围         | 支持版本 |
+| ------------ | -------- |
+| Java         | 21       |
+| Maven        | 3.9+     |
+| Spring Boot  | 4.0.7    |
+| Spring Cloud | 2025.1.2 |
+| Node.js      | 24.x     |
+| npm          | 11.x     |
+| React        | 19.2.7   |
+| Vite         | 8.1.0    |
+
+后端编译与测试：
+
+```bash
+mvn -pl server -am -DskipTests -Dexec.skip=true compile
+mvn test
+```
+
+前端检查：
 
 ```bash
 cd frontend
-# 使用 frontend/.nvmrc 或 frontend/.node-version 选择受支持的 Node 运行时。
 npm ci
 npm run verify:toolchain
 npm run checkTs
-npm run build:task
-npm run build
-npm run build:report:check:current
-npm run build:report:gzip:check:current
 npm run test:ci
+npm run build
 ```
 
 ## 文档入口
 
-- 部署说明：[Deployment.md](./Deployment.md)
-- 安全策略：[SECURITY.md](./SECURITY.md)
-- 维护者说明：[MAINTAINERS.md](./MAINTAINERS.md)
-- 路线图：[ROADMAP.md](./ROADMAP.md)
-- Agent-ready 架构改造计划：[docs/agent-ready-architecture-plan.md](./docs/agent-ready-architecture-plan.md)
-- 变更记录：[CHANGELOG.md](./CHANGELOG.md)
+- [部署说明](./Deployment.md)
+- [变更记录](./CHANGELOG.md)
+- [路线图](./ROADMAP.md)
+- [贡献指南](./CONTRIBUTING.md)
+- [支持说明](./SUPPORT.md)
+- [安全策略](./SECURITY.md)
+- [维护者](./MAINTAINERS.md)
 
-## 维护策略
+## 参与贡献与获取支持
 
-这个仓库当前接受以下类型的持续维护：
-
-- 构建和运行时兼容修复
-- 依赖升级
-- 测试稳定性治理
-- 文档与发布流程完善
-- 能显著降低现代化升级风险的定向重构
-
-涉及较大行为变化或架构变化的改造，应先把迁移路径说明清楚。
-
-## 参与贡献
-
-欢迎贡献，尤其是以下方向：
-
-- 现代环境下失败的构建或测试修复
-- 依赖升级
-- JDK / Spring / Node 兼容问题
-- 安全修复
-- 降低旧技术栈耦合的迁移工作
-
-如果改动较大，建议先提 issue 或 draft PR，先把迁移边界说明清楚。
-
-## 安全问题
-
-安全问题提交流程参见 [SECURITY.md](./SECURITY.md)。
+欢迎提交缺陷报告、功能建议、文档、测试和范围清晰的维护改动。发起 Pull Request 前请先阅读 [CONTRIBUTING.md](./CONTRIBUTING.md)；使用问题和故障排查参见 [SUPPORT.md](./SUPPORT.md)。安全漏洞不得在公开 Issue 中披露，请使用 [SECURITY.md](./SECURITY.md) 规定的私密渠道。
 
 ## 许可证
 
-本仓库继续使用 [Apache License 2.0](./LICENSE)。
-
-原项目归属信息继续保留；本仓库后续新增代码默认也在 Apache 2.0 下发布，除非某个文件明确另行说明。项目来源和归属说明见 [NOTICE](./NOTICE)。
+yu-bi 使用 [Apache License 2.0](./LICENSE) 发布。上游归属与项目来源信息保留在 [NOTICE](./NOTICE) 中。

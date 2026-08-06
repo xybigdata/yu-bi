@@ -1,242 +1,119 @@
----
-部署
----
+# yu-bi 部署指南
 
-# 0. 在线体验 Demo
+本文面向 `v0.1.x`。正式可用的版本和安装包以 [GitHub Releases](https://github.com/xybigdata/yu-bi/releases) 为准。
 
-- 当前不再维护公开 Demo，请以本地或自建环境验证为准
-- 用户名：demo
-- 密码：123456
+当前没有官方容器镜像。请使用 Release 安装包或从源码构建，不要使用来源不明的同名镜像。
 
-# 1. Docker 部署
+## 1. 本地体验
 
-```shell
-docker run -p 8080:8080 yubi/yu-bi
+本地体验需要 JDK 21。下载安装包后执行：
+
+```bash
+unzip yu-bi-server-v0.1.0-install.zip -d yu-bi-dist
+cd yu-bi-dist
+bash bin/yu-bi-server.sh start
 ```
-启动后可访问 <http://docker_ip:8080>  
-默认账户:用户名`demo`,密码`123456`
 
-## 1.1. 配置外部数据库
-在没有外部数据库配置的情况下，yu-bi 使用 H2 作为应用程序数据库。强烈建议您将自己的 Mysql 数据库配置为应用程序数据库。
+访问 <http://127.0.0.1:8080>。未配置外部数据库时，应用使用安装包内的受控 H2 种子进入 demo 模式。
 
-创建空文件 `yubi.conf`，将以下内容写入。
+demo 模式只用于本机体验：不要暴露到公网，不要存放生产数据，也不要把其中的固定演示配置复制到生产环境。停止服务可执行：
 
-```shell
-# 数据库连接配置
-datasource.ip=   
-datasource.port=
-datasource.database=
-datasource.username=
-datasource.password=
+```bash
+bash bin/yu-bi-server.sh stop
+```
 
-# server
+## 2. 生产准备
+
+生产部署至少需要：
+
+- JDK 21；
+- 外部 MySQL；目标数据库版本必须先在隔离环境验证迁移与查询兼容性，当前项目尚未发布完整兼容矩阵；
+- 独立且可备份的用户文件目录；
+- 至少 32 字节、仅属于当前部署的令牌密钥；
+- 反向代理、TLS 和数据库访问控制等基础安全措施。
+
+创建数据库时使用 UTF-8 编码：
+
+```sql
+CREATE DATABASE `yubi` CHARACTER SET 'utf8' COLLATE 'utf8_general_ci';
+```
+
+首次启动和版本升级会执行数据库迁移。数据库账号需要具备完成迁移所需的 DDL/DML 权限；迁移稳定后可按实际访问需求收紧权限。
+
+## 3. 基础配置
+
+编辑安装目录下的 `config/yubi.conf`：
+
+```properties
+datasource.ip=127.0.0.1
+datasource.port=3306
+datasource.database=yubi
+datasource.username=<database-user>
+datasource.password=<database-password>
+
 server.port=8080
-server.address=0.0.0.0
+server.address=127.0.0.1
+yubi.address=https://bi.example.com
+```
 
-# yubi config
-yubi.address=http://127.0.0.1
-yubi.send-mail=false
+不要把包含真实密码的 `yubi.conf` 提交到 Git。限制配置文件的读取权限，并通过部署平台的密钥管理能力注入敏感值。
+
+启动前必须提供稳定的令牌密钥：
+
+```bash
+export YUBI_SECURITY_TOKEN_SECRET='<at-least-32-byte-random-secret>'
+bash bin/yu-bi-server.sh start
+```
+
+该密钥用于签发和校验登录令牌。同一集群内所有实例必须使用同一密钥；部署后不要随意更换，否则现有登录态会失效。不要使用文档占位符、demo 密钥或公开示例值。
+
+## 4. 首个用户
+
+生产配置默认关闭公开注册，也不会自动提升固定用户名。首次初始化时可在受控网络内临时开放注册：
+
+```bash
+export YUBI_USER_REGISTER=true
+export YUBI_SECURITY_TOKEN_SECRET='<the-same-stable-secret>'
+bash bin/yu-bi-server.sh start
+```
+
+创建并验证首个账号后停止服务，移除 `YUBI_USER_REGISTER`（或设置为 `false`），再重新启动。确认注册入口已关闭后，才可对外提供服务。
+
+如需在启动时把已存在的指定用户提升为其组织的 `ORG_OWNER`，可临时设置 `YUBI_ADMIN_USERNAME`。完成后应移除该变量，避免后续启动产生意外授权。
+
+## 5. 用户文件与可选服务
+
+默认用户文件位于安装目录的 `files/`。生产环境应把该目录放在独立持久化存储上，并纳入备份、恢复和容量监控。
+
+截图和 PDF 导出需要可访问的 Chrome WebDriver。可在 `config/yubi.conf` 中配置：
+
+```properties
 yubi.webdriver-path=http://127.0.0.1:4444/wd/hub
 ```
 
-运行 `docker run -d --name yu-bi -v your_path/yubi.conf:/yu-bi/config/yubi.conf -p 8080:8080 yubi/yu-bi`
+WebDriver 不可用时，截图或 PDF 导出会失败，但不应影响应用的其他核心功能。邮件、Redis、OAuth 等高级配置位于 `config/profiles/application-config.yml`，修改前先备份并使用测试环境验证。
 
-## 1.2. 将用户文件挂载到外部
-
-默认配置下，用户文件（头像，文件数据源等）保存在 `files` 文件夹下，将这个路径挂载到外部，以在进行应用升级时，能够保留这些文件。
-
-在命令中增加参数 `-v your_path/files:/yu-bi/files` 即可。以下是完整命令：
-
-`docker run -d --name yu-bi -v your_path/yubi.conf:/yu-bi/config/yubi.conf -v your_path/files:/yu-bi/files -p 8080:8080 yubi/yu-bi`
-
-***更多配置请以当前仓库文档与配置文件示例为准。***
-
-# 2. 本地部署 
-## 2.1. 环境准备
-
-- JDK 21+
-- MySql5.7+
-- yu-bi 安装包（例如 `yu-bi-server-2.0.0-install.zip`）
-- Mail Server （可选）
-- [ChromeWebDriver](https://chromedriver.chromium.org/) （可选）
-- Redis （可选）
-
-方式1 :解压安装包 (官方提供的包)
+## 6. 启停与验证
 
 ```bash
-unzip yu-bi-server-2.0.0-install.zip
+bash bin/yu-bi-server.sh start
+bash bin/yu-bi-server.sh status
+bash bin/yu-bi-server.sh restart
+bash bin/yu-bi-server.sh stop
 ```
 
-方式2 :自行编译
+启动后至少验证：
 
-```bash
-git clone https://github.com/xybigdata/yu-bi.git
+- 登录页和健康检查可访问；
+- 注册开关符合预期；
+- 数据库迁移无报错；
+- 用户文件目录可写且备份任务生效；
+- 使用到截图或 PDF 导出时，WebDriver 链路可用。
 
-cd yu-bi
+## 7. 升级与回滚
 
-mvn clean package -Dmaven.test.skip=true
+升级前备份数据库、用户文件和外部配置，并在隔离环境验证迁移。不要覆盖旧安装目录，建议解压到新目录后复用外部配置和持久化目录。
 
-cp ./yu-bi-server-2.0.0-install.zip  ${deployment_basedir}
+令牌密钥在升级前后必须保持一致。若升级失败，先停止新版本，再按已验证的数据库恢复方案和旧安装目录回滚；不要在未确认迁移兼容性时让多个版本同时写入同一数据库。
 
-cd ${deployment_basedir}
-
-unzip yu-bi-server-2.0.0-install.zip
-
-```
-
-## 2.2. 以独立模式运行
-
-安装包解压后，即可运行 `./bin/yu-bi-server.sh start` 启动 yu-bi，启动后默认访问地址是 <http://127.0.0.1:8080>，默认用户 `demo/123456`
-
-***独立模式使用内置数据库作为应用数据库，数据的安全性和数据迁移无法保证，建议配置外部数据库作为应用数据库***
-
-## 2.3. 配置外部数据库，要求Mysql5.7及以上版本。
-
-- 创建数据库，指定数据库编码为utf8
-
-```bash
-mysql> CREATE DATABASE `yubi` CHARACTER SET 'utf8' COLLATE 'utf8_general_ci';
-```
-
-***注意：较老历史版本曾需要额外初始化脚本；当前维护线下，创建好数据库即可，在初次连接时会自动初始化数据库。***
-
-***首次连接数据库(或者版本升级)时,建议使用一个权限较高的数据库账号登录(如root账号)。因为首次连接会执行数据库初始化脚本，如果使用的数据库账号权限太低，会导致数据库初始化失败***
-
-- 基础配置：配置文件位于 config/yubi.conf
-
-```bash
-   数据库配置(必填):
-    1. datasource.ip(数据库IP地址)
-    2. datasource.port(数据库端口数据库端口)
-    3. datasource.database(指定数据库)
-    4. datasource.username(用户名)
-    5. datasource.password(密码)
-    
-   其它配置(选填):
-    1. server.port(应用绑定端口地址,默认8080)
-    2. server.address(应用绑定IP地址,默认 0.0.0.0)
-    3. yubi.address(yubi 外部可访问地址,默认http://127.0.0.1)
-    4. yubi.send-mail(用户注册是否使用邮件激活,默认 false )
-    5. yubi.webdriver-path(截图驱动)
-```
-
-## 2.4. 高级配置 (可选) : 配置文件位于 config/profiles/application-config.yml
-
-***高级配置文件格式是yml格式,配置错误会导致程序无法启动。配置时一定要严格遵循yml格式。***
-
-***application-config.yml直接由spring-boot处理,其中的oauth2,redis,mail等配置项完全遵循spring-boot-autoconfigure配置***
-
-### 2.4.1 配置文件信息
-
-```yaml
-spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://localhost:3306/yubi?&allowMultiQueries=true
-    username: yubi
-    password: yubi123
-
-  # mail config  is a aliyum email example 
-  mail:
-    host: smtp.mxhichina.com
-    port: 465
-    username: aliyun.djkjfhdjfhjd@aliyun.cn
-    fromAddress: aliyun.djkjfhdjfhjd@aliyun.cn
-    password: hdjksadsdjskdjsnd
-    senderName: aliyun
-
-    properties:
-      smtp:
-        starttls:
-          enable: true
-          required: true
-        auth: true
-      mail:
-        smtp:
-          ssl:
-            enable: true
-            trust: smtp.mxhichina.com
-
-# redis config 如需开启缓存 需要配置
-#  redis:
-#    port: 6379
-#    host: { HOST }
-
-# 服务端配置 Web服务绑定IP和端口 使用 本机ip + 指定端口
-server:
-  port: youport
-  address: youip
-
-
-  compression:
-    enabled: true
-    mime-types: application/javascript,application/json,application/xml,text/html,text/xml,text/plain,text/css,image/*
-
-# 配置服务端访问地址，创建分享，激活/邀请用户时，将使用这个地址作为服务端访问地址。 对外有域名的情况下可使用域名 
-yubi:
-  server:
-    address: http://youip:youport
-
-  user:
-    active:
-      send-mail: true  # 注册用户时是否需要邮件验证激活，如果没配置邮箱，这里需要设置为false
-
-
-  security:
-    token:
-      secret: "y@u$b%i^s&e*c" #加密密钥
-      timeout-min: 30  # 登录会话有效时长，单位：分钟。
-
-  env:
-    file-path: ${user.dir}/files # 服务端文件保存位置
-
-  # 可选配置 如需配置请参照 [3.2 截图配置 [ChromeWebDriver]-可选]
-  screenshot:
-    timeout-seconds: 60
-    webdriver-type: CHROME
-    webdriver-path: "http://youip:4444/wd/hub"
-
-```
-
-*注意：加密密钥每个服务端部署前应该进行修改，且部署后不能再次修改。如果是集群部署，同一个集群内的secret要保持统一*
-
-### 2.4.2 截图配置 [ChromeWebDriver]-可选
-
-```bash
-
-docker pull selenium/standalone-chrome  # 拉取docker镜像
-
-docker run -p 4444:4444 -d --name selenium-chrome --shm-size="2g" selenium/standalone-chrome  # run
-
-```
-
-### 2.5. 启动服务
-
-*注意：启动脚本 已更新了 start|stop|status|restart*
-
-```base
-${YUBI_HOME}/bin/yu-bi-server.sh (start|stop|status|restart)
-```
-
-### 2.5 访问服务
-
-*注意：没有默认用户 直接注册 成功后直接登录即可*
-
-```base
-http://youip:youport/login
-```
-
-## 3. 品牌迁移说明（datart → yu-bi 2.0.0）
-
-### 已知兼容保留项
-
-无。本项目为全新部署，无需保留任何旧版本兼容 salt 或 token。
-
-### 需要注意的运行时行为变更
-
-- **SQL 虚拟表别名**：生成的 SQL 中子查询别名从 `DATART_VTABLE` 变更为 `YUBI_VTABLE`。这不影响查询结果，但如果有外部系统解析生成的 SQL 字符串，需同步适配。
-- **文件扩展名**：模板文件 `.drt` → `.ybt`，资源文件 `.drr` → `.ybr`。已有的 `.drt`/`.drr` 文件需手动重命名后才能被新版本导入。
-- **配置文件名**：`datart.conf` → `yubi.conf`。升级时需重命名外部配置文件。
-- **环境变量前缀**：`DATART_*` → `YUBI_*`。升级后需更新部署脚本中的环境变量。
-- **数据库名**：默认数据库名从 `datart` 变为 `yubi`。升级时可保留原数据库名，只需在配置中指定 `datasource.database=原数据库名`。
+历史 datart 安装迁移到 yu-bi 可能涉及配置名、资源扩展名和 SQL 兼容差异。`v0.1.x` 不承诺直接升级历史数据，必须先在隔离环境完成验证。

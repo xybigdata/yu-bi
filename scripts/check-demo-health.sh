@@ -30,6 +30,23 @@ cleanup() {
 
 trap cleanup EXIT
 
+fail_if_server_stopped() {
+  if [[ -n "${SERVER_PID}" ]] && kill -0 "${SERVER_PID}" 2>/dev/null; then
+    return
+  fi
+
+  if wait "${SERVER_PID}"; then
+    server_exit_code=0
+  else
+    server_exit_code=$?
+  fi
+  SERVER_PID=""
+  echo "服务进程提前退出，退出码: ${server_exit_code}" >&2
+  echo "最近启动日志:" >&2
+  tail -n 120 "${LOG_FILE}" >&2 || true
+  exit 1
+}
+
 cd "${ROOT_DIR}"
 
 shopt -s nullglob
@@ -61,13 +78,16 @@ SERVER_PID=$!
 deadline=$((SECONDS + STARTUP_TIMEOUT_SECONDS))
 
 while (( SECONDS < deadline )); do
+  fail_if_server_stopped
   if curl --silent --show-error --fail "${HEALTH_URL}" | grep -q '"success":true'; then
     echo "健康检查通过: ${HEALTH_URL}"
     exit 0
   fi
+  fail_if_server_stopped
   sleep 2
 done
 
+fail_if_server_stopped
 echo "健康检查失败: ${HEALTH_URL}" >&2
 echo "最近启动日志:" >&2
 tail -n 120 "${LOG_FILE}" >&2 || true

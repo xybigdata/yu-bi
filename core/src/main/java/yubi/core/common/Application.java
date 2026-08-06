@@ -33,6 +33,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 import static yubi.core.base.consts.TenantManagementMode.PLATFORM;
@@ -100,11 +102,19 @@ public class Application implements ApplicationContextAware {
     }
 
     public static String getTokenSecret() {
-        return getProperty("yubi.security.token.secret", "d@a$t%a^r&a*t");
+        String tokenSecret = getProperty("yubi.security.token.secret");
+        String[] activeProfiles = context.getEnvironment().getActiveProfiles();
+        boolean demoProfile = activeProfiles != null && Arrays.asList(activeProfiles).contains("demo");
+        if (tokenSecret == null || tokenSecret.isBlank()
+                || (!demoProfile && tokenSecret.getBytes(StandardCharsets.UTF_8).length < 32)) {
+            throw new IllegalStateException(
+                    "必须通过 YUBI_SECURITY_TOKEN_SECRET 配置至少 32 字节的令牌密钥");
+        }
+        return tokenSecret;
     }
 
     public static boolean canRegister() {
-        return BooleanUtils.toBoolean(getProperty("yubi.user.register", "true"));
+        return BooleanUtils.toBoolean(getProperty("yubi.user.register", "false"));
     }
 
     public static TenantManagementMode getCurrMode() {

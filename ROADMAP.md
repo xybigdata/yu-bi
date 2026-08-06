@@ -3,7 +3,7 @@
 ## 近期
 
 - 保持 `JDK 21 + Spring Boot 4 + Node.js 24 + Vite 8` 当前基线稳定。
-- 按 [Agent-ready 架构改造计划](./docs/agent-ready-architecture-plan.md) 完成架构基线、Query 能力模块和查询行为测试。
+- 继续完善架构基线、Query 能力模块和查询行为测试，并把稳定决策记录为仓库内 ADR。
 - 将现有查询入口迁移到统一 Query 契约，并在仓库内调用迁移完成后清理旧接口。
 - 保持数据库结构、历史 View/Dashboard 配置和 DataProvider SPI 兼容。
 - 继续处理测试稳定性、依赖风险和发布链路维护。

@@ -1,121 +1,109 @@
-# yu-bi Independent Open Source Project
+# yu-bi
 
 <p align="center">
   <img src="frontend/public/brand/yu-bi-logo.svg" alt="yu-bi logo" width="180" />
 </p>
 
-> An independently maintained open source analytics project, focused on keeping the codebase runnable, modernized, and openly maintained.
+<p align="center">
+  An independently maintained, open source business intelligence and data visualization platform.
+</p>
+
+<p align="center">
+  English | <a href="./README_zh.md">简体中文</a> ·
+  <a href="https://github.com/xybigdata/yu-bi/releases">Releases</a> ·
+  <a href="./Deployment.md">Deployment</a> ·
+  <a href="./CONTRIBUTING.md">Contributing</a>
+</p>
+
+## Overview
+
+yu-bi helps teams connect data, create reusable views and charts, assemble dashboards and storyboards, and share analytics in an organization. The project focuses on a self-hosted workflow and currently provides:
+
+- relational data sources, SQL-based views, and reusable data models;
+- interactive charts, dashboards, and presentation-style storyboards;
+- organization, role, member, and resource permission management;
+- sharing, schedules, screenshots, and export-oriented workflows;
+- extension points for data providers and visualizations.
+
+The repository originated from [`running-elephant/datart`](https://github.com/running-elephant/datart) and is now developed independently under the `yu-bi` brand. It is not an official distribution of the original project and does not use that upstream repository as its ongoing maintenance source. See [NOTICE](./NOTICE) for attribution details.
 
 ## Project Status
 
-This repository is maintained as an independent open source project.
+yu-bi is in its first independent release line. The current focus is a reproducible release process, secure deployment defaults, modern toolchain support, and compatibility-preserving maintenance. Available downloads and their release notes are published on the [GitHub Releases page](https://github.com/xybigdata/yu-bi/releases).
 
-Current maintenance goals:
+No official container image is currently published. Use a release archive or build from source.
 
-- keep the project buildable on modern toolchains
-- preserve core product capabilities and compatibility where practical
-- continue security, dependency, and runtime maintenance
-- keep all ongoing maintenance work open and reviewable
+## Quick Start
 
-This project is independently maintained under the `yu-bi` brand. It originated from the original `datart` codebase, but it is not presented as the original official project and it does not follow the original upstream as a maintenance source.
-
-## Project Origin
-
-- Original project: `running-elephant/datart`
-- License: `Apache-2.0`
-- This repository retains the original license and attribution notices required by Apache License 2.0 and continues development as an independent project.
-
-## What This Project Maintains
-
-The current maintenance line is focused on:
-
-- JDK 21 compatibility
-- Spring Boot 3 / Spring Cloud modern baseline
-- Node 24 local development compatibility
-- Vite-based frontend build pipeline
-- dependency upgrades that do not unnecessarily break existing behavior
-- gradual migration away from aging technical stacks such as legacy test setup, Shiro coupling, and old editor/runtime integrations
-
-## Current Baseline
-
-- Java: `21`
-- Spring Boot: `3.5.15`
-- Spring Cloud: `2025.0.3`
-- Node.js: `24.x`
-- npm: `11.x`
-- Frontend build: `Vite 8.1.0`
-- React: `19.2.7`
-
-## Local Development
-
-### Backend
-
-See [Deployment.md](./Deployment.md) for deployment notes.
-
-Common commands:
+For local evaluation, download the latest install archive from [Releases](https://github.com/xybigdata/yu-bi/releases), then run:
 
 ```bash
-# Verify backend Java compilation only and skip frontend npm builds bound to the server module.
-mvn -pl server -am -DskipTests -Dexec.skip=true compile
+unzip <yu-bi-install-package>.zip -d yu-bi-dist
+cd yu-bi-dist
+bash bin/yu-bi-server.sh start
+```
 
-# Build the full release package. This runs frontend npm install, frontend build, and assembly.
+Open <http://127.0.0.1:8080>. With no external database configured, the application enters demo mode for local evaluation only. Do not expose demo mode to the public network or use it to store production data.
+
+For production, configure an external database, a unique `YUBI_SECURITY_TOKEN_SECRET` of at least 32 bytes, and the initial user process before startup. Registration and automatic administrator promotion are disabled by default. Follow [Deployment.md](./Deployment.md) for the full configuration and backup requirements.
+
+To build the install archive from source:
+
+```bash
+git clone https://github.com/xybigdata/yu-bi.git
+cd yu-bi
 mvn -pl server -am -DskipTests package
 ```
 
-### Frontend
+The build runs the frontend installation and build steps before assembling the archive in the repository root. Formal release artifacts are built and verified from a clean checkout; local packages are development artifacts.
+
+## Development
+
+### Toolchain
+
+| Area         | Supported baseline |
+| ------------ | ------------------ |
+| Java         | 21                 |
+| Maven        | 3.9+               |
+| Spring Boot  | 4.0.7              |
+| Spring Cloud | 2025.1.2           |
+| Node.js      | 24.x               |
+| npm          | 11.x               |
+| React        | 19.2.7             |
+| Vite         | 8.1.0              |
+
+Backend compilation and tests:
+
+```bash
+mvn -pl server -am -DskipTests -Dexec.skip=true compile
+mvn test
+```
+
+Frontend checks:
 
 ```bash
 cd frontend
-# Use frontend/.nvmrc or frontend/.node-version to select the supported Node runtime.
 npm ci
 npm run verify:toolchain
 npm run checkTs
-npm run build:task
-npm run build
-npm run build:report:check:current
-npm run build:report:gzip:check:current
 npm run test:ci
+npm run build
 ```
 
 ## Documentation
 
-- Deployment guide: [Deployment.md](./Deployment.md)
-- Security policy: [SECURITY.md](./SECURITY.md)
-- Maintainers: [MAINTAINERS.md](./MAINTAINERS.md)
-- Roadmap: [ROADMAP.md](./ROADMAP.md)
-- Agent-ready architecture plan: [docs/agent-ready-architecture-plan.md](./docs/agent-ready-architecture-plan.md)
-- Changelog: [CHANGELOG.md](./CHANGELOG.md)
+- [Deployment guide](./Deployment.md)
+- [Changelog](./CHANGELOG.md)
+- [Roadmap](./ROADMAP.md)
+- [Contributing guide](./CONTRIBUTING.md)
+- [Support guide](./SUPPORT.md)
+- [Security policy](./SECURITY.md)
+- [Maintainers](./MAINTAINERS.md)
 
-## Maintenance Policy
+## Contributing and Support
 
-This repository accepts ongoing maintenance changes in these areas:
-
-- build/runtime compatibility
-- dependency upgrades
-- test stabilization
-- documentation and release process improvements
-- targeted refactors that reduce modernization risk
-
-Large behavioral or architectural changes should be documented before broad rollout.
-
-## Contributing
-
-Contributions are welcome, especially for:
-
-- failing tests on modern environments
-- dependency refreshes
-- JDK / Spring / Node compatibility issues
-- security fixes
-- migration work that reduces legacy stack coupling
-
-Before large changes, open an issue or draft PR to make the migration path explicit.
-
-## Security
-
-Please use the process documented in [SECURITY.md](./SECURITY.md).
+Bug reports, feature proposals, documentation, tests, and focused maintenance changes are welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request. For usage questions and troubleshooting, see [SUPPORT.md](./SUPPORT.md). Do not report vulnerability details in a public issue; use the private process in [SECURITY.md](./SECURITY.md).
 
 ## License
 
-This repository continues to be distributed under the [Apache License 2.0](./LICENSE).
-
-Original project attribution remains in place. Ongoing development in this repository is released under Apache 2.0 unless explicitly stated otherwise in a specific file. See [NOTICE](./NOTICE) for project origin and attribution context.
+yu-bi is distributed under the [Apache License 2.0](./LICENSE). Upstream attribution and project-origin information are retained in [NOTICE](./NOTICE).

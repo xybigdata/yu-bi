@@ -5,7 +5,7 @@
     <parent>
         <artifactId>yu-bi-parent</artifactId>
         <groupId>yubi</groupId>
-        <version>2.0.0</version>
+        <version>0.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -60,6 +60,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
             <exclusions>
                 <exclusion>
                     <artifactId>asm</artifactId>
@@ -232,6 +233,7 @@
                             <goal>single</goal>
                         </goals>
                         <configuration>
+                            <finalName>yu-bi-server-v${project.version}</finalName>
                             <descriptors>
                                 <descriptor>src/main/resources/assembly/assembly.xml</descriptor>
                             </descriptors>

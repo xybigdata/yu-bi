@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全漏洞 / Security vulnerability
+    url: https://github.com/xybigdata/yu-bi/security/advisories/new
+    about: 请使用 GitHub Private Vulnerability Reporting 私密报告漏洞。
+  - name: 使用与支持 / Usage and support
+    url: https://github.com/xybigdata/yu-bi/blob/main/SUPPORT.md
+    about: 提问前请先阅读支持范围和信息准备清单。

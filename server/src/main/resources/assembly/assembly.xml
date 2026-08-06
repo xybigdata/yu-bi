@@ -10,6 +10,7 @@
             <directory>${project.parent.basedir}/bin</directory>
             <outputDirectory>bin</outputDirectory>
             <lineEnding>unix</lineEnding>
+            <fileMode>0755</fileMode>
             <includes>
                 <include>yu-bi-server.sh</include>
             </includes>
@@ -23,8 +24,11 @@
             </includes>
         </fileSet>
         <fileSet>
-            <directory>${project.parent.basedir}/bin/h2</directory>
+            <directory>${project.basedir}/src/main/release/bin/h2</directory>
             <outputDirectory>bin/h2</outputDirectory>
+            <includes>
+                <include>yubi.demo.mv.db</include>
+            </includes>
         </fileSet>
         <fileSet>
             <directory>${project.parent.basedir}/bin/migrations</directory>
@@ -44,6 +48,7 @@
             <includes>
                 <include>Dockerfile</include>
                 <include>LICENSE</include>
+                <include>NOTICE</include>
                 <include>README.md</include>
                 <include>Deployment.md</include>
             </includes>

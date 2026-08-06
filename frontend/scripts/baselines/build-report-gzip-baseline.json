@@ -3,103 +3,115 @@
     "chunk": {
       "categoryCounts": {
         "all": {
-          "runtime": 88,
+          "runtime": 89,
           "task": 1,
           "vendor": 14
         },
-        "gzipOversized": {},
+        "gzipOversized": {
+          "vendor": 1
+        },
         "oversized": {
+          "runtime": 1,
+          "task": 1,
           "vendor": 7
         },
         "rawOversized": {
+          "runtime": 1,
+          "task": 1,
           "vendor": 7
         }
       },
-      "files": 103,
+      "files": 104,
       "rawOversized": [
         "antdDesign.js",
         "monacoEditor.js",
         "echarts.js",
         "monacoBase.js",
         "antvG2.js",
+        "task/index.js",
         "antvS2.js",
+        "slice.js",
         "antvG.js"
       ],
-      "gzipOversized": [],
+      "gzipOversized": ["monacoEditor.js"],
       "oversized": [
         "antdDesign.js",
         "monacoEditor.js",
         "echarts.js",
         "monacoBase.js",
         "antvG2.js",
+        "task/index.js",
         "antvS2.js",
+        "slice.js",
         "antvG.js"
       ],
       "categorySizes": {
         "runtime": {
-          "bytes": 2164164,
-          "files": 88,
-          "gzipBytes": 648181,
-          "gzipRatio": 0.2995,
-          "gzipSavingsBytes": 1515983
+          "bytes": 2275204,
+          "files": 89,
+          "gzipBytes": 683903,
+          "gzipRatio": 0.3006,
+          "gzipSavingsBytes": 1591301
         },
         "task": {
-          "bytes": 454870,
+          "bytes": 582146,
           "files": 1,
-          "gzipBytes": 85849,
-          "gzipRatio": 0.1887,
-          "gzipSavingsBytes": 369021
+          "gzipBytes": 118979,
+          "gzipRatio": 0.2044,
+          "gzipSavingsBytes": 463167
         },
         "vendor": {
-          "bytes": 7830801,
+          "bytes": 9001461,
           "files": 14,
-          "gzipBytes": 2241477,
-          "gzipRatio": 0.2862,
-          "gzipSavingsBytes": 5589324
+          "gzipBytes": 2530025,
+          "gzipRatio": 0.2811,
+          "gzipSavingsBytes": 6471436
         }
       },
       "size": {
-        "bytes": 10449413,
-        "gzipBytes": 2975481,
-        "gzipRatio": 0.2848,
-        "gzipSavingsBytes": 7473932
+        "bytes": 11858811,
+        "gzipBytes": 3332907,
+        "gzipRatio": 0.281,
+        "gzipSavingsBytes": 8525904
       }
     },
     "asset": {
       "categoryCounts": {
         "all": {
-          "asset": 4,
+          "asset": 5,
           "geo": 2
         },
         "gzipOversized": {
           "geo": 1
         },
         "oversized": {
+          "asset": 1,
           "geo": 2
         },
         "rawOversized": {
+          "asset": 1,
           "geo": 2
         }
       },
-      "files": 6,
+      "files": 7,
       "rawOversized": [
         "geo-china-city.map.json",
-        "geo-china.map.json"
+        "geo-china.map.json",
+        "logo.svg"
       ],
-      "gzipOversized": [
-        "geo-china-city.map.json"
-      ],
+      "gzipOversized": ["geo-china-city.map.json"],
       "oversized": [
         "geo-china-city.map.json",
-        "geo-china.map.json"
+        "geo-china.map.json",
+        "logo.svg"
       ],
       "categorySizes": {
         "asset": {
-          "bytes": 102063,
-          "files": 4,
-          "gzipBytes": 80285,
-          "gzipRatio": 0.7866,
-          "gzipSavingsBytes": 21778
+          "bytes": 763624,
+          "files": 5,
+          "gzipBytes": 545110,
+          "gzipRatio": 0.7138,
+          "gzipSavingsBytes": 218514
         },
         "geo": {
           "bytes": 1789554,
@@ -110,10 +122,10 @@
         }
       },
       "size": {
-        "bytes": 1891617,
-        "gzipBytes": 989624,
-        "gzipRatio": 0.5232,
-        "gzipSavingsBytes": 901993
+        "bytes": 2553178,
+        "gzipBytes": 1454449,
+        "gzipRatio": 0.5697,
+        "gzipSavingsBytes": 1098729
       }
     }
   }

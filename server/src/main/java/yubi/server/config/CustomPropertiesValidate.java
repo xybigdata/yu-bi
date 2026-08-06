@@ -18,6 +18,7 @@ import org.springframework.core.io.FileSystemResource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 // EnvironmentPostProcessor 已标记待移除，升级 Spring Boot 前需迁移到替代扩展点。
@@ -30,6 +31,8 @@ public class CustomPropertiesValidate implements EnvironmentPostProcessor {
 
     private static final String CONFIG_DATABASE_URL = "datasource.ip";
 
+    private static final String TOKEN_SECRET = "yubi.security.token.secret";
+
     private static final String DEFAULT_APPLICATION_CONFIG = "config/profiles/application-config.yml";
 
     @Override
@@ -38,10 +41,24 @@ public class CustomPropertiesValidate implements EnvironmentPostProcessor {
         Properties properties = loadCustomProperties();
         addYuBiConfigPropertySource(propertySources, new PropertiesPropertySource("yubiConfig", properties));
         switchProfile(environment);
+        validateTokenSecret(environment);
         String jdbcUrl = processDBUrl(environment);
         if (StringUtils.isNotBlank(jdbcUrl)) {
             properties.setProperty(DATABASE_URL, jdbcUrl);
             addYuBiConfigPropertySource(propertySources, new PropertiesPropertySource("yubiConfig", properties));
+        }
+    }
+
+    private void validateTokenSecret(ConfigurableEnvironment environment) {
+        boolean demoProfile = Arrays.asList(environment.getActiveProfiles()).contains("demo");
+        if (demoProfile) {
+            return;
+        }
+        String tokenSecret = environment.getProperty(TOKEN_SECRET);
+        if (StringUtils.isBlank(tokenSecret)
+                || tokenSecret.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException(
+                    "非 demo 环境必须通过 YUBI_SECURITY_TOKEN_SECRET 配置至少 32 字节的令牌密钥");
         }
     }
 
