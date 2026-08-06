@@ -1,4 +1,4 @@
-import { matchPath } from 'react-router-dom';
+import { matchPath } from 'react-router';
 import { describe, expect, test } from 'vitest';
 import { getChartEditorClosePath, MAIN_PAGE_ROUTE_PATTERNS } from '../routes';
 

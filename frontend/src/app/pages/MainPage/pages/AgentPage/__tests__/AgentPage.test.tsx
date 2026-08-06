@@ -9,7 +9,7 @@ import { mainActions, reducer as mainReducer } from 'app/pages/MainPage/slice';
 import type { Organization } from 'app/pages/MainPage/slice/types';
 import i18n from 'i18next';
 import { Provider } from 'react-redux';
-import { MemoryRouter, Route, Routes, useNavigate } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useNavigate } from 'react-router';
 import { configureAppStore } from 'redux/configureStore';
 import { ThemeProvider } from 'styled-components';
 import { themes } from 'styles/theme/themes';

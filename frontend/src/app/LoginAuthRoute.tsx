@@ -18,7 +18,7 @@
  */
 
 import { useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router';
 import { getToken } from 'utils/auth';
 import { LazyMainPage } from './pages/MainPage/Loadable';
 import { selectSystemInfo } from './slice/selectors';

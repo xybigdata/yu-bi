@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, Route, type RouteProps } from 'react-router-dom';
+import { Navigate, Route, type RouteProps } from 'react-router';
 import { Authorized } from './Authorized';
 
 interface AuthorizedRouteProps {

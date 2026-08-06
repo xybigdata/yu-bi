@@ -8,7 +8,7 @@ import {
   useLocation,
   useNavigate,
   useParams as useReactRouterParams,
-} from 'react-router-dom';
+} from 'react-router';
 
 export function BrowserRouter(props: BrowserRouterProps) {
   return React.createElement(ReactRouterBrowserRouter, props);

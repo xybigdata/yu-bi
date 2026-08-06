@@ -2,7 +2,7 @@ import { useLocation } from 'app/routerCompat';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { useSelector } from 'react-redux';
-import { matchPath } from 'react-router-dom';
+import { matchPath } from 'react-router';
 
 const SCHEDULE_DETAIL_PATH = '/organizations/:orgId/schedules/:scheduleId';
 const SCHEDULE_LIST_PATH = '/organizations/:orgId/schedules';

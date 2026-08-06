@@ -1,5 +1,5 @@
 import { useLocation } from 'app/routerCompat';
-import { matchPath } from 'react-router-dom';
+import { matchPath } from 'react-router';
 
 type ShareRouteKey = 'chart' | 'dashboard' | 'storyPlayer';
 

@@ -23,7 +23,7 @@ import { antdLocales } from 'locales/i18n';
 import { useEffect, useLayoutEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useTranslation } from 'react-i18next';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import { BrowserRouter } from 'app/routerCompat';
 import { GlobalStyles } from 'styles/globalStyles';

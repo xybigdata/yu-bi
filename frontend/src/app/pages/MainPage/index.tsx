@@ -25,7 +25,7 @@ import { preloadChartPlugins } from 'app/services/chartPluginService';
 import { useAppSlice } from 'app/slice';
 import React, { useCallback, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes } from 'react-router';
 import { useAppDispatch } from 'app/hooks/useRedux';
 import styled from 'styled-components';
 import { defaultLazyLoad } from 'utils/loadable';

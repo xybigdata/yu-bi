@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router';
 import { describe, expect, test } from 'vitest';
 import { MemoryRouter, useParams } from '../routerCompat';
 
