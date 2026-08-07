@@ -45,32 +45,32 @@
       ],
       "categorySizes": {
         "runtime": {
-          "bytes": 2275204,
+          "bytes": 2273332,
           "files": 89,
-          "gzipBytes": 683903,
-          "gzipRatio": 0.3006,
-          "gzipSavingsBytes": 1591301
+          "gzipBytes": 685741,
+          "gzipRatio": 0.3016,
+          "gzipSavingsBytes": 1587591
         },
         "task": {
           "bytes": 582146,
           "files": 1,
-          "gzipBytes": 118979,
+          "gzipBytes": 118992,
           "gzipRatio": 0.2044,
-          "gzipSavingsBytes": 463167
+          "gzipSavingsBytes": 463154
         },
         "vendor": {
           "bytes": 9001461,
           "files": 14,
-          "gzipBytes": 2530025,
-          "gzipRatio": 0.2811,
-          "gzipSavingsBytes": 6471436
+          "gzipBytes": 2536869,
+          "gzipRatio": 0.2818,
+          "gzipSavingsBytes": 6464592
         }
       },
       "size": {
-        "bytes": 11858811,
-        "gzipBytes": 3332907,
-        "gzipRatio": 0.281,
-        "gzipSavingsBytes": 8525904
+        "bytes": 11856939,
+        "gzipBytes": 3341602,
+        "gzipRatio": 0.2818,
+        "gzipSavingsBytes": 8515337
       }
     },
     "asset": {
@@ -105,23 +105,23 @@
         "asset": {
           "bytes": 763624,
           "files": 5,
-          "gzipBytes": 545110,
-          "gzipRatio": 0.7138,
-          "gzipSavingsBytes": 218514
+          "gzipBytes": 542545,
+          "gzipRatio": 0.7105,
+          "gzipSavingsBytes": 221079
         },
         "geo": {
           "bytes": 1789554,
           "files": 2,
-          "gzipBytes": 909339,
-          "gzipRatio": 0.5081,
-          "gzipSavingsBytes": 880215
+          "gzipBytes": 889345,
+          "gzipRatio": 0.497,
+          "gzipSavingsBytes": 900209
         }
       },
       "size": {
         "bytes": 2553178,
-        "gzipBytes": 1454449,
-        "gzipRatio": 0.5697,
-        "gzipSavingsBytes": 1098729
+        "gzipBytes": 1431890,
+        "gzipRatio": 0.5608,
+        "gzipSavingsBytes": 1121288
       }
     }
   }

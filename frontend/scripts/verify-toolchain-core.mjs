@@ -92,6 +92,7 @@ export function verifyFrontendToolchain({
   assertEqual('.nvmrc 与 .node-version', nvmrc, nodeVersion);
   assertSatisfiesSimpleRange('Node 运行时版本', nodeVersion, packageJson.engines?.node);
   assertSatisfiesSimpleRange('Node 运行时版本', actualNode, packageJson.engines?.node);
+  assertEqual('Node 运行时版本与 .nvmrc', actualNode, nvmrc);
   assertSatisfiesSimpleRange(
     'packageManager npm 版本',
     packageManagerVersion,

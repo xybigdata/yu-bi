@@ -51,15 +51,30 @@ describe('verify-toolchain', () => {
     expect(
       verifyFrontendToolchain({
         engineStrict: 'true\n',
-        nodeActual: 'v24.18.0',
+        nodeActual: 'v24.16.0',
         npmActual: '11.16.0\n',
         toolchain,
       }),
     ).toEqual({
-      nodeVersion: '24.18.0',
+      nodeVersion: '24.16.0',
       npmVersion: '11.16.0',
       packageManager: 'npm@11.13.0',
     });
+  });
+
+  it('拒绝与版本文件不一致的 Node 运行时', async () => {
+    const toolchain = await readFrontendToolchainFiles(
+      await createToolchainFixture(),
+    );
+
+    expect(() =>
+      verifyFrontendToolchain({
+        engineStrict: 'true',
+        nodeActual: 'v24.18.0',
+        npmActual: '11.13.0',
+        toolchain,
+      }),
+    ).toThrow('Node 运行时版本与 .nvmrc 不匹配');
   });
 
   it('rejects mismatched runtime versions', async () => {

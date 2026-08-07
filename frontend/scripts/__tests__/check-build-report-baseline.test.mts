@@ -390,6 +390,38 @@ describe('check-build-report-baseline', () => {
     );
   });
 
+  it('在 GitHub Actions 中以错误注解报告体积差异', async () => {
+    const appRoot = await createTempRoot();
+    await writeFile(
+      path.join(appRoot, 'reports/report.json'),
+      JSON.stringify(
+        createReport({ chunkSize: { bytes: 1201, gzipBytes: 400 } }),
+      ),
+    );
+    await writeFile(
+      path.join(appRoot, 'reports/baseline.json'),
+      JSON.stringify(
+        createReport({ chunkSize: { bytes: 1200, gzipBytes: 400 } }),
+      ),
+    );
+
+    await expect(
+      execFileAsync(process.execPath, [baselineScript], {
+        cwd: appRoot,
+        env: {
+          ...process.env,
+          GITHUB_ACTIONS: 'true',
+          YU_BI_CHUNK_REPORT_BASELINE_FILE: 'reports/baseline.json',
+          YU_BI_CHUNK_REPORT_BASELINE_REPORT: 'reports/report.json',
+        },
+      }),
+    ).rejects.toMatchObject({
+      stderr: expect.stringContaining(
+        '::error title=前端构建体积门禁::chunk size raw bytes 超出基线: expected<=1200, actual=1201',
+      ),
+    });
+  });
+
   it('uses the default baseline file when no override is provided', async () => {
     const appRoot = await createTempRoot();
     await mkdir(path.join(appRoot, 'scripts/baselines'), { recursive: true });
