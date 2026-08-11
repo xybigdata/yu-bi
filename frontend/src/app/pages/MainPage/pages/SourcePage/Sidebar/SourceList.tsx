@@ -142,13 +142,9 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
       dispatch(
         deleteSource({
           id,
-          archive: !isFolder,
+          archive: true,
           resolve: () => {
-            message.success(
-              isFolder
-                ? tg('operation.archiveSuccess')
-                : tg('operation.deleteSuccess'),
-            );
+            message.success(tg('operation.archiveSuccess'));
             navigate.replace(`/organizations/${orgId}/sources`);
           },
         }),

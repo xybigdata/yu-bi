@@ -188,11 +188,9 @@ export const ScheduleList: FC<{
       dispatch(
         deleteSchedule({
           id,
-          archive: !isFolder,
+          archive: true,
           resolve: () => {
-            message.success(
-              `${t('success')}${isFolder ? t('delete') : t('moveToTrash')}`,
-            );
+            message.success(`${t('success')}${t('moveToTrash')}`);
             toDetails(orgId);
           },
         }),

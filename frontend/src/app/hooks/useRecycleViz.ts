@@ -17,21 +17,27 @@
  * limitations under the License.
  */
 
-import { message } from 'antd';
+import { useMoveToRecycle } from 'app/features/recycle/useMoveToRecycle';
+import { RecycleResourceType } from 'app/features/recycle/types';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
-import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import {
-  deleteViz,
+  getFolders,
+  getStoryboards,
   removeTab,
 } from 'app/pages/MainPage/pages/VizPage/slice/thunks';
 import { VizType } from 'app/pages/MainPage/pages/VizPage/slice/types';
 import { useCallback } from 'react';
 import { useAppDispatch } from 'app/hooks/useRedux';
 
-export const useRecycleViz = (orgId: string, vizId: string, type: VizType) => {
+type RecyclableVizType = Extract<VizType, RecycleResourceType>;
+
+export const useRecycleViz = (
+  orgId: string,
+  vizId: string,
+  type: RecyclableVizType,
+) => {
   const dispatch = useAppDispatch();
   const navigate = useCompatNavigate();
-  const tg = useI18NPrefix('global');
   const redirect = useCallback(
     tabKey => {
       if (tabKey) {
@@ -42,17 +48,22 @@ export const useRecycleViz = (orgId: string, vizId: string, type: VizType) => {
     },
     [navigate, orgId],
   );
-  const recycleViz = useCallback(() => {
-    dispatch(
-      deleteViz({
-        params: { id: vizId, archive: true },
-        type: type,
-        resolve: () => {
-          message.success(tg('operation.archiveSuccess'));
-          dispatch(removeTab({ id: vizId, resolve: redirect }));
-        },
-      }),
-    );
-  }, [dispatch, vizId, type, tg, redirect]);
+  const handleCompleted = useCallback(async () => {
+    if (type === 'STORYBOARD') {
+      await dispatch(getStoryboards(orgId));
+    } else {
+      await dispatch(getFolders(orgId));
+    }
+    dispatch(removeTab({ id: vizId, resolve: redirect }));
+  }, [dispatch, orgId, redirect, type, vizId]);
+  const { moveToRecycle } = useMoveToRecycle({
+    orgId,
+    resourceType: type,
+    onCompleted: handleCompleted,
+  });
+  const recycleViz = useCallback(
+    () => moveToRecycle([vizId]),
+    [moveToRecycle, vizId],
+  );
   return recycleViz;
 };

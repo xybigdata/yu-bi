@@ -117,14 +117,10 @@ export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
       dispatch(
         deleteView({
           id,
-          archive: !isFolder,
+          archive: true,
           resolve: () => {
             dispatch(removeEditingView({ id, resolve: redirect }));
-            message.success(
-              isFolder
-                ? tg('operation.deleteSuccess')
-                : tg('operation.archiveSuccess'),
-            );
+            message.success(tg('operation.archiveSuccess'));
           },
         }),
       );

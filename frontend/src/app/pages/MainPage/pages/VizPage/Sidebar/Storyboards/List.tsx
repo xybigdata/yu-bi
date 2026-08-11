@@ -1,6 +1,7 @@
 import { DeleteOutlined, EditOutlined, MoreOutlined } from '@ant-design/icons';
-import { Menu, MenuProps, message, Popconfirm } from 'antd';
+import { Menu, MenuProps } from 'antd';
 import { Popup, Tree, TreeTitle } from 'app/components';
+import { useMoveToRecycle } from 'app/features/recycle/useMoveToRecycle';
 import {
   MenuItemContent,
   TREE_MORE_MENU_ITEM_CLASS,
@@ -22,12 +23,7 @@ import {
 } from '../../../PermissionPage/constants';
 import { SaveFormContext } from '../../SaveFormContext';
 import { selectStoryboardListLoading } from '../../slice/selectors';
-import {
-  deleteViz,
-  editStoryboard,
-  getStoryboards,
-  removeTab,
-} from '../../slice/thunks';
+import { editStoryboard, getStoryboards, removeTab } from '../../slice/thunks';
 
 interface StoryboardListProps {
   selectedId?: string;
@@ -58,24 +54,23 @@ export const List = memo(({ list, selectedId }: StoryboardListProps) => {
     [navigate, orgId],
   );
 
-  const archiveStoryboard = useCallback(
-    (isFolder, id) => () => {
-      dispatch(
-        deleteViz({
-          params: { id, archive: !isFolder },
-          type: 'STORYBOARD',
-          resolve: () => {
-            message.success(
-              isFolder
-                ? tg('operation.deleteSuccess')
-                : tg('operation.deleteSuccess'),
-            );
-            dispatch(removeTab({ id, resolve: redirect }));
-          },
-        }),
-      );
+  const handleRecycleCompleted = useCallback(
+    async (rootIds: string[]) => {
+      await dispatch(getStoryboards(orgId));
+      rootIds.forEach(id => {
+        dispatch(removeTab({ id, resolve: redirect }));
+      });
     },
-    [dispatch, redirect, tg],
+    [dispatch, orgId, redirect],
+  );
+  const { moveToRecycle } = useMoveToRecycle({
+    orgId,
+    resourceType: 'STORYBOARD',
+    onCompleted: handleRecycleCompleted,
+  });
+  const archiveStoryboard = useCallback(
+    id => () => void moveToRecycle([id]),
+    [moveToRecycle],
   );
 
   const moreMenuClick = useCallback(
@@ -133,16 +128,9 @@ export const List = memo(({ list, selectedId }: StoryboardListProps) => {
               className={TREE_MORE_MENU_ITEM_CLASS}
               prefix={<DeleteOutlined className="icon" />}
             >
-              <Popconfirm
-                title={`${
-                  isFolder
-                    ? tg('operation.deleteConfirm')
-                    : tg('operation.archiveConfirm')
-                }`}
-                onConfirm={archiveStoryboard(isFolder, id)}
-              >
-                {isFolder ? tg('button.delete') : tg('button.archive')}
-              </Popconfirm>
+              <span onClick={archiveStoryboard(id)}>
+                {tg('button.archive')}
+              </span>
             </MenuItemContent>
           ),
         },

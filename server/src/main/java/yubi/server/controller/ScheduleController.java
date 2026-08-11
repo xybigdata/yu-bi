@@ -25,6 +25,8 @@ import yubi.server.base.dto.ResponseData;
 import yubi.server.base.dto.ScheduleBaseInfo;
 import yubi.server.base.params.*;
 import yubi.server.service.ScheduleService;
+import yubi.server.recycle.RecycleLegacyBridge;
+import yubi.server.recycle.RecycleResourceType;
 import io.swagger.v3.oas.annotations.Operation;
 import org.quartz.SchedulerException;
 import org.springframework.validation.annotation.Validated;
@@ -37,9 +39,15 @@ import java.util.List;
 public class ScheduleController extends BaseController {
 
     private final ScheduleService scheduleService;
+    private RecycleLegacyBridge recycleLegacyBridge;
 
     public ScheduleController(ScheduleService scheduleService) {
         this.scheduleService = scheduleService;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public void setRecycleLegacyBridge(RecycleLegacyBridge recycleLegacyBridge) {
+        this.recycleLegacyBridge = recycleLegacyBridge;
     }
 
     @Operation(summary = "check schedule name")
@@ -95,6 +103,11 @@ public class ScheduleController extends BaseController {
     @Operation(summary = "delete a schedule")
     @DeleteMapping(value = "/{scheduleId}")
     public ResponseData<Boolean> deleteSchedule(@PathVariable String scheduleId, @RequestParam boolean archive) {
+        if (archive && recycleLegacyBridge != null) {
+            Schedule schedule = scheduleService.retrieve(scheduleId);
+            return ResponseData.success(recycleLegacyBridge.moveToRecycle(
+                    schedule.getOrgId(), RecycleResourceType.SCHEDULE, scheduleId));
+        }
         return ResponseData.success(scheduleService.delete(scheduleId, archive, true));
     }
 

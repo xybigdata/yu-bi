@@ -365,8 +365,9 @@ export const GlobalOverlays = createGlobalStyle`
     .ant-popover-container,
     .ant-popover-inner {
       box-sizing: border-box;
-      width: 105px;
-      height: 110px;
+      width: max-content;
+      min-width: ${SPACE_TIMES(40)};
+      height: auto;
       padding: 1px 0;
       overflow: hidden;
       border: 0;
@@ -375,13 +376,13 @@ export const GlobalOverlays = createGlobalStyle`
     .ant-popover-content,
     .ant-popover-inner-content {
       width: 100%;
-      height: 100%;
+      height: auto;
       padding: 0;
     }
 
     .ant-dropdown-menu {
-      width: 105px;
-      min-width: 105px;
+      width: 100%;
+      min-width: ${SPACE_TIMES(40)};
       padding: 0;
       overflow: hidden;
       border-inline-end: 0 !important;
@@ -401,6 +402,7 @@ export const GlobalOverlays = createGlobalStyle`
     .sidebar-title-more-menu-item {
       box-sizing: border-box;
       width: 100%;
+      min-width: ${SPACE_TIMES(40)};
       height: 54px;
       padding: 0 ${SPACE_SM};
       overflow: hidden;

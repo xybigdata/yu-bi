@@ -6,6 +6,7 @@ import {
 } from '@ant-design/icons';
 import { Menu, MenuProps, message, Popconfirm } from 'antd';
 import { Popup, Tree, TreeTitle } from 'app/components';
+import { useMoveToRecycle } from 'app/features/recycle/useMoveToRecycle';
 import {
   MenuItemContent,
   TREE_MORE_MENU_ITEM_CLASS,
@@ -71,6 +72,26 @@ export function FolderTree({
     [navigate, orgId],
   );
 
+  const handleRecycleCompleted = useCallback(
+    async (rootIds: string[]) => {
+      await dispatch(getFolders(orgId));
+      rootIds.forEach(id => {
+        dispatch(removeTab({ id, resolve: redirect }));
+      });
+    },
+    [dispatch, orgId, redirect],
+  );
+  const { moveToRecycle } = useMoveToRecycle({
+    orgId,
+    resourceType: 'DATACHART',
+    onCompleted: handleRecycleCompleted,
+  });
+  const { moveToRecycle: moveDashboardToRecycle } = useMoveToRecycle({
+    orgId,
+    resourceType: 'DASHBOARD',
+    onCompleted: handleRecycleCompleted,
+  });
+
   const menuSelect = useCallback(
     (_, { node }) => {
       if (node.relType === 'FOLDER') {
@@ -89,27 +110,25 @@ export function FolderTree({
   const archiveViz = useCallback(
     ({ id: folderId, relId, relType }) =>
       () => {
-        let id = folderId;
-        let archive = false;
-        let msg = tg('operation.deleteSuccess');
-
-        if (['DASHBOARD', 'DATACHART'].includes(relType)) {
-          id = relId;
-          archive = true;
-          msg = tg('operation.archiveSuccess');
+        if (relType === 'DATACHART') {
+          void moveToRecycle([relId]);
+          return;
+        }
+        if (relType === 'DASHBOARD') {
+          void moveDashboardToRecycle([relId]);
+          return;
         }
         dispatch(
           deleteViz({
-            params: { id, archive },
+            params: { id: folderId, archive: false },
             type: relType,
             resolve: () => {
-              message.success(msg);
-              dispatch(removeTab({ id, resolve: redirect }));
+              message.success(tg('operation.deleteSuccess'));
             },
           }),
         );
       },
-    [dispatch, redirect, tg],
+    [dispatch, moveDashboardToRecycle, moveToRecycle, tg],
   );
 
   const moreMenuClick = useCallback(
@@ -201,18 +220,18 @@ export function FolderTree({
                       className={TREE_MORE_MENU_ITEM_CLASS}
                       prefix={<DeleteOutlined className="icon" />}
                     >
-                      <Popconfirm
-                        title={`${
-                          relType === 'FOLDER'
-                            ? tg('operation.deleteConfirm')
-                            : tg('operation.archiveConfirm')
-                        }`}
-                        onConfirm={archiveViz(node)}
-                      >
-                        {relType === 'FOLDER'
-                          ? tg('button.delete')
-                          : tg('button.archive')}
-                      </Popconfirm>
+                      {relType === 'FOLDER' ? (
+                        <Popconfirm
+                          title={tg('operation.deleteConfirm')}
+                          onConfirm={archiveViz(node)}
+                        >
+                          {tg('button.delete')}
+                        </Popconfirm>
+                      ) : (
+                        <span onClick={archiveViz(node)}>
+                          {tg('button.archive')}
+                        </span>
+                      )}
                     </MenuItemContent>
                   ),
                 },

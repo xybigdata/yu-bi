@@ -1,9 +1,12 @@
 import {
+  ClearOutlined,
   DeleteOutlined,
   FolderFilled,
   FolderOpenFilled,
   FundProjectionScreenOutlined,
   PlusOutlined,
+  SelectOutlined,
+  SettingOutlined,
 } from '@ant-design/icons';
 import {
   ListNav,
@@ -16,23 +19,32 @@ import { useDebouncedSearch } from 'app/hooks/useDebouncedSearch';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
-import React, { memo, useCallback, useContext, useMemo } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
+import {
+  RecycleBatchManager,
+  RecycleBinHandle,
+  RecycleBinManager,
+} from 'app/features/recycle';
 import styled from 'styled-components';
 import { SPACE_XS } from 'styles/StyleConstants';
 import { getInsertedNodeIndex } from 'utils/utils';
 import { VizResourceSubTypes } from '../../../PermissionPage/constants';
 import { SaveFormContext } from '../../SaveFormContext';
 import {
-  makeSelectArchivedStoryboradsTree,
   makeSelectStoryboradTree,
-  selectArchivedStoryboardLoading,
   selectStoryboards,
 } from '../../slice/selectors';
-import { addStoryboard, getArchivedStoryboards } from '../../slice/thunks';
-import { ArchivedViz, StoryboardViewModel } from '../../slice/types';
-import { Recycle } from '../Recycle';
+import { addStoryboard, getStoryboards } from '../../slice/thunks';
+import { StoryboardViewModel } from '../../slice/types';
 import { List } from './List';
 
 interface FoldersProps extends I18NComponentProps {
@@ -48,6 +60,13 @@ export const Storyboards = memo(
     const storyborads = useSelector(selectStoryboards);
     const selectStoryboradTree = useMemo(makeSelectStoryboradTree, []);
     const t = useI18NPrefix(i18nPrefix);
+    const [batchMode, setBatchMode] = useState(false);
+    const recycleRef = useRef<RecycleBinHandle>(null);
+
+    const handleBatchCompleted = useCallback(() => {
+      setBatchMode(false);
+      dispatch(getStoryboards(orgId));
+    }, [dispatch, orgId]);
 
     const getIcon = useCallback(
       ({ isFolder }: StoryboardViewModel) =>
@@ -72,30 +91,6 @@ export const Storyboards = memo(
       useDebouncedSearch(treeData, (keywords, d) =>
         d.title.toLowerCase().includes(keywords.toLowerCase()),
       );
-
-    const selectArchivedStoryboradsTree = useMemo(
-      makeSelectArchivedStoryboradsTree,
-      [],
-    );
-    const archivedListLoading = useSelector(selectArchivedStoryboardLoading);
-    const getArchivedDisabled = useCallback(
-      ({ deleteLoading }: ArchivedViz) => deleteLoading,
-      [],
-    );
-    const archivedTreeData = useSelector(state =>
-      selectArchivedStoryboradsTree(state, {
-        getDisabled: getArchivedDisabled,
-      }),
-    );
-    const {
-      filteredData: filteredRecycleData,
-      debouncedSearch: recycleSearch,
-    } = useDebouncedSearch(archivedTreeData, (keywords, d) =>
-      d.title.toLowerCase().includes(keywords.toLowerCase()),
-    );
-    const recycleInit = useCallback(() => {
-      dispatch(getArchivedStoryboards(orgId));
-    }, [dispatch, orgId]);
 
     const add = useCallback(
       ({ key }) => {
@@ -150,6 +145,11 @@ export const Storyboards = memo(
       [showSaveForm, storyborads, dispatch, orgId],
     );
 
+    const recycleMenuClick = useCallback(key => {
+      if (key === 'policy') void recycleRef.current?.openPolicy();
+      if (key === 'empty') void recycleRef.current?.empty();
+    }, []);
+
     const titles = useMemo(
       () => [
         {
@@ -168,6 +168,11 @@ export const Storyboards = memo(
             itemClassName: SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
             items: [
               {
+                key: 'batch',
+                text: batchMode ? '退出批量管理' : '批量管理',
+                prefix: <SelectOutlined className="icon" />,
+              },
+              {
                 key: 'recycle',
                 text: t('storyboards.recycle'),
                 prefix: <DeleteOutlined className="icon" />,
@@ -175,7 +180,11 @@ export const Storyboards = memo(
             ],
             callback: (key, _, onNext) => {
               switch (key) {
+                case 'batch':
+                  setBatchMode(value => !value);
+                  break;
                 case 'recycle':
+                  setBatchMode(false);
                   onNext();
                   break;
               }
@@ -187,28 +196,50 @@ export const Storyboards = memo(
           key: 'recycle',
           subTitle: t('storyboards.recycle'),
           back: true,
-          search: true,
-          onSearch: recycleSearch,
+          more: {
+            overlayClassName: SIDEBAR_TITLE_MORE_MENU_POPUP_CLASS,
+            itemClassName: SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
+            items: [
+              {
+                key: 'policy',
+                text: '自动清理设置',
+                prefix: <SettingOutlined className="icon" />,
+              },
+              {
+                key: 'empty',
+                text: '清空回收站',
+                prefix: <ClearOutlined className="icon" />,
+              },
+            ],
+            callback: recycleMenuClick,
+          },
         },
       ],
-      [add, listSearch, recycleSearch, t],
+      [add, listSearch, t, batchMode, recycleMenuClick],
     );
 
     return (
       <Wrapper className={className} defaultActiveKey="list">
         <ListPane key="list">
           <ListTitle {...titles[0]} />
-          <List list={filteredListData} selectedId={selectedId} />
+          {batchMode ? (
+            <RecycleBatchManager
+              orgId={orgId}
+              resourceType="STORYBOARD"
+              treeData={filteredListData || []}
+              onCompleted={handleBatchCompleted}
+              onExit={() => setBatchMode(false)}
+            />
+          ) : (
+            <List list={filteredListData} selectedId={selectedId} />
+          )}
         </ListPane>
         <ListPane key="recycle">
           <ListTitle {...titles[1]} />
-          <Recycle
-            type="storyboard"
+          <RecycleBinManager
+            ref={recycleRef}
             orgId={orgId}
-            list={filteredRecycleData}
-            listLoading={archivedListLoading}
-            selectedId={selectedId}
-            onInit={recycleInit}
+            resourceType="STORYBOARD"
           />
         </ListPane>
       </Wrapper>

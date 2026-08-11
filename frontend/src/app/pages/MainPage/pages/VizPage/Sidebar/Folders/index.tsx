@@ -1,4 +1,10 @@
-import { DeleteOutlined } from '@ant-design/icons';
+import {
+  ClearOutlined,
+  DeleteOutlined,
+  SelectOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
+import { Tabs, TreeDataNode } from 'antd';
 import {
   ListNav,
   ListPane,
@@ -12,26 +18,28 @@ import useGetVizIcon from 'app/hooks/useGetVizIcon';
 import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
-import React, { memo, useCallback, useContext, useMemo } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
+import {
+  RecycleBatchManager,
+  RecycleBinHandle,
+  RecycleBinManager,
+} from 'app/features/recycle';
 import styled from 'styled-components';
 import { SPACE_XS } from 'styles/StyleConstants';
 import { useAddViz } from '../../hooks/useAddViz';
 import { SaveFormContext } from '../../SaveFormContext';
-import {
-  makeSelectArchivedDashboardsTree,
-  makeSelectArchivedDatachartsTree,
-  makeSelectVizTree,
-  selectArchivedDashboardLoading,
-  selectArchivedDatachartLoading,
-} from '../../slice/selectors';
-import {
-  getArchivedDashboards,
-  getArchivedDatacharts,
-} from '../../slice/thunks';
-import { ArchivedViz, FolderViewModel } from '../../slice/types';
-import { Recycle } from '../Recycle';
+import { makeSelectVizTree } from '../../slice/selectors';
+import { FolderViewModel } from '../../slice/types';
+import { getFolders } from '../../slice/thunks';
 import { FolderTree } from './FolderTree';
 
 interface FoldersProps extends I18NComponentProps {
@@ -48,6 +56,16 @@ export const Folders = memo(
     const navigate = useCompatNavigate();
     const { showSaveForm } = useContext(SaveFormContext);
     const addVizFn = useAddViz({ showSaveForm });
+    const [batchType, setBatchType] = useState<
+      'DATACHART' | 'DASHBOARD' | null
+    >(null);
+    const datachartRecycleRef = useRef<RecycleBinHandle>(null);
+    const dashboardRecycleRef = useRef<RecycleBinHandle>(null);
+
+    const handleBatchCompleted = useCallback(() => {
+      setBatchType(null);
+      dispatch(getFolders(orgId));
+    }, [dispatch, orgId]);
 
     const getIcon = useGetVizIcon();
 
@@ -65,44 +83,14 @@ export const Folders = memo(
         d.title.toLowerCase().includes(keywords.toLowerCase()),
       );
 
-    const selectArchivedDatachartsTree = useMemo(
-      makeSelectArchivedDatachartsTree,
-      [],
-    );
-    const selectArchivedDashboardsTree = useMemo(
-      makeSelectArchivedDashboardsTree,
-      [],
-    );
-
-    const getArchivedDisabled = useCallback(
-      ({ deleteLoading }: ArchivedViz) => deleteLoading,
-      [],
-    );
-
-    const archivedDatachartsTreeData = useSelector(state =>
-      selectArchivedDatachartsTree(state, { getDisabled: getArchivedDisabled }),
-    );
-    const archivedDashboardsTreeData = useSelector(state =>
-      selectArchivedDashboardsTree(state, { getDisabled: getArchivedDisabled }),
-    );
-    const archivedDataChartLoading = useSelector(
-      selectArchivedDatachartLoading,
-    );
-    const archivedDashboardLoading = useSelector(
-      selectArchivedDashboardLoading,
-    );
-    const { filteredData: filteredListData, debouncedSearch: listSearch } =
-      useDebouncedSearch(
-        (archivedDatachartsTreeData || []).concat(
-          archivedDashboardsTreeData || [],
+    const batchTree = useMemo(
+      () =>
+        filterVizTree(
+          (filteredTreeData || []) as VizBatchNode[],
+          batchType || 'DATACHART',
         ),
-        (keywords, d) => d.title.toLowerCase().includes(keywords.toLowerCase()),
-      );
-
-    const recycleInit = useCallback(() => {
-      dispatch(getArchivedDatacharts(orgId));
-      dispatch(getArchivedDashboards(orgId));
-    }, [dispatch, orgId]);
+      [batchType, filteredTreeData],
+    );
 
     const add = useCallback(
       ({ key }) => {
@@ -124,6 +112,14 @@ export const Folders = memo(
       [orgId, navigate, addVizFn],
     );
 
+    const recycleMenuClick = useCallback(key => {
+      const target = key.startsWith('datachart')
+        ? datachartRecycleRef.current
+        : dashboardRecycleRef.current;
+      if (key.endsWith('policy')) void target?.openPolicy();
+      if (key.endsWith('empty')) void target?.empty();
+    }, []);
+
     const titles = useMemo(
       () => [
         {
@@ -142,6 +138,16 @@ export const Folders = memo(
             itemClassName: SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
             items: [
               {
+                key: 'batch-datachart',
+                text: '批量管理图表',
+                prefix: <SelectOutlined className="icon" />,
+              },
+              {
+                key: 'batch-dashboard',
+                text: '批量管理仪表盘',
+                prefix: <SelectOutlined className="icon" />,
+              },
+              {
                 key: 'recycle',
                 text: t('folders.recycle'),
                 prefix: <DeleteOutlined className="icon" />,
@@ -149,7 +155,14 @@ export const Folders = memo(
             ],
             callback: (key, _, onNext) => {
               switch (key) {
+                case 'batch-datachart':
+                  setBatchType('DATACHART');
+                  break;
+                case 'batch-dashboard':
+                  setBatchType('DASHBOARD');
+                  break;
                 case 'recycle':
+                  setBatchType(null);
                   onNext();
                   break;
               }
@@ -162,32 +175,86 @@ export const Folders = memo(
           key: 'recycle',
           subTitle: t('folders.recycle'),
           back: true,
-          search: true,
-          onSearch: listSearch,
+          more: {
+            overlayClassName: SIDEBAR_TITLE_MORE_MENU_POPUP_CLASS,
+            itemClassName: SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
+            items: [
+              {
+                key: 'datachart-policy',
+                text: '图表自动清理设置',
+                prefix: <SettingOutlined className="icon" />,
+              },
+              {
+                key: 'dashboard-policy',
+                text: '仪表盘自动清理设置',
+                prefix: <SettingOutlined className="icon" />,
+              },
+              {
+                key: 'datachart-empty',
+                text: '清空图表回收站',
+                prefix: <ClearOutlined className="icon" />,
+              },
+              {
+                key: 'dashboard-empty',
+                text: '清空仪表盘回收站',
+                prefix: <ClearOutlined className="icon" />,
+              },
+            ],
+            callback: recycleMenuClick,
+          },
         },
       ],
-      [add, treeSearch, listSearch, t],
+      [add, treeSearch, t, recycleMenuClick],
     );
 
     return (
       <Wrapper className={className} defaultActiveKey="list">
         <ListPane key="list">
           <ListTitle {...titles[0]} />
-          <FolderTree
-            treeData={filteredTreeData}
-            selectedId={selectedId}
-            i18nPrefix={i18nPrefix}
-          />
+          {batchType ? (
+            <RecycleBatchManager
+              orgId={orgId}
+              resourceType={batchType}
+              treeData={batchTree}
+              onCompleted={handleBatchCompleted}
+              onExit={() => setBatchType(null)}
+            />
+          ) : (
+            <FolderTree
+              treeData={filteredTreeData}
+              selectedId={selectedId}
+              i18nPrefix={i18nPrefix}
+            />
+          )}
         </ListPane>
         <ListPane key="recycle">
           <ListTitle {...titles[1]} />
-          <Recycle
-            type="viz"
-            orgId={orgId}
-            list={filteredListData}
-            listLoading={archivedDashboardLoading || archivedDataChartLoading}
-            selectedId={selectedId}
-            onInit={recycleInit}
+          <Tabs
+            size="small"
+            items={[
+              {
+                key: 'datachart',
+                label: '图表',
+                children: (
+                  <RecycleBinManager
+                    ref={datachartRecycleRef}
+                    orgId={orgId}
+                    resourceType="DATACHART"
+                  />
+                ),
+              },
+              {
+                key: 'dashboard',
+                label: '仪表盘',
+                children: (
+                  <RecycleBinManager
+                    ref={dashboardRecycleRef}
+                    orgId={orgId}
+                    resourceType="DASHBOARD"
+                  />
+                ),
+              },
+            ]}
           />
         </ListPane>
       </Wrapper>
@@ -203,3 +270,34 @@ const Wrapper = styled(ListNav)`
   padding: ${SPACE_XS} 0;
   background-color: ${p => p.theme.componentBackground};
 `;
+
+interface VizBatchNode extends TreeDataNode {
+  relType?: string;
+  relId?: string;
+  submitKey?: string | null;
+  children?: VizBatchNode[];
+}
+
+function filterVizTree(
+  nodes: VizBatchNode[],
+  resourceType: 'DATACHART' | 'DASHBOARD',
+): VizBatchNode[] {
+  const result: VizBatchNode[] = [];
+  nodes.forEach(node => {
+    const children = filterVizTree(node.children || [], resourceType);
+    if (node.relType === resourceType && node.relId) {
+      result.push({ ...node, key: node.relId, children });
+      return;
+    }
+    if (node.relType === 'FOLDER' && children.length) {
+      result.push({
+        ...node,
+        key: `viz-folder:${resourceType}:${node.key}`,
+        submitKey: null,
+        selectable: false,
+        children,
+      });
+    }
+  });
+  return result;
+}
