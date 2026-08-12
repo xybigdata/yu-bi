@@ -2,9 +2,11 @@ package yubi.server.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.context.support.StaticMessageSource;
 import yubi.core.entity.Datachart;
 import yubi.core.entity.User;
+import yubi.security.base.ResourceType;
 import yubi.security.manager.YuBiSecurityManager;
 import yubi.server.artifact.ArtifactAccess;
 import yubi.server.artifact.ArtifactContent;
@@ -34,14 +36,17 @@ import yubi.core.common.MessageResolver;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -114,6 +119,22 @@ class VizServiceImplArtifactTest {
         )) {
             assertInstanceOf(ResourceModel.class, input.readObject());
         }
+    }
+
+    @Test
+    void 数据图表页拒绝导入仪表板模板() throws Exception {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try (ObjectOutputStream objectOutput = new ObjectOutputStream(
+                new GZIPOutputStream(output))) {
+            objectOutput.writeObject(new yubi.server.base.transfer.model.DashboardTemplateModel());
+        }
+        MockMultipartFile file = new MockMultipartFile(
+                "file", "dashboard.ybt", "application/octet-stream", output.toByteArray());
+
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> service.importVizTemplate(
+                        file, "org-1", "", "模板", ResourceType.DATACHART));
+        assertEquals("模板类型与当前资源类型不一致", exception.getMessage());
     }
 
     private static final class RecordingArtifactTasks implements ArtifactTasks {

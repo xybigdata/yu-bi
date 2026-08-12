@@ -1,5 +1,5 @@
 import { describe, expect, test, vi, beforeEach } from 'vitest';
-import { runSql } from '../thunks';
+import { deleteView, runSql } from '../thunks';
 import { ViewViewModelStages } from '../../constants';
 import { generateEditingView } from '../../utils';
 import { RootState } from 'types';
@@ -146,5 +146,29 @@ describe('runSql', () => {
       {},
       expect.any(Object),
     );
+  });
+});
+
+describe('deleteView', () => {
+  beforeEach(() => {
+    requestMock.request2.mockReset();
+  });
+
+  test('后端未实际移入回收站时不触发成功回调', async () => {
+    requestMock.request2.mockResolvedValue({ data: false });
+    const resolve = vi.fn();
+
+    const action = await deleteView({
+      id: 'view-1',
+      archive: true,
+      resolve,
+    })(
+      vi.fn(),
+      vi.fn(() => createState()),
+      undefined,
+    );
+
+    expect(action.type).toBe('view/deleteView/rejected');
+    expect(resolve).not.toHaveBeenCalled();
   });
 });

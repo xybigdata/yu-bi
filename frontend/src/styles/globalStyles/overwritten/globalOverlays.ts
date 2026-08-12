@@ -366,9 +366,9 @@ export const GlobalOverlays = createGlobalStyle`
     .ant-popover-inner {
       box-sizing: border-box;
       width: max-content;
-      min-width: ${SPACE_TIMES(40)};
+      min-width: ${SPACE_TIMES(31)};
       height: auto;
-      padding: 1px 0;
+      padding: ${SPACE} 0;
       overflow: hidden;
       border: 0;
     }
@@ -381,8 +381,8 @@ export const GlobalOverlays = createGlobalStyle`
     }
 
     .ant-dropdown-menu {
-      width: 100%;
-      min-width: ${SPACE_TIMES(40)};
+      width: max-content;
+      min-width: ${SPACE_TIMES(31)};
       padding: 0;
       overflow: hidden;
       border-inline-end: 0 !important;
@@ -390,7 +390,7 @@ export const GlobalOverlays = createGlobalStyle`
     }
 
     .ant-dropdown-menu-item {
-      min-height: 54px;
+      min-height: ${SPACE_TIMES(11)};
       padding: 0;
       margin: 0;
     }
@@ -402,8 +402,8 @@ export const GlobalOverlays = createGlobalStyle`
     .sidebar-title-more-menu-item {
       box-sizing: border-box;
       width: 100%;
-      min-width: ${SPACE_TIMES(40)};
-      height: 54px;
+      min-width: ${SPACE_TIMES(31)};
+      height: ${SPACE_TIMES(11)};
       padding: 0 ${SPACE_SM};
       overflow: hidden;
       line-height: 1;

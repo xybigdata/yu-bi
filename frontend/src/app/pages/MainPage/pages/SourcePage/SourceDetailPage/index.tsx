@@ -21,6 +21,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Input, message, Popconfirm, Select } from 'antd';
 import { Authorized, EmptyFiller } from 'app/components';
 import { DetailPageHeader } from 'app/components/DetailPageHeader';
+import { useMoveToRecycle } from 'app/features/recycle/useMoveToRecycle';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useParams } from 'app/routerCompat';
@@ -146,6 +147,13 @@ export function SourceDetailPage() {
   );
   const allowManage =
     useCascadeAccess(allowManageSource(path))(true) && sourceId !== 'add';
+  const { loading: recycleLoading, moveToRecycle } = useMoveToRecycle({
+    orgId,
+    resourceType: 'SOURCE',
+    onCompleted: () => {
+      navigate.replace(`/organizations/${orgId}/sources`);
+    },
+  });
   const allowEnableView = useAccess({
     type: 'module',
     module: ResourceTypes.View,
@@ -341,6 +349,10 @@ export function SourceDetailPage() {
 
   const del = useCallback(
     archive => () => {
+      if (archive) {
+        void moveToRecycle([editingSource!.id]);
+        return;
+      }
       dispatch(
         deleteSource({
           id: editingSource!.id,
@@ -356,7 +368,7 @@ export function SourceDetailPage() {
         }),
       );
     },
-    [dispatch, navigate, orgId, editingSource, tg],
+    [dispatch, navigate, orgId, editingSource, moveToRecycle, tg],
   );
 
   const unarchive = useCallback(() => {
@@ -456,14 +468,13 @@ export function SourceDetailPage() {
                   {tg('button.save')}
                 </Button>
                 {formType === CommonFormTypes.Edit && (
-                  <Popconfirm
-                    title={tg('operation.archiveConfirm')}
-                    onConfirm={del(true)}
+                  <Button
+                    loading={deleteSourceLoading || recycleLoading}
+                    danger
+                    onClick={del(true)}
                   >
-                    <Button loading={deleteSourceLoading} danger>
-                      {tg('button.archive')}
-                    </Button>
-                  </Popconfirm>
+                    {tg('button.archive')}
+                  </Button>
                 )}
               </>
             ) : isOwner ? (

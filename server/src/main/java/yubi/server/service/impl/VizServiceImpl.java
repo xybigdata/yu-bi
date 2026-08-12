@@ -106,13 +106,18 @@ public class VizServiceImpl extends BaseService implements VizService {
             storyboard.setOrgId(orgId);
             return storyboardService.checkUnique(storyboard);
         } else {
-            return folderService.checkUnique(orgId, parentId, name);
+            return folderService.checkUnique(orgId, parentId, name, vizType);
         }
     }
 
     @Override
     public List<Folder> listViz(String orgId) {
         return folderService.listOrgFolders(orgId);
+    }
+
+    @Override
+    public List<Folder> listViz(String orgId, ResourceType resourceType) {
+        return folderService.listOrgFolders(orgId, resourceType);
     }
 
     @Override
@@ -440,13 +445,27 @@ public class VizServiceImpl extends BaseService implements VizService {
 
     @Override
     @Transactional
-    public Folder importVizTemplate(MultipartFile file, String orgId, String parentId, String name) throws Exception {
+    public Folder importVizTemplate(MultipartFile file, String orgId, String parentId, String name,
+                                    ResourceType resourceType) throws Exception {
         Folder parent = null;
+        String scopedParentId = StringUtils.isBlank(parentId) ? null : parentId;
+        folderService.requireParentScope(scopedParentId, resourceType);
         if (StringUtils.isNotBlank(parentId)) {
             parent = folderService.retrieve(parentId);
         }
-        TransferModel transferModel = null;
-        transferModel = extractModel(file);
+        TransferModel transferModel = extractModel(file);
+        ResourceType templateType;
+        if (transferModel instanceof DatachartTemplateModel) {
+            templateType = ResourceType.DATACHART;
+        } else if (transferModel instanceof DashboardTemplateModel) {
+            templateType = ResourceType.DASHBOARD;
+        } else {
+            Exceptions.msg("无法识别的模板类型");
+            return null;
+        }
+        if (templateType != resourceType) {
+            Exceptions.msg("模板类型与当前资源类型不一致");
+        }
         yubi.core.common.BeanUtils.validate(transferModel);
         if (transferModel instanceof DatachartTemplateModel) {
             return datachartService.importTemplate((DatachartTemplateModel) transferModel, orgId, name, parent);
@@ -550,7 +569,8 @@ public class VizServiceImpl extends BaseService implements VizService {
                 Dashboard dashboard = dashboardService.retrieve(vizId);
                 dashboardService.requirePermission(dashboard, Const.MANAGE);
                 //check name
-                folderService.checkUnique(dashboard.getOrgId(), parentId, newName);
+                folderService.checkUnique(dashboard.getOrgId(), parentId, newName,
+                        ResourceType.DASHBOARD);
                 // add to folder
                 createFolder(vizType, vizId, newName, dashboard.getOrgId(), parentId, index);
                 dashboard.setName(newName);
@@ -561,7 +581,8 @@ public class VizServiceImpl extends BaseService implements VizService {
                 Datachart datachart = datachartService.retrieve(vizId);
                 datachartService.requirePermission(datachart, Const.MANAGE);
                 //check name
-                folderService.checkUnique(datachart.getOrgId(), parentId, newName);
+                folderService.checkUnique(datachart.getOrgId(), parentId, newName,
+                        ResourceType.DATACHART);
                 //update status
                 datachart.setName(newName);
                 datachart.setStatus(Const.DATA_STATUS_ACTIVE);

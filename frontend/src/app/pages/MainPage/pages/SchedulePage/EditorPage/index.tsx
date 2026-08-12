@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from 'antd';
 import { DetailPageHeader } from 'app/components/DetailPageHeader';
+import { useMoveToRecycle } from 'app/features/recycle/useMoveToRecycle';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { getFolders } from 'app/pages/MainPage/pages/VizPage/slice/thunks';
 import { CommonFormTypes } from 'globalConstants';
@@ -93,6 +94,14 @@ export const EditorPage: FC = () => {
   const refreshScheduleList = useCallback(() => {
     dispatch(getSchedules(orgId));
   }, [dispatch, orgId]);
+  const { loading: recycleLoading, moveToRecycle } = useMoveToRecycle({
+    orgId,
+    resourceType: 'SCHEDULE',
+    onCompleted: () => {
+      refreshScheduleList();
+      toDetails(orgId);
+    },
+  });
   const onFinish = useCallback(() => {
     form.validateFields().then((values: FormValues) => {
       if (!(values?.folderContent && values?.folderContent?.length > 0)) {
@@ -269,6 +278,10 @@ export const EditorPage: FC = () => {
 
   const del = useCallback(
     archive => () => {
+      if (archive) {
+        void moveToRecycle([editingSchedule!.id]);
+        return;
+      }
       dispatch(
         deleteSchedule({
           id: editingSchedule!.id,
@@ -282,7 +295,7 @@ export const EditorPage: FC = () => {
         }),
       );
     },
-    [dispatch, toDetails, orgId, editingSchedule, t],
+    [dispatch, toDetails, orgId, editingSchedule, moveToRecycle, t],
   );
 
   useEffect(() => {
@@ -342,14 +355,14 @@ export const EditorPage: FC = () => {
                     placement="bottom"
                     title={active ? t('allowMoveAfterStopping') : ''}
                   >
-                    <Popconfirm
-                      title={t('sureMoveRecycleBin')}
-                      onConfirm={del(true)}
+                    <Button
+                      loading={deleteLoading || recycleLoading}
+                      disabled={active}
+                      danger
+                      onClick={del(true)}
                     >
-                      <Button loading={deleteLoading} disabled={active} danger>
-                        {t('moveToTrash')}
-                      </Button>
-                    </Popconfirm>
+                      {t('moveToTrash')}
+                    </Button>
                   </Tooltip>
                 )}
               </>

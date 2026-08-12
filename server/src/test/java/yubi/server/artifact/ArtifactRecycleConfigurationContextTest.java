@@ -3,6 +3,7 @@ package yubi.server.artifact;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
+import yubi.core.mappers.ext.UserMapperExt;
 import yubi.security.manager.PermissionDataCache;
 import yubi.server.recycle.RecycleService;
 
@@ -26,6 +27,7 @@ class ArtifactRecycleConfigurationContextTest {
                         recycleConfiguration,
                         recycleHistoryMigrator)
                 .withBean(JdbcTemplate.class, () -> mock(JdbcTemplate.class))
+                .withBean(UserMapperExt.class, () -> mock(UserMapperExt.class))
                 .withBean(PermissionDataCache.class, () -> mock(PermissionDataCache.class))
                 .withBean(ArtifactTaskStore.class, () -> mock(ArtifactTaskStore.class))
                 .withBean(ArtifactBlobStore.class, () -> mock(ArtifactBlobStore.class))

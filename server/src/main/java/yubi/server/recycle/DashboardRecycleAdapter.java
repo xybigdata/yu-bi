@@ -6,18 +6,20 @@ import yubi.core.mappers.ext.FolderMapperExt;
 import yubi.core.mappers.ext.ShareMapperExt;
 import yubi.security.base.ResourceType;
 import yubi.server.service.DashboardService;
+import yubi.server.service.FolderService;
 import yubi.server.service.VizService;
 
 @Component
-final class DashboardRecycleAdapter extends VizRecycleAdapter<Dashboard> {
+class DashboardRecycleAdapter extends VizRecycleAdapter<Dashboard> {
 
     DashboardRecycleAdapter(DashboardService service,
                             VizService vizService,
+                            FolderService folderService,
                             FolderMapperExt folderMapper,
                             ShareMapperExt shareMapper,
                             RecycleDependencyResolver dependencyResolver) {
         super(RecycleResourceType.DASHBOARD, ResourceType.DASHBOARD,
-                service, vizService, folderMapper, shareMapper,
+                service, vizService, folderService, folderMapper, shareMapper,
                 Dashboard::getName, Dashboard::getOrgId, dependencyResolver);
     }
 }

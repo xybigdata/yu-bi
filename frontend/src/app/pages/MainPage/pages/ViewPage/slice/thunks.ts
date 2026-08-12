@@ -420,11 +420,14 @@ export const deleteView = createAsyncThunk<
   DeleteViewParams,
   { state: RootState }
 >('view/deleteView', async ({ id, archive, resolve }, { dispatch }) => {
-  await request2<boolean>({
+  const { data } = await request2<boolean>({
     url: `/views/${id}`,
     method: 'DELETE',
     params: { archive },
   });
+  if (!data) {
+    throw new Error(archive ? '移至回收站失败，请重试' : '删除失败，请重试');
+  }
   resolve();
   return null;
 });

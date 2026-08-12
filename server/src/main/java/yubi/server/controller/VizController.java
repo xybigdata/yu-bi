@@ -72,8 +72,12 @@ public class VizController extends BaseController {
 
     @Operation(summary = "list viz folders")
     @GetMapping(value = "/folders")
-    public ResponseData<List<Folder>> listVizFolders(String orgId) {
-        return ResponseData.success(vizService.listViz(orgId));
+    public ResponseData<List<Folder>> listVizFolders(
+            String orgId,
+            @RequestParam(required = false) ResourceType resourceType) {
+        return ResponseData.success(resourceType == null
+                ? vizService.listViz(orgId)
+                : vizService.listViz(orgId, resourceType));
     }
 
 
@@ -337,8 +341,12 @@ public class VizController extends BaseController {
 
     @Operation(summary = "import viz template")
     @PostMapping(value = "/import/template")
-    public ResponseData<Folder> importVizTemplate(@RequestParam("file") MultipartFile file, @RequestParam String parentId, @RequestParam String orgId, @RequestParam String name) throws Exception {
-        return ResponseData.success(vizService.importVizTemplate(file, orgId, parentId, name));
+    public ResponseData<Folder> importVizTemplate(@RequestParam("file") MultipartFile file,
+                                                  @RequestParam String parentId,
+                                                  @RequestParam String orgId,
+                                                  @RequestParam String name,
+                                                  @RequestParam ResourceType resourceType) throws Exception {
+        return ResponseData.success(vizService.importVizTemplate(file, orgId, parentId, name, resourceType));
     }
 
 }

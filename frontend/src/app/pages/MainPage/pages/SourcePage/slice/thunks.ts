@@ -114,11 +114,14 @@ export const unarchiveSource = createAsyncThunk<null, UnarchiveSourceParams>(
 export const deleteSource = createAsyncThunk<null, DeleteSourceParams>(
   'source/deleteSource',
   async ({ id, archive, resolve }) => {
-    await request2<boolean>({
+    const { data } = await request2<boolean>({
       url: `/sources/${id}`,
       method: 'DELETE',
       params: { archive },
     });
+    if (!data) {
+      throw new Error(archive ? '移至回收站失败，请重试' : '删除失败，请重试');
+    }
     resolve();
     return null;
   },

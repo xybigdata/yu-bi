@@ -40,13 +40,19 @@ export const makeSelectVizFolderTree = () =>
     [
       selectVizs,
       (_, props: SelectVizFolderTree) => props.id,
+      (_, props: SelectVizFolderTree) => props.resourceType,
       (_, props: SelectVizFolderTree) => props.getDisabled,
     ],
-    (vizs, id, getDisabled) =>
+    (vizs, id, resourceType, getDisabled) =>
       listToTree(
         vizs &&
           vizs
-            .filter(v => v.relType === 'FOLDER' && v.id !== id)
+            .filter(
+              v =>
+                v.relType === 'FOLDER' &&
+                v.id !== id &&
+                (!resourceType || v.subType === resourceType),
+            )
             .map(v => ({ ...v, isFolder: true })),
         null,
         [VizResourceSubTypes.Folder],

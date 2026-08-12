@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { message, Modal } from 'antd';
 import { ThemeProvider } from 'styled-components';
@@ -133,5 +133,50 @@ describe('RecycleBatchManager', () => {
 
     expect(await screen.findByText(/删除人 alice/)).toBeInTheDocument();
     expect(screen.queryByText(/删除人 user-1/)).not.toBeInTheDocument();
+  });
+
+  it('父组件回调引用变化时保留已选资源', async () => {
+    recycleClientMock.list.mockResolvedValue([
+      {
+        id: 'record-1',
+        rootId: 'chart-1',
+        name: '测试图表',
+        folder: false,
+        expandedItemCount: 1,
+        deletedBy: 'user-1',
+        deletedByName: 'alice',
+        deletedAt: '2026-08-11T07:45:00Z',
+        expiresAt: '2026-09-10T07:45:00Z',
+      },
+    ]);
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <ThemeProvider theme={themes.light}>
+        <RecycleBinManager
+          orgId="org-1"
+          resourceType="DATACHART"
+          onEntriesChange={() => undefined}
+        />
+      </ThemeProvider>,
+    );
+
+    const entry = await screen.findByRole('checkbox', { name: /测试图表/ });
+    await user.click(entry);
+    expect(screen.getByText('已选 1 项')).toBeInTheDocument();
+
+    rerender(
+      <ThemeProvider theme={themes.light}>
+        <RecycleBinManager
+          orgId="org-1"
+          resourceType="DATACHART"
+          onEntriesChange={() => undefined}
+        />
+      </ThemeProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('已选 1 项')).toBeInTheDocument();
+      expect(recycleClientMock.list).toHaveBeenCalledOnce();
+    });
   });
 });

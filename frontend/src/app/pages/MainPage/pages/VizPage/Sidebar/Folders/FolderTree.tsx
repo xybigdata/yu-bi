@@ -4,7 +4,7 @@ import {
   EditOutlined,
   MoreOutlined,
 } from '@ant-design/icons';
-import { Menu, MenuProps, message, Popconfirm } from 'antd';
+import { Menu, MenuProps, Popconfirm } from 'antd';
 import { Popup, Tree, TreeTitle } from 'app/components';
 import { useMoveToRecycle } from 'app/features/recycle/useMoveToRecycle';
 import {
@@ -30,21 +30,18 @@ import {
 import { useSaveAsViz } from '../../hooks/useSaveAsViz';
 import { SaveFormContext } from '../../SaveFormContext';
 import { selectVizListLoading, selectVizs } from '../../slice/selectors';
-import {
-  deleteViz,
-  editFolder,
-  getFolders,
-  removeTab,
-} from '../../slice/thunks';
+import { editFolder, getFolders, removeTab } from '../../slice/thunks';
 
 interface FolderTreeProps extends I18NComponentProps {
   selectedId?: string;
   treeData?: LocalTreeDataNode[];
+  resourceType: 'DATACHART' | 'DASHBOARD';
 }
 
 export function FolderTree({
   selectedId,
   treeData,
+  resourceType,
   i18nPrefix,
 }: FolderTreeProps) {
   const tg = useI18NPrefix('global');
@@ -83,12 +80,7 @@ export function FolderTree({
   );
   const { moveToRecycle } = useMoveToRecycle({
     orgId,
-    resourceType: 'DATACHART',
-    onCompleted: handleRecycleCompleted,
-  });
-  const { moveToRecycle: moveDashboardToRecycle } = useMoveToRecycle({
-    orgId,
-    resourceType: 'DASHBOARD',
+    resourceType,
     onCompleted: handleRecycleCompleted,
   });
 
@@ -110,25 +102,13 @@ export function FolderTree({
   const archiveViz = useCallback(
     ({ id: folderId, relId, relType }) =>
       () => {
-        if (relType === 'DATACHART') {
-          void moveToRecycle([relId]);
+        if (relType === 'FOLDER') {
+          void moveToRecycle([folderId]);
           return;
         }
-        if (relType === 'DASHBOARD') {
-          void moveDashboardToRecycle([relId]);
-          return;
-        }
-        dispatch(
-          deleteViz({
-            params: { id: folderId, archive: false },
-            type: relType,
-            resolve: () => {
-              message.success(tg('operation.deleteSuccess'));
-            },
-          }),
-        );
+        void moveToRecycle([relId]);
       },
-    [dispatch, moveDashboardToRecycle, moveToRecycle, tg],
+    [moveToRecycle],
   );
 
   const moreMenuClick = useCallback(
@@ -141,7 +121,14 @@ export function FolderTree({
               vizType: node.relType,
               type: CommonFormTypes.Edit,
               open: true,
-              initialValues: { ...node, parentId: node.parentId || void 0 },
+              initialValues: {
+                ...node,
+                parentId: node.parentId || void 0,
+                resourceType:
+                  node.relType === 'FOLDER'
+                    ? node.subType || resourceType
+                    : resourceType,
+              },
               onSave: (values, onClose) => {
                 let index = node.index;
                 if (isParentIdEqual(node.parentId, values.parentId)) {
@@ -170,7 +157,7 @@ export function FolderTree({
             break;
         }
       },
-    [dispatch, showSaveForm, vizsData, saveAsViz],
+    [dispatch, resourceType, showSaveForm, vizsData, saveAsViz],
   );
 
   const renderTreeTitle = useCallback(

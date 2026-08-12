@@ -24,8 +24,9 @@ import {
   MonitorOutlined,
   MoreOutlined,
 } from '@ant-design/icons';
-import { Menu, MenuProps, message, Popconfirm, TreeDataNode } from 'antd';
+import { Menu, MenuProps, TreeDataNode } from 'antd';
 import { Popup, Tree, TreeTitle } from 'app/components';
+import { useMoveToRecycle } from 'app/features/recycle/useMoveToRecycle';
 import {
   MenuItemContent,
   TREE_MORE_MENU_ITEM_CLASS,
@@ -63,12 +64,7 @@ import {
   selectViewListLoading,
   selectViews,
 } from '../slice/selectors';
-import {
-  deleteView,
-  getViews,
-  removeEditingView,
-  updateViewBase,
-} from '../slice/thunks';
+import { getViews, removeEditingView, updateViewBase } from '../slice/thunks';
 
 interface FolderTreeProps {
   treeData?: TreeDataNode[];
@@ -111,22 +107,16 @@ export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
     [navigate, orgId],
   );
 
-  const archive = useCallback(
-    (id, isFolder) => e => {
-      e.stopPropagation();
-      dispatch(
-        deleteView({
-          id,
-          archive: true,
-          resolve: () => {
-            dispatch(removeEditingView({ id, resolve: redirect }));
-            message.success(tg('operation.archiveSuccess'));
-          },
-        }),
-      );
+  const { moveToRecycle } = useMoveToRecycle({
+    orgId,
+    resourceType: 'VIEW',
+    onCompleted: rootIds => {
+      dispatch(getViews(orgId));
+      rootIds.forEach(id => {
+        dispatch(removeEditingView({ id, resolve: redirect }));
+      });
     },
-    [dispatch, redirect, tg],
-  );
+  });
 
   const moreMenuClick = useCallback(
     ({ id, name, parentId, index, isFolder }) =>
@@ -164,6 +154,7 @@ export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
             });
             break;
           case 'delete':
+            void moveToRecycle([id]);
             break;
           case 'saveAs':
             saveAsView(id);
@@ -175,7 +166,15 @@ export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
             break;
         }
       },
-    [dispatch, showSaveForm, viewsData, t, saveAsView, startAnalysis],
+    [
+      dispatch,
+      moveToRecycle,
+      showSaveForm,
+      viewsData,
+      t,
+      saveAsView,
+      startAnalysis,
+    ],
   );
 
   const renderTreeTitle = useCallback(
@@ -248,18 +247,7 @@ export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
                               className={TREE_MORE_MENU_ITEM_CLASS}
                               prefix={<DeleteOutlined className="icon" />}
                             >
-                              <Popconfirm
-                                title={
-                                  isFolder
-                                    ? tg('operation.deleteConfirm')
-                                    : tg('operation.archiveConfirm')
-                                }
-                                onConfirm={archive(id, isFolder)}
-                              >
-                                {isFolder
-                                  ? tg('button.delete')
-                                  : tg('button.archive')}
-                              </Popconfirm>
+                              {tg('button.archive')}
                             </MenuItemContent>
                           ),
                         },
@@ -291,7 +279,7 @@ export const FolderTree = memo(({ treeData }: FolderTreeProps) => {
         </TreeTitle>
       );
     },
-    [archive, moreMenuClick, tg, allowEnableViz, t, isOwner, permissionMap],
+    [moreMenuClick, tg, allowEnableViz, t, isOwner, permissionMap],
   );
 
   const treeSelect = useCallback(

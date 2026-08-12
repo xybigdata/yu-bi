@@ -49,6 +49,8 @@ export interface ListTitleProps {
       text: string;
       prefix?: ReactElement;
       suffix?: ReactElement;
+      disabled?: boolean;
+      tooltip?: string;
     }>;
     callback: (
       key: string,
@@ -91,16 +93,21 @@ export function ListTitle({
   }, [onPrevious]);
 
   const moreItems: MenuProps['items'] | undefined = more?.items.map(
-    ({ key, text, prefix, suffix }) => ({
+    ({ key, text, prefix, suffix, disabled, tooltip }) => ({
       key,
+      disabled,
       label: (
-        <MenuItemContent
-          className={more.itemClassName}
-          prefix={prefix}
-          suffix={suffix}
-        >
-          {text}
-        </MenuItemContent>
+        <Tooltip title={tooltip} placement="right">
+          <MenuTooltipTarget>
+            <MenuItemContent
+              className={more.itemClassName}
+              prefix={prefix}
+              suffix={suffix}
+            >
+              {text}
+            </MenuItemContent>
+          </MenuTooltipTarget>
+        </Tooltip>
       ),
     }),
   );
@@ -158,6 +165,11 @@ export function ListTitle({
     </Wrapper>
   );
 }
+
+const MenuTooltipTarget = styled.span`
+  display: block;
+  width: 100%;
+`;
 
 const Wrapper = styled.div`
   display: flex;

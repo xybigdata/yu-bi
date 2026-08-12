@@ -15,6 +15,7 @@ export interface SaveFormModel {
   viewId?: string;
   file?: TemplateUploadValue; //template
   subType?: string; //board
+  resourceType?: 'DATACHART' | 'DASHBOARD';
   avatar?: string; //datachart
 }
 

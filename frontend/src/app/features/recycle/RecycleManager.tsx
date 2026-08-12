@@ -27,6 +27,7 @@ import {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import styled from 'styled-components';
@@ -70,40 +71,46 @@ export function RecycleBatchManager({
   return (
     <ManagerWrapper>
       <Toolbar>
-        <Checkbox
-          checked={allKeys.length > 0 && checkedKeys.length === allKeys.length}
-          indeterminate={
-            checkedKeys.length > 0 && checkedKeys.length < allKeys.length
-          }
-          onChange={event =>
-            setCheckedKeys(event.target.checked ? allKeys : [])
-          }
-        >
-          全选
-        </Checkbox>
-        <Typography.Text type="secondary">
-          已选 {selectedRoots.length} 项
-        </Typography.Text>
-        <Button
-          danger
-          type="primary"
-          size="small"
-          icon={<DeleteOutlined />}
-          disabled={!selectedRoots.length}
-          loading={loading}
-          onClick={() => void moveToRecycle(selectedRoots)}
-        >
-          移入回收站
-        </Button>
-        <Tooltip title="退出批量管理">
+        <ToolbarSummary>
+          <Checkbox
+            checked={
+              allKeys.length > 0 && checkedKeys.length === allKeys.length
+            }
+            indeterminate={
+              checkedKeys.length > 0 && checkedKeys.length < allKeys.length
+            }
+            onChange={event =>
+              setCheckedKeys(event.target.checked ? allKeys : [])
+            }
+          >
+            全选
+          </Checkbox>
+          <Typography.Text type="secondary">
+            已选 {selectedRoots.length} 项
+          </Typography.Text>
+        </ToolbarSummary>
+        <ToolbarActions>
           <Button
-            type="text"
+            danger
+            type="primary"
             size="small"
-            icon={<CloseOutlined />}
-            aria-label="退出批量管理"
-            onClick={onExit}
-          />
-        </Tooltip>
+            icon={<DeleteOutlined />}
+            disabled={!selectedRoots.length}
+            loading={loading}
+            onClick={() => void moveToRecycle(selectedRoots)}
+          >
+            移入回收站
+          </Button>
+          <Tooltip title="退出批量管理">
+            <Button
+              type="text"
+              size="small"
+              icon={<CloseOutlined />}
+              aria-label="退出批量管理"
+              onClick={onExit}
+            />
+          </Tooltip>
+        </ToolbarActions>
       </Toolbar>
       {treeData.length ? (
         <Tree
@@ -134,18 +141,27 @@ interface BinManagerProps {
   orgId: string;
   resourceType: RecycleResourceType;
   emptyText?: ReactNode;
+  onEntriesChange?: (count: number) => void;
 }
 
 export const RecycleBinManager = forwardRef<RecycleBinHandle, BinManagerProps>(
-  ({ orgId, resourceType, emptyText }, ref) => {
+  ({ orgId, resourceType, emptyText, onEntriesChange }, ref) => {
     const [entries, setEntries] = useState<RecycleEntry[]>([]);
     const [selected, setSelected] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
+    const onEntriesChangeRef = useRef(onEntriesChange);
+    const resourceLabel = RECYCLE_RESOURCE_LABELS[resourceType];
+
+    useEffect(() => {
+      onEntriesChangeRef.current = onEntriesChange;
+    }, [onEntriesChange]);
 
     const load = useCallback(async () => {
       setLoading(true);
       try {
-        setEntries(await recycleClient.list(orgId, resourceType));
+        const nextEntries = await recycleClient.list(orgId, resourceType);
+        setEntries(nextEntries);
+        onEntriesChangeRef.current?.(nextEntries.length);
         setSelected([]);
       } finally {
         setLoading(false);
@@ -188,7 +204,7 @@ export const RecycleBinManager = forwardRef<RecycleBinHandle, BinManagerProps>(
         };
         if (operation === 'delete') {
           Modal.confirm({
-            title: `永久删除 ${recordIds.length} 项内容？`,
+            title: `永久删除 ${resourceLabel}回收站中的 ${recordIds.length} 项内容？`,
             content: '删除后无法恢复。',
             okText: '永久删除',
             okButtonProps: { danger: true },
@@ -199,14 +215,14 @@ export const RecycleBinManager = forwardRef<RecycleBinHandle, BinManagerProps>(
           await execute();
         }
       },
-      [load, orgId, resourceType, selected],
+      [load, orgId, resourceLabel, resourceType, selected],
     );
 
     const openPolicy = useCallback(async () => {
       const current = await recycleClient.getPolicy(orgId, resourceType);
       let next = current;
       Modal.confirm({
-        title: '自动清理设置',
+        title: `${resourceLabel}自动清理设置`,
         content: (
           <PolicyEditor value={current} onChange={value => (next = value)} />
         ),
@@ -218,7 +234,7 @@ export const RecycleBinManager = forwardRef<RecycleBinHandle, BinManagerProps>(
           await load();
         },
       });
-    }, [load, orgId, resourceType]);
+    }, [load, orgId, resourceLabel, resourceType]);
 
     const empty = useCallback(async () => {
       const current = await recycleClient.list(orgId, resourceType);
@@ -241,39 +257,43 @@ export const RecycleBinManager = forwardRef<RecycleBinHandle, BinManagerProps>(
     return (
       <ManagerWrapper>
         <Toolbar>
-          <Checkbox
-            checked={entries.length > 0 && selected.length === entries.length}
-            indeterminate={
-              selected.length > 0 && selected.length < entries.length
-            }
-            onChange={event =>
-              setSelected(
-                event.target.checked ? entries.map(entry => entry.id) : [],
-              )
-            }
-          >
-            全选
-          </Checkbox>
-          <Typography.Text type="secondary">
-            已选 {selected.length} 项
-          </Typography.Text>
-          <Button
-            size="small"
-            icon={<RollbackOutlined />}
-            disabled={!selected.length}
-            onClick={() => void run('restore')}
-          >
-            恢复
-          </Button>
-          <Button
-            danger
-            size="small"
-            icon={<DeleteOutlined />}
-            disabled={!selected.length}
-            onClick={() => void run('delete')}
-          >
-            永久删除
-          </Button>
+          <ToolbarSummary>
+            <Checkbox
+              checked={entries.length > 0 && selected.length === entries.length}
+              indeterminate={
+                selected.length > 0 && selected.length < entries.length
+              }
+              onChange={event =>
+                setSelected(
+                  event.target.checked ? entries.map(entry => entry.id) : [],
+                )
+              }
+            >
+              全选
+            </Checkbox>
+            <Typography.Text type="secondary">
+              已选 {selected.length} 项
+            </Typography.Text>
+          </ToolbarSummary>
+          <ToolbarActions>
+            <Button
+              size="small"
+              icon={<RollbackOutlined />}
+              disabled={!selected.length}
+              onClick={() => void run('restore')}
+            >
+              恢复
+            </Button>
+            <Button
+              danger
+              size="small"
+              icon={<DeleteOutlined />}
+              disabled={!selected.length}
+              onClick={() => void run('delete')}
+            >
+              永久删除
+            </Button>
+          </ToolbarActions>
         </Toolbar>
         <List
           loading={loading}
@@ -314,6 +334,15 @@ export const RecycleBinManager = forwardRef<RecycleBinHandle, BinManagerProps>(
     );
   },
 );
+
+const RECYCLE_RESOURCE_LABELS: Record<RecycleResourceType, string> = {
+  SOURCE: '数据源',
+  VIEW: '数据视图',
+  SCHEDULE: '定时任务',
+  DATACHART: '数据图表',
+  DASHBOARD: '仪表板',
+  STORYBOARD: '故事板',
+};
 
 function PolicyEditor({
   value,
@@ -356,6 +385,20 @@ const ManagerWrapper = styled.div`
   min-height: 0;
   padding: 0 8px 8px;
   overflow: auto;
+
+  .ant-tree {
+    padding-top: 4px;
+    background: transparent;
+  }
+
+  .ant-list-item {
+    padding: 10px 4px;
+  }
+
+  .ant-list-item > .ant-checkbox-wrapper {
+    align-items: flex-start;
+    width: 100%;
+  }
 `;
 
 const Toolbar = styled.div`
@@ -363,22 +406,44 @@ const Toolbar = styled.div`
   top: 0;
   z-index: 2;
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px 8px;
   align-items: center;
-  min-height: 40px;
+  justify-content: space-between;
+  min-height: 44px;
+  padding: 6px 0;
   background: ${p => p.theme.componentBackground};
   border-bottom: 1px solid ${p => p.theme.borderColorSplit};
 `;
 
+const ToolbarSummary = styled.div`
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+  align-items: center;
+  min-width: max-content;
+`;
+
+const ToolbarActions = styled.div`
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  align-items: center;
+  margin-left: auto;
+`;
+
 const EntryTitle = styled.div`
-  max-width: 220px;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   font-weight: 500;
+  line-height: 20px;
   white-space: nowrap;
 `;
 
 const EntryMeta = styled.div`
+  margin-top: 2px;
   font-size: 12px;
+  line-height: 18px;
   color: ${p => p.theme.textColorLight};
 `;
