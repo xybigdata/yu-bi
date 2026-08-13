@@ -117,27 +117,6 @@ export const useVizOperationMenuItems = ({
             { key: 'reloadDataLine', type: 'divider' as const },
           ]
         : []),
-      ...(allowManage && onSaveAsVizs
-        ? [
-            {
-              key: 'saveAs',
-              icon: <CopyFilled />,
-              onClick: onSaveAsVizs,
-              label: tg('button.saveAs'),
-            },
-          ]
-        : []),
-      ...(allowManage && onSaveAsVizs
-        ? [
-            {
-              key: 'addToDash',
-              icon: <FileAddOutlined />,
-              onClick: () => onAddToDashBoard(true),
-              label: t('addToDash'),
-            },
-            { key: 'addToDashLine', type: 'divider' as const },
-          ]
-        : []),
       ...(allowShare && onShareLinkClick
         ? [
             {
@@ -186,8 +165,28 @@ export const useVizOperationMenuItems = ({
                 openMockData,
               ),
             },
-            { type: 'divider' as const },
             { key: 'downloadDataLine', type: 'divider' as const },
+          ]
+        : []),
+      ...(allowManage && onSaveAsVizs
+        ? [
+            {
+              key: 'saveAs',
+              icon: <CopyFilled />,
+              onClick: onSaveAsVizs,
+              label: tg('button.saveAs'),
+            },
+          ]
+        : []),
+      ...(allowManage && onAddToDashBoard
+        ? [
+            {
+              key: 'addToDash',
+              icon: <FileAddOutlined />,
+              onClick: () => onAddToDashBoard(true),
+              label: t('addToDash'),
+            },
+            { key: 'addToDashLine', type: 'divider' as const },
           ]
         : []),
       ...(allowManage && onPublish
