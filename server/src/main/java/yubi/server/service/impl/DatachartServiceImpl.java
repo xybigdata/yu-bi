@@ -146,9 +146,8 @@ public class DatachartServiceImpl extends BaseService implements DatachartServic
     public Folder createWithFolder(BaseCreateParam createParam) {
         // check unique
         DatachartCreateParam param = (DatachartCreateParam) createParam;
-        if (!CollectionUtils.isEmpty(folderMapper.checkVizName(param.getOrgId(), param.getParentId(), param.getName()))) {
-            Exceptions.tr(ParamException.class, "error.param.exists.name");
-        }
+        folderService.checkUnique(param.getOrgId(), param.getParentId(),
+                param.getName(), ResourceType.DATACHART);
         Datachart datachart = DatachartService.super.create(createParam);
         // create folder
         Folder folder = new Folder();

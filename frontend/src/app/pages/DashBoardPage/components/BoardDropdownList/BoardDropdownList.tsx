@@ -31,6 +31,7 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useSaveAsViz } from 'app/pages/MainPage/pages/VizPage/hooks/useSaveAsViz';
 import { FC, memo, useCallback, useContext, useMemo, useState } from 'react';
 import { useAppDispatch } from 'app/hooks/useRedux';
+import { joinMenuItemGroups } from 'app/utils/menuItems';
 import { useRecycleViz } from '../../../../hooks/useRecycleViz';
 import { usePublishBoard } from '../../hooks/usePublishBoard';
 import { widgetsQueryAction } from '../../pages/Board/slice/asyncActions';
@@ -107,99 +108,117 @@ export const useBoardDropdownItems = ({
       </ConfirmMenuLabel>
     );
 
-    return [
+    return joinMenuItemGroups([
       {
         key: 'reloadData',
-        onClick: reloadData,
-        icon: <ReloadOutlined />,
-        label: t('syncData'),
+        items: [
+          {
+            key: 'reloadData',
+            onClick: reloadData,
+            icon: <ReloadOutlined />,
+            label: t('syncData'),
+          },
+        ],
       },
-      ...(allowShare
-        ? [
-            { key: 'shareLinkLine', type: 'divider' as const },
-            {
-              key: 'shareLink',
-              onClick: onOpenShareLink,
-              icon: <ShareAltOutlined />,
-              label: t('share.shareLink'),
-            },
-          ]
-        : []),
-      ...(allowDownload
-        ? [
-            { key: 'exportDataLine', type: 'divider' as const },
-            {
-              key: 'exportData',
-              onClick: openConfirmMenuFromItem('exportData'),
-              icon: <CloudDownloadOutlined />,
-              label: confirmLabel('exportData', t('share.exportData'), () =>
-                onBoardToDownLoad?.(DownloadFileType.Excel),
-              ),
-            },
-            {
-              key: 'exportPDF',
-              onClick: openConfirmMenuFromItem('exportPDF'),
-              icon: <CloudDownloadOutlined />,
-              label: confirmLabel('exportPDF', t('share.exportPDF'), () =>
-                onBoardToDownLoad?.(DownloadFileType.Pdf),
-              ),
-            },
-            {
-              key: 'exportPicture',
-              onClick: openConfirmMenuFromItem('exportPicture'),
-              icon: <CloudDownloadOutlined />,
-              label: confirmLabel(
-                'exportPicture',
-                t('share.exportPicture'),
-                () => onBoardToDownLoad?.(DownloadFileType.Image),
-              ),
-            },
-            {
-              key: 'exportTpl',
-              onClick: openConfirmMenuFromItem('exportTpl'),
-              icon: <CloudDownloadOutlined />,
-              label: confirmLabel(
-                'exportTpl',
-                t('share.exportTpl'),
-                openMockData,
-              ),
-            },
-          ]
-        : []),
-      ...(allowManage
-        ? [
-            { key: 'unpublishLine', type: 'divider' as const },
-            ...(status === 2
-              ? [
-                  {
-                    key: 'unpublish',
-                    onClick: publishBoard,
-                    icon: <FileAddOutlined />,
-                    label: t('unpublish'),
-                  },
-                ]
-              : []),
-            {
-              key: 'saveAs',
-              onClick: () => saveAsViz(boardId, 'DASHBOARD'),
-              icon: <CopyFilled />,
-              label: tg('button.saveAs'),
-            },
-            {
-              key: 'addToStory',
-              onClick: openStoryList,
-              icon: <FileAddOutlined />,
-              label: t('addToStory'),
-            },
-            {
-              key: 'archive',
-              onClick: recycleViz,
-              icon: <DeleteOutlined />,
-              label: tg('button.archive'),
-            },
-          ]
-        : []),
-    ];
+      {
+        key: 'share',
+        items: allowShare
+          ? [
+              {
+                key: 'shareLink',
+                onClick: onOpenShareLink,
+                icon: <ShareAltOutlined />,
+                label: t('share.shareLink'),
+              },
+            ]
+          : [],
+      },
+      {
+        key: 'export',
+        items: allowDownload
+          ? [
+              {
+                key: 'exportData',
+                onClick: openConfirmMenuFromItem('exportData'),
+                icon: <CloudDownloadOutlined />,
+                label: confirmLabel('exportData', t('share.exportData'), () =>
+                  onBoardToDownLoad?.(DownloadFileType.Excel),
+                ),
+              },
+              {
+                key: 'exportPDF',
+                onClick: openConfirmMenuFromItem('exportPDF'),
+                icon: <CloudDownloadOutlined />,
+                label: confirmLabel('exportPDF', t('share.exportPDF'), () =>
+                  onBoardToDownLoad?.(DownloadFileType.Pdf),
+                ),
+              },
+              {
+                key: 'exportPicture',
+                onClick: openConfirmMenuFromItem('exportPicture'),
+                icon: <CloudDownloadOutlined />,
+                label: confirmLabel(
+                  'exportPicture',
+                  t('share.exportPicture'),
+                  () => onBoardToDownLoad?.(DownloadFileType.Image),
+                ),
+              },
+              {
+                key: 'exportTpl',
+                onClick: openConfirmMenuFromItem('exportTpl'),
+                icon: <CloudDownloadOutlined />,
+                label: confirmLabel(
+                  'exportTpl',
+                  t('share.exportTpl'),
+                  openMockData,
+                ),
+              },
+            ]
+          : [],
+      },
+      {
+        key: 'manage',
+        items: allowManage
+          ? [
+              ...(status === 2
+                ? [
+                    {
+                      key: 'unpublish',
+                      onClick: publishBoard,
+                      icon: <FileAddOutlined />,
+                      label: t('unpublish'),
+                    },
+                  ]
+                : []),
+              {
+                key: 'saveAs',
+                onClick: () => saveAsViz(boardId, 'DASHBOARD'),
+                icon: <CopyFilled />,
+                label: tg('button.saveAs'),
+              },
+              {
+                key: 'addToStory',
+                onClick: openStoryList,
+                icon: <FileAddOutlined />,
+                label: t('addToStory'),
+              },
+            ]
+          : [],
+      },
+      {
+        key: 'danger',
+        items: allowManage
+          ? [
+              {
+                key: 'archive',
+                onClick: recycleViz,
+                icon: <DeleteOutlined />,
+                label: tg('button.archive'),
+              },
+            ]
+          : [],
+      },
+    ]);
   }, [
     allowDownload,
     allowManage,

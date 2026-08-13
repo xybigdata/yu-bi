@@ -45,6 +45,7 @@ export interface Folder {
   parentId: string | null;
   relId: string;
   relType: VizType;
+  subType?: string | null;
   status: number;
   updateBy: string;
   updateTime: string;
@@ -132,6 +133,7 @@ export interface AddVizParams {
     viewId?: string;
     avatar?: string | null;
     subType?: string;
+    resourceType?: 'DATACHART' | 'DASHBOARD';
     file?: TemplateUploadValue;
   };
   type: VizType;
@@ -212,6 +214,7 @@ export interface SelectVizTree {
 
 export interface SelectVizFolderTree {
   id?: string;
+  resourceType?: 'DATACHART' | 'DASHBOARD';
   getDisabled: (o: FolderViewModel, path: string[]) => boolean;
 }
 

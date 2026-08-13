@@ -27,6 +27,8 @@ import yubi.server.base.params.ViewBaseUpdateParam;
 import yubi.server.base.params.ViewCreateParam;
 import yubi.server.base.params.ViewUpdateParam;
 import yubi.server.service.ViewService;
+import yubi.server.recycle.RecycleLegacyBridge;
+import yubi.server.recycle.RecycleResourceType;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -38,9 +40,15 @@ import java.util.List;
 public class ViewController extends BaseController {
 
     private final ViewService viewService;
+    private RecycleLegacyBridge recycleLegacyBridge;
 
     public ViewController(ViewService viewService) {
         this.viewService = viewService;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public void setRecycleLegacyBridge(RecycleLegacyBridge recycleLegacyBridge) {
+        this.recycleLegacyBridge = recycleLegacyBridge;
     }
 
     @Operation(summary = "check view name is unique")
@@ -91,6 +99,11 @@ public class ViewController extends BaseController {
     public ResponseData<Boolean> deleteView(@PathVariable String viewId,
                                             @RequestParam boolean archive) {
         checkBlank(viewId, "viewId");
+        if (archive && recycleLegacyBridge != null) {
+            View view = viewService.retrieve(viewId);
+            return ResponseData.success(recycleLegacyBridge.moveToRecycle(
+                    view.getOrgId(), RecycleResourceType.VIEW, viewId));
+        }
         return ResponseData.success(viewService.delete(viewId, archive));
 
     }

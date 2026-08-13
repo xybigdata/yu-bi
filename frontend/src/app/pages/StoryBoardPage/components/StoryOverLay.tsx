@@ -21,7 +21,7 @@ import {
   ShareAltOutlined,
   VerticalAlignBottomOutlined,
 } from '@ant-design/icons';
-import { Menu, MenuProps, Popconfirm } from 'antd';
+import { Menu, MenuProps } from 'antd';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { useRecycleViz } from 'app/hooks/useRecycleViz';
 import { memo, useContext, useMemo } from 'react';
@@ -68,16 +68,10 @@ export const useStoryOverlayItems = ({
       {
         key: 'delete',
         icon: <DeleteOutlined />,
+        onClick: recycleViz,
         disabled: false,
         render: allowManage,
-        content: (
-          <Popconfirm
-            title={tg('operation.archiveConfirm')}
-            onConfirm={recycleViz}
-          >
-            {tg('button.archive')}
-          </Popconfirm>
-        ),
+        content: tg('button.archive'),
       },
     ];
 

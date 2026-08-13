@@ -25,6 +25,8 @@ import yubi.core.entity.Source;
 import yubi.server.base.dto.ResponseData;
 import yubi.server.base.params.*;
 import yubi.server.service.SourceService;
+import yubi.server.recycle.RecycleLegacyBridge;
+import yubi.server.recycle.RecycleResourceType;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,9 +39,15 @@ import java.util.List;
 public class SourceController extends BaseController {
 
     private final SourceService sourceService;
+    private RecycleLegacyBridge recycleLegacyBridge;
 
     public SourceController(SourceService sourceService) {
         this.sourceService = sourceService;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public void setRecycleLegacyBridge(RecycleLegacyBridge recycleLegacyBridge) {
+        this.recycleLegacyBridge = recycleLegacyBridge;
     }
 
     @Operation(summary = "check source name is unique")
@@ -88,6 +96,11 @@ public class SourceController extends BaseController {
     public ResponseData<Boolean> deleteSource(@PathVariable String sourceId,
                                               @RequestParam boolean archive) {
         checkBlank(sourceId, "sourceId");
+        if (archive && recycleLegacyBridge != null) {
+            Source source = sourceService.retrieve(sourceId);
+            return ResponseData.success(recycleLegacyBridge.moveToRecycle(
+                    source.getOrgId(), RecycleResourceType.SOURCE, sourceId));
+        }
         return ResponseData.success(sourceService.delete(sourceId, archive, true));
     }
 

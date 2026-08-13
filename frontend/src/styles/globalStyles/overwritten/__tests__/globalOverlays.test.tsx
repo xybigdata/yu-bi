@@ -39,4 +39,19 @@ describe('Global overlay styles', () => {
       /\.yubi-popup[\s\S]*\.ant-dropdown-menu,\s*\.ant-menu[\s\S]*border-right: 0 !important;/,
     );
   });
+
+  test('should keep sidebar action menus compact and content-sized', () => {
+    const source = readFileSync(
+      resolve(
+        process.cwd(),
+        'src/styles/globalStyles/overwritten/globalOverlays.ts',
+      ),
+      'utf8',
+    );
+
+    expect(source).toContain('.yubi-sidebar-title-more-menu-popup');
+    expect(source).toContain('width: max-content');
+    expect(source).toContain('min-width: ${SPACE_TIMES(31)}');
+    expect(source).toContain('min-height: ${SPACE_TIMES(11)}');
+  });
 });

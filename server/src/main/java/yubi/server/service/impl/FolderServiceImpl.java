@@ -142,6 +142,16 @@ public class FolderServiceImpl extends BaseService implements FolderService {
     }
 
     @Override
+    public List<Folder> listOrgFolders(String orgId, ResourceType resourceType) {
+        requireVizFolderScope(resourceType);
+        return listOrgFolders(orgId).stream()
+                .filter(folder -> resourceType.name().equals(folder.getRelType())
+                        || ResourceType.FOLDER.name().equals(folder.getRelType())
+                        && resourceType.name().equals(folder.getSubType()))
+                .toList();
+    }
+
+    @Override
     @Transactional
     public boolean delete(String id) {
         List<Folder> folders = folderMapper.selectByParentId(id);
@@ -157,6 +167,35 @@ public class FolderServiceImpl extends BaseService implements FolderService {
             Exceptions.tr(ParamException.class, "error.param.exists.name");
         }
         return true;
+    }
+
+    @Override
+    public boolean checkUnique(String orgId,
+                               String parentId,
+                               String name,
+                               ResourceType resourceType) {
+        requireVizFolderScope(resourceType);
+        requireParentScope(parentId, resourceType);
+        boolean exists = folderMapper.checkVizName(orgId, parentId, name).stream()
+                .anyMatch(folder -> belongsToScope(folder, resourceType));
+        if (exists) {
+            Exceptions.tr(ParamException.class, "error.param.exists.name");
+        }
+        return true;
+    }
+
+    @Override
+    public void requireParentScope(String parentId, ResourceType resourceType) {
+        requireVizFolderScope(resourceType);
+        if (parentId == null) {
+            return;
+        }
+        Folder parent = folderMapper.selectByPrimaryKey(parentId);
+        if (parent == null
+                || !ResourceType.FOLDER.name().equals(parent.getRelType())
+                || !resourceType.name().equals(parent.getSubType())) {
+            throw new IllegalArgumentException("目标目录不属于当前资源类型");
+        }
     }
 
     @Override
@@ -310,13 +349,13 @@ public class FolderServiceImpl extends BaseService implements FolderService {
             return false;
         }
         requirePermission(folder, Const.MANAGE);
+        ResourceType resourceType = folderScope(folder);
+        requireParentScope(updateParam.getParentId(), resourceType);
         // check name
-        if (!folder.getName().equals(updateParam.getName())) {
-            Folder check = new Folder();
-            check.setOrgId(folder.getOrgId());
-            check.setParentId(updateParam.getParentId());
-            check.setName(updateParam.getName());
-            checkUnique(check);
+        if (!Objects.equals(folder.getName(), updateParam.getName())
+                || !Objects.equals(folder.getParentId(), updateParam.getParentId())) {
+            checkUnique(folder.getOrgId(), updateParam.getParentId(),
+                    updateParam.getName(), resourceType);
         }
         // update folder
         folder.setUpdateBy(getCurrentUser().getId());
@@ -364,12 +403,11 @@ public class FolderServiceImpl extends BaseService implements FolderService {
     public Folder create(BaseCreateParam createParam) {
         FolderCreateParam folderCreate = (FolderCreateParam) createParam;
         requireExists(folderCreate.getOrgId(), Organization.class);
+        requireVizFolderScope(folderCreate.getResourceType());
+        requireParentScope(folderCreate.getParentId(), folderCreate.getResourceType());
         // check name
-        Folder check = new Folder();
-        check.setOrgId(folderCreate.getOrgId());
-        check.setParentId(folderCreate.getParentId());
-        check.setName(folderCreate.getName());
-        checkUnique(check);
+        checkUnique(folderCreate.getOrgId(), folderCreate.getParentId(),
+                folderCreate.getName(), folderCreate.getResourceType());
         // insert folder
         Folder folder = new Folder();
         BeanUtils.copyProperties(createParam, folder);
@@ -377,6 +415,7 @@ public class FolderServiceImpl extends BaseService implements FolderService {
         folder.setCreateTime(new Date());
         folder.setId(UUIDGenerator.generate());
         folder.setRelType(ResourceType.FOLDER.name());
+        folder.setSubType(folderCreate.getResourceType().name());
         requirePermission(folder, Const.CREATE);
         // insert permissions
         if (!CollectionUtils.isEmpty(folderCreate.getPermissions())) {
@@ -385,6 +424,35 @@ public class FolderServiceImpl extends BaseService implements FolderService {
         grantDefaultPermission(folder);
         folderMapper.insert(folder);
         return folder;
+    }
+
+    private void requireVizFolderScope(ResourceType resourceType) {
+        if (resourceType != ResourceType.DATACHART
+                && resourceType != ResourceType.DASHBOARD) {
+            throw new IllegalArgumentException("目录类型仅支持数据图表或仪表板");
+        }
+    }
+
+    private boolean belongsToScope(Folder folder, ResourceType resourceType) {
+        return resourceType.name().equals(folder.getRelType())
+                || ResourceType.FOLDER.name().equals(folder.getRelType())
+                && resourceType.name().equals(folder.getSubType());
+    }
+
+    private ResourceType folderScope(Folder folder) {
+        if (ResourceType.FOLDER.name().equals(folder.getRelType())) {
+            ResourceType resourceType;
+            try {
+                resourceType = ResourceType.valueOf(folder.getSubType());
+            } catch (RuntimeException exception) {
+                throw new IllegalArgumentException("目录缺少有效的资源类型", exception);
+            }
+            requireVizFolderScope(resourceType);
+            return resourceType;
+        }
+        ResourceType resourceType = ResourceType.valueOf(folder.getRelType());
+        requireVizFolderScope(resourceType);
+        return resourceType;
     }
 
     private boolean hasReadPermission(Folder folder) {

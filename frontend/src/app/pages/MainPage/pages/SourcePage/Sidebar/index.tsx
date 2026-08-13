@@ -16,7 +16,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { DeleteOutlined } from '@ant-design/icons';
+import {
+  ClearOutlined,
+  DeleteOutlined,
+  SelectOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
 import { message } from 'antd';
 import {
   ListNav,
@@ -33,21 +38,28 @@ import { SidebarCollapseButton } from 'app/pages/MainPage/components/SidebarColl
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { useParams } from 'app/routerCompat';
 import { CommonFormTypes } from 'globalConstants';
-import { memo, useCallback, useContext, useMemo } from 'react';
+import {
+  memo,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
+import {
+  RecycleBatchManager,
+  RecycleBinHandle,
+  RecycleBinManager,
+} from 'app/features/recycle';
 import styled from 'styled-components';
 import { LEVEL_5, SPACE_XS } from 'styles/StyleConstants';
 import { getInsertedNodeIndex } from 'utils/utils';
 import { SaveFormContext } from '../SaveFormContext';
-import {
-  makeSelectSourceTree,
-  selectArchived,
-  selectSources,
-} from '../slice/selectors';
-import { addSource } from '../slice/thunks';
+import { makeSelectSourceTree, selectSources } from '../slice/selectors';
+import { addSource, getSources } from '../slice/thunks';
 import { SourceSimpleViewModel } from '../slice/types';
-import { Recycle } from './Recycle';
 import { SourceList } from './SourceList';
 
 interface SidebarProps {
@@ -61,12 +73,18 @@ export const Sidebar = memo(
     const dispatch = useAppDispatch();
     const navigate = useCompatNavigate();
     const orgId = useSelector(selectOrgId);
-    const archived = useSelector(selectArchived);
     const sourceData = useSelector(selectSources);
     const { sourceId } = useParams<{ sourceId?: string }>();
     const t = useI18NPrefix('source');
     const selectSourceTree = useMemo(makeSelectSourceTree, []);
     const { showSaveForm } = useContext(SaveFormContext);
+    const [batchMode, setBatchMode] = useState(false);
+    const recycleRef = useRef<RecycleBinHandle>(null);
+
+    const handleBatchCompleted = useCallback(() => {
+      setBatchMode(false);
+      dispatch(getSources(orgId));
+    }, [dispatch, orgId]);
 
     const getIcon = useGetSourceDbTypeIcon();
     const getDisabled = useCallback(
@@ -77,29 +95,8 @@ export const Sidebar = memo(
     const treeData = useSelector(state =>
       selectSourceTree(state, { getIcon, getDisabled }),
     );
-    const recycleList = useMemo(
-      () =>
-        archived?.map(config => {
-          const { id, name, parentId, isFolder, deleteLoading } = config;
-          return {
-            id,
-            key: id,
-            title: name,
-            icon: getIcon(config),
-            parentId,
-            isFolder,
-            disabled: deleteLoading,
-          };
-        }),
-      [archived, getIcon],
-    );
-
     const { filteredData: sourceList, debouncedSearch: listSearch } =
       useDebouncedSearch(treeData, (keywords, d) =>
-        d.title.toLowerCase().includes(keywords.toLowerCase()),
-      );
-    const { filteredData: archivedList, debouncedSearch: archivedSearch } =
-      useDebouncedSearch(recycleList, (keywords, d) =>
         d.title.toLowerCase().includes(keywords.toLowerCase()),
       );
     const toAdd = useCallback(
@@ -145,10 +142,19 @@ export const Sidebar = memo(
 
     const moreMenuClick = useCallback((key, _, onNext) => {
       switch (key) {
+        case 'batch':
+          setBatchMode(value => !value);
+          break;
         case 'recycle':
+          setBatchMode(false);
           onNext();
           break;
       }
+    }, []);
+
+    const recycleMenuClick = useCallback(key => {
+      if (key === 'policy') void recycleRef.current?.openPolicy();
+      if (key === 'empty') void recycleRef.current?.empty();
     }, []);
 
     const titles = useMemo(
@@ -170,6 +176,11 @@ export const Sidebar = memo(
             itemClassName: SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
             items: [
               {
+                key: 'batch',
+                text: batchMode ? '退出批量管理' : '批量管理',
+                prefix: <SelectOutlined className="icon" />,
+              },
+              {
                 key: 'recycle',
                 text: t('sidebar.recycle'),
                 prefix: <DeleteOutlined className="icon" />,
@@ -182,11 +193,26 @@ export const Sidebar = memo(
           key: 'recycle',
           title: t('sidebar.recycle'),
           back: true,
-          search: true,
-          onSearch: archivedSearch,
+          more: {
+            overlayClassName: SIDEBAR_TITLE_MORE_MENU_POPUP_CLASS,
+            itemClassName: SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
+            items: [
+              {
+                key: 'policy',
+                text: '自动清理设置',
+                prefix: <SettingOutlined className="icon" />,
+              },
+              {
+                key: 'empty',
+                text: '清空回收站',
+                prefix: <ClearOutlined className="icon" />,
+              },
+            ],
+            callback: recycleMenuClick,
+          },
         },
       ],
-      [t, listSearch, toAdd, moreMenuClick, archivedSearch],
+      [t, listSearch, toAdd, moreMenuClick, batchMode, recycleMenuClick],
     );
 
     return (
@@ -204,11 +230,25 @@ export const Sidebar = memo(
         <ListNavWrapper defaultActiveKey="list">
           <ListPane key="list">
             <ListTitle {...titles[0]} />
-            <SourceList sourceId={sourceId} list={sourceList} />
+            {batchMode ? (
+              <RecycleBatchManager
+                orgId={orgId}
+                resourceType="SOURCE"
+                treeData={sourceList || []}
+                onCompleted={handleBatchCompleted}
+                onExit={() => setBatchMode(false)}
+              />
+            ) : (
+              <SourceList sourceId={sourceId} list={sourceList} />
+            )}
           </ListPane>
           <ListPane key="recycle">
             <ListTitle {...titles[1]} />
-            <Recycle sourceId={sourceId} list={archivedList} />
+            <RecycleBinManager
+              ref={recycleRef}
+              orgId={orgId}
+              resourceType="SOURCE"
+            />
           </ListPane>
         </ListNavWrapper>
       </Wrapper>

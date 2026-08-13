@@ -47,6 +47,9 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
   const formRef = useRef<FormInstance | undefined>(undefined);
   const t = useI18NPrefix('viz.saveForm');
   const tg = useI18NPrefix('global');
+  const resourceType =
+    initialValues?.resourceType ||
+    (vizType === 'DATACHART' || vizType === 'DASHBOARD' ? vizType : undefined);
 
   const getDisabled = useCallback(
     (_, path: string[]) =>
@@ -61,7 +64,11 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
   );
 
   const folderTreeData = useSelector(state =>
-    selectVizFolderTree(state, { id: initialValues?.id, getDisabled }),
+    selectVizFolderTree(state, {
+      id: initialValues?.id,
+      resourceType,
+      getDisabled,
+    }),
   );
   const storyboardTreeData = useSelector(state =>
     selectStoryboradFolderTree(state, { id: initialValues?.id, getDisabled }),
@@ -134,7 +141,10 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
               const data = {
                 name: value,
                 orgId,
-                vizType: vizType === 'TEMPLATE' ? 'FOLDER' : vizType,
+                vizType:
+                  vizType === 'FOLDER' || vizType === 'TEMPLATE'
+                    ? resourceType
+                    : vizType,
                 parentId: parentId || null,
               };
               return fetchCheckName('viz', data);
@@ -142,6 +152,9 @@ export function SaveForm({ formProps, ...modalProps }: SaveFormProps) {
           },
         ]}
       >
+        <Input />
+      </Form.Item>
+      <Form.Item name="resourceType" hidden>
         <Input />
       </Form.Item>
       {vizType === 'DATACHART' && !(type === CommonFormTypes.SaveAs) && (

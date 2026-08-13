@@ -4,8 +4,9 @@ import {
   EditOutlined,
   MoreOutlined,
 } from '@ant-design/icons';
-import { Menu, MenuProps, message, Popconfirm } from 'antd';
+import { Menu, MenuProps, Popconfirm } from 'antd';
 import { Popup, Tree, TreeTitle } from 'app/components';
+import { useMoveToRecycle } from 'app/features/recycle/useMoveToRecycle';
 import {
   MenuItemContent,
   TREE_MORE_MENU_ITEM_CLASS,
@@ -29,21 +30,18 @@ import {
 import { useSaveAsViz } from '../../hooks/useSaveAsViz';
 import { SaveFormContext } from '../../SaveFormContext';
 import { selectVizListLoading, selectVizs } from '../../slice/selectors';
-import {
-  deleteViz,
-  editFolder,
-  getFolders,
-  removeTab,
-} from '../../slice/thunks';
+import { editFolder, getFolders, removeTab } from '../../slice/thunks';
 
 interface FolderTreeProps extends I18NComponentProps {
   selectedId?: string;
   treeData?: LocalTreeDataNode[];
+  resourceType: 'DATACHART' | 'DASHBOARD';
 }
 
 export function FolderTree({
   selectedId,
   treeData,
+  resourceType,
   i18nPrefix,
 }: FolderTreeProps) {
   const tg = useI18NPrefix('global');
@@ -71,6 +69,21 @@ export function FolderTree({
     [navigate, orgId],
   );
 
+  const handleRecycleCompleted = useCallback(
+    async (rootIds: string[]) => {
+      await dispatch(getFolders(orgId));
+      rootIds.forEach(id => {
+        dispatch(removeTab({ id, resolve: redirect }));
+      });
+    },
+    [dispatch, orgId, redirect],
+  );
+  const { moveToRecycle } = useMoveToRecycle({
+    orgId,
+    resourceType,
+    onCompleted: handleRecycleCompleted,
+  });
+
   const menuSelect = useCallback(
     (_, { node }) => {
       if (node.relType === 'FOLDER') {
@@ -89,27 +102,13 @@ export function FolderTree({
   const archiveViz = useCallback(
     ({ id: folderId, relId, relType }) =>
       () => {
-        let id = folderId;
-        let archive = false;
-        let msg = tg('operation.deleteSuccess');
-
-        if (['DASHBOARD', 'DATACHART'].includes(relType)) {
-          id = relId;
-          archive = true;
-          msg = tg('operation.archiveSuccess');
+        if (relType === 'FOLDER') {
+          void moveToRecycle([folderId]);
+          return;
         }
-        dispatch(
-          deleteViz({
-            params: { id, archive },
-            type: relType,
-            resolve: () => {
-              message.success(msg);
-              dispatch(removeTab({ id, resolve: redirect }));
-            },
-          }),
-        );
+        void moveToRecycle([relId]);
       },
-    [dispatch, redirect, tg],
+    [moveToRecycle],
   );
 
   const moreMenuClick = useCallback(
@@ -122,7 +121,14 @@ export function FolderTree({
               vizType: node.relType,
               type: CommonFormTypes.Edit,
               open: true,
-              initialValues: { ...node, parentId: node.parentId || void 0 },
+              initialValues: {
+                ...node,
+                parentId: node.parentId || void 0,
+                resourceType:
+                  node.relType === 'FOLDER'
+                    ? node.subType || resourceType
+                    : resourceType,
+              },
               onSave: (values, onClose) => {
                 let index = node.index;
                 if (isParentIdEqual(node.parentId, values.parentId)) {
@@ -151,7 +157,7 @@ export function FolderTree({
             break;
         }
       },
-    [dispatch, showSaveForm, vizsData, saveAsViz],
+    [dispatch, resourceType, showSaveForm, vizsData, saveAsViz],
   );
 
   const renderTreeTitle = useCallback(
@@ -201,18 +207,18 @@ export function FolderTree({
                       className={TREE_MORE_MENU_ITEM_CLASS}
                       prefix={<DeleteOutlined className="icon" />}
                     >
-                      <Popconfirm
-                        title={`${
-                          relType === 'FOLDER'
-                            ? tg('operation.deleteConfirm')
-                            : tg('operation.archiveConfirm')
-                        }`}
-                        onConfirm={archiveViz(node)}
-                      >
-                        {relType === 'FOLDER'
-                          ? tg('button.delete')
-                          : tg('button.archive')}
-                      </Popconfirm>
+                      {relType === 'FOLDER' ? (
+                        <Popconfirm
+                          title={tg('operation.deleteConfirm')}
+                          onConfirm={archiveViz(node)}
+                        >
+                          {tg('button.delete')}
+                        </Popconfirm>
+                      ) : (
+                        <span onClick={archiveViz(node)}>
+                          {tg('button.archive')}
+                        </span>
+                      )}
                     </MenuItemContent>
                   ),
                 },

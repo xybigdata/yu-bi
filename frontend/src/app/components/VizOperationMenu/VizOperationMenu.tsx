@@ -30,6 +30,7 @@ import { Menu, MenuProps } from 'antd';
 import { DownloadFileType } from 'app/constants';
 import { ConfirmMenuLabel } from 'app/components/Popup';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
+import { joinMenuItemGroups } from 'app/utils/menuItems';
 import { FC, memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -105,117 +106,128 @@ export const useVizOperationMenuItems = ({
       </ConfirmMenuLabel>
     );
 
-    return [
-      ...(onReloadData
-        ? [
-            {
-              key: 'reloadData',
-              icon: <ReloadOutlined />,
-              onClick: onReloadData,
-              label: t('syncData'),
-            },
-            { key: 'reloadDataLine', type: 'divider' as const },
-          ]
-        : []),
-      ...(allowManage && onSaveAsVizs
-        ? [
-            {
-              key: 'saveAs',
-              icon: <CopyFilled />,
-              onClick: onSaveAsVizs,
-              label: tg('button.saveAs'),
-            },
-          ]
-        : []),
-      ...(allowManage && onSaveAsVizs
-        ? [
-            {
-              key: 'addToDash',
-              icon: <FileAddOutlined />,
-              onClick: () => onAddToDashBoard(true),
-              label: t('addToDash'),
-            },
-            { key: 'addToDashLine', type: 'divider' as const },
-          ]
-        : []),
-      ...(allowShare && onShareLinkClick
-        ? [
-            {
-              key: 'shareLink',
-              icon: <ShareAltOutlined />,
-              onClick: onShareLinkClick,
-              label: t('share.shareLink'),
-            },
-          ]
-        : []),
-      ...(allowDownload && onDownloadDataLinkClick
-        ? [
-            {
-              key: 'exportData',
-              onClick: openConfirmMenuFromItem('exportData'),
-              icon: <CloudDownloadOutlined />,
-              label: confirmLabel('exportData', t('share.exportData'), () =>
-                onDownloadDataLinkClick(DownloadFileType.Excel),
-              ),
-            },
-            {
-              key: 'exportPDF',
-              onClick: openConfirmMenuFromItem('exportPDF'),
-              icon: <CloudDownloadOutlined />,
-              label: confirmLabel('exportPDF', t('share.exportPDF'), () =>
-                onDownloadDataLinkClick(DownloadFileType.Pdf),
-              ),
-            },
-            {
-              key: 'exportPicture',
-              onClick: openConfirmMenuFromItem('exportPicture'),
-              icon: <CloudDownloadOutlined />,
-              label: confirmLabel(
-                'exportPicture',
-                t('share.exportPicture'),
-                () => onDownloadDataLinkClick(DownloadFileType.Image),
-              ),
-            },
-            {
-              key: 'exportTpl',
-              onClick: openConfirmMenuFromItem('exportTpl'),
-              icon: <CloudDownloadOutlined />,
-              label: confirmLabel(
-                'exportTpl',
-                t('share.exportTpl'),
-                openMockData,
-              ),
-            },
-            { type: 'divider' as const },
-            { key: 'downloadDataLine', type: 'divider' as const },
-          ]
-        : []),
-      ...(allowManage && onPublish
-        ? [
-            {
-              key: 'publish',
-              icon: <VerticalAlignBottomOutlined />,
-              onClick: onPublish,
-              label: t('unpublish'),
-            },
-          ]
-        : []),
-      ...(allowManage && onRecycleViz
-        ? [
-            {
-              key: 'delete',
-              icon: <DeleteOutlined />,
-              onClick: openConfirmMenuFromItem('delete'),
-              label: confirmLabel(
-                'delete',
-                tg('button.archive'),
-                onRecycleViz,
-                tg('operation.archiveConfirm'),
-              ),
-            },
-          ]
-        : []),
-    ];
+    return joinMenuItemGroups([
+      {
+        key: 'reloadData',
+        items: onReloadData
+          ? [
+              {
+                key: 'reloadData',
+                icon: <ReloadOutlined />,
+                onClick: onReloadData,
+                label: t('syncData'),
+              },
+            ]
+          : [],
+      },
+      {
+        key: 'share',
+        items:
+          allowShare && onShareLinkClick
+            ? [
+                {
+                  key: 'shareLink',
+                  icon: <ShareAltOutlined />,
+                  onClick: onShareLinkClick,
+                  label: t('share.shareLink'),
+                },
+              ]
+            : [],
+      },
+      {
+        key: 'export',
+        items:
+          allowDownload && onDownloadDataLinkClick
+            ? [
+                {
+                  key: 'exportData',
+                  onClick: openConfirmMenuFromItem('exportData'),
+                  icon: <CloudDownloadOutlined />,
+                  label: confirmLabel('exportData', t('share.exportData'), () =>
+                    onDownloadDataLinkClick(DownloadFileType.Excel),
+                  ),
+                },
+                {
+                  key: 'exportPDF',
+                  onClick: openConfirmMenuFromItem('exportPDF'),
+                  icon: <CloudDownloadOutlined />,
+                  label: confirmLabel('exportPDF', t('share.exportPDF'), () =>
+                    onDownloadDataLinkClick(DownloadFileType.Pdf),
+                  ),
+                },
+                {
+                  key: 'exportPicture',
+                  onClick: openConfirmMenuFromItem('exportPicture'),
+                  icon: <CloudDownloadOutlined />,
+                  label: confirmLabel(
+                    'exportPicture',
+                    t('share.exportPicture'),
+                    () => onDownloadDataLinkClick(DownloadFileType.Image),
+                  ),
+                },
+                {
+                  key: 'exportTpl',
+                  onClick: openConfirmMenuFromItem('exportTpl'),
+                  icon: <CloudDownloadOutlined />,
+                  label: confirmLabel(
+                    'exportTpl',
+                    t('share.exportTpl'),
+                    openMockData,
+                  ),
+                },
+              ]
+            : [],
+      },
+      {
+        key: 'manage',
+        items: [
+          ...(allowManage && onPublish
+            ? [
+                {
+                  key: 'publish',
+                  icon: <VerticalAlignBottomOutlined />,
+                  onClick: onPublish,
+                  label: t('unpublish'),
+                },
+              ]
+            : []),
+          ...(allowManage && onSaveAsVizs
+            ? [
+                {
+                  key: 'saveAs',
+                  icon: <CopyFilled />,
+                  onClick: onSaveAsVizs,
+                  label: tg('button.saveAs'),
+                },
+              ]
+            : []),
+          ...(allowManage && onAddToDashBoard
+            ? [
+                {
+                  key: 'addToDash',
+                  icon: <FileAddOutlined />,
+                  onClick: () => onAddToDashBoard(true),
+                  label: t('addToDash'),
+                },
+              ]
+            : []),
+        ],
+      },
+      {
+        key: 'danger',
+        items:
+          allowManage && onRecycleViz
+            ? [
+                {
+                  key: 'delete',
+                  icon: <DeleteOutlined />,
+                  onClick: onRecycleViz,
+                  label: tg('button.archive'),
+                },
+              ]
+            : [],
+      },
+    ]);
   }, [
     allowDownload,
     allowManage,

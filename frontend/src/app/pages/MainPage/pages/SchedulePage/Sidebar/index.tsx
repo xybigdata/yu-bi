@@ -1,10 +1,11 @@
 import {
+  ClearOutlined,
   DeleteOutlined,
-  FileOutlined,
   FolderFilled,
   FolderOpenFilled,
-  FolderOutlined,
   MailOutlined,
+  SelectOutlined,
+  SettingOutlined,
   WechatOutlined,
 } from '@ant-design/icons';
 import { message } from 'antd';
@@ -20,9 +21,21 @@ import useI18NPrefix, { I18NComponentProps } from 'app/hooks/useI18NPrefix';
 import { SidebarCollapseButton } from 'app/pages/MainPage/components/SidebarCollapseButton';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
-import { memo, useCallback, useContext, useMemo } from 'react';
+import {
+  memo,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
+import {
+  RecycleBatchManager,
+  RecycleBinHandle,
+  RecycleBinManager,
+} from 'app/features/recycle';
 import styled from 'styled-components';
 import { LEVEL_5, SPACE_XS } from 'styles/StyleConstants';
 import { getInsertedNodeIndex } from 'utils/utils';
@@ -30,14 +43,9 @@ import { JobTypes } from '../constants';
 import { useToScheduleDetails } from '../hooks';
 import { SaveForm } from '../SaveForm';
 import { SaveFormContext } from '../SaveFormContext';
-import {
-  makeSelectScheduleTree,
-  selectArchived,
-  selectSchedules,
-} from '../slice/selectors';
-import { addSchedule } from '../slice/thunks';
+import { makeSelectScheduleTree, selectSchedules } from '../slice/selectors';
+import { addSchedule, getSchedules } from '../slice/thunks';
 import { ScheduleSimpleViewModel } from '../slice/types';
-import { Recycle } from './Recycle';
 import { ScheduleList } from './ScheduleList';
 import { useScheduleRouteParams } from '../hooks';
 
@@ -52,11 +60,17 @@ export const Sidebar = memo(
     const dispatch = useAppDispatch();
     const { scheduleId } = useScheduleRouteParams();
     const orgId = useSelector(selectOrgId);
-    const archived = useSelector(selectArchived);
     const scheduleData = useSelector(selectSchedules);
     const { showSaveForm } = useContext(SaveFormContext);
     const t = useI18NPrefix('schedule.sidebar');
     const tg = useI18NPrefix('global');
+    const [batchMode, setBatchMode] = useState(false);
+    const recycleRef = useRef<RecycleBinHandle>(null);
+
+    const handleBatchCompleted = useCallback(() => {
+      setBatchMode(false);
+      dispatch(getSchedules(orgId));
+    }, [dispatch, orgId]);
 
     const selectScheduleTree = useMemo(makeSelectScheduleTree, []);
     const getIcon = useCallback(
@@ -79,26 +93,8 @@ export const Sidebar = memo(
       selectScheduleTree(state, { getIcon, getDisabled }),
     );
 
-    const recycleList = useMemo(
-      () =>
-        archived?.map(({ id, name, parentId, isFolder, deleteLoading }) => ({
-          id,
-          key: id,
-          title: name,
-          parentId,
-          icon: isFolder ? <FolderOutlined /> : <FileOutlined />,
-          isFolder,
-          disabled: deleteLoading,
-        })),
-      [archived],
-    );
-
     const { filteredData: scheduleList, debouncedSearch: listSearch } =
       useDebouncedSearch(treeData, (keywords, d) =>
-        d.title.toLowerCase().includes(keywords.toLowerCase()),
-      );
-    const { filteredData: archivedList, debouncedSearch: archivedSearch } =
-      useDebouncedSearch(recycleList, (keywords, d) =>
         d.title.toLowerCase().includes(keywords.toLowerCase()),
       );
 
@@ -145,10 +141,19 @@ export const Sidebar = memo(
 
     const moreMenuClick = useCallback((key, _, onNext) => {
       switch (key) {
+        case 'batch':
+          setBatchMode(value => !value);
+          break;
         case 'recycle':
+          setBatchMode(false);
           onNext();
           break;
       }
+    }, []);
+
+    const recycleMenuClick = useCallback(key => {
+      if (key === 'policy') void recycleRef.current?.openPolicy();
+      if (key === 'empty') void recycleRef.current?.empty();
     }, []);
 
     const titles = useMemo(
@@ -170,6 +175,11 @@ export const Sidebar = memo(
             itemClassName: SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
             items: [
               {
+                key: 'batch',
+                text: batchMode ? '退出批量管理' : '批量管理',
+                prefix: <SelectOutlined className="icon" />,
+              },
+              {
                 key: 'recycle',
                 text: t('index.recycle'),
                 prefix: <DeleteOutlined className="icon" />,
@@ -182,11 +192,26 @@ export const Sidebar = memo(
           key: 'recycle',
           title: t('index.recycle'),
           back: true,
-          search: true,
-          onSearch: archivedSearch,
+          more: {
+            overlayClassName: SIDEBAR_TITLE_MORE_MENU_POPUP_CLASS,
+            itemClassName: SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
+            items: [
+              {
+                key: 'policy',
+                text: '自动清理设置',
+                prefix: <SettingOutlined className="icon" />,
+              },
+              {
+                key: 'empty',
+                text: '清空回收站',
+                prefix: <ClearOutlined className="icon" />,
+              },
+            ],
+            callback: recycleMenuClick,
+          },
         },
       ],
-      [t, listSearch, toAdd, moreMenuClick, archivedSearch],
+      [t, listSearch, toAdd, moreMenuClick, batchMode, recycleMenuClick],
     );
 
     return (
@@ -204,15 +229,29 @@ export const Sidebar = memo(
         <ListNavWrapper defaultActiveKey="list">
           <ListPane key="list">
             <ListTitle {...titles[0]} />
-            <ScheduleList
-              orgId={orgId}
-              scheduleId={scheduleId}
-              list={scheduleList}
-            />
+            {batchMode ? (
+              <RecycleBatchManager
+                orgId={orgId}
+                resourceType="SCHEDULE"
+                treeData={scheduleList || []}
+                onCompleted={handleBatchCompleted}
+                onExit={() => setBatchMode(false)}
+              />
+            ) : (
+              <ScheduleList
+                orgId={orgId}
+                scheduleId={scheduleId}
+                list={scheduleList}
+              />
+            )}
           </ListPane>
           <ListPane key="recycle">
             <ListTitle {...titles[1]} />
-            <Recycle scheduleId={scheduleId} list={archivedList} />
+            <RecycleBinManager
+              ref={recycleRef}
+              orgId={orgId}
+              resourceType="SCHEDULE"
+            />
           </ListPane>
         </ListNavWrapper>
         <SaveForm

@@ -23,8 +23,9 @@ import {
   LoadingOutlined,
   MoreOutlined,
 } from '@ant-design/icons';
-import { Menu, MenuProps, message, Popconfirm, TreeDataNode } from 'antd';
+import { Menu, MenuProps, TreeDataNode } from 'antd';
 import { Popup, Tree, TreeTitle } from 'app/components';
+import { useMoveToRecycle } from 'app/features/recycle/useMoveToRecycle';
 import {
   MenuItemContent,
   TREE_MORE_MENU_ITEM_CLASS,
@@ -53,7 +54,7 @@ import {
   selectDeleteSourceLoading,
   selectSourceListLoading,
 } from '../slice/selectors';
-import { deleteSource, getSources, updateSourceBase } from '../slice/thunks';
+import { getSources, updateSourceBase } from '../slice/thunks';
 
 interface SourceListProps {
   sourceId?: string;
@@ -72,6 +73,15 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
   const isOwner = useSelector(selectIsOrgOwner);
   const permissionMap = useSelector(selectPermissionMap);
   const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+
+  const { loading: recycleLoading, moveToRecycle } = useMoveToRecycle({
+    orgId,
+    resourceType: 'SOURCE',
+    onCompleted: () => {
+      dispatch(getSources(orgId));
+      navigate.replace(`/organizations/${orgId}/sources`);
+    },
+  });
 
   useEffect(() => {
     dispatch(getSources(orgId));
@@ -128,33 +138,13 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
             });
             break;
           case 'delete':
+            void moveToRecycle([id]);
             break;
           default:
             break;
         }
       },
-    [dispatch, navigate, orgId, showSaveForm, t, toDetails],
-  );
-
-  const del = useCallback(
-    (id, isFolder) => () => {
-      if (deleteLoading) return;
-      dispatch(
-        deleteSource({
-          id,
-          archive: !isFolder,
-          resolve: () => {
-            message.success(
-              isFolder
-                ? tg('operation.archiveSuccess')
-                : tg('operation.deleteSuccess'),
-            );
-            navigate.replace(`/organizations/${orgId}/sources`);
-          },
-        }),
-      );
-    },
-    [deleteLoading, dispatch, tg, navigate, orgId],
+    [dispatch, moveToRecycle, navigate, orgId, showSaveForm, t, toDetails],
   );
 
   const renderTreeTitle = useCallback(
@@ -216,25 +206,14 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
                           <MenuItemContent
                             className={TREE_MORE_MENU_ITEM_CLASS}
                             prefix={
-                              deleteLoading ? (
+                              deleteLoading || recycleLoading ? (
                                 <LoadingOutlined className="icon" />
                               ) : (
                                 <DeleteOutlined className="icon" />
                               )
                             }
                           >
-                            <Popconfirm
-                              title={
-                                isFolder
-                                  ? tg('operation.deleteConfirm')
-                                  : tg('operation.archiveConfirm')
-                              }
-                              onConfirm={del(id, isFolder)}
-                            >
-                              {isFolder
-                                ? tg('button.delete')
-                                : tg('button.archive')}
-                            </Popconfirm>
+                            {tg('button.archive')}
                           </MenuItemContent>
                         ),
                       },
@@ -266,7 +245,15 @@ export const SourceList = memo(({ sourceId, list }: SourceListProps) => {
         </TreeTitle>
       );
     },
-    [isOwner, permissionMap, moreMenuClick, tg, t, deleteLoading, del],
+    [
+      isOwner,
+      permissionMap,
+      moreMenuClick,
+      tg,
+      t,
+      deleteLoading,
+      recycleLoading,
+    ],
   );
 
   const onDrop = info => {

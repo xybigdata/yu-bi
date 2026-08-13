@@ -29,6 +29,7 @@ import ChartDrillContext from 'app/contexts/ChartDrillContext';
 import { useCacheWidthHeight } from 'app/hooks/useCacheWidthHeight';
 import useChartInteractions from 'app/hooks/useChartInteractions';
 import { useCompatNavigate } from 'app/hooks/useCompatNavigate';
+import { useRecycleViz } from 'app/hooks/useRecycleViz';
 import useDebouncedLoadingStatus from 'app/hooks/useDebouncedLoadingStatus';
 import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { ChartDataRequestBuilder } from 'app/features/query';
@@ -82,11 +83,9 @@ import {
   selectVizs,
 } from '../slice/selectors';
 import {
-  deleteViz,
   fetchDataSetByPreviewChartAction,
   initChartPreviewData,
   publishViz,
-  removeTab,
   updateFilterAndFetchDataset,
   updateGroupAndFetchDataset,
 } from '../slice/thunks';
@@ -596,29 +595,7 @@ const ChartPreviewBoard: FC<{
       [previewCharts, navigate, backendChartId, orgId],
     );
 
-    const redirect = useCallback(
-      tabKey => {
-        if (tabKey) {
-          navigate.push(`/organizations/${orgId}/vizs/${tabKey}`);
-        } else {
-          navigate.push(`/organizations/${orgId}/vizs`);
-        }
-      },
-      [navigate, orgId],
-    );
-
-    const handleRecycleViz = useCallback(() => {
-      dispatch(
-        deleteViz({
-          params: { id: backendChartId, archive: true },
-          type: 'DATACHART',
-          resolve: () => {
-            message.success(tg('operation.archiveSuccess'));
-            dispatch(removeTab({ id: backendChartId, resolve: redirect }));
-          },
-        }),
-      );
-    }, [backendChartId, dispatch, redirect, tg]);
+    const handleRecycleViz = useRecycleViz(orgId, backendChartId, 'DATACHART');
 
     const handleDateLevelChange = (
       type: 'data',

@@ -107,11 +107,14 @@ export const unarchiveSchedule = createAsyncThunk<
 export const deleteSchedule = createAsyncThunk<null, DeleteScheduleParams>(
   'schedule/deleteSchedule',
   async ({ id, archive, resolve }) => {
-    await request2<boolean>({
+    const { data } = await request2<boolean>({
       url: `/schedules/${id}`,
       method: 'DELETE',
       params: { archive },
     });
+    if (!data) {
+      throw new Error(archive ? '移至回收站失败，请重试' : '删除失败，请重试');
+    }
     resolve();
     return null;
   },

@@ -353,9 +353,8 @@ public class DashboardServiceImpl extends BaseService implements DashboardServic
 
     @Override
     public Folder createWithFolder(DashboardCreateParam createParam) {
-        if (!CollectionUtils.isEmpty(folderMapper.checkVizName(createParam.getOrgId(), createParam.getParentId(), createParam.getName()))) {
-            Exceptions.tr(ParamException.class, "error.param.exists.name");
-        }
+        folderService.checkUnique(createParam.getOrgId(), createParam.getParentId(),
+                createParam.getName(), ResourceType.DASHBOARD);
         Dashboard dashboard = DashboardService.super.create(createParam);
 
         // create folder

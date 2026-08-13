@@ -19,9 +19,12 @@
 
 import {
   CodeFilled,
+  ClearOutlined,
   DeleteOutlined,
   FolderFilled,
   FolderOpenFilled,
+  SelectOutlined,
+  SettingOutlined,
 } from '@ant-design/icons';
 import {
   ListNav,
@@ -36,23 +39,30 @@ import useI18NPrefix from 'app/hooks/useI18NPrefix';
 import { SidebarCollapseButton } from 'app/pages/MainPage/components/SidebarCollapseButton';
 import { selectOrgId } from 'app/pages/MainPage/slice/selectors';
 import { CommonFormTypes } from 'globalConstants';
-import React, { memo, useCallback, useContext, useMemo } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from 'app/hooks/useRedux';
+import {
+  RecycleBatchManager,
+  RecycleBinHandle,
+  RecycleBinManager,
+} from 'app/features/recycle';
 import styled from 'styled-components';
 import { LEVEL_10, SPACE_XS } from 'styles/StyleConstants';
 import { getInsertedNodeIndex, uuidv4 } from 'utils/utils';
 import { UNPERSISTED_ID_PREFIX } from '../constants';
 import { SaveFormContext } from '../SaveFormContext';
-import {
-  makeSelectViewTree,
-  selectArchived,
-  selectViews,
-} from '../slice/selectors';
-import { saveFolder } from '../slice/thunks';
+import { makeSelectViewTree, selectViews } from '../slice/selectors';
+import { getViews, saveFolder } from '../slice/thunks';
 import { ViewSimpleViewModel } from '../slice/types';
 import { FolderTree } from './FolderTree';
-import { Recycle } from './Recycle';
 
 interface SidebarProps {
   isDragging: boolean;
@@ -69,6 +79,13 @@ export const Sidebar = memo(
     const selectViewTree = useMemo(makeSelectViewTree, []);
     const viewsData = useSelector(selectViews);
     const t = useI18NPrefix('view.sidebar');
+    const [batchMode, setBatchMode] = useState(false);
+    const recycleRef = useRef<RecycleBinHandle>(null);
+
+    const handleBatchCompleted = useCallback(() => {
+      setBatchMode(false);
+      dispatch(getViews(orgId));
+    }, [dispatch, orgId]);
 
     const getIcon = useCallback(
       ({ isFolder }: ViewSimpleViewModel) =>
@@ -92,23 +109,6 @@ export const Sidebar = memo(
       useDebouncedSearch(treeData, (keywords, d) =>
         d.title.toLowerCase().includes(keywords.toLowerCase()),
       );
-    const archived = useSelector(selectArchived);
-    const recycleList = useMemo(
-      () =>
-        archived?.map(({ id, name, parentId, isFolder, deleteLoading }) => ({
-          key: id,
-          title: name,
-          parentId,
-          isFolder,
-          disabled: deleteLoading,
-        })),
-      [archived],
-    );
-    const { filteredData: filteredListData, debouncedSearch: listSearch } =
-      useDebouncedSearch(recycleList, (keywords, d) =>
-        d.title.toLowerCase().includes(keywords.toLowerCase()),
-      );
-
     const add = useCallback(
       ({ key }) => {
         switch (key) {
@@ -146,6 +146,11 @@ export const Sidebar = memo(
       [dispatch, navigate, orgId, showSaveForm, viewsData, t],
     );
 
+    const recycleMenuClick = useCallback(key => {
+      if (key === 'policy') void recycleRef.current?.openPolicy();
+      if (key === 'empty') void recycleRef.current?.empty();
+    }, []);
+
     const titles = useMemo(
       () => [
         {
@@ -164,6 +169,11 @@ export const Sidebar = memo(
             itemClassName: SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
             items: [
               {
+                key: 'batch',
+                text: batchMode ? '退出批量管理' : '批量管理',
+                prefix: <SelectOutlined className="icon" />,
+              },
+              {
                 key: 'recycle',
                 text: t('recycle'),
                 prefix: <DeleteOutlined className="icon" />,
@@ -171,7 +181,11 @@ export const Sidebar = memo(
             ],
             callback: (key, _, onNext) => {
               switch (key) {
+                case 'batch':
+                  setBatchMode(value => !value);
+                  break;
                 case 'recycle':
+                  setBatchMode(false);
                   onNext();
                   break;
               }
@@ -183,11 +197,26 @@ export const Sidebar = memo(
           key: 'recycle',
           title: t('recycle'),
           back: true,
-          search: true,
-          onSearch: listSearch,
+          more: {
+            overlayClassName: SIDEBAR_TITLE_MORE_MENU_POPUP_CLASS,
+            itemClassName: SIDEBAR_TITLE_MORE_MENU_ITEM_CLASS,
+            items: [
+              {
+                key: 'policy',
+                text: '自动清理设置',
+                prefix: <SettingOutlined className="icon" />,
+              },
+              {
+                key: 'empty',
+                text: '清空回收站',
+                prefix: <ClearOutlined className="icon" />,
+              },
+            ],
+            callback: recycleMenuClick,
+          },
         },
       ],
-      [add, treeSearch, listSearch, t],
+      [add, treeSearch, t, batchMode, recycleMenuClick],
     );
 
     return (
@@ -205,11 +234,25 @@ export const Sidebar = memo(
         <ListNavWrapper defaultActiveKey="list">
           <ListPane key="list">
             <ListTitle {...titles[0]} />
-            <FolderTree treeData={filteredTreeData} />
+            {batchMode ? (
+              <RecycleBatchManager
+                orgId={orgId}
+                resourceType="VIEW"
+                treeData={filteredTreeData || []}
+                onCompleted={handleBatchCompleted}
+                onExit={() => setBatchMode(false)}
+              />
+            ) : (
+              <FolderTree treeData={filteredTreeData} />
+            )}
           </ListPane>
           <ListPane key="recycle">
             <ListTitle {...titles[1]} />
-            <Recycle list={filteredListData} />
+            <RecycleBinManager
+              ref={recycleRef}
+              orgId={orgId}
+              resourceType="VIEW"
+            />
           </ListPane>
         </ListNavWrapper>
       </Wrapper>

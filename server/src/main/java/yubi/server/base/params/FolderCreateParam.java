@@ -20,6 +20,9 @@ package yubi.server.base.params;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import yubi.security.base.ResourceType;
+
+import jakarta.validation.constraints.NotNull;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -28,6 +31,9 @@ public class FolderCreateParam extends VizCreateParam {
     private String name;
 
     private String orgId;
+
+    @NotNull
+    private ResourceType resourceType;
 
     private String parentId;
 

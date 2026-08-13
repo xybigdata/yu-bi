@@ -28,6 +28,8 @@ import yubi.server.base.transfer.ImportStrategy;
 import yubi.server.base.transfer.ResourceTransferParam;
 import yubi.server.service.VizService;
 import yubi.server.artifact.ArtifactTaskWebMapper;
+import yubi.server.recycle.RecycleLegacyBridge;
+import yubi.server.recycle.RecycleResourceType;
 import yubi.server.artifact.ArtifactTaskWebMapper.ArtifactTaskResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,11 +50,17 @@ public class VizController extends BaseController {
 
     private final VizService vizService;
     private final ArtifactTaskWebMapper artifactTaskWebMapper;
+    private RecycleLegacyBridge recycleLegacyBridge;
 
     public VizController(VizService vizService,
                          ArtifactTaskWebMapper artifactTaskWebMapper) {
         this.vizService = vizService;
         this.artifactTaskWebMapper = artifactTaskWebMapper;
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public void setRecycleLegacyBridge(RecycleLegacyBridge recycleLegacyBridge) {
+        this.recycleLegacyBridge = recycleLegacyBridge;
     }
 
 
@@ -64,8 +72,12 @@ public class VizController extends BaseController {
 
     @Operation(summary = "list viz folders")
     @GetMapping(value = "/folders")
-    public ResponseData<List<Folder>> listVizFolders(String orgId) {
-        return ResponseData.success(vizService.listViz(orgId));
+    public ResponseData<List<Folder>> listVizFolders(
+            String orgId,
+            @RequestParam(required = false) ResourceType resourceType) {
+        return ResponseData.success(resourceType == null
+                ? vizService.listViz(orgId)
+                : vizService.listViz(orgId, resourceType));
     }
 
 
@@ -98,6 +110,11 @@ public class VizController extends BaseController {
     @Operation(summary = "delete a datachart")
     @DeleteMapping(value = "/datacharts/{datachartId}")
     public ResponseData<Boolean> deleteDatachart(@PathVariable String datachartId, @RequestParam boolean archive) {
+        if (archive && recycleLegacyBridge != null) {
+            DatachartDetail detail = vizService.getDatachart(datachartId);
+            return ResponseData.success(recycleLegacyBridge.moveToRecycle(
+                    detail.getOrgId(), RecycleResourceType.DATACHART, datachartId));
+        }
         return ResponseData.success(vizService.deleteDatachart(datachartId, archive));
     }
 
@@ -131,6 +148,11 @@ public class VizController extends BaseController {
     @DeleteMapping(value = "/dashboards/{dashboardId}")
     public ResponseData<Boolean> deleteDashboard(@PathVariable String dashboardId, @RequestParam Boolean archive) {
         checkBlank(dashboardId, "dashboardId");
+        if (Boolean.TRUE.equals(archive) && recycleLegacyBridge != null) {
+            DashboardDetail detail = vizService.getDashboard(dashboardId);
+            return ResponseData.success(recycleLegacyBridge.moveToRecycle(
+                    detail.getOrgId(), RecycleResourceType.DASHBOARD, dashboardId));
+        }
         return ResponseData.success(vizService.deleteDashboard(dashboardId, archive));
     }
 
@@ -202,6 +224,11 @@ public class VizController extends BaseController {
     public ResponseData<Boolean> deleteStoryboard(@PathVariable String storyboardId, @RequestParam boolean archive) {
 
         checkBlank(storyboardId, "storyboardId");
+        if (archive && recycleLegacyBridge != null) {
+            StoryboardDetail detail = vizService.getStoryboard(storyboardId);
+            return ResponseData.success(recycleLegacyBridge.moveToRecycle(
+                    detail.getOrgId(), RecycleResourceType.STORYBOARD, storyboardId));
+        }
         return ResponseData.success(vizService.deleteStoryboard(storyboardId, archive));
     }
 
@@ -314,8 +341,12 @@ public class VizController extends BaseController {
 
     @Operation(summary = "import viz template")
     @PostMapping(value = "/import/template")
-    public ResponseData<Folder> importVizTemplate(@RequestParam("file") MultipartFile file, @RequestParam String parentId, @RequestParam String orgId, @RequestParam String name) throws Exception {
-        return ResponseData.success(vizService.importVizTemplate(file, orgId, parentId, name));
+    public ResponseData<Folder> importVizTemplate(@RequestParam("file") MultipartFile file,
+                                                  @RequestParam String parentId,
+                                                  @RequestParam String orgId,
+                                                  @RequestParam String name,
+                                                  @RequestParam ResourceType resourceType) throws Exception {
+        return ResponseData.success(vizService.importVizTemplate(file, orgId, parentId, name, resourceType));
     }
 
 }

@@ -67,6 +67,8 @@ public interface VizService {
 
     List<Folder> listViz(String orgId);
 
+    List<Folder> listViz(String orgId, ResourceType resourceType);
+
     Folder createFolder(FolderCreateParam createParam);
 
     boolean updateFolder(FolderUpdateParam updateParam);
@@ -89,7 +91,8 @@ public interface VizService {
 
     TaskHandle exportDashboardTemplate(DashboardTemplateParam templateModel);
 
-    Folder importVizTemplate(MultipartFile file, String orgId, String parentId, String name) throws Exception;
+    Folder importVizTemplate(MultipartFile file, String orgId, String parentId, String name,
+                             ResourceType resourceType) throws Exception;
 
     boolean updateStoryboardBase(StoryboardBaseUpdateParam updateParam);
 }

@@ -3,7 +3,7 @@
     "chunk": {
       "categoryCounts": {
         "all": {
-          "runtime": 89,
+          "runtime": 90,
           "task": 1,
           "vendor": 14
         },
@@ -19,7 +19,7 @@
           "vendor": 7
         }
       },
-      "files": 104,
+      "files": 105,
       "rawOversized": [
         "monacoEditor.js",
         "antdDesign.js",
@@ -45,11 +45,11 @@
       ],
       "categorySizes": {
         "runtime": {
-          "bytes": 2273332,
-          "files": 89,
-          "gzipBytes": 685741,
-          "gzipRatio": 0.3016,
-          "gzipSavingsBytes": 1587591
+          "bytes": 2281130,
+          "files": 90,
+          "gzipBytes": 691200,
+          "gzipRatio": 0.303,
+          "gzipSavingsBytes": 1589930
         },
         "task": {
           "bytes": 582146,
@@ -59,18 +59,18 @@
           "gzipSavingsBytes": 463154
         },
         "vendor": {
-          "bytes": 9001461,
+          "bytes": 9003163,
           "files": 14,
-          "gzipBytes": 2536869,
+          "gzipBytes": 2537300,
           "gzipRatio": 0.2818,
-          "gzipSavingsBytes": 6464592
+          "gzipSavingsBytes": 6465863
         }
       },
       "size": {
-        "bytes": 11856939,
-        "gzipBytes": 3341602,
-        "gzipRatio": 0.2818,
-        "gzipSavingsBytes": 8515337
+        "bytes": 11866439,
+        "gzipBytes": 3347405,
+        "gzipRatio": 0.2821,
+        "gzipSavingsBytes": 8519034
       }
     },
     "asset": {

@@ -151,6 +151,9 @@ export const deleteStoryboard = createAsyncThunk<
     method: 'DELETE',
     params: { archive },
   });
+  if (!data) {
+    throw new Error(archive ? '移至回收站失败，请重试' : '删除失败，请重试');
+  }
   resolve();
   return data;
 });
@@ -160,10 +163,14 @@ export const addViz = createAsyncThunk<Folder, AddVizParams>(
   async ({ viz, type }, { dispatch }) => {
     if (type === 'TEMPLATE') {
       const { data } = await request2<Folder>({
-        url: `/viz/import/template?parentId=${viz.parentId || ''}&orgId=${
-          viz.orgId
-        }&name=${viz.name}`,
+        url: '/viz/import/template',
         method: 'POST',
+        params: {
+          parentId: viz.parentId || '',
+          orgId: viz.orgId,
+          name: viz.name,
+          resourceType: viz.resourceType,
+        },
         data: viz.file,
       });
       dispatch(getFolders(viz.orgId as string));
@@ -219,6 +226,9 @@ export const deleteViz = createAsyncThunk<boolean, DeleteVizParams>(
       method: 'DELETE',
       params: { archive },
     });
+    if (!data) {
+      throw new Error(archive ? '移至回收站失败，请重试' : '删除失败，请重试');
+    }
     resolve();
     return data;
   },

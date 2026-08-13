@@ -7,8 +7,9 @@ import {
   PauseOutlined,
   SendOutlined,
 } from '@ant-design/icons';
-import { Menu, MenuProps, message, Popconfirm, TreeDataNode } from 'antd';
+import { Menu, MenuProps, message, TreeDataNode } from 'antd';
 import { Popup, Tree, TreeTitle } from 'app/components';
+import { useMoveToRecycle } from 'app/features/recycle/useMoveToRecycle';
 import {
   MenuItemContent,
   TREE_MORE_MENU_ITEM_CLASS,
@@ -39,11 +40,7 @@ import {
   selectEditingSchedule,
   selectScheduleListLoading,
 } from '../slice/selectors';
-import {
-  deleteSchedule,
-  getSchedules,
-  updateScheduleBase,
-} from '../slice/thunks';
+import { getSchedules, updateScheduleBase } from '../slice/thunks';
 
 export const ScheduleList: FC<{
   orgId: string;
@@ -75,6 +72,15 @@ export const ScheduleList: FC<{
   const permissionMap = useSelector(selectPermissionMap);
   const t = useI18NPrefix('schedule.sidebar.scheduleList');
   const tg = useI18NPrefix('global');
+
+  const { loading: recycleLoading, moveToRecycle } = useMoveToRecycle({
+    orgId,
+    resourceType: 'SCHEDULE',
+    onCompleted: () => {
+      onUpdateScheduleList();
+      toDetails(orgId);
+    },
+  });
 
   const moreMenuClick = useCallback(
     ({ id, name, parentId, index }) =>
@@ -162,6 +168,7 @@ export const ScheduleList: FC<{
             }
             break;
           case 'delete':
+            void moveToRecycle([id]);
             break;
           default:
             break;
@@ -172,6 +179,7 @@ export const ScheduleList: FC<{
       dispatch,
       editingSchedule?.id,
       executeLoading,
+      moveToRecycle,
       onUpdateScheduleList,
       orgId,
       showSaveForm,
@@ -180,25 +188,6 @@ export const ScheduleList: FC<{
       t,
       toDetails,
     ],
-  );
-
-  const del = useCallback(
-    (id, isFolder) => () => {
-      if (deleteLoading) return;
-      dispatch(
-        deleteSchedule({
-          id,
-          archive: !isFolder,
-          resolve: () => {
-            message.success(
-              `${t('success')}${isFolder ? t('delete') : t('moveToTrash')}`,
-            );
-            toDetails(orgId);
-          },
-        }),
-      );
-    },
-    [deleteLoading, dispatch, t, toDetails, orgId],
   );
 
   const renderTreeTitle = useCallback(
@@ -307,25 +296,14 @@ export const ScheduleList: FC<{
                           <MenuItemContent
                             className={TREE_MORE_MENU_ITEM_CLASS}
                             prefix={
-                              deleteLoading ? (
+                              deleteLoading || recycleLoading ? (
                                 <LoadingOutlined className="icon" />
                               ) : (
                                 <DeleteOutlined className="icon" />
                               )
                             }
                           >
-                            <Popconfirm
-                              title={
-                                isFolder
-                                  ? tg('operation.deleteConfirm')
-                                  : tg('operation.archiveConfirm')
-                              }
-                              onConfirm={del(id, isFolder)}
-                            >
-                              {isFolder
-                                ? tg('button.delete')
-                                : tg('button.archive')}
-                            </Popconfirm>
+                            {tg('button.archive')}
                           </MenuItemContent>
                         ),
                       },
@@ -367,7 +345,7 @@ export const ScheduleList: FC<{
       stopLoading,
       executeLoading,
       deleteLoading,
-      del,
+      recycleLoading,
     ],
   );
 
