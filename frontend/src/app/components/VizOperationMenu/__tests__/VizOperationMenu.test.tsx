@@ -29,17 +29,37 @@ describe('可视化操作菜单', () => {
         .filter(Boolean),
     ).toEqual([
       'reloadData',
-      'reloadDataLine',
+      'shareLine',
       'shareLink',
+      'exportLine',
       'exportData',
       'exportPDF',
       'exportPicture',
       'exportTpl',
-      'downloadDataLine',
+      'manageLine',
       'saveAs',
       'addToDash',
-      'addToDashLine',
+      'dangerLine',
       'delete',
     ]);
+  });
+
+  it('权限收缩时不产生首尾或连续分割线', () => {
+    const callback = vi.fn();
+    const { result } = renderHook(() =>
+      useVizOperationMenuItems({
+        onReloadData: callback,
+        onRecycleViz: callback,
+        allowDownload: false,
+        allowShare: false,
+        allowManage: true,
+      }),
+    );
+
+    expect(
+      result.current
+        ?.map(item => item && 'key' in item && item.key)
+        .filter(Boolean),
+    ).toEqual(['reloadData', 'dangerLine', 'delete']);
   });
 });
