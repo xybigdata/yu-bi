@@ -49,9 +49,9 @@
         "runtime": {
           "bytes": 2281130,
           "files": 90,
-          "gzipBytes": 685741,
-          "gzipRatio": 0.3006,
-          "gzipSavingsBytes": 1595389
+          "gzipBytes": 691200,
+          "gzipRatio": 0.303,
+          "gzipSavingsBytes": 1589930
         },
         "task": {
           "bytes": 582146,
@@ -63,16 +63,16 @@
         "vendor": {
           "bytes": 9003163,
           "files": 14,
-          "gzipBytes": 2536869,
+          "gzipBytes": 2537300,
           "gzipRatio": 0.2818,
-          "gzipSavingsBytes": 6466294
+          "gzipSavingsBytes": 6465863
         }
       },
       "size": {
         "bytes": 11866439,
-        "gzipBytes": 3341602,
-        "gzipRatio": 0.2816,
-        "gzipSavingsBytes": 8524837
+        "gzipBytes": 3347405,
+        "gzipRatio": 0.2821,
+        "gzipSavingsBytes": 8519034
       }
     },
     "asset": {
