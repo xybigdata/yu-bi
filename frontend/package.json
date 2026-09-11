@@ -149,7 +149,7 @@
     "typescript": "6.0.3",
     "vite": "8.1.0",
     "vite-plugin-svgr": "5.2.0",
-    "vitest": "4.1.9"
+    "vitest": "4.1.11"
   },
   "overrides": {
     "browserslist": "4.28.7",
